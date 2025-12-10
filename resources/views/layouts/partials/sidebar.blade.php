@@ -5,20 +5,20 @@
 </div>
 
 <div class="list-group list-group-flush shadow-sm rounded-3">
-    <a href="{{ route('frontend.site.index') }}" class="list-group-item list-group-item-action {{ request()->routeIs('frontend.site.index') || request()->routeIs('home') ? 'active' : '' }} py-3 d-flex align-items-center" title="Dashboard">
-        <i class="bi bi-speedometer2 me-2 fs-5"></i> <span class="sidebar-text">หน้าหลัก (Dashboard)</span>
+    <a href="{{ route('frontend.site.index') }}" class="list-group-item list-group-item-action {{ request()->routeIs('frontend.site.index') || request()->routeIs('home') ? 'active bg-primary border-primary fw-bold text-white' : '' }} py-3 d-flex align-items-center rounded-2 mb-1" title="Dashboard">
+        <i class="bi bi-speedometer2 me-3 fs-5"></i> <span class="sidebar-text">Dashboard</span>
     </a>
-    <a href="{{ route('frontend.rdbproject.index') }}" class="list-group-item list-group-item-action {{ request()->routeIs('frontend.rdbproject.*') ? 'active' : '' }} py-3 d-flex align-items-center" title="Projects">
-        <span class="me-2 fs-5">📊</span> <span class="sidebar-text">โครงการวิจัย</span>
+    <a href="{{ route('frontend.rdbproject.index') }}" class="list-group-item list-group-item-action {{ request()->routeIs('frontend.rdbproject.*') ? 'active bg-primary border-primary fw-bold text-white' : '' }} py-3 d-flex align-items-center rounded-2 mb-1" title="Projects">
+        <i class="bi bi-bar-chart-line-fill me-3 fs-5"></i> <span class="sidebar-text">โครงการวิจัย</span>
     </a>
-    <a href="{{ route('frontend.rdbpublished.index') }}" class="list-group-item list-group-item-action {{ request()->routeIs('frontend.rdbpublished.*') ? 'active' : '' }} py-3 d-flex align-items-center" title="Publications">
-        <span class="me-2 fs-5">📑</span> <span class="sidebar-text">ผลงานตีพิมพ์</span>
+    <a href="{{ route('frontend.rdbpublished.index') }}" class="list-group-item list-group-item-action {{ request()->routeIs('frontend.rdbpublished.*') ? 'active bg-primary border-primary fw-bold text-white' : '' }} py-3 d-flex align-items-center rounded-2 mb-1" title="Publications">
+        <i class="bi bi-file-earmark-text-fill me-3 fs-5"></i> <span class="sidebar-text">งานตีพิมพ์</span>
     </a>
-    <a href="{{ route('frontend.rdbdip.index') }}" class="list-group-item list-group-item-action {{ request()->routeIs('frontend.rdbdip.*') ? 'active' : '' }} py-3 d-flex align-items-center" title="IP">
-        <span class="me-2 fs-5">💡</span> <span class="sidebar-text">ทรัพย์สินทางปัญญาล่าสุด</span>
+    <a href="{{ route('frontend.rdbdip.index') }}" class="list-group-item list-group-item-action {{ request()->routeIs('frontend.rdbdip.*') ? 'active bg-primary border-primary fw-bold text-white' : '' }} py-3 d-flex align-items-center rounded-2 mb-1" title="IP">
+        <i class="bi bi-lightbulb-fill me-3 fs-5"></i> <span class="sidebar-text">ทรัพย์สินทางปัญญา</span>
     </a>
-    <a href="{{ route('frontend.rdbprojectutilize.index') }}" class="list-group-item list-group-item-action {{ request()->routeIs('frontend.rdbprojectutilize.*') ? 'active' : '' }} py-3 d-flex align-items-center" title="Utilization">
-        <span class="me-2 fs-5">🚀</span> <span class="sidebar-text">การนำไปใช้ประโยชน์</span>
+    <a href="{{ route('frontend.rdbprojectutilize.index') }}" class="list-group-item list-group-item-action {{ request()->routeIs('frontend.rdbprojectutilize.*') ? 'active bg-primary border-primary fw-bold text-white' : '' }} py-3 d-flex align-items-center rounded-2 mb-1" title="Utilization">
+        <i class="bi bi-rocket-takeoff-fill me-3 fs-5"></i> <span class="sidebar-text">การใช้ประโยชน์</span>
     </a>
 </div>
 
