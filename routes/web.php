@@ -1,0 +1,162 @@
+<?php
+
+use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Route;
+
+// Backend Controllers
+use App\Http\Controllers\Backend\SiteController;
+use App\Http\Controllers\Backend\RdbProjectController;
+use App\Http\Controllers\Backend\RdbResearcherController;
+use App\Http\Controllers\Backend\RdbbranchController;
+use App\Http\Controllers\Backend\RdbdepartmentController;
+use App\Http\Controllers\Backend\RdbdepartmenttypeController;
+use App\Http\Controllers\Backend\RdbdepmajorController;
+use App\Http\Controllers\Backend\RdbgroupprojectController;
+use App\Http\Controllers\Backend\RdbprefixController;
+use App\Http\Controllers\Backend\RdbprojectfilesController;
+use App\Http\Controllers\Backend\RdbprojectpositionController;
+use App\Http\Controllers\Backend\RdbprojecttypeController;
+use App\Http\Controllers\Backend\RdbprojectworkController;
+use App\Http\Controllers\Backend\RdbstrategicController;
+use App\Http\Controllers\Backend\RdbyearController;
+
+// Frontend Controllers
+use App\Http\Controllers\Frontend\JournalstatusController;
+use App\Http\Controllers\Frontend\RdbchangwatController;
+use App\Http\Controllers\Frontend\RdbdateeventController;
+use App\Http\Controllers\Frontend\RdbdateeventtypeController;
+use App\Http\Controllers\Frontend\RdbdepartmentController as FrontendRdbdepartmentController;
+use App\Http\Controllers\Frontend\RdbdepartmentcategoryController;
+use App\Http\Controllers\Frontend\RdbdepartmentcourseController;
+use App\Http\Controllers\Frontend\RdbdepmajorController as FrontendRdbdepmajorController;
+use App\Http\Controllers\Frontend\RdbdipController;
+use App\Http\Controllers\Frontend\RdbdiptypeController;
+use App\Http\Controllers\Frontend\RdbgroupprojectController as FrontendRdbgroupprojectController;
+use App\Http\Controllers\Frontend\RdbnaccController;
+use App\Http\Controllers\Frontend\RdbprefixController as FrontendRdbprefixController;
+use App\Http\Controllers\Frontend\RdbprojectController as FrontendRdbprojectController;
+use App\Http\Controllers\Frontend\RdbprojectbudgetController;
+use App\Http\Controllers\Frontend\RdbprojectdownloadController;
+use App\Http\Controllers\Frontend\RdbprojectfilesController as FrontendRdbprojectfilesController;
+use App\Http\Controllers\Frontend\RdbprojectgroupController;
+use App\Http\Controllers\Frontend\RdbprojectpersonnelController;
+use App\Http\Controllers\Frontend\RdbprojectpersonneldepController;
+use App\Http\Controllers\Frontend\RdbprojectpositionController as FrontendRdbprojectpositionController;
+use App\Http\Controllers\Frontend\RdbprojectstatusController;
+use App\Http\Controllers\Frontend\RdbprojecttypeController as FrontendRdbprojecttypeController;
+use App\Http\Controllers\Frontend\RdbprojecttypesubController;
+use App\Http\Controllers\Frontend\RdbprojectutilizationController;
+use App\Http\Controllers\Frontend\RdbprojectutilizeController;
+use App\Http\Controllers\Frontend\RdbprojectutilizetypeController;
+use App\Http\Controllers\Frontend\RdbprojectworkController as FrontendRdbprojectworkController;
+use App\Http\Controllers\Frontend\RdbpublishedController;
+use App\Http\Controllers\Frontend\RdbpublishedbranchController;
+use App\Http\Controllers\Frontend\RdbpublishedbranchperController;
+use App\Http\Controllers\Frontend\RdbpublishedcheckyearController;
+use App\Http\Controllers\Frontend\RdbpublishedpersonnelController;
+use App\Http\Controllers\Frontend\RdbpublishedpersonneldepController;
+use App\Http\Controllers\Frontend\RdbpublishedtypeController;
+use App\Http\Controllers\Frontend\RdbpublishedtypeauthorController;
+use App\Http\Controllers\Frontend\RdbpublishedworkController;
+use App\Http\Controllers\Frontend\RdbresearcherController as FrontendRdbresearcherController;
+use App\Http\Controllers\Frontend\RdbresearchereducationController;
+use App\Http\Controllers\Frontend\RdbresearcherstatusController;
+use App\Http\Controllers\Frontend\RdbstrategicController as FrontendRdbstrategicController;
+use App\Http\Controllers\Frontend\RdbtrainingController;
+use App\Http\Controllers\Frontend\RdbtrainingregisterController;
+use App\Http\Controllers\Frontend\RdbyearController as FrontendRdbyearController;
+use App\Http\Controllers\Frontend\ResearchcoferenceinthaiController;
+use App\Http\Controllers\Frontend\ResearchnewsController;
+use App\Http\Controllers\Frontend\SiteController as FrontendSiteController;
+
+Route::get('/', [FrontendSiteController::class, 'index'])->name('home');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// Backend Routes (Protected)
+Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function () {
+    Route::get('/', [SiteController::class, 'index'])->name('site.index');
+    Route::resource('rdb_project', RdbProjectController::class);
+    Route::resource('rdb_researcher', RdbResearcherController::class);
+    Route::resource('rdbbranch', RdbbranchController::class);
+    Route::resource('rdbdepartment', RdbdepartmentController::class);
+    Route::resource('rdbdepartmenttype', RdbdepartmenttypeController::class);
+    Route::resource('rdbdepmajor', RdbdepmajorController::class);
+    Route::resource('rdbgroupproject', RdbgroupprojectController::class);
+    Route::resource('rdbprefix', RdbprefixController::class);
+    Route::resource('rdbprojectfiles', RdbprojectfilesController::class);
+    Route::resource('rdbprojectposition', RdbprojectpositionController::class);
+    Route::resource('rdbprojecttype', RdbprojecttypeController::class);
+    Route::resource('rdbprojectwork', RdbprojectworkController::class);
+    Route::resource('rdbstrategic', RdbstrategicController::class);
+    Route::resource('rdbyear', RdbyearController::class);
+});
+
+// Frontend Routes
+Route::name('frontend.')->group(function () {
+    Route::resource('journalstatus', JournalstatusController::class)->parameters(['journalstatus' => 'id']);
+    Route::resource('rdbchangwat', RdbchangwatController::class)->parameters(['rdbchangwat' => 'id']);
+    Route::resource('rdbdateevent', RdbdateeventController::class)->parameters(['rdbdateevent' => 'id']);
+    Route::resource('rdbdateeventtype', RdbdateeventtypeController::class)->parameters(['rdbdateeventtype' => 'id']);
+    Route::resource('rdbdepartment', FrontendRdbdepartmentController::class)->parameters(['rdbdepartment' => 'id']);
+    Route::resource('rdbdepartmentcategory', RdbdepartmentcategoryController::class)->parameters(['rdbdepartmentcategory' => 'id']);
+    Route::resource('rdbdepartmentcourse', RdbdepartmentcourseController::class)->parameters(['rdbdepartmentcourse' => 'id']);
+    Route::resource('rdbdepartmenttype', RdbdepartmenttypeController::class)->parameters(['rdbdepartmenttype' => 'id']);
+    Route::resource('rdbdepmajor', RdbdepmajorController::class)->parameters(['rdbdepmajor' => 'id']);
+    Route::get('rdbdip/export', [RdbdipController::class, 'export'])->name('rdbdip.export');
+    Route::resource('rdbdip', RdbdipController::class)->parameters(['rdbdip' => 'id']);
+    Route::resource('rdbdiptype', RdbdiptypeController::class)->parameters(['rdbdiptype' => 'id']);
+    Route::resource('rdbgroupproject', FrontendRdbgroupprojectController::class)->parameters(['rdbgroupproject' => 'id']);
+    Route::resource('rdbnacc', RdbnaccController::class)->parameters(['rdbnacc' => 'id']);
+    Route::resource('rdbprefix', FrontendRdbprefixController::class)->parameters(['rdbprefix' => 'id']);
+    Route::get('rdbproject/export', [FrontendRdbprojectController::class, 'export'])->name('rdbproject.export');
+    Route::get('rdbproject/api/types-by-year', [FrontendRdbprojectController::class, 'getTypesByYear'])->name('rdbproject.typesByYear');
+    Route::get('rdbproject/api/subtypes-by-type', [FrontendRdbprojectController::class, 'getSubTypesByType'])->name('rdbproject.subTypesByType');
+    Route::resource('rdbproject', FrontendRdbprojectController::class)->parameters(['rdbproject' => 'id']);
+    Route::resource('rdbprojectbudget', RdbprojectbudgetController::class)->parameters(['rdbprojectbudget' => 'id']);
+    Route::resource('rdbprojectdownload', RdbprojectdownloadController::class)->parameters(['rdbprojectdownload' => 'id']);
+    Route::resource('rdbprojectfiles', RdbprojectfilesController::class)->parameters(['rdbprojectfiles' => 'id']);
+    Route::resource('rdbprojectgroup', RdbprojectgroupController::class)->parameters(['rdbprojectgroup' => 'id']);
+    Route::resource('rdbprojectpersonnel', RdbprojectpersonnelController::class)->parameters(['rdbprojectpersonnel' => 'id']);
+    Route::resource('rdbprojectpersonneldep', RdbprojectpersonneldepController::class)->parameters(['rdbprojectpersonneldep' => 'id']);
+    Route::resource('rdbprojectposition', FrontendRdbprojectpositionController::class)->parameters(['rdbprojectposition' => 'id']);
+    Route::resource('rdbprojectstatus', RdbprojectstatusController::class)->parameters(['rdbprojectstatus' => 'id']);
+    Route::resource('rdbprojecttype', FrontendRdbprojecttypeController::class)->parameters(['rdbprojecttype' => 'id']);
+    Route::resource('rdbprojecttypesub', RdbprojecttypesubController::class)->parameters(['rdbprojecttypesub' => 'id']);
+    Route::resource('rdbprojectutilization', RdbprojectutilizationController::class)->parameters(['rdbprojectutilization' => 'id']);
+    Route::resource('rdbprojectutilize', RdbprojectutilizeController::class)->parameters(['rdbprojectutilize' => 'id']);
+
+    Route::resource('rdbprojectutilizetype', RdbprojectutilizetypeController::class)->parameters(['rdbprojectutilizetype' => 'id']);
+    Route::resource('rdbprojectwork', RdbprojectworkController::class)->parameters(['rdbprojectwork' => 'id']);
+    Route::get('rdbpublished/export', [RdbpublishedController::class, 'export'])->name('rdbpublished.export');
+    Route::resource('rdbpublished', RdbpublishedController::class)->parameters(['rdbpublished' => 'id']);
+    Route::resource('rdbpublishedbranch', RdbpublishedbranchController::class)->parameters(['rdbpublishedbranch' => 'id']);
+    Route::resource('rdbpublishedbranchper', RdbpublishedbranchperController::class)->parameters(['rdbpublishedbranchper' => 'id']);
+    Route::resource('rdbpublishedcheckyear', RdbpublishedcheckyearController::class)->parameters(['rdbpublishedcheckyear' => 'id']);
+    Route::resource('rdbpublishedpersonnel', RdbpublishedpersonnelController::class)->parameters(['rdbpublishedpersonnel' => 'id']);
+    Route::resource('rdbpublishedpersonneldep', RdbpublishedpersonneldepController::class)->parameters(['rdbpublishedpersonneldep' => 'id']);
+    Route::resource('rdbpublishedtype', RdbpublishedtypeController::class)->parameters(['rdbpublishedtype' => 'id']);
+    Route::resource('rdbpublishedtypeauthor', RdbpublishedtypeauthorController::class)->parameters(['rdbpublishedtypeauthor' => 'id']);
+    Route::resource('rdbpublishedwork', RdbpublishedworkController::class)->parameters(['rdbpublishedwork' => 'id']);
+    Route::get('rdbresearcher/export', [FrontendRdbresearcherController::class, 'export'])->name('rdbresearcher.export');
+    Route::resource('rdbresearcher', FrontendRdbresearcherController::class)->parameters(['rdbresearcher' => 'id']);
+    Route::resource('rdbresearchereducation', RdbresearchereducationController::class)->parameters(['rdbresearchereducation' => 'id']);
+    Route::resource('rdbresearcherstatus', RdbresearcherstatusController::class)->parameters(['rdbresearcherstatus' => 'id']);
+    Route::resource('rdbstrategic', FrontendRdbstrategicController::class)->parameters(['rdbstrategic' => 'id']);
+    Route::resource('rdbtraining', RdbtrainingController::class)->parameters(['rdbtraining' => 'id']);
+    Route::resource('rdbtrainingregister', RdbtrainingregisterController::class)->parameters(['rdbtrainingregister' => 'id']);
+    Route::resource('rdbyear', FrontendRdbyearController::class)->parameters(['rdbyear' => 'id']);
+    Route::resource('researchcoferenceinthai', ResearchcoferenceinthaiController::class)->parameters(['researchcoferenceinthai' => 'id']);
+    Route::resource('researchnews', ResearchnewsController::class)->parameters(['researchnews' => 'id']);
+    Route::get('/site', [FrontendSiteController::class, 'index'])->name('site.index');
+});
+
+require __DIR__.'/auth.php';
+
+Route::get('/debug/permissions', function () {
+    return \App\Models\AuthItem::select('name', 'type', 'description')->get();
+});

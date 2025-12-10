@@ -1,0 +1,56 @@
+<?php
+
+namespace App\Http\Controllers\Backend;
+
+use App\Http\Controllers\Controller;
+use App\Models\RdbProjectfiles;
+use Illuminate\Http\Request;
+
+class RdbprojectfilesController extends Controller
+{
+    public function index()
+    {
+        $items = RdbProjectfiles::paginate(10);
+        return view('backend.rdbprojectfiles.index', compact('items'));
+    }
+
+    public function create()
+    {
+        return view('backend.rdbprojectfiles.create');
+    }
+
+    public function store(Request $request)
+    {
+        $item = new RdbProjectfiles();
+        $item->fill($request->all());
+        $item->save();
+        return redirect()->route('backend.rdbprojectfiles.index')->with('success', 'Created successfully.');
+    }
+
+    public function show($id)
+    {
+        $item = RdbProjectfiles::findOrFail($id);
+        return view('backend.rdbprojectfiles.show', compact('item'));
+    }
+
+    public function edit($id)
+    {
+        $item = RdbProjectfiles::findOrFail($id);
+        return view('backend.rdbprojectfiles.edit', compact('item'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $item = RdbProjectfiles::findOrFail($id);
+        $item->fill($request->all());
+        $item->save();
+        return redirect()->route('backend.rdbprojectfiles.index')->with('success', 'Updated successfully.');
+    }
+
+    public function destroy($id)
+    {
+        $item = RdbProjectfiles::findOrFail($id);
+        $item->delete();
+        return redirect()->route('backend.rdbprojectfiles.index')->with('success', 'Deleted successfully.');
+    }
+}
