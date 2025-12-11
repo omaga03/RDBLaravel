@@ -28,45 +28,78 @@
     </div>
 
     <!-- Stats Cards -->
+    <!-- Stats Cards -->
+    <style>
+        .stats-card {
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: relative;
+            border: none;
+            border-radius: 15px;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
+        }
+        .stats-icon {
+            position: absolute;
+            right: 10px;
+            bottom: -10px;
+            font-size: 5rem;
+            opacity: 0.2;
+            transform: rotate(-15deg);
+            z-index: 0;
+        }
+    </style>
+
     <div class="row mb-4">
-                <!-- Project Card -->
-            <div class="col-md-4 mb-4">
-                <div class="card bg-success text-white shadow h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="card-title mb-0">📅 ปีงบประมาณ {{ $max_year->year_name }}</h5>
-                        </div>
-                        <h6 class="text-white-50 small text-uppercase mb-1">📋 จำนวนโครงการวิจัย</h6>
-                        <div class="h2 mb-0 fw-bold">{{ number_format($sumProject) }}</div>
+        <!-- Project Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card stats-card h-100 text-white shadow" 
+                 style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                <div class="card-body position-relative p-4">
+                    <i class="bi bi-file-earmark-text-fill stats-icon"></i>
+                    <div class="d-flex flex-column position-relative z-1" style="z-index: 1;">
+                        <h6 class="text-white-50 text-uppercase fw-bold mb-2">📅 ปีงบประมาณ {{ $max_year->year_name }}</h6>
+                        <h5 class="fw-bold mb-1">จำนวนโครงการวิจัย</h5>
+                        <div class="display-5 fw-bold">{{ number_format($sumProject) }}</div>
+                        <small class="text-white-50 mt-1">โครงการ</small>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Budget Card -->
-            <div class="col-md-4 mb-4">
-                <div class="card bg-warning text-white shadow h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="card-title mb-0">💰 งบประมาณสนับสนุน</h5>
-                        </div>
-                        <h6 class="text-white-50 small text-uppercase mb-1">รวม (บาท)</h6>
-                        <div class="h2 mb-0 fw-bold">{{ number_format($sumBudget) }}</div>
+        <!-- Budget Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card stats-card h-100 text-white shadow" 
+                 style="background: linear-gradient(135deg, #FF8008 0%, #FFC837 100%);">
+                <div class="card-body position-relative p-4">
+                    <i class="bi bi-cash-coin stats-icon"></i>
+                    <div class="d-flex flex-column position-relative z-1" style="z-index: 1;">
+                        <h6 class="text-white-50 text-uppercase fw-bold mb-2">💰 งบประมาณสนับสนุน</h6>
+                        <h5 class="fw-bold mb-1">รวมเป็นเงินทั้งสิ้น</h5>
+                        <div class="display-5 fw-bold">{{ number_format($sumBudget) }}</div>
+                        <small class="text-white-50 mt-1">บาท</small>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Researcher Card -->
-            <div class="col-md-4 mb-4">
-                <div class="card bg-primary text-white shadow h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="card-title mb-0">👥 นักวิจัย</h5>
-                        </div>
-                        <h6 class="text-white-50 small text-uppercase mb-1">จำนวน (คน)</h6>
-                        <div class="h2 mb-0 fw-bold">{{ number_format($countResearcher) }}</div>
+        <!-- Researcher Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card stats-card h-100 text-white shadow" 
+                 style="background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);">
+                <div class="card-body position-relative p-4">
+                    <i class="bi bi-people-fill stats-icon"></i>
+                    <div class="d-flex flex-column position-relative z-1" style="z-index: 1;">
+                        <h6 class="text-white-50 text-uppercase fw-bold mb-2">👥 นักวิจัย</h6>
+                        <h5 class="fw-bold mb-1">นักวิจัยทั้งหมด</h5>
+                        <div class="display-5 fw-bold">{{ number_format($countResearcher) }}</div>
+                        <small class="text-white-50 mt-1">คน</small>
                     </div>
                 </div>
             </div>
+        </div>
     </div>
 
     <!-- Chart Section -->
