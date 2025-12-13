@@ -20,7 +20,7 @@ class RdbResearcherController extends Controller
      */
     public function index(Request $request)
     {
-        $query = RdbResearcher::with('prefix');
+        $query = RdbResearcher::with(['prefix', 'department']);
 
         if ($request->filled('researcher_fname')) {
             $query->where('researcher_fname', 'like', '%' . $request->researcher_fname . '%');
@@ -32,7 +32,12 @@ class RdbResearcherController extends Controller
             $query->where('department_id', $request->department_id);
         }
 
-        $researchers = $query->orderBy('researcher_id', 'desc')->paginate(10);
+        $researchers = $query->leftJoin('rdb_department', 'rdb_researcher.department_id', '=', 'rdb_department.department_id')
+                             ->select('rdb_researcher.*')
+                             ->orderByRaw('rdb_department.department_nameTH IS NULL ASC') // Push NULLs to bottom
+                             ->orderBy('rdb_department.department_nameTH', 'asc')
+                             ->orderBy('rdb_researcher.researcher_fname', 'asc')
+                             ->paginate(10);
         
         $departments = RdbDepartment::all(); // For filter dropdown
 
@@ -88,7 +93,15 @@ class RdbResearcherController extends Controller
      */
     public function show($id)
     {
-        $researcher = RdbResearcher::findOrFail($id);
+        $researcher = RdbResearcher::with([
+            'prefix', 
+            'department', 
+            'major', 
+            'departmentCategory', 
+            'departmentCourse', 
+            'status', 
+            'rdbResearcherEducations'
+        ])->findOrFail($id);
         return view('backend.rdb_researcher.show', compact('researcher'));
     }
 

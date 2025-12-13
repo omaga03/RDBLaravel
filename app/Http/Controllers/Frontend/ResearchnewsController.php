@@ -15,8 +15,18 @@ class ResearchnewsController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where('news_name', 'like', "%{$search}%")
+            $query->where(function($q) use ($search) {
+                $q->where('news_name', 'like', "%{$search}%")
                   ->orWhere('news_detail', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('date_start')) {
+            $query->whereDate('news_date', '>=', $request->date_start);
+        }
+
+        if ($request->filled('date_end')) {
+            $query->whereDate('news_date', '<=', $request->date_end);
         }
 
         $items = $query->orderBy('id', 'desc')->paginate(10);

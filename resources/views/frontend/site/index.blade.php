@@ -116,6 +116,131 @@
         </div>
     </div>
 
+    <style>
+        .premium-card {
+            border-radius: 20px;
+            border: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncy effect */
+            background: var(--bs-body-bg);
+            overflow: hidden;
+            position: relative;
+        }
+        .premium-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #007bff, #00c6ff); /* Default Blue Gradient */
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .premium-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15) !important;
+        }
+        .premium-card:hover::after {
+            opacity: 1;
+        }
+        .premium-card .card-img-wrapper {
+            overflow: hidden;
+            border-radius: 20px 20px 0 0;
+            position: relative;
+        }
+        .premium-card .card-img-top {
+            transition: transform 0.6s ease;
+        }
+        .premium-card:hover .card-img-top {
+            transform: scale(1.1);
+        }
+        .premium-card-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            line-height: 1.4;
+            transition: color 0.3s ease;
+        }
+        .premium-card:hover .premium-card-title {
+            color: var(--bs-primary);
+        }
+        
+        /* Specific coloring for Conference */
+        .premium-card.conf-card::after {
+            background: linear-gradient(90deg, #FF8008, #FFC837); /* Orange Gradient */
+        }
+        .premium-card.conf-card:hover .premium-card-title {
+            color: #FF8008;
+        }
+    </style>
+
+    <!-- Latest News Section -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="fw-bold"><i class="bi bi-newspaper text-primary"></i> ข่าวกิจกรรมงานวิจัยล่าสุด</h4>
+                <a href="{{ route('frontend.researchnews.index') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">ดูทั้งหมด <i class="bi bi-arrow-right"></i></a>
+            </div>
+            <div class="row g-3"> <!-- g-3 for better spacing -->
+                @foreach($latestNews as $news)
+                <div class="col-md-2 col-sm-6">
+                    <div class="card h-100 shadow-sm premium-card">
+                        <a href="{{ route('frontend.researchnews.show', $news->id) }}" target="_blank" class="text-decoration-none text-body" title="{{ $news->news_name }}">
+                            <div class="ratio ratio-4x3 card-img-wrapper">
+                                @if($news->news_img)
+                                    <img src="{{ Storage::url($news->news_img) }}" class="card-img-top object-fit-cover" alt="{{ $news->news_name }}">
+                                @else
+                                    <div class="d-flex align-items-center justify-content-center bg-secondary bg-opacity-10 text-secondary h-100">
+                                        <i class="bi bi-image fs-1 opacity-50"></i>
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="card-body p-3 d-flex align-items-center justify-content-center text-center">
+                                <h6 class="premium-card-title mb-0 text-truncate-3" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                                    📰 {{ $news->news_name }}
+                                </h6>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    <!-- Latest Conference Section -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="fw-bold"><i class="bi bi-megaphone-fill text-primary"></i> การประชุมวิชาการล่าสุด</h4>
+                <a href="{{ route('frontend.researchcoferenceinthai.index') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">ดูทั้งหมด <i class="bi bi-arrow-right"></i></a>
+            </div>
+            <div class="row g-3">
+                @foreach($latestConference as $conf)
+                <div class="col-md-2 col-sm-6">
+                    <div class="card h-100 shadow-sm premium-card conf-card">
+                        <a href="{{ route('frontend.researchcoferenceinthai.show', $conf->id) }}" target="_blank" class="text-decoration-none text-body" title="{{ $conf->con_name }}">
+                            <div class="ratio ratio-4x3 card-img-wrapper">
+                                @if($conf->con_img)
+                                    <img src="{{ Storage::url($conf->con_img) }}" class="card-img-top object-fit-cover" alt="{{ $conf->con_name }}">
+                                @else
+                                    <div class="d-flex align-items-center justify-content-center bg-secondary bg-opacity-10 text-secondary h-100">
+                                        <i class="bi bi-people-fill fs-1 opacity-50"></i>
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="card-body p-3 d-flex align-items-center justify-content-center text-center">
+                                <h6 class="premium-card-title mb-0 text-truncate-3" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                                    📢 {{ $conf->con_name }}
+                                </h6>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
     <!-- Latest Data Tabs -->
     <div class="row">
         <div class="col-md-12">
@@ -142,6 +267,8 @@
                             🚀 การนำไปใช้ประโยชน์ล่าสุด
                         </button>
                     </li>
+
+
                 </ul>
                 </div>
                 <div class="card-body">
@@ -379,6 +506,10 @@
                                 </table>
                             </div>
                         </div>
+
+
+
+
                     </div>
                 </div>
             </div>

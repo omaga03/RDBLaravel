@@ -15,8 +15,18 @@ class ResearchcoferenceinthaiController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where('con_name', 'like', "%{$search}%")
+            $query->where(function($q) use ($search) {
+                $q->where('con_name', 'like', "%{$search}%")
                   ->orWhere('con_venue', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('date_start')) {
+            $query->whereDate('con_even_date', '>=', $request->date_start);
+        }
+
+        if ($request->filled('date_end')) {
+            $query->whereDate('con_even_date', '<=', $request->date_end);
         }
 
         $items = $query->orderBy('id', 'desc')->paginate(10);

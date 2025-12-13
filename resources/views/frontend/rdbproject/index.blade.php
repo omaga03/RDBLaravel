@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-4">
+<div class="py-4">
     <div class="row mb-4">
         <div class="col-md-12">
             <h2 class="mb-4"><i class="bi bi-folder2-open"></i> โครงการวิจัย (Research Projects)</h2>

@@ -1,35 +1,46 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="card mb-3">
-        <div class="card-header" data-bs-toggle="collapse" href="#collapseSearch" role="button" aria-expanded="false" aria-controls="collapseSearch">
-            <i class="bi bi-search"></i> Advanced Search
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0"><i class="bi bi-people-fill"></i> จัดการนักวิจัย (Researchers)</h1>
+        <a href="{{ route('backend.rdb_researcher.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> เพิ่มนักวิจัยใหม่
+        </a>
+    </div>
+
+    <!-- Search Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header py-3" data-bs-toggle="collapse" href="#collapseSearch" role="button" aria-expanded="false" aria-controls="collapseSearch">
+            <div class="d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary"><i class="bi bi-search"></i> ค้นหาขั้นสูง (Advanced Search)</h6>
+                <i class="bi bi-chevron-down"></i>
+            </div>
         </div>
         <div class="collapse {{ request()->anyFilled(['researcher_fname', 'researcher_lname', 'department_id']) ? 'show' : '' }}" id="collapseSearch">
             <div class="card-body">
                 <form action="{{ route('backend.rdb_researcher.index') }}" method="GET">
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label for="researcher_fname" class="form-label">First Name</label>
-                            <input type="text" class="form-control" id="researcher_fname" name="researcher_fname" value="{{ request('researcher_fname') }}">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="researcher_fname" class="form-label">ชื่อ (First Name)</label>
+                            <input type="text" class="form-control" id="researcher_fname" name="researcher_fname" value="{{ request('researcher_fname') }}" placeholder="ระบุชื่อ...">
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="researcher_lname" class="form-label">Last Name</label>
-                            <input type="text" class="form-control" id="researcher_lname" name="researcher_lname" value="{{ request('researcher_lname') }}">
+                        <div class="col-md-4">
+                            <label for="researcher_lname" class="form-label">นามสกุล (Last Name)</label>
+                            <input type="text" class="form-control" id="researcher_lname" name="researcher_lname" value="{{ request('researcher_lname') }}" placeholder="ระบุนามสกุล...">
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="department_id" class="form-label">Department</label>
+                        <div class="col-md-4">
+                            <label for="department_id" class="form-label">หน่วยงาน (Department)</label>
                             <select class="form-select" id="department_id" name="department_id">
-                                <option value="">All</option>
+                                <option value="">-- ทั้งหมด (All) --</option>
                                 @foreach($departments as $dept)
                                     <option value="{{ $dept->department_id }}" {{ request('department_id') == $dept->department_id ? 'selected' : '' }}>{{ $dept->department_name }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-12 text-end">
-                            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Search</button>
-                            <a href="{{ route('backend.rdb_researcher.index') }}" class="btn btn-secondary">Reset</a>
+                        <div class="col-12 text-end mt-3">
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> ค้นหา</button>
+                            <a href="{{ route('backend.rdb_researcher.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-counterclockwise"></i> ล้างค่า</a>
                         </div>
                     </div>
                 </form>
@@ -37,62 +48,100 @@
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-header">
-            <div class="d-flex justify-content-between align-items-center">
-                <span>Rdb Researchers</span>
-                <a href="{{ route('backend.rdb_researcher.create') }}" class="btn btn-primary btn-sm">Create New</a>
-            </div>
-        </div>
-
-        <div class="card-body">
+    <!-- Researchers List -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
             @if (session('success'))
-                <div class="alert alert-success" role="alert">
-                    {{ session('success') }}
+                <div class="alert alert-success m-3" role="alert">
+                    <i class="bi bi-check-circle-fill"></i> {{ session('success') }}
                 </div>
             @endif
 
-            <table class="table table-bordered table-hover">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Picture</th>
-                        <th>Name</th>
-                        <th>Department</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($researchers as $researcher)
-                    <tr>
-                        <td>{{ $researcher->researcher_id }}</td>
-                        <td>
-                            @if($researcher->researcher_picture)
-                                <img src="{{ asset('storage/uploads/researchers/' . $researcher->researcher_picture) }}" alt="Pic" style="height: 40px; width: auto;">
-                            @else
-                                -
-                            @endif
-                        </td>
-                        <td>
-                            {{ $researcher->prefix->prefix_nameTH ?? '' }} 
-                            {{ $researcher->researcher_fname }} {{ $researcher->researcher_lname }}
-                        </td>
-                        <td>{{ $researcher->department->department_name ?? '-' }}</td>
-                        <td>
-                            <a href="{{ route('backend.rdb_researcher.show', $researcher->getKey()) }}" class="btn btn-info btn-sm">View</a>
-                            <a href="{{ route('backend.rdb_researcher.edit', $researcher->getKey()) }}" class="btn btn-warning btn-sm">Edit</a>
-                            <form action="{{ route('backend.rdb_researcher.destroy', $researcher->getKey()) }}" method="POST" style="display:inline-block;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-
-            {{ $researchers->links() }}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 50%" class="ps-4">ข้อมูลนักวิจัย (Researcher Info)</th>
+                            <th style="width: 35%">หน่วยงาน (Affiliation)</th>
+                            <th style="width: 15%" class="text-center">จัดการ (Actions)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($researchers as $researcher)
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0 me-3">
+                                        @if($researcher->researcher_picture)
+                                            <img src="{{ asset('storage/uploads/researchers/' . $researcher->researcher_picture) }}" 
+                                                 alt="Profile" 
+                                                 class="rounded-circle border"
+                                                 style="width: 60px; height: 60px; object-fit: cover;">
+                                        @else
+                                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center border" style="width: 60px; height: 60px;">
+                                                <i class="bi bi-person text-secondary" style="font-size: 1.5rem;"></i>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold fs-5 text-primary">
+                                            {{ $researcher->prefix->prefix_nameTH ?? '' }} {{ $researcher->researcher_fname }} {{ $researcher->researcher_lname }}
+                                        </div>
+                                        <div class="small text-muted mb-1">
+                                            @if($researcher->researcher_email)
+                                                <i class="bi bi-envelope"></i> {{ $researcher->researcher_email }}
+                                            @endif
+                                            @if($researcher->researcher_mobile)
+                                                <span class="ms-2"><i class="bi bi-phone"></i> {{ $researcher->researcher_mobile }}</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                @if($researcher->department)
+                                    <div class="fw-semibold"><i class="bi bi-building"></i> {{ $researcher->department->department_nameTH ?? $researcher->department->department_nameEN }}</div>
+                                @elseif($researcher->researcher_note)
+                                    <div class="text-muted"><i class="bi bi-card-text"></i> {{ $researcher->researcher_note }}</div>
+                                @else
+                                    <span class="text-muted fst-italic">- ไม่ระบุ -</span>
+                                @endif
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    <a href="{{ route('backend.rdb_researcher.show', $researcher->getKey()) }}" class="btn btn-outline-primary btn-sm" title="ดูรายละเอียด">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ route('backend.rdb_researcher.edit', $researcher->getKey()) }}" class="btn btn-outline-warning btn-sm" title="แก้ไข">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form action="{{ route('backend.rdb_researcher.destroy', $researcher->getKey()) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันการลบข้อมูลนี้?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-outline-danger btn-sm" title="ลบ">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="3" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                ไม่พบข้อมูลนักวิจัย (No available data)
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            
+            @if($researchers->hasPages())
+                <div class="card-footer py-3">
+                    {{ $researchers->withQueryString()->links() }}
+                </div>
+            @endif
         </div>
     </div>
 </div>

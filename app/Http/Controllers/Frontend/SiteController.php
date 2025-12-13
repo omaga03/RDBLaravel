@@ -9,6 +9,9 @@ use App\Models\RdbProjectType;
 use App\Models\RdbDepartment;
 use Illuminate\Support\Facades\DB;
 
+use App\Models\ResearchCoferenceinthai;
+use App\Models\ResearchNews;
+
 class SiteController extends Controller
 {
     public function index(\Illuminate\Http\Request $request)
@@ -52,20 +55,7 @@ class SiteController extends Controller
         // Execute Raw SQL
         $chartDataRaw = DB::select($sql);
 
-        // DEBUG: Check data for 2568
-        // dd($chartDataRaw);
-
         // Process Data for Chart.js
-        // We need:
-        // - Labels: Departments
-        // - Datasets: One for each Year (Project Count) + One for Budget (Spline? Maybe just stick to Project Count for now as per legacy chart structure)
-        
-        // Legacy Chart Structure:
-        // X-Axis: Departments
-        // Series: Years (Columns) -> Project Count
-        // Series: Budget (Spline) -> Total Budget per Department (Sum of all years?)
-        
-        // Let's organize data
         $departments = [];
         $years = [];
         $dataPoints = []; // [year][department] = count
@@ -94,7 +84,6 @@ class SiteController extends Controller
         rsort($years); // Sort Descending to get latest years first
         
         // Filter out years greater than max_year (latest active year)
-        // Ensure we are comparing numeric values or string values consistently
         if ($max_year) {
              $years = array_filter($years, function($y) use ($max_year) {
                  return $y <= $max_year->year_name;
@@ -155,14 +144,10 @@ class SiteController extends Controller
         // Stats for Top Cards
         $sumProject = RdbProject::where('year_id', $max_year->year_id)->where('data_show', 1)->count();
         $sumBudget = RdbProject::where('year_id', $max_year->year_id)->where('data_show', 1)->sum('pro_budget');
-        // $countResearcher = ... (Need RdbResearcher logic, skip for now or use simple count)
-        $countResearcher = \App\Models\RdbResearcher::count(); // Simple count for now
+        $countResearcher = \App\Models\RdbResearcher::count(); 
 
         // 6. Latest Publications
         $latestPublications = \App\Models\RdbPublished::with(['project', 'pubtype', 'authors' => function($q) {
-                                        // Need to identify first author. Usually pivot pubw_main=1 or similar?
-                                        // Or distinct status. User says "status name first".
-                                        // If we don't know exact pivot field, we load all and filter in View.
                                         $q->withPivot('pubta_id', 'pubw_main'); 
                                     }, 'authors.prefix'])
                                     ->orderBy('created_at', 'desc')
@@ -170,7 +155,7 @@ class SiteController extends Controller
                                     ->get();
 
         // 7. Latest IP
-        $latestIP = \App\Models\RdbDip::with(['dipType', 'researcher', 'researcher.prefix']) // Load researcher as inventor
+        $latestIP = \App\Models\RdbDip::with(['dipType', 'researcher', 'researcher.prefix']) 
                                     ->orderBy('created_at', 'desc')
                                     ->limit(5)
                                     ->get();
@@ -181,6 +166,12 @@ class SiteController extends Controller
                                     ->limit(5)
                                     ->get();
 
+        // 9. Latest Conference
+        $latestConference = ResearchCoferenceinthai::orderBy('id', 'desc')->limit(5)->get();
+
+        // 10. Latest News
+        $latestNews = ResearchNews::orderBy('id', 'desc')->limit(5)->get();
+
         return view('frontend.site.index', compact(
             'max_year', 
             'chartData', 
@@ -188,6 +179,8 @@ class SiteController extends Controller
             'latestPublications',
             'latestIP',
             'latestUtilization',
+            'latestConference',
+            'latestNews',
             'sumProject',
             'sumBudget',
             'countResearcher',

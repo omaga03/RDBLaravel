@@ -26,3 +26,13 @@ Thumbs.db
 # Debug Files
 debug_*.php
 debug_output.txt
+
+# Backups
+# Exclude entire backup folder by default
+/backups/*
+
+# Except structure dumps
+!/backups/structure_ordered_*.sql
+
+# Except table order lists
+!/backups/table_order_list_*.txt

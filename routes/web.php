@@ -94,6 +94,16 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     Route::resource('rdbprojectwork', RdbprojectworkController::class);
     Route::resource('rdbstrategic', RdbstrategicController::class);
     Route::resource('rdbyear', RdbyearController::class);
+
+    // Project Researcher Management
+    Route::post('/rdb_project/{id}/researcher', [RdbProjectController::class, 'storeResearcher'])->name('rdb_project.researcher.store');
+    Route::put('/rdb_project/{id}/researcher/{rid}', [RdbProjectController::class, 'updateResearcher'])->name('rdb_project.researcher.update');
+    Route::delete('/rdb_project/{id}/researcher/{rid}', [RdbProjectController::class, 'destroyResearcher'])->name('rdb_project.researcher.destroy');
+
+    // File Management
+    Route::post('/rdb_project/{id}/file', [RdbProjectController::class, 'storeFile'])->name('rdb_project.file.store');
+    Route::put('/rdb_project/{id}/file/{fid}', [RdbProjectController::class, 'updateFile'])->name('rdb_project.file.update');
+    Route::delete('/rdb_project/{id}/file/{fid}', [RdbProjectController::class, 'destroyFile'])->name('rdb_project.file.destroy');
 });
 
 // Frontend Routes
