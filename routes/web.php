@@ -80,6 +80,10 @@ Route::middleware('auth')->group(function () {
 // Backend Routes (Protected)
 Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function () {
     Route::get('/', [SiteController::class, 'index'])->name('site.index');
+
+    // AJAX Researcher Search (must be BEFORE resource route)
+    Route::get('/rdb_project/search-researchers', [RdbProjectController::class, 'searchResearchers'])->name('rdb_project.search_researchers');
+
     Route::resource('rdb_project', RdbProjectController::class);
     Route::resource('rdb_researcher', RdbResearcherController::class);
     Route::resource('rdbbranch', RdbbranchController::class);
@@ -104,6 +108,26 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     Route::post('/rdb_project/{id}/file', [RdbProjectController::class, 'storeFile'])->name('rdb_project.file.store');
     Route::put('/rdb_project/{id}/file/{fid}', [RdbProjectController::class, 'updateFile'])->name('rdb_project.file.update');
     Route::delete('/rdb_project/{id}/file/{fid}', [RdbProjectController::class, 'destroyFile'])->name('rdb_project.file.destroy');
+    Route::get('/rdb_project/{id}/file/{fid}/download', [RdbProjectController::class, 'downloadFile'])->name('rdb_project.file.download');
+    Route::post('/rdb_project/{id}/toggle-report-status', [RdbProjectController::class, 'toggleReportStatus'])->name('rdb_project.toggle_report_status');
+    Route::post('/rdb_project/{id}/file/{fid}/toggle-status', [RdbProjectController::class, 'toggleFileStatus'])->name('rdb_project.file.toggle_status');
+
+    // Project Main Files (Abstract & Report)
+    Route::post('/rdb_project/{id}/upload-abstract', [RdbProjectController::class, 'uploadAbstract'])->name('rdb_project.upload_abstract');
+    Route::delete('/rdb_project/{id}/delete-abstract', [RdbProjectController::class, 'deleteAbstract'])->name('rdb_project.delete_abstract');
+    Route::post('/rdb_project/{id}/upload-report', [RdbProjectController::class, 'uploadReport'])->name('rdb_project.upload_report');
+    Route::delete('/rdb_project/{id}/delete-report', [RdbProjectController::class, 'deleteReport'])->name('rdb_project.delete_report');
+    Route::get('/rdb_project/{id}/view-abstract', [RdbProjectController::class, 'viewAbstract'])->name('rdb_project.view_abstract');
+    Route::get('/rdb_project/{id}/view-report', [RdbProjectController::class, 'viewReport'])->name('rdb_project.view_report');
+
+    // AJAX Search endpoints for Project Form
+    Route::get('/rdb_project/search/project-type', [RdbProjectController::class, 'searchProjectType'])->name('rdb_project.search_project_type');
+    Route::get('/rdb_project/search/project-type-sub', [RdbProjectController::class, 'searchProjectTypeSub'])->name('rdb_project.search_project_type_sub');
+    Route::get('/rdb_project/search/pro-group', [RdbProjectController::class, 'searchProGroup'])->name('rdb_project.search_pro_group');
+    Route::get('/rdb_project/search/researcher', [RdbProjectController::class, 'searchResearcher'])->name('rdb_project.search_researcher');
+    Route::get('/rdb_project/search/depcou', [RdbProjectController::class, 'searchDepcou'])->name('rdb_project.search_depcou');
+    Route::get('/rdb_project/search/major', [RdbProjectController::class, 'searchMajor'])->name('rdb_project.search_major');
+
 });
 
 // Frontend Routes

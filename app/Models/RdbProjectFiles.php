@@ -8,7 +8,7 @@ class RdbProjectFiles extends Model
 {
     protected $table = 'rdb_project_files';
     protected $primaryKey = 'id';
-    public $timestamps = false;
+    public $timestamps = true;
 
     public function project()
     {

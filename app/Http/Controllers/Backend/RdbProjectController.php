@@ -68,14 +68,17 @@ class RdbProjectController extends Controller
      */
     public function create()
     {
+        Gate::authorize('Project');
+        
         $groups = RdbGroupproject::all();
         $types = RdbProjectType::all();
-        $departments = RdbDepartment::all();
+        $departments = RdbDepartment::orderBy('department_nameTH')->get();
         $years = RdbYear::orderBy('year_id', 'desc')->get();
         $strategics = RdbStrategic::all();
         $statuses = RdbProjectStatus::all();
+        $positions = RdbProjectPosition::all();
 
-        return view('backend.rdb_project.create', compact('groups', 'types', 'departments', 'years', 'strategics', 'statuses'));
+        return view('backend.rdb_project.create', compact('groups', 'types', 'departments', 'years', 'strategics', 'statuses', 'positions'));
     }
 
     /**
@@ -83,35 +86,58 @@ class RdbProjectController extends Controller
      */
     public function store(Request $request)
     {
-        \Illuminate\Support\Facades\Gate::authorize('Project'); // Enforce RBAC
+        Gate::authorize('Project');
 
         $request->validate([
             'pro_nameTH' => 'required',
             'year_id' => 'required',
-            'pro_abstract_file' => 'nullable|file|mimes:pdf|max:20480', // 20MB max
-            'pro_file' => 'nullable|file|mimes:pdf|max:20480',
+            'researcher_id' => 'required|exists:rdb_researcher,researcher_id',
+            'ratio' => 'required|numeric|min:0|max:100',
+            'position_id' => 'required|exists:rdb_project_position,position_id',
         ]);
 
         $project = new RdbProject();
-        $project->fill($request->all());
-
-        if ($request->hasFile('pro_abstract_file')) {
-            $file = $request->file('pro_abstract_file');
-            $filename = time() . '_abs_' . $file->getClientOriginalName();
-            $file->storeAs('public/uploads/projects', $filename);
-            $project->pro_abstract_file = $filename;
+        $project->fill($request->except(['researcher_id', 'ratio', 'position_id', 'pro_abstract_th', 'pro_abstract_en']));
+        
+        // Combine abstract Thai and English with separator
+        $abstractTH = $request->input('pro_abstract_th', '');
+        $abstractEN = $request->input('pro_abstract_en', '');
+        if ($abstractTH || $abstractEN) {
+            $project->pro_abstract = $abstractTH . '<br><br><br><br>' . $abstractEN;
         }
+        
+        // Set defaults
+        $project->data_show = 1;
+        $project->created_at = now();
 
-        if ($request->hasFile('pro_file')) {
-            $file = $request->file('pro_file');
-            $filename = time() . '_full_' . $file->getClientOriginalName();
-            $file->storeAs('public/uploads/projects', $filename);
-            $project->pro_file = $filename;
+        $project->user_created = auth()->id();
+
+        // Sync Department Info from Researcher if likely Head/Director (Initial Create)
+        // Note: For create, we assume the first researcher added is significant.
+        if ($request->researcher_id) {
+            $researcher = RdbResearcher::find($request->researcher_id);
+            if ($researcher) {
+                $project->department_id = $researcher->department_id;
+                $project->depcou_id = $researcher->depcou_id;
+                $project->major_id = $researcher->maj_id;
+            }
         }
 
         $project->save();
 
-        return redirect()->route('backend.rdb_project.index')->with('success', 'Project created successfully.');
+        // Create project work for the researcher
+        if ($request->researcher_id) {
+            RdbProjectWork::create([
+                'pro_id' => $project->pro_id,
+                'researcher_id' => $request->researcher_id,
+                'position_id' => $request->position_id ?? 1,
+                'ratio' => $request->ratio ?? 100,
+                'user_created' => auth()->id(),
+            ]);
+        }
+
+        return redirect()->route('backend.rdb_project.show', $project->pro_id)
+            ->with('success', 'บันทึกข้อมูลโครงการวิจัยเรียบร้อยแล้ว');
     }
 
     /**
@@ -134,12 +160,11 @@ class RdbProjectController extends Controller
             'rdbProjectWorks.researcher.prefix'
         ])->findOrFail($id);
 
-        // Fetch all researchers (for Edit mode) but identify existing ones
+        // Increment page view count
+        $project->increment('pro_count_page');
+
+        // Fetch existing researcher IDs for duplicate check (sent to JS)
         $existingResearcherIds = $project->rdbProjectWorks->pluck('researcher_id')->toArray();
-        $allResearchers = RdbResearcher::with(['prefix', 'department'])
-            ->whereNotNull('researcher_fname')
-            ->where('researcher_fname', '!=', '')
-            ->get();
         
         $positions = RdbProjectPosition::all();
 
@@ -148,7 +173,39 @@ class RdbProjectController extends Controller
         $hasDirector = in_array(1, $takenPositions);
         $hasHead = in_array(2, $takenPositions);
 
-        return view('backend.rdb_project.show', compact('project', 'allResearchers', 'positions', 'existingResearcherIds', 'takenPositions', 'hasDirector', 'hasHead'));
+        return view('backend.rdb_project.show', compact('project', 'positions', 'existingResearcherIds', 'takenPositions', 'hasDirector', 'hasHead'));
+    }
+
+    /**
+     * Search researchers via AJAX for TomSelect
+     */
+    public function searchResearchers(Request $request)
+    {
+        $query = $request->get('q', '');
+        
+        if (strlen($query) < 2) {
+            return response()->json([]);
+        }
+
+        $researchers = RdbResearcher::with(['prefix', 'department'])
+            ->whereNotNull('researcher_fname')
+            ->where('researcher_fname', '!=', '')
+            ->where(function($q) use ($query) {
+                $q->where('researcher_fname', 'like', "%{$query}%")
+                  ->orWhere('researcher_lname', 'like', "%{$query}%");
+            })
+            ->limit(10)
+            ->get()
+            ->map(function($r) {
+                $deptName = $r->department->department_nameTH ?? $r->department->department_nameEN ?? $r->researcher_note ?? '-';
+                $fullName = ($r->prefix->prefix_nameTH ?? '') . $r->researcher_fname . ' ' . $r->researcher_lname . ' (' . $deptName . ')';
+                return [
+                    'value' => $r->researcher_id,
+                    'text' => $fullName
+                ];
+            });
+
+        return response()->json($researchers);
     }
 
     /**
@@ -172,7 +229,7 @@ class RdbProjectController extends Controller
      */
     public function update(Request $request, $id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('Project'); // Enforce RBAC
+        Gate::authorize('Project');
 
         $project = RdbProject::findOrFail($id);
         
@@ -183,7 +240,16 @@ class RdbProjectController extends Controller
             'pro_file' => 'nullable|file|mimes:pdf|max:20480',
         ]);
         
-        $project->fill($request->all());
+        $project->fill($request->except(['pro_abstract_th', 'pro_abstract_en', 'pro_abstract_file', 'pro_file']));
+        
+        // Combine abstract Thai and English with separator
+        $abstractTH = $request->input('pro_abstract_th', '');
+        $abstractEN = $request->input('pro_abstract_en', '');
+        if ($abstractTH || $abstractEN) {
+            $project->pro_abstract = $abstractTH . '<br><br><br><br>' . $abstractEN;
+        }
+        
+        $project->user_updated = auth()->id();
 
         if ($request->hasFile('pro_abstract_file')) {
             // Delete old file
@@ -209,7 +275,8 @@ class RdbProjectController extends Controller
 
         $project->save();
 
-        return redirect()->route('backend.rdb_project.index')->with('success', 'Project updated successfully.');
+        return redirect()->route('backend.rdb_project.show', $project->pro_id)
+            ->with('success', 'แก้ไขข้อมูลโครงการวิจัยเรียบร้อยแล้ว');
     }
 
     /**
@@ -253,7 +320,20 @@ class RdbProjectController extends Controller
         $work->researcher_id = $request->researcher_id;
         $work->position_id = $request->position_id;
         $work->ratio = $request->ratio;
+        $work->ratio = $request->ratio;
         $work->save();
+
+        // Sync Department Info if Position is Director (1) or Head (2)
+        if (in_array($request->position_id, [1, 2])) {
+            $researcher = RdbResearcher::find($request->researcher_id);
+            if ($researcher) {
+                $project->department_id = $researcher->department_id;
+                $project->depcou_id = $researcher->depcou_id;
+                $project->major_id = $researcher->maj_id;
+                $project->user_updated = auth()->id();
+                $project->save();
+            }
+        }
 
         return redirect()->back()->with('success', 'Researcher added successfully.');
     }
@@ -281,6 +361,20 @@ class RdbProjectController extends Controller
                           'position_id' => $request->position_id,
                           'ratio' => $request->ratio
                       ]);
+
+        // Sync Department Info if Position is Director (1) or Head (2)
+        if (in_array($request->position_id, [1, 2])) {
+             $researcher = RdbResearcher::find($rid);
+             // Verify project again to be safe
+             $project = RdbProject::find($id);
+             if ($researcher && $project) {
+                 $project->department_id = $researcher->department_id;
+                 $project->depcou_id = $researcher->depcou_id;
+                 $project->major_id = $researcher->maj_id;
+                 $project->user_updated = auth()->id();
+                 $project->save();
+             }
+        }
 
         return redirect()->back()->with('success', 'Researcher updated successfully.');
     }
@@ -334,7 +428,7 @@ class RdbProjectController extends Controller
                 'rf_files' => $filename,
                 'rf_note' => $request->rf_note,
                 'user_created' => auth()->id(),
-                'rf_files_show' => 1 // Default show
+                'rf_files_show' => $request->has('rf_files_show') ? 1 : 0
             ]);
         }
 
@@ -409,5 +503,353 @@ class RdbProjectController extends Controller
         $fileRecord->delete();
 
         return redirect()->back()->with('success', 'ลบไฟล์เรียบร้อยแล้ว');
+    }
+
+    /**
+     * Track file download and redirect to file
+     */
+    public function downloadFile($id, $fid)
+    {
+        $fileRecord = RdbProjectFiles::where('pro_id', $id)->where('id', $fid)->firstOrFail();
+
+        // Increment download count
+        $fileRecord->rf_download = ($fileRecord->rf_download ?? 0) + 1;
+        $fileRecord->save();
+
+        // Redirect to actual file
+        return redirect(asset('storage/uploads/project_files/' . $fileRecord->rf_files));
+    }
+
+    /**
+     * Toggle full report visibility
+     */
+    public function toggleReportStatus($id)
+    {
+        Gate::authorize('Project');
+        $project = RdbProject::findOrFail($id);
+        $project->pro_file_show = $project->pro_file_show == 1 ? 0 : 1;
+        $project->user_updated = auth()->id();
+        $project->save();
+        return response()->json(['success' => true, 'status' => $project->pro_file_show]);
+    }
+
+    /**
+     * Toggle additional file visibility
+     */
+    public function toggleFileStatus($id, $fid)
+    {
+        Gate::authorize('Project');
+        \Illuminate\Support\Facades\Log::info("Toggling file status for Project: $id, File: $fid");
+        
+        $file = RdbProjectFiles::where('pro_id', $id)->where('id', $fid)->firstOrFail();
+        \Illuminate\Support\Facades\Log::info("Old Status: " . $file->rf_files_show);
+        
+        $file->rf_files_show = $file->rf_files_show == 1 ? 0 : 1;
+        $file->user_updated = auth()->id();
+        $file->save();
+        
+        \Illuminate\Support\Facades\Log::info("New Status: " . $file->rf_files_show);
+        
+        return response()->json(['success' => true, 'status' => $file->rf_files_show]);
+    }
+
+    /**
+     * Upload abstract file
+     */
+    public function uploadAbstract(Request $request, $id)
+    {
+        Gate::authorize('Project');
+        
+        $request->validate([
+            'pro_abstract_file' => 'required|file|mimes:pdf|max:20480',
+        ]);
+
+        $project = RdbProject::findOrFail($id);
+
+        // Delete old file if exists
+        if ($project->pro_abstract_file && Storage::disk('public')->exists('uploads/projects/' . $project->pro_abstract_file)) {
+            Storage::disk('public')->delete('uploads/projects/' . $project->pro_abstract_file);
+        }
+
+        $file = $request->file('pro_abstract_file');
+        $filename = $id . '-abs' . date('YmdHis') . \Illuminate\Support\Str::random(40) . '.' . $file->getClientOriginalExtension();
+        
+        $path = 'uploads/projects';
+        if (!Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->makeDirectory($path);
+        }
+        
+        Storage::disk('public')->put($path . '/' . $filename, file_get_contents($file));
+        
+        $project->pro_abstract_file = $filename;
+        $project->user_updated = auth()->id();
+        $project->save();
+
+        return redirect()->back()->with('success', 'อัปโหลดไฟล์บทคัดย่อเรียบร้อยแล้ว');
+    }
+
+    /**
+     * Delete abstract file
+     */
+    public function deleteAbstract($id)
+    {
+        Gate::authorize('Project');
+        
+        $project = RdbProject::findOrFail($id);
+
+        if ($project->pro_abstract_file && Storage::disk('public')->exists('uploads/projects/' . $project->pro_abstract_file)) {
+            Storage::disk('public')->delete('uploads/projects/' . $project->pro_abstract_file);
+        }
+
+        $project->pro_abstract_file = null;
+        $project->user_updated = auth()->id();
+        $project->save();
+
+        return redirect()->back()->with('success', 'ลบไฟล์บทคัดย่อเรียบร้อยแล้ว');
+    }
+
+    /**
+     * Upload full report file
+     */
+    public function uploadReport(Request $request, $id)
+    {
+        Gate::authorize('Project');
+        
+        $request->validate([
+            'pro_file' => 'required|file|mimes:pdf|max:20480',
+        ]);
+
+        $project = RdbProject::findOrFail($id);
+
+        // Delete old file if exists
+        if ($project->pro_file && Storage::disk('public')->exists('uploads/projects/' . $project->pro_file)) {
+            Storage::disk('public')->delete('uploads/projects/' . $project->pro_file);
+        }
+
+        $file = $request->file('pro_file');
+        $filename = $id . '-full' . date('YmdHis') . \Illuminate\Support\Str::random(40) . '.' . $file->getClientOriginalExtension();
+        
+        $path = 'uploads/projects';
+        if (!Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->makeDirectory($path);
+        }
+        
+        Storage::disk('public')->put($path . '/' . $filename, file_get_contents($file));
+        
+        $project->pro_file = $filename;
+        $project->ps_id = 2; // Set status to 'ดำเนินการเสร็จสิ้น'
+        $project->pro_finish = now()->format('Y-m-d');
+        $project->pro_file_show = $request->has('pro_file_show') ? 1 : 0;
+        $project->user_updated = auth()->id();
+        $project->save();
+
+        return redirect()->back()->with('success', 'อัปโหลดไฟล์รายงานฉบับสมบูรณ์เรียบร้อยแล้ว (สถานะ: ดำเนินการเสร็จสิ้น)');
+    }
+
+    /**
+     * Delete full report file
+     */
+    public function deleteReport($id)
+    {
+        Gate::authorize('Project');
+        
+        $project = RdbProject::findOrFail($id);
+
+        if ($project->pro_file && Storage::disk('public')->exists('uploads/projects/' . $project->pro_file)) {
+            Storage::disk('public')->delete('uploads/projects/' . $project->pro_file);
+        }
+
+        $project->pro_file = null;
+        $project->user_updated = auth()->id();
+        $project->save();
+
+        return redirect()->back()->with('success', 'ลบไฟล์รายงานฉบับสมบูรณ์เรียบร้อยแล้ว');
+    }
+
+    /**
+     * View abstract file (with counter)
+     */
+    public function viewAbstract($id)
+    {
+        $project = RdbProject::findOrFail($id);
+        
+        if (!$project->pro_abstract_file) {
+            abort(404, 'ไม่พบไฟล์บทคัดย่อ');
+        }
+
+        // Increment view count
+        $project->pro_count_abs = ($project->pro_count_abs ?? 0) + 1;
+        $project->save();
+
+        return redirect(asset('storage/uploads/projects/' . $project->pro_abstract_file));
+    }
+
+    /**
+     * View full report file (with counter)
+     */
+    public function viewReport($id)
+    {
+        $project = RdbProject::findOrFail($id);
+        
+        if (!$project->pro_file) {
+            abort(404, 'ไม่พบไฟล์รายงานฉบับสมบูรณ์');
+        }
+
+        // Increment view count
+        $project->pro_count_full = ($project->pro_count_full ?? 0) + 1;
+        $project->save();
+
+        return redirect(asset('storage/uploads/projects/' . $project->pro_file));
+    }
+
+    /**
+     * Search project types for TomSelect AJAX
+     */
+    public function searchProjectType(Request $request)
+    {
+        $q = $request->get('q', '');
+        $yearId = $request->get('year_id');
+        
+        $query = RdbProjectType::query();
+        
+        if ($q) {
+            $query->where('pt_name', 'like', "%{$q}%");
+        }
+        if ($yearId) {
+            $query->where('year_id', $yearId);
+        }
+        
+        $results = $query->limit(30)->get()->map(function($item) {
+            return ['id' => $item->pt_id, 'text' => $item->pt_name];
+        });
+        
+        return response()->json(['results' => $results]);
+    }
+
+    /**
+     * Search project type sub for TomSelect AJAX
+     */
+    public function searchProjectTypeSub(Request $request)
+    {
+        $q = $request->get('q', '');
+        $ptId = $request->get('pt_id');
+        
+        $query = \App\Models\RdbProjectTypeSub::query();
+        
+        if ($q) {
+            $query->where('pts_name', 'like', "%{$q}%");
+        }
+        if ($ptId) {
+            $query->where('pt_id', $ptId);
+        }
+        
+        $results = $query->limit(30)->get()->map(function($item) {
+            return ['id' => $item->pts_id, 'text' => $item->pts_name];
+        });
+        
+        return response()->json(['results' => $results]);
+    }
+
+    /**
+     * Search pro group (parent projects) for TomSelect AJAX
+     */
+    public function searchProGroup(Request $request)
+    {
+        $q = $request->get('q', '');
+        $yearId = $request->get('year_id');
+        
+        $query = RdbProject::where('pgroup_id', 1); // Group projects only
+        
+        if ($q) {
+            $query->where('pro_nameTH', 'like', "%{$q}%");
+        }
+        if ($yearId) {
+            $query->where('year_id', $yearId);
+        }
+        
+        $results = $query->with('year')->limit(30)->get()->map(function($item) {
+            $yearName = $item->year ? $item->year->year_name : '--';
+            return ['id' => $item->pro_id, 'text' => "[{$yearName}] {$item->pro_nameTH}"];
+        });
+        
+        return response()->json(['results' => $results]);
+    }
+
+    /**
+     * Search researchers for TomSelect AJAX
+     */
+    public function searchResearcher(Request $request)
+    {
+        $q = $request->get('q', '');
+        
+        $query = RdbResearcher::with(['prefix', 'department']);
+        
+        if ($q) {
+            $query->where(function($sub) use ($q) {
+                $sub->where('researcher_fname', 'like', "%{$q}%")
+                    ->orWhere('researcher_lname', 'like', "%{$q}%");
+            });
+        }
+        
+        $results = $query->limit(30)->get()->map(function($item) {
+            $prefix = $item->prefix ? $item->prefix->prefix_nameTH : '';
+            $dept = $item->department ? $item->department->department_nameTH : '';
+            return [
+                'id' => $item->researcher_id, 
+                'text' => "{$prefix}{$item->researcher_fname} {$item->researcher_lname} [{$dept}]"
+            ];
+        });
+        
+        return response()->json(['results' => $results]);
+    }
+
+    /**
+     * Search department courses for TomSelect AJAX
+     */
+    public function searchDepcou(Request $request)
+    {
+        $q = $request->get('q', '');
+        $departmentId = $request->get('department_id');
+        
+        $query = \App\Models\RdbDepartmentCourse::with('department');
+        
+        if ($q) {
+            $query->where('cou_name', 'like', "%{$q}%");
+        }
+        if ($departmentId) {
+            $query->where('department_id', $departmentId);
+        }
+        
+        $results = $query->limit(30)->get()->map(function($item) {
+            $deptName = $item->department ? $item->department->department_nameTH : '';
+            return ['id' => $item->depcou_id, 'text' => "{$item->cou_name} [{$deptName}]"];
+        });
+        
+        return response()->json(['results' => $results]);
+    }
+
+    /**
+     * Search majors for TomSelect AJAX
+     */
+    public function searchMajor(Request $request)
+    {
+        $q = $request->get('q', '');
+        $depcouId = $request->get('depcou_id');
+        
+        $query = \App\Models\RdbDepMajor::with('department');
+        
+        if ($q) {
+            $query->where('maj_nameTH', 'like', "%{$q}%");
+        }
+        if ($depcouId) {
+            $query->where('depcou_id', $depcouId);
+        }
+        
+        $results = $query->limit(30)->get()->map(function($item) {
+            $deptName = $item->department ? $item->department->department_nameTH : '';
+            return ['id' => $item->maj_id, 'text' => "{$item->maj_nameTH} [{$deptName}]"];
+        });
+        
+        return response()->json(['results' => $results]);
     }
 }

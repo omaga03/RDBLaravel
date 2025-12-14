@@ -36,3 +36,13 @@ debug_output.txt
 
 # Except table order lists
 !/backups/table_order_list_*.txt
+
+# Backup Script Temp Files
+all_objects.txt
+base_tables.txt
+sorted_objects.txt
+table_deps.txt
+view_deps.txt
+test_strict_utf8.ps1
+test_*.sql
+test_*.ps1

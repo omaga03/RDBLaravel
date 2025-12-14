@@ -54,4 +54,9 @@ class User extends Authenticatable
     {
         return $this->roles->contains('item_name', $role);
     }
+
+    public function researcher()
+    {
+        return $this->belongsTo(RdbResearcher::class, 'researcher_id', 'researcher_id');
+    }
 }

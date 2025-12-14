@@ -26,6 +26,7 @@ class RdbProjectWork extends Model
     }
 
     protected $fillable = [
+        'pro_id',
         'researcher_id',
         'ratio',
         'position_id',

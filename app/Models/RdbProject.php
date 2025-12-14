@@ -102,6 +102,16 @@ class RdbProject extends Model
         return $this->hasMany(RdbProjectFiles::class, 'pro_id', 'pro_id');
     }
 
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'user_created', 'id');
+    }
+
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'user_updated', 'id');
+    }
+
     public function pts()
     {
         return $this->belongsTo(RdbProjectTypeSub::class, 'pts_id', 'pts_id');

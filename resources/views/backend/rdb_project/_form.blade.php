@@ -1,131 +1,592 @@
-<div class="row">
-    <div class="col-md-6 mb-3">
-        <label for="pro_nameTH" class="form-label">Project Name (TH)</label>
-        <input type="text" class="form-control" id="pro_nameTH" name="pro_nameTH" value="{{ old('pro_nameTH', $project->pro_nameTH ?? '') }}" required>
+{{-- TomSelect CSS is loaded in app layout --}}
+@php
+    $isEdit = isset($project) && $project->pro_id;
+@endphp
+
+<div class="rdb-project-form">
+    {{-- Row 1: ปีงบประมาณ, ประเภททุน, ประเภทโครงการย่อย --}}
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label for="year_id" class="form-label">ปีงบประมาณ <span class="text-danger">*</span></label>
+            <select class="form-select" id="year_id" name="year_id" required>
+                <option value="">เลือกปีงบประมาณ...</option>
+                @foreach($years as $year)
+                    <option value="{{ $year->year_id }}" {{ (old('year_id', $project->year_id ?? '') == $year->year_id) ? 'selected' : '' }}>
+                        {{ $year->year_name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label for="pt_id" class="form-label">ประเภททุนอุดหนุนการวิจัย</label>
+            <select class="form-select" id="pt_id" name="pt_id">
+                <option value="">เลือกปีงบประมาณก่อน...</option>
+                {{-- Will be loaded via AJAX based on year_id --}}
+            </select>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label for="pts_id" class="form-label">ประเภทโครงการย่อย</label>
+            <select class="form-select" id="pts_id" name="pts_id">
+                <option value="">เลือกประเภทโครงการย่อย...</option>
+                {{-- Will be loaded via AJAX based on pt_id --}}
+            </select>
+        </div>
     </div>
-    <div class="col-md-6 mb-3">
-        <label for="pro_nameEN" class="form-label">Project Name (EN)</label>
-        <input type="text" class="form-control" id="pro_nameEN" name="pro_nameEN" value="{{ old('pro_nameEN', $project->pro_nameEN ?? '') }}">
+
+    {{-- Row 2: รหัสโครงการ, กลุ่มโครงการ, งบประมาณ --}}
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label for="pro_code" class="form-label">รหัสโครงการ</label>
+            <input type="text" class="form-control" id="pro_code" name="pro_code" 
+                   value="{{ old('pro_code', $project->pro_code ?? '') }}" maxlength="50">
+        </div>
+        <div class="col-md-4 mb-3">
+            <label for="pgroup_id" class="form-label">กลุ่มโครงการ</label>
+            <select class="form-select" id="pgroup_id" name="pgroup_id">
+                <option value="">เลือกกลุ่มโครงการ...</option>
+                @foreach($groups as $group)
+                    <option value="{{ $group->pgroup_id }}" {{ (old('pgroup_id', $project->pgroup_id ?? '') == $group->pgroup_id) ? 'selected' : '' }}>
+                        {{ $group->pgroup_nameTH }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label for="pro_budget" class="form-label">งบประมาณ (บาท)</label>
+            <input type="text" class="form-control budget-input" id="pro_budget" name="pro_budget" 
+                   value="{{ old('pro_budget', $project->pro_budget ?? '0') }}"
+                   onclick="this.select()">
+        </div>
+    </div>
+
+    {{-- Row 3: แผนงานโครงการวิจัย (แสดงเมื่อ pgroup_id == 2) --}}
+    <div class="row" id="progroup_row" style="display: none;">
+        <div class="col-12 mb-3">
+            <label for="pro_group" class="form-label">แผนงานโครงการวิจัย</label>
+            <select class="form-select" id="pro_group" name="pro_group">
+                <option value="">เลือกแผนงานโครงการวิจัย...</option>
+                {{-- Will be loaded via AJAX --}}
+            </select>
+        </div>
+    </div>
+
+    {{-- Row 4: ชื่อโครงการ TH/EN --}}
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="pro_nameTH" class="form-label">ชื่อโครงการวิจัย (ภาษาไทย) <span class="text-danger">*</span></label>
+            <textarea class="form-control ckeditor-basic" id="pro_nameTH" name="pro_nameTH">{{ old('pro_nameTH', $project->pro_nameTH ?? '') }}</textarea>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="pro_nameEN" class="form-label">ชื่อโครงการวิจัย (ภาษาอังกฤษ)</label>
+            <textarea class="form-control ckeditor-basic" id="pro_nameEN" name="pro_nameEN">{{ old('pro_nameEN', $project->pro_nameEN ?? '') }}</textarea>
+        </div>
+    </div>
+
+    {{-- Row 5: สำหรับ Create - นักวิจัย, สัดส่วน, ตำแหน่ง --}}
+    @if(!$isEdit)
+    <div class="row">
+        <div class="col-md-5 mb-3">
+            <label for="researcher_id" class="form-label">นักวิจัย <span class="text-danger">*</span></label>
+            <select class="form-select" id="researcher_id" name="researcher_id" required>
+            </select>
+        </div>
+        <div class="col-md-3 mb-3">
+            <label for="ratio" class="form-label">สัดส่วน (%)</label>
+            <input type="number" class="form-control" id="ratio" name="ratio" value="100" min="0" max="100">
+        </div>
+        <div class="col-md-4 mb-3">
+            <label for="position_id" class="form-label">ตำแหน่งในโครงการ</label>
+            <select class="form-select" id="position_id" name="position_id">
+                @foreach($positions ?? [] as $position)
+                    <option value="{{ $position->position_id }}" {{ (old('position_id') == $position->position_id || $position->position_id == 2) ? 'selected' : '' }}>
+                        {{ $position->position_nameTH }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+    @endif
+
+    {{-- Row 5b: สำหรับ Edit - คณะ, หลักสูตร, สาขา --}}
+    @if($isEdit)
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label for="department_id" class="form-label">คณะ/หน่วยงาน</label>
+            <select class="form-select" id="department_id" name="department_id">
+                <option value="">เลือกคณะ/หน่วยงาน...</option>
+                @foreach($departments as $dept)
+                    <option value="{{ $dept->department_id }}" {{ (old('department_id', $project->department_id ?? '') == $dept->department_id) ? 'selected' : '' }}>
+                        {{ $dept->department_nameTH ?? $dept->department_nameEN }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label for="depcou_id" class="form-label">หลักสูตร</label>
+            <select class="form-select" id="depcou_id" name="depcou_id">
+                <option value="">เลือกหลักสูตร...</option>
+            </select>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label for="major_id" class="form-label">สาขาวิชา</label>
+            <select class="form-select" id="major_id" name="major_id">
+                <option value="">เลือกสาขาวิชา...</option>
+            </select>
+        </div>
+    </div>
+    @endif
+
+    {{-- Row 6: บทคัดย่อ (Thai + English) --}}
+    @php
+        // Split existing abstract into Thai and English parts
+        $abstractParts = isset($project->pro_abstract) ? explode('<br><br><br><br>', $project->pro_abstract, 2) : ['', ''];
+        $abstractTH = old('pro_abstract_th', $abstractParts[0] ?? '');
+        $abstractEN = old('pro_abstract_en', $abstractParts[1] ?? '');
+    @endphp
+    <div class="row">
+        <div class="col-12 mb-3">
+            <label for="pro_abstract_th" class="form-label">บทคัดย่อ (ภาษาไทย)</label>
+            <textarea class="form-control ckeditor-standard" id="pro_abstract_th" name="pro_abstract_th">{{ $abstractTH }}</textarea>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 mb-3">
+            <label for="pro_abstract_en" class="form-label">บทคัดย่อ (ภาษาอังกฤษ)</label>
+            <textarea class="form-control ckeditor-standard" id="pro_abstract_en" name="pro_abstract_en">{{ $abstractEN }}</textarea>
+        </div>
+    </div>
+
+    {{-- Row 7: คำสำคัญ, ระยะเวลา --}}
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="pro_keyword" class="form-label">คำสำคัญ</label>
+            <input type="text" class="form-control" id="pro_keyword" name="pro_keyword" 
+                   value="{{ old('pro_keyword', $project->pro_keyword ?? '') }}"
+                   placeholder="คั่นด้วยเครื่องหมาย ,">
+        </div>
+        <div class="col-md-3 mb-3">
+            <label for="pro_date_start" class="form-label">วันที่เริ่มต้น</label>
+            <input type="date" class="form-control" id="pro_date_start" name="pro_date_start" 
+                   value="{{ old('pro_date_start', $project->pro_date_start ?? date('Y-m-d')) }}">
+        </div>
+        <div class="col-md-3 mb-3">
+            <label for="pro_date_end" class="form-label">วันที่สิ้นสุด</label>
+            <input type="date" class="form-control" id="pro_date_end" name="pro_date_end" 
+                   value="{{ old('pro_date_end', $project->pro_date_end ?? (date('m') >= 10 ? (date('Y')+1).'-09-30' : date('Y').'-09-30')) }}">
+        </div>
+    </div>
+
+    {{-- Row 8: หมายเหตุ --}}
+    <div class="row">
+        <div class="col-12 mb-3">
+            <label for="pro_note" class="form-label">หมายเหตุ</label>
+            <input type="text" class="form-control" id="pro_note" name="pro_note" 
+                   value="{{ old('pro_note', $project->pro_note ?? '') }}" maxlength="255">
+        </div>
+    </div>
+
+    {{-- Row 9: สถานะ (สำหรับ Create) --}}
+    @if(!$isEdit)
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="ps_id" class="form-label">สถานะโครงการ</label>
+            <select class="form-select" id="ps_id" name="ps_id">
+                @foreach($statuses as $status)
+                    <option value="{{ $status->ps_id }}" {{ $loop->first ? 'selected' : '' }}>
+                        {{ $status->ps_name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+    @endif
+
+    {{-- Buttons --}}
+    <div class="form-group mt-4">
+        <button type="submit" class="btn btn-{{ $isEdit ? 'primary' : 'success' }}">
+            <i class="bi bi-save"></i> บันทึกข้อมูล
+        </button>
+        <a href="{{ route('backend.rdb_project.index') }}" class="btn btn-warning">
+            <i class="bi bi-arrow-left"></i> ย้อนกลับ
+        </a>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-4 mb-3">
-        <label for="pgroup_id" class="form-label">Project Group</label>
-        <select class="form-select" id="pgroup_id" name="pgroup_id">
-            <option value="">Select Group</option>
-            @foreach($groups as $group)
-                <option value="{{ $group->gp_id }}" {{ (old('pgroup_id', $project->pgroup_id ?? '') == $group->gp_id) ? 'selected' : '' }}>
-                    {{ $group->gp_name }}
-                </option>
-            @endforeach
-        </select>
-    </div>
-    <div class="col-md-4 mb-3">
-        <label for="pt_id" class="form-label">Project Type</label>
-        <select class="form-select" id="pt_id" name="pt_id">
-            <option value="">Select Type</option>
-            @foreach($types as $type)
-                <option value="{{ $type->pt_id }}" {{ (old('pt_id', $project->pt_id ?? '') == $type->pt_id) ? 'selected' : '' }}>
-                    {{ $type->pt_name }}
-                </option>
-            @endforeach
-        </select>
-    </div>
-    <div class="col-md-4 mb-3">
-        <label for="department_id" class="form-label">Department</label>
-        <select class="form-select" id="department_id" name="department_id">
-            <option value="">Select Department</option>
-            @foreach($departments as $dept)
-                <option value="{{ $dept->department_id }}" {{ (old('department_id', $project->department_id ?? '') == $dept->department_id) ? 'selected' : '' }}>
-                    {{ $dept->department_name }}
-                </option>
-            @endforeach
-        </select>
-    </div>
-</div>
+@push('scripts')
+<!-- CKEditor Dark Mode Styles -->
+<style>
+/* Hide CKEditor security notification */
+.cke_notification_warning {
+    display: none !important;
+}
+[data-bs-theme="dark"] .cke {
+    border-color: #495057 !important;
+}
+[data-bs-theme="dark"] .cke_top,
+[data-bs-theme="dark"] .cke_bottom {
+    background: #343a40 !important;
+    border-color: #495057 !important;
+}
+[data-bs-theme="dark"] .cke_toolgroup {
+    background: #495057 !important;
+    border-color: #6c757d !important;
+}
+[data-bs-theme="dark"] .cke_button,
+[data-bs-theme="dark"] .cke_combo_button {
+    background: transparent !important;
+}
+[data-bs-theme="dark"] .cke_button_icon {
+    filter: invert(1);
+}
+[data-bs-theme="dark"] .cke_wysiwyg_frame,
+[data-bs-theme="dark"] .cke_wysiwyg_div {
+    background: #212529 !important;
+}
+</style>
+<!-- TomSelect CDN -->
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+<!-- CKEditor 4 LTS CDN -->
+<script src="https://cdn.ckeditor.com/4.22.1/full/ckeditor.js"></script>
+<script>
+// Wait for CKEditor to be loaded
+window.addEventListener('load', function() {
+    if (typeof CKEDITOR === 'undefined') {
+        console.error('CKEditor failed to load');
+        return;
+    }
+    
+    var isDarkMode = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+    var uiColor = isDarkMode ? '#343a40' : '#f8f9fa';
+    
+    // Custom CSS for dark mode content area
+    var darkModeCSS = isDarkMode ? 'body { background-color: #212529; color: #dee2e6; }' : '';
+    
+    // Initialize CKEditor for basic fields (pro_nameTH, pro_nameEN)
+    var basicFields = document.querySelectorAll('.ckeditor-basic');
+    basicFields.forEach(function(el) {
+        if (el.id && !CKEDITOR.instances[el.id]) {
+            var editor = CKEDITOR.replace(el.id, {
+                toolbar: [
+                    { name: 'basicstyles', items: ['Bold', 'Italic', 'Subscript', 'Superscript'] }
+                ],
+                height: 80,
+                removeButtons: '',
+                language: 'th',
+                uiColor: uiColor
+            });
+            if (isDarkMode) {
+                editor.on('instanceReady', function(e) {
+                    e.editor.document.getBody().setStyle('background-color', '#212529');
+                    e.editor.document.getBody().setStyle('color', '#dee2e6');
+                });
+            }
+        }
+    });
+    
+    // Initialize CKEditor for standard fields (pro_abstract_th, pro_abstract_en)
+    var standardFields = document.querySelectorAll('.ckeditor-standard');
+    standardFields.forEach(function(el) {
+        if (el.id && !CKEDITOR.instances[el.id]) {
+            var editor = CKEDITOR.replace(el.id, {
+                toolbar: [
+                    { name: 'basicstyles', items: ['Bold', 'Italic', 'Subscript', 'Superscript'] },
+                    { name: 'paragraph', items: ['NumberedList', 'BulletedList'] },
+                    { name: 'tools', items: ['Undo', 'Redo'] }
+                ],
+                height: 200,
+                language: 'th',
+                uiColor: uiColor
+            });
+            if (isDarkMode) {
+                editor.on('instanceReady', function(e) {
+                    e.editor.document.getBody().setStyle('background-color', '#212529');
+                    e.editor.document.getBody().setStyle('color', '#dee2e6');
+                });
+            }
+        }
+    });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle progroup row based on pgroup_id
+    const pgroupSelect = document.getElementById('pgroup_id');
+    const progroupRow = document.getElementById('progroup_row');
+    
+    function toggleProgroupRow() {
+        if (pgroupSelect && pgroupSelect.value == '2') {
+            progroupRow.style.display = 'flex';
+        } else if (progroupRow) {
+            progroupRow.style.display = 'none';
+        }
+    }
+    
+    if (pgroupSelect) {
+        pgroupSelect.addEventListener('change', function() {
+            toggleProgroupRow();
+            
+            // Auto-set position_id based on pgroup_id
+            // Case 1: แผนงานวิจัย (id=1) -> ผู้อำนวยการแผนงานวิจัย (id=1)
+            // Case Other -> หัวหน้าโครงการ (id=2)
+            const positionSelect = document.getElementById('position_id');
+            if (positionSelect) {
+                if (this.value == '1') {
+                    // แผนงานวิจัย -> ผู้อำนวยการแผนงานวิจัย
+                    positionSelect.value = '1';
+                } else {
+                    // อื่นๆ หรือ ไม่เลือก -> หัวหน้าโครงการ
+                    positionSelect.value = '2';
+                }
+            }
+        });
+        toggleProgroupRow(); // Initial check
+    }
 
-<div class="row">
-    <div class="col-md-4 mb-3">
-        <label for="year_id" class="form-label">Year</label>
-        <select class="form-select" id="year_id" name="year_id">
-            <option value="">Select Year</option>
-            @foreach($years as $year)
-                <option value="{{ $year->year_id }}" {{ (old('year_id', $project->year_id ?? '') == $year->year_id) ? 'selected' : '' }}>
-                    {{ $year->year_name }}
-                </option>
-            @endforeach
-        </select>
-    </div>
-    <div class="col-md-4 mb-3">
-        <label for="strategic_id" class="form-label">Strategic</label>
-        <select class="form-select" id="strategic_id" name="strategic_id">
-            <option value="">Select Strategic</option>
-            @foreach($strategics as $strategic)
-                <option value="{{ $strategic->strategic_id }}" {{ (old('strategic_id', $project->strategic_id ?? '') == $strategic->strategic_id) ? 'selected' : '' }}>
-                    {{ $strategic->strategic_name }}
-                </option>
-            @endforeach
-        </select>
-    </div>
-    <div class="col-md-4 mb-3">
-        <label for="ps_id" class="form-label">Status</label>
-        <select class="form-select" id="ps_id" name="ps_id">
-            <option value="">Select Status</option>
-            @foreach($statuses as $status)
-                <option value="{{ $status->ps_id }}" {{ (old('ps_id', $project->ps_id ?? '') == $status->ps_id) ? 'selected' : '' }}>
-                    {{ $status->ps_name }}
-                </option>
-            @endforeach
-        </select>
-    </div>
-</div>
+    // Format budget input
+    const budgetInput = document.getElementById('pro_budget');
+    if (budgetInput) {
+        budgetInput.addEventListener('blur', function() {
+            let value = this.value.replace(/,/g, '');
+            if (!isNaN(value) && value !== '') {
+                this.value = parseFloat(value).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            }
+        });
+        budgetInput.addEventListener('focus', function() {
+            this.value = this.value.replace(/,/g, '');
+        });
+    }
 
-<div class="row">
-    <div class="col-md-4 mb-3">
-        <label for="pro_budget" class="form-label">Budget</label>
-        <input type="number" step="0.01" class="form-control" id="pro_budget" name="pro_budget" value="{{ old('pro_budget', $project->pro_budget ?? '') }}">
-    </div>
-    <div class="col-md-4 mb-3">
-        <label for="pro_date_start" class="form-label">Start Date</label>
-        <input type="date" class="form-control" id="pro_date_start" name="pro_date_start" value="{{ old('pro_date_start', $project->pro_date_start ?? '') }}">
-    </div>
-    <div class="col-md-4 mb-3">
-        <label for="pro_date_end" class="form-label">End Date</label>
-        <input type="date" class="form-control" id="pro_date_end" name="pro_date_end" value="{{ old('pro_date_end', $project->pro_date_end ?? '') }}">
-    </div>
-</div>
+    // Initialize TomSelect for researcher search
+    const researcherSelect = document.getElementById('researcher_id');
+    if (researcherSelect && typeof TomSelect !== 'undefined') {
+        new TomSelect(researcherSelect, {
+            create: false,
+            openOnFocus: true,
+            persist: false,
+            maxOptions: 10,
+            valueField: 'value',
+            labelField: 'text',
+            searchField: 'text',
+            placeholder: '-- พิมพ์เพื่อค้นหานักวิจัย --',
+            loadThrottle: 300,
+            load: function(query, callback) {
+                if (!query.length || query.length < 2) return callback();
+                
+                fetch('{{ route("backend.rdb_project.search_researchers") }}?q=' + encodeURIComponent(query))
+                    .then(response => response.json())
+                    .then(json => {
+                        callback(json);
+                    })
+                    .catch(() => {
+                        callback();
+                    });
+            },
+            render: {
+                option: function(data, escape) {
+                    return '<div>' + escape(data.text) + '</div>';
+                },
+                item: function(data, escape) {
+                    return '<div>' + escape(data.text) + '</div>';
+                },
+                no_results: function(data, escape) {
+                    return '<div class="no-results p-2 text-muted">ไม่พบข้อมูล (พิมพ์อย่างน้อย 2 ตัวอักษร)</div>';
+                }
+            }
+        });
+    }
+});
+</script>
 
-<div class="mb-3">
-    <label for="pro_abstract" class="form-label">Abstract</label>
-    <textarea class="form-control" id="pro_abstract" name="pro_abstract" rows="4">{{ old('pro_abstract', $project->pro_abstract ?? '') }}</textarea>
-</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // -------------------------------------------------------------------------
+    // Chain 1: Department -> Course -> Major
+    // -------------------------------------------------------------------------
+    const depSelect = document.getElementById('department_id');
+    const couSelect = document.getElementById('depcou_id');
+    const majSelect = document.getElementById('major_id');
 
-<div class="mb-3">
-    <label for="pro_keyword" class="form-label">Keywords</label>
-    <textarea class="form-control" id="pro_keyword" name="pro_keyword" rows="2">{{ old('pro_keyword', $project->pro_keyword ?? '') }}</textarea>
-</div>
+    // Pre-selected values (Edit mode or Old input)
+    const selectedCou = "{{ old('depcou_id', $project->depcou_id ?? '') }}";
+    const selectedMaj = "{{ old('major_id', $project->major_id ?? '') }}";
 
-<div class="row">
-    <div class="col-md-6 mb-3">
-        <label for="pro_abstract_file" class="form-label">Abstract File (PDF)</label>
-        <input type="file" class="form-control" id="pro_abstract_file" name="pro_abstract_file" accept=".pdf">
-        @if(isset($project) && $project->pro_abstract_file)
-            <div class="mt-1">
-                <small>Current file: <a href="{{ asset('storage/uploads/projects/' . $project->pro_abstract_file) }}" target="_blank">{{ $project->pro_abstract_file }}</a></small>
-            </div>
-        @endif
-    </div>
-    <div class="col-md-6 mb-3">
-        <label for="pro_file" class="form-label">Full Report File (PDF)</label>
-        <input type="file" class="form-control" id="pro_file" name="pro_file" accept=".pdf">
-        @if(isset($project) && $project->pro_file)
-            <div class="mt-1">
-                <small>Current file: <a href="{{ asset('storage/uploads/projects/' . $project->pro_file) }}" target="_blank">{{ $project->pro_file }}</a></small>
-            </div>
-        @endif
-    </div>
-</div>
+    function loadCourses(depId, preSelect = '') {
+        if (!couSelect) return;
+        couSelect.innerHTML = '<option value="">กำลังโหลด...</option>';
+        if (majSelect) majSelect.innerHTML = '<option value="">เลือกสาขาวิชา...</option>'; 
 
-<button type="submit" class="btn btn-primary">{{ isset($project) ? 'Update' : 'Create' }}</button>
-<a href="{{ route('backend.rdb_project.index') }}" class="btn btn-secondary">Cancel</a>
+        if(!depId) {
+            couSelect.innerHTML = '<option value="">เลือกหลักสูตร...</option>';
+            return;
+        }
+
+        fetch('{{ route("backend.rdb_project.search_depcou") }}?department_id=' + depId)
+            .then(res => res.json())
+            .then(data => {
+                let options = '<option value="">เลือกหลักสูตร...</option>';
+                data.results.forEach(item => {
+                    const isSelected = String(item.id) === String(preSelect) ? 'selected' : '';
+                    options += `<option value="${item.id}" ${isSelected}>${item.text}</option>`;
+                });
+                couSelect.innerHTML = options;
+                
+                if (preSelect) {
+                    loadMajors(preSelect, selectedMaj);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                couSelect.innerHTML = '<option value="">เกิดข้อผิดพลาด</option>';
+            });
+    }
+
+    function loadMajors(couId, preSelect = '') {
+        if (!majSelect) return;
+        majSelect.innerHTML = '<option value="">กำลังโหลด...</option>';
+
+        if(!couId) {
+            majSelect.innerHTML = '<option value="">เลือกสาขาวิชา...</option>';
+            return;
+        }
+
+        fetch('{{ route("backend.rdb_project.search_major") }}?depcou_id=' + couId)
+            .then(res => res.json())
+            .then(data => {
+                let options = '<option value="">เลือกสาขาวิชา...</option>';
+                data.results.forEach(item => {
+                    const isSelected = String(item.id) === String(preSelect) ? 'selected' : '';
+                    options += `<option value="${item.id}" ${isSelected}>${item.text}</option>`;
+                });
+                majSelect.innerHTML = options;
+            })
+            .catch(err => {
+                console.error(err);
+                majSelect.innerHTML = '<option value="">เกิดข้อผิดพลาด</option>';
+            });
+    }
+
+    if(depSelect) {
+        depSelect.addEventListener('change', function() {
+            loadCourses(this.value);
+        });
+    }
+
+    if(couSelect) {
+        couSelect.addEventListener('change', function() {
+            loadMajors(this.value);
+        });
+    }
+
+    if (depSelect && depSelect.value) {
+        loadCourses(depSelect.value, selectedCou);
+    }
+
+
+    // -------------------------------------------------------------------------
+    // Chain 2: Year -> Project Type -> Project Type Sub
+    // -------------------------------------------------------------------------
+    const yearSelect = document.getElementById('year_id');
+    const typeSelect = document.getElementById('pt_id');
+    const subTypeSelect = document.getElementById('pts_id');
+    const proGroupSelect = document.getElementById('pro_group'); // Added based on context from deleted code
+
+    // Pre-selected values
+    const selectedType    = "{{ old('pt_id', $project->pt_id ?? '') }}";
+    const selectedSubType = "{{ old('pts_id', $project->pts_id ?? '') }}";
+    const selectedProGroup = "{{ old('pro_group', $project->pro_group ?? '') }}";
+
+    function loadProjectTypes(yearId, preSelectType = '', preSelectGroup = '') {
+        if (typeSelect) typeSelect.innerHTML = '<option value="">กำลังโหลด...</option>';
+        if (subTypeSelect) subTypeSelect.innerHTML = '<option value="">เลือกประเภทโครงการย่อย...</option>';
+        if (proGroupSelect) proGroupSelect.innerHTML = '<option value="">เลือกแผนงานโครงการวิจัย...</option>';
+
+        if(!yearId) {
+            if (typeSelect) typeSelect.innerHTML = '<option value="">เลือกประเภททุนอุดหนุนการวิจัย...</option>';
+            return;
+        }
+
+        // Load Project Types
+        if (typeSelect) {
+            fetch('{{ route("backend.rdb_project.search_project_type") }}?year_id=' + yearId)
+                .then(res => res.json())
+                .then(data => {
+                    let options = '<option value="">เลือกประเภททุนอุดหนุนการวิจัย...</option>';
+                    (data.results || []).forEach(item => {
+                        const isSelected = String(item.id) === String(preSelectType) ? 'selected' : '';
+                        options += `<option value="${item.id}" ${isSelected}>${item.text}</option>`;
+                    });
+                    typeSelect.innerHTML = options;
+
+                    if (preSelectType) {
+                        loadProjectTypeSubs(preSelectType, selectedSubType);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    typeSelect.innerHTML = '<option value="">เกิดข้อผิดพลาด</option>';
+                });
+        }
+        
+        // Load Project Groups (if element exists)
+        if (proGroupSelect) {
+             fetch('{{ route("backend.rdb_project.search_pro_group") }}?year_id=' + yearId)
+                .then(res => res.json())
+                .then(data => {
+                    let options = '<option value="">เลือกแผนงานโครงการวิจัย...</option>';
+                    (data.results || []).forEach(item => {
+                         const isSelected = String(item.id) === String(preSelectGroup) ? 'selected' : '';
+                        options += `<option value="${item.id}" ${isSelected}>${item.text}</option>`;
+                    });
+                    proGroupSelect.innerHTML = options;
+                })
+                .catch(err => {
+                    console.error(err);
+                    proGroupSelect.innerHTML = '<option value="">เกิดข้อผิดพลาด</option>';
+                });
+        }
+    }
+
+    function loadProjectTypeSubs(ptId, preSelect = '') {
+        if (!subTypeSelect) return;
+        subTypeSelect.innerHTML = '<option value="">กำลังโหลด...</option>';
+
+        if(!ptId) {
+            subTypeSelect.innerHTML = '<option value="">เลือกประเภทโครงการย่อย...</option>';
+            return;
+        }
+
+        fetch('{{ route("backend.rdb_project.search_project_type_sub") }}?pt_id=' + ptId)
+            .then(res => res.json())
+            .then(data => {
+                let options = '<option value="">เลือกประเภทโครงการย่อย...</option>';
+                (data.results || []).forEach(item => {
+                    const isSelected = String(item.id) === String(preSelect) ? 'selected' : '';
+                    options += `<option value="${item.id}" ${isSelected}>${item.text}</option>`;
+                });
+                subTypeSelect.innerHTML = options;
+            })
+            .catch(err => {
+                console.error(err);
+                subTypeSelect.innerHTML = '<option value="">เกิดข้อผิดพลาด</option>';
+            });
+    }
+
+    if(yearSelect) {
+        yearSelect.addEventListener('change', function() {
+            loadProjectTypes(this.value);
+        });
+    }
+
+    if(typeSelect) {
+        typeSelect.addEventListener('change', function() {
+            loadProjectTypeSubs(this.value);
+        });
+    }
+
+    if (yearSelect && yearSelect.value) {
+        loadProjectTypes(yearSelect.value, selectedType, selectedProGroup);
+    }
+});
+</script>
+@endpush
