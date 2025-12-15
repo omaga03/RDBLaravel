@@ -287,9 +287,13 @@ class RdbProjectController extends Controller
         \Illuminate\Support\Facades\Gate::authorize('Project'); // Enforce RBAC
 
         $project = RdbProject::findOrFail($id);
-        $project->delete();
+        
+        // Soft delete by hiding
+        $project->data_show = 0;
+        $project->user_updated = auth()->id();
+        $project->save();
 
-        return redirect()->route('backend.rdb_project.index')->with('success', 'Project deleted successfully.');
+        return redirect()->route('backend.rdb_project.index')->with('success', 'ลบโครงการเรียบร้อยแล้ว (ซ่อนการแสดงผล)');
     }
 
     public function storeResearcher(Request $request, $id)

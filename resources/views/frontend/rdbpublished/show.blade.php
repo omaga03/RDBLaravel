@@ -39,14 +39,8 @@
                             <div class="col-sm-4 fw-bold">Date:</div>
                             <div class="col-sm-8">
                                 @if($item->pub_date)
-                                    @php
-                                        $date = \Carbon\Carbon::parse($item->pub_date);
-                                        $months = [
-                                            1 => 'ม.ค.', 2 => 'ก.พ.', 3 => 'มี.ค.', 4 => 'เม.ย.', 5 => 'พ.ค.', 6 => 'มิ.ย.',
-                                            7 => 'ก.ค.', 8 => 'ส.ค.', 9 => 'ก.ย.', 10 => 'ต.ค.', 11 => 'พ.ย.', 12 => 'ธ.ค.'
-                                        ];
-                                    @endphp
-                                    {{ $date->day }} {{ $months[$date->month] }} {{ $date->year + 543 }}
+                                @if($item->pub_date)
+                                    {{ \App\Helpers\ThaiDateHelper::format($item->pub_date, false, true) }}
                                 @else
                                     -
                                 @endif

@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class RdbNacc extends Model
 {
+    use \App\Traits\HasDataShowScope;
+
     protected $table = 'rdb_nacc';
     protected $primaryKey = 'nacc_id';
     public $timestamps = false;

@@ -37,11 +37,7 @@
                                     <div>เลขที่: {{ $item->dip_request_number }}</div>
                                 @endif
                                 @if($item->dip_request_date)
-                                    @php
-                                        $reqDate = \Carbon\Carbon::parse($item->dip_request_date);
-                                        $months = [1=>'ม.ค.', 2=>'ก.พ.', 3=>'มี.ค.', 4=>'เม.ย.', 5=>'พ.ค.', 6=>'มิ.ย.', 7=>'ก.ค.', 8=>'ส.ค.', 9=>'ก.ย.', 10=>'ต.ค.', 11=>'พ.ย.', 12=>'ธ.ค.'];
-                                    @endphp
-                                    <div>วันที่: {{ $reqDate->day }} {{ $months[$reqDate->month] }} {{ $reqDate->year + 543 }}</div>
+                                    <div>วันที่: {{ \App\Helpers\ThaiDateHelper::format($item->dip_request_date, false, true) }}</div>
                                 @endif
                             </div>
                         </div>
@@ -56,10 +52,7 @@
                                     <div>เลขที่: {{ $item->dip_publication_no }}</div>
                                 @endif
                                 @if($item->dip_publication_date)
-                                    @php
-                                        $pubDate = \Carbon\Carbon::parse($item->dip_publication_date);
-                                    @endphp
-                                    <div>วันที่: {{ $pubDate->day }} {{ $months[$pubDate->month] }} {{ $pubDate->year + 543 }}</div>
+                                    <div>วันที่: {{ \App\Helpers\ThaiDateHelper::format($item->dip_publication_date, false, true) }}</div>
                                 @endif
                             </div>
                         </div>
@@ -80,12 +73,10 @@
                             <div class="col-sm-4 fw-bold">ระยะเวลาการคุ้มครอง:</div>
                             <div class="col-sm-8">
                                 @if($item->dip_startdate)
-                                    @php $startDate = \Carbon\Carbon::parse($item->dip_startdate); @endphp
-                                    {{ $startDate->day }} {{ $months[$startDate->month] }} {{ $startDate->year + 543 }}
+                                    {{ \App\Helpers\ThaiDateHelper::format($item->dip_startdate, false, true) }}
                                 @endif
                                 @if($item->dip_enddate)
-                                    @php $endDate = \Carbon\Carbon::parse($item->dip_enddate); @endphp
-                                    - {{ $endDate->day }} {{ $months[$endDate->month] }} {{ $endDate->year + 543 }}
+                                    - {{ \App\Helpers\ThaiDateHelper::format($item->dip_enddate, false, true) }}
                                 @endif
                             </div>
                         </div>

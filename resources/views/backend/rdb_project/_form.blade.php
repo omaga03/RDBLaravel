@@ -166,13 +166,13 @@
         </div>
         <div class="col-md-3 mb-3">
             <label for="pro_date_start" class="form-label">วันที่เริ่มต้น</label>
-            <input type="date" class="form-control" id="pro_date_start" name="pro_date_start" 
-                   value="{{ old('pro_date_start', $project->pro_date_start ?? date('Y-m-d')) }}">
+            <input type="text" class="form-control datepicker" id="pro_date_start" name="pro_date_start" 
+                   value="{{ old('pro_date_start', $project->pro_date_start ?? date('Y-m-d')) }}" placeholder="วว/ดด/ปปปป">
         </div>
         <div class="col-md-3 mb-3">
             <label for="pro_date_end" class="form-label">วันที่สิ้นสุด</label>
-            <input type="date" class="form-control" id="pro_date_end" name="pro_date_end" 
-                   value="{{ old('pro_date_end', $project->pro_date_end ?? (date('m') >= 10 ? (date('Y')+1).'-09-30' : date('Y').'-09-30')) }}">
+            <input type="text" class="form-control datepicker" id="pro_date_end" name="pro_date_end" 
+                   value="{{ old('pro_date_end', $project->pro_date_end ?? (date('m') >= 10 ? (date('Y')+1).'-09-30' : date('Y').'-09-30')) }}" placeholder="วว/ดด/ปปปป">
         </div>
     </div>
 
@@ -213,101 +213,14 @@
 </div>
 
 @push('scripts')
-<!-- CKEditor Dark Mode Styles -->
-<style>
-/* Hide CKEditor security notification */
-.cke_notification_warning {
-    display: none !important;
-}
-[data-bs-theme="dark"] .cke {
-    border-color: #495057 !important;
-}
-[data-bs-theme="dark"] .cke_top,
-[data-bs-theme="dark"] .cke_bottom {
-    background: #343a40 !important;
-    border-color: #495057 !important;
-}
-[data-bs-theme="dark"] .cke_toolgroup {
-    background: #495057 !important;
-    border-color: #6c757d !important;
-}
-[data-bs-theme="dark"] .cke_button,
-[data-bs-theme="dark"] .cke_combo_button {
-    background: transparent !important;
-}
-[data-bs-theme="dark"] .cke_button_icon {
-    filter: invert(1);
-}
-[data-bs-theme="dark"] .cke_wysiwyg_frame,
-[data-bs-theme="dark"] .cke_wysiwyg_div {
-    background: #212529 !important;
-}
-</style>
+@push('scripts')
 <!-- TomSelect CDN -->
 <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
-<!-- CKEditor 4 LTS CDN -->
-<script src="https://cdn.ckeditor.com/4.22.1/full/ckeditor.js"></script>
-<script>
-// Wait for CKEditor to be loaded
-window.addEventListener('load', function() {
-    if (typeof CKEDITOR === 'undefined') {
-        console.error('CKEditor failed to load');
-        return;
-    }
-    
-    var isDarkMode = document.documentElement.getAttribute('data-bs-theme') === 'dark';
-    var uiColor = isDarkMode ? '#343a40' : '#f8f9fa';
-    
-    // Custom CSS for dark mode content area
-    var darkModeCSS = isDarkMode ? 'body { background-color: #212529; color: #dee2e6; }' : '';
-    
-    // Initialize CKEditor for basic fields (pro_nameTH, pro_nameEN)
-    var basicFields = document.querySelectorAll('.ckeditor-basic');
-    basicFields.forEach(function(el) {
-        if (el.id && !CKEDITOR.instances[el.id]) {
-            var editor = CKEDITOR.replace(el.id, {
-                toolbar: [
-                    { name: 'basicstyles', items: ['Bold', 'Italic', 'Subscript', 'Superscript'] }
-                ],
-                height: 80,
-                removeButtons: '',
-                language: 'th',
-                uiColor: uiColor
-            });
-            if (isDarkMode) {
-                editor.on('instanceReady', function(e) {
-                    e.editor.document.getBody().setStyle('background-color', '#212529');
-                    e.editor.document.getBody().setStyle('color', '#dee2e6');
-                });
-            }
-        }
-    });
-    
-    // Initialize CKEditor for standard fields (pro_abstract_th, pro_abstract_en)
-    var standardFields = document.querySelectorAll('.ckeditor-standard');
-    standardFields.forEach(function(el) {
-        if (el.id && !CKEDITOR.instances[el.id]) {
-            var editor = CKEDITOR.replace(el.id, {
-                toolbar: [
-                    { name: 'basicstyles', items: ['Bold', 'Italic', 'Subscript', 'Superscript'] },
-                    { name: 'paragraph', items: ['NumberedList', 'BulletedList'] },
-                    { name: 'tools', items: ['Undo', 'Redo'] }
-                ],
-                height: 200,
-                language: 'th',
-                uiColor: uiColor
-            });
-            if (isDarkMode) {
-                editor.on('instanceReady', function(e) {
-                    e.editor.document.getBody().setStyle('background-color', '#212529');
-                    e.editor.document.getBody().setStyle('color', '#dee2e6');
-                });
-            }
-        }
-    });
-});
-</script>
+
+    @include('layouts.partials.ckeditor_setup')
+@endpush
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Toggle progroup row based on pgroup_id
@@ -394,6 +307,94 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
+    }
+
+    // Initialize Flatpickr for Thai Buddhist Date
+    if (typeof flatpickr !== 'undefined') {
+        flatpickr.l10ns.th.firstDayOfWeek = 0; // Sunday start
+        
+        flatpickr(".datepicker", {
+            dateFormat: "Y-m-d", // Value sent to server
+            altInput: true,
+            altFormat: "j F Y", // Format for display
+            locale: "th",
+            disableMobile: true, // Force custom picker on mobile
+            formatDate: (date, format, locale) => {
+                // Return standard format if not the display format
+                // This ensures "Y-m-d" for value attribute remains correct
+                if (format !== "j F Y") {
+                     return flatpickr.formatDate(date, format, locale);
+                }
+                
+                // For display (altInput), convert Year to Buddhist Era
+                const buddhistYear = date.getFullYear() + 543;
+                return flatpickr.formatDate(date, "j F", locale) + " " + buddhistYear;
+            },
+            onMonthChange: function(selectedDates, dateStr, instance) {
+                 adjustCalendarYear(instance);
+            },
+            onYearChange: function(selectedDates, dateStr, instance) {
+                 adjustCalendarYear(instance);
+            },
+            onOpen: function(selectedDates, dateStr, instance) {
+                 adjustCalendarYear(instance);
+            },
+            onReady: function(selectedDates, dateStr, instance) {
+                // If this is the START date and it has a value, try to update the END date
+                if (instance.element.id === 'pro_date_start' && selectedDates.length > 0) {
+                    const endDateInput = document.getElementById('pro_date_end');
+                    // Only update if end date instance is already ready
+                    if (endDateInput && endDateInput._flatpickr) {
+                        endDateInput._flatpickr.set('minDate', selectedDates[0]);
+                    }
+                }
+                
+                // If this is the END date, check if START date has a value and apply restriction
+                if (instance.element.id === 'pro_date_end') {
+                    const startDateInput = document.getElementById('pro_date_start');
+                    if (startDateInput && startDateInput._flatpickr && startDateInput._flatpickr.selectedDates.length > 0) {
+                        instance.set('minDate', startDateInput._flatpickr.selectedDates[0]);
+                    }
+                }
+            },
+            onChange: function(selectedDates, dateStr, instance) {
+                // When start date changes, update end date's minDate
+                if (instance.element.id === 'pro_date_start') {
+                     const endDateInput = document.getElementById('pro_date_end');
+                     if (endDateInput && endDateInput._flatpickr) {
+                         endDateInput._flatpickr.set('minDate', selectedDates[0] || null);
+                         
+                         // Optional: Clear end date if it's now invalid (less than start date)
+                         // But usually setting minDate just disables previous dates. 
+                         // If we want to be strict, we can check value.
+                         const currentEndDate = endDateInput._flatpickr.selectedDates[0];
+                         if (currentEndDate && selectedDates.length > 0 && currentEndDate < selectedDates[0]) {
+                             endDateInput._flatpickr.clear();
+                         }
+                     }
+                }
+            }
+        });
+
+        // Function to hack the year display in the calendar header to allow showing BE
+        // Note: This is purely visual. The underlying logic uses AD.
+        function adjustCalendarYear(instance) {
+            setTimeout(() => {
+                const yearInput = instance.currentYearElement;
+                if (yearInput) {
+                     // Get the ACTUAL Gregorian year from the instance
+                     const currentYear = instance.currentYear;
+                     const buddhistYear = currentYear + 543;
+                     
+                     // Visually update the input value
+                     if (yearInput.value != buddhistYear) {
+                        yearInput.value = buddhistYear;
+                     }
+                }
+            }, 0);
+        }
+
+
     }
 });
 </script>

@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class RdbPublished extends Model
 {
+    use \App\Traits\HasDataShowScope;
+
     protected $table = 'rdb_published';
     protected $primaryKey = 'id';
     public $timestamps = false; // Assuming no standard created_at/updated_at, change if needed

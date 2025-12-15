@@ -24,6 +24,23 @@
             background-color: #212529;
             color: #f8f9fa;
         }
+        /* Dark Mode Scrollbar */
+        [data-bs-theme="dark"] ::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+        [data-bs-theme="dark"] ::-webkit-scrollbar-track {
+            background: #212529; 
+        }
+        [data-bs-theme="dark"] ::-webkit-scrollbar-thumb {
+            background-color: #495057;
+            border-radius: 10px;
+            border: 3px solid #212529;
+        }
+        [data-bs-theme="dark"] ::-webkit-scrollbar-corner {
+            background: #212529;
+        }
+
         [data-bs-theme="light"] body {
             background-color: #f8f9fa;
             color: #212529;
@@ -62,7 +79,7 @@
                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
                         <!-- Theme Toggle -->
                         <li class="nav-item me-2">
-                            <button class="btn btn-link nav-link" id="theme-toggle" title="Toggle theme">
+                            <button type="button" class="btn btn-link nav-link" id="theme-toggle" title="Toggle theme">
                                 <i class="bi bi-moon-stars-fill" id="theme-icon"></i>
                             </button>
                         </li>
@@ -314,6 +331,7 @@
         });
     </script>
     
+    @include('layouts.partials.flatpickr_setup')
     @stack('scripts')
 </body>
 </html>

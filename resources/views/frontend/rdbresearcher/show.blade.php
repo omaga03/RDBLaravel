@@ -188,14 +188,7 @@
                                                     <td>
                                                         @if($pub->pub_date)
                                                             <div class="fw-bold">
-                                                                @php
-                                                                    $date = \Carbon\Carbon::parse($pub->pub_date);
-                                                                    $months = [
-                                                                        1 => 'ม.ค.', 2 => 'ก.พ.', 3 => 'มี.ค.', 4 => 'เม.ย.', 5 => 'พ.ค.', 6 => 'มิ.ย.',
-                                                                        7 => 'ก.ค.', 8 => 'ส.ค.', 9 => 'ก.ย.', 10 => 'ต.ค.', 11 => 'พ.ย.', 12 => 'ธ.ค.'
-                                                                    ];
-                                                                @endphp
-                                                                {{ $date->day }} {{ $months[$date->month] }} {{ $date->year + 543 }}
+                                                                {{ \App\Helpers\ThaiDateHelper::format($pub->pub_date, false, true) }}
                                                             </div>
                                                         @endif
                                                         @if($pub->pubtype && $pub->pubtype->pubtype_subgroup)
@@ -231,14 +224,7 @@
                                                     <td>
                                                         @if($util->utz_date)
                                                             <div class="fw-bold mb-1">
-                                                                @php
-                                                                    $date = \Carbon\Carbon::parse($util->utz_date);
-                                                                    $months = [
-                                                                        1 => 'ม.ค.', 2 => 'ก.พ.', 3 => 'มี.ค.', 4 => 'เม.ย.', 5 => 'พ.ค.', 6 => 'มิ.ย.',
-                                                                        7 => 'ก.ค.', 8 => 'ส.ค.', 9 => 'ก.ย.', 10 => 'ต.ค.', 11 => 'พ.ย.', 12 => 'ธ.ค.'
-                                                                    ];
-                                                                @endphp
-                                                                วันที่: {{ $date->day }} {{ $months[$date->month] }} {{ $date->year + 543 }}
+                                                                วันที่: {{ \App\Helpers\ThaiDateHelper::format($util->utz_date, false, true) }}
                                                             </div>
                                                         @endif
                                                         
@@ -330,14 +316,7 @@
                                                     </td>
                                                     <td>
                                                         @if($dip->dip_request_date)
-                                                            @php
-                                                                $date = \Carbon\Carbon::parse($dip->dip_request_date);
-                                                                $months = [
-                                                                    1 => 'ม.ค.', 2 => 'ก.พ.', 3 => 'มี.ค.', 4 => 'เม.ย.', 5 => 'พ.ค.', 6 => 'มิ.ย.',
-                                                                    7 => 'ก.ค.', 8 => 'ส.ค.', 9 => 'ก.ย.', 10 => 'ต.ค.', 11 => 'พ.ย.', 12 => 'ธ.ค.'
-                                                                ];
-                                                            @endphp
-                                                            {{ $date->day }} {{ $months[$date->month] }} {{ $date->year + 543 }}
+                                                            {{ \App\Helpers\ThaiDateHelper::format($dip->dip_request_date, false, true) }}
                                                         @endif
                                                     </td>
                                                 </tr>

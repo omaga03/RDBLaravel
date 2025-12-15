@@ -49,16 +49,23 @@
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <h2 class="mb-0"><i class="bi bi-folder2-open"></i> รายละเอียดโครงการวิจัย (Project Details)</h2>
                 <div class="d-flex gap-2">
-                    <button onclick="window.print()" class="btn btn-primary d-print-none">
-                        <i class="bi bi-printer"></i> พิมพ์
+                    <a href="{{ route('backend.rdb_project.index') }}" class="btn btn-secondary d-print-none d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
+                        <i class="bi bi-arrow-left me-2"></i> ย้อนกลับ
+                    </a>
+                    <a href="{{ route('backend.rdb_project.edit', $project->pro_id) }}" class="btn btn-warning d-print-none d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
+                        <i class="bi bi-pencil me-2"></i> แก้ไขข้อมูล
+                    </a>
+                    <button onclick="window.print()" class="btn btn-primary d-print-none d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
+                        <i class="bi bi-printer me-2"></i> พิมพ์
                     </button>
-                    <a href="{{ route('backend.rdb_project.index') }}" class="btn btn-secondary d-print-none">
-                        <i class="bi bi-arrow-left"></i> ย้อนกลับ
-                    </a>
-                    <a href="{{ route('backend.rdb_project.edit', $project->pro_id) }}" class="btn btn-warning d-print-none">
-                        <i class="bi bi-pencil"></i> แก้ไขข้อมูล
-                    </a>
+                    <button type="submit" form="delete-form-top" class="btn btn-danger d-print-none d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
+                        <i class="bi bi-trash me-2"></i> ลบ
+                    </button>
                 </div>
+                <form id="delete-form-top" action="{{ route('backend.rdb_project.destroy', $project->pro_id) }}" method="POST" class="d-none" onsubmit="return confirm('ยืนยันลบโครงการนี้?');">
+                    @csrf
+                    @method('DELETE')
+                </form>
             </div>
         </div>
 
@@ -298,16 +305,23 @@
 
             <!-- Bottom Action Buttons -->
             <div class="d-flex justify-content-end gap-2 mb-4 d-print-none">
-                <button onclick="window.print()" class="btn btn-outline-dark">
-                    <i class="bi bi-printer"></i> พิมพ์
+                 <a href="{{ route('backend.rdb_project.index') }}" class="btn btn-secondary d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
+                    <i class="bi bi-arrow-left me-2"></i> ย้อนกลับ
+                </a>
+                <a href="{{ route('backend.rdb_project.edit', $project->pro_id) }}" class="btn btn-warning d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
+                    <i class="bi bi-pencil me-2"></i> แก้ไขข้อมูล
+                </a>
+                <button onclick="window.print()" class="btn btn-primary d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
+                    <i class="bi bi-printer me-2"></i> พิมพ์
                 </button>
-                 <a href="{{ route('backend.rdb_project.index') }}" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left"></i> ย้อนกลับ
-                </a>
-                <a href="{{ route('backend.rdb_project.edit', $project->pro_id) }}" class="btn btn-warning">
-                    <i class="bi bi-pencil"></i> แก้ไขข้อมูล
-                </a>
+                <button type="submit" form="delete-form-bottom" class="btn btn-danger d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
+                    <i class="bi bi-trash me-2"></i> ลบ
+                </button>
             </div>
+            <form id="delete-form-bottom" action="{{ route('backend.rdb_project.destroy', $project->pro_id) }}" method="POST" class="d-none" onsubmit="return confirm('ยืนยันลบโครงการนี้?');">
+                @csrf
+                @method('DELETE')
+            </form>
         </div>
 
         <div class="col-lg-4 order-2 order-lg-2">

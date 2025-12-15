@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class RdbProject extends Model
 {
+    use \App\Traits\HasDataShowScope;
+
     protected $table = 'rdb_project';
     protected $primaryKey = 'pro_id';
     public $timestamps = false; // Assuming no standard created_at/updated_at, change if needed
@@ -44,8 +46,10 @@ class RdbProject extends Model
         'user_created',
         'user_updated',
         'created_at',
+        'created_at',
         'updated_at',
     ];
+
     public function status()
     {
         return $this->belongsTo(RdbProjectStatus::class, 'ps_id', 'ps_id');

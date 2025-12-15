@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class RdbProjectUtilize extends Model
 {
+    use \App\Traits\HasDataShowScope;
+
     protected $table = 'rdb_project_utilize';
     protected $primaryKey = 'utz_id';
     public $timestamps = false;

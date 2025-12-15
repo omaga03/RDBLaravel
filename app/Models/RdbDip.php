@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class RdbDip extends Model
 {
+    use \App\Traits\HasDataShowScope;
+
     protected $table = 'rdb_dip';
     protected $primaryKey = 'dip_id';
     public $timestamps = false;

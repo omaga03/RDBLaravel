@@ -17,14 +17,7 @@
                             <div class="col-sm-4 fw-bold">วันที่นำไปใช้:</div>
                             <div class="col-sm-8">
                                 @if($item->utz_date)
-                                    @php
-                                        $date = \Carbon\Carbon::parse($item->utz_date);
-                                        $months = [
-                                            1 => 'ม.ค.', 2 => 'ก.พ.', 3 => 'มี.ค.', 4 => 'เม.ย.', 5 => 'พ.ค.', 6 => 'มิ.ย.',
-                                            7 => 'ก.ค.', 8 => 'ส.ค.', 9 => 'ก.ย.', 10 => 'ต.ค.', 11 => 'พ.ย.', 12 => 'ธ.ค.'
-                                        ];
-                                    @endphp
-                                    {{ $date->day }} {{ $months[$date->month] }} {{ $date->year + 543 }}
+                                    <div><i class="bi bi-calendar-check me-2 text-primary"></i> <strong>วันที่นำไปใช้:</strong> {{ \App\Helpers\ThaiDateHelper::format($item->utz_date, false, true) }}</div>
                                 @else
                                     -
                                 @endif

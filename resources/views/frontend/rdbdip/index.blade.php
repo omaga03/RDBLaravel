@@ -80,14 +80,7 @@
                                         @endif
                                         @if($item->dip_request_date)
                                             <small class="text-muted d-block mt-1">
-                                                @php
-                                                    $date = \Carbon\Carbon::parse($item->dip_request_date);
-                                                    $months = [
-                                                        1 => 'ม.ค.', 2 => 'ก.พ.', 3 => 'มี.ค.', 4 => 'เม.ย.', 5 => 'พ.ค.', 6 => 'มิ.ย.',
-                                                        7 => 'ก.ค.', 8 => 'ส.ค.', 9 => 'ก.ย.', 10 => 'ต.ค.', 11 => 'พ.ย.', 12 => 'ธ.ค.'
-                                                    ];
-                                                @endphp
-                                                <i class="bi bi-calendar"></i> {{ $date->day }} {{ $months[$date->month] }} {{ $date->year + 543 }}
+                                                <i class="bi bi-calendar"></i> {{ \App\Helpers\ThaiDateHelper::format($item->dip_request_date, false, true) }}
                                             </small>
                                         @endif
                                     </td>

@@ -108,7 +108,7 @@
                                             @if($project->pro_id)
                                                 <span class="badge bg-secondary me-1">#{{ $project->pro_id }}</span>
                                             @endif
-                                            {{ $project->pro_nameTH }}
+                                            {!! $project->pro_nameTH !!}
                                         </div>
                                         <small class="text-muted d-block mt-1">
                                             @if($project->year)
