@@ -48,7 +48,41 @@
         .navbar-brand {
             font-weight: bold;
         }
+
+        /* --- Global Custom Styles for Dark Mode --- */
+        
+        /* 1. Dark Mode Tabs */
+        [data-bs-theme="dark"] .nav-tabs .nav-link {
+            color: #0d6efd; /* Default Blue for inactive */
+        }
+        [data-bs-theme="dark"] .nav-tabs .nav-link:hover {
+            border-color: #495057 #495057 #dee2e6;
+        }
+        [data-bs-theme="dark"] .nav-tabs .nav-link.active {
+            color: #fff !important;
+            background-color: #343a40 !important;
+            border-color: #343a40 #343a40 #fff !important;
+        }
+
+        /* 2. Dark Mode Tables */
+        /* Override .table-light to be dark in dark mode */
+        [data-bs-theme="dark"] .table-light,
+        [data-bs-theme="dark"] .table .thead-light th {
+            background-color: #343a40 !important;
+            color: #fff !important;
+            border-color: #495057;
+        }
+        /* Ensure standard thead is transparent or matches theme */
+        [data-bs-theme="dark"] .table thead th {
+            border-bottom-color: #495057;
+        }
+        /* Fix card header text in dark mode if needed */
+        [data-bs-theme="dark"] .card-header {
+            border-bottom-color: #495057;
+        }
     </style>
+    <!-- IMask CDN -->
+    <script src="https://unpkg.com/imask"></script>
 </head>
 <body>
     <div id="app">
@@ -242,6 +276,32 @@
                     
                     <!-- Main Content -->
                     <div class="@if(request()->is('backend*')) col-12 @else col-md-9 col-lg-10 @endif" id="main-content-col">
+                        
+                        @if(session('success'))
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                {{ session('success') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        @endif
+
+                        @if(session('error'))
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                {{ session('error') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        @endif
+                        
+                        @if ($errors->any())
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <ul class="mb-0">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        @endif
+
                         @yield('content')
                     </div>
                 </div>

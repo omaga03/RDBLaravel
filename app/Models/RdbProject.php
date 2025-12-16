@@ -20,8 +20,7 @@ class RdbProject extends Model
         'pro_nameTH',
         'pro_nameEN',
         'department_id',
-        'depcou_id',
-        'major_id',
+        'depcat_id',
         'year_id',
         'pro_abstract',
         'pro_reference',
@@ -73,6 +72,11 @@ class RdbProject extends Model
     public function department()
     {
         return $this->belongsTo(RdbDepartment::class, 'department_id', 'department_id');
+    }
+
+    public function departmentCategory()
+    {
+        return $this->belongsTo(RdbDepartmentCategory::class, 'depcat_id', 'depcat_id');
     }
 
     public function year()

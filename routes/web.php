@@ -86,6 +86,8 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
 
     Route::resource('rdb_project', RdbProjectController::class);
     Route::resource('rdb_researcher', RdbResearcherController::class);
+    Route::post('/rdb_researcher/{id}/update-codeid', [RdbResearcherController::class, 'updateCodeId'])->name('rdb_researcher.update_codeid');
+    Route::post('/rdb_researcher/{id}/update-image', [RdbResearcherController::class, 'updateImage'])->name('rdb_researcher.update_image');
     Route::resource('rdbbranch', RdbbranchController::class);
     Route::resource('rdbdepartment', RdbdepartmentController::class);
     Route::resource('rdbdepartmenttype', RdbdepartmenttypeController::class);

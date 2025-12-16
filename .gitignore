@@ -47,3 +47,9 @@ test_strict_utf8.ps1
 test_*.sql
 test_*.ps1
 refined_orphans_export_*.csv
+
+# Legacy Migration Source
+yii2_rdb-main/
+
+# Temporary Check Scripts
+check_*.php

@@ -2,14 +2,10 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0"><i class="bi bi-pencil-square"></i> แก้ไขข้อมูลโครงการวิจัย</h5>
-            <small>{!! $project->pro_nameTH !!}</small>
-        </div>
-        <div class="card-body">
+    <div class="row">
+        <div class="col-12">
             @if ($errors->any())
-                <div class="alert alert-danger">
+                <div class="alert alert-danger mb-4">
                     <ul class="mb-0">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
@@ -17,7 +13,7 @@
                     </ul>
                 </div>
             @endif
-            
+
             <form method="POST" action="{{ route('backend.rdb_project.update', $project->pro_id) }}" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')

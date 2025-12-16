@@ -3,212 +3,221 @@
     $isEdit = isset($project) && $project->pro_id;
 @endphp
 
-<div class="rdb-project-form">
-    {{-- Row 1: ปีงบประมาณ, ประเภททุน, ประเภทโครงการย่อย --}}
-    <div class="row">
-        <div class="col-md-4 mb-3">
-            <label for="year_id" class="form-label">ปีงบประมาณ <span class="text-danger">*</span></label>
-            <select class="form-select" id="year_id" name="year_id" required>
-                <option value="">เลือกปีงบประมาณ...</option>
-                @foreach($years as $year)
-                    <option value="{{ $year->year_id }}" {{ (old('year_id', $project->year_id ?? '') == $year->year_id) ? 'selected' : '' }}>
-                        {{ $year->year_name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        <div class="col-md-4 mb-3">
-            <label for="pt_id" class="form-label">ประเภททุนอุดหนุนการวิจัย</label>
-            <select class="form-select" id="pt_id" name="pt_id">
-                <option value="">เลือกปีงบประมาณก่อน...</option>
-                {{-- Will be loaded via AJAX based on year_id --}}
-            </select>
-        </div>
-        <div class="col-md-4 mb-3">
-            <label for="pts_id" class="form-label">ประเภทโครงการย่อย</label>
-            <select class="form-select" id="pts_id" name="pts_id">
-                <option value="">เลือกประเภทโครงการย่อย...</option>
-                {{-- Will be loaded via AJAX based on pt_id --}}
-            </select>
-        </div>
+<div class="card shadow-sm border-primary">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="bi bi-pencil-square"></i> {{ $isEdit ? 'แก้ไขข้อมูลโครงการวิจัย' : 'เพิ่มโครงการวิจัย' }}</h5>
+        @if($isEdit)
+        <small>{!! $project->pro_nameTH !!}</small>
+        @endif
     </div>
+    <div class="card-body">
+        <div class="rdb-project-form">
+            {{-- Row 1: ปีงบประมาณ, ประเภททุน, ประเภทโครงการย่อย --}}
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="year_id" class="form-label">ปีงบประมาณ <span class="text-danger">*</span></label>
+                    <select class="form-select" id="year_id" name="year_id" required>
+                        <option value="">เลือกปีงบประมาณ...</option>
+                        @foreach($years as $year)
+                            <option value="{{ $year->year_id }}" {{ (old('year_id', $project->year_id ?? '') == $year->year_id) ? 'selected' : '' }}>
+                                {{ $year->year_name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="pt_id" class="form-label">ประเภททุนอุดหนุนการวิจัย</label>
+                    <select class="form-select" id="pt_id" name="pt_id">
+                        <option value="">เลือกปีงบประมาณก่อน...</option>
+                        {{-- Will be loaded via AJAX based on year_id --}}
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="pts_id" class="form-label">ประเภทโครงการย่อย</label>
+                    <select class="form-select" id="pts_id" name="pts_id">
+                        <option value="">เลือกประเภทโครงการย่อย...</option>
+                        {{-- Will be loaded via AJAX based on pt_id --}}
+                    </select>
+                </div>
+            </div>
 
-    {{-- Row 2: รหัสโครงการ, กลุ่มโครงการ, งบประมาณ --}}
-    <div class="row">
-        <div class="col-md-4 mb-3">
-            <label for="pro_code" class="form-label">รหัสโครงการ</label>
-            <input type="text" class="form-control" id="pro_code" name="pro_code" 
-                   value="{{ old('pro_code', $project->pro_code ?? '') }}" maxlength="50">
-        </div>
-        <div class="col-md-4 mb-3">
-            <label for="pgroup_id" class="form-label">กลุ่มโครงการ</label>
-            <select class="form-select" id="pgroup_id" name="pgroup_id">
-                <option value="">เลือกกลุ่มโครงการ...</option>
-                @foreach($groups as $group)
-                    <option value="{{ $group->pgroup_id }}" {{ (old('pgroup_id', $project->pgroup_id ?? '') == $group->pgroup_id) ? 'selected' : '' }}>
-                        {{ $group->pgroup_nameTH }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        <div class="col-md-4 mb-3">
-            <label for="pro_budget" class="form-label">งบประมาณ (บาท)</label>
-            <input type="text" class="form-control budget-input" id="pro_budget" name="pro_budget" 
-                   value="{{ old('pro_budget', $project->pro_budget ?? '0') }}"
-                   onclick="this.select()">
-        </div>
-    </div>
+            {{-- Row 2: รหัสโครงการ, กลุ่มโครงการ, งบประมาณ --}}
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="pro_code" class="form-label">รหัสโครงการ</label>
+                    <input type="text" class="form-control" id="pro_code" name="pro_code" 
+                           value="{{ old('pro_code', $project->pro_code ?? '') }}" maxlength="50">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="pgroup_id" class="form-label">กลุ่มโครงการ</label>
+                    <select class="form-select" id="pgroup_id" name="pgroup_id">
+                        <option value="">เลือกกลุ่มโครงการ...</option>
+                        @foreach($groups as $group)
+                            <option value="{{ $group->pgroup_id }}" {{ (old('pgroup_id', $project->pgroup_id ?? '') == $group->pgroup_id) ? 'selected' : '' }}>
+                                {{ $group->pgroup_nameTH }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="pro_budget" class="form-label">งบประมาณ (บาท)</label>
+                    <input type="text" class="form-control budget-input" id="pro_budget" name="pro_budget" 
+                           value="{{ old('pro_budget', $project->pro_budget ?? '0') }}"
+                           onclick="this.select()">
+                </div>
+            </div>
 
-    {{-- Row 3: แผนงานโครงการวิจัย (แสดงเมื่อ pgroup_id == 2) --}}
-    <div class="row" id="progroup_row" style="display: none;">
-        <div class="col-12 mb-3">
-            <label for="pro_group" class="form-label">แผนงานโครงการวิจัย</label>
-            <select class="form-select" id="pro_group" name="pro_group">
-                <option value="">เลือกแผนงานโครงการวิจัย...</option>
-                {{-- Will be loaded via AJAX --}}
-            </select>
-        </div>
-    </div>
+            {{-- Row 3: แผนงานโครงการวิจัย (แสดงเมื่อ pgroup_id == 2) --}}
+            <div class="row" id="progroup_row" style="display: none;">
+                <div class="col-12 mb-3">
+                    <label for="pro_group" class="form-label">แผนงานโครงการวิจัย</label>
+                    <select class="form-select" id="pro_group" name="pro_group">
+                        <option value="">เลือกแผนงานโครงการวิจัย...</option>
+                        {{-- Will be loaded via AJAX --}}
+                    </select>
+                </div>
+            </div>
 
-    {{-- Row 4: ชื่อโครงการ TH/EN --}}
-    <div class="row">
-        <div class="col-md-6 mb-3">
-            <label for="pro_nameTH" class="form-label">ชื่อโครงการวิจัย (ภาษาไทย) <span class="text-danger">*</span></label>
-            <textarea class="form-control ckeditor-basic" id="pro_nameTH" name="pro_nameTH">{{ old('pro_nameTH', $project->pro_nameTH ?? '') }}</textarea>
-        </div>
-        <div class="col-md-6 mb-3">
-            <label for="pro_nameEN" class="form-label">ชื่อโครงการวิจัย (ภาษาอังกฤษ)</label>
-            <textarea class="form-control ckeditor-basic" id="pro_nameEN" name="pro_nameEN">{{ old('pro_nameEN', $project->pro_nameEN ?? '') }}</textarea>
-        </div>
-    </div>
+            {{-- Row 4: ชื่อโครงการ TH/EN --}}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="pro_nameTH" class="form-label">ชื่อโครงการวิจัย (ภาษาไทย) <span class="text-danger">*</span></label>
+                    <textarea class="form-control ckeditor-basic" id="pro_nameTH" name="pro_nameTH">{{ old('pro_nameTH', $project->pro_nameTH ?? '') }}</textarea>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="pro_nameEN" class="form-label">ชื่อโครงการวิจัย (ภาษาอังกฤษ)</label>
+                    <textarea class="form-control ckeditor-basic" id="pro_nameEN" name="pro_nameEN">{{ old('pro_nameEN', $project->pro_nameEN ?? '') }}</textarea>
+                </div>
+            </div>
 
-    {{-- Row 5: สำหรับ Create - นักวิจัย, สัดส่วน, ตำแหน่ง --}}
-    @if(!$isEdit)
-    <div class="row">
-        <div class="col-md-5 mb-3">
-            <label for="researcher_id" class="form-label">นักวิจัย <span class="text-danger">*</span></label>
-            <select class="form-select" id="researcher_id" name="researcher_id" required>
-            </select>
-        </div>
-        <div class="col-md-3 mb-3">
-            <label for="ratio" class="form-label">สัดส่วน (%)</label>
-            <input type="number" class="form-control" id="ratio" name="ratio" value="100" min="0" max="100">
-        </div>
-        <div class="col-md-4 mb-3">
-            <label for="position_id" class="form-label">ตำแหน่งในโครงการ</label>
-            <select class="form-select" id="position_id" name="position_id">
-                @foreach($positions ?? [] as $position)
-                    <option value="{{ $position->position_id }}" {{ (old('position_id') == $position->position_id || $position->position_id == 2) ? 'selected' : '' }}>
-                        {{ $position->position_nameTH }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-    </div>
-    @endif
+            {{-- Row 5: สำหรับ Create - นักวิจัย, สัดส่วน, ตำแหน่ง --}}
+            @if(!$isEdit)
+            <div class="row">
+                <div class="col-md-5 mb-3">
+                    <label for="researcher_id" class="form-label">นักวิจัย <span class="text-danger">*</span></label>
+                    <select class="form-select" id="researcher_id" name="researcher_id" required>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="ratio" class="form-label">สัดส่วน (%)</label>
+                    <input type="number" class="form-control" id="ratio" name="ratio" value="100" min="0" max="100">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="position_id" class="form-label">ตำแหน่งในโครงการ</label>
+                    <select class="form-select" id="position_id" name="position_id">
+                        @foreach($positions ?? [] as $position)
+                            <option value="{{ $position->position_id }}" {{ (old('position_id') == $position->position_id || $position->position_id == 2) ? 'selected' : '' }}>
+                                {{ $position->position_nameTH }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            @endif
 
-    {{-- Row 5b: สำหรับ Edit - คณะ, หลักสูตร, สาขา --}}
-    @if($isEdit)
-    <div class="row">
-        <div class="col-md-4 mb-3">
-            <label for="department_id" class="form-label">คณะ/หน่วยงาน</label>
-            <select class="form-select" id="department_id" name="department_id">
-                <option value="">เลือกคณะ/หน่วยงาน...</option>
-                @foreach($departments as $dept)
-                    <option value="{{ $dept->department_id }}" {{ (old('department_id', $project->department_id ?? '') == $dept->department_id) ? 'selected' : '' }}>
-                        {{ $dept->department_nameTH ?? $dept->department_nameEN }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        <div class="col-md-4 mb-3">
-            <label for="depcou_id" class="form-label">หลักสูตร</label>
-            <select class="form-select" id="depcou_id" name="depcou_id">
-                <option value="">เลือกหลักสูตร...</option>
-            </select>
-        </div>
-        <div class="col-md-4 mb-3">
-            <label for="major_id" class="form-label">สาขาวิชา</label>
-            <select class="form-select" id="major_id" name="major_id">
-                <option value="">เลือกสาขาวิชา...</option>
-            </select>
-        </div>
-    </div>
-    @endif
+            {{-- Row 5b: สำหรับ Edit - คณะ, สาขาทางวิชาการ --}}
+            @if($isEdit)
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="department_id" class="form-label">คณะ/หน่วยงาน</label>
+                    <select class="form-select" id="department_id" name="department_id">
+                        <option value="">เลือกคณะ/หน่วยงาน...</option>
+                        @foreach($departments as $dept)
+                            <option value="{{ $dept->department_id }}" {{ (old('department_id', $project->department_id ?? '') == $dept->department_id) ? 'selected' : '' }}>
+                                {{ $dept->department_nameTH ?? $dept->department_nameEN }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="depcat_id" class="form-label">สาขาทางวิชาการ</label>
+                    <select class="form-select" id="depcat_id" name="depcat_id">
+                        <option value="">เลือกสาขาทางวิชาการ...</option>
+                        @foreach($categories as $cat)
+                             <option value="{{ $cat->depcat_id }}" {{ (old('depcat_id', $project->depcat_id ?? '') == $cat->depcat_id) ? 'selected' : '' }}>
+                                {{ $cat->depcat_name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            @endif
 
-    {{-- Row 6: บทคัดย่อ (Thai + English) --}}
-    @php
-        // Split existing abstract into Thai and English parts
-        $abstractParts = isset($project->pro_abstract) ? explode('<br><br><br><br>', $project->pro_abstract, 2) : ['', ''];
-        $abstractTH = old('pro_abstract_th', $abstractParts[0] ?? '');
-        $abstractEN = old('pro_abstract_en', $abstractParts[1] ?? '');
-    @endphp
-    <div class="row">
-        <div class="col-12 mb-3">
-            <label for="pro_abstract_th" class="form-label">บทคัดย่อ (ภาษาไทย)</label>
-            <textarea class="form-control ckeditor-standard" id="pro_abstract_th" name="pro_abstract_th">{{ $abstractTH }}</textarea>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-12 mb-3">
-            <label for="pro_abstract_en" class="form-label">บทคัดย่อ (ภาษาอังกฤษ)</label>
-            <textarea class="form-control ckeditor-standard" id="pro_abstract_en" name="pro_abstract_en">{{ $abstractEN }}</textarea>
-        </div>
-    </div>
+            {{-- Row 6: บทคัดย่อ (Thai + English) --}}
+            @php
+                // Split existing abstract into Thai and English parts
+                $abstractParts = isset($project->pro_abstract) ? explode('<br><br><br><br>', $project->pro_abstract, 2) : ['', ''];
+                $abstractTH = old('pro_abstract_th', $abstractParts[0] ?? '');
+                $abstractEN = old('pro_abstract_en', $abstractParts[1] ?? '');
+            @endphp
+            <div class="row">
+                <div class="col-12 mb-3">
+                    <label for="pro_abstract_th" class="form-label">บทคัดย่อ (ภาษาไทย)</label>
+                    <textarea class="form-control ckeditor-standard" id="pro_abstract_th" name="pro_abstract_th">{{ $abstractTH }}</textarea>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 mb-3">
+                    <label for="pro_abstract_en" class="form-label">บทคัดย่อ (ภาษาอังกฤษ)</label>
+                    <textarea class="form-control ckeditor-standard" id="pro_abstract_en" name="pro_abstract_en">{{ $abstractEN }}</textarea>
+                </div>
+            </div>
 
-    {{-- Row 7: คำสำคัญ, ระยะเวลา --}}
-    <div class="row">
-        <div class="col-md-6 mb-3">
-            <label for="pro_keyword" class="form-label">คำสำคัญ</label>
-            <input type="text" class="form-control" id="pro_keyword" name="pro_keyword" 
-                   value="{{ old('pro_keyword', $project->pro_keyword ?? '') }}"
-                   placeholder="คั่นด้วยเครื่องหมาย ,">
-        </div>
-        <div class="col-md-3 mb-3">
-            <label for="pro_date_start" class="form-label">วันที่เริ่มต้น</label>
-            <input type="text" class="form-control datepicker" id="pro_date_start" name="pro_date_start" 
-                   value="{{ old('pro_date_start', $project->pro_date_start ?? date('Y-m-d')) }}" placeholder="วว/ดด/ปปปป">
-        </div>
-        <div class="col-md-3 mb-3">
-            <label for="pro_date_end" class="form-label">วันที่สิ้นสุด</label>
-            <input type="text" class="form-control datepicker" id="pro_date_end" name="pro_date_end" 
-                   value="{{ old('pro_date_end', $project->pro_date_end ?? (date('m') >= 10 ? (date('Y')+1).'-09-30' : date('Y').'-09-30')) }}" placeholder="วว/ดด/ปปปป">
-        </div>
-    </div>
+            {{-- Row 7: คำสำคัญ, ระยะเวลา --}}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="pro_keyword" class="form-label">คำสำคัญ</label>
+                    <input type="text" class="form-control" id="pro_keyword" name="pro_keyword" 
+                           value="{{ old('pro_keyword', $project->pro_keyword ?? '') }}"
+                           placeholder="คั่นด้วยเครื่องหมาย ,">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="pro_date_start" class="form-label">วันที่เริ่มต้น</label>
+                    <input type="text" class="form-control datepicker" id="pro_date_start" name="pro_date_start" 
+                           value="{{ old('pro_date_start', $project->pro_date_start ?? date('Y-m-d')) }}" placeholder="วว/ดด/ปปปป">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="pro_date_end" class="form-label">วันที่สิ้นสุด</label>
+                    <input type="text" class="form-control datepicker" id="pro_date_end" name="pro_date_end" 
+                           value="{{ old('pro_date_end', $project->pro_date_end ?? (date('m') >= 10 ? (date('Y')+1).'-09-30' : date('Y').'-09-30')) }}" placeholder="วว/ดด/ปปปป">
+                </div>
+            </div>
 
-    {{-- Row 8: หมายเหตุ --}}
-    <div class="row">
-        <div class="col-12 mb-3">
-            <label for="pro_note" class="form-label">หมายเหตุ</label>
-            <input type="text" class="form-control" id="pro_note" name="pro_note" 
-                   value="{{ old('pro_note', $project->pro_note ?? '') }}" maxlength="255">
-        </div>
-    </div>
+            {{-- Row 8: หมายเหตุ --}}
+            <div class="row">
+                <div class="col-12 mb-3">
+                    <label for="pro_note" class="form-label">หมายเหตุ</label>
+                    <input type="text" class="form-control" id="pro_note" name="pro_note" 
+                           value="{{ old('pro_note', $project->pro_note ?? '') }}" maxlength="255">
+                </div>
+            </div>
 
-    {{-- Row 9: สถานะ (สำหรับ Create) --}}
-    @if(!$isEdit)
-    <div class="row">
-        <div class="col-md-6 mb-3">
-            <label for="ps_id" class="form-label">สถานะโครงการ</label>
-            <select class="form-select" id="ps_id" name="ps_id">
-                @foreach($statuses as $status)
-                    <option value="{{ $status->ps_id }}" {{ $loop->first ? 'selected' : '' }}>
-                        {{ $status->ps_name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-    </div>
-    @endif
+            {{-- Row 9: สถานะ (สำหรับ Create) --}}
+            @if(!$isEdit)
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="ps_id" class="form-label">สถานะโครงการ</label>
+                    <select class="form-select" id="ps_id" name="ps_id">
+                        @foreach($statuses as $status)
+                            <option value="{{ $status->ps_id }}" {{ $loop->first ? 'selected' : '' }}>
+                                {{ $status->ps_name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            @endif
 
-    {{-- Buttons --}}
-    <div class="form-group mt-4">
-        <button type="submit" class="btn btn-{{ $isEdit ? 'primary' : 'success' }}">
-            <i class="bi bi-save"></i> บันทึกข้อมูล
-        </button>
-        <a href="{{ route('backend.rdb_project.index') }}" class="btn btn-warning">
-            <i class="bi bi-arrow-left"></i> ย้อนกลับ
-        </a>
+            {{-- Buttons --}}
+            <div class="form-group mt-4">
+                <button type="submit" class="btn btn-{{ $isEdit ? 'primary' : 'success' }}">
+                    <i class="bi bi-save"></i> บันทึกข้อมูล
+                </button>
+                <a href="{{ $isEdit ? route('backend.rdb_project.show', $project->pro_id) : route('backend.rdb_project.index') }}" class="btn btn-warning">
+                    <i class="bi bi-arrow-left"></i> ย้อนกลับ
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -402,86 +411,10 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // -------------------------------------------------------------------------
-    // Chain 1: Department -> Course -> Major
+    // Chain 1: Department (No longer chains to Course/Major)
     // -------------------------------------------------------------------------
-    const depSelect = document.getElementById('department_id');
-    const couSelect = document.getElementById('depcou_id');
-    const majSelect = document.getElementById('major_id');
-
-    // Pre-selected values (Edit mode or Old input)
-    const selectedCou = "{{ old('depcou_id', $project->depcou_id ?? '') }}";
-    const selectedMaj = "{{ old('major_id', $project->major_id ?? '') }}";
-
-    function loadCourses(depId, preSelect = '') {
-        if (!couSelect) return;
-        couSelect.innerHTML = '<option value="">กำลังโหลด...</option>';
-        if (majSelect) majSelect.innerHTML = '<option value="">เลือกสาขาวิชา...</option>'; 
-
-        if(!depId) {
-            couSelect.innerHTML = '<option value="">เลือกหลักสูตร...</option>';
-            return;
-        }
-
-        fetch('{{ route("backend.rdb_project.search_depcou") }}?department_id=' + depId)
-            .then(res => res.json())
-            .then(data => {
-                let options = '<option value="">เลือกหลักสูตร...</option>';
-                data.results.forEach(item => {
-                    const isSelected = String(item.id) === String(preSelect) ? 'selected' : '';
-                    options += `<option value="${item.id}" ${isSelected}>${item.text}</option>`;
-                });
-                couSelect.innerHTML = options;
-                
-                if (preSelect) {
-                    loadMajors(preSelect, selectedMaj);
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                couSelect.innerHTML = '<option value="">เกิดข้อผิดพลาด</option>';
-            });
-    }
-
-    function loadMajors(couId, preSelect = '') {
-        if (!majSelect) return;
-        majSelect.innerHTML = '<option value="">กำลังโหลด...</option>';
-
-        if(!couId) {
-            majSelect.innerHTML = '<option value="">เลือกสาขาวิชา...</option>';
-            return;
-        }
-
-        fetch('{{ route("backend.rdb_project.search_major") }}?depcou_id=' + couId)
-            .then(res => res.json())
-            .then(data => {
-                let options = '<option value="">เลือกสาขาวิชา...</option>';
-                data.results.forEach(item => {
-                    const isSelected = String(item.id) === String(preSelect) ? 'selected' : '';
-                    options += `<option value="${item.id}" ${isSelected}>${item.text}</option>`;
-                });
-                majSelect.innerHTML = options;
-            })
-            .catch(err => {
-                console.error(err);
-                majSelect.innerHTML = '<option value="">เกิดข้อผิดพลาด</option>';
-            });
-    }
-
-    if(depSelect) {
-        depSelect.addEventListener('change', function() {
-            loadCourses(this.value);
-        });
-    }
-
-    if(couSelect) {
-        couSelect.addEventListener('change', function() {
-            loadMajors(this.value);
-        });
-    }
-
-    if (depSelect && depSelect.value) {
-        loadCourses(depSelect.value, selectedCou);
-    }
+    // Logic for loading Courses/Majors removed as per requirement to replace with Academic Branch (Category)
+    
 
 
     // -------------------------------------------------------------------------

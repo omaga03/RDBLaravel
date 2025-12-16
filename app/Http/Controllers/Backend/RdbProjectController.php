@@ -14,6 +14,7 @@ use App\Models\RdbResearcher;
 use App\Models\RdbProjectPosition;
 use App\Models\RdbProjectWork;
 use App\Models\RdbProjectFiles;
+use App\Models\RdbDepartmentCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -118,8 +119,9 @@ class RdbProjectController extends Controller
             $researcher = RdbResearcher::find($request->researcher_id);
             if ($researcher) {
                 $project->department_id = $researcher->department_id;
-                $project->depcou_id = $researcher->depcou_id;
-                $project->major_id = $researcher->maj_id;
+                $project->depcat_id = $researcher->depcat_id;
+                // $project->depcou_id = $researcher->depcou_id; // Removed
+                // $project->major_id = $researcher->maj_id; // Removed
             }
         }
 
@@ -220,8 +222,9 @@ class RdbProjectController extends Controller
         $years = RdbYear::orderBy('year_id', 'desc')->get();
         $strategics = RdbStrategic::all();
         $statuses = RdbProjectStatus::all();
+        $categories = RdbDepartmentCategory::all();
 
-        return view('backend.rdb_project.edit', compact('project', 'groups', 'types', 'departments', 'years', 'strategics', 'statuses'));
+        return view('backend.rdb_project.edit', compact('project', 'groups', 'types', 'departments', 'years', 'strategics', 'statuses', 'categories'));
     }
 
     /**
@@ -332,8 +335,8 @@ class RdbProjectController extends Controller
             $researcher = RdbResearcher::find($request->researcher_id);
             if ($researcher) {
                 $project->department_id = $researcher->department_id;
-                $project->depcou_id = $researcher->depcou_id;
-                $project->major_id = $researcher->maj_id;
+                $project->depcat_id = $researcher->depcat_id;
+                // Removed depcou_id and major_id as per request
                 $project->user_updated = auth()->id();
                 $project->save();
             }
@@ -373,8 +376,8 @@ class RdbProjectController extends Controller
              $project = RdbProject::find($id);
              if ($researcher && $project) {
                  $project->department_id = $researcher->department_id;
-                 $project->depcou_id = $researcher->depcou_id;
-                 $project->major_id = $researcher->maj_id;
+                 $project->depcat_id = $researcher->depcat_id;
+                 // Removed depcou_id and major_id as per request
                  $project->user_updated = auth()->id();
                  $project->save();
              }
