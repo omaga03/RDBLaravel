@@ -61,6 +61,12 @@ document.addEventListener('DOMContentLoaded', function() {
             'body.dark-mode::-webkit-scrollbar-corner { background: #212529; }'
         );
 
+        // Global Defaults: Prevent auto-paragraphing (<p>) and use <br> for line breaks
+        CKEDITOR.config.enterMode = CKEDITOR.ENTER_BR;
+        CKEDITOR.config.autoParagraph = false;
+        CKEDITOR.config.fillEmptyBlocks = false; // Prevent &nbsp; filler
+        CKEDITOR.config.ignoreEmptyParagraph = true;
+
         var isDarkMode = document.documentElement.getAttribute('data-bs-theme') === 'dark';
         var uiColor = isDarkMode ? '#343a40' : '#f8f9fa';
         // Set initial bodyClass based on current theme
@@ -117,6 +123,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     height: 200,
                     language: 'th',
                     uiColor: uiColor,
+                    enterMode: CKEDITOR.ENTER_BR,
+                    autoParagraph: false,
                     bodyClass: initialBodyClass // Apply class at creation time
                 });
                 

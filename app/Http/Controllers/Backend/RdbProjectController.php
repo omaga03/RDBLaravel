@@ -98,11 +98,20 @@ class RdbProjectController extends Controller
         ]);
 
         $project = new RdbProject();
+
+        // 1. Clean HTML for Names
+        $cleanNameTH = $this->cleanHtml($request->pro_nameTH);
+        $cleanNameEN = $this->cleanHtml($request->pro_nameEN);
+        $request->merge([
+            'pro_nameTH' => $cleanNameTH,
+            'pro_nameEN' => $cleanNameEN,
+        ]);
+
         $project->fill($request->except(['researcher_id', 'ratio', 'position_id', 'pro_abstract_th', 'pro_abstract_en']));
         
-        // Combine abstract Thai and English with separator
-        $abstractTH = $request->input('pro_abstract_th', '');
-        $abstractEN = $request->input('pro_abstract_en', '');
+        // 2. Clean & Combine Abstract
+        $abstractTH = $this->cleanHtml($request->input('pro_abstract_th', ''));
+        $abstractEN = $this->cleanHtml($request->input('pro_abstract_en', ''));
         if ($abstractTH || $abstractEN) {
             $project->pro_abstract = $abstractTH . '<br><br><br><br>' . $abstractEN;
         }
@@ -243,11 +252,19 @@ class RdbProjectController extends Controller
             'pro_file' => 'nullable|file|mimes:pdf|max:20480',
         ]);
         
+        // 1. Clean HTML for Names
+        $cleanNameTH = $this->cleanHtml($request->pro_nameTH);
+        $cleanNameEN = $this->cleanHtml($request->pro_nameEN);
+        $request->merge([
+            'pro_nameTH' => $cleanNameTH,
+            'pro_nameEN' => $cleanNameEN,
+        ]);
+
         $project->fill($request->except(['pro_abstract_th', 'pro_abstract_en', 'pro_abstract_file', 'pro_file']));
         
-        // Combine abstract Thai and English with separator
-        $abstractTH = $request->input('pro_abstract_th', '');
-        $abstractEN = $request->input('pro_abstract_en', '');
+        // 2. Clean & Combine Abstract
+        $abstractTH = $this->cleanHtml($request->input('pro_abstract_th', ''));
+        $abstractEN = $this->cleanHtml($request->input('pro_abstract_en', ''));
         if ($abstractTH || $abstractEN) {
             $project->pro_abstract = $abstractTH . '<br><br><br><br>' . $abstractEN;
         }
@@ -858,5 +875,17 @@ class RdbProjectController extends Controller
         });
         
         return response()->json(['results' => $results]);
+    }
+    private function cleanHtml($html)
+    {
+        if (empty($html)) return $html;
+        // Replace <p> with empty, </p> with <br>
+        $html = str_replace('<p>', '', $html);
+        $html = str_replace('</p>', '<br>', $html);
+        // Remove trailing <br>
+        while (substr($html, -4) === '<br>') {
+            $html = substr($html, 0, -4);
+        }
+        return $html;
     }
 }

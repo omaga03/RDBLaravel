@@ -65,6 +65,13 @@
                         <a href="{{ route('backend.rdb_researcher.edit', $item->researcher_id) }}" class="btn btn-warning text-dark">
                             <i class="bi bi-pencil-square"></i> แก้ไขข้อมูลนักวิจัย
                         </a>
+                        <form action="{{ route('backend.rdb_researcher.destroy', $item->researcher_id) }}" method="POST" class="d-grid" onsubmit="return confirm('ยืนยันการลบข้อมูลนี้ทั้งหมด?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> ลบข้อมูลนักวิจัย
+                            </button>
+                        </form>
                         <a href="{{ route('backend.rdb_researcher.index') }}" class="btn btn-secondary">
                             <i class="bi bi-arrow-left"></i> กลับหน้ารายการ
                         </a>

@@ -154,21 +154,9 @@
                                         @endif
                                     </td>
                                     <td class="text-end">
-                                        <div class="btn-group" role="group">
-                                            <a href="{{ route('backend.rdb_project.show', $project->pro_id) }}" class="btn btn-outline-primary btn-sm" title="ดูข้อมูล">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                            <a href="{{ route('backend.rdb_project.edit', $project->pro_id) }}" class="btn btn-outline-warning btn-sm" title="แก้ไข">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-                                            <form action="{{ route('backend.rdb_project.destroy', $project->pro_id) }}" method="POST" class="d-inline" onsubmit="return confirm('คุณแน่ใจหรือไม่ที่จะลบข้อมูลนี้?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-outline-danger btn-sm" title="ลบ">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </form>
-                                        </div>
+                                        <a href="{{ route('backend.rdb_project.show', $project->getKey()) }}" class="btn btn-outline-primary btn-sm" title="ดูรายละเอียด">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
                                     </td>
                                 </tr>
                                 @empty

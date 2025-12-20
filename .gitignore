@@ -53,3 +53,4 @@ yii2_rdb-main/
 
 # Temporary Check Scripts
 check_*.php
+update_*.php

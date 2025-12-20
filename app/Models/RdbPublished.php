@@ -73,6 +73,9 @@ class RdbPublished extends Model
     public function authors()
     {
         return $this->belongsToMany(RdbResearcher::class, 'rdb_published_work', 'published_id', 'researcher_id')
-                    ->withPivot('pubta_id', 'pubw_main', 'pubw_bud');
+                    ->withPivot('pubta_id', 'pubw_main', 'pubw_bud')
+                    ->orderByPivot('pubw_bud', 'desc')
+                    ->orderByPivot('pubw_main', 'desc')
+                    ->orderByPivot('pubta_id', 'asc');
     }
 }

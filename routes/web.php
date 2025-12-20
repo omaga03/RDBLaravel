@@ -100,6 +100,12 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     Route::resource('rdbprojectwork', RdbprojectworkController::class);
     Route::resource('rdbstrategic', RdbstrategicController::class);
     Route::resource('rdbyear', RdbyearController::class);
+    Route::get('/rdb_published/search/researcher', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'searchResearcher'])->name('rdb_published.search_researcher');
+    Route::get('/rdb_published/search/project', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'searchProject'])->name('rdb_published.search_project');
+    Route::resource('rdb_published', \App\Http\Controllers\Backend\RdbPublishedController::class);
+    Route::resource('rdb_dip', \App\Http\Controllers\Backend\RdbDipController::class);
+    Route::resource('rdbprojectutilize', \App\Http\Controllers\Backend\RdbProjectUtilizeController::class);
+    Route::resource('research_news', \App\Http\Controllers\Backend\ResearchNewsController::class);
 
     // Project Researcher Management
     Route::post('/rdb_project/{id}/researcher', [RdbProjectController::class, 'storeResearcher'])->name('rdb_project.researcher.store');

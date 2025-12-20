@@ -58,7 +58,7 @@
             @endif
 
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-hover align-top mb-0">
                     <thead>
                         <tr>
                             <th style="width: 50%" class="ps-4">ข้อมูลนักวิจัย (Researcher Info)</th>
@@ -95,6 +95,11 @@
                                                 <span class="ms-2"><i class="bi bi-phone"></i> {{ $researcher->researcher_mobile }}</span>
                                             @endif
                                         </div>
+                                        @if($researcher->researcher_codeid)
+                                            <div class="small text-muted">
+                                                <i class="bi bi-person-badge"></i> {{ $researcher->researcher_codeid }}
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             </td>
@@ -106,23 +111,15 @@
                                 @else
                                     <span class="text-muted fst-italic">- ไม่ระบุ -</span>
                                 @endif
+
+                                @if($researcher->departmentCategory)
+                                    <div class="small text-muted mt-1"><i class="bi bi-tag"></i> สาขาทางวิชาการ: {{ $researcher->departmentCategory->depcat_name }}</div>
+                                @endif
                             </td>
                             <td class="text-center">
-                                <div class="btn-group" role="group">
                                     <a href="{{ route('backend.rdb_researcher.show', $researcher->getKey()) }}" class="btn btn-outline-primary btn-sm" title="ดูรายละเอียด">
                                         <i class="bi bi-eye"></i>
                                     </a>
-                                    <a href="{{ route('backend.rdb_researcher.edit', $researcher->getKey()) }}" class="btn btn-outline-warning btn-sm" title="แก้ไข">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <form action="{{ route('backend.rdb_researcher.destroy', $researcher->getKey()) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันการลบข้อมูลนี้?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-outline-danger btn-sm" title="ลบ">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
                             </td>
                         </tr>
                         @empty

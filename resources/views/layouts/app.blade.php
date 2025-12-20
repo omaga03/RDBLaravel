@@ -158,7 +158,7 @@
         <!-- Row 2: Backend Menu Items -->
         @auth
             @if(request()->is('backend*'))
-            <nav class="navbar navbar-expand-md shadow-sm border-bottom py-0">
+            <nav class="navbar navbar-expand-md shadow-sm border-bottom py-0" style="z-index: 1050;">
                 <div class="container">
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#backendMenuContent" aria-controls="backendMenuContent" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon" style="font-size: 0.8rem;"></span>
@@ -201,7 +201,7 @@
                                         <i class="bi bi-journal-text"></i> ตีพิมพ์
                                     </a>
                                     <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item disabled" href="#"><i class="bi bi-file-earmark-text"></i> รายการตีพิมพ์</a></li>
+                                        <li><a class="dropdown-item" href="{{ route('backend.rdb_published.index') }}"><i class="bi bi-file-earmark-text"></i> รายการตีพิมพ์</a></li>
                                         <li><hr class="dropdown-divider"></li>
                                         <li><div class="dropdown-header text-uppercase small fw-bold">ข้อมูลพื้นฐาน</div></li>
                                         <li><a class="dropdown-item disabled" href="#">ประเภทผลงาน</a></li>
@@ -214,7 +214,7 @@
                                         <i class="bi bi-lightbulb"></i> ทรัพย์สินฯ
                                     </a>
                                     <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item disabled" href="#"><i class="bi bi-award"></i> รายการทรัพย์สินฯ</a></li>
+                                        <li><a class="dropdown-item" href="{{ route('backend.rdb_dip.index') }}"><i class="bi bi-award"></i> รายการทรัพย์สินฯ</a></li>
                                         <li><hr class="dropdown-divider"></li>
                                         <li><div class="dropdown-header text-uppercase small fw-bold">ข้อมูลพื้นฐาน</div></li>
                                         <li><a class="dropdown-item disabled" href="#">ประเภท</a></li>
@@ -227,7 +227,7 @@
                                         <i class="bi bi-rocket-takeoff"></i> การใช้ประโยชน์
                                     </a>
                                     <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item disabled" href="#"><i class="bi bi-graph-up-arrow"></i> รายการการใช้ฯ</a></li>
+                                        <li><a class="dropdown-item" href="{{ route('backend.rdbprojectutilize.index') }}"><i class="bi bi-graph-up-arrow"></i> รายการการใช้ฯ</a></li>
                                         <li><hr class="dropdown-divider"></li>
                                         <li><div class="dropdown-header text-uppercase small fw-bold">ข้อมูลพื้นฐาน</div></li>
                                         <li><a class="dropdown-item disabled" href="#">ประเภท</a></li>
@@ -239,7 +239,7 @@
                                         <i class="bi bi-newspaper"></i> ข่าว/กิจกรรม
                                     </a>
                                     <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item disabled" href="#"><i class="bi bi-megaphone"></i> ข่าวประชาสัมพันธ์</a></li>
+                                        <li><a class="dropdown-item" href="{{ route('backend.research_news.index') }}"><i class="bi bi-megaphone"></i> ข่าวประชาสัมพันธ์</a></li>
                                         <li><a class="dropdown-item disabled" href="#"><i class="bi bi-calendar-event"></i> ข่าวการประชุม/อบรม</a></li>
                                     </ul>
                                 </li>
