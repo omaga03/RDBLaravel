@@ -19,6 +19,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
+use App\Http\Requests\Backend\StoreProjectRequest;
+use App\Http\Requests\Backend\UpdateProjectRequest;
+
 class RdbProjectController extends Controller
 {
     /**
@@ -85,17 +88,11 @@ class RdbProjectController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreProjectRequest $request)
     {
         Gate::authorize('Project');
 
-        $request->validate([
-            'pro_nameTH' => 'required',
-            'year_id' => 'required',
-            'researcher_id' => 'required|exists:rdb_researcher,researcher_id',
-            'ratio' => 'required|numeric|min:0|max:100',
-            'position_id' => 'required|exists:rdb_project_position,position_id',
-        ]);
+        // Validation handled by StoreProjectRequest
 
         $project = new RdbProject();
 
@@ -239,18 +236,13 @@ class RdbProjectController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(UpdateProjectRequest $request, $id)
     {
         Gate::authorize('Project');
 
         $project = RdbProject::findOrFail($id);
         
-        $request->validate([
-            'pro_nameTH' => 'required',
-            'year_id' => 'required',
-            'pro_abstract_file' => 'nullable|file|mimes:pdf|max:20480',
-            'pro_file' => 'nullable|file|mimes:pdf|max:20480',
-        ]);
+        // Validation handled by UpdateProjectRequest
         
         // 1. Clean HTML for Names
         $cleanNameTH = $this->cleanHtml($request->pro_nameTH);
@@ -434,8 +426,8 @@ class RdbProjectController extends Controller
                 return redirect()->back()->withErrors(['rf_files' => 'File upload failed: ' . $file->getErrorMessage()]);
             }
             
-            // Format: PRO_ID-rfTIMESTAMP + Random(40) . ext
-            $filename = $project->pro_id . '-rf' . date('YmdHis') . \Illuminate\Support\Str::random(40) . '.' . $file->getClientOriginalExtension();
+            // Format: PRO_ID-rf{YmdHis}{random50}~.ext (Yii2 convention)
+            $filename = $project->pro_id . '-rf' . date('YmdHis') . \Illuminate\Support\Str::random(50) . '~.' . $file->getClientOriginalExtension();
             
             $path = 'uploads/project_files';
             // Ensure directory exists
@@ -596,7 +588,8 @@ class RdbProjectController extends Controller
         }
 
         $file = $request->file('pro_abstract_file');
-        $filename = $id . '-abs' . date('YmdHis') . \Illuminate\Support\Str::random(40) . '.' . $file->getClientOriginalExtension();
+        // Yii2 convention: {id}-abs{YmdHis}{random50}~.{ext}
+        $filename = $id . '-abs' . date('YmdHis') . \Illuminate\Support\Str::random(50) . '~.' . $file->getClientOriginalExtension();
         
         $path = 'uploads/projects';
         if (!Storage::disk('public')->exists($path)) {
@@ -651,7 +644,8 @@ class RdbProjectController extends Controller
         }
 
         $file = $request->file('pro_file');
-        $filename = $id . '-full' . date('YmdHis') . \Illuminate\Support\Str::random(40) . '.' . $file->getClientOriginalExtension();
+        // Yii2 convention: {id}-full{YmdHis}{random50}~.{ext}
+        $filename = $id . '-full' . date('YmdHis') . \Illuminate\Support\Str::random(50) . '~.' . $file->getClientOriginalExtension();
         
         $path = 'uploads/projects';
         if (!Storage::disk('public')->exists($path)) {
@@ -702,8 +696,7 @@ class RdbProjectController extends Controller
         }
 
         // Increment view count
-        $project->pro_count_abs = ($project->pro_count_abs ?? 0) + 1;
-        $project->save();
+        $project->increment('pro_count_abs');
 
         return redirect(asset('storage/uploads/projects/' . $project->pro_abstract_file));
     }
@@ -720,8 +713,7 @@ class RdbProjectController extends Controller
         }
 
         // Increment view count
-        $project->pro_count_full = ($project->pro_count_full ?? 0) + 1;
-        $project->save();
+        $project->increment('pro_count_full');
 
         return redirect(asset('storage/uploads/projects/' . $project->pro_file));
     }

@@ -23,11 +23,13 @@ class ResearchNewsController extends Controller
 
     public function create()
     {
+        \Illuminate\Support\Facades\Gate::authorize('News');
         return view('backend.research_news.create');
     }
 
     public function store(Request $request)
     {
+        \Illuminate\Support\Facades\Gate::authorize('News');
         $validated = $request->validate([
             'news_name' => 'required',
         ]);
@@ -62,12 +64,14 @@ class ResearchNewsController extends Controller
 
     public function edit($id)
     {
+        \Illuminate\Support\Facades\Gate::authorize('News');
         $item = ResearchNews::findOrFail($id);
         return view('backend.research_news.edit', compact('item'));
     }
 
     public function update(Request $request, $id)
     {
+        \Illuminate\Support\Facades\Gate::authorize('News');
         $item = ResearchNews::findOrFail($id);
         
         $cleanName = $this->cleanHtml($request->news_name);
@@ -94,6 +98,7 @@ class ResearchNewsController extends Controller
 
     public function destroy($id)
     {
+        \Illuminate\Support\Facades\Gate::authorize('News');
         $item = ResearchNews::findOrFail($id);
         $item->delete();
         return redirect()->route('backend.research_news.index')->with('success', 'ลบข้อมูลเรียบร้อยแล้ว');

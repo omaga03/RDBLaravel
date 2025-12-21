@@ -160,7 +160,7 @@ class RdbProject extends Model
             WHERE
             cpro.year_id = rdb_year.year_id
             AND cpro.data_show = 1
-            AND cpro.ps_id <> 6  
+            AND cpro.ps_id <> " . RdbProjectStatus::STATUS_CANCELLED . "  
             AND cpro.department_id = rdb_department.department_id
             AND cpro.pt_id IN ($impptid)
             ) AS cpro,
@@ -174,7 +174,7 @@ class RdbProject extends Model
             WHERE
             d.year_id = rdb_year.year_id
             AND d.data_show = 1
-            AND d.ps_id <> 6 
+            AND d.ps_id <> " . RdbProjectStatus::STATUS_CANCELLED . " 
             AND d.department_id = rdb_department.department_id
             AND d.pt_id IN ($impptid)
             ),

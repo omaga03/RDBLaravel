@@ -14,7 +14,7 @@
                  <a href="{{ route('backend.research_news.edit', $item->id) }}" class="btn btn-warning btn-sm me-2">
                     <i class="bi bi-pencil-square"></i> แก้ไข
                 </a>
-                <form action="{{ route('backend.research_news.destroy', $item->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('ยืนยันการลบข้อมูล?');">
+                <form action="{{ route('backend.research_news.destroy', $item->id) }}" method="POST" class="d-inline-block delete-form">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-danger btn-sm">

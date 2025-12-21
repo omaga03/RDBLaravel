@@ -62,7 +62,7 @@
                         <i class="bi bi-trash me-2"></i> ลบ
                     </button>
                 </div>
-                <form id="delete-form-top" action="{{ route('backend.rdb_project.destroy', $project->pro_id) }}" method="POST" class="d-none" onsubmit="return confirm('ยืนยันลบโครงการนี้?');">
+                <form id="delete-form-top" action="{{ route('backend.rdb_project.destroy', $project->pro_id) }}" method="POST" class="d-none delete-form">
                     @csrf
                     @method('DELETE')
                 </form>
@@ -130,7 +130,11 @@
                                 @if($project->pro_keyword)
                                 <tr>
                                     <th>คำสำคัญ:</th>
-                                    <td>{{ $project->pro_keyword }}</td>
+                                    <td>
+                                        @foreach(explode(',', $project->pro_keyword) as $keyword)
+                                            <span class="badge bg-secondary me-1 mb-1">{{ trim($keyword) }}</span>
+                                        @endforeach
+                                    </td>
                                 </tr>
                                 @endif
                                 <tr>

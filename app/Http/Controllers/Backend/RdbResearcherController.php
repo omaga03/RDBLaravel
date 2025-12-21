@@ -50,6 +50,7 @@ class RdbResearcherController extends Controller
      */
     public function create()
     {
+        \Illuminate\Support\Facades\Gate::authorize('Project');
         $prefixes = RdbPrefix::all();
         $departments = RdbDepartment::all();
         $majors = RdbDepMajor::all();
@@ -190,6 +191,7 @@ class RdbResearcherController extends Controller
      */
     public function edit($id)
     {
+        \Illuminate\Support\Facades\Gate::authorize('Project');
         $researcher = RdbResearcher::findOrFail($id);
         $prefixes = RdbPrefix::all();
         $departments = RdbDepartment::all();

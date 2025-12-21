@@ -24,11 +24,13 @@ class RdbDipController extends Controller
 
     public function create()
     {
+        \Illuminate\Support\Facades\Gate::authorize('Dip');
         return view('backend.rdb_dip.create');
     }
 
     public function store(Request $request)
     {
+        \Illuminate\Support\Facades\Gate::authorize('Dip');
         // Validation logic here
         $validated = $request->validate([
             'dip_request_number' => 'required',
@@ -45,12 +47,14 @@ class RdbDipController extends Controller
 
     public function edit($id)
     {
+        \Illuminate\Support\Facades\Gate::authorize('Dip');
         $item = RdbDip::findOrFail($id);
         return view('backend.rdb_dip.edit', compact('item'));
     }
 
     public function update(Request $request, $id)
     {
+        \Illuminate\Support\Facades\Gate::authorize('Dip');
         $item = RdbDip::findOrFail($id);
         $item->update($request->all());
         return redirect()->route('backend.rdb_dip.index')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
@@ -58,6 +62,7 @@ class RdbDipController extends Controller
 
     public function destroy($id)
     {
+        \Illuminate\Support\Facades\Gate::authorize('Dip');
         $item = RdbDip::findOrFail($id);
         $item->delete();
         return redirect()->route('backend.rdb_dip.index')->with('success', 'ลบข้อมูลเรียบร้อยแล้ว');

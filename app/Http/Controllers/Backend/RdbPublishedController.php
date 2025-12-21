@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Backend;
 use App\Http\Controllers\Controller;
 use App\Models\RdbPublished;
 use Illuminate\Http\Request;
+use App\Http\Requests\Backend\StorePublishedRequest;
+use App\Http\Requests\Backend\UpdatePublishedRequest;
 
 class RdbPublishedController extends Controller
 {
@@ -139,21 +141,16 @@ class RdbPublishedController extends Controller
 
     public function create()
     {
+        \Illuminate\Support\Facades\Gate::authorize('Published');
         $pubTypes = \App\Models\RdbPublishedType::all();
-        return view('backend.rdb_published.create', compact('pubTypes'));
+        $authorTypes = \App\Models\RdbPublishedTypeAuthor::pluck('pubta_nameTH', 'pubta_id');
+        return view('backend.rdb_published.create', compact('pubTypes', 'authorTypes'));
     }
 
-    public function store(Request $request)
+    public function store(StorePublishedRequest $request)
     {
-        $validated = $request->validate([
-            'pub_name' => 'required|string', 
-            'pub_file' => 'nullable|file|mimes:pdf|max:20480',
-            'pub_budget' => 'required|numeric',
-            'researcher_id' => 'required|exists:rdb_researcher,researcher_id',
-            'pubtype_id' => 'required|exists:rdb_published_type,pubtype_id',
-            'pub_date' => 'required|date',
-            'pub_score' => 'required|numeric',
-        ]);
+        \Illuminate\Support\Facades\Gate::authorize('Published');
+        // Validation handled by StorePublishedRequest
 
         $item = new RdbPublished();
 
@@ -208,14 +205,17 @@ class RdbPublishedController extends Controller
             }
         }
 
-        // 2. Auto Branch & Author Pivot
+        // 2. Auto Branch, Department & Course from Main Researcher
         if ($request->filled('researcher_id')) {
             $researcher = \App\Models\RdbResearcher::find($request->researcher_id);
             if ($researcher) {
                 // Set Branch from DepCat
                 if (empty($item->branch_id)) {
-                    $item->branch_id = $researcher->depcat_id; // Check schema if compatible types
+                    $item->branch_id = $researcher->depcat_id;
                 }
+                // Set Department & Course (As per user request: derived from Main Author)
+                $item->department_id = $researcher->department_id;
+                $item->depcou_id = $researcher->depcou_id;
             }
         }
 
@@ -238,45 +238,53 @@ class RdbPublishedController extends Controller
 
         $item->save();
 
-        // Sync Author Pivot (Main Researcher)
+        // Sync Author Pivot (Main Researcher with Main Office = 1)
         if ($request->filled('researcher_id')) {
+            $researcher = \App\Models\RdbResearcher::find($request->researcher_id);
+            
             $item->authors()->attach($request->researcher_id, [
-                'pubw_main' => 1,
+                'pubw_main' => 1, // Main Office = 1
                 'pubw_bud' => 1,
-                // 'pubta_id' => 1 // Optional default role
+                'pubta_id' => $request->pubta_id ?? 1
             ]);
+
+            // Set department directly from the main office author
+            if ($researcher) {
+                $item->department_id = $researcher->department_id;
+                $item->depcou_id = $researcher->depcou_id;
+                $item->branch_id = $researcher->depcat_id;
+                $item->save();
+            }
         }
 
-        return redirect()->route('backend.rdb_published.index')->with('success', 'บันทึกข้อมูลเรียบร้อยแล้ว');
+        return redirect()->route('backend.rdb_published.show', $item->id)->with('success', 'บันทึกข้อมูลเรียบร้อยแล้ว');
     }
 
     public function show($id)
     {
         $item = RdbPublished::findOrFail($id);
+        
+        // Increment View/Download Counter
+        $item->increment('pub_download');
+
         $authorTypes = \App\Models\RdbPublishedTypeAuthor::pluck('pubta_nameTH', 'pubta_id');
         return view('backend.rdb_published.show', compact('item', 'authorTypes'));
     }
 
     public function edit($id)
     {
+        \Illuminate\Support\Facades\Gate::authorize('Published');
         $item = RdbPublished::findOrFail($id);
         $pubTypes = \App\Models\RdbPublishedType::all();
         return view('backend.rdb_published.edit', compact('item', 'pubTypes'));
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdatePublishedRequest $request, $id)
     {
+        \Illuminate\Support\Facades\Gate::authorize('Published');
         $item = RdbPublished::findOrFail($id);
         
-        $validated = $request->validate([
-            'pub_name' => 'required|string',
-            'pub_file' => 'nullable|file|mimes:pdf|max:20480',
-            'pub_budget' => 'required|numeric',
-            // 'researcher_id' => 'required', // Disabled for Edit mode as requested
-            'pubtype_id' => 'required|exists:rdb_published_type,pubtype_id',
-            'pub_date' => 'required|date',
-            'pub_score' => 'required|numeric',
-        ]);
+        // Validation handled by UpdatePublishedRequest
 
         // Merge Abstract TH/EN
         // Merge Abstract TH/EN
@@ -326,14 +334,15 @@ class RdbPublishedController extends Controller
             }
         }
 
-        // 2. Auto Branch (Update)
+        // 2. Auto Branch, Department & Course from Main Researcher
         if ($request->filled('researcher_id')) {
             $researcher = \App\Models\RdbResearcher::find($request->researcher_id);
             if ($researcher) {
-                // If branch_id is empty or we want to enforce consistency? 
-                // Let's only set if empty to allow manual override, or force update? 
-                // Requirement: "refer... to branch_id". Sounds like force update.
+                // Set Branch from DepCat
                 $item->branch_id = $researcher->depcat_id;
+                // Set Department & Course (As per user request: derived from Main Author)
+                $item->department_id = $researcher->department_id;
+                $item->depcou_id = $researcher->depcou_id;
             }
         }
 
@@ -379,7 +388,7 @@ class RdbPublishedController extends Controller
             }
         }
 
-        return redirect()->route('backend.rdb_published.index')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
+        return redirect()->route('backend.rdb_published.show', $item->id)->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
     }
 
     private function cleanHtml($html)
@@ -462,11 +471,229 @@ class RdbPublishedController extends Controller
         return response()->json(['results' => $results]);
     }
 
-    public function destroy($id)
+    // --- Author Management ---
+
+    public function storeAuthor(Request $request, $id)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('Published');
+        
+        $item = RdbPublished::findOrFail($id);
+
+        $request->validate([
+            'researcher_id' => 'required',
+            'pubta_id' => 'required',
+            'pubw_main' => 'nullable|boolean',
+            'pubw_bud' => 'nullable|boolean',
+        ]);
+
+        // Validation: Unique First Author (pubta_id = 1)
+        if ($request->pubta_id == 1) {
+             // Check if already exists in pivot
+             $exists = $item->authors()->wherePivot('pubta_id', 1)->exists();
+             if ($exists) {
+                 return back()->with('error', 'มีผู้เขียนหลัก (First Author) อยู่แล้ว สามารถมีได้เพียงคนเดียว');
+             }
+        }
+
+        // Validation: Unique Main Author (pubw_main = 1)
+        if ($request->filled('pubw_main') && $request->pubw_main == 1) {
+            $exists = $item->authors()->wherePivot('pubw_main', 1)->exists();
+            if ($exists) {
+                return back()->with('error', 'มีหน่วยงานหลัก (Main Office) อยู่แล้ว สามารถมีได้เพียงคนเดียว');
+            }
+        }
+
+        // Validation: Unique Budget Holder (pubw_bud = 1)
+        if ($request->filled('pubw_bud') && $request->pubw_bud == 1) {
+            $exists = $item->authors()->wherePivot('pubw_bud', 1)->exists();
+            if ($exists) {
+                return back()->with('error', 'มีผู้ได้รับการสนับสนุนงบประมาณอยู่แล้ว สามารถมีได้เพียงคนเดียว');
+            }
+        }
+
+        // Check if researcher already exists in this publication
+        if ($item->authors()->where('rdb_published_work.researcher_id', $request->researcher_id)->exists()) {
+             return back()->with('error', 'นักวิจัยท่านนี้มีชื่ออยู่ในรายการแล้ว');
+        }
+
+        $item->authors()->attach($request->researcher_id, [
+            'pubta_id' => $request->pubta_id,
+            'pubw_main' => $request->pubw_main ?? 0,
+            'pubw_bud' => $request->pubw_bud ?? 0,
+            'user_created' => auth()->id(),
+            'created_at' => now(),
+            'user_updated' => auth()->id(),
+            'updated_at' => now()
+        ]);
+
+        // Update department_id from main office author (pubw_main = 1)
+        $this->updateDepartmentFromMainOffice($item);
+
+        return back()->with('success', 'เพิ่มผู้แต่งเรียบร้อยแล้ว');
+    }
+
+    public function updateAuthor(Request $request, $id, $researcher_id)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('Published');
+        $item = RdbPublished::findOrFail($id);
+
+         $request->validate([
+            'pubta_id' => 'required',
+            'pubw_main' => 'nullable',
+            'pubw_bud' => 'nullable',
+        ]);
+
+        // Validation: Unique First Author (pubta_id = 1)
+        if ($request->pubta_id == 1) {
+             $exists = $item->authors()
+                            ->where('rdb_published_work.researcher_id', '!=', $researcher_id)
+                            ->wherePivot('pubta_id', 1)
+                            ->exists();
+             if ($exists) {
+                 return back()->with('error', 'มีผู้เขียนหลัก (First Author) อยู่แล้ว สามารถมีได้เพียงคนเดียว');
+             }
+        }
+
+        // Validation: Unique Main Author
+        if ($request->filled('pubw_main') && $request->pubw_main == 1) {
+             $exists = $item->authors()
+                            ->where('rdb_published_work.researcher_id', '!=', $researcher_id)
+                            ->wherePivot('pubw_main', 1)
+                            ->exists();
+            if ($exists) {
+                return back()->with('error', 'มีหน่วยงานหลัก (Main Office) อยู่แล้ว สามารถมีได้เพียงคนเดียว');
+            }
+        }
+
+        // Validation: Unique Budget Holder
+        if ($request->filled('pubw_bud') && $request->pubw_bud == 1) {
+             $exists = $item->authors()
+                            ->where('rdb_published_work.researcher_id', '!=', $researcher_id)
+                            ->wherePivot('pubw_bud', 1)
+                            ->exists();
+            if ($exists) {
+                return back()->with('error', 'มีผู้ได้รับการสนับสนุนงบประมาณอยู่แล้ว สามารถมีได้เพียงคนเดียว');
+            }
+        }
+
+        $item->authors()->updateExistingPivot($researcher_id, [
+            'pubta_id' => $request->pubta_id,
+            'pubw_main' => $request->pubw_main ?? 0,
+            'pubw_bud' => $request->pubw_bud ?? 0,
+            'user_updated' => auth()->id(),
+            'updated_at' => now()
+        ]);
+
+        // Update department_id from main office author (pubw_main = 1)
+        $this->updateDepartmentFromMainOffice($item);
+
+        return back()->with('success', 'ปรับปรุงข้อมูลผู้แต่งเรียบร้อยแล้ว');
+    }
+
+    public function destroyAuthor($id, $researcher_id)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('Published');
+        $item = RdbPublished::findOrFail($id);
+        $item->authors()->detach($researcher_id);
+        return back()->with('success', 'ลบผู้แต่งออกจากรายการเรียบร้อยแล้ว');
+    }
+
+    // --- File Management (Single File) ---
+
+    public function uploadFile(Request $request, $id)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('Published');
+        $item = RdbPublished::findOrFail($id);
+
+        $request->validate([
+            'pub_file' => 'required|mimes:pdf|max:20480', // 20MB
+        ]);
+
+        if ($request->hasFile('pub_file')) {
+            // Delete old file
+            if ($item->pub_file) {
+                 $oldPath = storage_path('app/public/uploads/rdb_published/' . $item->pub_file);
+                 if (file_exists($oldPath)) @unlink($oldPath);
+            }
+
+            $file = $request->file('pub_file');
+            $extension = $file->getClientOriginalExtension();
+            // Naming convention from Yii2: {id}-full{YmdHis}{randomString(50)}~.{extension}
+            $filename = $id . '-full' . date('YmdHis') . \Illuminate\Support\Str::random(50) . '~.' . $extension;
+            $destinationPath = storage_path('app/public/uploads/rdb_published');
+            if (!file_exists($destinationPath)) mkdir($destinationPath, 0755, true);
+            $file->move($destinationPath, $filename);
+            
+            $item->pub_file = $filename;
+            $item->user_updated = auth()->id();
+            $item->updated_at = now();
+            $item->save();
+        }
+
+        return back()->with('success', 'อัปโหลดไฟล์เรียบร้อยแล้ว');
+    }
+
+    public function deleteFile($id)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('Published');
+        $item = RdbPublished::findOrFail($id);
+
+        if ($item->pub_file) {
+            $oldPath = storage_path('app/public/uploads/rdb_published/' . $item->pub_file);
+            if (file_exists($oldPath)) @unlink($oldPath);
+            
+            $item->pub_file = null;
+            $item->user_updated = auth()->id();
+            $item->updated_at = now();
+            $item->save();
+        }
+        
+        return back()->with('success', 'ลบไฟล์เรียบร้อยแล้ว');
+    }
+
+    /**
+     * View/Download file and increment counter
+     */
+    public function viewFile($id)
     {
         $item = RdbPublished::findOrFail($id);
-        $item->delete();
+        
+        if (!$item->pub_file) {
+            abort(404, 'ไม่พบไฟล์');
+        }
+        
+        // Increment file view counter
+        $item->increment('pub_view_file');
+        
+        // Return file path for redirect
+        $filePath = asset('storage/uploads/rdb_published/' . $item->pub_file);
+        return redirect($filePath);
+    }
 
-        return redirect()->route('backend.rdb_published.index')->with('success', 'ลบข้อมูลเรียบร้อยแล้ว');
+    public function destroy($id)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('Published');
+        $item = RdbPublished::findOrFail($id);
+        
+        // Soft Delete: Hide data instead of removing from DB
+        $item->data_show = 0;
+        $item->save();
+
+        return redirect()->route('backend.rdb_published.index')->with('success', 'ลบข้อมูลเรียบร้อยแล้ว (Soft Delete)');
+    }
+
+    /**
+     * Update department_id from main office author (pubw_main = 1)
+     */
+    private function updateDepartmentFromMainOffice(RdbPublished $item)
+    {
+        $mainOfficeAuthor = $item->authors()->wherePivot('pubw_main', 1)->first();
+        
+        if ($mainOfficeAuthor) {
+            $item->department_id = $mainOfficeAuthor->department_id;
+            $item->depcou_id = $mainOfficeAuthor->depcou_id;
+            $item->branch_id = $mainOfficeAuthor->depcat_id;
+            $item->save();
+        }
     }
 }

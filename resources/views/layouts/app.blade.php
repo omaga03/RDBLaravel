@@ -158,107 +158,7 @@
         <!-- Row 2: Backend Menu Items -->
         @auth
             @if(request()->is('backend*'))
-            <nav class="navbar navbar-expand-md shadow-sm border-bottom py-0" style="z-index: 1050;">
-                <div class="container">
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#backendMenuContent" aria-controls="backendMenuContent" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon" style="font-size: 0.8rem;"></span>
-                    </button>
-                    
-                    <div class="collapse navbar-collapse" id="backendMenuContent">
-                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle {{ request()->is('backend/rdb_project*') || request()->is('backend/rdbgroupproject*') || request()->is('backend/rdbprojecttype*') || request()->is('backend/rdbprojectwork*') || request()->is('backend/rdbprojectposition*') || request()->is('backend/rdbstrategic*') || request()->is('backend/rdbyear*') ? 'active fw-bold' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
-                                        <i class="bi bi-folder2-open"></i> โครงการ
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="{{ route('backend.rdb_project.index') }}"><i class="bi bi-list-ul"></i> รายการโครงการ</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><div class="dropdown-header text-uppercase small fw-bold">ข้อมูลพื้นฐาน</div></li>
-                                        <li><a class="dropdown-item" href="{{ route('backend.rdbyear.index') }}">ปีงบประมาณ</a></li>
-                                        <li><a class="dropdown-item" href="{{ route('backend.rdbstrategic.index') }}">ยุทธศาสตร์</a></li>
-                                        <li><a class="dropdown-item" href="{{ route('backend.rdbgroupproject.index') }}">กลุ่มโครงการ</a></li>
-                                        <li><a class="dropdown-item" href="{{ route('backend.rdbprojecttype.index') }}">ประเภททุน</a></li>
-                                        <li><a class="dropdown-item" href="{{ route('backend.rdbprojectwork.index') }}">งานวิจัย</a></li>
-                                        <li><a class="dropdown-item" href="{{ route('backend.rdbprojectposition.index') }}">ตำแหน่ง</a></li>
-                                        <li><a class="dropdown-item" href="{{ route('backend.rdbprojectfiles.index') }}">ประเภทไฟล์แนบ</a></li>
-                                    </ul>
-                                </li>
-
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle {{ request()->is('backend/rdb_researcher*') || request()->is('backend/rdbprefix*') ? 'active fw-bold' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
-                                        <i class="bi bi-people"></i> นักวิจัย
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="{{ route('backend.rdb_researcher.index') }}"><i class="bi bi-person-lines-fill"></i> รายการนักวิจัย</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><div class="dropdown-header text-uppercase small fw-bold">ข้อมูลพื้นฐาน</div></li>
-                                        <li><a class="dropdown-item" href="{{ route('backend.rdbprefix.index') }}">คำนำหน้าชื่อ</a></li>
-                                    </ul>
-                                </li>
-
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle {{ request()->is('backend/rdb_published*') ? 'active fw-bold' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
-                                        <i class="bi bi-journal-text"></i> ตีพิมพ์
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="{{ route('backend.rdb_published.index') }}"><i class="bi bi-file-earmark-text"></i> รายการตีพิมพ์</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><div class="dropdown-header text-uppercase small fw-bold">ข้อมูลพื้นฐาน</div></li>
-                                        <li><a class="dropdown-item disabled" href="#">ประเภทผลงาน</a></li>
-                                        <li><a class="dropdown-item disabled" href="#">สถานะ</a></li>
-                                    </ul>
-                                </li>
-
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle {{ request()->is('backend/rdb_dip*') ? 'active fw-bold' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
-                                        <i class="bi bi-lightbulb"></i> ทรัพย์สินฯ
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="{{ route('backend.rdb_dip.index') }}"><i class="bi bi-award"></i> รายการทรัพย์สินฯ</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><div class="dropdown-header text-uppercase small fw-bold">ข้อมูลพื้นฐาน</div></li>
-                                        <li><a class="dropdown-item disabled" href="#">ประเภท</a></li>
-                                        <li><a class="dropdown-item disabled" href="#">สถานะ</a></li>
-                                    </ul>
-                                </li>
-
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle {{ request()->is('backend/rdbprojectutilize*') ? 'active fw-bold' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
-                                        <i class="bi bi-rocket-takeoff"></i> การใช้ประโยชน์
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="{{ route('backend.rdbprojectutilize.index') }}"><i class="bi bi-graph-up-arrow"></i> รายการการใช้ฯ</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><div class="dropdown-header text-uppercase small fw-bold">ข้อมูลพื้นฐาน</div></li>
-                                        <li><a class="dropdown-item disabled" href="#">ประเภท</a></li>
-                                    </ul>
-                                </li>
-
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle {{ request()->is('backend/research_news*') ? 'active fw-bold' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
-                                        <i class="bi bi-newspaper"></i> ข่าว/กิจกรรม
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="{{ route('backend.research_news.index') }}"><i class="bi bi-megaphone"></i> ข่าวประชาสัมพันธ์</a></li>
-                                        <li><a class="dropdown-item disabled" href="#"><i class="bi bi-calendar-event"></i> ข่าวการประชุม/อบรม</a></li>
-                                    </ul>
-                                </li>
-
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle {{ request()->is('backend/rdbdepartment*') || request()->is('backend/rdbdepmajor*') || request()->is('backend/rdbbranch*') ? 'active fw-bold' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
-                                        <i class="bi bi-building"></i> องค์กร
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="{{ route('backend.rdbdepartment.index') }}">หน่วยงาน/คณะ</a></li>
-                                        <li><a class="dropdown-item" href="{{ route('backend.rdbdepartmenttype.index') }}">ประเภทหน่วยงาน</a></li>
-                                        <li><a class="dropdown-item" href="{{ route('backend.rdbdepmajor.index') }}">สาขาวิชา</a></li>
-                                        <li><a class="dropdown-item" href="{{ route('backend.rdbbranch.index') }}">สาขาการวิจัย</a></li>
-                                    </ul>
-                                </li>
-                        </ul>
-                    </div>
-                </div>
-            </nav>
+            <x-backend-menu />
             @endif
         @endauth
 
@@ -277,30 +177,12 @@
                     <!-- Main Content -->
                     <div class="@if(request()->is('backend*')) col-12 @else col-md-9 col-lg-10 @endif" id="main-content-col">
                         
-                        @if(session('success'))
-                            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                {{ session('success') }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        @endif
-
-                        @if(session('error'))
-                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                {{ session('error') }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        @endif
-                        
-                        @if ($errors->any())
-                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                <ul class="mb-0">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        @endif
+                        <!-- Alerts handled by SweetAlert2 Toast now -->
+                        <div id="flash-messages" style="display: none;" 
+                             data-success="{{ session('success') }}" 
+                             data-error="{{ session('error') }}"
+                             data-errors="{{ $errors->any() ? json_encode($errors->all()) : '' }}">
+                        </div>
 
                         @yield('content')
                     </div>
@@ -393,5 +275,132 @@
     
     @include('layouts.partials.flatpickr_setup')
     @stack('scripts')
-</body>
-</html>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Global UX Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 0. SweetAlert2 Toast Configuration
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+
+            // Check for Flash Messages
+            const flashDiv = document.getElementById('flash-messages');
+            if (flashDiv) {
+                const successMsg = flashDiv.dataset.success;
+                const errorMsg = flashDiv.dataset.error;
+                const errorsData = flashDiv.dataset.errors;
+
+                if (successMsg) {
+                    Toast.fire({
+                        icon: 'success',
+                        title: successMsg
+                    });
+                }
+
+                if (errorMsg) {
+                    Toast.fire({
+                        icon: 'error',
+                        title: errorMsg
+                    });
+                }
+
+                // Handle Validation Errors (Array)
+                if (errorsData) {
+                    try {
+                        const errors = JSON.parse(errorsData);
+                        if (errors.length > 0) {
+                            // Show first error as toast, or list them? 
+                            // Standard toast is small, maybe just say "Validation Error" + first msg
+                            // Or use a regular Swal for multiple errors if huge.
+                            // Let's stick to Toast for consistency, using first error or generic msg.
+                            Toast.fire({
+                                icon: 'error',
+                                title: errors[0] // Show the first error
+                            });
+                        }
+                    } catch (e) {
+                        console.error("Error parsing validation errors", e);
+                    }
+                }
+            }
+
+            // 1. Delete Confirmation with SweetAlert2
+            document.querySelectorAll('.delete-form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    Swal.fire({
+                        title: 'ยืนยันการลบข้อมูล?',
+                        text: "หากลบแล้วจะไม่สามารถกู้คืนได้!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'ลบข้อมูล',
+                        cancelButtonText: 'ยกเลิก'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Show loading on delete
+                            Swal.fire({
+                                title: 'กำลังลบข้อมูล...',
+                                allowOutsideClick: false,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                }
+                            });
+                            this.submit();
+                        }
+                    });
+                });
+            });
+
+            // 2. Loading State on Form Submit
+            document.querySelectorAll('form:not(.delete-form):not(.no-loading)').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    if (!this.checkValidity()) return; // Skip if HTML5 validation fails
+                    
+                    const btn = this.querySelector('button[type="submit"]');
+                    if (btn && !btn.classList.contains('disabled')) {
+                        const originalText = btn.innerHTML;
+                        btn.classList.add('disabled');
+                        btn.disabled = true;
+                        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> กำลังบันทึก...';
+                        
+                        // Optional: Restore after timeout in case of back-button or error (safety net)
+                        setTimeout(() => {
+                            btn.innerHTML = originalText;
+                            btn.classList.remove('disabled');
+                            btn.disabled = false;
+                        }, 10000); 
+                    }
+                });
+            });
+
+            // 3. Global Auto-Focus & Select on Click
+            // Helps users quickly overwrite data in textboxes
+            document.addEventListener('click', function(e) {
+                // Check if target is a relevant input
+                if (e.target.matches('input[type="text"].form-control, input[type="number"].form-control, textarea.form-control')) {
+                    // Use timeout to ensure selection happens AFTER browser handles the click event
+                    // This fixes the issue where clicking "deselects" the text immediately
+                    setTimeout(() => {
+                        e.target.focus();
+                        if (typeof e.target.select === 'function') {
+                            e.target.select();
+                        }
+                    }, 50);
+                }
+            });
+        });
+    </script>

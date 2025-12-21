@@ -20,4 +20,6 @@ class RdbProjectStatus extends Model
         'created_at',
         'updated_at',
     ];
+
+    const STATUS_CANCELLED = 6;
 }

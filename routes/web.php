@@ -102,6 +102,17 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     Route::resource('rdbyear', RdbyearController::class);
     Route::get('/rdb_published/search/researcher', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'searchResearcher'])->name('rdb_published.search_researcher');
     Route::get('/rdb_published/search/project', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'searchProject'])->name('rdb_published.search_project');
+    
+    // Published Author Management
+    Route::post('/rdb_published/{id}/author', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'storeAuthor'])->name('rdb_published.store_author');
+    Route::put('/rdb_published/{id}/author/{researcher_id}', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'updateAuthor'])->name('rdb_published.update_author');
+    Route::delete('/rdb_published/{id}/author/{researcher_id}', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'destroyAuthor'])->name('rdb_published.destroy_author');
+
+    // Published File Management
+    Route::post('/rdb_published/{id}/upload-file', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'uploadFile'])->name('rdb_published.upload_file');
+    Route::post('/rdb_published/{id}/delete-file', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'deleteFile'])->name('rdb_published.delete_file');
+    Route::get('/rdb_published/{id}/view-file', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'viewFile'])->name('rdb_published.view_file');
+
     Route::resource('rdb_published', \App\Http\Controllers\Backend\RdbPublishedController::class);
     Route::resource('rdb_dip', \App\Http\Controllers\Backend\RdbDipController::class);
     Route::resource('rdbprojectutilize', \App\Http\Controllers\Backend\RdbProjectUtilizeController::class);
