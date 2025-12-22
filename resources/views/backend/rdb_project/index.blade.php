@@ -19,10 +19,10 @@
             </div>
             @endif
 
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <div class="card shadow-sm mb-4 search-box">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="bi bi-funnel"></i> ค้นหาโครงการวิจัย</h5>
-                    <button class="btn btn-sm btn-light" type="button" data-bs-toggle="collapse" data-bs-target="#searchCollapse" aria-expanded="{{ request()->anyFilled(['pro_nameTH', 'year_id', 'department_id', 'pt_id', 'ps_id']) ? 'true' : 'false' }}" aria-controls="searchCollapse">
+                    <button class="btn btn-sm btn-toggle-search" type="button" data-bs-toggle="collapse" data-bs-target="#searchCollapse" aria-expanded="{{ request()->anyFilled(['pro_nameTH', 'year_id', 'department_id', 'pt_id', 'ps_id']) ? 'true' : 'false' }}" aria-controls="searchCollapse">
                         <i class="bi bi-chevron-down"></i> แสดง/ซ่อน
                     </button>
                 </div>
@@ -123,7 +123,7 @@
                                         </small>
                                         @if($project->status)
                                             <div class="mt-1">
-                                                <span class="badge bg-primary">{{ $project->status->ps_name }}</span>
+                                                <span class="badge" style="background-color: {{ $project->status->ps_color ?? '#6c757d' }}; color: #fff;">{{ $project->status->ps_name }}</span>
                                             </div>
                                         @endif
                                     </td>

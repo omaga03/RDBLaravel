@@ -21,5 +21,13 @@ class RdbProjectStatus extends Model
         'updated_at',
     ];
 
-    const STATUS_CANCELLED = 6;
+    // Project Status Constants
+    const IN_PROGRESS = 1;        // อยู่ระหว่างดำเนินการ
+    const COMPLETED = 2;          // ดำเนินการเสร็จสิ้น
+    const EXTENDED = 3;           // ขยายเวลาดำเนินการ
+    const EXTENDED_2 = 4;         // ขยายเวลาดำเนินการ ครั้งที่ 2
+    const OVERDUE = 5;            // ค้างส่งโครงการวิจัย
+    const REFUNDED = 6;           // คืนงบประมาณ
+    const DRAFT_SUBMITTED = 7;    // ส่งร่างรายงานวิจัย
+    const TERMINATED = 8;         // ยุติโครงการ
 }

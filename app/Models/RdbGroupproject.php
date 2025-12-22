@@ -18,4 +18,7 @@ class RdbGroupproject extends Model
         'created_at',
         'updated_at',
     ];
+
+    // Group Type Constants
+    const GROUP_PROJECT = 1;  // โครงการชุด
 }

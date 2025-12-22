@@ -110,7 +110,7 @@
                             @if($item->pubtype)
                                 <span class="badge bg-info text-dark me-2">{{ $item->pubtype->pubtype_name ?? $item->pubtype->pubtype_group }}</span>
                             @endif
-                             @if($item->pub_score)
+                             @if($item->pub_score && floatval($item->pub_score) > 0)
                                 <span class="badge bg-success me-2">คะแนน: {{ $item->pub_score }}</span>
                             @endif
                         </div>
@@ -325,12 +325,7 @@
                 </div>
             </div>
 
-            <!-- Bottom Buttons (Print View Only) -->
-             <div class="d-flex justify-content-end gap-2 mb-4 d-print-none">
-                 <a href="{{ route('backend.rdb_published.index') }}" class="btn btn-secondary d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
-                    <i class="bi bi-arrow-left me-2"></i> ย้อนกลับ
-                </a>
-             </div>
+
 
         </div>
 
@@ -399,6 +394,26 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Bottom Buttons (After all content for proper mobile ordering) -->
+    <div class="d-flex justify-content-end flex-wrap gap-2 mt-4 mb-4 d-print-none">
+        <a href="{{ route('backend.rdb_published.index') }}" class="btn btn-secondary d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
+            <i class="bi bi-arrow-left me-2"></i> ย้อนกลับ
+        </a>
+        <a href="{{ route('backend.rdb_published.edit', $item->id) }}" class="btn btn-warning d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
+            <i class="bi bi-pencil me-2"></i> แก้ไขข้อมูล
+        </a>
+        <button onclick="window.print()" class="btn btn-primary d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
+            <i class="bi bi-printer me-2"></i> พิมพ์
+        </button>
+        <button type="submit" form="delete-form-bottom" class="btn btn-danger d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
+            <i class="bi bi-trash me-2"></i> ลบ
+        </button>
+        <form id="delete-form-bottom" action="{{ route('backend.rdb_published.destroy', $item->id) }}" method="POST" class="d-none delete-form">
+            @csrf
+            @method('DELETE')
+        </form>
     </div>
 </div>
 

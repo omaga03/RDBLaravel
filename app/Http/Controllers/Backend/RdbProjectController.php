@@ -340,7 +340,7 @@ class RdbProjectController extends Controller
         $work->save();
 
         // Sync Department Info if Position is Director (1) or Head (2)
-        if (in_array($request->position_id, [1, 2])) {
+        if (in_array($request->position_id, [RdbProjectPosition::DIRECTOR, RdbProjectPosition::HEAD])) {
             $researcher = RdbResearcher::find($request->researcher_id);
             if ($researcher) {
                 $project->department_id = $researcher->department_id;
@@ -378,8 +378,8 @@ class RdbProjectController extends Controller
                           'ratio' => $request->ratio
                       ]);
 
-        // Sync Department Info if Position is Director (1) or Head (2)
-        if (in_array($request->position_id, [1, 2])) {
+        // Sync Department Info if Position is Director or Head
+        if (in_array($request->position_id, [RdbProjectPosition::DIRECTOR, RdbProjectPosition::HEAD])) {
              $researcher = RdbResearcher::find($rid);
              // Verify project again to be safe
              $project = RdbProject::find($id);
@@ -655,7 +655,7 @@ class RdbProjectController extends Controller
         Storage::disk('public')->put($path . '/' . $filename, file_get_contents($file));
         
         $project->pro_file = $filename;
-        $project->ps_id = 2; // Set status to 'ดำเนินการเสร็จสิ้น'
+        $project->ps_id = RdbProjectStatus::COMPLETED; // ดำเนินการเสร็จสิ้น
         $project->pro_finish = now()->format('Y-m-d');
         $project->pro_file_show = $request->has('pro_file_show') ? 1 : 0;
         $project->user_updated = auth()->id();
@@ -774,7 +774,7 @@ class RdbProjectController extends Controller
         $q = $request->get('q', '');
         $yearId = $request->get('year_id');
         
-        $query = RdbProject::where('pgroup_id', 1); // Group projects only
+        $query = RdbProject::where('pgroup_id', RdbGroupproject::GROUP_PROJECT);
         
         if ($q) {
             $query->where('pro_nameTH', 'like', "%{$q}%");

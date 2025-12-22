@@ -230,6 +230,49 @@
 <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
 
+<style>
+    /* TomSelect Dark Mode Support */
+    [data-bs-theme="dark"] .ts-wrapper .ts-control {
+        background-color: #212529;
+        border-color: #495057;
+        color: #fff;
+    }
+    [data-bs-theme="dark"] .ts-wrapper .ts-control input {
+        color: #fff !important;
+    }
+    [data-bs-theme="dark"] .ts-wrapper .ts-control input::placeholder {
+        color: #adb5bd !important;
+    }
+    [data-bs-theme="dark"] .ts-dropdown {
+        background-color: #2b3035;
+        border-color: #495057;
+        color: #fff;
+    }
+    [data-bs-theme="dark"] .ts-dropdown .option {
+        color: #fff;
+    }
+    [data-bs-theme="dark"] .ts-dropdown .option:hover,
+    [data-bs-theme="dark"] .ts-dropdown .option.active {
+        background-color: #0d6efd;
+        color: #fff;
+    }
+    [data-bs-theme="dark"] .ts-dropdown .highlight {
+        background-color: rgba(255, 193, 7, 0.3);
+        color: #fff;
+    }
+    [data-bs-theme="dark"] .ts-wrapper .ts-control .item {
+        background-color: #0d6efd;
+        color: #fff;
+    }
+    [data-bs-theme="dark"] .ts-wrapper.focus .ts-control {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    [data-bs-theme="dark"] .ts-dropdown .no-results {
+        color: #adb5bd;
+    }
+</style>
+
     @include('layouts.partials.ckeditor_setup')
 @endpush
 @push('scripts')

@@ -22,6 +22,21 @@ class RdbProjectUtilize extends Model
         return $this->belongsTo(RdbChangwat::class, 'chw_id', 'id');
     }
 
+    public function utilizeType()
+    {
+        return $this->belongsTo(RdbProjectUtilizeType::class, 'utz_group', 'utz_type_id');
+    }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'user_created', 'id');
+    }
+
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'user_updated', 'id');
+    }
+
     protected $fillable = [
         'pro_id',
         'utz_year_id',
@@ -31,6 +46,7 @@ class RdbProjectUtilize extends Model
         'utz_leading',
         'utz_leading_position',
         'utz_department_name',
+        'utz_department_address',
         'chw_id',
         'utz_group',
         'utz_group_qa',

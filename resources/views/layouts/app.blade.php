@@ -64,18 +64,89 @@
             border-color: #343a40 #343a40 #fff !important;
         }
 
-        /* 2. Dark Mode Tables */
-        /* Override .table-light to be dark in dark mode */
-        [data-bs-theme="dark"] .table-light,
-        [data-bs-theme="dark"] .table .thead-light th {
-            background-color: #343a40 !important;
+        /* 2. Global Table Header Styling - Gradient Blue */
+        .table thead th,
+        .table-light,
+        .table .thead-light th {
+            background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #3949ab 100%) !important;
             color: #fff !important;
-            border-color: #495057;
+            border-color: #1a237e !important;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
-        /* Ensure standard thead is transparent or matches theme */
+        
+        /* Both themes use the same gradient header */
+        [data-bs-theme="dark"] .table thead th,
+        [data-bs-theme="dark"] .table-light,
+        [data-bs-theme="dark"] .table .thead-light th,
+        [data-bs-theme="light"] .table thead th,
+        [data-bs-theme="light"] .table-light,
+        [data-bs-theme="light"] .table .thead-light th {
+            background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #3949ab 100%) !important;
+            color: #fff !important;
+            border-color: #1a237e !important;
+        }
+        
+        /* Table border adjustments */
         [data-bs-theme="dark"] .table thead th {
-            border-bottom-color: #495057;
+            border-bottom-color: #3949ab !important;
         }
+        [data-bs-theme="light"] .table thead th {
+            border-bottom-color: #3949ab !important;
+        }
+        
+        /* 3. Global Search Box Styling - Collapsible with Gradient Header */
+        .search-box .card-header,
+        .card.search-box > .card-header,
+        .card-header.search-header {
+            background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #3949ab 100%) !important;
+            color: #fff !important;
+            border-color: #1a237e !important;
+            cursor: pointer;
+        }
+        .search-box .card-header h5,
+        .search-box .card-header h6,
+        .card-header.search-header h5,
+        .card-header.search-header h6 {
+            color: #fff !important;
+        }
+        .search-box .btn-toggle-search,
+        .btn-toggle-search {
+            background: rgba(255,255,255,0.15) !important;
+            border: 1px solid rgba(255,255,255,0.3) !important;
+            color: #fff !important;
+            transition: all 0.2s ease;
+        }
+        .search-box .btn-toggle-search:hover,
+        .btn-toggle-search:hover {
+            background: rgba(255,255,255,0.25) !important;
+        }
+        /* Rotate chevron when expanded */
+        .btn-toggle-search[aria-expanded="true"] .bi-chevron-down {
+            transform: rotate(180deg);
+            transition: transform 0.2s ease;
+        }
+        .btn-toggle-search[aria-expanded="false"] .bi-chevron-down {
+            transform: rotate(0deg);
+            transition: transform 0.2s ease;
+        }
+        /* Search box tabs styling */
+        .search-box .nav-tabs .nav-link,
+        .card-header.search-header .nav-tabs .nav-link {
+            color: rgba(255,255,255,0.8) !important;
+            border: none;
+        }
+        .search-box .nav-tabs .nav-link.active,
+        .card-header.search-header .nav-tabs .nav-link.active {
+            background-color: #fff !important;
+            color: #1a237e !important;
+        }
+        .search-box .nav-tabs .nav-link:hover:not(.active),
+        .card-header.search-header .nav-tabs .nav-link:hover:not(.active) {
+            color: #fff !important;
+            background-color: rgba(255,255,255,0.1) !important;
+        }
+        
         /* Fix card header text in dark mode if needed */
         [data-bs-theme="dark"] .card-header {
             border-bottom-color: #495057;

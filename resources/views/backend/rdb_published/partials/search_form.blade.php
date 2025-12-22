@@ -1,11 +1,11 @@
-<div class="card shadow-sm mb-4">
-    <div class="card-header bg-dark py-3">
+<div class="card shadow-sm mb-4 search-box">
+    <div class="card-header py-3">
         <ul class="nav nav-tabs card-header-tabs" id="searchTabs" role="tablist">
             <li class="nav-item">
-                <button class="nav-link {{ request('search_mode') != 'advanced' ? 'active bg-white text-dark' : 'text-white' }}" id="simple-tab" data-bs-toggle="tab" data-bs-target="#simple-search" type="button" role="tab"><i class="bi bi-search"></i> ค้นหาทั่วไป</button>
+                <button class="nav-link {{ request('search_mode') != 'advanced' ? 'active' : '' }}" id="simple-tab" data-bs-toggle="tab" data-bs-target="#simple-search" type="button" role="tab"><i class="bi bi-search"></i> ค้นหาทั่วไป</button>
             </li>
             <li class="nav-item">
-                <button class="nav-link {{ request('search_mode') == 'advanced' ? 'active bg-white text-dark' : 'text-white' }}" id="advanced-tab" data-bs-toggle="tab" data-bs-target="#advanced-search" type="button" role="tab"><i class="bi bi-sliders"></i> ค้นหาละเอียด</button>
+                <button class="nav-link {{ request('search_mode') == 'advanced' ? 'active' : '' }}" id="advanced-tab" data-bs-toggle="tab" data-bs-target="#advanced-search" type="button" role="tab"><i class="bi bi-sliders"></i> ค้นหาละเอียด</button>
             </li>
         </ul>
     </div>

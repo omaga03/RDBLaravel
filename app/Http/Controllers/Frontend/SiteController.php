@@ -7,6 +7,7 @@ use App\Models\RdbProject;
 use App\Models\RdbYear;
 use App\Models\RdbProjectType;
 use App\Models\RdbDepartment;
+use App\Models\RdbProjectStatus;
 use Illuminate\Support\Facades\DB;
 
 use App\Models\ResearchCoferenceinthai;
@@ -18,7 +19,7 @@ class SiteController extends Controller
     {
         // 0. Find the latest year that actually has project data
         $latest_active_year_id = RdbProject::where('data_show', 1)
-                                           ->where('ps_id', '<>', 6) // Exclude cancelled if needed, or keep all
+                                           ->where('ps_id', '<>', RdbProjectStatus::REFUNDED)
                                            ->max('year_id');
 
         // If no projects at all, fallback to latest year in DB
@@ -131,7 +132,7 @@ class SiteController extends Controller
 
         // 5. Latest Data
         $latestProjects = RdbProject::where('data_show', 1)
-                                    ->where('ps_id', '<>', 6)
+                                    ->where('ps_id', '<>', RdbProjectStatus::REFUNDED)
                                     // Eager load researchers sorted by position (1,2 pivot)
                                     ->with(['rdbProjectWorks' => function($q) {
                                         $q->orderBy('position_id', 'asc') // 1, 2 first

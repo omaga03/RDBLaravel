@@ -10,12 +10,12 @@
     </div>
 
     <!-- Search Card -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header py-3" data-bs-toggle="collapse" href="#collapseSearch" role="button" aria-expanded="false" aria-controls="collapseSearch">
-            <div class="d-flex justify-content-between align-items-center">
-                <h6 class="m-0 font-weight-bold text-primary"><i class="bi bi-search"></i> ค้นหาขั้นสูง (Advanced Search)</h6>
-                <i class="bi bi-chevron-down"></i>
-            </div>
+    <div class="card shadow-sm mb-4 search-box">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold"><i class="bi bi-search"></i> ค้นหาขั้นสูง (Advanced Search)</h6>
+            <button class="btn btn-sm btn-toggle-search" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSearch" aria-expanded="{{ request()->anyFilled(['researcher_fname', 'researcher_lname', 'department_id']) ? 'true' : 'false' }}" aria-controls="collapseSearch">
+                <i class="bi bi-chevron-down"></i> แสดง/ซ่อน
+            </button>
         </div>
         <div class="collapse {{ request()->anyFilled(['researcher_fname', 'researcher_lname', 'department_id']) ? 'show' : '' }}" id="collapseSearch">
             <div class="card-body">

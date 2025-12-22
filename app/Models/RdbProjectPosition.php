@@ -18,4 +18,8 @@ class RdbProjectPosition extends Model
         'created_at',
         'updated_at',
     ];
+
+    // Position Constants
+    const DIRECTOR = 1;  // หัวหน้าโครงการ
+    const HEAD = 2;      // ผู้ร่วมวิจัย (หัวหน้า)
 }

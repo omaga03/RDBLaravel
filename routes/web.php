@@ -115,6 +115,15 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
 
     Route::resource('rdb_published', \App\Http\Controllers\Backend\RdbPublishedController::class);
     Route::resource('rdb_dip', \App\Http\Controllers\Backend\RdbDipController::class);
+    
+    // AJAX Location Search (for cascading dropdowns)
+    Route::get('/rdbprojectutilize/search/provinces', [\App\Http\Controllers\Backend\RdbProjectUtilizeController::class, 'searchProvinces'])->name('rdbprojectutilize.search_provinces');
+    Route::get('/rdbprojectutilize/search/amphoes', [\App\Http\Controllers\Backend\RdbProjectUtilizeController::class, 'searchAmphoes'])->name('rdbprojectutilize.search_amphoes');
+    Route::get('/rdbprojectutilize/search/tambons', [\App\Http\Controllers\Backend\RdbProjectUtilizeController::class, 'searchTambons'])->name('rdbprojectutilize.search_tambons');
+    Route::get('/rdbprojectutilize/search/years', [\App\Http\Controllers\Backend\RdbProjectUtilizeController::class, 'searchYears'])->name('rdbprojectutilize.search_years');
+    Route::get('/rdbprojectutilize/search/utilize-types', [\App\Http\Controllers\Backend\RdbProjectUtilizeController::class, 'searchUtilizeTypes'])->name('rdbprojectutilize.search_utilize_types');
+    Route::get('/rdbprojectutilize/download/{id}/{filename}', [\App\Http\Controllers\Backend\RdbProjectUtilizeController::class, 'downloadFile'])->name('rdbprojectutilize.download');
+    
     Route::resource('rdbprojectutilize', \App\Http\Controllers\Backend\RdbProjectUtilizeController::class);
     Route::resource('research_news', \App\Http\Controllers\Backend\ResearchNewsController::class);
 
