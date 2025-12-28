@@ -324,7 +324,7 @@
                     <thead>
                         <tr>
                             <th style="width: 65%;">📅 วันที่ / หน่วยงาน / โครงการอ้างอิง</th>
-                            <th style="width: 30%;">👤 ผู้นำไปใช้ประโยชน์</th>
+                            <th style="width: 30%;">ผู้ใช้ประโยชน์</th>
                             <th style="width: 5%;" class="text-end">จัดการ</th>
                         </tr>
                     </thead>
@@ -332,21 +332,20 @@
                         @forelse($items as $item)
                         <tr>
                             <td>
-                                <!-- Date Badge -->
                                 @if($item->utz_date)
-                                    <span class="badge bg-info text-dark mb-2">
-                                        📅 {{ \App\Helpers\ThaiDateHelper::format($item->utz_date, false, true) }}
-                                    </span>
+                                    <small class="text-muted">
+                                        {{ \App\Helpers\ThaiDateHelper::format($item->utz_date, false, true) }}
+                                    </small>
+                                    <span class="text-muted mx-1">|</span>
                                 @endif
 
                                 <!-- Department Name -->
-                                <div class="fw-bold text-primary">
-                                    🏢 {{ html_entity_decode($item->utz_department_name ?? '-') }}
-                                </div>
+                                <span class="fw-bold">
+                                    {{ html_entity_decode($item->utz_department_name ?? '-') }}
+                                </span>
 
-                                <!-- Address (ต. อ. จ.) -->
                                 @if($item->changwat)
-                                    <small class="text-muted d-block">
+                                    <small class="text-muted d-block mt-1">
                                         📍 
                                         @if($item->changwat->tambon_t)
                                             ต.{{ preg_replace('/^ต\./', '', $item->changwat->tambon_t) }}
@@ -363,7 +362,7 @@
                                 <!-- Project Reference -->
                                 @if($item->project)
                                     <div class="mt-2">
-                                        <a href="{{ route('backend.rdb_project.show', $item->project->pro_id) }}" class="text-decoration-none small" target="_blank">
+                                        <a href="{{ route('backend.rdb_project.show', $item->project->pro_id) }}" class="text-decoration-none text-secondary small" target="_blank">
                                             <i class="bi bi-folder-symlink"></i> {{ Str::limit($item->project->pro_nameTH, 80) }}
                                         </a>
                                         @php
@@ -374,6 +373,21 @@
                                                 👨‍🔬 {{ $leader->researcher->researcher_fname }} {{ $leader->researcher->researcher_lname }}
                                             </small>
                                         @endif
+                                    </div>
+                                @endif
+
+                                <!-- Utilize Types Badges -->
+                                @if($item->utz_group)
+                                    <div class="mt-2">
+                                        @php
+                                            $groupIds = array_map('trim', explode(',', $item->utz_group));
+                                            $types = \App\Models\RdbProjectUtilizeType::whereIn('utz_type_id', $groupIds)->get();
+                                        @endphp
+                                        @foreach($types as $type)
+                                            <span class="badge bg-light text-primary border border-primary-subtle" style="font-size: 0.75rem;">
+                                                {{ $type->utz_typr_name }}
+                                            </span>
+                                        @endforeach
                                     </div>
                                 @endif
                             </td>
@@ -394,11 +408,10 @@
                                     </small>
                                 @endif
 
-                                <!-- Budget if available -->
                                 @if($item->utz_budget && floatval($item->utz_budget) > 0)
-                                    <span class="badge bg-success bg-opacity-10 text-success mt-1">
+                                    <small class="text-success d-block mt-1">
                                         💰 {{ number_format($item->utz_budget, 2) }} บาท
-                                    </span>
+                                    </small>
                                 @endif
                             </td>
                             <td class="text-end">

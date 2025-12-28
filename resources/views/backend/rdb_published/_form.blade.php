@@ -87,16 +87,31 @@
         
         <div class="row">
             <div class="col-md-12 mb-3">
-                <label for="pro_id" class="form-label">โครงการวิจัยที่เกี่ยวข้อง (ถ้ามี)</label>
-                <select class="form-select" id="pro_id" name="pro_id">
-                    <option value="">-- พิมพ์เพื่อค้นหาโครงการ --</option>
-                    @if(isset($item) && $item->pro_id)
-                        @php $pro = \App\Models\RdbProject::find($item->pro_id); @endphp
-                        @if($pro)
-                            <option value="{{ $pro->pro_id }}" selected>{{ $pro->pro_nameTH }}</option>
-                        @endif
-                    @endif
-                </select>
+
+                @if($isEdit && $item->pro_id)
+                    @php
+                        $proText = '';
+                        $proObj = \App\Models\RdbProject::with(['year','rdbProjectWorks.researcher'])->find($item->pro_id);
+                        if($proObj) {
+                            $y = $proObj->year->year_name ?? '-';
+                            $n = strip_tags($proObj->pro_nameTH);
+                            $r = '-';
+                            if($proObj->rdbProjectWorks->isNotEmpty()){
+                                $mw = $proObj->rdbProjectWorks->sortBy('position_id')->first();
+                                if($mw && $mw->researcher) {
+                                    $r = $mw->researcher->researcher_fname.' '.$mw->researcher->researcher_lname;
+                                }
+                            }
+                            $proText = "{$y} • {$n} • {$r}";
+                        }
+                    @endphp
+                @endif
+                
+                <x-backend.form.project-search 
+                    label="โครงการวิจัยที่เกี่ยวข้อง (ถ้ามี)" 
+                    :selected="$isEdit && $item->pro_id ? $item->pro_id : null"
+                    :initial-text="$isEdit && $item->pro_id && isset($proText) ? $proText : ''"
+                />
             </div>
         </div>
 
@@ -323,38 +338,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // TomSelect: Project
-        new TomSelect("#pro_id", {
-            create: false,
-            openOnFocus: true,
-            persist: false,
-            valueField: 'id',
-            labelField: 'text',
-            searchField: 'text',
-            placeholder: '-- พิมพ์เพื่อค้นหาโครงการ --',
-            loadThrottle: 300,
-            load: function(query, callback) {
-                if (!query.length || query.length < 2) return callback();
-                fetch('{{ route("backend.rdb_published.search_project") }}?q=' + encodeURIComponent(query))
-                    .then(response => response.json())
-                    .then(json => {
-                        callback(json.results);
-                    }).catch(() => {
-                        callback();
-                    });
-            },
-            render: {
-                option: function(data, escape) {
-                    return '<div>' + escape(data.text) + '</div>';
-                },
-                item: function(data, escape) {
-                    return '<div>' + escape(data.text) + '</div>';
-                },
-                no_results: function(data, escape) {
-                    return '<div class="no-results p-2 text-muted">ไม่พบข้อมูล</div>';
-                }
-            }
-        });
+
 
         // Initialize Flatpickr for Thai Buddhist Date
         if (typeof flatpickr !== 'undefined') {

@@ -54,7 +54,7 @@
                         <h6 class="fw-bold border-bottom pb-2">รายละเอียดเพิ่มเติม</h6>
                         <table class="table table-borderless table-sm">
                             <tr>
-                                <th style="width: 30%;">วันที่นำไปใช้:</th>
+                                <th style="width: 30%;">วันที่ใช้ประโยชน์:</th>
                                 <td>
                                     <span class="badge bg-info text-dark">
                                         📅 {{ \App\Helpers\ThaiDateHelper::format($item->utz_date, false, true) }}
@@ -62,7 +62,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <th>ผู้นำไปใช้ประโยชน์:</th>
+                                <th>ผู้ใช้ประโยชน์:</th>
                                 <td>
                                     <strong>{{ $item->utz_leading ?? '-' }}</strong>
                                     @if($item->utz_leading_position)
@@ -71,7 +71,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <th>จังหวัด/อำเภอ/ตำบล:</th>
+                                <th>ที่อยู่:</th>
                                 <td>
                                     @if($item->changwat)
                                         📍 ต.{{ preg_replace('/^ต\./', '', $item->changwat->tambon_t ?? '') }} 
@@ -89,7 +89,7 @@
                             </tr>
                             @endif
                             <tr>
-                            <th>จำนวนการเข้าชม:</th>
+                            <th>เข้าชม:</th>
                             <td><span class="badge bg-info text-dark">{{ number_format($item->utz_count ?? 0) }} ครั้ง</span></td>
                         </tr>
                             @if($item->utz_files || $item->utz_countfile)
@@ -100,10 +100,19 @@
                                         <div class="mb-2">
                                             @foreach(explode(',', $item->utz_files) as $file)
                                                 @if(trim($file))
-                                                    <a href="{{ route('backend.rdbprojectutilize.download', ['id' => $item->utz_id, 'filename' => trim($file)]) }}" 
+                                                    @php
+                                                        $trimmedFile = trim($file);
+                                                        $ext = pathinfo($trimmedFile, PATHINFO_EXTENSION);
+                                                        $nameOnly = pathinfo($trimmedFile, PATHINFO_FILENAME);
+                                                        $displayName = (mb_strlen($nameOnly) > 10) 
+                                                            ? mb_substr($nameOnly, 0, 10) . '...' . ($ext ? '.' . $ext : '')
+                                                            : $trimmedFile;
+                                                    @endphp
+                                                    <a href="{{ route('backend.rdbprojectutilize.download', ['id' => $item->utz_id, 'filename' => $trimmedFile]) }}" 
                                                        target="_blank" 
-                                                       class="btn btn-sm btn-outline-primary me-1 mb-1">
-                                                        <i class="bi bi-file-earmark"></i> {{ trim($file) }}
+                                                       class="btn btn-sm btn-outline-primary me-1 mb-1"
+                                                       title="{{ $trimmedFile }}">
+                                                        <i class="bi bi-file-earmark"></i> {{ $displayName }}
                                                     </a>
                                                 @endif
                                             @endforeach

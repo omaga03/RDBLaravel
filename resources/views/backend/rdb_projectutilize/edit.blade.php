@@ -1,13 +1,23 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid">
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">แก้ไขข้อมูลการใช้ประโยชน์</h6>
+<div class="container-fluid py-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0"><i class="bi bi-pencil-square"></i> แก้ไขข้อมูลการใช้ประโยชน์</h5>
         </div>
         <div class="card-body">
-            <form action="{{ route('backend.rdbprojectutilize.update', $item->utz_id) }}" method="POST" enctype="multipart/form-data">
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+            
+            <form method="POST" action="{{ route('backend.rdbprojectutilize.update', $item->utz_id) }}" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 @include('backend.rdb_projectutilize._form')
@@ -15,4 +25,5 @@
         </div>
     </div>
 </div>
+
 @endsection

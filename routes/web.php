@@ -83,6 +83,8 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
 
     // AJAX Researcher Search (must be BEFORE resource route)
     Route::get('/rdb_project/search-researchers', [RdbProjectController::class, 'searchResearchers'])->name('rdb_project.search_researchers');
+    // AJAX Project Search (Central)
+    Route::get('/rdb_project/search', [RdbProjectController::class, 'search'])->name('rdb_project.search');
 
     Route::resource('rdb_project', RdbProjectController::class);
     Route::resource('rdb_researcher', RdbResearcherController::class);
@@ -120,8 +122,10 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     Route::get('/rdbprojectutilize/search/provinces', [\App\Http\Controllers\Backend\RdbProjectUtilizeController::class, 'searchProvinces'])->name('rdbprojectutilize.search_provinces');
     Route::get('/rdbprojectutilize/search/amphoes', [\App\Http\Controllers\Backend\RdbProjectUtilizeController::class, 'searchAmphoes'])->name('rdbprojectutilize.search_amphoes');
     Route::get('/rdbprojectutilize/search/tambons', [\App\Http\Controllers\Backend\RdbProjectUtilizeController::class, 'searchTambons'])->name('rdbprojectutilize.search_tambons');
+    Route::get('/rdbprojectutilize/search/location', [\App\Http\Controllers\Backend\RdbProjectUtilizeController::class, 'searchLocation'])->name('rdbprojectutilize.search_location');
     Route::get('/rdbprojectutilize/search/years', [\App\Http\Controllers\Backend\RdbProjectUtilizeController::class, 'searchYears'])->name('rdbprojectutilize.search_years');
     Route::get('/rdbprojectutilize/search/utilize-types', [\App\Http\Controllers\Backend\RdbProjectUtilizeController::class, 'searchUtilizeTypes'])->name('rdbprojectutilize.search_utilize_types');
+    Route::get('/rdbprojectutilize/search/projects', [\App\Http\Controllers\Backend\RdbProjectUtilizeController::class, 'searchProjects'])->name('rdbprojectutilize.search_projects');
     Route::get('/rdbprojectutilize/download/{id}/{filename}', [\App\Http\Controllers\Backend\RdbProjectUtilizeController::class, 'downloadFile'])->name('rdbprojectutilize.download');
     
     Route::resource('rdbprojectutilize', \App\Http\Controllers\Backend\RdbProjectUtilizeController::class);

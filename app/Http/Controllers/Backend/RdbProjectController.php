@@ -880,4 +880,59 @@ class RdbProjectController extends Controller
         }
         return $html;
     }
+    /**
+     * AJAX Search for Projects (Centralized)
+     */
+    public function search(Request $request)
+    {
+        $q = $request->get('q', '');
+        
+        if (strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        $projects = RdbProject::with(['year', 'department', 'rdbProjectWorks' => function($q) {
+                // Get Head or Director first
+                $q->orderBy('position_id', 'asc');
+            }, 'rdbProjectWorks.researcher', 'utilizations']) // Eager load utilizations
+            ->withCount('utilizations')
+            ->where('pro_nameTH', 'like', "%{$q}%")
+            ->orWhere('pro_nameEN', 'like', "%{$q}%")
+            ->orWhere('pro_code', 'like', "%{$q}%")
+            ->orderBy('created_at', 'desc')
+            ->limit(20)
+            ->get()
+            ->map(fn($p) => [
+                'id' => $p->pro_id,
+                'value' => $p->pro_id,
+                'text' => $this->formatProjectText($p),
+                'utilization_rows' => $p->utilizations->map(function($u, $index) {
+                     $date = $u->utz_date ? \App\Helpers\ThaiDateHelper::format($u->utz_date, false, true) : '-'; // Thai short date
+                     $dept = $u->utz_department_name ?? '-';
+                     $lead = $u->utz_leading ?? '-';
+                     return ($index + 1) . ". {$date} • {$dept} • {$lead}";
+                })->values()->toArray()
+            ]);
+
+        return response()->json(['results' => $projects]); // TomSelect usually likes { results: [] } structure or just [] depending on config. RdbPublished uses {results}.
+    }
+
+    private function formatProjectText($project)
+    {
+        $year = $project->year->year_name ?? '-';
+        $name = strip_tags($project->pro_nameTH);
+        $count = $project->utilizations_count ?? 0;
+        
+        // Find main researcher
+        $researcherName = '-';
+        if ($project->rdbProjectWorks->isNotEmpty()) {
+            $mainWork = $project->rdbProjectWorks->first();
+            if ($mainWork && $mainWork->researcher) {
+                $researcherName = $mainWork->researcher->researcher_fname . ' ' . $mainWork->researcher->researcher_lname;
+            }
+        }
+        
+        // Format: (Count) Year • Name • Researcher
+        return "({$count}) {$year} • {$name} • {$researcherName}";
+    }
 }
