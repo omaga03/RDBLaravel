@@ -33,6 +33,8 @@ class RdbResearcher extends Model
         'researcher_fax',
         'researcher_picture',
         'scopus_authorId',
+        'researcher_hindex',
+        'scopus_synced_at',
         'orcid',
         'researcher_note',
         'user_created',

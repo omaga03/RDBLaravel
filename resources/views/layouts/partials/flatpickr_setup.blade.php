@@ -97,45 +97,45 @@ window.flatpickrThaiConfig = {
     altFormat: "j F Y", // Format for display
     locale: "th",
     disableMobile: true,
+    firstDayOfWeek: 0, // Explicitly set Sunday
     formatDate: (date, format, locale) => {
-        // Return standard format if not the display format
-        if (format !== "j F Y") {
-                return flatpickr.formatDate(date, format, locale);
-        }
-        
-        // For display (altInput), convert Year to Buddhist Era
-        const buddhistYear = date.getFullYear() + 543;
-        return flatpickr.formatDate(date, "j F", locale) + " " + buddhistYear;
+        if (format !== "j F Y") return flatpickr.formatDate(date, format, locale);
+        const year = date.getFullYear() + 543;
+        const month = locale.months.longhand[date.getMonth()];
+        const day = date.getDate();
+        return `${day} ${month} ${year}`;
+    },
+    onReady: function(selectedDates, dateStr, instance) {
+        adjustCalendarYear(instance);
     },
     onMonthChange: function(selectedDates, dateStr, instance) {
-            adjustCalendarYear(instance);
-            if (instance.config.onMonthChangeOriginal) instance.config.onMonthChangeOriginal(selectedDates, dateStr, instance);
+        setTimeout(() => adjustCalendarYear(instance), 0);
     },
     onYearChange: function(selectedDates, dateStr, instance) {
-            adjustCalendarYear(instance);
-            if (instance.config.onYearChangeOriginal) instance.config.onYearChangeOriginal(selectedDates, dateStr, instance);
-
+        setTimeout(() => adjustCalendarYear(instance), 0);
     },
     onOpen: function(selectedDates, dateStr, instance) {
-            adjustCalendarYear(instance);
-            if (instance.config.onOpenOriginal) instance.config.onOpenOriginal(selectedDates, dateStr, instance);
+        adjustCalendarYear(instance);
+    },
+    onValueUpdate: function(selectedDates, dateStr, instance) {
+        adjustCalendarYear(instance);
     }
 };
 
 function adjustCalendarYear(instance) {
-    setTimeout(() => {
-        const yearInput = instance.currentYearElement;
-        if (yearInput) {
-                // Get the ACTUAL Gregorian year from the instance
-                const currentYear = instance.currentYear;
-                const buddhistYear = currentYear + 543;
-                
-                // Visually update the input value
-                if (yearInput.value != buddhistYear) {
-                yearInput.value = buddhistYear;
-                }
+    if (!instance.calendarContainer) return;
+    
+    const yearElements = instance.calendarContainer.querySelectorAll('.cur-year, .numInput.cur-year');
+    const year = parseInt(instance.currentYear);
+    
+    yearElements.forEach(el => {
+        const beYear = year + 543;
+        if (el.tagName === 'INPUT') {
+            if (el.value != beYear) el.value = beYear;
+        } else {
+            if (el.textContent != beYear) el.textContent = beYear;
         }
-    }, 0);
+    });
 }
 
 /**
@@ -148,25 +148,33 @@ function initThaiFlatpickr(selector, customOptions = {}) {
         flatpickr.l10ns.th.firstDayOfWeek = 0; // Sunday start
     }
 
-    // Merge callbacks carefully
+    // Prepare merged config
     const mergedConfig = { ...window.flatpickrThaiConfig, ...customOptions };
     
-    // If customOptions has callbacks that are also in base config, wrap them
-    // Note: The base config already calls "Original" hooks if they exist in config.
-    // But since we are merging, customOptions will overwrite base attributes.
-    // So we need to ensure the base logic (adjustCalendarYear) runs.
-    
-    // Instead of complex merging, let's just ensure we call our helper in the merged hooks
-    const hooks = ['onMonthChange', 'onYearChange', 'onOpen'];
+    // Ensure vital hooks still call adjustCalendarYear even if customized
+    const hooks = ['onReady', 'onMonthChange', 'onYearChange', 'onOpen', 'onValueUpdate', 'onChange'];
     hooks.forEach(hook => {
         const customHook = customOptions[hook];
         mergedConfig[hook] = function(selectedDates, dateStr, instance) {
-            adjustCalendarYear(instance); // Always run our hack
-            if (customHook) customHook(selectedDates, dateStr, instance); // Run custom logic
+            adjustCalendarYear(instance); 
+            if (customHook) customHook(selectedDates, dateStr, instance);
         }
     });
 
     return flatpickr(selector, mergedConfig);
 }
+
+// Global click listener for safety
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.flatpickr-calendar')) {
+        // Find if this calendar belongs to a flatpickr instance
+        // Flatpickr instances are often stored on the original element
+        document.querySelectorAll('.flatpickr-input').forEach(el => {
+            if (el._flatpickr && el._flatpickr.isOpen) {
+                adjustCalendarYear(el._flatpickr);
+            }
+        });
+    }
+}, true);
 </script>
 @endpush

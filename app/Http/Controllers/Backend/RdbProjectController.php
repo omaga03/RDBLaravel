@@ -921,18 +921,19 @@ class RdbProjectController extends Controller
     {
         $year = $project->year->year_name ?? '-';
         $name = strip_tags($project->pro_nameTH);
-        $count = $project->utilizations_count ?? 0;
         
         // Find main researcher
         $researcherName = '-';
+        $departmentName = '';
         if ($project->rdbProjectWorks->isNotEmpty()) {
             $mainWork = $project->rdbProjectWorks->first();
             if ($mainWork && $mainWork->researcher) {
                 $researcherName = $mainWork->researcher->researcher_fname . ' ' . $mainWork->researcher->researcher_lname;
+                $departmentName = $mainWork->researcher->department->department_nameTH ?? '';
             }
         }
         
-        // Format: (Count) Year • Name • Researcher
-        return "({$count}) {$year} • {$name} • {$researcherName}";
+        // Format: [Year] Name โดย : Researcher Department
+        return "[{$year}] {$name} โดย : {$researcherName} " . ($departmentName ? "({$departmentName})" : "");
     }
 }

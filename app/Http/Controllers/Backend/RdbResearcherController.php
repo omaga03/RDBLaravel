@@ -12,6 +12,7 @@ use App\Models\RdbDepartmentCourse;
 use App\Models\RdbResearcherStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 class RdbResearcherController extends Controller
@@ -21,16 +22,24 @@ class RdbResearcherController extends Controller
      */
     public function index(Request $request)
     {
-        $query = RdbResearcher::with(['prefix', 'department']);
+        $query = RdbResearcher::with(['prefix', 'department', 'departmentCategory']);
 
-        if ($request->filled('researcher_fname')) {
-            $query->where('researcher_fname', 'like', '%' . $request->researcher_fname . '%');
+        if ($request->filled('q')) {
+            $q = $request->q;
+            $query->where(function($w) use ($q) {
+                $w->where('researcher_fname', 'like', "%{$q}%")
+                  ->orWhere('researcher_lname', 'like', "%{$q}%")
+                  ->orWhere('researcher_email', 'like', "%{$q}%")
+                  ->orWhere('researcher_note', 'like', "%{$q}%");
+            });
         }
-        if ($request->filled('researcher_lname')) {
-            $query->where('researcher_lname', 'like', '%' . $request->researcher_lname . '%');
-        }
+        
         if ($request->filled('department_id')) {
             $query->where('department_id', $request->department_id);
+        }
+
+        if ($request->filled('depcat_id')) {
+            $query->where('depcat_id', $request->depcat_id);
         }
 
         $researchers = $query->leftJoin('rdb_department', 'rdb_researcher.department_id', '=', 'rdb_department.department_id')
@@ -38,11 +47,12 @@ class RdbResearcherController extends Controller
                              ->orderByRaw('rdb_department.department_nameTH IS NULL ASC') // Push NULLs to bottom
                              ->orderBy('rdb_department.department_nameTH', 'asc')
                              ->orderBy('rdb_researcher.researcher_fname', 'asc')
-                             ->paginate(10);
+                             ->paginate(15);
         
-        $departments = RdbDepartment::all(); // For filter dropdown
+        $departments = RdbDepartment::orderBy('department_nameTH')->get(); // For filter dropdown
+        $categories = RdbDepartmentCategory::orderBy('depcat_name')->get();
 
-        return view('backend.rdb_researcher.index', compact('researchers', 'departments'));
+        return view('backend.rdb_researcher.index', compact('researchers', 'departments', 'categories'));
     }
 
     /**
@@ -336,6 +346,76 @@ class RdbResearcherController extends Controller
         $researcher->delete();
 
         return redirect()->route('backend.rdb_researcher.index')->with('success', 'Researcher deleted successfully.');
+    }
+
+    /**
+     * Sync h-index data from Scopus API
+     */
+    public function syncScopus($id)
+    {
+        \Illuminate\Support\Facades\Gate::authorize('Project');
+
+        $researcher = RdbResearcher::findOrFail($id);
+
+        if (!$researcher->scopus_authorId) {
+            return redirect()->back()->with('error', 'ไม่พบ Scopus Author ID สำหรับนักวิจัยท่านนี้');
+        }
+
+        $apiKey = config('services.scopus.key');
+        $instToken = config('services.scopus.insttoken');
+
+        if (!$apiKey) {
+            return redirect()->back()->with('error', 'ระบบยังไม่ได้ตั้งค่า Scopus API Key ในไฟล์ .env');
+        }
+
+        try {
+            $url = "https://api.elsevier.com/content/author/author_id/{$researcher->scopus_authorId}";
+            
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+            
+            $headers = [
+                "X-ELS-APIKey: {$apiKey}",
+                "Accept: application/json"
+            ];
+            if ($instToken) {
+                $headers[] = "X-ELS-Insttoken: {$instToken}";
+            }
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+            
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($ch);
+            curl_close($ch);
+            
+            if ($curlError) {
+                return redirect()->back()->with('error', 'cURL Error: ' . $curlError);
+            }
+            
+            if ($httpCode == 401) {
+                return redirect()->back()->with('error', 'ข้อผิดพลาด (401): API Key ไม่มีสิทธิ์เข้าถึง กรุณาใช้ VPN มหาวิทยาลัย หรือเพิ่ม Inst Token');
+            }
+            
+            if ($httpCode != 200) {
+                return redirect()->back()->with('error', "Scopus API Error (HTTP {$httpCode}): " . Str::limit($response, 100));
+            }
+            
+            $data = json_decode($response, true);
+            $hIndex = $data['author-retrieval-response'][0]['h-index'] ?? 0;
+
+            $researcher->researcher_hindex = (int)$hIndex;
+            $researcher->scopus_synced_at = now();
+            $researcher->save();
+
+            return redirect()->back()->with('success', 'อัปเดตข้อมูล Scopus (h-index: ' . $hIndex . ') สำเร็จ');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'เกิดข้อผิดพลาด: ' . $e->getMessage());
+        }
     }
     /**
      * Validate Thai Citizen ID

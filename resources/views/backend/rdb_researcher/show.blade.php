@@ -36,10 +36,14 @@
                     <p class="text-muted mb-3">
                         {{ $item->researcher_fnameEN }} {{ $item->researcher_lnameEN }}
                     </p>
-                    <span class="badge bg-primary mb-3">{{ $item->department->department_nameTH ?? '-' }}</span>
+                    <div class="mb-3">
+                        <span class="badge bg-primary text-wrap lh-base" style="max-width: 100%;">
+                            {{ $item->department->department_nameTH ?? '-' }}
+                        </span>
+                    </div>
 
                     <div class="mb-3 d-flex justify-content-center align-items-center">
-                        <span class="text-secondary small font-monospace me-2">{{ $item->researcher_codeid ?? '-' }}</span>
+                        <span class="text-secondary small font-monospace me-2 text-break">{{ $item->researcher_codeid ?? '-' }}</span>
                          <a href="#" data-bs-toggle="modal" data-bs-target="#editCodeIdModal" class="text-secondary text-decoration-none" title="แก้ไข Code ID">
                             <i class="bi bi-pencil-square"></i>
                         </a>
@@ -47,15 +51,38 @@
                     
                     <hr>
                     
-                    <div class="text-start px-3">
+                    <div class="text-start px-3 text-break">
                         <p class="mb-2"><i class="bi bi-envelope-fill text-secondary me-2"></i> {{ $item->researcher_email ?? '-' }}</p>
                         <p class="mb-2"><i class="bi bi-telephone-fill text-secondary me-2"></i> {{ $item->researcher_tel ?? '-' }}</p>
                         <p class="mb-2"><i class="bi bi-phone-fill text-secondary me-2"></i> {{ $item->researcher_mobile ?? '-' }}</p>
                         @if($item->scopus_authorId)
-                            <p class="mb-2"><i class="bi bi-journal-text text-secondary me-2"></i> Scopus ID: {{ $item->scopus_authorId }}</p>
+                            <p class="mb-2">
+                                <i class="bi bi-journal-bookmark-fill text-secondary me-2"></i> Scopus ID: 
+                                <a href="https://www.scopus.com/authid/detail.uri?authorId={{ $item->scopus_authorId }}" target="_blank" class="text-decoration-none">
+                                    {{ $item->scopus_authorId }} <i class="bi bi-box-arrow-up-right small"></i>
+                                </a>
+                            </p>
+                            <div class="mb-2 d-flex align-items-center">
+                                <i class="bi bi-graph-up text-secondary me-2"></i> 
+                                <span class="me-1">h-index: <strong>{{ $item->researcher_hindex ?? 0 }}</strong></span>
+                                <form action="{{ route('backend.rdb_researcher.sync_scopus', $item->researcher_id) }}" method="POST" class="d-inline ms-1">
+                                    @csrf
+                                    <button type="submit" class="btn btn-link btn-sm p-0 text-info text-decoration-none" title="Sync h-index จาก Scopus">
+                                        <i class="bi bi-arrow-repeat"></i> Sync
+                                    </button>
+                                </form>
+                                @if($item->scopus_synced_at)
+                                    <small class="text-muted ms-2" style="font-size: 0.8em;">(อัปเดต: {{ \App\Helpers\ThaiDateHelper::format($item->scopus_synced_at, false, true) }})</small>
+                                @endif
+                            </div>
                         @endif
                         @if($item->orcid)
-                            <p class="mb-2"><i class="bi bi-person-badge text-secondary me-2"></i> ORCID: {{ $item->orcid }}</p>
+                            <p class="mb-2">
+                                <i class="bi bi-link-45deg text-secondary me-2"></i> ORCID: 
+                                <a href="https://orcid.org/{{ $item->orcid }}" target="_blank" class="text-decoration-none">
+                                    {{ $item->orcid }} <i class="bi bi-box-arrow-up-right small"></i>
+                                </a>
+                            </p>
                         @endif
                     </div>
                     
@@ -313,29 +340,32 @@
                                     <table class="table table-hover table-striped align-top">
                                         <thead>
                                             <tr>
-                                                <th style="width: 30%;">เลขที่คำขอ</th>
-                                                <th style="width: 50%;">ชื่อ / ประเภท</th>
-                                                <th style="width: 20%;">วันที่คำขอ</th>
+                                                <th style="width: 60%;">ชื่อผลงาน</th>
+                                                <th style="width: 20%;">ประเภทผลงาน</th>
+                                                <th style="width: 20%;">วันที่</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach($item->rdbDips as $dip)
                                                 <tr>
                                                     <td>
-                                                        <div>{!! $dip->dip_request_number !!}</div>
-                                                        @if($dip->dip_number)
-                                                            <small class="text-muted">ทะเบียน: {!! $dip->dip_number !!}</small>
+                                                        <div class="fw-bold">
+                                                            <a href="{{ route('backend.rdb_dip.show', $dip->dip_id) }}" target="_blank" class="text-body text-decoration-none">
+                                                                {!! $dip->dip_data2_name ?? 'ไม่มีชื่อผลงาน' !!}
+                                                            </a>
+                                                        </div>
+                                                        @if($dip->dip_request_number)
+                                                            <small class="text-muted">เลขที่คำขอ: {!! $dip->dip_request_number !!}</small>
                                                         @endif
                                                     </td>
                                                     <td>
-                                                        <div class="fw-bold">{!! $dip->dip_name !!}</div>
-                                                        @if($dip->dipType)
-                                                            <small class="text-muted">{{ $dip->dipType->diptype_name }}</small>
-                                                        @endif
+                                                        {{ $dip->dipType->dipt_name ?? '-' }}
                                                     </td>
                                                     <td>
                                                         @if($dip->dip_request_date)
                                                             {{ \App\Helpers\ThaiDateHelper::format($dip->dip_request_date, false, true) }}
+                                                        @else
+                                                            -
                                                         @endif
                                                     </td>
                                                 </tr>

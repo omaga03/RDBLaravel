@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'scopus' => [
+        'key' => env('SCOPUS_API_KEY'),
+        'insttoken' => env('SCOPUS_INST_TOKEN'),
+    ],
+
 ];

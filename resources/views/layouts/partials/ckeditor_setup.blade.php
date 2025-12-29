@@ -136,6 +136,36 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
+        // Initialize CKEditor for full fields with Link support (class: ckeditor-full)
+        var fullFields = document.querySelectorAll('.ckeditor-full');
+        fullFields.forEach(function(el) {
+            if (el.id && !CKEDITOR.instances[el.id]) {
+                var editor = CKEDITOR.replace(el.id, {
+                    toolbar: [
+                        { name: 'document', items: ['Source'] },
+                        { name: 'clipboard', items: ['Undo', 'Redo'] },
+                        { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', 'RemoveFormat'] },
+                        { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote'] },
+                        { name: 'links', items: ['Link', 'Unlink'] },
+                        { name: 'insert', items: ['Table', 'HorizontalRule', 'SpecialChar'] },
+                        { name: 'styles', items: ['Format', 'FontSize'] },
+                        { name: 'colors', items: ['TextColor', 'BGColor'] }
+                    ],
+                    height: 300,
+                    language: 'th',
+                    uiColor: uiColor,
+                    enterMode: CKEDITOR.ENTER_BR,
+                    autoParagraph: false,
+                    bodyClass: initialBodyClass
+                });
+                
+                editor.on('contentDom', function() {
+                    var currentThemeDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+                    updateEditorTheme(this, currentThemeDark);
+                });
+            }
+        });
+
         // Observer for real-time theme changes
         var observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {

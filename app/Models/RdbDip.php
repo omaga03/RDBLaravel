@@ -12,6 +12,13 @@ class RdbDip extends Model
     protected $primaryKey = 'dip_id';
     public $timestamps = false;
 
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'dip_request_date' => 'date',
+        'dip_data2_dateend' => 'date',
+    ];
+
     public function dipType()
     {
         return $this->belongsTo(RdbDipType::class, 'dipt_id', 'dipt_id');
@@ -25,6 +32,16 @@ class RdbDip extends Model
     public function researcher()
     {
         return $this->belongsTo(RdbResearcher::class, 'researcher_id', 'researcher_id');
+    }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'user_created', 'id');
+    }
+
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'user_updated', 'id');
     }
 
     protected $fillable = [

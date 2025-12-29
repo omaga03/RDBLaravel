@@ -90,6 +90,7 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     Route::resource('rdb_researcher', RdbResearcherController::class);
     Route::post('/rdb_researcher/{id}/update-codeid', [RdbResearcherController::class, 'updateCodeId'])->name('rdb_researcher.update_codeid');
     Route::post('/rdb_researcher/{id}/update-image', [RdbResearcherController::class, 'updateImage'])->name('rdb_researcher.update_image');
+    Route::post('/rdb_researcher/{id}/sync-scopus', [RdbResearcherController::class, 'syncScopus'])->name('rdb_researcher.sync_scopus');
     Route::resource('rdbbranch', RdbbranchController::class);
     Route::resource('rdbdepartment', RdbdepartmentController::class);
     Route::resource('rdbdepartmenttype', RdbdepartmenttypeController::class);
@@ -116,6 +117,12 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     Route::get('/rdb_published/{id}/view-file', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'viewFile'])->name('rdb_published.view_file');
 
     Route::resource('rdb_published', \App\Http\Controllers\Backend\RdbPublishedController::class);
+    
+    // DIP File Management
+    Route::post('/rdb_dip/{id}/upload-file', [\App\Http\Controllers\Backend\RdbDipController::class, 'uploadFile'])->name('rdb_dip.upload_file');
+    Route::delete('/rdb_dip/{id}/delete-file', [\App\Http\Controllers\Backend\RdbDipController::class, 'deleteFile'])->name('rdb_dip.delete_file');
+    Route::get('/rdb_dip/search/years', [\App\Http\Controllers\Backend\RdbDipController::class, 'searchYears'])->name('rdb_dip.search_years');
+    
     Route::resource('rdb_dip', \App\Http\Controllers\Backend\RdbDipController::class);
     
     // AJAX Location Search (for cascading dropdowns)

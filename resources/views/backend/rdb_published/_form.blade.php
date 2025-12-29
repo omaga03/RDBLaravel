@@ -340,70 +340,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-        // Initialize Flatpickr for Thai Buddhist Date
-        if (typeof flatpickr !== 'undefined') {
-            flatpickr.l10ns.th.firstDayOfWeek = 0; // Sunday start
-            
-            flatpickr(".datepicker", {
-                dateFormat: "Y-m-d", // Value sent to server
-                altInput: true,
-                altFormat: "j F Y", // Format for display
-                locale: "th",
-                disableMobile: true, // Force custom picker on mobile
-                formatDate: (date, format, locale) => {
-                    // Return standard format if not the display format
-                    if (format !== "j F Y") {
-                         return flatpickr.formatDate(date, format, locale);
-                    }
-                    // For display (altInput), convert Year to Buddhist Era
-                    const buddhistYear = date.getFullYear() + 543;
-                    return flatpickr.formatDate(date, "j F", locale) + " " + buddhistYear;
-                },
-                onMonthChange: function(selectedDates, dateStr, instance) {
-                     adjustCalendarYear(instance);
-                },
-                onYearChange: function(selectedDates, dateStr, instance) {
-                     adjustCalendarYear(instance);
-                },
-                onOpen: function(selectedDates, dateStr, instance) {
-                     adjustCalendarYear(instance);
-                },
-                onReady: function(selectedDates, dateStr, instance) {
-                    if (instance.element.id === 'pub_date' && selectedDates.length > 0) {
-                        const endDateInput = document.getElementById('pub_date_end');
-                        if (endDateInput && endDateInput._flatpickr) {
-                            endDateInput._flatpickr.set('minDate', selectedDates[0]);
-                        }
-                    }
-                    if (instance.element.id === 'pub_date_end') {
-                        const startDateInput = document.getElementById('pub_date');
-                        if (startDateInput && startDateInput._flatpickr && startDateInput._flatpickr.selectedDates.length > 0) {
-                            instance.set('minDate', startDateInput._flatpickr.selectedDates[0]);
-                        }
-                    }
-                },
+        // Initialize Flatpickr for Thai Buddhist Date using global helper
+        if (typeof initThaiFlatpickr !== 'undefined') {
+            const startDatePicker = initThaiFlatpickr("#pub_date", {
                 onChange: function(selectedDates, dateStr, instance) {
-                    if (instance.element.id === 'pub_date') {
-                         const endDateInput = document.getElementById('pub_date_end');
-                         if (endDateInput && endDateInput._flatpickr) {
-                             endDateInput._flatpickr.set('minDate', selectedDates[0] || null);
-                         }
+                    if (endDatePicker) {
+                        endDatePicker.set('minDate', dateStr || null);
                     }
                 }
             });
 
-            function adjustCalendarYear(instance) {
-                setTimeout(() => {
-                    const yearInput = instance.currentYearElement;
-                    if (yearInput) {
-                         const currentYear = instance.currentYear;
-                         const buddhistYear = currentYear + 543;
-                         if (yearInput.value != buddhistYear) {
-                            yearInput.value = buddhistYear;
-                         }
+            const endDatePicker = initThaiFlatpickr("#pub_date_end", {
+                onReady: function(selectedDates, dateStr, instance) {
+                    if (startDatePicker && startDatePicker.selectedDates.length > 0) {
+                        instance.set('minDate', startDatePicker.selectedDates[0]);
                     }
-                }, 0);
-            }
+                }
+            });
         }
 
         // Keyword Tag Input System

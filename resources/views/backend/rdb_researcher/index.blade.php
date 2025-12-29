@@ -12,29 +12,38 @@
     <!-- Search Card -->
     <div class="card shadow-sm mb-4 search-box">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold"><i class="bi bi-search"></i> ค้นหาขั้นสูง (Advanced Search)</h6>
-            <button class="btn btn-sm btn-toggle-search" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSearch" aria-expanded="{{ request()->anyFilled(['researcher_fname', 'researcher_lname', 'department_id']) ? 'true' : 'false' }}" aria-controls="collapseSearch">
+            <h6 class="m-0 font-weight-bold"><i class="bi bi-search"></i> ค้นหา (Search)</h6>
+            <button class="btn btn-sm btn-toggle-search" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSearch" aria-expanded="{{ request()->anyFilled(['q', 'department_id', 'depcat_id']) ? 'true' : 'false' }}" aria-controls="collapseSearch">
                 <i class="bi bi-chevron-down"></i> แสดง/ซ่อน
             </button>
         </div>
-        <div class="collapse {{ request()->anyFilled(['researcher_fname', 'researcher_lname', 'department_id']) ? 'show' : '' }}" id="collapseSearch">
+        <div class="collapse {{ request()->anyFilled(['q', 'department_id', 'depcat_id']) ? 'show' : '' }}" id="collapseSearch">
             <div class="card-body">
                 <form action="{{ route('backend.rdb_researcher.index') }}" method="GET">
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <label for="researcher_fname" class="form-label">ชื่อ (First Name)</label>
-                            <input type="text" class="form-control" id="researcher_fname" name="researcher_fname" value="{{ request('researcher_fname') }}" placeholder="ระบุชื่อ...">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="researcher_lname" class="form-label">นามสกุล (Last Name)</label>
-                            <input type="text" class="form-control" id="researcher_lname" name="researcher_lname" value="{{ request('researcher_lname') }}" placeholder="ระบุนามสกุล...">
+                            <label for="q" class="form-label">คำค้นหา (Keywords)</label>
+                            <input type="text" class="form-control" id="q" name="q" value="{{ request('q') }}" placeholder="ชื่อ, อีเมล, หมายเหตุ...">
                         </div>
                         <div class="col-md-4">
                             <label for="department_id" class="form-label">หน่วยงาน (Department)</label>
                             <select class="form-select" id="department_id" name="department_id">
                                 <option value="">-- ทั้งหมด (All) --</option>
                                 @foreach($departments as $dept)
-                                    <option value="{{ $dept->department_id }}" {{ request('department_id') == $dept->department_id ? 'selected' : '' }}>{{ $dept->department_name }}</option>
+                                    <option value="{{ $dept->department_id }}" {{ request('department_id') == $dept->department_id ? 'selected' : '' }}>
+                                        {{ $dept->department_nameTH ?? $dept->department_nameEN }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="depcat_id" class="form-label">สาขาทางวิชาการ (Academic Category)</label>
+                            <select class="form-select" id="depcat_id" name="depcat_id">
+                                <option value="">-- ทั้งหมด (All) --</option>
+                                @foreach($categories as $cat)
+                                    <option value="{{ $cat->depcat_id }}" {{ request('depcat_id') == $cat->depcat_id ? 'selected' : '' }}>
+                                        {{ $cat->depcat_name }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -95,11 +104,27 @@
                                                 <span class="ms-2"><i class="bi bi-phone"></i> {{ $researcher->researcher_mobile }}</span>
                                             @endif
                                         </div>
-                                        @if($researcher->researcher_codeid)
-                                            <div class="small text-muted">
-                                                <i class="bi bi-person-badge"></i> {{ $researcher->researcher_codeid }}
-                                            </div>
-                                        @endif
+                                        <div class="small text-muted mb-1">
+                                            @if($researcher->scopus_authorId)
+                                                <span class="me-3" title="Scopus Author ID">
+                                                    <i class="bi bi-journal-bookmark-fill text-info"></i> Scopus: 
+                                                    <a href="https://www.scopus.com/authid/detail.uri?authorId={{ $researcher->scopus_authorId }}" target="_blank" class="text-decoration-none">
+                                                        {{ $researcher->scopus_authorId }}
+                                                    </a>
+                                                    @if($researcher->researcher_hindex)
+                                                        <span class="badge bg-info-subtle text-info-emphasis ms-1" title="h-index">h: {{ $researcher->researcher_hindex }}</span>
+                                                    @endif
+                                                </span>
+                                            @endif
+                                            @if($researcher->orcid)
+                                                <span title="ORCID">
+                                                    <i class="bi bi-link-45deg text-success"></i> ORCID: 
+                                                    <a href="https://orcid.org/{{ $researcher->orcid }}" target="_blank" class="text-decoration-none">
+                                                        {{ $researcher->orcid }}
+                                                    </a>
+                                                </span>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
                             </td>

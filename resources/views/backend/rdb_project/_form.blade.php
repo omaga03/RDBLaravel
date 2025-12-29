@@ -364,92 +364,28 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Initialize Flatpickr for Thai Buddhist Date
-    if (typeof flatpickr !== 'undefined') {
-        flatpickr.l10ns.th.firstDayOfWeek = 0; // Sunday start
-        
-        flatpickr(".datepicker", {
-            dateFormat: "Y-m-d", // Value sent to server
-            altInput: true,
-            altFormat: "j F Y", // Format for display
-            locale: "th",
-            disableMobile: true, // Force custom picker on mobile
-            formatDate: (date, format, locale) => {
-                // Return standard format if not the display format
-                // This ensures "Y-m-d" for value attribute remains correct
-                if (format !== "j F Y") {
-                     return flatpickr.formatDate(date, format, locale);
-                }
-                
-                // For display (altInput), convert Year to Buddhist Era
-                const buddhistYear = date.getFullYear() + 543;
-                return flatpickr.formatDate(date, "j F", locale) + " " + buddhistYear;
-            },
-            onMonthChange: function(selectedDates, dateStr, instance) {
-                 adjustCalendarYear(instance);
-            },
-            onYearChange: function(selectedDates, dateStr, instance) {
-                 adjustCalendarYear(instance);
-            },
-            onOpen: function(selectedDates, dateStr, instance) {
-                 adjustCalendarYear(instance);
-            },
-            onReady: function(selectedDates, dateStr, instance) {
-                // If this is the START date and it has a value, try to update the END date
-                if (instance.element.id === 'pro_date_start' && selectedDates.length > 0) {
-                    const endDateInput = document.getElementById('pro_date_end');
-                    // Only update if end date instance is already ready
-                    if (endDateInput && endDateInput._flatpickr) {
-                        endDateInput._flatpickr.set('minDate', selectedDates[0]);
-                    }
-                }
-                
-                // If this is the END date, check if START date has a value and apply restriction
-                if (instance.element.id === 'pro_date_end') {
-                    const startDateInput = document.getElementById('pro_date_start');
-                    if (startDateInput && startDateInput._flatpickr && startDateInput._flatpickr.selectedDates.length > 0) {
-                        instance.set('minDate', startDateInput._flatpickr.selectedDates[0]);
-                    }
-                }
-            },
+    // Initialize Flatpickr for Thai Buddhist Date using global helper
+    if (typeof initThaiFlatpickr !== 'undefined') {
+        const startDatePicker = initThaiFlatpickr("#pro_date_start", {
             onChange: function(selectedDates, dateStr, instance) {
-                // When start date changes, update end date's minDate
-                if (instance.element.id === 'pro_date_start') {
-                     const endDateInput = document.getElementById('pro_date_end');
-                     if (endDateInput && endDateInput._flatpickr) {
-                         endDateInput._flatpickr.set('minDate', selectedDates[0] || null);
-                         
-                         // Optional: Clear end date if it's now invalid (less than start date)
-                         // But usually setting minDate just disables previous dates. 
-                         // If we want to be strict, we can check value.
-                         const currentEndDate = endDateInput._flatpickr.selectedDates[0];
-                         if (currentEndDate && selectedDates.length > 0 && currentEndDate < selectedDates[0]) {
-                             endDateInput._flatpickr.clear();
-                         }
-                     }
+                if (endDatePicker) {
+                    endDatePicker.set('minDate', dateStr || null);
+                    // Clear end date if it's now invalid
+                    const currentEndDate = endDatePicker.selectedDates[0];
+                    if (currentEndDate && selectedDates.length > 0 && currentEndDate < selectedDates[0]) {
+                        endDatePicker.clear();
+                    }
                 }
             }
         });
 
-        // Function to hack the year display in the calendar header to allow showing BE
-        // Note: This is purely visual. The underlying logic uses AD.
-        function adjustCalendarYear(instance) {
-            setTimeout(() => {
-                const yearInput = instance.currentYearElement;
-                if (yearInput) {
-                     // Get the ACTUAL Gregorian year from the instance
-                     const currentYear = instance.currentYear;
-                     const buddhistYear = currentYear + 543;
-                     
-                     // Visually update the input value
-                     if (yearInput.value != buddhistYear) {
-                        yearInput.value = buddhistYear;
-                     }
+        const endDatePicker = initThaiFlatpickr("#pro_date_end", {
+            onReady: function(selectedDates, dateStr, instance) {
+                if (startDatePicker && startDatePicker.selectedDates.length > 0) {
+                    instance.set('minDate', startDatePicker.selectedDates[0]);
                 }
-            }, 0);
-        }
-
-
+            }
+        });
     }
 });
 </script>
