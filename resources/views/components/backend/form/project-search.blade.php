@@ -30,45 +30,6 @@
             <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
         @endif
 
-        <style>
-            /* Centralized TomSelect Styles for Project Search */
-            .ts-control {
-                background-color: var(--bs-body-bg);
-                color: var(--bs-body-color);
-                border: 1px solid #d1d3e2; 
-            }
-            .ts-control.focus {
-                border-color: #86b7fe;
-                box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-            }
-            .ts-dropdown {
-                background-color: #fff;
-                color: #333;
-            }
-            .ts-control > input {
-                color: inherit !important;
-            }
-            
-            /* Dark Mode Support */
-            [data-bs-theme="dark"] .ts-control {
-                background-color: #212529;
-                border-color: #495057;
-                color: #fff;
-            }
-            [data-bs-theme="dark"] .ts-dropdown {
-                background-color: #2b3035;
-                color: #fff;
-            }
-            [data-bs-theme="dark"] .ts-dropdown .option:hover,
-            [data-bs-theme="dark"] .ts-dropdown .active {
-                background-color: #0d6efd;
-                color: #fff;
-            }
-            [data-bs-theme="dark"] .ts-dropdown .highlight {
-                background-color: rgba(255, 193, 7, 0.3);
-                color: #fff;
-            }
-        </style>
     @endpush
 @endonce
 
@@ -100,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             render: {
                 option: function(data, escape) {
-                    let html = '<div>' + escape(data.text);
+                    let html = '<div>' + (data._highlight || escape(data.text));
                     if (data.utilization_rows && data.utilization_rows.length > 0) {
                         data.utilization_rows.forEach(function(row) {
                              html += '<div class="text-muted small mt-1" style="font-size: 0.85em; margin-left:1em;">' +

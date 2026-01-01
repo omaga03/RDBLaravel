@@ -8,7 +8,17 @@ class RdbDepartmentType extends Model
 {
     protected $table = 'rdb_department_type';
     protected $primaryKey = 'tdepartment_id';
-    public $timestamps = false; // Assuming no standard created_at/updated_at, change if needed
+    public $timestamps = false;
+
+    public function departments()
+    {
+        return $this->hasMany(RdbDepartment::class, 'tdepartment_id', 'tdepartment_id');
+    }
+
+    public function canDelete()
+    {
+        return $this->departments()->count() === 0;
+    }
 
     protected $fillable = [
         'tdepartment_nameTH',

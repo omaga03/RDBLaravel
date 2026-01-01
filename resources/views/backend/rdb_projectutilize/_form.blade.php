@@ -3,8 +3,6 @@
     $isEdit = isset($item) && $item->utz_id;
 @endphp
 
-<div class="card shadow-sm mb-4">
-    <div class="card-body">
         {{-- Row 1: โครงการวิจัย --}}
         <div class="row">
             <div class="col-md-12 mb-3">
@@ -128,8 +126,6 @@
                 <i class="bi bi-arrow-left"></i> ย้อนกลับ
             </a>
         </div>
-    </div>
-</div>
 
 
 
@@ -202,7 +198,7 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             render: {
                 option: function(data, escape) {
-                    return '<div>' + escape(data.text) + '</div>';
+                    return '<div>' + (data._highlight || escape(data.text)) + '</div>';
                 },
                 item: function(data, escape) {
                     return '<div>' + escape(data.text) + '</div>';

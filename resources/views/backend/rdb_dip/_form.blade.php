@@ -2,14 +2,6 @@
     $isEdit = isset($item) && $item->dip_id;
 @endphp
 
-<div class="card shadow-sm border-primary">
-    <div class="card-header bg-primary text-white">
-        <h5 class="mb-0"><i class="bi bi-shield-check"></i> {{ $isEdit ? 'แก้ไขข้อมูลทรัพย์สินทางปัญญา' : 'เพิ่มข้อมูลทรัพย์สินทางปัญญา' }}</h5>
-        @if($isEdit)
-            <small>{{ $item->dip_data2_name }}</small>
-        @endif
-    </div>
-    <div class="card-body">
         {{-- Section 1: ข้อมูลหลัก --}}
         <div class="row">
             <div class="col-md-4 mb-3">
@@ -124,23 +116,11 @@
                 <i class="bi bi-arrow-left"></i> ย้อนกลับ
             </a>
         </div>
-    </div>
-</div>
 
 @push('scripts')
 <!-- TomSelect CDN -->
 <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
-
-<style>
-    /* TomSelect Dark Mode Support */
-    [data-bs-theme="dark"] .ts-wrapper .ts-control { background-color: #212529; border-color: #495057; color: #fff; }
-    [data-bs-theme="dark"] .ts-wrapper .ts-control input { color: #fff !important; }
-    [data-bs-theme="dark"] .ts-dropdown { background-color: #2b3035; border-color: #495057; color: #fff; }
-    [data-bs-theme="dark"] .ts-dropdown .option { color: #fff; }
-    [data-bs-theme="dark"] .ts-dropdown .option:hover, [data-bs-theme="dark"] .ts-dropdown .option.active { background-color: #0d6efd; }
-    [data-bs-theme="dark"] .ts-wrapper .ts-control .item { background-color: #0d6efd; color: #fff; }
-</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -156,6 +136,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     .then(response => response.json())
                     .then(json => callback(json))
                     .catch(() => callback());
+            },
+            render: {
+                option: function(data, escape) {
+                    return '<div>' + (data._highlight || escape(data.text)) + '</div>';
+                },
+                item: function(data, escape) {
+                    return '<div>' + escape(data.text) + '</div>';
+                }
             }
         });
     }
@@ -172,6 +160,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     .then(response => response.json())
                     .then(json => callback(json))
                     .catch(() => callback());
+            },
+            render: {
+                option: function(data, escape) {
+                    return '<div>' + (data._highlight || escape(data.text)) + '</div>';
+                },
+                item: function(data, escape) {
+                    return '<div>' + escape(data.text) + '</div>';
+                }
             }
         });
     }

@@ -1,34 +1,57 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="card">
-        <div class="card-header">
-            Rdbprojectposition List
-            <a href="{{ route('backend.rdbprojectposition.create') }}" class="btn btn-primary btn-sm float-end">Create New</a>
+<div class="py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0"><i class="bi bi-person-workspace me-2"></i>จัดการตำแหน่งในโครงการ</h2>
+        <a href="{{ route('backend.rdbprojectposition.create') }}" class="btn btn-success d-inline-flex align-items-center">
+            <i class="bi bi-plus-circle me-2"></i> เพิ่มตำแหน่งใหม่
+        </a>
+    </div>
+
+    <x-search-bar :searchRoute="route('backend.rdbprojectposition.index')" :collapsed="true">
+        <div class="row g-3">
+            <div class="col-md-12">
+                <label class="form-label">ชื่อตำแหน่ง</label>
+                <input type="text" name="position_nameTH" class="form-control" value="{{ request('position_nameTH') }}" placeholder="ค้นหาตำแหน่ง...">
+            </div>
         </div>
-        <div class="card-body">
-            <table class="table table-bordered">
-                <thead><tr><th>ID</th><th>Actions</th></tr></thead>
-                <tbody>
-                    @foreach($items as $item)
+    </x-search-bar>
+
+    <x-card>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
                     <tr>
-                        <td>{{ $item->getKey() }}</td>
-                        <td>
-                            <a href="{{ route('backend.rdbprojectposition.show', $item->getKey()) }}" class="btn btn-info btn-sm">View</a>
-                            <a href="{{ route('backend.rdbprojectposition.edit', $item->getKey()) }}" class="btn btn-warning btn-sm">Edit</a>
-                             <form action="{{ route('backend.rdbprojectposition.destroy', $item->getKey()) }}" method="POST" style="display:inline-block;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</button>
-                            </form>
+                        <th style="width: 80px;">ID</th>
+                        <th>ชื่อตำแหน่ง</th>
+                        <th>คำอธิบาย</th>
+                        <th style="width: 80px;" class="text-center">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($items as $item)
+                    <tr>
+                        <td><code>{{ $item->position_id }}</code></td>
+                        <td class="fw-bold">{{ $item->position_nameTH ?? '-' }}</td>
+                        <td>{{ \Illuminate\Support\Str::limit($item->position_desc, 50) ?? '-' }}</td>
+                        <td class="text-center">
+                            <a href="{{ route('backend.rdbprojectposition.show', $item->position_id) }}" class="btn btn-outline-primary btn-sm" title="ดูรายละเอียด">
+                                <i class="bi bi-eye"></i>
+                            </a>
                         </td>
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">ไม่พบข้อมูล</td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
-            {{ $items->links() }}
         </div>
-    </div>
+        @if($items->hasPages())
+        <div class="mt-3">{{ $items->withQueryString()->links() }}</div>
+        @endif
+    </x-card>
 </div>
 @endsection

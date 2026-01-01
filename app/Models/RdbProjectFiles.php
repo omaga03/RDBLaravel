@@ -15,6 +15,12 @@ class RdbProjectFiles extends Model
         return $this->belongsTo(RdbProject::class, 'pro_id', 'pro_id');
     }
 
+    public function canDelete()
+    {
+        // Files is a leaf, can be deleted unconditionally or if needed
+        return true;
+    }
+
     protected $fillable = [
         'pro_id',
         'rf_files',

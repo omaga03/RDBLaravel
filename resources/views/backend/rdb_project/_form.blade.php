@@ -3,15 +3,7 @@
     $isEdit = isset($project) && $project->pro_id;
 @endphp
 
-<div class="card shadow-sm border-primary">
-    <div class="card-header bg-primary text-white">
-        <h5 class="mb-0"><i class="bi bi-pencil-square"></i> {{ $isEdit ? 'แก้ไขข้อมูลโครงการวิจัย' : 'เพิ่มโครงการวิจัย' }}</h5>
-        @if($isEdit)
-        <small>{!! $project->pro_nameTH !!}</small>
-        @endif
-    </div>
-    <div class="card-body">
-        <div class="rdb-project-form">
+<div class="rdb-project-form">
             {{-- Row 1: ปีงบประมาณ, ประเภททุน, ประเภทโครงการย่อย --}}
             <div class="row">
                 <div class="col-md-4 mb-3">
@@ -211,71 +203,15 @@
             </div>
             @endif
 
-            {{-- Buttons --}}
-            <div class="form-group mt-4">
-                <button type="submit" class="btn btn-{{ $isEdit ? 'primary' : 'success' }}">
-                    <i class="bi bi-save"></i> บันทึกข้อมูล
-                </button>
-                <a href="{{ $isEdit ? route('backend.rdb_project.show', $project->pro_id) : route('backend.rdb_project.index') }}" class="btn btn-warning">
-                    <i class="bi bi-arrow-left"></i> ย้อนกลับ
-                </a>
-            </div>
         </div>
-    </div>
-</div>
 
-@push('scripts')
 @push('scripts')
 <!-- TomSelect CDN -->
 <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
 
-<style>
-    /* TomSelect Dark Mode Support */
-    [data-bs-theme="dark"] .ts-wrapper .ts-control {
-        background-color: #212529;
-        border-color: #495057;
-        color: #fff;
-    }
-    [data-bs-theme="dark"] .ts-wrapper .ts-control input {
-        color: #fff !important;
-    }
-    [data-bs-theme="dark"] .ts-wrapper .ts-control input::placeholder {
-        color: #adb5bd !important;
-    }
-    [data-bs-theme="dark"] .ts-dropdown {
-        background-color: #2b3035;
-        border-color: #495057;
-        color: #fff;
-    }
-    [data-bs-theme="dark"] .ts-dropdown .option {
-        color: #fff;
-    }
-    [data-bs-theme="dark"] .ts-dropdown .option:hover,
-    [data-bs-theme="dark"] .ts-dropdown .option.active {
-        background-color: #0d6efd;
-        color: #fff;
-    }
-    [data-bs-theme="dark"] .ts-dropdown .highlight {
-        background-color: rgba(255, 193, 7, 0.3);
-        color: #fff;
-    }
-    [data-bs-theme="dark"] .ts-wrapper .ts-control .item {
-        background-color: #0d6efd;
-        color: #fff;
-    }
-    [data-bs-theme="dark"] .ts-wrapper.focus .ts-control {
-        border-color: #0d6efd;
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-    }
-    [data-bs-theme="dark"] .ts-dropdown .no-results {
-        color: #adb5bd;
-    }
-</style>
-
     @include('layouts.partials.ckeditor_setup')
-@endpush
-@push('scripts')
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Toggle progroup row based on pgroup_id
@@ -352,7 +288,7 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             render: {
                 option: function(data, escape) {
-                    return '<div>' + escape(data.text) + '</div>';
+                    return '<div>' + (data._highlight || escape(data.text)) + '</div>';
                 },
                 item: function(data, escape) {
                     return '<div>' + escape(data.text) + '</div>';

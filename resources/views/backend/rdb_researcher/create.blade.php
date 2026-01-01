@@ -1,15 +1,22 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="card">
-        <div class="card-header">Create Rdb Researcher</div>
-        <div class="card-body">
-            <form method="POST" action="{{ route('backend.rdb_researcher.store') }}" enctype="multipart/form-data">
-                @csrf
-                @include('backend.rdb_researcher._form')
-            </form>
+<div class="container-fluid">
+    <x-form-wrapper 
+        title="เพิ่มข้อมูลนักวิจัยใหม่" 
+        icon="bi-plus-circle"
+        mode="create" 
+        action="{{ route('backend.rdb_researcher.store') }}" 
+        enctype="multipart/form-data"
+    >
+        @include('backend.rdb_researcher._form')
+        
+        <div class="mt-4 border-top pt-3">
+            <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> บันทึกข้อมูล</button>
+            <a href="{{ route('backend.rdb_researcher.index') }}" class="btn btn-secondary ms-2">
+                <i class="bi bi-arrow-left"></i> ยกเลิก
+            </a>
         </div>
-    </div>
+    </x-form-wrapper>
 </div>
 @endsection

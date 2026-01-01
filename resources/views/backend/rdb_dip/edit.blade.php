@@ -14,11 +14,17 @@
                 </div>
             @endif
 
-            <form action="{{ route('backend.rdb_dip.update', $item->dip_id) }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
+            <x-form-wrapper 
+                title="แก้ไขข้อมูลทรัพย์สินทางปัญญา" 
+                icon="bi-shield-check"
+                mode="edit" 
+                :backRoute="route('backend.rdb_dip.show', $item->dip_id)"
+                :actionRoute="route('backend.rdb_dip.update', $item->dip_id)"
+                method="PUT"
+                enctype="multipart/form-data"
+            >
                 @include('backend.rdb_dip._form', ['item' => $item])
-            </form>
+            </x-form-wrapper>
         </div>
     </div>
 </div>

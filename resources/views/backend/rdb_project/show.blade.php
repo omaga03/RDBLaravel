@@ -3,72 +3,19 @@
 @section('content')
 <!-- TomSelect CSS -->
 <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
-<style>
-    /* TomSelect Dark Mode Support */
-    [data-bs-theme="dark"] .ts-control {
-        background-color: #212529 !important;
-        border-color: #495057 !important;
-        color: #fff !important;
-    }
-    [data-bs-theme="dark"] .ts-dropdown {
-        background-color: #343a40 !important;
-        border-color: #495057 !important;
-        color: #fff !important;
-    }
-    [data-bs-theme="dark"] .ts-dropdown .option {
-        color: #fff !important;
-    }
-    [data-bs-theme="dark"] .ts-dropdown .option:hover,
-    [data-bs-theme="dark"] .ts-dropdown .active {
-        background-color: #0d6efd !important;
-        color: #fff !important;
-    }
-    [data-bs-theme="dark"] .ts-control .item {
-        color: #fff !important;
-    }
-    [data-bs-theme="dark"] .ts-wrapper.single .ts-control:after {
-        border-color: #fff transparent transparent transparent !important;
-    }
-    /* Input Text Colors in Dark Mode */
-    [data-bs-theme="dark"] .form-control,
-    [data-bs-theme="dark"] .form-select {
-        color: #e9ecef !important;
-        background-color: #2b3035;
-        border-color: #495057;
-    }
-    [data-bs-theme="dark"] .form-control::placeholder {
-        color: #adb5bd;
-    }
-    [data-bs-theme="dark"] .ts-control input {
-        color: #e9ecef !important;
-    }
-</style>
 <div class="py-4">
-    <div class="row">
-        <div class="col-md-12 mb-4">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <h2 class="mb-0"><i class="bi bi-folder2-open"></i> รายละเอียดโครงการวิจัย (Project Details)</h2>
-                <div class="d-flex gap-2">
-                    <a href="{{ route('backend.rdb_project.index') }}" class="btn btn-secondary d-print-none d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
-                        <i class="bi bi-arrow-left me-2"></i> ย้อนกลับ
-                    </a>
-                    <a href="{{ route('backend.rdb_project.edit', $project->pro_id) }}" class="btn btn-warning d-print-none d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
-                        <i class="bi bi-pencil me-2"></i> แก้ไขข้อมูล
-                    </a>
-                    <button onclick="window.print()" class="btn btn-primary d-print-none d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
-                        <i class="bi bi-printer me-2"></i> พิมพ์
-                    </button>
-                    <button type="submit" form="delete-form-top" class="btn btn-danger d-print-none d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
-                        <i class="bi bi-trash me-2"></i> ลบ
-                    </button>
-                </div>
-                <form id="delete-form-top" action="{{ route('backend.rdb_project.destroy', $project->pro_id) }}" method="POST" class="d-none delete-form">
-                    @csrf
-                    @method('DELETE')
-                </form>
-            </div>
-        </div>
+    {{-- Page Header with Actions --}}
+    <x-page-header 
+        title="รายละเอียดโครงการวิจัย"
+        icon="bi-folder2-open"
+        :backRoute="route('backend.rdb_project.index')"
+        :editRoute="route('backend.rdb_project.edit', $project->pro_id)"
+        :deleteRoute="route('backend.rdb_project.destroy', $project->pro_id)"
+        :canDelete="true"
+        :showPrint="true"
+    />
 
+    <div class="row">
         <div class="col-lg-8 order-1 order-lg-1">
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-primary text-white d-print-none">
@@ -210,7 +157,7 @@
                 <div class="card-header bg-success text-white d-flex justify-content-between align-items-center d-print-none">
                     <h5 class="mb-0"><i class="bi bi-people"></i> คณะผู้วิจัย (Researchers)</h5>
                     <button type="button" class="btn btn-light btn-sm text-success fw-bold" data-bs-toggle="modal" data-bs-target="#researcherModal">
-                        <i class="bi bi-gear-fill"></i> จัดการข้อมูล (Manage)
+                        <i class="bi bi-gear-fill"></i> จัดการ
                     </button>
                 </div>
                 <div class="card-header bg-success text-white d-none d-print-block">
@@ -262,51 +209,6 @@
             </div>
 
 
-            <!-- Additional Files (File Project) -->
-            <div class="card shadow-sm mb-4 d-print-none">
-                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="bi bi-paperclip"></i> ข้อมูลเอกสารเพิ่มเติม (Additional Documents)</h5>
-                    <button type="button" class="btn btn-light btn-sm text-success fw-bold" data-bs-toggle="modal" data-bs-target="#fileModal">
-                        <i class="bi bi-gear-fill"></i> จัดการข้อมูล (Manage)
-                    </button>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>ชื่อเอกสาร</th>
-                                    <th>หมายเหตุ</th>
-                                    <th>ดาวน์โหลด</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($project->files as $file)
-                                <tr>
-                                    <td>
-                                        {{ $file->rf_filesname }}
-                                        <span class="badge bg-secondary ms-1" title="จำนวนดาวน์โหลด">
-                                            <i class="bi bi-download"></i> {{ $file->rf_download ?? 0 }}
-                                        </span>
-                                    </td>
-                                    <td>{{ $file->rf_note ?? '-' }}</td>
-                                    <td>
-                                        <a href="{{ route('backend.rdb_project.file.download', [$project->pro_id, $file->id]) }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                            <i class="bi bi-download"></i> Download
-                                        </a>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="3" class="text-center text-muted py-3">ไม่มีเอกสารเพิ่มเติม</td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
             <!-- Bottom Action Buttons -->
             <div class="d-flex justify-content-end gap-2 mb-4 d-print-none">
                  <a href="{{ route('backend.rdb_project.index') }}" class="btn btn-secondary d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
@@ -318,11 +220,11 @@
                 <button onclick="window.print()" class="btn btn-primary d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
                     <i class="bi bi-printer me-2"></i> พิมพ์
                 </button>
-                <button type="submit" form="delete-form-bottom" class="btn btn-danger d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
+                <button type="submit" form="delete-form-bottom" class="btn btn-danger d-inline-flex justify-content-center align-items-center" style="min-width: 120px;" onclick="return confirm('ยืนยันลบโครงการนี้?');">
                     <i class="bi bi-trash me-2"></i> ลบ
                 </button>
             </div>
-            <form id="delete-form-bottom" action="{{ route('backend.rdb_project.destroy', $project->pro_id) }}" method="POST" class="d-none" onsubmit="return confirm('ยืนยันลบโครงการนี้?');">
+            <form id="delete-form-bottom" action="{{ route('backend.rdb_project.destroy', $project->pro_id) }}" method="POST" class="d-none">
                 @csrf
                 @method('DELETE')
             </form>
@@ -441,6 +343,57 @@
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">❌ ปิด</button>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Files (File Project) -->
+            <div class="card shadow-sm mb-4 d-print-none">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-paperclip"></i> ข้อมูลเอกสารเพิ่มเติม</h5>
+                    <button type="button" class="btn btn-light btn-sm text-success fw-bold" data-bs-toggle="modal" data-bs-target="#fileModal">
+                        <i class="bi bi-gear-fill"></i> จัดการ
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ชื่อเอกสาร</th>
+                                    <th style="width: 50px;">files</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($project->files as $file)
+                                <tr>
+                                    <td>
+                                        @if($file->rf_files_show)
+                                            <i class="bi bi-check-circle-fill text-success" title="แสดงผลสาธารณะ"></i>
+                                        @else
+                                            <i class="bi bi-x-circle-fill text-danger" title="ซ่อนจากสาธารณะ"></i>
+                                        @endif
+                                        {{ $file->rf_filesname }}
+                                        @if($file->rf_note)
+                                            <small class="text-muted d-block"><i class="bi bi-chat-left-text"></i> {{ $file->rf_note }}</small>
+                                        @endif
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="{{ route('backend.rdb_project.file.download', [$project->pro_id, $file->id]) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+                                        <small class="d-block text-muted" title="จำนวนดาวน์โหลด">
+                                            <i class="bi bi-eye"></i> {{ $file->rf_download ?? 0 }}
+                                        </small>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="2" class="text-center text-muted py-3">ไม่มีเอกสารเพิ่มเติม</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -751,7 +704,9 @@
                 },
                 render: {
                     option: function(data, escape) {
-                        return '<div>' + escape(data.text) + '</div>';
+                        return '<div class="py-1">' + 
+                            '<div>' + (data._highlight || escape(data.text)) + '</div>' +
+                            '</div>';
                     },
                     item: function(data, escape) {
                         return '<div>' + escape(data.text) + '</div>';

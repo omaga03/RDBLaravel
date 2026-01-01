@@ -140,10 +140,13 @@
                 </div>
             </div>
             
-            <div class="mt-4 pt-3 border-top">
+            <div class="mt-4 pt-3 border-top d-flex gap-2">
                 <a href="{{ route('frontend.researchcoferenceinthai.index') }}" class="btn btn-secondary px-4 rounded-pill">
                     <i class="bi bi-arrow-left me-1"></i> ย้อนกลับ
                 </a>
+                <button onclick="window.print()" class="btn btn-outline-secondary px-4 rounded-pill">
+                    <i class="bi bi-printer me-1"></i> พิมพ์
+                </button>
             </div>
         </div>
     </div>

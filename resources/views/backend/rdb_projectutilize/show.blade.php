@@ -23,29 +23,14 @@
 <div class="py-4">
     <div class="row">
         <!-- Header & Action Buttons -->
-        <div class="col-md-12 mb-4">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <h2 class="mb-0 text-gray-800"><i class="bi bi-rocket-takeoff"></i> รายละเอียดการใช้ประโยชน์ (Utilization Details)</h2>
-                <div class="d-flex gap-2">
-                    <a href="{{ route('backend.rdbprojectutilize.index') }}" class="btn btn-secondary d-print-none d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
-                        <i class="bi bi-arrow-left me-2"></i> ย้อนกลับ
-                    </a>
-                    <a href="{{ route('backend.rdbprojectutilize.edit', $item->utz_id) }}" class="btn btn-warning d-print-none d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
-                        <i class="bi bi-pencil me-2"></i> แก้ไขข้อมูล
-                    </a>
-                    <button onclick="window.print()" class="btn btn-primary d-print-none d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
-                        <i class="bi bi-printer me-2"></i> พิมพ์
-                    </button>
-                    <form action="{{ route('backend.rdbprojectutilize.destroy', $item->utz_id) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันการลบข้อมูลนี้?');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger d-print-none d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
-                            <i class="bi bi-trash me-2"></i> ลบ
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
+        <x-page-header 
+            title="รายละเอียดการใช้ประโยชน์ (Utilization Details)"
+            icon="bi-rocket-takeoff"
+            :backRoute="route('backend.rdbprojectutilize.index')"
+            :editRoute="route('backend.rdbprojectutilize.edit', $item->utz_id)"
+            :deleteRoute="route('backend.rdbprojectutilize.destroy', $item->utz_id)"
+            :showPrint="true"
+        />
 
         <!-- Left Column -->
         <div class="col-lg-8">
@@ -247,58 +232,22 @@
             @endif
 
             <!-- Metadata / System Info -->
-            <div class="card shadow-sm d-print-none border">
-                <div class="card-header bg-dark text-white border-0">
-                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> ข้อมูลระบบ (System Info)</h5>
-                </div>
-                <div class="card-body p-3 border-top">
-                    @php
-                        function getUserName($user) {
-                            if(!$user) return '-';
-                            if($user->researcher) {
-                                return $user->researcher->researcher_fname . ' ' . $user->researcher->researcher_lname;
-                            }
-                            return $user->username ?? $user->email ?? '-';
-                        }
-                    @endphp
-                    <div class="small">
-                        <div class="mb-2">
-                            <span class="text-muted">สร้างเมื่อ:</span> 
-                            <span class="fw-bold">{{ \App\Helpers\ThaiDateHelper::formatDateTime($item->created_at) }}</span>
-                            <br>
-                            <span class="text-muted">โดย:</span> {{ getUserName($item->createdBy) }}
-                        </div>
-                        <hr class="my-2">
-                        <div class="mb-0">
-                            <span class="text-muted">แก้ไขล่าสุด:</span> 
-                            <span class="fw-bold">{{ \App\Helpers\ThaiDateHelper::formatDateTime($item->updated_at) }}</span>
-                            <br>
-                            <span class="text-muted">โดย:</span> {{ getUserName($item->updatedBy) }}
-                        </div>
-                    </div>
-                </div>
+            <div class="mb-4">
+                @php
+                    $createdByName = $item->createdBy?->researcher ? ($item->createdBy->researcher->researcher_fname . ' ' . $item->createdBy->researcher->researcher_lname) : ($item->createdBy?->username ?? '-');
+                    $updatedByName = $item->updatedBy?->researcher ? ($item->updatedBy->researcher->researcher_fname . ' ' . $item->updatedBy->researcher->researcher_lname) : ($item->updatedBy?->username ?? '-');
+                @endphp
+                 <x-system-info :created_at="$item->created_at" :created_by="$createdByName" :updated_at="$item->updated_at" :updated_by="$updatedByName" />
             </div>
         </div>
     </div>
 
     <!-- Bottom Actions -->
-    <div class="d-flex justify-content-end flex-wrap gap-2 mt-4 mb-4 d-print-none">
-        <a href="{{ route('backend.rdbprojectutilize.index') }}" class="btn btn-secondary d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
-            <i class="bi bi-arrow-left me-2"></i> ย้อนกลับ
-        </a>
-        <a href="{{ route('backend.rdbprojectutilize.edit', $item->utz_id) }}" class="btn btn-warning d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
-            <i class="bi bi-pencil me-2"></i> แก้ไขข้อมูล
-        </a>
-        <button onclick="window.print()" class="btn btn-primary d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
-            <i class="bi bi-printer me-2"></i> พิมพ์
-        </button>
-        <form action="{{ route('backend.rdbprojectutilize.destroy', $item->utz_id) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันคุณจะลบรายการนี้?');">
-            @csrf
-            @method('DELETE')
-            <button type="submit" class="btn btn-danger d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
-                <i class="bi bi-trash me-2"></i> ลบ
-            </button>
-        </form>
-    </div>
+    <x-action-buttons 
+        :backRoute="route('backend.rdbprojectutilize.index')"
+        :editRoute="route('backend.rdbprojectutilize.edit', $item->utz_id)"
+        :deleteRoute="route('backend.rdbprojectutilize.destroy', $item->utz_id)"
+        :showPrint="true"
+    />
 </div>
 @endsection

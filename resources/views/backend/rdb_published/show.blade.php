@@ -18,31 +18,6 @@
     }
     
     /* Dark Mode Text Support */
-    [data-bs-theme="dark"] .text-gray-800 { color: #e9ecef !important; }
-    
-    /* TomSelect Dark Mode Styles */
-    [data-bs-theme="dark"] .ts-wrapper .ts-control,
-    [data-bs-theme="dark"] .ts-wrapper .ts-dropdown {
-        background-color: #212529;
-        color: #e9ecef;
-        border-color: #495057;
-    }
-    [data-bs-theme="dark"] .ts-wrapper .ts-control input {
-        color: #e9ecef;
-    }
-    [data-bs-theme="dark"] .ts-wrapper .ts-dropdown .option {
-        color: #e9ecef;
-    }
-    [data-bs-theme="dark"] .ts-wrapper .ts-dropdown .option.active,
-    [data-bs-theme="dark"] .ts-wrapper .ts-dropdown .option:hover {
-        background-color: #0d6efd;
-        color: #fff;
-    }
-    [data-bs-theme="dark"] .ts-wrapper .ts-dropdown .highlight {
-        background-color: transparent;
-        color: #ffc107;
-        font-weight: bold;
-    }
     
     /* Match TomSelect and form-select heights to 40px */
     .ts-wrapper .ts-control {
@@ -66,29 +41,14 @@
 <div class="py-4">
     <div class="row">
         <!-- Header & Actions -->
-        <div class="col-md-12 mb-4">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <h2 class="mb-0 text-gray-800"><i class="bi bi-journal-check"></i> รายละเอียดการตีพิมพ์ (Publication Details)</h2>
-                <div class="d-flex gap-2">
-                    <a href="{{ route('backend.rdb_published.index') }}" class="btn btn-secondary d-print-none d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
-                        <i class="bi bi-arrow-left me-2"></i> ย้อนกลับ
-                    </a>
-                    <a href="{{ route('backend.rdb_published.edit', $item->id) }}" class="btn btn-warning d-print-none d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
-                        <i class="bi bi-pencil me-2"></i> แก้ไขข้อมูล
-                    </a>
-                    <button onclick="window.print()" class="btn btn-primary d-print-none d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
-                        <i class="bi bi-printer me-2"></i> พิมพ์
-                    </button>
-                    <button type="submit" form="delete-form-top" class="btn btn-danger d-print-none d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
-                        <i class="bi bi-trash me-2"></i> ลบ
-                    </button>
-                    <form id="delete-form-top" action="{{ route('backend.rdb_published.destroy', $item->id) }}" method="POST" class="d-none delete-form">
-                        @csrf
-                        @method('DELETE')
-                    </form>
-                </div>
-            </div>
-        </div>
+        <x-page-header 
+            title="รายละเอียดการตีพิมพ์ (Publication Details)"
+            icon="bi-journal-check"
+            :backRoute="route('backend.rdb_published.index')"
+            :editRoute="route('backend.rdb_published.edit', $item->id)"
+            :deleteRoute="route('backend.rdb_published.destroy', $item->id)"
+            :showPrint="true"
+        />
 
         <div class="col-lg-8 order-1 order-lg-1">
             <!-- General Information -->
@@ -371,50 +331,25 @@
             </div>
 
             <!-- Metadata -->
-            <div class="card shadow-sm d-print-none">
-                <div class="card-header bg-secondary text-white">
-                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> ข้อมูลระบบ (System Info)</h5>
-                </div>
-                <div class="card-body small">
-                     @php
-                        function getUserName($id) {
-                            $user = \App\Models\User::find($id);
-                            if(!$user) return '-';
-                            if($user->researcher) {
-                                return $user->researcher->researcher_fname . ' ' . $user->researcher->researcher_lname;
-                            }
-                            return $user->username ?? '-';
-                        }
-                    @endphp
-                    <p class="mb-2"><strong>สร้างเมื่อ:</strong> {{ \App\Helpers\ThaiDateHelper::formatDateTime($item->created_at ?? now()) }}</p>
-                    <p class="mb-2"><strong>โดย:</strong> {{ getUserName($item->user_created) }}</p>
-                    <hr>
-                    <p class="mb-2"><strong>แก้ไขล่าสุด:</strong> {{ \App\Helpers\ThaiDateHelper::formatDateTime($item->updated_at ?? now()) }}</p>
-                    <p class="mb-0"><strong>โดย:</strong> {{ getUserName($item->user_updated) }}</p>
-                </div>
+            <div class="mt-4">
+                @php
+                    $createdBy = $item->user_created ? \App\Models\User::find($item->user_created) : null;
+                    $updatedBy = $item->user_updated ? \App\Models\User::find($item->user_updated) : null;
+                    $createdByName = $createdBy?->researcher ? ($createdBy->researcher->researcher_fname . ' ' . $createdBy->researcher->researcher_lname) : ($createdBy?->username ?? '-');
+                    $updatedByName = $updatedBy?->researcher ? ($updatedBy->researcher->researcher_fname . ' ' . $updatedBy->researcher->researcher_lname) : ($updatedBy?->username ?? '-');
+                @endphp
+                <x-system-info :created_at="$item->created_at" :created_by="$createdByName" :updated_at="$item->updated_at" :updated_by="$updatedByName" />
             </div>
         </div>
     </div>
 
-    <!-- Bottom Buttons (After all content for proper mobile ordering) -->
-    <div class="d-flex justify-content-end flex-wrap gap-2 mt-4 mb-4 d-print-none">
-        <a href="{{ route('backend.rdb_published.index') }}" class="btn btn-secondary d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
-            <i class="bi bi-arrow-left me-2"></i> ย้อนกลับ
-        </a>
-        <a href="{{ route('backend.rdb_published.edit', $item->id) }}" class="btn btn-warning d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
-            <i class="bi bi-pencil me-2"></i> แก้ไขข้อมูล
-        </a>
-        <button onclick="window.print()" class="btn btn-primary d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
-            <i class="bi bi-printer me-2"></i> พิมพ์
-        </button>
-        <button type="submit" form="delete-form-bottom" class="btn btn-danger d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
-            <i class="bi bi-trash me-2"></i> ลบ
-        </button>
-        <form id="delete-form-bottom" action="{{ route('backend.rdb_published.destroy', $item->id) }}" method="POST" class="d-none delete-form">
-            @csrf
-            @method('DELETE')
-        </form>
-    </div>
+    <!-- Bottom Buttons -->
+    <x-action-buttons 
+        :backRoute="route('backend.rdb_published.index')"
+        :editRoute="route('backend.rdb_published.edit', $item->id)"
+        :deleteRoute="route('backend.rdb_published.destroy', $item->id)"
+        :showPrint="true"
+    />
 </div>
 
 <!-- Modals -->
@@ -604,7 +539,7 @@
                 },
                 render: {
                     option: function(item, escape) {
-                        return '<div>' + escape(item.text) + '</div>';
+                        return '<div>' + (item._highlight || escape(item.text)) + '</div>';
                     },
                     item: function(item, escape) {
                         return '<div>' + escape(item.text) + '</div>';

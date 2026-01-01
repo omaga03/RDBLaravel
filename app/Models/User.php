@@ -59,4 +59,13 @@ class User extends Authenticatable
     {
         return $this->belongsTo(RdbResearcher::class, 'researcher_id', 'researcher_id');
     }
+
+    public function getNameAttribute()
+    {
+        if ($this->researcher) {
+            $prefix = $this->researcher->prefix->prefix_name ?? '';
+            return trim($prefix . $this->researcher->researcher_fname . ' ' . $this->researcher->researcher_lname);
+        }
+        return $this->username;
+    }
 }

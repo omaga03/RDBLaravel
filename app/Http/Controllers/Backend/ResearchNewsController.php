@@ -145,6 +145,10 @@ class ResearchNewsController extends Controller
     private function cleanHtml($html)
     {
         if (empty($html)) return $html;
+        
+        // Decode HTML entities (e.g., &ldquo; &rdquo; → " ")
+        $html = html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        
         $html = str_replace('<p>', '', $html);
         $html = str_replace('</p>', '<br>', $html);
         while (substr($html, -4) === '<br>') {

@@ -1,17 +1,20 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="card">
-        <div class="card-header">Edit Rdbprojectwork</div>
-        <div class="card-body">
-            <form method="POST" action="{{ route('backend.rdbprojectwork.update', $item->getKey()) }}">
-                @csrf
-                @method('PUT')
-                <!-- Fields -->
-                <button type="submit" class="btn btn-primary">Update</button>
-            </form>
-        </div>
-    </div>
+<div class="container-fluid">
+    @if(isset($item->id))
+        <x-form-wrapper 
+            title="แก้ไขข้อมูลงานวิจัย" 
+            icon="bi-pencil-square"
+            mode="edit" 
+            :backRoute="route('backend.rdbprojectwork.show', $item->id)"
+            :actionRoute="route('backend.rdbprojectwork.update', $item->id)"
+            method="PUT"
+        >
+            @include('backend.rdbprojectwork._form')
+        </x-form-wrapper>
+    @else
+        <div class="alert alert-danger">ไม่สามารถแก้ไขข้อมูลได้ (ไม่พบ Primary Key)</div>
+    @endif
 </div>
 @endsection

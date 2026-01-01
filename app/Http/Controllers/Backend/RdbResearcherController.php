@@ -87,6 +87,7 @@ class RdbResearcherController extends Controller
 
         $researcher = new RdbResearcher();
         $researcher->fill($request->all());
+        $researcher->user_created = auth()->id();
 
         // Process Code ID from Citizen ID if provided
         if ($request->filled('citizen_id')) {
@@ -230,6 +231,8 @@ class RdbResearcherController extends Controller
         ]);
         
         $researcher->fill($request->all());
+        $researcher->user_updated = auth()->id();
+        $researcher->updated_at = now();
         
         // Process Code ID from Citizen ID if provided
         if ($request->filled('citizen_id')) {
@@ -345,7 +348,7 @@ class RdbResearcherController extends Controller
         $researcher = RdbResearcher::findOrFail($id);
         $researcher->delete();
 
-        return redirect()->route('backend.rdb_researcher.index')->with('success', 'Researcher deleted successfully.');
+        return redirect()->route('backend.rdb_researcher.index')->with('success', 'ลบข้อมูลนักวิจัยเรียบร้อยแล้ว');
     }
 
     /**

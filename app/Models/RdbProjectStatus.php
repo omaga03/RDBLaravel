@@ -27,7 +27,9 @@ class RdbProjectStatus extends Model
     const EXTENDED = 3;           // ขยายเวลาดำเนินการ
     const EXTENDED_2 = 4;         // ขยายเวลาดำเนินการ ครั้งที่ 2
     const OVERDUE = 5;            // ค้างส่งโครงการวิจัย
+
     const REFUNDED = 6;           // คืนงบประมาณ
+    const STATUS_CANCELLED = 6;   // Alias for REFUNDED (used in RdbProject sql)
     const DRAFT_SUBMITTED = 7;    // ส่งร่างรายงานวิจัย
     const TERMINATED = 8;         // ยุติโครงการ
 }

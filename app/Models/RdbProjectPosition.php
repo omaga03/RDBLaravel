@@ -8,7 +8,17 @@ class RdbProjectPosition extends Model
 {
     protected $table = 'rdb_project_position';
     protected $primaryKey = 'position_id';
-    public $timestamps = false; // Assuming no standard created_at/updated_at, change if needed
+    public $timestamps = false;
+
+    public function projectWorks()
+    {
+        return $this->hasMany(RdbProjectWork::class, 'position_id', 'position_id');
+    }
+
+    public function canDelete()
+    {
+        return $this->projectWorks()->count() === 0;
+    }
 
     protected $fillable = [
         'position_nameTH',
@@ -19,7 +29,6 @@ class RdbProjectPosition extends Model
         'updated_at',
     ];
 
-    // Position Constants
-    const DIRECTOR = 1;  // หัวหน้าโครงการ
-    const HEAD = 2;      // ผู้ร่วมวิจัย (หัวหน้า)
+    const DIRECTOR = 1;
+    const HEAD = 2;
 }

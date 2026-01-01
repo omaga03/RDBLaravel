@@ -18,4 +18,14 @@ class RdbPrefix extends Model
         'created_at',
         'updated_at',
     ];
+
+    public function researchers()
+    {
+        return $this->hasMany(RdbResearcher::class, 'prefix_id', 'prefix_id');
+    }
+
+    public function canDelete()
+    {
+        return $this->researchers()->doesntExist();
+    }
 }

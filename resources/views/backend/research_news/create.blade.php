@@ -2,16 +2,24 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">เพิ่มข่าว/กิจกรรมใหม่</h6>
+    @if ($errors->any())
+        <div class="alert alert-danger mb-4 shadow-sm">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
-        <div class="card-body">
-            <form action="{{ route('backend.research_news.store') }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                @include('backend.research_news._form')
-            </form>
-        </div>
-    </div>
+    @endif
+    
+    <x-form-wrapper 
+        title="เพิ่มข่าว/กิจกรรมใหม่" 
+        icon="bi-newspaper"
+        mode="create" 
+        action="{{ route('backend.research_news.store') }}" 
+        enctype="multipart/form-data"
+    >
+        @include('backend.research_news._form')
+    </x-form-wrapper>
 </div>
 @endsection

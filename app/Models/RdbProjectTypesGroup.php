@@ -18,4 +18,33 @@ class RdbProjectTypesGroup extends Model
         'created_at',
         'updated_at',
     ];
+
+    public function rdbProjectTypes()
+    {
+        return $this->hasMany(RdbProjectType::class, 'pttg_id', 'pttg_id');
+    }
+
+    public function canDelete()
+    {
+        return $this->rdbProjectTypes()->count() === 0;
+    }
+
+    public static function getGroupList()
+    {
+        return [
+            '1' => 'งบประมาณภายใน/ภาครัฐ',
+            '2' => 'งบประมาณภายนอก',
+            '3' => 'งบประมาณส่วนตัว'
+        ];
+    }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'user_created', 'id');
+    }
+
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'user_updated', 'id');
+    }
 }

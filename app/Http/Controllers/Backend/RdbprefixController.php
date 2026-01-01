@@ -23,8 +23,10 @@ class RdbprefixController extends Controller
     {
         $item = new RdbPrefix();
         $item->fill($request->all());
+        $item->user_created = auth()->id();
+        $item->created_at = now();
         $item->save();
-        return redirect()->route('backend.rdbprefix.index')->with('success', 'Created successfully.');
+        return redirect()->route('backend.rdbprefix.show', $item->prefix_id)->with('success', 'บันทึกข้อมูลเรียบร้อยแล้ว');
     }
 
     public function show($id)
@@ -43,14 +45,23 @@ class RdbprefixController extends Controller
     {
         $item = RdbPrefix::findOrFail($id);
         $item->fill($request->all());
+        $item->user_updated = auth()->id();
+        $item->updated_at = now();
         $item->save();
-        return redirect()->route('backend.rdbprefix.index')->with('success', 'Updated successfully.');
+        return redirect()->route('backend.rdbprefix.show', $item->prefix_id)->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
     }
 
     public function destroy($id)
     {
         $item = RdbPrefix::findOrFail($id);
+        
+        // No data_show: Hard Delete with canDelete check
+        if (!$item->canDelete()) {
+            return redirect()->route('backend.rdbprefix.show', $id)
+                             ->with('error', 'ไม่สามารถลบได้เนื่องจากมีนักวิจัยใช้งานคำนำหน้านี้อยู่');
+        }
+        
         $item->delete();
-        return redirect()->route('backend.rdbprefix.index')->with('success', 'Deleted successfully.');
+        return redirect()->route('backend.rdbprefix.index')->with('success', 'ลบข้อมูลเรียบร้อยแล้ว');
     }
 }

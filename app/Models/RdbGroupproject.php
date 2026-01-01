@@ -8,7 +8,17 @@ class RdbGroupproject extends Model
 {
     protected $table = 'rdb_groupproject';
     protected $primaryKey = 'pgroup_id';
-    public $timestamps = false; // Assuming no standard created_at/updated_at, change if needed
+    public $timestamps = false;
+
+    public function projects()
+    {
+        return $this->hasMany(RdbProject::class, 'pgroup_id', 'pgroup_id');
+    }
+
+    public function canDelete()
+    {
+        return $this->projects()->count() === 0;
+    }
 
     protected $fillable = [
         'pgroup_nameTH',
@@ -19,6 +29,5 @@ class RdbGroupproject extends Model
         'updated_at',
     ];
 
-    // Group Type Constants
-    const GROUP_PROJECT = 1;  // โครงการชุด
+    const GROUP_PROJECT = 1;
 }

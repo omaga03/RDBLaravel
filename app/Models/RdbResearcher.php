@@ -42,6 +42,14 @@ class RdbResearcher extends Model
         'created_at',
         'updated_at',
     ];
+
+    public function creator() {
+        return $this->belongsTo(User::class, 'user_created');
+    }
+
+    public function updater() {
+        return $this->belongsTo(User::class, 'user_updated');
+    }
     public function prefix()
     {
         return $this->belongsTo(RdbPrefix::class, 'prefix_id', 'prefix_id');
@@ -97,5 +105,13 @@ class RdbResearcher extends Model
     public function rdbDips()
     {
         return $this->hasMany(RdbDip::class, 'researcher_id', 'researcher_id');
+    }
+
+    public function canDelete()
+    {
+        return $this->rdbProjects()->doesntExist() && 
+               $this->rdbPublisheds()->doesntExist() && 
+               $this->rdbDips()->doesntExist() &&
+               $this->rdbResearcherEducations()->doesntExist();
     }
 }

@@ -2,7 +2,7 @@
     <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
         <h5 class="mb-0"><i class="bi bi-file-earmark-arrow-down"></i> ไฟล์เอกสาร (Files)</h5>
         <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#projectFilesModal">
-            <i class="bi bi-gear"></i> จัดการข้อมูล (Manage)
+            <i class="bi bi-gear"></i> จัดการ
         </button>
     </div>
     <div class="card-body">

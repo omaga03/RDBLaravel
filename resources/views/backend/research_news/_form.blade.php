@@ -40,8 +40,8 @@
             <div class="col-md-6 mb-3">
                 <label for="news_type" class="form-label">ประเภทข่าว</label>
                 <select class="form-select" id="news_type" name="news_type">
-                    <option value="ข่าวประชาสัมพันธ์" {{ (old('news_type', $item->news_type ?? '') == 'ข่าวประชาสัมพันธ์') ? 'selected' : '' }}>ข่าวประชาสัมพันธ์</option>
-                    <option value="ข่าวการประชุม/อบรม" {{ (old('news_type', $item->news_type ?? '') == 'ข่าวการประชุม/อบรม') ? 'selected' : '' }}>ข่าวการประชุม/อบรม</option>
+                    <option value="ข่าวทุนวิจัย" {{ (old('news_type', $item->news_type ?? '') == 'ข่าวทุนวิจัย') ? 'selected' : '' }}>ข่าวทุนวิจัย</option>
+                    <option value="ข่าวงานประชุมวิชาการ" {{ (old('news_type', $item->news_type ?? '') == 'ข่าวงานประชุมวิชาการ') ? 'selected' : '' }}>ข่าวงานประชุมวิชาการ</option>
                     <option value="อื่นๆ" {{ (old('news_type', $item->news_type ?? '') == 'อื่นๆ') ? 'selected' : '' }}>อื่นๆ</option>
                 </select>
             </div>

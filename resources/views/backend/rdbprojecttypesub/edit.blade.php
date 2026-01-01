@@ -1,0 +1,27 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">แก้ไขประเภทโครงการทุนย่อย: {{ $item->pts_name }}</h1>
+        <a href="{{ route('backend.rdbprojecttypesub.show', $item->pts_id) }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> ย้อนกลับ
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form action="{{ route('backend.rdbprojecttypesub.update', $item->pts_id) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
+                @include('backend.rdbprojecttypesub._form')
+                
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> บันทึกการแก้ไข</button>
+                    <a href="{{ route('backend.rdbprojecttypesub.show', $item->pts_id) }}" class="btn btn-secondary ms-2"><i class="bi bi-x-circle"></i> ยกเลิก</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endsection

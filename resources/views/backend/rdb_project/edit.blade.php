@@ -13,12 +13,17 @@
                     </ul>
                 </div>
             @endif
-
-            <form method="POST" action="{{ route('backend.rdb_project.update', $project->pro_id) }}" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
-                @include('backend.rdb_project._form', ['project' => $project])
-            </form>
+            <x-form-wrapper
+                title="แก้ไขข้อมูลโครงการวิจัย"
+                icon="bi-pencil-square"
+                mode="edit"
+                :backRoute="route('backend.rdb_project.show', $project->pro_id)"
+                :actionRoute="route('backend.rdb_project.update', $project->pro_id)"
+                method="PUT"
+                enctype="multipart/form-data"
+            >
+                @include('backend.rdb_project._form')
+            </x-form-wrapper>
         </div>
     </div>
 </div>

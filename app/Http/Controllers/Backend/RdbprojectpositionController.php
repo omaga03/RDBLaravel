@@ -16,15 +16,23 @@ class RdbprojectpositionController extends Controller
 
     public function create()
     {
-        return view('backend.rdbprojectposition.create');
+        $item = new RdbProjectposition();
+        return view('backend.rdbprojectposition.create', compact('item'));
     }
 
     public function store(Request $request)
     {
+        $request->validate([
+            'position_nameTH' => 'required|max:255|unique:rdb_project_position,position_nameTH',
+        ], [
+            'position_nameTH.unique' => 'ชื่อตำแหน่งนี้มีอยู่ในระบบแล้ว',
+        ]);
         $item = new RdbProjectposition();
         $item->fill($request->all());
+        $item->user_created = auth()->id();
+        $item->created_at = now();
         $item->save();
-        return redirect()->route('backend.rdbprojectposition.index')->with('success', 'Created successfully.');
+        return redirect()->route('backend.rdbprojectposition.show', $item->position_id)->with('success', 'บันทึกข้อมูลเรียบร้อยแล้ว');
     }
 
     public function show($id)
@@ -41,16 +49,30 @@ class RdbprojectpositionController extends Controller
 
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'position_nameTH' => 'required|max:255|unique:rdb_project_position,position_nameTH,' . $id . ',position_id',
+        ], [
+            'position_nameTH.unique' => 'ชื่อตำแหน่งนี้มีอยู่ในระบบแล้ว',
+        ]);
         $item = RdbProjectposition::findOrFail($id);
         $item->fill($request->all());
+        $item->user_updated = auth()->id();
+        $item->updated_at = now();
         $item->save();
-        return redirect()->route('backend.rdbprojectposition.index')->with('success', 'Updated successfully.');
+        return redirect()->route('backend.rdbprojectposition.show', $item->position_id)->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
     }
 
     public function destroy($id)
     {
         $item = RdbProjectposition::findOrFail($id);
+        
+        // No data_show: Hard Delete with canDelete check
+        if (!$item->canDelete()) {
+            return redirect()->route('backend.rdbprojectposition.show', $id)
+                             ->with('error', 'ไม่สามารถลบได้เนื่องจากมีนักวิจัยใช้งานตำแหน่งนี้อยู่');
+        }
+        
         $item->delete();
-        return redirect()->route('backend.rdbprojectposition.index')->with('success', 'Deleted successfully.');
+        return redirect()->route('backend.rdbprojectposition.index')->with('success', 'ลบข้อมูลเรียบร้อยแล้ว');
     }
 }

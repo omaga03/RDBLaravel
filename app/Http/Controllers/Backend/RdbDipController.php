@@ -150,8 +150,13 @@ class RdbDipController extends Controller
     {
         \Illuminate\Support\Facades\Gate::authorize('Dip');
         $item = RdbDip::findOrFail($id);
-        $item->delete();
-        return redirect()->route('backend.rdb_dip.index')->with('success', 'ลบข้อมูลเรียบร้อยแล้ว');
+
+        // Soft Delete: has data_show column
+        $item->data_show = 0;
+        $item->user_updated = auth()->id();
+        $item->save();
+
+        return redirect()->route('backend.rdb_dip.index')->with('success', 'ลบข้อมูลเรียบร้อยแล้ว (ซ่อนการแสดงผล)');
     }
 
     public function uploadFile(Request $request, $id)

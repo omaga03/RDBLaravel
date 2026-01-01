@@ -40,8 +40,64 @@ class RdbProjectController extends Controller
             'rdbProjectWorks.researcher'
         ]);
 
+        // General Search - searches across ALL fields
+        if ($request->filled('search')) {
+            $searchTerm = trim($request->search);
+            $searchWords = preg_split('/\s+/', $searchTerm); // Split by whitespace
+            
+            $query->where(function($q) use ($searchTerm, $searchWords) {
+                // Project direct fields
+                $q->where('pro_nameTH', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('pro_nameEN', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('pro_keyword', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('pro_code', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('pro_abstract', 'like', '%' . $searchTerm . '%'); // บทคัดย่อ
+                
+                // Project Type (ประเภททุน)
+                $q->orWhereHas('type', function($tq) use ($searchTerm) {
+                    $tq->where('pt_name', 'like', '%' . $searchTerm . '%');
+                });
+                
+                // Project Type Sub (ประเภททุนย่อย)
+                $q->orWhereHas('typeSub', function($tsq) use ($searchTerm) {
+                    $tsq->where('pts_name', 'like', '%' . $searchTerm . '%');
+                });
+                
+                // Year (ปีงบประมาณ)
+                $q->orWhereHas('year', function($yq) use ($searchTerm) {
+                    $yq->where('year_name', 'like', '%' . $searchTerm . '%');
+                });
+                
+                // Department (หน่วยงาน/คณะ)
+                $q->orWhereHas('department', function($dq) use ($searchTerm) {
+                    $dq->where('department_nameTH', 'like', '%' . $searchTerm . '%')
+                       ->orWhere('department_nameEN', 'like', '%' . $searchTerm . '%');
+                });
+                
+                // Researcher (นักวิจัย): match all words across fname/lname
+                $q->orWhereHas('researchers', function($rq) use ($searchWords) {
+                    foreach ($searchWords as $word) {
+                        $rq->where(function($wq) use ($word) {
+                            $wq->where('researcher_fname', 'like', '%' . $word . '%')
+                               ->orWhere('researcher_lname', 'like', '%' . $word . '%');
+                        });
+                    }
+                });
+            });
+        }
+
         if ($request->filled('pro_nameTH')) {
-            $query->where('pro_nameTH', 'like', '%' . $request->pro_nameTH . '%');
+            // Multi-word search (OR logic): split by space, slash, or comma
+            $words = preg_split('/[\s\/,]+/', trim($request->pro_nameTH));
+            $query->where(function($q) use ($words) {
+                foreach ($words as $word) {
+                    if (empty($word)) continue;
+                    $q->orWhere(function($wq) use ($word) {
+                        $wq->where('pro_nameTH', 'like', '%' . $word . '%')
+                           ->orWhere('pro_nameEN', 'like', '%' . $word . '%');
+                    });
+                }
+            });
         }
         if ($request->filled('year_id')) {
             $query->where('year_id', $request->year_id);
@@ -52,19 +108,162 @@ class RdbProjectController extends Controller
         if ($request->filled('pt_id')) {
             $query->where('pt_id', $request->pt_id);
         }
+        if ($request->filled('pts_id')) {
+            $query->where('pts_id', $request->pts_id);
+        }
+        if ($request->filled('pgroup_id')) {
+            $query->where('pgroup_id', $request->pgroup_id);
+        }
         if ($request->filled('ps_id')) {
             $query->where('ps_id', $request->ps_id);
+        }
+        if ($request->filled('pro_code')) {
+            $query->where('pro_code', 'like', '%' . $request->pro_code . '%');
+        }
+        if ($request->filled('budget_min')) {
+            $query->where('pro_budget', '>=', $request->budget_min);
+        }
+        if ($request->filled('budget_max')) {
+            $query->where('pro_budget', '<=', $request->budget_max);
+        }
+        if ($request->filled('researcher_id') && $request->researcher_id !== 'pre') {
+            // Direct search by researcher_id (from TomSelect)
+            $query->whereHas('researchers', function($rq) use ($request) {
+                $rq->where('rdb_researcher.researcher_id', $request->researcher_id);
+            });
+        } elseif ($request->filled('researcher_name')) {
+            // Fallback: search by name (remove common prefixes)
+            $cleanName = preg_replace('/^(นาย|นาง|นางสาว|ดร\.|ผศ\.|รศ\.|ศ\.)\s*/u', '', trim($request->researcher_name));
+            $searchWords = preg_split('/\s+/', $cleanName);
+            $query->whereHas('researchers', function($rq) use ($searchWords) {
+                foreach ($searchWords as $word) {
+                    if (empty($word)) continue;
+                    $rq->where(function($wq) use ($word) {
+                        $wq->where('researcher_fname', 'like', '%' . $word . '%')
+                           ->orWhere('researcher_lname', 'like', '%' . $word . '%');
+                    });
+                }
+            });
+        }
+        if ($request->filled('pro_abstract')) {
+            // Multi-word search (OR logic)
+            $words = preg_split('/[\s\/,]+/', trim($request->pro_abstract));
+            $query->where(function($q) use ($words) {
+                foreach ($words as $word) {
+                    if (empty($word)) continue;
+                    $q->orWhere('pro_abstract', 'like', '%' . $word . '%');
+                }
+            });
+        }
+        if ($request->filled('pro_keyword')) {
+            // Multi-word search (OR logic)
+            $words = preg_split('/[\s\/,]+/', trim($request->pro_keyword));
+            $query->where(function($q) use ($words) {
+                foreach ($words as $word) {
+                    if (empty($word)) continue;
+                    $q->orWhere('pro_keyword', 'like', '%' . $word . '%');
+                }
+            });
+        }
+        if ($request->filled('date_start')) {
+            $query->where('pro_date_start', '>=', $request->date_start);
+        }
+        if ($request->filled('date_end')) {
+            $query->where('pro_date_end', '<=', $request->date_end);
+        }
+        if ($request->filled('pro_note')) {
+            // Multi-word search (OR logic)
+            $words = preg_split('/[\s\/,]+/', trim($request->pro_note));
+            $query->where(function($q) use ($words) {
+                foreach ($words as $word) {
+                    if (empty($word)) continue;
+                    $q->orWhere('pro_note', 'like', '%' . $word . '%');
+                }
+            });
         }
 
         $projects = $query->orderBy('pro_id', 'desc')->paginate(10);
         
+        // Calculate match sources for tooltip when general search is used
+        $searchTerm = $request->filled('search') ? trim($request->search) : null;
+        if ($searchTerm) {
+            $searchWords = preg_split('/\s+/', $searchTerm);
+            
+            foreach ($projects as $project) {
+                $matchSources = [];
+                
+                // Check project fields
+                if (stripos($project->pro_nameTH ?? '', $searchTerm) !== false) {
+                    $matchSources[] = 'ชื่อโครงการ (ไทย)';
+                }
+                if (stripos($project->pro_nameEN ?? '', $searchTerm) !== false) {
+                    $matchSources[] = 'ชื่อโครงการ (อังกฤษ)';
+                }
+                if (stripos($project->pro_code ?? '', $searchTerm) !== false) {
+                    $matchSources[] = 'รหัสโครงการ';
+                }
+                if (stripos($project->pro_keyword ?? '', $searchTerm) !== false) {
+                    $matchSources[] = 'คำสำคัญ';
+                }
+                if (stripos($project->pro_abstract ?? '', $searchTerm) !== false) {
+                    $matchSources[] = 'บทคัดย่อ';
+                }
+                
+                // Check type
+                if ($project->type && stripos($project->type->pt_name ?? '', $searchTerm) !== false) {
+                    $matchSources[] = 'ประเภททุน';
+                }
+                
+                // Check type sub
+                if ($project->typeSub && stripos($project->typeSub->pts_name ?? '', $searchTerm) !== false) {
+                    $matchSources[] = 'ประเภททุนย่อย';
+                }
+                
+                // Check year
+                if ($project->year && stripos($project->year->year_name ?? '', $searchTerm) !== false) {
+                    $matchSources[] = 'ปีงบประมาณ';
+                }
+                
+                // Check department
+                if ($project->department) {
+                    if (stripos($project->department->department_nameTH ?? '', $searchTerm) !== false ||
+                        stripos($project->department->department_nameEN ?? '', $searchTerm) !== false) {
+                        $matchSources[] = 'หน่วยงาน';
+                    }
+                }
+                
+                // Check researchers
+                $matchedResearchers = [];
+                foreach ($project->researchers as $researcher) {
+                    $matched = true;
+                    foreach ($searchWords as $word) {
+                        if (stripos($researcher->researcher_fname ?? '', $word) === false &&
+                            stripos($researcher->researcher_lname ?? '', $word) === false) {
+                            $matched = false;
+                            break;
+                        }
+                    }
+                    if ($matched) {
+                        $matchedResearchers[] = ($researcher->researcher_fname ?? '') . ' ' . ($researcher->researcher_lname ?? '');
+                    }
+                }
+                if (!empty($matchedResearchers)) {
+                    $matchSources[] = 'นักวิจัย: ' . implode(', ', $matchedResearchers);
+                }
+                
+                $project->match_sources = $matchSources;
+            }
+        }
+        
         // Pass dropdown data for search form
         $years = RdbYear::orderBy('year_id', 'desc')->get();
-        $departments = RdbDepartment::all();
+        $departments = RdbDepartment::orderBy('department_nameTH')->get();
         $types = RdbProjectType::all();
+        $typeSubs = \App\Models\RdbProjectTypeSub::all();
+        $groups = RdbGroupproject::all();
         $statuses = RdbProjectStatus::all();
 
-        return view('backend.rdb_project.index', compact('projects', 'years', 'departments', 'types', 'statuses'));
+        return view('backend.rdb_project.index', compact('projects', 'years', 'departments', 'types', 'typeSubs', 'groups', 'statuses'));
     }
 
     /**
@@ -206,7 +405,7 @@ class RdbProjectController extends Controller
             ->get()
             ->map(function($r) {
                 $deptName = $r->department->department_nameTH ?? $r->department->department_nameEN ?? $r->researcher_note ?? '-';
-                $fullName = ($r->prefix->prefix_nameTH ?? '') . $r->researcher_fname . ' ' . $r->researcher_lname . ' (' . $deptName . ')';
+                $fullName = ($r->prefix->prefix_nameTH ?? '') . $r->researcher_fname . ' ' . $r->researcher_lname . ' [' . $deptName . ']';
                 return [
                     'value' => $r->researcher_id,
                     'text' => $fullName
@@ -300,7 +499,7 @@ class RdbProjectController extends Controller
 
         $project = RdbProject::findOrFail($id);
         
-        // Soft delete by hiding
+        // Soft delete by hiding (has data_show column - no canDelete check needed)
         $project->data_show = 0;
         $project->user_updated = auth()->id();
         $project->save();

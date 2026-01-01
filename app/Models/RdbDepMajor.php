@@ -20,6 +20,16 @@ class RdbDepMajor extends Model
         return $this->belongsTo(RdbDepartment::class, 'department_id', 'department_id');
     }
 
+    public function researchers()
+    {
+        return $this->hasMany(RdbResearcher::class, 'maj_id', 'maj_id');
+    }
+
+    public function canDelete()
+    {
+        return $this->researchers()->count() === 0;
+    }
+
     protected $fillable = [
         'maj_id',
         'depcou_id',

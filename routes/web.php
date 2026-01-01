@@ -16,6 +16,8 @@ use App\Http\Controllers\Backend\RdbprefixController;
 use App\Http\Controllers\Backend\RdbprojectfilesController;
 use App\Http\Controllers\Backend\RdbprojectpositionController;
 use App\Http\Controllers\Backend\RdbprojecttypeController;
+use App\Http\Controllers\Backend\RdbProjectTypesGroupController;
+use App\Http\Controllers\Backend\RdbProjectTypeSubController;
 use App\Http\Controllers\Backend\RdbprojectworkController;
 use App\Http\Controllers\Backend\RdbstrategicController;
 use App\Http\Controllers\Backend\RdbyearController;
@@ -44,7 +46,7 @@ use App\Http\Controllers\Frontend\RdbprojectpersonneldepController;
 use App\Http\Controllers\Frontend\RdbprojectpositionController as FrontendRdbprojectpositionController;
 use App\Http\Controllers\Frontend\RdbprojectstatusController;
 use App\Http\Controllers\Frontend\RdbprojecttypeController as FrontendRdbprojecttypeController;
-use App\Http\Controllers\Frontend\RdbprojecttypesubController;
+use App\Http\Controllers\Frontend\RdbprojecttypesubController as FrontendRdbprojecttypesubController;
 use App\Http\Controllers\Frontend\RdbprojectutilizationController;
 use App\Http\Controllers\Frontend\RdbprojectutilizeController;
 use App\Http\Controllers\Frontend\RdbprojectutilizetypeController;
@@ -100,8 +102,16 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     Route::resource('rdbprojectfiles', RdbprojectfilesController::class);
     Route::resource('rdbprojectposition', RdbprojectpositionController::class);
     Route::resource('rdbprojecttype', RdbprojecttypeController::class);
+    Route::resource('rdbprojecttypesgroup', RdbProjectTypesGroupController::class);
+    Route::resource('rdbprojecttypesub', RdbProjectTypeSubController::class);
     Route::resource('rdbprojectwork', RdbprojectworkController::class);
     Route::resource('rdbstrategic', RdbstrategicController::class);
+    
+    // New Master Data Routes
+    Route::resource('rdbpublishedtype', \App\Http\Controllers\Backend\RdbPublishedTypeController::class);
+    Route::resource('rdbdiptype', \App\Http\Controllers\Backend\RdbDipTypeController::class);
+    Route::resource('rdbprojectutilizetype', \App\Http\Controllers\Backend\RdbProjectUtilizeTypeController::class);
+
     Route::resource('rdbyear', RdbyearController::class);
     Route::get('/rdb_published/search/researcher', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'searchResearcher'])->name('rdb_published.search_researcher');
     Route::get('/rdb_published/search/project', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'searchProject'])->name('rdb_published.search_project');
@@ -137,6 +147,7 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     
     Route::resource('rdbprojectutilize', \App\Http\Controllers\Backend\RdbProjectUtilizeController::class);
     Route::resource('research_news', \App\Http\Controllers\Backend\ResearchNewsController::class);
+    Route::resource('research_conference', \App\Http\Controllers\Backend\ResearchConferenceController::class);
 
     // Project Researcher Management
     Route::post('/rdb_project/{id}/researcher', [RdbProjectController::class, 'storeResearcher'])->name('rdb_project.researcher.store');
@@ -189,6 +200,10 @@ Route::name('frontend.')->group(function () {
     Route::get('rdbproject/export', [FrontendRdbprojectController::class, 'export'])->name('rdbproject.export');
     Route::get('rdbproject/api/types-by-year', [FrontendRdbprojectController::class, 'getTypesByYear'])->name('rdbproject.typesByYear');
     Route::get('rdbproject/api/subtypes-by-type', [FrontendRdbprojectController::class, 'getSubTypesByType'])->name('rdbproject.subTypesByType');
+    Route::get('rdbproject/api/search-researchers', [FrontendRdbprojectController::class, 'searchResearchers'])->name('rdbproject.search_researchers');
+    Route::get('rdbproject/{id}/file/{fid}/download', [FrontendRdbprojectController::class, 'downloadFile'])->name('rdbproject.file.download');
+    Route::get('rdbproject/{id}/view-abstract', [FrontendRdbprojectController::class, 'viewAbstract'])->name('rdbproject.view_abstract');
+    Route::get('rdbproject/{id}/view-report', [FrontendRdbprojectController::class, 'viewReport'])->name('rdbproject.view_report');
     Route::resource('rdbproject', FrontendRdbprojectController::class)->parameters(['rdbproject' => 'id']);
     Route::resource('rdbprojectbudget', RdbprojectbudgetController::class)->parameters(['rdbprojectbudget' => 'id']);
     Route::resource('rdbprojectdownload', RdbprojectdownloadController::class)->parameters(['rdbprojectdownload' => 'id']);
@@ -199,7 +214,7 @@ Route::name('frontend.')->group(function () {
     Route::resource('rdbprojectposition', FrontendRdbprojectpositionController::class)->parameters(['rdbprojectposition' => 'id']);
     Route::resource('rdbprojectstatus', RdbprojectstatusController::class)->parameters(['rdbprojectstatus' => 'id']);
     Route::resource('rdbprojecttype', FrontendRdbprojecttypeController::class)->parameters(['rdbprojecttype' => 'id']);
-    Route::resource('rdbprojecttypesub', RdbprojecttypesubController::class)->parameters(['rdbprojecttypesub' => 'id']);
+    Route::resource('rdbprojecttypesub', FrontendRdbprojecttypesubController::class)->parameters(['rdbprojecttypesub' => 'id']);
     Route::resource('rdbprojectutilization', RdbprojectutilizationController::class)->parameters(['rdbprojectutilization' => 'id']);
     Route::resource('rdbprojectutilize', RdbprojectutilizeController::class)->parameters(['rdbprojectutilize' => 'id']);
 

@@ -1,10 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid">
-    <form action="{{ route('backend.rdb_published.store') }}" method="POST" enctype="multipart/form-data">
-        @csrf
+    <x-form-wrapper 
+        title="เพิ่มข้อมูลการตีพิมพ์ใหม่" 
+        icon="bi-pencil-square"
+        mode="create" 
+        :backRoute="route('backend.rdb_published.index')"
+        :actionRoute="route('backend.rdb_published.store')"
+        enctype="multipart/form-data"
+    >
         @include('backend.rdb_published._form')
-    </form>
-</div>
+    </x-form-wrapper>
 @endsection

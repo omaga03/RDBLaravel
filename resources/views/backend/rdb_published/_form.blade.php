@@ -6,14 +6,7 @@
     $abstractEN = old('pub_abstract_en', $abstractParts[1] ?? '');
 @endphp
 
-<div class="card shadow mb-4">
-    <div class="card-header py-3 bg-primary text-white">
-        <h6 class="m-0 font-weight-bold"><i class="bi bi-pencil-square"></i> {{ $isEdit ? 'แก้ไขข้อมูลการตีพิมพ์' : 'เพิ่มข้อมูลการตีพิมพ์ใหม่' }}</h6>
-        @if($isEdit)
-        <small class="text-white-50">{{ $item->pub_name }}</small>
-        @endif
-    </div>
-    <div class="card-body">
+
 
         <div class="row">
             <div class="col-md-12 mb-3">
@@ -262,41 +255,12 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </div>
 
-    </div>
-</div>
 
-
-
-<hr>
-<div class="d-flex justify-content-end mb-4">
-    <a href="{{ route('backend.rdb_published.index') }}" class="btn btn-secondary me-2">ยกเลิก</a>
-    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> บันทึกข้อมูล</button>
-</div>
 
 @push('scripts')
 <!-- TomSelect CDN -->
 <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
-<style>
-    /* Fix TomSelect for Dark/Theme usage */
-    .ts-control {
-        background-color: var(--bs-body-bg); /* Use Bootstrap variable if available, or inherit */
-        color: var(--bs-body-color);
-        border: 1px solid #d1d3e2; /* Match project border color */
-    }
-    .ts-control.focus {
-        border-color: #86b7fe;
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-    }
-    .ts-dropdown {
-        background-color: #fff;
-        color: #333;
-    }
-    /* Ensure input text within TomSelect is visible */
-    .ts-control > input {
-        color: inherit !important;
-    }
-</style>
 
     @include('layouts.partials.ckeditor_setup')
 
@@ -326,7 +290,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 render: {
                     option: function(data, escape) {
-                        return '<div>' + escape(data.text) + '</div>';
+                        return '<div>' + (data._highlight || escape(data.text)) + '</div>';
                     },
                     item: function(data, escape) {
                         return '<div>' + escape(data.text) + '</div>';

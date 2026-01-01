@@ -8,7 +8,17 @@ class RdbYear extends Model
 {
     protected $table = 'rdb_year';
     protected $primaryKey = 'year_id';
-    public $timestamps = false; // Assuming no standard created_at/updated_at, change if needed
+    public $timestamps = false;
+
+    public function projects()
+    {
+        return $this->hasMany(RdbProject::class, 'year_id', 'year_id');
+    }
+
+    public function canDelete()
+    {
+        return $this->projects()->count() === 0;
+    }
 
     protected $fillable = [
         'year_name',

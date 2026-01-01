@@ -151,6 +151,41 @@
         [data-bs-theme="dark"] .card-header {
             border-bottom-color: #495057;
         }
+
+        /* 4. Global TomSelect Highlighting - User Requested Style (Yellow Text, No Bg) */
+        .ts-dropdown .highlight {
+            background: transparent !important;
+            color: #d9a406 !important; /* Darker Yellow/Gold for Light Mode readability */
+            font-weight: bold !important;
+            padding: 0 !important;
+        }
+        
+        [data-bs-theme="dark"] .ts-dropdown .highlight {
+            color: #ffc107 !important; /* Bright Yellow for Dark Mode */
+            text-shadow: none !important;
+        }
+
+        /* Fix TomSelect Input Text Color to match theme */
+        .ts-wrapper .ts-control, 
+        .ts-wrapper .ts-control input {
+            color: var(--bs-body-color) !important;
+        }
+        [data-bs-theme="dark"] .ts-wrapper .ts-control,
+        [data-bs-theme="dark"] .ts-wrapper .ts-control input {
+            color: #fff !important;
+        }
+        [data-bs-theme="dark"] .ts-dropdown {
+            background-color: #2b3035 !important;
+            color: #fff !important;
+            border-color: #495057 !important;
+        }
+        [data-bs-theme="dark"] .ts-dropdown .option {
+            color: #fff !important;
+        }
+        [data-bs-theme="dark"] .ts-dropdown .active {
+            background-color: #0d6efd !important;
+            color: #fff !important;
+        }
     </style>
     <!-- IMask CDN -->
     <script src="https://unpkg.com/imask"></script>

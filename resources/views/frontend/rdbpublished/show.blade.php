@@ -150,23 +150,41 @@
 
             <!-- Downloads -->
             @if($item->pub_file)
-            <div class="alert alert-secondary border shadow-sm d-flex align-items-center justify-content-between flex-wrap">
-                <div>
-                    <h5 class="alert-heading fw-bold mb-1"><i class="bi bi-download me-2"></i>Downloads</h5>
-                    <p class="mb-0 small">Access full paper and documents for this publication.</p>
+            <div class="card shadow-sm mb-4 border-0">
+                <div class="card-header text-white" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);">
+                    <h5 class="mb-0"><i class="bi bi-download me-2"></i>Downloads / Files</h5>
                 </div>
-                <div class="mt-2 mt-md-0 d-flex gap-2">
-                    <a href="{{ asset('storage/uploads/published/' . $item->pub_file) }}" class="btn btn-outline-primary" target="_blank">
-                        <i class="bi bi-file-earmark-pdf me-1"></i> Full Paper
-                    </a>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex align-items-center justify-content-between p-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-file-earmark-pdf text-danger fs-4 me-3"></i>
+                                <div>
+                                    <a href="{{ asset('storage/uploads/published/' . $item->pub_file) }}" class="text-decoration-none fw-bold text-primary hover-underline" target="_blank">
+                                        <i class="bi bi-box-arrow-up-right me-1 small"></i> Full Paper / บทความฉบับเต็ม
+                                    </a>
+                                    <small class="text-muted d-block">คลิกเพื่อเปิดไฟล์</small>
+                                </div>
+                            </div>
+                            <div class="text-muted" title="จำนวนดาวน์โหลด">
+                                <i class="bi bi-eye"></i> {{ $item->pub_download ?? 0 }}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             @endif
 
-            <div class="mt-4">
+            <div class="mt-4 d-flex gap-2">
                 <a href="{{ route('frontend.rdbpublished.index') }}" class="btn btn-outline-secondary px-4"><i class="bi bi-arrow-left me-1"></i> Back to List</a>
+                <button onclick="window.print()" class="btn btn-outline-secondary px-4"><i class="bi bi-printer me-1"></i> พิมพ์</button>
             </div>
         </div>
     </div>
 </div>
+<style>
+    .hover-underline:hover {
+        text-decoration: underline !important;
+    }
+</style>
 @endsection

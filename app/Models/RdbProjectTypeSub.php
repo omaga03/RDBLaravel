@@ -20,8 +20,28 @@ class RdbProjectTypeSub extends Model
         'updated_at',
     ];
 
+    public function rdbProjects()
+    {
+        return $this->hasMany(RdbProject::class, 'pts_id', 'pts_id');
+    }
+
     public function projectType()
     {
         return $this->belongsTo(RdbProjectType::class, 'pt_id', 'pt_id');
+    }
+
+    public function canDelete()
+    {
+        return $this->rdbProjects()->count() === 0;
+    }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'user_created', 'id');
+    }
+
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'user_updated', 'id');
     }
 }

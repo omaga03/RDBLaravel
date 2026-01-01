@@ -136,23 +136,41 @@
 
             <!-- Files -->
             @if($item->utz_files)
-            <div class="alert alert-secondary border shadow-sm d-flex align-items-center justify-content-between flex-wrap">
-                <div>
-                    <h5 class="alert-heading fw-bold mb-1"><i class="bi bi-download me-2"></i>ไฟล์แนบ</h5>
-                    <p class="mb-0 small">ดาวน์โหลดเอกสารการนำไปใช้ประโยชน์</p>
+            <div class="card shadow-sm mb-4 border-0">
+                <div class="card-header text-white" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);">
+                    <h5 class="mb-0"><i class="bi bi-download me-2"></i>ไฟล์แนบ (Attachments)</h5>
                 </div>
-                <div class="mt-2 mt-md-0 d-flex gap-2">
-                    <a href="{{ asset('storage/' . $item->utz_files) }}" class="btn btn-outline-primary" target="_blank">
-                        <i class="bi bi-file-earmark-pdf me-1"></i> ดาวน์โหลด
-                    </a>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex align-items-center justify-content-between p-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-file-earmark-text text-primary fs-4 me-3"></i>
+                                <div>
+                                    <a href="{{ asset('storage/' . $item->utz_files) }}" class="text-decoration-none fw-bold text-primary hover-underline" target="_blank">
+                                        <i class="bi bi-box-arrow-up-right me-1 small"></i> เอกสารการนำไปใช้ประโยชน์
+                                    </a>
+                                    <small class="text-muted d-block">คลิกเพื่อดาวน์โหลด/เปิดไฟล์</small>
+                                </div>
+                            </div>
+                            <div class="text-muted" title="จำนวนดาวน์โหลด">
+                                <i class="bi bi-eye"></i> {{ $item->utz_countfile ?? 0 }}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             @endif
 
-            <div class="mt-4">
+            <div class="mt-4 d-flex gap-2">
                 <a href="{{ route('frontend.rdbprojectutilize.index') }}" class="btn btn-outline-secondary px-4"><i class="bi bi-arrow-left me-1"></i> Back to List</a>
+                <button onclick="window.print()" class="btn btn-outline-secondary px-4"><i class="bi bi-printer me-1"></i> พิมพ์</button>
             </div>
         </div>
     </div>
 </div>
+<style>
+    .hover-underline:hover {
+        text-decoration: underline !important;
+    }
+</style>
 @endsection

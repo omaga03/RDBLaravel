@@ -12,9 +12,15 @@
         </div>
     @endif
     
-    <form method="POST" action="{{ route('backend.rdb_dip.store') }}" enctype="multipart/form-data">
-        @csrf
+    <x-form-wrapper 
+        title="เพิ่มข้อมูลทรัพย์สินทางปัญญา" 
+        icon="bi-shield-check"
+        mode="create" 
+        :backRoute="route('backend.rdb_dip.index')"
+        :actionRoute="route('backend.rdb_dip.store')"
+        enctype="multipart/form-data"
+    >
         @include('backend.rdb_dip._form')
-    </form>
+    </x-form-wrapper>
 </div>
 @endsection

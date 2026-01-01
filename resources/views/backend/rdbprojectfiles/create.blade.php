@@ -1,16 +1,19 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="card">
-        <div class="card-header">Create Rdbprojectfiles</div>
-        <div class="card-body">
-            <form method="POST" action="{{ route('backend.rdbprojectfiles.store') }}">
-                @csrf
-                <!-- Fields -->
-                <button type="submit" class="btn btn-primary">Submit</button>
-            </form>
+    <x-form-wrapper 
+        title="เพิ่มไฟล์แนบใหม่" 
+        icon="bi-file-earmark-plus"
+        mode="create" 
+        action="{{ route('backend.rdbprojectfiles.store') }}"
+    >
+        @include('backend.rdbprojectfiles._form')
+
+        <div class="mt-4 border-top pt-3">
+            <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> บันทึกข้อมูล</button>
+            <a href="{{ route('backend.rdbprojectfiles.index') }}" class="btn btn-secondary ms-2">
+                <i class="bi bi-arrow-left"></i> ยกเลิก
+            </a>
         </div>
-    </div>
-</div>
+    </x-form-wrapper>
 @endsection

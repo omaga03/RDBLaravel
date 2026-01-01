@@ -15,10 +15,17 @@ class RdbDepartment extends Model
         return $this->hasMany(RdbResearcher::class, 'department_id', 'department_id');
     }
 
+    public function depMajors()
+    {
+        return $this->hasMany(RdbDepMajor::class, 'department_id', 'department_id');
+    }
+
     public function departmentType()
     {
         return $this->belongsTo(RdbDepartmentType::class, 'tdepartment_id', 'tdepartment_id');
     }
+
+    // Consolidating relationships and logic below
 
     public static function getProDepTea($type)
     {
@@ -44,6 +51,23 @@ class RdbDepartment extends Model
         return $ids;
     }
 
+    public function researchers()
+    {
+        return $this->hasMany(RdbResearcher::class, 'department_id');
+    }
+
+    public function projects()
+    {
+        return $this->hasMany(RdbProject::class, 'department_id', 'department_id');
+    }
+
+    public function canDelete()
+    {
+        return $this->researchers()->doesntExist() && 
+               $this->projects()->doesntExist() && 
+               $this->depMajors()->doesntExist();
+    }
+
     protected $fillable = [
         'tdepartment_id',
         'department_code',
@@ -55,4 +79,12 @@ class RdbDepartment extends Model
         'created_at',
         'updated_at',
     ];
+
+    public function creator() {
+        return $this->belongsTo(User::class, 'user_created');
+    }
+
+    public function updater() {
+        return $this->belongsTo(User::class, 'user_updated');
+    }
 }

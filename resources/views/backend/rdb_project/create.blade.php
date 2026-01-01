@@ -12,10 +12,16 @@
         </div>
     @endif
     
-    <form method="POST" action="{{ route('backend.rdb_project.store') }}" enctype="multipart/form-data">
-        @csrf
+    <x-form-wrapper 
+        title="เพิ่มโครงการวิจัย" 
+        icon="bi-pencil-square"
+        mode="create" 
+        :backRoute="route('backend.rdb_project.index')"
+        :actionRoute="route('backend.rdb_project.store')"
+        enctype="multipart/form-data"
+    >
         @include('backend.rdb_project._form')
-    </form>
+    </x-form-wrapper>
 </div>
 
 @endsection
