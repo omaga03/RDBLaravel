@@ -63,7 +63,7 @@
                             <td class="p-3">
                                 <div class="fw-bold fs-6 mb-1">
                                     <a href="{{ route('backend.research_conference.show', $item->id) }}" class="text-decoration-none text-body fw-bold hover-primary text-break">
-                                        {!! $item->con_name !!}
+                                        {{ strip_tags($item->con_name) }}
                                     </a>
                                 </div>
                                 <div class="small text-body-secondary d-flex flex-wrap gap-2 align-items-center mt-1">

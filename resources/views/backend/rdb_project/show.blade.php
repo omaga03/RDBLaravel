@@ -158,9 +158,9 @@
                         <div class="tab-content" id="projectTabContent">
                             <!-- Tab 1: รายละเอียด & บทคัดย่อ -->
                             <div class="tab-pane fade show active" id="tab-details" role="tabpanel" aria-labelledby="details-tab">
-                                <h4 class="text-primary fw-bold mb-2">{!! $project->pro_nameTH !!}</h4>
+                                <h4 class="text-primary fw-bold mb-2">{{ strip_tags($project->pro_nameTH) }}</h4>
                                 @if($project->pro_nameEN)
-                                    <h5 class="text-body-secondary mb-4">{!! $project->pro_nameEN !!}</h5>
+                                    <h5 class="text-body-secondary mb-4">{{ strip_tags($project->pro_nameEN) }}</h5>
                                 @endif
 
                                 <div class="table-responsive mb-4">
@@ -212,7 +212,7 @@
                                     <div class="mb-3">
                                         <span class="badge bg-primary mb-2">บทคัดย่อภาษาไทย</span>
                                         <div class="p-3 rounded border bg-body-tertiary" style="line-height: 1.8; overflow-wrap: break-word;">
-                                            {!! $abstractParts[0] !!}
+                                            {!! strip_tags($abstractParts[0], '<p><br><b><strong><i><em><u>') !!}
                                         </div>
                                     </div>
                                     @endif
@@ -221,7 +221,7 @@
                                     <div>
                                         <span class="badge bg-info text-dark mb-2">บทคัดย่อภาษาอังกฤษ</span>
                                         <div class="p-3 rounded border bg-body-tertiary" style="line-height: 1.8; overflow-wrap: break-word;">
-                                            {!! $abstractParts[1] !!}
+                                            {!! strip_tags($abstractParts[1], '<p><br><b><strong><i><em><u>') !!}
                                         </div>
                                     </div>
                                     @endif

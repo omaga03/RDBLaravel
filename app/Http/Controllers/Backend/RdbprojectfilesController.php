@@ -82,8 +82,8 @@ class RdbprojectfilesController extends Controller
         $validated = $request->validated();
 
         if ($request->hasFile('rf_files')) {
-            if ($item->prf_path && Storage::exists($item->prf_path)) {
-                Storage::delete($item->prf_path);
+            if ($item->prf_path && Storage::disk('public')->exists($item->prf_path)) {
+                Storage::disk('public')->delete($item->prf_path);
             }
             $fileInfo = $this->fileUploadService->storeFile($validated['rf_files'], 'project_files');
             $item->prf_safe_name = $fileInfo['safe_name'];
@@ -109,11 +109,11 @@ class RdbprojectfilesController extends Controller
         $item = RdbProjectFiles::findOrFail($id);
         $this->authorize('delete', $item);
         
-        if ($item->prf_path && Storage::exists($item->prf_path)) {
-            Storage::delete($item->prf_path);
+        if ($item->prf_path && Storage::disk('public')->exists($item->prf_path)) {
+            Storage::disk('public')->delete($item->prf_path);
         }
-        if ($item->rf_files && $item->rf_files != $item->prf_safe_name && Storage::exists('uploads/project_files/' . $item->rf_files)) {
-            Storage::delete('uploads/project_files/' . $item->rf_files);
+        if ($item->rf_files && $item->rf_files != $item->prf_safe_name && Storage::disk('public')->exists('uploads/project_files/' . $item->rf_files)) {
+            Storage::disk('public')->delete('uploads/project_files/' . $item->rf_files);
         }
 
         $item->delete();

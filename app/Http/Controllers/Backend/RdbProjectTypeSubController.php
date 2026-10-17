@@ -86,8 +86,8 @@ class RdbProjectTypeSubController extends Controller
         $item->user_updated = auth()->id();
         
         if ($request->hasFile('pts_file')) {
-            if ($item->pts_path && Storage::exists($item->pts_path)) {
-                Storage::delete($item->pts_path);
+            if ($item->pts_path && Storage::disk('public')->exists($item->pts_path)) {
+                Storage::disk('public')->delete($item->pts_path);
             }
             
             $fileInfo = $this->fileUploadService->storeFile($request->file('pts_file'), 'project_types_sub');
@@ -113,8 +113,8 @@ class RdbProjectTypeSubController extends Controller
                              ->with('error', 'ไม่สามารถลบได้เนื่องจากมีโครงการวิจัยใช้งานประเภทนี้อยู่');
         }
         
-        if ($item->pts_path && Storage::exists($item->pts_path)) {
-            Storage::delete($item->pts_path);
+        if ($item->pts_path && Storage::disk('public')->exists($item->pts_path)) {
+            Storage::disk('public')->delete($item->pts_path);
         }
         
         $item->delete();
@@ -128,10 +128,14 @@ class RdbProjectTypeSubController extends Controller
 
         $filePath = $item->getTypeSubFilePath();
 
-        if (!$filePath || !Storage::exists($filePath)) {
-            abort(404, 'ไม่พบไฟล์');
+        if ($filePath && Storage::disk('public')->exists($filePath)) {
+            return Storage::disk('public')->response($filePath);
         }
 
-        return Storage::response($filePath);
+        if ($filePath && file_exists(public_path($filePath))) {
+            return response()->file(public_path($filePath));
+        }
+
+        abort(404, 'ไม่พบไฟล์');
     }
 }

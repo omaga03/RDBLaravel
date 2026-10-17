@@ -686,8 +686,8 @@ class RdbProjectController extends Controller
         $validated = $request->validated();
 
         try {
-            if (!empty($project->pro_abstract_file_path) && Storage::exists($project->pro_abstract_file_path)) {
-                Storage::delete($project->pro_abstract_file_path);
+            if (!empty($project->pro_abstract_file_path) && Storage::disk('public')->exists($project->pro_abstract_file_path)) {
+                Storage::disk('public')->delete($project->pro_abstract_file_path);
             }
 
             $file = $validated['pro_abstract_file'];
@@ -714,14 +714,14 @@ class RdbProjectController extends Controller
         $project = RdbProject::findOrFail($id);
         $this->authorize('update', $project); // Authorize to update project via abstract deletion
         
-        if ($project->pro_abstract_file_path && Storage::exists($project->pro_abstract_file_path)) {
-            Storage::delete($project->pro_abstract_file_path);
+        if ($project->pro_abstract_file_path && Storage::disk('public')->exists($project->pro_abstract_file_path)) {
+            Storage::disk('public')->delete($project->pro_abstract_file_path);
         }
 
         if ($project->pro_abstract_file && 
             $project->pro_abstract_file !== $project->pro_abstract_file_path &&
-            Storage::exists('uploads/projects/' . $project->pro_abstract_file)) {
-            Storage::delete('uploads/projects/' . $project->pro_abstract_file);
+            Storage::disk('public')->exists('uploads/projects/' . $project->pro_abstract_file)) {
+            Storage::disk('public')->delete('uploads/projects/' . $project->pro_abstract_file);
         }
 
         $project->pro_abstract_file = null;
@@ -744,8 +744,8 @@ class RdbProjectController extends Controller
         $validated = $request->validated();
 
         try {
-            if (!empty($project->pro_file_path) && Storage::exists($project->pro_file_path)) {
-                Storage::delete($project->pro_file_path);
+            if (!empty($project->pro_file_path) && Storage::disk('public')->exists($project->pro_file_path)) {
+                Storage::disk('public')->delete($project->pro_file_path);
             }
 
             $file = $validated['pro_file'];
@@ -773,21 +773,18 @@ class RdbProjectController extends Controller
         $this->authorize('view', $project); // Authorize viewing project to view its abstract
         $filePath = $project->getAbstractFilePath();
         
-        // Resolve to absolute path for direct file existence check
-        $absoluteFilePath = $filePath ? Storage::disk('public')->path($filePath) : null;
+        $fileContents = null;
+        if ($filePath && Storage::disk('public')->exists($filePath)) {
+            $fileContents = Storage::disk('public')->get($filePath);
+        } elseif ($filePath && file_exists(public_path($filePath))) {
+            $fileContents = file_get_contents(public_path($filePath));
+        }
 
-        if (!$filePath || !file_exists($absoluteFilePath)) {
+        if ($fileContents === null) {
             abort(404, 'ไม่พบไฟล์บทคัดย่อ');
         }
 
         $project->increment('pro_count_abs');
-
-        // Read the file content directly and send as a response to display in browser
-        $fileContents = Storage::disk('public')->get($filePath);
-
-        if ($fileContents === null) {
-            abort(404, 'ไม่พบเนื้อหาไฟล์บทคัดย่อ');
-        }
 
         $mimeType = $project->pro_abstract_mime ?? 'application/pdf'; // Fallback to PDF
         
@@ -806,21 +803,18 @@ class RdbProjectController extends Controller
         $this->authorize('view', $project); // Authorize viewing project to view its report
         $filePath = $project->getReportFilePath();
         
-        // Resolve to absolute path for direct file existence check
-        $absoluteFilePath = $filePath ? Storage::disk('public')->path($filePath) : null;
+        $fileContents = null;
+        if ($filePath && Storage::disk('public')->exists($filePath)) {
+            $fileContents = Storage::disk('public')->get($filePath);
+        } elseif ($filePath && file_exists(public_path($filePath))) {
+            $fileContents = file_get_contents(public_path($filePath));
+        }
 
-        if (!$filePath || !file_exists($absoluteFilePath)) {
+        if ($fileContents === null) {
             abort(404, 'ไม่พบไฟล์รายงาน');
         }
 
         $project->increment('pro_count_full');
-
-        // Read the file content directly and send as a response to display in browser
-        $fileContents = Storage::disk('public')->get($filePath);
-
-        if ($fileContents === null) {
-            abort(404, 'ไม่พบเนื้อหาไฟล์รายงาน');
-        }
 
         $mimeType = $project->pro_file_mime ?? 'application/pdf'; // Fallback to PDF
         
@@ -1051,8 +1045,8 @@ class RdbProjectController extends Controller
             if ($request->hasFile('rf_files')) {
                 // Delete old file if exists
                 $existingFilePath = $file->getFilePath();
-                if ($existingFilePath && Storage::exists($existingFilePath)) {
-                    Storage::delete($existingFilePath);
+                if ($existingFilePath && Storage::disk('public')->exists($existingFilePath)) {
+                    Storage::disk('public')->delete($existingFilePath);
                 }
 
                 $fileInfo = $this->fileUploadService->storeFile($request->file('rf_files'), 'project_files');
@@ -1087,8 +1081,8 @@ class RdbProjectController extends Controller
 
         // Delete File
         $existingFilePath = $file->getFilePath();
-        if ($existingFilePath && Storage::exists($existingFilePath)) {
-            Storage::delete($existingFilePath);
+        if ($existingFilePath && Storage::disk('public')->exists($existingFilePath)) {
+            Storage::disk('public')->delete($existingFilePath);
         }
 
         $file->delete();
@@ -1112,10 +1106,14 @@ class RdbProjectController extends Controller
         // Use the getFilePath() method from the model to resolve the correct path
         $filePath = $file->getFilePath();
 
-        // Resolve to absolute path for direct file existence check
-        $absoluteFilePath = $filePath ? Storage::disk('public')->path($filePath) : null;
+        $fileContents = null;
+        if ($filePath && Storage::disk('public')->exists($filePath)) {
+            $fileContents = Storage::disk('public')->get($filePath);
+        } elseif ($filePath && file_exists(public_path($filePath))) {
+            $fileContents = file_get_contents(public_path($filePath));
+        }
 
-        if (!$filePath || !file_exists($absoluteFilePath)) {
+        if ($fileContents === null) {
             abort(404, 'ไม่พบไฟล์');
         }
 
@@ -1140,13 +1138,6 @@ class RdbProjectController extends Controller
         }
 
         $originalFileName = $file->rf_filesname . ($extension ? '.' . $extension : '');
-
-        // Read the file content directly and send as a response to display in browser
-        $fileContents = Storage::disk('public')->get($filePath);
-
-        if ($fileContents === null) {
-            abort(404, 'ไม่พบเนื้อหาไฟล์');
-        }
 
         return response($fileContents, 200, [
             'Content-Type' => $file->prf_mime_type ?? 'application/octet-stream',

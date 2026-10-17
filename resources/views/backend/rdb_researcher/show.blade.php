@@ -157,10 +157,10 @@
                                                     <td>
                                                         <div class="fw-bold mb-1">
                                                             @if($project->pro_code)
-                                                                <span class="text-primary me-1">[{!! $project->pro_code !!}]</span>
+                                                                <span class="text-primary me-1">[{{ strip_tags($project->pro_code) }}]</span>
                                                             @endif
                                                             <a href="{{ route('backend.rdb_project.show', $project->pro_id) }}" target="_blank" class="text-decoration-none text-body">
-                                                                {!! $project->pro_nameTH !!}
+                                                                {{ strip_tags($project->pro_nameTH) }}
                                                             </a>
                                                         </div>
                                                         <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
@@ -224,14 +224,14 @@
                                                         @endif
                                                         <div class="fw-bold text-body">
                                                             <a href="{{ route('backend.rdb_published.show', $pub->id) }}" target="_blank" class="text-decoration-none text-body fw-bold">
-                                                                {!! $pub->pub_name !!}
+                                                                {{ strip_tags($pub->pub_name) }}
                                                             </a>
                                                         </div>
                                                         @if($pub->project)
                                                             <small class="text-muted d-block mt-1">
                                                                 <i class="bi bi-link-45deg"></i> โครงการ: 
                                                                 <a href="{{ route('backend.rdb_project.show', $pub->project->pro_id) }}" target="_blank" class="text-decoration-none text-muted">
-                                                                    {!! $pub->project->pro_nameTH !!}
+                                                                    {{ strip_tags($pub->project->pro_nameTH) }}
                                                                 </a>
                                                             </small>
                                                         @endif
@@ -246,7 +246,7 @@
                                                             <div class="small text-muted mt-1">{{ $pub->pubtype->pubtype_subgroup }}</div>
                                                         @endif
                                                         @if($pub->pub_name_journal)
-                                                            <small class="text-muted d-block">in: {!! $pub->pub_name_journal !!}</small>
+                                                            <small class="text-muted d-block">in: {{ strip_tags($pub->pub_name_journal) }}</small>
                                                         @endif
                                                     </td>
                                                 </tr>
@@ -280,7 +280,7 @@
                                                             @if($util->utz_department_name)
                                                                 <div class="fw-bold text-primary">
                                                                     <a href="{{ route('backend.rdbprojectutilize.show', $util->utz_id) }}" target="_blank" class="text-decoration-none text-primary fw-bold">
-                                                                        <i class="bi bi-building me-1"></i> {!! $util->utz_department_name !!}
+                                                                        <i class="bi bi-building me-1"></i> {{ strip_tags($util->utz_department_name) }}
                                                                     </a>
                                                                 </div>
                                                             @endif
@@ -302,7 +302,7 @@
 
                                                         @if($util->utz_department_address)
                                                             <div class="mb-2 small text-secondary">
-                                                                {!! $util->utz_department_address !!}
+                                                                {{ strip_tags($util->utz_department_address) }}
                                                             </div>
                                                         @endif
                                                         
@@ -310,7 +310,7 @@
                                                             <div class="mt-2 pt-2 border-top">
                                                                 <small class="text-muted">จากโครงการ:</small>
                                                                 <a href="{{ route('backend.rdb_project.show', $util->project->pro_id) }}" target="_blank" class="d-block text-decoration-none text-body fw-semibold">
-                                                                    {!! $util->project->pro_nameTH !!}
+                                                                    {{ strip_tags($util->project->pro_nameTH) }}
                                                                 </a>
                                                             </div>
                                                         @endif
@@ -346,11 +346,11 @@
                                                     <td>
                                                         <div class="fw-bold">
                                                             <a href="{{ route('backend.rdb_dip.show', $dip->dip_id) }}" target="_blank" class="text-decoration-none text-body">
-                                                                {!! $dip->dip_data2_name ?? 'ไม่มีชื่อผลงาน' !!}
+                                                                {{ strip_tags($dip->dip_data2_name ?? 'ไม่มีชื่อผลงาน') }}
                                                             </a>
                                                         </div>
                                                         @if($dip->dip_request_number)
-                                                            <small class="text-muted"><i class="bi bi-upc"></i> เลขที่คำขอ: {!! $dip->dip_request_number !!}</small>
+                                                            <small class="text-muted"><i class="bi bi-upc"></i> เลขที่คำขอ: {{ strip_tags($dip->dip_request_number) }}</small>
                                                         @endif
                                                     </td>
                                                     <td>

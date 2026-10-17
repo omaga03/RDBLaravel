@@ -88,8 +88,8 @@ class ResearchNewsController extends Controller
         $validated = $request->validated();
         
         if ($request->hasFile('news_img')) {
-            if ($item->news_path && Storage::exists($item->news_path)) {
-                Storage::delete($item->news_path);
+            if ($item->news_path && Storage::disk('public')->exists($item->news_path)) {
+                Storage::disk('public')->delete($item->news_path);
             }
             
             $fileInfo = $this->fileUploadService->storeFile($validated['news_img'], 'news');
@@ -125,10 +125,14 @@ class ResearchNewsController extends Controller
 
         $filePath = $item->getNewsFilePath(oldField: 'news_img', oldDir: 'uploads/news');
 
-        if (!$filePath || !Storage::exists($filePath)) {
-            abort(404, 'ไม่พบรูปภาพข่าว');
+        if ($filePath && Storage::disk('public')->exists($filePath)) {
+            return Storage::disk('public')->response($filePath);
         }
 
-        return Storage::response($filePath);
+        if ($filePath && file_exists(public_path($filePath))) {
+            return response()->file(public_path($filePath));
+        }
+
+        abort(404, 'ไม่พบรูปภาพข่าว');
     }
 }

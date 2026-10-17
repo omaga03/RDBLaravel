@@ -151,7 +151,7 @@
                                         <span class="badge bg-secondary-subtle text-secondary-emphasis border me-1">#{{ $project->pro_id }}</span>
                                     @endif
                                     <a href="{{ route('backend.rdb_project.show', $project->pro_id) }}" class="text-decoration-none text-body fw-bold hover-primary text-break">
-                                        {!! $project->pro_nameTH !!}
+                                        {{ strip_tags($project->pro_nameTH) }}
                                     </a>
                                 </div>
                                 <div class="small d-flex flex-wrap gap-2 align-items-center mt-2">

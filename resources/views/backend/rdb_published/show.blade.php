@@ -176,7 +176,7 @@
                                 <span class="badge bg-primary mb-2 d-print-none">บทคัดย่อภาษาไทย</span>
                                 <strong class="d-none d-print-block">บทคัดย่อภาษาไทย</strong>
                                 <div class="bg-abstract p-3 rounded border" style="min-height: 100px; height: auto; overflow: visible; overflow-wrap: break-word; word-wrap: break-word;">
-                                    {!! $abstractParts[0] !!}
+                                    {!! strip_tags($abstractParts[0], '<p><br><b><strong><i><em><u>') !!}
                                 </div>
                             </div>
                             @endif
@@ -186,7 +186,7 @@
                                 <span class="badge bg-info text-dark mb-2 d-print-none">บทคัดย่อภาษาอังกฤษ</span>
                                 <strong class="d-none d-print-block">บทคัดย่อภาษาอังกฤษ</strong>
                                 <div class="bg-abstract p-3 rounded border" style="min-height: 100px; height: auto; overflow: visible; overflow-wrap: break-word; word-wrap: break-word;">
-                                    {!! $abstractParts[1] !!}
+                                    {!! strip_tags($abstractParts[1], '<p><br><b><strong><i><em><u>') !!}
                                 </div>
                             </div>
                             @endif

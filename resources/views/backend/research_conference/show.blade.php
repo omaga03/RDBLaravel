@@ -34,7 +34,7 @@
                     <h5 class="mb-0"><i class="bi bi-info-circle"></i> ข้อมูลงานประชุมวิชาการ</h5>
                 </div>
                 <div class="card-body">
-                    <h4 class="text-primary fw-bold mb-3">{!! $item->con_name !!}</h4>
+                    <h4 class="text-primary fw-bold mb-3">{{ strip_tags($item->con_name) }}</h4>
                     
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -82,7 +82,7 @@
 
                     <h6 class="fw-bold border-bottom pb-2"><i class="bi bi-file-text me-2"></i>รายละเอียด</h6>
                     <div class="p-3 rounded border bg-body-secondary">
-                        {!! $item->con_detail !!}
+                        {!! strip_tags($item->con_detail, '<p><br><b><strong><i><em><u><ul><ol><li><a>') !!}
                     </div>
                 </div>
             </div>

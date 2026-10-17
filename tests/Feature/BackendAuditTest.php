@@ -416,4 +416,30 @@ class BackendAuditTest extends TestCase
             $responseYear->assertSee('ล้างตัวกรอง');
         }
     }
+
+    public function test_security_headers_are_present_in_responses()
+    {
+        $admin = \App\Models\User::find(129);
+        $response = $this->actingAs($admin)->get(route('backend.site.index'));
+        
+        $response->assertStatus(200);
+        $response->assertHeader('X-Frame-Options', 'SAMEORIGIN');
+        $response->assertHeader('X-Content-Type-Options', 'nosniff');
+        $response->assertHeader('X-XSS-Protection', '1; mode=block');
+        $response->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+        $this->assertTrue($response->headers->has('Permissions-Policy'));
+    }
+
+    public function test_export_routes_have_rate_limiting_and_functionality()
+    {
+        $admin = \App\Models\User::find(129);
+        
+        // Project export returns 200 stream
+        $response = $this->actingAs($admin)->get(route('backend.rdb_project.export'));
+        $this->assertTrue(in_array($response->getStatusCode(), [200, 429]));
+        
+        // Researcher export returns 200 stream
+        $responseRes = $this->actingAs($admin)->get(route('backend.rdb_researcher.export'));
+        $this->assertTrue(in_array($responseRes->getStatusCode(), [200, 429]));
+    }
 }

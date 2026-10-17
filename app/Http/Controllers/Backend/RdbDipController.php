@@ -225,8 +225,8 @@ class RdbDipController extends Controller
         $data['user_updated'] = auth()->id();
 
         if ($request->hasFile('dip_files')) {
-            if ($item->dip_path && Storage::exists($item->dip_path)) {
-                Storage::delete($item->dip_path);
+            if ($item->dip_path && Storage::disk('public')->exists($item->dip_path)) {
+                Storage::disk('public')->delete($item->dip_path);
             }
             
             $fileInfo = $this->fileUploadService->storeFile($request->file('dip_files'), 'dips');
@@ -259,8 +259,8 @@ class RdbDipController extends Controller
         $this->authorize('update', $item);
         $validated = $request->validated();
 
-        if ($item->dip_path && Storage::exists($item->dip_path)) {
-            Storage::delete($item->dip_path);
+        if ($item->dip_path && Storage::disk('public')->exists($item->dip_path)) {
+            Storage::disk('public')->delete($item->dip_path);
         }
 
         $fileInfo = $this->fileUploadService->storeFile($validated['dip_files'], 'dips');
@@ -282,8 +282,8 @@ class RdbDipController extends Controller
         $item = RdbDip::findOrFail($id);
         $this->authorize('update', $item);
 
-        if ($item->dip_path && Storage::exists($item->dip_path)) {
-            Storage::delete($item->dip_path);
+        if ($item->dip_path && Storage::disk('public')->exists($item->dip_path)) {
+            Storage::disk('public')->delete($item->dip_path);
         }
         
         $item->update([
@@ -305,10 +305,14 @@ class RdbDipController extends Controller
 
         $filePath = $item->getDipFilePath();
 
-        if (!$filePath || !Storage::exists($filePath)) {
-            abort(404, 'ไม่พบไฟล์');
+        if ($filePath && Storage::disk('public')->exists($filePath)) {
+            return Storage::disk('public')->response($filePath);
         }
 
-        return Storage::response($filePath);
+        if ($filePath && file_exists(public_path($filePath))) {
+            return response()->file(public_path($filePath));
+        }
+
+        abort(404, 'ไม่พบไฟล์');
     }
 }

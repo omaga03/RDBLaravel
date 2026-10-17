@@ -309,8 +309,8 @@ class RdbResearcherController extends Controller
         }
 
         if ($request->hasFile('fileimg')) {
-            if ($researcher->rf_path && Storage::exists($researcher->rf_path)) {
-                Storage::delete($researcher->rf_path);
+            if ($researcher->rf_path && Storage::disk('public')->exists($researcher->rf_path)) {
+                Storage::disk('public')->delete($researcher->rf_path);
             }
 
             $fileInfo = $this->fileUploadService->storeFile($request->file('fileimg'), 'researchers');
@@ -361,8 +361,8 @@ class RdbResearcherController extends Controller
         $this->authorize('update', $researcher);
 
         if ($request->hasFile('fileimg')) {
-            if ($researcher->rf_path && Storage::exists($researcher->rf_path)) {
-                Storage::delete($researcher->rf_path);
+            if ($researcher->rf_path && Storage::disk('public')->exists($researcher->rf_path)) {
+                Storage::disk('public')->delete($researcher->rf_path);
             }
             
             $fileInfo = $this->fileUploadService->storeFile($request->file('fileimg'), 'researchers');
@@ -385,11 +385,15 @@ class RdbResearcherController extends Controller
 
         $filePath = $researcher->getProfileFilePath();
 
-        if (!$filePath || !Storage::exists($filePath)) {
-            abort(404, 'ไม่พบรูปภาพโปรไฟล์');
+        if ($filePath && Storage::disk('public')->exists($filePath)) {
+            return Storage::disk('public')->response($filePath);
         }
 
-        return Storage::response($filePath);
+        if ($filePath && file_exists(public_path($filePath))) {
+            return response()->file(public_path($filePath));
+        }
+
+        abort(404, 'ไม่พบรูปภาพโปรไฟล์');
     }
 
     /**

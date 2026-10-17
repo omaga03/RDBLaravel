@@ -241,8 +241,8 @@ class RdbProjectUtilizeController extends Controller
         }
 
         if ($request->hasFile('utz_files_upload')) {
-            if ($item->uf_path && Storage::exists($item->uf_path)) {
-                Storage::delete($item->uf_path);
+            if ($item->uf_path && Storage::disk('public')->exists($item->uf_path)) {
+                Storage::disk('public')->delete($item->uf_path);
             }
             $fileInfo = $this->fileUploadService->storeFile($request->file('utz_files_upload'), 'utilize');
             $data['uf_safe_name'] = $fileInfo['safe_name'];
@@ -276,13 +276,17 @@ class RdbProjectUtilizeController extends Controller
         
         $filePath = $item->getUtilizeFilePath();
 
-        if (!$filePath || !Storage::exists($filePath)) {
-            abort(404, 'ไม่พบไฟล์');
+        if ($filePath && Storage::disk('public')->exists($filePath)) {
+            $item->increment('utz_countfile');
+            return Storage::disk('public')->response($filePath);
         }
-        
-        $item->increment('utz_countfile');
-        
-        return Storage::response($filePath);
+
+        if ($filePath && file_exists(public_path($filePath))) {
+            $item->increment('utz_countfile');
+            return response()->download(public_path($filePath));
+        }
+
+        abort(404, 'ไม่พบไฟล์');
     }
     
     public function searchProvinces()

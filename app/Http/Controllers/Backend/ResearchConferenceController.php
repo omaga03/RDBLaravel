@@ -104,8 +104,8 @@ class ResearchConferenceController extends Controller
         }
 
         if ($request->hasFile('con_img')) {
-            if ($item->con_path && Storage::exists($item->con_path)) {
-                Storage::delete($item->con_path);
+            if ($item->con_path && Storage::disk('public')->exists($item->con_path)) {
+                Storage::disk('public')->delete($item->con_path);
             }
             
             $fileInfo = $this->fileUploadService->storeFile($request->file('con_img'), 'conference');
@@ -139,11 +139,15 @@ class ResearchConferenceController extends Controller
 
         $filePath = $item->getConferenceFilePath();
 
-        if (!$filePath || !Storage::exists($filePath)) {
-            abort(404, 'ไม่พบรูปภาพงานประชุม');
+        if ($filePath && Storage::disk('public')->exists($filePath)) {
+            return Storage::disk('public')->response($filePath);
         }
 
-        return Storage::response($filePath);
+        if ($filePath && file_exists(public_path($filePath))) {
+            return response()->file(public_path($filePath));
+        }
+
+        abort(404, 'ไม่พบรูปภาพงานประชุม');
     }
 
     private function cleanHtml($html)

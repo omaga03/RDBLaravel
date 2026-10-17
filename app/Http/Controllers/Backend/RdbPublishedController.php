@@ -349,8 +349,8 @@ class RdbPublishedController extends Controller
         $data['user_updated'] = auth()->id();
 
         if ($request->hasFile('pub_file')) {
-            if ($item->pf_path && Storage::exists($item->pf_path)) {
-                Storage::delete($item->pf_path);
+            if ($item->pf_path && Storage::disk('public')->exists($item->pf_path)) {
+                Storage::disk('public')->delete($item->pf_path);
             }
 
             $fileInfo = $this->fileUploadService->storeFile($request->file('pub_file'), 'published');
@@ -583,8 +583,8 @@ class RdbPublishedController extends Controller
 
         $validated = $request->validated();
 
-        if ($item->pf_path && Storage::exists($item->pf_path)) {
-            Storage::delete($item->pf_path);
+        if ($item->pf_path && Storage::disk('public')->exists($item->pf_path)) {
+            Storage::disk('public')->delete($item->pf_path);
         }
 
         $fileInfo = $this->fileUploadService->storeFile($validated['pub_file'], 'published');
@@ -605,13 +605,15 @@ class RdbPublishedController extends Controller
         $item = RdbPublished::findOrFail($id);
         $this->authorize('update', $item);
 
-        if ($item->pf_path && Storage::exists($item->pf_path)) {
-            Storage::delete($item->pf_path);
+        if ($item->pf_path && Storage::disk('public')->exists($item->pf_path)) {
+            Storage::disk('public')->delete($item->pf_path);
         }
 
         $legacyPath = 'uploads/published/' . $item->pub_file;
-        if ($item->pub_file && Storage::exists($legacyPath)) {
-            Storage::delete($legacyPath);
+        if ($item->pub_file && Storage::disk('public')->exists($legacyPath)) {
+            Storage::disk('public')->delete($legacyPath);
+        } elseif ($item->pub_file && file_exists(public_path($legacyPath))) {
+            @unlink(public_path($legacyPath));
         }
         
         $item->pub_file = null;
@@ -632,13 +634,17 @@ class RdbPublishedController extends Controller
         
         $filePath = $item->getPublishedFilePath();
 
-        if (!$filePath || !Storage::exists($filePath)) {
-            abort(404, 'ไม่พบไฟล์');
+        if ($filePath && Storage::disk('public')->exists($filePath)) {
+            $item->increment('pub_download');
+            return Storage::disk('public')->response($filePath);
         }
-        
-        $item->increment('pub_download');
-        
-        return Storage::response($filePath);
+
+        if ($filePath && file_exists(public_path($filePath))) {
+            $item->increment('pub_download');
+            return response()->file(public_path($filePath));
+        }
+
+        abort(404, 'ไม่พบไฟล์');
     }
 
     public function destroy($id)

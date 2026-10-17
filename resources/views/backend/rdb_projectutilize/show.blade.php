@@ -132,7 +132,7 @@
                 </div>
                 <div class="card-body">
                     <div class="bg-body-secondary p-3 rounded border">
-                        {!! $item->utz_detail !!}
+                        {!! strip_tags($item->utz_detail, '<p><br><b><strong><i><em><u><ul><ol><li><a>') !!}
                     </div>
                 </div>
             </div>
@@ -146,7 +146,7 @@
                 </div>
                 <div class="card-body">
                     <div class="text-muted small">
-                        {!! $item->utz_note !!}
+                        {!! nl2br(e($item->utz_note)) !!}
                     </div>
                 </div>
             </div>

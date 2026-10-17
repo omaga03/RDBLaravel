@@ -90,12 +90,14 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     // AJAX Project Search (Central)
     Route::get('/rdb_project/search', [RdbProjectController::class, 'search'])->name('rdb_project.search');
 
-    // Export Routes (Must be BEFORE resource routes)
-    Route::get('/rdb_project/export', [RdbProjectController::class, 'export'])->name('rdb_project.export');
-    Route::get('/rdb_researcher/export', [RdbResearcherController::class, 'export'])->name('rdb_researcher.export');
-    Route::get('/rdb_published/export', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'export'])->name('rdb_published.export');
-    Route::get('/rdb_dip/export', [\App\Http\Controllers\Backend\RdbDipController::class, 'export'])->name('rdb_dip.export');
-    Route::get('/rdbprojectutilize/export', [\App\Http\Controllers\Backend\RdbProjectUtilizeController::class, 'export'])->name('rdbprojectutilize.export');
+    // Export Routes (Must be BEFORE resource routes, rate-limited to protect server resources)
+    Route::middleware('throttle:30,1')->group(function () {
+        Route::get('/rdb_project/export', [RdbProjectController::class, 'export'])->name('rdb_project.export');
+        Route::get('/rdb_researcher/export', [RdbResearcherController::class, 'export'])->name('rdb_researcher.export');
+        Route::get('/rdb_published/export', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'export'])->name('rdb_published.export');
+        Route::get('/rdb_dip/export', [\App\Http\Controllers\Backend\RdbDipController::class, 'export'])->name('rdb_dip.export');
+        Route::get('/rdbprojectutilize/export', [\App\Http\Controllers\Backend\RdbProjectUtilizeController::class, 'export'])->name('rdbprojectutilize.export');
+    });
 
     Route::resource('rdb_project', RdbProjectController::class);
     Route::resource('rdb_researcher', RdbResearcherController::class);

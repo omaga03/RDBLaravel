@@ -427,14 +427,15 @@ class RdbprojectController extends Controller
 
         $filePath = $fileRecord->getFilePath();
         
-        if (!$filePath || !Storage::exists($filePath)) {
-            abort(404, 'ไฟล์ไม่พบ');
+        if ($filePath && Storage::disk('public')->exists($filePath)) {
+            $fileRecord->increment('rf_download');
+            return Storage::disk('public')->download($filePath);
+        } elseif ($filePath && file_exists(public_path($filePath))) {
+            $fileRecord->increment('rf_download');
+            return response()->download(public_path($filePath));
         }
 
-        // ✅ เพิ่ม counter เท่านั้น (ไม่สามารถแก้ไข/ลบ)
-        $fileRecord->increment('rf_download');
-
-        return Storage::download($filePath);
+        abort(404, 'ไฟล์ไม่พบ');
     }
 
     public function viewAbstract($id)
@@ -448,14 +449,15 @@ class RdbprojectController extends Controller
 
         $filePath = $project->getAbstractFilePath();
         
-        if (!$filePath || !Storage::exists($filePath)) {
-            abort(404, 'ไม่พบไฟล์');
+        if ($filePath && Storage::disk('public')->exists($filePath)) {
+            $project->increment('pro_count_abs');
+            return Storage::disk('public')->response($filePath);
+        } elseif ($filePath && file_exists(public_path($filePath))) {
+            $project->increment('pro_count_abs');
+            return response()->file(public_path($filePath));
         }
 
-        // ✅ เพิ่ม counter เท่านั้น (ไม่แก้ไขไฟล์)
-        $project->increment('pro_count_abs');
-
-        return Storage::response($filePath);
+        abort(404, 'ไม่พบไฟล์');
     }
 
     public function viewReport($id)
@@ -474,14 +476,15 @@ class RdbprojectController extends Controller
 
         $filePath = $project->getReportFilePath();
         
-        if (!$filePath || !Storage::exists($filePath)) {
-            abort(404, 'ไม่พบไฟล์');
+        if ($filePath && Storage::disk('public')->exists($filePath)) {
+            $project->increment('pro_count_full');
+            return Storage::disk('public')->response($filePath);
+        } elseif ($filePath && file_exists(public_path($filePath))) {
+            $project->increment('pro_count_full');
+            return response()->file(public_path($filePath));
         }
 
-        // ✅ เพิ่ม counter เท่านั้น (ไม่แก้ไขไฟล์)
-        $project->increment('pro_count_full');
-
-        return Storage::response($filePath);
+        abort(404, 'ไม่พบไฟล์');
     }
 
     public function show($id)
