@@ -491,4 +491,85 @@ class BackendAuditTest extends TestCase
         $project->refresh();
         $this->assertEquals(2, $project->ps_id);
     }
+
+    public function test_upload_report_automatically_sets_status_to_completed()
+    {
+        \Illuminate\Support\Facades\Storage::fake('public');
+        $admin = \App\Models\User::find(129);
+        $project = \App\Models\RdbProject::find(2744) ?? \App\Models\RdbProject::first();
+        $this->assertNotNull($project);
+
+        // Set status to something other than 2 first (e.g. 1 กำลังดำเนินการ)
+        $project->ps_id = 1;
+        $project->save();
+
+        $fakePdf = \Illuminate\Http\UploadedFile::fake()->createWithContent('complete_report.pdf', '%PDF-1.4 test report content');
+
+        $response = $this->actingAs($admin)->post(route('backend.rdb_project.upload_report', $project->pro_id), [
+            'pro_file' => $fakePdf,
+            'pro_file_show' => 1,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $project->refresh();
+        $this->assertEquals(2, $project->ps_id, 'Project status should be automatically set to completed (ps_id = 2) when report is uploaded.');
+        $this->assertNotNull($project->pro_file);
+        $this->assertEquals(1, $project->pro_file_show);
+    }
+
+    public function test_toggle_report_and_file_status()
+    {
+        $admin = \App\Models\User::find(129);
+        $project = \App\Models\RdbProject::find(2744) ?? \App\Models\RdbProject::first();
+        $this->assertNotNull($project);
+
+        // Toggle report status
+        $initialShow = (int) $project->pro_file_show;
+        $toggleReportResponse = $this->actingAs($admin)->postJson(route('backend.rdb_project.toggle_report_status', $project->pro_id));
+        $toggleReportResponse->assertStatus(200);
+        $toggleReportResponse->assertJson(['success' => true]);
+        
+        $project->refresh();
+        $this->assertNotEquals($initialShow, (int) $project->pro_file_show);
+
+        // If project has files, toggle file status
+        $file = $project->files()->first();
+        if (!$file) {
+            $file = \App\Models\RdbProjectFiles::create([
+                'pro_id' => $project->pro_id,
+                'rf_filesname' => 'Test File',
+                'rf_files' => 'test.pdf',
+                'rf_files_show' => 1,
+                'user_created' => $admin->id,
+            ]);
+        }
+
+        $initialFileShow = (int) $file->rf_files_show;
+        $toggleFileResponse = $this->actingAs($admin)->postJson(route('backend.rdb_project.file.toggle_status', [$project->pro_id, $file->id]));
+        $toggleFileResponse->assertStatus(200);
+        $toggleFileResponse->assertJson(['success' => true]);
+
+        $file->refresh();
+        $this->assertNotEquals($initialFileShow, (int) $file->rf_files_show);
+    }
+
+    public function test_project_show_contains_visibility_and_uniform_buttons()
+    {
+        $admin = \App\Models\User::find(129);
+        $project = \App\Models\RdbProject::find(2744) ?? \App\Models\RdbProject::first();
+        $this->assertNotNull($project);
+
+        $response = $this->actingAs($admin)->get(route('backend.rdb_project.show', $project->pro_id));
+        $response->assertStatus(200);
+
+        // Check uniform button styling and delete form
+        $response->assertSee('d-inline-flex m-0 p-0 align-items-center delete-form', false);
+        $response->assertSee('height: 38px', false);
+
+        // Check public visibility elements
+        $response->assertSee('การแสดงผล', false);
+        $response->assertSee('Public Visible', false);
+    }
 }

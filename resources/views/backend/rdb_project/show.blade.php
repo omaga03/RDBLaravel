@@ -80,6 +80,18 @@
                                     {{ \App\Helpers\ThaiDateHelper::format($project->pro_date_start) }} ถึง {{ \App\Helpers\ThaiDateHelper::format($project->pro_date_end) }}
                                 </span>
                             </li>
+                            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-0">
+                                <span class="text-body-secondary">การเผยแพร่ข้อมูล:</span>
+                                @if($project->data_show)
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                                        <i class="bi bi-globe me-1"></i> สาธารณะ (Public)
+                                    </span>
+                                @else
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">
+                                        <i class="bi bi-eye-slash-fill me-1"></i> ซ่อนเฉพาะผู้ดูแล (Private)
+                                    </span>
+                                @endif
+                            </li>
                         </ul>
 
                         <!-- Statistics Counter -->
@@ -377,14 +389,29 @@
                                             <div class="card-body">
                                                 <div class="d-flex align-items-center justify-content-between mb-2">
                                                     <span class="fw-bold"><i class="bi bi-file-earmark-richtext text-success me-2 fs-5"></i>รายงานฉบับสมบูรณ์</span>
-                                                    @if($project->pro_file)
-                                                        <span class="badge bg-success-subtle text-success border border-success-subtle">มีไฟล์</span>
-                                                    @else
-                                                        <span class="badge bg-secondary-subtle text-secondary">ไม่มีไฟล์</span>
-                                                    @endif
+                                                    <div class="d-flex align-items-center gap-1">
+                                                        @if($project->pro_file)
+                                                            <span class="badge bg-success-subtle text-success border border-success-subtle">มีไฟล์</span>
+                                                            @if($project->pro_file_show)
+                                                                <span class="badge bg-success text-white" title="เปิดเผยต่อสาธารณะ"><i class="bi bi-globe me-1"></i>สาธารณะ (Public)</span>
+                                                            @else
+                                                                <span class="badge bg-secondary text-white" title="ซ่อนเฉพาะผู้ดูแล"><i class="bi bi-lock-fill me-1"></i>ซ่อน (Private)</span>
+                                                            @endif
+                                                        @else
+                                                            <span class="badge bg-secondary-subtle text-secondary">ไม่มีไฟล์</span>
+                                                        @endif
+                                                    </div>
                                                 </div>
                                                 @if($project->pro_file)
-                                                    <div class="small text-body-secondary text-truncate mb-3">{{ $project->pro_file }}</div>
+                                                    <div class="small text-body-secondary text-truncate mb-2">{{ $project->pro_file }}</div>
+                                                    <div class="d-flex align-items-center justify-content-between small text-body-secondary mb-3 p-2 bg-body-tertiary rounded">
+                                                        <span><i class="bi bi-shield-check me-1 text-primary"></i>การแสดงผลสาธารณะ:</span>
+                                                        @if($project->pro_file_show)
+                                                            <strong class="text-success"><i class="bi bi-eye me-1"></i>เปิดเผยต่อบุคคลทั่วไป (Public)</strong>
+                                                        @else
+                                                            <strong class="text-secondary"><i class="bi bi-eye-slash me-1"></i>ซ่อนเฉพาะผู้ดูแลระบบ (Private)</strong>
+                                                        @endif
+                                                    </div>
                                                     <a href="{{ route('backend.rdb_project.view_report', $project->pro_id) }}" target="_blank" class="btn btn-outline-success btn-sm w-100">
                                                         <i class="bi bi-eye me-1"></i> เปิดดูรายงานฉบับสมบูรณ์
                                                     </a>
@@ -400,10 +427,11 @@
                                 <h6 class="fw-bold mb-2">เอกสารเพิ่มเติม ({{ $project->files->count() }} ไฟล์)</h6>
                                 <div class="table-responsive">
                                     <table class="table table-hover align-middle mb-0">
-                                        <thead>
+                                        <thead class="table-light">
                                             <tr>
                                                 <th>ชื่อเอกสาร</th>
                                                 <th>หมายเหตุ</th>
+                                                <th class="text-center" style="width: 170px;">การแสดงผล (Visibility)</th>
                                                 <th class="text-center" style="width: 120px;">ดาวน์โหลด</th>
                                             </tr>
                                         </thead>
@@ -416,6 +444,17 @@
                                                 </td>
                                                 <td><small class="text-body-secondary">{{ $file->rf_note ?? '-' }}</small></td>
                                                 <td class="text-center">
+                                                    @if($file->rf_files_show)
+                                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                                                            <i class="bi bi-globe me-1"></i> สาธารณะ (Public)
+                                                        </span>
+                                                    @else
+                                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">
+                                                            <i class="bi bi-lock-fill me-1"></i> ซ่อน (Private)
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                                <td class="text-center">
                                                     <a href="{{ route('backend.rdb_project.file.download', [$project->pro_id, $file->id]) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
                                                         <i class="bi bi-download"></i> ดาวน์โหลด
                                                     </a>
@@ -423,7 +462,7 @@
                                             </tr>
                                             @empty
                                             <tr>
-                                                <td colspan="3" class="text-center py-3 text-body-secondary">ไม่มีเอกสารเพิ่มเติม</td>
+                                                <td colspan="4" class="text-center py-3 text-body-secondary">ไม่มีเอกสารเพิ่มเติม</td>
                                             </tr>
                                             @endforelse
                                         </tbody>
@@ -669,22 +708,29 @@
                                     </div>
                                     <div class="card-body">
                                         @if($project->pro_file)
-                                            <div class="d-flex justify-content-between align-items-center mb-3 p-2 rounded" style="background: rgba(0,0,0,0.05);">
-                                                <div class="text-truncate me-2" style="max-width: 70%;">
-                                                    <i class="bi bi-file-earmark-pdf text-danger fs-4 me-2"></i>
-                                                    <small class="text-muted">{{ $project->pro_file }}</small>
+                                            <div class="d-flex justify-content-between align-items-center mb-3 p-3 rounded border bg-body-tertiary">
+                                                <div class="text-truncate me-2" style="max-width: 55%;">
+                                                    <i class="bi bi-file-earmark-pdf text-danger fs-4 me-2 align-middle"></i>
+                                                    <strong class="text-body">{{ $project->pro_file }}</strong>
                                                 </div>
-                                                <div class="d-flex gap-1 align-items-center">
-                                                    <div class="form-check form-switch m-0 me-2 d-flex align-items-center" title="แสดงผลไฟล์นี้">
-                                                        <input class="form-check-input toggle-report-status" type="checkbox" data-id="{{ $project->pro_id }}" role="button" {{ $project->pro_file_show ? 'checked' : '' }}>
+                                                <div class="d-flex gap-2 align-items-center">
+                                                    <div class="form-check form-switch m-0 d-flex align-items-center px-2 py-1 rounded border bg-white" title="ปรับการแสดงผลไฟล์นี้">
+                                                        <input class="form-check-input toggle-report-status me-2" type="checkbox" id="toggleReportStatus" data-id="{{ $project->pro_id }}" role="button" {{ $project->pro_file_show ? 'checked' : '' }}>
+                                                        <label class="form-check-label small fw-bold mb-0 cursor-pointer" for="toggleReportStatus" id="reportStatusLabel">
+                                                            @if($project->pro_file_show)
+                                                                <span class="text-success"><i class="bi bi-globe me-1"></i>สาธารณะ (Public)</span>
+                                                            @else
+                                                                <span class="text-secondary"><i class="bi bi-lock-fill me-1"></i>ซ่อน (Private)</span>
+                                                            @endif
+                                                        </label>
                                                     </div>
-                                                    <a href="{{ asset('storage/uploads/projects/' . $project->pro_file) }}" target="_blank" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center justify-content-center" style="width: 70px; height: 32px;">
+                                                    <a href="{{ asset('storage/uploads/projects/' . $project->pro_file) }}" target="_blank" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center justify-content-center" style="min-width: 70px; height: 32px;">
                                                         <i class="bi bi-eye me-1"></i> ดู
                                                     </a>
-                                                    <form action="{{ route('backend.rdb_project.delete_report', $project->pro_id) }}" method="POST" class="d-inline-flex m-0" onsubmit="return confirm('ยืนยันลบไฟล์รายงานฉบับสมบูรณ์?');">
+                                                    <form action="{{ route('backend.rdb_project.delete_report', $project->pro_id) }}" method="POST" class="d-inline-flex m-0 p-0" onsubmit="return confirm('ยืนยันลบไฟล์รายงานฉบับสมบูรณ์?');">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center justify-content-center" style="width: 70px; height: 32px;">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center justify-content-center" style="min-width: 70px; height: 32px;">
                                                             <i class="bi bi-trash me-1"></i> ลบ
                                                         </button>
                                                     </form>
@@ -693,17 +739,22 @@
                                         @endif
                                         <form action="{{ route('backend.rdb_project.upload_report', $project->pro_id) }}" method="POST" enctype="multipart/form-data">
                                             @csrf
-                                            <div class="input-group">
+                                            <div class="input-group mb-2">
                                                 <input type="file" name="pro_file" class="form-control form-control-sm" accept=".pdf" required>
-                                                <button type="submit" class="btn btn-success btn-sm">
-                                                    <i class="bi bi-upload"></i> {{ $project->pro_file ? 'เปลี่ยนไฟล์' : 'อัปโหลด' }}
+                                                <button type="submit" class="btn btn-success btn-sm px-3">
+                                                    <i class="bi bi-upload me-1"></i> {{ $project->pro_file ? 'เปลี่ยนไฟล์รายงาน' : 'อัปโหลดรายงาน' }}
                                                 </button>
                                             </div>
-                                            <div class="form-check form-switch mt-1">
-                                                <input class="form-check-input" type="checkbox" name="pro_file_show" value="1" id="proFileShow" checked>
-                                                <label class="form-check-label small text-muted" for="proFileShow">แสดงผลไฟล์ (Visible)</label>
+                                            <div class="d-flex justify-content-between align-items-center mt-2 p-2 bg-light rounded border flex-wrap gap-2">
+                                                <div class="form-check form-switch m-0">
+                                                    <input class="form-check-input" type="checkbox" name="pro_file_show" value="1" id="proFileShow" checked>
+                                                    <label class="form-check-label small fw-bold text-dark" for="proFileShow">
+                                                        <i class="bi bi-globe me-1 text-primary"></i> เปิดให้บุคคลทั่วไปเข้าถึงได้ (Public Visible)
+                                                    </label>
+                                                </div>
+                                                <small class="text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i>อัปโหลดแล้วระบบจะปรับสถานะเป็น "ดำเนินการเสร็จสิ้น" ทันที</small>
                                             </div>
-                                            <small class="text-muted">รองรับเฉพาะไฟล์ PDF ขนาดไม่เกิน 20MB</small>
+                                            <small class="text-muted d-block mt-1">รองรับเฉพาะไฟล์ PDF ขนาดไม่เกิน 50MB</small>
                                         </form>
                                     </div>
                                 </div>
@@ -743,9 +794,11 @@
                                                     </div>
                                                     <div class="row g-2 mt-2">
                                                         <div class="col-12">
-                                                            <div class="form-check form-switch">
-                                                                <input class="form-check-input" type="checkbox" name="rf_files_show" value="1" id="rfFilesShow" checked>
-                                                                <label class="form-check-label small" for="rfFilesShow">แสดงผลไฟล์ให้คนทั่วไปเห็น (Public Visible)</label>
+                                                            <div class="form-check form-switch p-2 bg-light rounded border">
+                                                                <input class="form-check-input ms-0 me-2" type="checkbox" name="rf_files_show" value="1" id="rfFilesShow" checked>
+                                                                <label class="form-check-label small fw-bold text-dark" for="rfFilesShow">
+                                                                    <i class="bi bi-globe me-1 text-primary"></i> เปิดให้บุคคลทั่วไปดาวน์โหลดเอกสารนี้ได้ (Public Visible)
+                                                                </label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -756,12 +809,12 @@
                                         <!-- File List Table -->
                                         <div class="table-responsive">
                                             <table class="table table-bordered table-hover align-middle table-sm">
-                                                <thead>
+                                                <thead class="table-light">
                                                     <tr>
                                                         <th>ชื่อเอกสาร</th>
                                                         <th>หมายเหตุ</th>
-                                                        <th class="text-center" style="width: 100px;">สถานะ</th>
-                                                        <th class="text-center">จัดการ</th>
+                                                        <th class="text-center" style="width: 150px;">สถานะการแสดงผล</th>
+                                                        <th class="text-center" style="width: 100px;">จัดการ</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -787,26 +840,37 @@
                                                             </td>
                                                             <td>{{ $file->rf_note ?? '-' }}</td>
                                                             <td class="text-center">
-                                                                <div class="form-check form-switch d-inline-block">
-                                                                    <input class="form-check-input toggle-file-status" type="checkbox" data-pid="{{ $project->pro_id }}" data-fid="{{ $file->id }}" role="button" {{ $file->rf_files_show ? 'checked' : '' }}>
+                                                                <div class="form-check form-switch d-inline-flex align-items-center gap-1 m-0">
+                                                                    <input class="form-check-input toggle-file-status" type="checkbox" data-pid="{{ $project->pro_id }}" data-fid="{{ $file->id }}" id="toggle_file_{{ $file->id }}" role="button" {{ $file->rf_files_show ? 'checked' : '' }}>
+                                                                    <label class="form-check-label small mb-0 fw-semibold file-status-label-{{ $file->id }}" for="toggle_file_{{ $file->id }}">
+                                                                        @if($file->rf_files_show)
+                                                                            <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-globe me-1"></i>สาธารณะ</span>
+                                                                        @else
+                                                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle"><i class="bi bi-lock-fill me-1"></i>ซ่อน</span>
+                                                                        @endif
+                                                                    </label>
                                                                 </div>
                                                             </td>
                                                             <td class="text-center">
-                                                                <button class="btn btn-outline-warning btn-sm edit-file-btn"
-                                                                    data-fid="{{ $file->id }}"
-                                                                    data-name="{{ $file->rf_filesname }}"
-                                                                    data-note="{{ $file->rf_note }}"
-                                                                    data-filename="{{ $file->rf_files }}"
-                                                                    data-action="{{ route('backend.rdb_project.file.update', [$project->pro_id, $file->id]) }}">
-                                                                    <i class="bi bi-pencil"></i>
-                                                                </button>
-                                                                <form action="{{ route('backend.rdb_project.file.destroy', [$project->pro_id, $file->id]) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันลบไฟล์นี้?');">
-                                                                    @csrf
-                                                                    @method('DELETE')
-                                                                    <button type="submit" class="btn btn-outline-danger btn-sm">
-                                                                        <i class="bi bi-trash"></i>
+                                                                <div class="btn-group btn-group-sm">
+                                                                    <button class="btn btn-outline-warning edit-file-btn"
+                                                                        data-fid="{{ $file->id }}"
+                                                                        data-name="{{ $file->rf_filesname }}"
+                                                                        data-note="{{ $file->rf_note }}"
+                                                                        data-show="{{ $file->rf_files_show ? 1 : 0 }}"
+                                                                        data-filename="{{ $file->rf_files }}"
+                                                                        data-action="{{ route('backend.rdb_project.file.update', [$project->pro_id, $file->id]) }}"
+                                                                        title="แก้ไข">
+                                                                        <i class="bi bi-pencil"></i>
                                                                     </button>
-                                                                </form>
+                                                                    <form action="{{ route('backend.rdb_project.file.destroy', [$project->pro_id, $file->id]) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันลบไฟล์นี้?');">
+                                                                        @csrf
+                                                                        @method('DELETE')
+                                                                        <button type="submit" class="btn btn-outline-danger" title="ลบ">
+                                                                            <i class="bi bi-trash"></i>
+                                                                        </button>
+                                                                    </form>
+                                                                </div>
                                                             </td>
                                                         </tr>
                                                     @empty
@@ -1149,6 +1213,7 @@
         const fileNameInput = document.getElementById('fileNameInput');
         const fileNoteInput = document.getElementById('fileNoteInput');
         const fileInput = document.getElementById('fileInput');
+        const rfFilesShow = document.getElementById('rfFilesShow');
         const currentFileDisplay = document.getElementById('currentFileDisplay');
         const defaultFileAction = "{{ route('backend.rdb_project.file.store', $project->pro_id) }}";
 
@@ -1159,13 +1224,15 @@
                 const note = this.dataset.note;
                 const filename = this.dataset.filename;
                 const action = this.dataset.action;
+                const isShow = this.dataset.show === '1';
 
                 // Set Form to Edit Mode
                 fileForm.action = action;
                 fileFormMethod.value = "PUT";
                 
                 fileNameInput.value = name;
-                fileNoteInput.value = note || '';
+                fileNoteInput.value = (note && note !== 'null' && note !== 'undefined') ? note : '';
+                if(rfFilesShow) rfFilesShow.checked = isShow;
                 
                 // Show current filename
                 currentFileDisplay.classList.remove('d-none');
@@ -1191,6 +1258,7 @@
             currentFileDisplay.classList.add('d-none');
             currentFileDisplay.innerHTML = '';
             fileInput.required = true; // Required on add
+            if(rfFilesShow) rfFilesShow.checked = true;
 
             fileSubmitBtn.innerHTML = '<i class="bi bi-plus-circle"></i> เพิ่ม';
             fileSubmitBtn.classList.add('btn-primary');
@@ -1206,6 +1274,7 @@
         document.querySelector('.toggle-report-status')?.addEventListener('change', function() {
             const id = this.dataset.id;
             const checked = this.checked;
+            const label = document.getElementById('reportStatusLabel');
             
             fetch(`{{ url('backend/rdb_project') }}/${id}/toggle-report-status`, {
                 method: 'POST',
@@ -1217,7 +1286,11 @@
             .then(res => res.json())
             .then(data => {
                 if(data.success) {
-                    console.log('Report status toggled:', data.status);
+                    if (label) {
+                        label.innerHTML = data.status == 1 
+                            ? '<span class="text-success"><i class="bi bi-globe me-1"></i>สาธารณะ (Public)</span>'
+                            : '<span class="text-secondary"><i class="bi bi-lock-fill me-1"></i>ซ่อน (Private)</span>';
+                    }
                 } else {
                     alert('เกิดข้อผิดพลาดในการเปลี่ยนสถานะ');
                     this.checked = !checked;
@@ -1236,6 +1309,7 @@
                 const pid = this.dataset.pid;
                 const fid = this.dataset.fid;
                 const checked = this.checked;
+                const label = document.querySelector(`.file-status-label-${fid}`);
 
                 fetch(`{{ url('backend/rdb_project') }}/${pid}/file/${fid}/toggle-status`, {
                     method: 'POST',
@@ -1247,7 +1321,11 @@
                 .then(res => res.json())
                 .then(data => {
                     if(data.success) {
-                        console.log('File status toggled:', data.status);
+                        if (label) {
+                            label.innerHTML = data.status == 1
+                                ? '<span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-globe me-1"></i>สาธารณะ</span>'
+                                : '<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle"><i class="bi bi-lock-fill me-1"></i>ซ่อน</span>';
+                        }
                     } else {
                         alert('เกิดข้อผิดพลาดในการเปลี่ยนสถานะ');
                         this.checked = !checked;

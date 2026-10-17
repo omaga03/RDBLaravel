@@ -23,6 +23,7 @@ class UploadProjectReportRequest extends FormRequest
     {
         return [
             'pro_file' => 'required|file|max:51200',
+            'pro_file_show' => 'nullable|boolean',
         ];
     }
 }

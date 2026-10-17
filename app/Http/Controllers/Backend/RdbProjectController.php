@@ -712,7 +712,11 @@ class RdbProjectController extends Controller
         $file->user_updated = auth()->id();
         $file->save();
         
-        return response()->json(['success' => true, 'status' => $file->rf_files_show]);
+        return response()->json([
+            'success' => true,
+            'status' => (int) $file->rf_files_show,
+            'message' => 'ปรับปรุงสถานะการแสดงผลไฟล์เรียบร้อยแล้ว'
+        ]);
     }
 
     /**
@@ -773,9 +777,6 @@ class RdbProjectController extends Controller
         return redirect()->back()->with('success', 'ลบไฟล์บทคัดย่อเรียบร้อยแล้ว');
     }
 
-    /**
-     * Upload full report file
-     */
     public function uploadReport(UploadProjectReportRequest $request, $id)
     {
         $project = RdbProject::findOrFail($id);
@@ -794,10 +795,23 @@ class RdbProjectController extends Controller
             $project->pro_file_size = $fileInfo['size'];
             $project->pro_file_mime = $fileInfo['mime_type'];
             $project->pro_file = $fileInfo['safe_name'];
+
+            // Public visibility
+            if ($request->has('pro_file_show')) {
+                $project->pro_file_show = $request->boolean('pro_file_show') ? 1 : 0;
+            } else {
+                $project->pro_file_show = 1;
+            }
+
+            // หากมีการแนบไฟล์เล่มรายงานฉบับสมบูรณ์ ให้ปรับสถานะเป็น "ดำเนินการเสร็จสิ้น" ทันที
+            $completedStatus = \App\Models\RdbProjectStatus::where('ps_name', 'like', '%เสร็จสิ้น%')->first();
+            $project->ps_id = $completedStatus ? $completedStatus->ps_id : 2;
+
             $project->user_updated = auth()->id();
             $project->save();
 
-            return redirect()->back()->with('success', 'อัปโหลดไฟล์รายงานเรียบร้อยแล้ว');
+            $statusName = $completedStatus ? $completedStatus->ps_name : 'ดำเนินการเสร็จสิ้น';
+            return redirect()->back()->with('success', 'อัปโหลดรายงานฉบับสมบูรณ์เรียบร้อยแล้ว และระบบได้ปรับสถานะโครงการเป็น "' . $statusName . '" อัตโนมัติ');
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['pro_file' => $e->getMessage()]);
         }
@@ -1078,6 +1092,7 @@ class RdbProjectController extends Controller
             'rf_filesname' => 'required|string|max:255',
             'rf_files' => 'nullable|file|max:20480|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar,jpg,jpeg,png',
             'rf_note' => 'nullable|string',
+            'rf_files_show' => 'nullable|boolean',
         ]);
 
         try {
@@ -1099,6 +1114,9 @@ class RdbProjectController extends Controller
 
             $file->rf_filesname = $request->rf_filesname;
             $file->rf_note = $request->rf_note;
+            if ($request->has('rf_files_show')) {
+                $file->rf_files_show = $request->boolean('rf_files_show') ? 1 : 0;
+            }
             $file->user_updated = auth()->id();
             $file->save();
 
@@ -1181,6 +1199,25 @@ class RdbProjectController extends Controller
         return response($fileContents, 200, [
             'Content-Type' => $file->prf_mime_type ?? 'application/octet-stream',
             'Content-Disposition' => 'inline; filename="' . $originalFileName . '";',
+        ]);
+    }
+
+    /**
+     * Toggle full report visibility (pro_file_show)
+     */
+    public function toggleReportStatus($id)
+    {
+        $project = RdbProject::findOrFail($id);
+        $this->authorize('update', $project);
+
+        $project->pro_file_show = $project->pro_file_show ? 0 : 1;
+        $project->user_updated = auth()->id();
+        $project->save();
+
+        return response()->json([
+            'success' => true,
+            'status' => (int) $project->pro_file_show,
+            'message' => 'ปรับปรุงสถานะการแสดงผลรายงานฉบับสมบูรณ์เรียบร้อยแล้ว'
         ]);
     }
 }
