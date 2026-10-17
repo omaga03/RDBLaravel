@@ -4,13 +4,14 @@
     'mode' => 'create', // 'create' or 'edit'
     'actionRoute' => null,
     'action' => null,
-    'method' => 'POST',
+    'method' => null,
     'backRoute' => null,
     'enctype' => null,
     'colClass' => 'col-12'
 ])
 
 @php
+    $resolvedMethod = $method ?? ($mode === 'edit' ? 'PUT' : 'POST');
     $actionUrl = $actionRoute ?? $action ?? '#';
     $back = $backRoute ?? url()->previous();
     $headerColor = $mode === 'create' ? 'success' : 'primary';
@@ -29,8 +30,8 @@
             <div class="card-body p-4">
                 <form action="{{ $actionUrl }}" method="POST" {{ $enctype ? "enctype=$enctype" : '' }}>
                     @csrf
-                    @if(strtoupper($method) !== 'POST')
-                        @method($method)
+                    @if(strtoupper($resolvedMethod) !== 'POST')
+                        @method($resolvedMethod)
                     @endif
                     
                     {{ $slot }}

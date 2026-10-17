@@ -7,6 +7,7 @@
         icon="bi-pencil-square"
         mode="edit" 
         :actionRoute="route('backend.user.update', $user->id)" 
+        method="PUT"
         :backRoute="route('backend.user.index')" 
     >
         <div class="row g-3">

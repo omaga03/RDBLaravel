@@ -78,5 +78,15 @@ class BackendAuditTest extends TestCase
         $userShowResponse = $this->actingAs($admin)->get(route('backend.user.show', $admin->id));
         $this->assertEquals(200, $userShowResponse->getStatusCode());
         $userShowResponse->assertSee($admin->username);
+
+        // Test User Update via PUT
+        $userUpdateResponse = $this->actingAs($admin)->put(route('backend.user.update', $admin->id), [
+            'username' => $admin->username,
+            'email' => $admin->email,
+            'role' => 'The Creator',
+            'status' => $admin->status,
+            'researcher_id' => $admin->researcher_id,
+        ]);
+        $this->assertEquals(302, $userUpdateResponse->getStatusCode());
     }
 }
