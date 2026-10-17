@@ -171,6 +171,9 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     Route::resource('research_conference', \App\Http\Controllers\Backend\ResearchConferenceController::class);
     Route::get('/research_conference/{id}/view-image', [\App\Http\Controllers\Backend\ResearchConferenceController::class, 'viewConferenceImage'])->name('research_conference.view_image');
 
+    // Project Status Management
+    Route::patch('/rdb_project/{id}/status', [RdbProjectController::class, 'updateStatus'])->name('rdb_project.update_status');
+
     // Project Researcher Management
     Route::post('/rdb_project/{id}/researcher', [RdbProjectController::class, 'storeResearcher'])->name('rdb_project.researcher.store');
     Route::put('/rdb_project/{id}/researcher/{rid}', [RdbProjectController::class, 'updateResearcher'])->name('rdb_project.researcher.update');

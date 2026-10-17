@@ -84,7 +84,7 @@ class UpdateProjectRequest extends FormRequest
             'pro_date_end' => 'required|date|after:pro_date_start',
             'pro_finish' => 'nullable|date',
             'pt_id' => 'required|integer|exists:rdb_project_types,pt_id',
-            'ps_id' => 'required|integer|exists:rdb_project_status,ps_id',
+            'ps_id' => 'nullable|integer|exists:rdb_project_status,ps_id',
             'year_id' => 'required|integer|exists:rdb_year,year_id',
             'department_id' => 'required|integer|exists:rdb_department,department_id',
             'pgroup_id' => 'nullable|integer|exists:rdb_groupproject,pgroup_id',

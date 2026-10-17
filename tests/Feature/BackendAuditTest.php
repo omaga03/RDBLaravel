@@ -442,4 +442,53 @@ class BackendAuditTest extends TestCase
         $responseRes = $this->actingAs($admin)->get(route('backend.rdb_researcher.export'));
         $this->assertTrue(in_array($responseRes->getStatusCode(), [200, 429]));
     }
+
+    public function test_project_edit_does_not_require_ps_id()
+    {
+        $admin = \App\Models\User::find(129);
+        $project = \App\Models\RdbProject::find(2744) ?? \App\Models\RdbProject::first();
+        $this->assertNotNull($project);
+
+        // Edit page loads with statuses and form
+        $editResponse = $this->actingAs($admin)->get(route('backend.rdb_project.edit', $project->pro_id));
+        $editResponse->assertStatus(200);
+        $editResponse->assertSee('สถานะโครงการ');
+
+        // Update without ps_id in payload
+        $updateResponse = $this->actingAs($admin)->put(route('backend.rdb_project.update', $project->pro_id), [
+            'pro_nameTH' => 'โครงการทดสอบอัปเดตไม่บังคับสถานะ',
+            'pro_date_start' => '2025-01-01',
+            'pro_date_end' => '2025-12-31',
+            'pt_id' => $project->pt_id ?? 1,
+            'year_id' => $project->year_id ?? 18,
+            'department_id' => $project->department_id ?? 1,
+            // ps_id is omitted on purpose
+        ]);
+
+        $updateResponse->assertSessionDoesntHaveErrors('ps_id');
+        $this->assertEquals(302, $updateResponse->getStatusCode());
+    }
+
+    public function test_project_status_update_directly()
+    {
+        $admin = \App\Models\User::find(129);
+        $project = \App\Models\RdbProject::find(2744) ?? \App\Models\RdbProject::first();
+        $this->assertNotNull($project);
+
+        // Show page has status update modal and routes
+        $showResponse = $this->actingAs($admin)->get(route('backend.rdb_project.show', $project->pro_id));
+        $showResponse->assertStatus(200);
+        $showResponse->assertSee('projectStatusModal');
+        $showResponse->assertSee(route('backend.rdb_project.update_status', $project->pro_id));
+
+        // Directly patch status to 2 (ดำเนินการเสร็จสิ้น)
+        $patchResponse = $this->actingAs($admin)->patch(route('backend.rdb_project.update_status', $project->pro_id), [
+            'ps_id' => 2,
+        ]);
+        $patchResponse->assertRedirect();
+        $patchResponse->assertSessionHas('success');
+
+        $project->refresh();
+        $this->assertEquals(2, $project->ps_id);
+    }
 }

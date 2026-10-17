@@ -31,11 +31,20 @@
                             <span class="badge bg-light text-primary fw-bold font-monospace fs-6">
                                 {{ $project->pro_code ?? 'ID: ' . $project->pro_id }}
                             </span>
-                            @if($project->status)
-                                <span class="badge" style="background-color: {{ $project->status->ps_color ?? '#6c757d' }}; color: #fff;">
-                                    {{ $project->status->ps_name }}
-                                </span>
-                            @endif
+                            <div class="d-flex align-items-center gap-1">
+                                @if($project->status)
+                                    <span class="badge" style="background-color: {{ $project->status->ps_color ?? '#6c757d' }}; color: #fff;">
+                                        {{ $project->status->ps_name }}
+                                    </span>
+                                @else
+                                    <span class="badge bg-secondary">ไม่ระบุสถานะ</span>
+                                @endif
+                                @can('update', $project)
+                                <button type="button" class="btn btn-sm btn-light py-0 px-2 text-dark shadow-sm" data-bs-toggle="modal" data-bs-target="#projectStatusModal" title="ปรับปรุงสถานะโครงการ">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                @endcan
+                            </div>
                         </div>
                     </div>
                     <div class="card-body">
@@ -97,6 +106,18 @@
 
                         <!-- Quick Shortcuts -->
                         <div class="d-grid gap-2">
+                            @can('update', $project)
+                            <button type="button" class="btn btn-outline-warning btn-sm d-flex justify-content-between align-items-center" data-bs-toggle="modal" data-bs-target="#projectStatusModal">
+                                <span><i class="bi bi-flag-fill me-2"></i> ปรับปรุงสถานะโครงการ</span>
+                                @if($project->status)
+                                    <span class="badge" style="background-color: {{ $project->status->ps_color ?? '#6c757d' }}; color: #fff;">
+                                        {{ $project->status->ps_name }}
+                                    </span>
+                                @else
+                                    <span class="badge bg-secondary">ยังไม่ระบุ</span>
+                                @endif
+                            </button>
+                            @endcan
                             <button type="button" class="btn btn-outline-success btn-sm d-flex justify-content-between align-items-center" data-bs-toggle="modal" data-bs-target="#researcherModal">
                                 <span><i class="bi bi-people-fill me-2"></i> จัดการคณะผู้วิจัย</span>
                                 <span class="badge bg-success">{{ $project->rdbProjectWorks->count() }} ท่าน</span>
@@ -166,6 +187,25 @@
                                 <div class="table-responsive mb-4">
                                     <table class="table table-bordered table-sm align-middle">
                                         <tbody>
+                                            <tr>
+                                                <th style="width: 25%;" class="bg-body-tertiary">สถานะโครงการ:</th>
+                                                <td colspan="3">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        @if($project->status)
+                                                            <span class="badge px-3 py-1" style="background-color: {{ $project->status->ps_color ?? '#6c757d' }}; color: #fff;">
+                                                                <i class="bi bi-flag-fill me-1"></i> {{ $project->status->ps_name }}
+                                                            </span>
+                                                        @else
+                                                            <span class="badge bg-secondary px-3 py-1">ยังไม่ระบุสถานะ</span>
+                                                        @endif
+                                                        @can('update', $project)
+                                                        <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" data-bs-toggle="modal" data-bs-target="#projectStatusModal">
+                                                            <i class="bi bi-pencil-square me-1"></i> ปรับปรุงสถานะ
+                                                        </button>
+                                                        @endcan
+                                                    </div>
+                                                </td>
+                                            </tr>
                                             <tr>
                                                 <th style="width: 25%;" class="bg-body-tertiary">ประเภททุน:</th>
                                                 <td>
@@ -508,8 +548,64 @@
             </div>
         </div>
 
-                <!-- Project Files Modal -->
-                <div class="modal fade" id="projectFilesModal" tabindex="-1" aria-labelledby="projectFilesModalLabel" aria-hidden="true">
+        <!-- Project Status Modal -->
+        <div class="modal fade" id="projectStatusModal" tabindex="-1" aria-labelledby="projectStatusModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content shadow border-0">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="projectStatusModalLabel">
+                            <i class="bi bi-flag-fill me-2"></i> ปรับปรุงสถานะโครงการวิจัย
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="{{ route('backend.rdb_project.update_status', $project->pro_id) }}" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        <div class="modal-body p-4">
+                            <div class="mb-3 text-center p-3 bg-body-tertiary rounded border">
+                                <div class="small text-muted mb-1">สถานะโครงการปัจจุบัน:</div>
+                                @if($project->status)
+                                    <span class="badge px-3 py-2 fs-6" style="background-color: {{ $project->status->ps_color ?? '#6c757d' }}; color: #fff;">
+                                        <i class="bi bi-flag-fill me-1"></i> {{ $project->status->ps_name }}
+                                    </span>
+                                @else
+                                    <span class="badge bg-secondary px-3 py-2 fs-6">ยังไม่ระบุสถานะ</span>
+                                @endif
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="project_status_select" class="form-label fw-bold">เลือกสถานะใหม่ <span class="text-danger">*</span></label>
+                                <select name="ps_id" id="project_status_select" class="form-select form-select-lg" required>
+                                    <option value="">-- เลือกสถานะโครงการ --</option>
+                                    @foreach($statuses as $st)
+                                        <option value="{{ $st->ps_id }}" 
+                                                {{ (string)$project->ps_id === (string)$st->ps_id ? 'selected' : '' }}>
+                                            {{ $st->ps_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="alert alert-info py-2 px-3 small mb-0 d-flex align-items-center">
+                                <i class="bi bi-info-circle-fill fs-5 me-2 text-info"></i>
+                                <div>การปรับปรุงสถานะโครงการจะอัปเดตข้อมูลบนแดชบอร์ด รายงานวิจัย และหน้าแสดงผลทันที</div>
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-body-tertiary">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-lg me-1"></i> ยกเลิก
+                            </button>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-check-lg me-1"></i> บันทึกสถานะใหม่
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Files Modal -->
+        <div class="modal fade" id="projectFilesModal" tabindex="-1" aria-labelledby="projectFilesModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-lg">
                         <div class="modal-content">
                             <div class="modal-header bg-secondary text-white">

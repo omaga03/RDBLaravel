@@ -187,21 +187,20 @@
                 </div>
             </div>
 
-            {{-- Row 9: สถานะ (สำหรับ Create) --}}
-            @if(!$isEdit)
+            {{-- Row 9: สถานะโครงการ --}}
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="ps_id" class="form-label">สถานะโครงการ</label>
                     <select class="form-select" id="ps_id" name="ps_id">
+                        <option value="">-- เลือกสถานะโครงการ --</option>
                         @foreach($statuses as $status)
-                            <option value="{{ $status->ps_id }}" {{ $loop->first ? 'selected' : '' }}>
+                            <option value="{{ $status->ps_id }}" {{ (string)old('ps_id', $project->ps_id ?? '') === (string)$status->ps_id ? 'selected' : '' }}>
                                 {{ $status->ps_name }}
                             </option>
                         @endforeach
                     </select>
                 </div>
             </div>
-            @endif
 
         </div>
 

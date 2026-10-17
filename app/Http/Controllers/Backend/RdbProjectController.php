@@ -470,12 +470,13 @@ class RdbProjectController extends Controller
         $existingResearcherIds = $project->rdbProjectWorks->pluck('researcher_id')->toArray();
         
         $positions = RdbProjectPosition::all();
+        $statuses = RdbProjectStatus::all();
 
         $takenPositions = $project->rdbProjectWorks->pluck('position_id')->toArray();
         $hasDirector = in_array(1, $takenPositions);
         $hasHead = in_array(2, $takenPositions);
 
-        return view('backend.rdb_project.show', compact('project', 'positions', 'existingResearcherIds', 'takenPositions', 'hasDirector', 'hasHead'));
+        return view('backend.rdb_project.show', compact('project', 'positions', 'statuses', 'existingResearcherIds', 'takenPositions', 'hasDirector', 'hasHead'));
     }
 
     /**
@@ -552,12 +553,50 @@ class RdbProjectController extends Controller
             $validated = $request->validated();
             $validated['user_updated'] = auth()->id();
             
+            // If ps_id is null or empty in request, don't overwrite existing ps_id
+            if (!isset($validated['ps_id']) || $validated['ps_id'] === null) {
+                if (!$request->has('ps_id') || $request->input('ps_id') === '') {
+                    unset($validated['ps_id']);
+                }
+            }
+            
             $project->update($validated);
 
             return redirect()->back()->with('success', 'แก้ไขโครงการเรียบร้อยแล้ว');
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }
+    }
+
+    /**
+     * Update project status (ps_id) directly
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        $project = RdbProject::findOrFail($id);
+        $this->authorize('update', $project);
+
+        $validated = $request->validate([
+            'ps_id' => 'required|integer|exists:rdb_project_status,ps_id',
+        ], [
+            'ps_id.required' => 'กรุณาเลือกสถานะโครงการ',
+            'ps_id.integer' => 'รหัสสถานะโครงการต้องเป็นตัวเลข',
+            'ps_id.exists' => 'ไม่พบข้อมูลสถานะโครงการที่เลือก',
+        ]);
+
+        $project->ps_id = $validated['ps_id'];
+        $project->user_updated = auth()->id();
+        $project->save();
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'ปรับปรุงสถานะโครงการเรียบร้อยแล้ว',
+                'status' => $project->status,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'ปรับปรุงสถานะโครงการเรียบร้อยแล้ว');
     }
 
     /**
