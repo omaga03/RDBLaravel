@@ -9,7 +9,7 @@
         </a>
     </div>
 
-    <x-search-bar :searchRoute="route('backend.rdb_project.index')" :collapsed="true" 
+    <x-search-bar :searchRoute="route('backend.rdb_project.index')" :exportRoute="route('backend.rdb_project.export')" :collapsed="true" 
         :simplePlaceholder="'ค้นหาจาก: ชื่อโครงการ, รหัส, คำสำคัญ, นักวิจัย, ประเภททุน, ปีงบประมาณ, หน่วยงาน, บทคัดย่อ'">
         <div class="row g-3">
             {{-- Row 1: ปีงบประมาณ, ประเภททุน, ประเภทย่อย (Cascading) --}}

@@ -284,6 +284,96 @@ class RdbProjectController extends Controller
     }
 
     /**
+     * Export projects to CSV (Excel compatible)
+     */
+    public function export(Request $request)
+    {
+        $this->authorize('viewAny', RdbProject::class);
+
+        $query = RdbProject::with(['year', 'type', 'typeSub', 'status', 'department', 'researchers', 'group']);
+
+        if ($request->filled('search')) {
+            $words = preg_split('/[\s\/,]+/', trim($request->search));
+            $query->where(function ($q) use ($words) {
+                foreach ($words as $word) {
+                    if (empty($word)) continue;
+                    $q->orWhere('pro_nameTH', 'like', "%{$word}%")
+                      ->orWhere('pro_nameEN', 'like', "%{$word}%")
+                      ->orWhere('pro_code', 'like', "%{$word}%")
+                      ->orWhere('pro_keyword', 'like', "%{$word}%");
+                }
+            });
+        }
+        if ($request->filled('pro_year')) {
+            $query->where('pro_year', $request->pro_year);
+        }
+        if ($request->filled('pt_id')) {
+            $query->where('pt_id', $request->pt_id);
+        }
+        if ($request->filled('pro_status')) {
+            $query->where('pro_status', $request->pro_status);
+        }
+        if ($request->filled('department_id')) {
+            $query->where('department_id', $request->department_id);
+        }
+
+        $projects = $query->orderBy('pro_id', 'desc')->get();
+
+        $filename = 'projects_' . date('Y-m-d_His') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        return response()->stream(function () use ($projects) {
+            $handle = fopen('php://output', 'w');
+            fputs($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, [
+                'ID',
+                'รหัสโครงการ',
+                'ปีงบประมาณ',
+                'ชื่อโครงการ (ไทย)',
+                'ชื่อโครงการ (อังกฤษ)',
+                'ประเภททุน',
+                'ประเภททุนย่อย',
+                'งบประมาณ (บาท)',
+                'หน่วยงาน/คณะ',
+                'หัวหน้าโครงการ',
+                'สถานะ',
+                'วันที่เริ่มต้น',
+                'วันที่สิ้นสุด'
+            ]);
+
+            foreach ($projects as $p) {
+                $headResearcher = $p->researchers->first();
+                $headName = $headResearcher ? (($headResearcher->prefix->prefix_nameTH ?? '') . $headResearcher->researcher_fname . ' ' . $headResearcher->researcher_lname) : '-';
+
+                fputcsv($handle, [
+                    $p->pro_id,
+                    $p->pro_code ?? '-',
+                    $p->year->year_name ?? '-',
+                    strip_tags(html_entity_decode($p->pro_nameTH ?? '', ENT_QUOTES, 'UTF-8')),
+                    strip_tags(html_entity_decode($p->pro_nameEN ?? '', ENT_QUOTES, 'UTF-8')),
+                    $p->type->pt_name ?? '-',
+                    $p->typeSub->pts_name ?? '-',
+                    $p->pro_budget ?? 0,
+                    $p->department->department_nameTH ?? '-',
+                    $headName,
+                    $p->status->ps_name ?? '-',
+                    $p->pro_date_start ?? '-',
+                    $p->pro_date_end ?? '-'
+                ]);
+            }
+
+            fclose($handle);
+        }, 200, $headers);
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create()
@@ -368,6 +458,10 @@ class RdbProjectController extends Controller
             },
             'rdbProjectWorks.researcher',
             'rdbProjectWorks.researcher.prefix',
+            'publisheds',
+            'dips',
+            'utilizations',
+            'files',
             'createdBy',
             'updatedBy'
         ])->findOrFail($id);

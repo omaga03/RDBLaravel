@@ -68,6 +68,85 @@ class RdbResearcherController extends Controller
     }
 
     /**
+     * Export researchers to CSV (Excel compatible)
+     */
+    public function export(Request $request)
+    {
+        $this->authorize('viewAny', RdbResearcher::class);
+
+        $query = RdbResearcher::with(['prefix', 'department', 'status']);
+
+        if ($request->filled('q') || $request->filled('search')) {
+            $search = trim($request->q ?? $request->search);
+            $query->where(function($w) use ($search) {
+                $w->where('researcher_fname', 'like', "%{$search}%")
+                  ->orWhere('researcher_lname', 'like', "%{$search}%")
+                  ->orWhere('researcher_fnameEN', 'like', "%{$search}%")
+                  ->orWhere('researcher_lnameEN', 'like', "%{$search}%")
+                  ->orWhere('researcher_email', 'like', "%{$search}%")
+                  ->orWhere('researcher_codeid', 'like', "%{$search}%");
+            });
+        }
+        if ($request->filled('department_id')) {
+            $query->where('department_id', $request->department_id);
+        }
+
+        $researchers = $query->orderBy('researcher_fname', 'asc')->get();
+
+        $filename = 'researchers_' . date('Y-m-d_His') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        return response()->stream(function () use ($researchers) {
+            $handle = fopen('php://output', 'w');
+            fputs($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, [
+                'ID',
+                'Code ID',
+                'คำนำหน้า',
+                'ชื่อ (ไทย)',
+                'นามสกุล (ไทย)',
+                'ชื่อ (อังกฤษ)',
+                'นามสกุล (อังกฤษ)',
+                'สังกัด/หน่วยงาน',
+                'อีเมล',
+                'โทรศัพท์',
+                'มือถือ',
+                'Scopus Author ID',
+                'h-index',
+                'ORCID'
+            ]);
+
+            foreach ($researchers as $r) {
+                fputcsv($handle, [
+                    $r->researcher_id,
+                    $r->researcher_codeid ?? '-',
+                    $r->prefix->prefix_nameTH ?? '',
+                    $r->researcher_fname,
+                    $r->researcher_lname,
+                    $r->researcher_fnameEN ?? '-',
+                    $r->researcher_lnameEN ?? '-',
+                    $r->department->department_nameTH ?? '-',
+                    $r->researcher_email ?? '-',
+                    $r->researcher_tel ?? '-',
+                    $r->researcher_mobile ?? '-',
+                    $r->scopus_authorId ?? '-',
+                    $r->researcher_hindex ?? 0,
+                    $r->orcid ?? '-'
+                ]);
+            }
+
+            fclose($handle);
+        }, 200, $headers);
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create()

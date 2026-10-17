@@ -10,7 +10,7 @@
     </div>
 
     {{-- Central Template Search --}}
-    <x-search-bar :searchRoute="route('backend.rdb_researcher.index')" :collapsed="true">
+    <x-search-bar :searchRoute="route('backend.rdb_researcher.index')" :exportRoute="route('backend.rdb_researcher.export')" :collapsed="true">
         <div class="row g-3">
             <div class="col-md-4">
                 <label class="form-label">คำค้นหา (Keywords)</label>

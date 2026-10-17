@@ -25,12 +25,12 @@
         </button>
         @endif
         @if($deleteRoute && $canDelete)
-        <button type="submit" form="delete-form-top" class="btn btn-danger d-inline-flex justify-content-center align-items-center" style="min-width: 120px;" onclick="return confirm('ยืนยันลบข้อมูลนี้?');">
-            <i class="bi bi-trash me-2"></i> ลบ
-        </button>
-        <form id="delete-form-top" action="{{ $deleteRoute }}" method="POST" class="d-none">
+        <form id="delete-form-top" action="{{ $deleteRoute }}" method="POST" class="d-inline delete-form">
             @csrf
             @method('DELETE')
+            <button type="submit" class="btn btn-danger d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
+                <i class="bi bi-trash me-2"></i> ลบ
+            </button>
         </form>
         @endif
         {{ $slot }}

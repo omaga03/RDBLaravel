@@ -102,6 +102,17 @@
                             <li><a class="dropdown-item" href="{{ route('backend.rdbdepmajor.index') }}">สาขาวิชา</a></li>
                         </ul>
                     </li>
+
+                    <!-- 8. ผู้ดูแลระบบ -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {{ request()->is('backend/user*') || request()->is('backend/rbac*') ? 'active fw-bold' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-shield-lock"></i> ผู้ดูแลระบบ
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item {{ request()->is('backend/user*') ? 'active' : '' }}" href="{{ route('backend.user.index') }}"><i class="bi bi-people-gear me-2"></i> จัดการผู้ใช้งาน (Users)</a></li>
+                            <li><a class="dropdown-item {{ request()->is('backend/rbac*') ? 'active' : '' }}" href="{{ route('backend.rbac.index') }}"><i class="bi bi-shield-check me-2"></i> จัดการบทบาทและสิทธิ์ (RBAC)</a></li>
+                        </ul>
+                    </li>
             </ul>
         </div>
     </div>

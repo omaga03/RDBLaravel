@@ -243,11 +243,24 @@
                                     {{ Auth::user()->username ?? Auth::user()->name }}
                                 </a>
 
-                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" href="{{ route('logout') }}"
+                                <div class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="navbarDropdown">
+                                    <div class="dropdown-header small text-body-secondary fw-bold">
+                                        <i class="bi bi-person me-1"></i> {{ Auth::user()->username }}
+                                        @if(Auth::user()->roles->count())
+                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1 font-monospace">{{ Auth::user()->roles->first()->item_name }}</span>
+                                        @endif
+                                    </div>
+                                    <a class="dropdown-item" href="{{ route('backend.user.show', Auth::id()) }}">
+                                        <i class="bi bi-person-circle me-2"></i> บัญชีของฉัน
+                                    </a>
+                                    <a class="dropdown-item" href="{{ route('backend.user.edit', Auth::id()) }}">
+                                        <i class="bi bi-key me-2"></i> เปลี่ยนรหัสผ่าน
+                                    </a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item text-danger" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">
-                                        {{ __('Logout') }}
+                                        <i class="bi bi-box-arrow-right me-2"></i> {{ __('Logout') }}
                                     </a>
 
                                     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
@@ -441,33 +454,35 @@
                 }
             }
 
-            // 1. Delete Confirmation with SweetAlert2
-            document.querySelectorAll('.delete-form').forEach(form => {
-                form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    
-                    Swal.fire({
-                        title: 'ยืนยันการลบข้อมูล?',
-                        text: "หากลบแล้วจะไม่สามารถกู้คืนได้!",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#d33',
-                        cancelButtonColor: '#3085d6',
-                        confirmButtonText: 'ลบข้อมูล',
-                        cancelButtonText: 'ยกเลิก'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // Show loading on delete
-                            Swal.fire({
-                                title: 'กำลังลบข้อมูล...',
-                                allowOutsideClick: false,
-                                didOpen: () => {
-                                    Swal.showLoading();
-                                }
-                            });
-                            this.submit();
-                        }
-                    });
+            // 1. Delete Confirmation with SweetAlert2 (Delegated)
+            document.addEventListener('submit', function(e) {
+                const form = e.target.closest('.delete-form');
+                if (!form || form.dataset.confirmed === 'true') return;
+
+                e.preventDefault();
+                
+                Swal.fire({
+                    title: 'ยืนยันการลบข้อมูล?',
+                    text: "หากลบแล้วจะไม่สามารถกู้คืนข้อมูลนี้ได้!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="bi bi-trash me-1"></i> ยืนยันการลบ',
+                    cancelButtonText: 'ยกเลิก',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'กำลังลบข้อมูล...',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+                        form.dataset.confirmed = 'true';
+                        form.submit();
+                    }
                 });
             });
 

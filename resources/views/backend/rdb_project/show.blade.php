@@ -22,228 +22,491 @@
             :showPrint="true"
         />
 
-        <div class="row">
-            <div class="col-lg-8 order-1 order-lg-1">
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-primary text-white d-print-none">
-                        <h5 class="mb-0"><i class="bi bi-info-circle"></i> ข้อมูลทั่วไป (General Information)</h5>
-                    </div>
-                    <div class="card-body">
-                        <h4 class="text-primary fw-bold mb-3">{!! $project->pro_nameTH !!}</h4>
-                        @if($project->pro_nameEN)
-                            <h5 class="text-muted mb-4">{!! $project->pro_nameEN !!}</h5>
-                        @endif
-
-                        <div class="row g-3">
-                            <div class="col-md-12">
-                                @if($project->pro_code)
-                                    <span class="badge bg-secondary me-2">รหัส: {{ $project->pro_code }}</span>
-                                @endif
-                                @if($project->year)
-                                    <span class="badge bg-info text-dark me-2">ปีงบประมาณ: {{ $project->year->year_name }}</span>
-                                @endif
-                                @if($project->status)
-                                    <span class="badge bg-primary">สถานะ: {{ $project->status->ps_name }}</span>
-                                @endif
-                            </div>
-
-                            <div class="col-md-12 mt-4">
-                                <h6 class="fw-bold border-bottom pb-2">รายละเอียดเพิ่มเติม</h6>
-                                <table class="table table-borderless table-sm">
-                                    <tr>
-                                        <th style="width: 30%;">ประเภททุน:</th>
-                                        <td>
-                                            {{ $project->type->pt_name ?? '-' }}
-                                            @if($project->typeSub)
-                                                <small class="text-muted">({{ $project->typeSub->pts_name }})</small>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>งบประมาณ:</th>
-                                        <td class="text-success fw-bold">{{ number_format($project->pro_budget, 2) }} บาท</td>
-                                    </tr>
-                                    <tr>
-                                        <th>ระยะเวลา:</th>
-                                        <td>
-                                            {{ \App\Helpers\ThaiDateHelper::format($project->pro_date_start) }}
-                                            ถึง
-                                            {{ \App\Helpers\ThaiDateHelper::format($project->pro_date_end) }}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>หน่วยงาน:</th>
-                                        <td>{{ $project->department->department_nameTH ?? '-' }}</td>
-                                    </tr>
-                                    @if($project->strategic)
-                                    <tr>
-                                        <th>ยุทธศาสตร์:</th>
-                                        <td>{{ $project->strategic->strategic_name ?? '-' }}</td>
-                                    </tr>
-                                    @endif
-                                    @if($project->pro_keyword)
-                                    <tr>
-                                        <th>คำสำคัญ:</th>
-                                        <td>
-                                            @foreach(explode(',', $project->pro_keyword) as $keyword)
-                                                <span class="badge bg-secondary me-1 mb-1">{{ trim($keyword) }}</span>
-                                            @endforeach
-                                        </td>
-                                    </tr>
-                                    @endif
-                                    <tr>
-                                        <th>จำนวนการเข้าดู:</th>
-                                        <td><span class="badge bg-secondary">{{ number_format($project->pro_count_page ?? 0) }}</span> ครั้ง</td>
-                                    </tr>
-                                </table>
-                            </div>
-
-                            @if($project->pro_abstract)
-                            <div class="col-md-12 mt-3">
-                                <h6 class="fw-bold border-bottom pb-2">บทคัดย่อ (Abstract)</h6>
-                                @php
-                                    $separator = '<br><br><br><br>';
-                                    if (!str_contains($project->pro_abstract, $separator) && str_contains($project->pro_abstract, '<br><br><br>')) {
-                                        $separator = '<br><br><br>';
-                                    }
-                                    $abstractParts = explode($separator, $project->pro_abstract);
-                                @endphp
-
-                                <style>
-                                    [data-bs-theme="dark"] .bg-abstract {
-                                        background-color: #2b3035 !important;
-                                        color: #dee2e6;
-                                    }
-                                    [data-bs-theme="light"] .bg-abstract {
-                                        background-color: #f8f9fa !important;
-                                        color: #212529;
-                                    }
-                                    @media print {
-                                        .bg-abstract {
-                                            border: 1px solid #dee2e6 !important;
-                                            background-color: #fff !important;
-                                            color: #000 !important;
-                                        }
-                                        .d-print-none { display: none !important; }
-                                        .card { border: none !important; shadow: none !important; }
-                                    }
-                                </style>
-
-                                @if(!empty($abstractParts[0]))
-                                <div class="mb-3">
-                                    <span class="badge bg-primary mb-2 d-print-none">บทคัดย่อภาษาไทย</span>
-                                    <strong class="d-none d-print-block">บทคัดย่อภาษาไทย</strong>
-                                    <div class="bg-abstract p-3 rounded border" style="min-height: 100px; height: auto; overflow: visible; overflow-wrap: break-word; word-wrap: break-word;">
-                                        {!! $abstractParts[0] !!}
-                                    </div>
-                                </div>
-                                @endif
-
-                                @if(!empty($abstractParts[1]))
-                                <div>
-                                    <span class="badge bg-info text-dark mb-2 d-print-none">บทคัดย่อภาษาอังกฤษ</span>
-                                    <strong class="d-none d-print-block">บทคัดย่อภาษาอังกฤษ</strong>
-                                    <div class="bg-abstract p-3 rounded border" style="min-height: 100px; height: auto; overflow: visible; overflow-wrap: break-word; word-wrap: break-word;">
-                                        {!! $abstractParts[1] !!}
-                                    </div>
-                                </div>
-                                @endif
-                            </div>
+        <div class="row g-4">
+            <!-- Left Column: Project Summary & Quick Info -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm border mb-4 sticky-top" style="top: 20px;">
+                    <div class="card-header bg-primary text-white py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-light text-primary fw-bold font-monospace fs-6">
+                                {{ $project->pro_code ?? 'ID: ' . $project->pro_id }}
+                            </span>
+                            @if($project->status)
+                                <span class="badge" style="background-color: {{ $project->status->ps_color ?? '#6c757d' }}; color: #fff;">
+                                    {{ $project->status->ps_name }}
+                                </span>
                             @endif
                         </div>
                     </div>
-                </div>
+                    <div class="card-body">
+                        <!-- Budget Highlight -->
+                        <div class="text-center p-3 mb-3 bg-body-secondary rounded border border-secondary-subtle">
+                            <span class="text-body-secondary small fw-bold text-uppercase d-block mb-1">งบประมาณโครงการ</span>
+                            <h3 class="fw-bold mb-0 text-success">฿{{ number_format($project->pro_budget, 2) }}</h3>
+                        </div>
 
-                <!-- Files (Mobile Only - shows on < lg) - Placed before Researchers on mobile -->
-                <div class="d-lg-none d-print-none">
-                    @include('backend.rdb_project._files_card')
-                </div>
+                        <!-- Key Details List -->
+                        <ul class="list-group list-group-flush mb-3 small">
+                            <li class="list-group-item bg-transparent d-flex justify-content-between px-0">
+                                <span class="text-body-secondary">ปีงบประมาณ:</span>
+                                <span class="fw-bold text-body">{{ $project->year->year_name ?? '-' }}</span>
+                            </li>
+                            <li class="list-group-item bg-transparent d-flex justify-content-between px-0">
+                                <span class="text-body-secondary">หน่วยงาน/คณะ:</span>
+                                <span class="fw-bold text-body text-end ms-2">{{ $project->department->department_nameTH ?? '-' }}</span>
+                            </li>
+                            <li class="list-group-item bg-transparent d-flex justify-content-between px-0">
+                                <span class="text-body-secondary">ประเภททุน:</span>
+                                <span class="fw-bold text-body text-end ms-2">{{ $project->type->pt_name ?? '-' }}</span>
+                            </li>
+                            @if($project->typeSub)
+                            <li class="list-group-item bg-transparent d-flex justify-content-between px-0">
+                                <span class="text-body-secondary">ทุนย่อย:</span>
+                                <span class="fw-bold text-body text-end ms-2">{{ $project->typeSub->pts_name }}</span>
+                            </li>
+                            @endif
+                            <li class="list-group-item bg-transparent d-flex justify-content-between px-0">
+                                <span class="text-body-secondary">ระยะเวลา:</span>
+                                <span class="fw-bold text-body text-end ms-2">
+                                    {{ \App\Helpers\ThaiDateHelper::format($project->pro_date_start) }} ถึง {{ \App\Helpers\ThaiDateHelper::format($project->pro_date_end) }}
+                                </span>
+                            </li>
+                        </ul>
 
-                <!-- นักวิจัย -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center d-print-none">
-                        <h5 class="mb-0"><i class="bi bi-people"></i> คณะผู้วิจัย (Researchers)</h5>
-                        <button type="button" class="btn btn-light btn-sm text-success fw-bold" data-bs-toggle="modal" data-bs-target="#researcherModal">
-                            <i class="bi bi-gear-fill"></i> จัดการ
-                        </button>
+                        <!-- Statistics Counter -->
+                        <div class="row g-2 text-center mb-3">
+                            <div class="col-4">
+                                <div class="p-2 border rounded bg-body-tertiary">
+                                    <div class="fw-bold fs-6 text-primary">{{ number_format($project->pro_count_page ?? 0) }}</div>
+                                    <small class="text-body-secondary" style="font-size: 0.75rem;">เข้าชม</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-2 border rounded bg-body-tertiary">
+                                    <div class="fw-bold fs-6 text-info">{{ number_format($project->pro_count_abs ?? 0) }}</div>
+                                    <small class="text-body-secondary" style="font-size: 0.75rem;">บทคัดย่อ</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-2 border rounded bg-body-tertiary">
+                                    <div class="fw-bold fs-6 text-success">{{ number_format($project->pro_count_full ?? 0) }}</div>
+                                    <small class="text-body-secondary" style="font-size: 0.75rem;">รายงาน</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Shortcuts -->
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-outline-success btn-sm d-flex justify-content-between align-items-center" data-bs-toggle="modal" data-bs-target="#researcherModal">
+                                <span><i class="bi bi-people-fill me-2"></i> จัดการคณะผู้วิจัย</span>
+                                <span class="badge bg-success">{{ $project->rdbProjectWorks->count() }} ท่าน</span>
+                            </button>
+                            <button type="button" class="btn btn-outline-primary btn-sm d-flex justify-content-between align-items-center" data-bs-toggle="modal" data-bs-target="#projectFilesModal">
+                                <span><i class="bi bi-file-earmark-arrow-up-fill me-2"></i> จัดการไฟล์โครงการ</span>
+                                <span class="badge bg-primary">{{ ($project->pro_abstract_file ? 1 : 0) + ($project->pro_file ? 1 : 0) + $project->files->count() }} ไฟล์</span>
+                            </button>
+                        </div>
                     </div>
-                    <div class="card-header bg-success text-white d-none d-print-block">
-                         <h5 class="mb-0">คณะผู้วิจัย (Researchers)</h5>
+
+                    <!-- System Info Footer -->
+                    <div class="card-footer bg-body-tertiary py-2 px-3 small text-body-secondary">
+                        @php
+                            $createdBy = $project->user_created ? \App\Models\User::find($project->user_created) : null;
+                            $updatedBy = $project->user_updated ? \App\Models\User::find($project->user_updated) : null;
+                            $createdByName = $createdBy?->researcher ? ($createdBy->researcher->researcher_fname . ' ' . $createdBy->researcher->researcher_lname) : ($createdBy?->username ?? '-');
+                            $updatedByName = $updatedBy?->researcher ? ($updatedBy->researcher->researcher_fname . ' ' . $updatedBy->researcher->researcher_lname) : ($updatedBy?->username ?? '-');
+                        @endphp
+                        <div><i class="bi bi-clock me-1"></i> สร้าง: {{ \App\Helpers\ThaiDateHelper::formatDateTime($project->created_at) }} ({{ $createdByName }})</div>
+                        @if($project->updated_at)
+                        <div><i class="bi bi-pencil me-1"></i> ปรับปรุง: {{ \App\Helpers\ThaiDateHelper::formatDateTime($project->updated_at) }} ({{ $updatedByName }})</div>
+                        @endif
                     </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>ชื่อ-นามสกุล</th>
-                                        <th>ตำแหน่งในโครงการ</th>
-                                        <th>สัดส่วน (%)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($project->rdbProjectWorks as $work)
-                                    <tr>
-                                        <td>
-                                            @if($work->researcher)
-                                                <a href="{{ route('backend.rdb_researcher.show', $work->researcher->researcher_id) }}" class="text-decoration-none text-body fw-bold hover-primary">
-                                                    {{ $work->researcher->prefix->prefix_nameTH ?? '' }}{{ $work->researcher->researcher_fname }} {{ $work->researcher->researcher_lname }}
-                                                </a>
-                                                <small class="text-body-secondary d-block">
-                                                    {{ $work->researcher->department->department_nameTH ?? $work->researcher->department->department_nameEN ?? $work->researcher->researcher_note ?? '-' }}
-                                                </small>
-                                            @else
-                                                -
+                </div>
+            </div>
+
+            <!-- Right Column: Tabs (Details, Researchers, Files, Related Outputs) -->
+            <div class="col-lg-8">
+                <div class="card shadow-sm border mb-4">
+                    <div class="card-header bg-body-tertiary border-bottom pb-0 pt-3">
+                        <ul class="nav nav-tabs card-header-tabs" id="projectTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active fw-bold" id="details-tab" data-bs-toggle="tab" data-bs-target="#tab-details" type="button" role="tab" aria-selected="true">
+                                    <i class="bi bi-info-circle me-1"></i> ข้อมูล & บทคัดย่อ
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link fw-bold" id="researchers-tab" data-bs-toggle="tab" data-bs-target="#tab-researchers" type="button" role="tab" aria-selected="false">
+                                    <i class="bi bi-people me-1"></i> คณะผู้วิจัย
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1">{{ $project->rdbProjectWorks->count() }}</span>
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link fw-bold" id="files-tab" data-bs-toggle="tab" data-bs-target="#tab-files" type="button" role="tab" aria-selected="false">
+                                    <i class="bi bi-folder-check me-1"></i> เอกสารโครงการ
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle ms-1">{{ ($project->pro_abstract_file ? 1 : 0) + ($project->pro_file ? 1 : 0) + $project->files->count() }}</span>
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link fw-bold" id="related-tab" data-bs-toggle="tab" data-bs-target="#tab-related" type="button" role="tab" aria-selected="false">
+                                    <i class="bi bi-diagram-3 me-1"></i> ผลงานที่เกี่ยวข้อง
+                                    <span class="badge bg-info-subtle text-info border border-info-subtle ms-1">{{ $project->publisheds->count() + $project->dips->count() + $project->utilizations->count() }}</span>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="tab-content" id="projectTabContent">
+                            <!-- Tab 1: รายละเอียด & บทคัดย่อ -->
+                            <div class="tab-pane fade show active" id="tab-details" role="tabpanel" aria-labelledby="details-tab">
+                                <h4 class="text-primary fw-bold mb-2">{!! $project->pro_nameTH !!}</h4>
+                                @if($project->pro_nameEN)
+                                    <h5 class="text-body-secondary mb-4">{!! $project->pro_nameEN !!}</h5>
+                                @endif
+
+                                <div class="table-responsive mb-4">
+                                    <table class="table table-bordered table-sm align-middle">
+                                        <tbody>
+                                            <tr>
+                                                <th style="width: 25%;" class="bg-body-tertiary">ประเภททุน:</th>
+                                                <td>
+                                                    {{ $project->type->pt_name ?? '-' }}
+                                                    @if($project->typeSub)
+                                                        <small class="text-body-secondary">({{ $project->typeSub->pts_name }})</small>
+                                                    @endif
+                                                </td>
+                                                <th style="width: 25%;" class="bg-body-tertiary">กลุ่มโครงการ:</th>
+                                                <td>{{ $project->group->group_name ?? '-' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="bg-body-tertiary">ยุทธศาสตร์:</th>
+                                                <td colspan="3">{{ $project->strategic->strategic_name ?? '-' }}</td>
+                                            </tr>
+                                            @if($project->pro_keyword)
+                                            <tr>
+                                                <th class="bg-body-tertiary">คำสำคัญ:</th>
+                                                <td colspan="3">
+                                                    @foreach(explode(',', $project->pro_keyword) as $keyword)
+                                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle me-1 mb-1">{{ trim($keyword) }}</span>
+                                                    @endforeach
+                                                </td>
+                                            </tr>
                                             @endif
-                                        </td>
-                                        <td>
-                                            {{ $work->position->position_nameTH ?? '-' }}
-                                        </td>
-                                        <td>{{ $work->ratio }}%</td>
-                                    </tr>
-                                    @empty
-                                    <tr>
-                                        <td colspan="3" class="text-center text-muted py-3">ไม่มีข้อมูลนักวิจัย</td>
-                                    </tr>
-                                    @endforelse
-                                </tbody>
-                                <tfoot class="table-light fw-bold">
-                                    <tr>
-                                        <td colspan="2" class="text-end">รวมสัดส่วน (Total Ratio):</td>
-                                        <td>{{ $project->rdbProjectWorks->sum('ratio') }}%</td>
-                                    </tr>
-                                </tfoot>
-                            </table>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                @if($project->pro_abstract)
+                                <div class="mt-4">
+                                    <h6 class="fw-bold border-bottom pb-2 mb-3">
+                                        <i class="bi bi-file-text me-1 text-primary"></i> บทคัดย่อ (Abstract)
+                                    </h6>
+                                    @php
+                                        $separator = '<br><br><br><br>';
+                                        if (!str_contains($project->pro_abstract, $separator) && str_contains($project->pro_abstract, '<br><br><br>')) {
+                                            $separator = '<br><br><br>';
+                                        }
+                                        $abstractParts = explode($separator, $project->pro_abstract);
+                                    @endphp
+
+                                    @if(!empty($abstractParts[0]))
+                                    <div class="mb-3">
+                                        <span class="badge bg-primary mb-2">บทคัดย่อภาษาไทย</span>
+                                        <div class="p-3 rounded border bg-body-tertiary" style="line-height: 1.8; overflow-wrap: break-word;">
+                                            {!! $abstractParts[0] !!}
+                                        </div>
+                                    </div>
+                                    @endif
+
+                                    @if(!empty($abstractParts[1]))
+                                    <div>
+                                        <span class="badge bg-info text-dark mb-2">บทคัดย่อภาษาอังกฤษ</span>
+                                        <div class="p-3 rounded border bg-body-tertiary" style="line-height: 1.8; overflow-wrap: break-word;">
+                                            {!! $abstractParts[1] !!}
+                                        </div>
+                                    </div>
+                                    @endif
+                                </div>
+                                @endif
+                            </div>
+
+                            <!-- Tab 2: คณะผู้วิจัย -->
+                            <div class="tab-pane fade" id="tab-researchers" role="tabpanel" aria-labelledby="researchers-tab">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="fw-bold mb-0 text-body">
+                                        <i class="bi bi-people-fill text-success me-2"></i>รายชื่อผู้วิจัยและสัดส่วนงานวิจัย
+                                    </h6>
+                                    <button type="button" class="btn btn-sm btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#researcherModal">
+                                        <i class="bi bi-gear-fill me-1"></i> จัดการคณะผู้วิจัย
+                                    </button>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 50%;">ชื่อ-นามสกุล</th>
+                                                <th style="width: 30%;">ตำแหน่งในโครงการ</th>
+                                                <th style="width: 20%;" class="text-center">สัดส่วน (%)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @forelse($project->rdbProjectWorks as $work)
+                                            <tr>
+                                                <td>
+                                                    @if($work->researcher)
+                                                        <a href="{{ route('backend.rdb_researcher.show', $work->researcher->researcher_id) }}" class="text-decoration-none text-body fw-bold">
+                                                            {{ $work->researcher->prefix->prefix_nameTH ?? '' }}{{ $work->researcher->researcher_fname }} {{ $work->researcher->researcher_lname }}
+                                                        </a>
+                                                        <small class="text-body-secondary d-block">
+                                                            {{ $work->researcher->department->department_nameTH ?? $work->researcher->department->department_nameEN ?? '-' }}
+                                                        </small>
+                                                    @else
+                                                        -
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    @if($work->position_id == 1)
+                                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle">{{ $work->position->position_nameTH ?? '-' }}</span>
+                                                    @else
+                                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">{{ $work->position->position_nameTH ?? '-' }}</span>
+                                                    @endif
+                                                </td>
+                                                <td class="text-center fw-bold">{{ $work->ratio }}%</td>
+                                            </tr>
+                                            @empty
+                                            <tr>
+                                                <td colspan="3" class="text-center py-4 text-body-secondary">ยังไม่มีข้อมูลผู้วิจัยในโครงการ</td>
+                                            </tr>
+                                            @endforelse
+                                        </tbody>
+                                        @if($project->rdbProjectWorks->count() > 0)
+                                        <tfoot class="table-light fw-bold">
+                                            <tr>
+                                                <td colspan="2" class="text-end">รวมสัดส่วนทั้งหมด:</td>
+                                                <td class="text-center">
+                                                    @php $totalRatio = $project->rdbProjectWorks->sum('ratio'); @endphp
+                                                    <span class="badge {{ $totalRatio == 100 ? 'bg-success' : 'bg-warning text-dark' }} fs-6">
+                                                        {{ $totalRatio }}%
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                        @endif
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Tab 3: เอกสารโครงการ -->
+                            <div class="tab-pane fade" id="tab-files" role="tabpanel" aria-labelledby="files-tab">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="fw-bold mb-0 text-body">
+                                        <i class="bi bi-folder-check text-primary me-2"></i>เอกสารและไฟล์แนบโครงการ
+                                    </h6>
+                                    <button type="button" class="btn btn-sm btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#projectFilesModal">
+                                        <i class="bi bi-upload me-1"></i> อัปโหลด / จัดการไฟล์
+                                    </button>
+                                </div>
+
+                                <div class="row g-3 mb-4">
+                                    <!-- Abstract File Card -->
+                                    <div class="col-md-6">
+                                        <div class="card h-100 border">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                                    <span class="fw-bold"><i class="bi bi-file-earmark-pdf text-danger me-2 fs-5"></i>ไฟล์บทคัดย่อ (Abstract)</span>
+                                                    @if($project->pro_abstract_file)
+                                                        <span class="badge bg-success-subtle text-success border border-success-subtle">มีไฟล์</span>
+                                                    @else
+                                                        <span class="badge bg-secondary-subtle text-secondary">ไม่มีไฟล์</span>
+                                                    @endif
+                                                </div>
+                                                @if($project->pro_abstract_file)
+                                                    <div class="small text-body-secondary text-truncate mb-3">{{ $project->pro_abstract_file }}</div>
+                                                    <a href="{{ route('backend.rdb_project.view_abstract', $project->pro_id) }}" target="_blank" class="btn btn-outline-primary btn-sm w-100">
+                                                        <i class="bi bi-eye me-1"></i> เปิดดูไฟล์บทคัดย่อ
+                                                    </a>
+                                                @else
+                                                    <p class="small text-body-secondary mb-0">ยังไม่มีการอัปโหลดไฟล์บทคัดย่อ</p>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Report File Card -->
+                                    <div class="col-md-6">
+                                        <div class="card h-100 border">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                                    <span class="fw-bold"><i class="bi bi-file-earmark-richtext text-success me-2 fs-5"></i>รายงานฉบับสมบูรณ์</span>
+                                                    @if($project->pro_file)
+                                                        <span class="badge bg-success-subtle text-success border border-success-subtle">มีไฟล์</span>
+                                                    @else
+                                                        <span class="badge bg-secondary-subtle text-secondary">ไม่มีไฟล์</span>
+                                                    @endif
+                                                </div>
+                                                @if($project->pro_file)
+                                                    <div class="small text-body-secondary text-truncate mb-3">{{ $project->pro_file }}</div>
+                                                    <a href="{{ route('backend.rdb_project.view_report', $project->pro_id) }}" target="_blank" class="btn btn-outline-success btn-sm w-100">
+                                                        <i class="bi bi-eye me-1"></i> เปิดดูรายงานฉบับสมบูรณ์
+                                                    </a>
+                                                @else
+                                                    <p class="small text-body-secondary mb-0">ยังไม่มีการอัปโหลดรายงานฉบับสมบูรณ์</p>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Additional Files List -->
+                                <h6 class="fw-bold mb-2">เอกสารเพิ่มเติม ({{ $project->files->count() }} ไฟล์)</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>ชื่อเอกสาร</th>
+                                                <th>หมายเหตุ</th>
+                                                <th class="text-center" style="width: 120px;">ดาวน์โหลด</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @forelse($project->files as $file)
+                                            <tr>
+                                                <td>
+                                                    <i class="bi bi-paperclip text-primary me-2"></i>
+                                                    <span class="fw-semibold">{{ $file->rf_filesname }}</span>
+                                                </td>
+                                                <td><small class="text-body-secondary">{{ $file->rf_note ?? '-' }}</small></td>
+                                                <td class="text-center">
+                                                    <a href="{{ route('backend.rdb_project.file.download', [$project->pro_id, $file->id]) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                                        <i class="bi bi-download"></i> ดาวน์โหลด
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            @empty
+                                            <tr>
+                                                <td colspan="3" class="text-center py-3 text-body-secondary">ไม่มีเอกสารเพิ่มเติม</td>
+                                            </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Tab 4: ผลงานที่เกี่ยวข้อง -->
+                            <div class="tab-pane fade" id="tab-related" role="tabpanel" aria-labelledby="related-tab">
+                                <!-- 1. Publications -->
+                                <div class="mb-4">
+                                    <h6 class="fw-bold mb-3 text-info">
+                                        <i class="bi bi-journal-text me-2"></i>ผลงานตีพิมพ์ที่เชื่อมโยง ({{ $project->publisheds->count() }})
+                                    </h6>
+                                    @if($project->publisheds->count() > 0)
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>ชื่อผลงานตีพิมพ์</th>
+                                                    <th>วารสาร / แหล่งตีพิมพ์</th>
+                                                    <th class="text-center" style="width: 100px;">ดูข้อมูล</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($project->publisheds as $pub)
+                                                <tr>
+                                                    <td><span class="fw-semibold">{{ $pub->pub_name }}</span></td>
+                                                    <td><small class="text-body-secondary">{{ $pub->pub_name_journal ?? '-' }}</small></td>
+                                                    <td class="text-center">
+                                                        <a href="{{ route('backend.rdb_published.show', $pub->getKey()) }}" class="btn btn-sm btn-outline-info" target="_blank">
+                                                            <i class="bi bi-eye"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    @else
+                                    <p class="text-body-secondary small mb-0"><i class="bi bi-dash-circle me-1"></i> ยังไม่มีผลงานตีพิมพ์ที่เชื่อมโยงกับโครงการนี้</p>
+                                    @endif
+                                </div>
+
+                                <hr>
+
+                                <!-- 2. Intellectual Property -->
+                                <div class="mb-4">
+                                    <h6 class="fw-bold mb-3 text-warning">
+                                        <i class="bi bi-award me-2"></i>ทรัพย์สินทางปัญญาที่เชื่อมโยง ({{ $project->dips->count() }})
+                                    </h6>
+                                    @if($project->dips->count() > 0)
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>ชื่อผลงานทรัพย์สินฯ</th>
+                                                    <th>เลขที่คำขอ</th>
+                                                    <th class="text-center" style="width: 100px;">ดูข้อมูล</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($project->dips as $dip)
+                                                <tr>
+                                                    <td><span class="fw-semibold">{{ $dip->dip_data2_name }}</span></td>
+                                                    <td><code>{{ $dip->dip_request_number ?? '-' }}</code></td>
+                                                    <td class="text-center">
+                                                        <a href="{{ route('backend.rdb_dip.show', $dip->dip_id) }}" class="btn btn-sm btn-outline-warning" target="_blank">
+                                                            <i class="bi bi-eye"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    @else
+                                    <p class="text-body-secondary small mb-0"><i class="bi bi-dash-circle me-1"></i> ยังไม่มีทรัพย์สินทางปัญญาที่เชื่อมโยงกับโครงการนี้</p>
+                                    @endif
+                                </div>
+
+                                <hr>
+
+                                <!-- 3. Utilization -->
+                                <div>
+                                    <h6 class="fw-bold mb-3 text-danger">
+                                        <i class="bi bi-rocket-takeoff me-2"></i>การนำไปใช้ประโยชน์ที่เชื่อมโยง ({{ $project->utilizations->count() }})
+                                    </h6>
+                                    @if($project->utilizations->count() > 0)
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>รายละเอียดการนำไปใช้</th>
+                                                    <th>ประเภทการนำไปใช้</th>
+                                                    <th class="text-center" style="width: 100px;">ดูข้อมูล</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($project->utilizations as $utz)
+                                                <tr>
+                                                    <td><span class="fw-semibold">{{ $utz->utz_agency_name ?? $utz->utz_location_address ?? '-' }}</span></td>
+                                                    <td><span class="badge bg-danger-subtle text-danger border border-danger-subtle">{{ $utz->utilizeType->utz_type_name ?? '-' }}</span></td>
+                                                    <td class="text-center">
+                                                        <a href="{{ route('backend.rdbprojectutilize.show', $utz->utz_id) }}" class="btn btn-sm btn-outline-danger" target="_blank">
+                                                            <i class="bi bi-eye"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    @else
+                                    <p class="text-body-secondary small mb-0"><i class="bi bi-dash-circle me-1"></i> ยังไม่มีข้อมูลการนำไปใช้ประโยชน์ที่เชื่อมโยงกับโครงการนี้</p>
+                                    @endif
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-
-                <!-- Bottom Action Buttons -->
-                <div class="d-flex justify-content-end gap-2 mb-4 d-print-none">
-                     <a href="{{ route('backend.rdb_project.index') }}" class="btn btn-secondary d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
-                        <i class="bi bi-arrow-left me-2"></i> ย้อนกลับ
-                    </a>
-                    <a href="{{ route('backend.rdb_project.edit', $project->pro_id) }}" class="btn btn-warning d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
-                        <i class="bi bi-pencil me-2"></i> แก้ไขข้อมูล
-                    </a>
-                    <button onclick="window.print()" class="btn btn-primary d-inline-flex justify-content-center align-items-center" style="min-width: 120px;">
-                        <i class="bi bi-printer me-2"></i> พิมพ์
-                    </button>
-                    <button type="submit" form="delete-form-bottom" class="btn btn-danger d-inline-flex justify-content-center align-items-center" style="min-width: 120px;" onclick="return confirm('ยืนยันลบโครงการนี้?');">
-                        <i class="bi bi-trash me-2"></i> ลบ
-                    </button>
-                </div>
-                <form id="delete-form-bottom" action="{{ route('backend.rdb_project.destroy', $project->pro_id) }}" method="POST" class="d-none">
-                    @csrf
-                    @method('DELETE')
-                </form>
             </div>
-
-            <div class="col-lg-4 order-2 order-lg-2">
-                <!-- Files (Desktop Only - shows on >= lg) -->
-                <div class="d-none d-lg-block d-print-none">
-                    @include('backend.rdb_project._files_card')
-                </div>
+        </div>
 
                 <!-- Project Files Modal -->
                 <div class="modal fade" id="projectFilesModal" tabindex="-1" aria-labelledby="projectFilesModalLabel" aria-hidden="true">
@@ -460,72 +723,15 @@
                                 </div>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">❌ ปิด</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="bi bi-x-lg me-1"></i> ปิดหน้าต่าง
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Additional Files Summary (File Project) -->
-                <div class="card shadow-sm mb-4 d-print-none">
-                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="bi bi-paperclip"></i> ข้อมูลเอกสารเพิ่มเติม</h5>
-                        <button type="button" class="btn btn-light btn-sm text-success fw-bold" data-bs-toggle="modal" data-bs-target="#projectFilesModal">
-                            <i class="bi bi-gear-fill"></i> จัดการ
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-grid gap-2">
-                            @forelse($project->files as $file)
-                                @php
-                                    $btnClass = $file->rf_files_show ? 'btn-outline-success' : 'btn-outline-danger';
-                                    $badgeClass = $file->rf_files_show ? 'bg-success' : 'bg-danger';
-                                    $iconClass = $file->rf_files_show ? 'bi-check-circle-fill text-success' : 'bi-x-circle-fill text-danger';
-                                @endphp
-                                <a href="{{ route('backend.rdb_project.file.download', [$project->pro_id, $file->id]) }}" target="_blank" class="btn {{ $btnClass }} text-start d-flex justify-content-between align-items-center file-card-hover">
-                                    <span>
-                                        <i class="bi {{ $file->rf_files_show ? 'bi-check-circle-fill' : 'bi-x-circle-fill' }} fs-4 me-2"></i> 
-                                        <span class="fw-bold">{{ $file->rf_filesname }}</span><br>
-                                        @if($file->rf_note)
-                                            <small class="text-muted"><i class="bi bi-chat-left-text"></i> {{ $file->rf_note }}</small>
-                                        @endif
-                                    </span>
-                                    <span class="badge {{ $badgeClass }} rounded-pill" title="จำนวนดาวน์โหลด">
-                                        <i class="bi bi-eye"></i> {{ $file->rf_download ?? 0 }}
-                                    </span>
-                                </a>
-                            @empty
-                                <button class="btn btn-light text-start text-muted" disabled>
-                                    <i class="bi bi-file-earmark-x fs-4 me-2"></i> ไม่มีเอกสารเพิ่มเติม
-                                </button>
-                            @endforelse
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Metadata -->
-                <div class="card shadow-sm d-print-none">
-                    <div class="card-header bg-info text-dark">
-                        <h5 class="mb-0"><i class="bi bi-clock-history"></i> ประวัติการแก้ไข (History)</h5>
-                    </div>
-                    <div class="card-body small">
-                        @php
-                            function getUserName($user) {
-                                if(!$user) return '-';
-                                if($user->researcher) {
-                                    $r = $user->researcher;
-                                    return $r->researcher_fname . ' ' . $r->researcher_lname;
-                                }
-                                return $user->username ?? $user->email ?? '-';
-                            }
-                        @endphp
-                        <p class="mb-2"><strong>สร้างเมื่อ:</strong> {{ \App\Helpers\ThaiDateHelper::formatDateTime($project->created_at) }} โดย {{ getUserName($project->createdBy) }}</p>
-                        <p class="mb-0"><strong>แก้ไขล่าสุด:</strong> {{ \App\Helpers\ThaiDateHelper::formatDateTime($project->updated_at) }} โดย {{ getUserName($project->updatedBy) }}</p>
-                    </div>
-                </div>
             </div>
         </div>
-    </div>
 </div>
 @endsection
 

@@ -1,4 +1,4 @@
-@props(['searchRoute', 'collapsed' => true, 'simplePlaceholder' => 'พิมพ์คำค้นหา...'])
+@props(['searchRoute', 'exportRoute' => null, 'collapsed' => true, 'simplePlaceholder' => 'พิมพ์คำค้นหา...'])
 @php
     $action = $searchRoute ?? '#';
 @endphp
@@ -14,9 +14,17 @@
         <h5 class="mb-0"><i class="bi bi-search me-2"></i> ค้นหาข้อมูล (Search)</h5>
         
         <div class="d-flex align-items-center gap-2">
+            @if($exportRoute)
+                <a href="{{ $exportRoute . (request()->getQueryString() ? '?' . request()->getQueryString() : '') }}" 
+                   class="btn btn-sm btn-success text-white shadow-sm" 
+                   title="ส่งออกข้อมูลเป็น Excel (CSV)" 
+                   onclick="event.stopPropagation();">
+                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> ส่งออก Excel
+                </a>
+            @endif
             @if(request()->except(['page']))
                 <a href="{{ $action }}" class="btn btn-sm btn-warning" title="ล้างค่าการค้นหา" onclick="event.stopPropagation();">
-                    <i class="bi bi-arrow-counterclockwise"></i>
+                    <i class="bi bi-arrow-counterclockwise"></i> ล้างตัวกรอง
                 </a>
             @endif
             <button type="button" class="btn btn-sm btn-light">
@@ -73,6 +81,11 @@
                     <div class="tab-pane fade show active" id="simple-search" role="tabpanel" aria-labelledby="simple-tab">
                         <div class="input-group">
                             <input type="text" name="search" class="form-control" placeholder="{{ $simplePlaceholder }}" value="{{ request('search') }}">
+                            @if(request()->filled('search'))
+                                <a href="{{ $action }}" class="btn btn-outline-secondary" title="ล้างคำค้นหา">
+                                    <i class="bi bi-x-circle me-1"></i> ล้างค่า
+                                </a>
+                            @endif
                             <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> ค้นหา</button>
                         </div>
                     </div>

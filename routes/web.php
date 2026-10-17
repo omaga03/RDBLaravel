@@ -21,6 +21,8 @@ use App\Http\Controllers\Backend\RdbProjectTypeSubController;
 use App\Http\Controllers\Backend\RdbprojectworkController;
 use App\Http\Controllers\Backend\RdbstrategicController;
 use App\Http\Controllers\Backend\RdbyearController;
+use App\Http\Controllers\Backend\RbacController;
+use App\Http\Controllers\Backend\UserController;
 
 // Frontend Controllers
 use App\Http\Controllers\Frontend\JournalstatusController;
@@ -100,7 +102,9 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     Route::post('rdb_project/{id}/file', [RdbProjectController::class, 'storeFile'])->name('rdb_project.store_file');
     Route::put('rdb_project/{id}/file/{fileId}', [RdbProjectController::class, 'updateFile'])->name('rdb_project.update_file');
     Route::delete('rdb_project/{id}/file/{fileId}', [RdbProjectController::class, 'destroyFile'])->name('rdb_project.destroy_file');
-    Route::get('rdb_project/{id}/file/{fileId}/download', [RdbProjectController::class, 'downloadFile'])->name('rdb_project.download_file');
+    // Export Routes (Must be BEFORE resource routes)
+    Route::get('/rdb_project/export', [RdbProjectController::class, 'export'])->name('rdb_project.export');
+    Route::get('/rdb_researcher/export', [RdbResearcherController::class, 'export'])->name('rdb_researcher.export');
 
     Route::resource('rdb_project', RdbProjectController::class);
     Route::resource('rdb_researcher', RdbResearcherController::class);
@@ -126,6 +130,9 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     Route::resource('rdbpublishedtype', \App\Http\Controllers\Backend\RdbPublishedTypeController::class);
     Route::resource('rdbdiptype', \App\Http\Controllers\Backend\RdbDipTypeController::class);
     Route::resource('rdbprojectutilizetype', \App\Http\Controllers\Backend\RdbProjectUtilizeTypeController::class);
+
+    Route::resource('rbac', RbacController::class);
+    Route::resource('user', UserController::class);
 
     Route::resource('rdbyear', RdbyearController::class);
     Route::get('/rdb_published/search/researcher', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'searchResearcher'])->name('rdb_published.search_researcher');

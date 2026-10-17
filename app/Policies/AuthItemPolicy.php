@@ -15,7 +15,7 @@ class AuthItemPolicy
      */
     public function before(User $user, $ability)
     {
-        if ($user->hasRole('The Creator')) {
+        if ($user->hasRole('The Creator') || $user->hasRole('Admin')) {
             return true;
         }
     }
