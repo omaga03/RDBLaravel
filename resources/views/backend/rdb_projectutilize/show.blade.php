@@ -20,7 +20,7 @@
     [data-bs-theme="light"] .bg-light-styled { background-color: #f8f9fa !important; color: #212529; }
 </style>
 
-<div class="py-4">
+<div class="container-fluid py-4">
     <div class="row">
         <!-- Header & Action Buttons -->
         <x-page-header 
@@ -49,7 +49,7 @@
                                 $types = \App\Models\RdbProjectUtilizeType::whereIn('utz_type_id', $groupIds)->get();
                             @endphp
                             @foreach($types as $type)
-                                <span class="badge bg-info text-dark me-1 border shadow-sm">{{ $type->utz_typr_name }}</span>
+                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle me-1 shadow-sm">{{ $type->utz_typr_name }}</span>
                             @endforeach
                         </div>
                     @endif
@@ -104,8 +104,8 @@
                             <tr>
                                 <th>ปีงบประมาณ / ปีการศึกษา:</th>
                                 <td>
-                                    @if($item->utz_year_bud) <span class="badge bg-secondary">งบประมาณ: {{ $item->utz_year_bud }}</span> @endif
-                                    @if($item->utz_year_edu) <span class="badge bg-dark">การศึกษา: {{ $item->utz_year_edu }}</span> @endif
+                                    @if($item->utz_year_bud) <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">งบประมาณ: {{ $item->utz_year_bud }}</span> @endif
+                                    @if($item->utz_year_edu) <span class="badge bg-dark-subtle text-dark-emphasis border border-dark-subtle">การศึกษา: {{ $item->utz_year_edu }}</span> @endif
                                 </td>
                             </tr>
                             @endif
@@ -131,7 +131,7 @@
                     <h5 class="mb-0"><i class="bi bi-file-text"></i> รายละเอียดการดำเนินงาน (Utilization Details)</h5>
                 </div>
                 <div class="card-body">
-                    <div class="bg-light-styled p-3 rounded border">
+                    <div class="bg-body-secondary p-3 rounded border">
                         {!! $item->utz_detail !!}
                     </div>
                 </div>

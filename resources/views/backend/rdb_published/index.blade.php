@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="py-4">
+<div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0"><i class="bi bi-journal-text me-2"></i>จัดการข้อมูลการตีพิมพ์ (Publications)</h2>
         <a href="{{ route('backend.rdb_published.create') }}" class="btn btn-success d-inline-flex align-items-center">
@@ -109,79 +109,116 @@
         </div>
     </x-search-bar>
 
-    {{-- Data Table --}}
-    <x-card>
-        <div class="table-responsive">
-            <table class="table table-hover align-top mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th style="width: 40%;">ชื่อผลงาน</th>
-                        <th style="width: 25%;">ประเภท</th>
-                        <th style="width: 25%;">คณะผู้เขียน</th>
-                        <th style="width: 10%;" class="text-center">จัดการ</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($items as $item)
-                    <tr>
-                        <td class="ps-3">
-                            <div class="fw-bold">
-                                {{ $item->pub_name }}
-                            </div>
-                            <div class="text-muted small mb-1">
-                                <i class="bi bi-calendar-event me-1"></i> {{ \App\Helpers\ThaiDateHelper::format($item->pub_date, false, true) }}
-                            </div>
-                            <small class="text-secondary d-block">
-                                <i class="bi bi-journal-bookmark me-1"></i> {{ $item->pub_name_journal }}
-                            </small>
-                        </td>
-                        <td>
-                            <i class="bi bi-tag me-1 text-secondary"></i> {{ $item->pubtype->pubtype_subgroup ?? $item->pubtype->pubtype_grouptype ?? '-' }}
-                        </td>
-                        <td>
-                            @if($item->authors->isNotEmpty())
-                                @php
-                                    $firstAuthor = $item->authors->first();
-                                    $remainingCount = $item->authors->count() - 1;
-                                @endphp
-                                <div>
-                                    <i class="bi bi-person-circle text-secondary"></i>
-                                    {{ $firstAuthor->researcher_fname }} {{ $firstAuthor->researcher_lname }}
-                                    @if(isset($authorTypes[$firstAuthor->pivot->pubta_id]))
-                                        <small class="text-muted">({{ $authorTypes[$firstAuthor->pivot->pubta_id] }})</small>
+    <div class="card shadow-sm border mb-4">
+        <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center py-3">
+            <h5 class="mb-0 fw-bold text-body">
+                <i class="bi bi-list-ul me-2 text-primary"></i>รายการข้อมูลการตีพิมพ์
+                <span class="badge bg-primary rounded-pill ms-2">{{ number_format($items->total()) }} รายการ</span>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-top mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 45%;">ชื่อผลงาน</th>
+                            <th style="width: 20%;">ประเภท</th>
+                            <th style="width: 25%;">คณะผู้เขียน</th>
+                            <th style="width: 10%;" class="text-center text-nowrap">จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($items as $item)
+                        <tr>
+                            <td class="p-3">
+                                <div class="fw-bold mb-1">
+                                    <a href="{{ route('backend.rdb_published.show', $item->getKey()) }}" class="text-decoration-none text-body fw-bold hover-primary text-break">
+                                        {{ $item->pub_name }}
+                                    </a>
+                                </div>
+                                <div class="d-flex flex-wrap gap-2 align-items-center mt-2 small">
+                                    @if(isset($item->data_show))
+                                        @if($item->data_show)
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle" title="เผยแพร่สู่สาธารณะ">
+                                                <i class="bi bi-eye"></i> สาธารณะ
+                                            </span>
+                                        @else
+                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle" title="ซ่อนไว้ (ไม่แสดงหน้าบ้าน)">
+                                                <i class="bi bi-eye-slash"></i> ซ่อน
+                                            </span>
+                                        @endif
                                     @endif
-                                    @if($remainingCount > 0)
-                                        <span class="text-muted small">(+{{ $remainingCount }})</span>
+                                    @if($item->pub_date)
+                                        <span class="text-body-secondary">
+                                            <i class="bi bi-calendar-event me-1"></i> {{ \App\Helpers\ThaiDateHelper::format($item->pub_date, false, true) }}
+                                        </span>
                                     @endif
                                 </div>
-                            @else
-                                <span class="text-muted">-</span>
-                            @endif
-                        </td>
-                        <td class="text-center">
-                            <a href="{{ route('backend.rdb_published.show', $item->getKey()) }}" class="btn btn-outline-primary btn-sm" title="ดูรายละเอียด">
-                                <i class="bi bi-eye"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="4" class="text-center py-5 text-muted">
-                            <i class="bi bi-inbox fs-1 d-block mb-3"></i>
-                            ไม่พบข้อมูล
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                                @if($item->pub_name_journal)
+                                <small class="text-body-secondary d-block mt-1 text-break">
+                                    <i class="bi bi-journal-bookmark me-1 text-primary"></i> {{ $item->pub_name_journal }}
+                                </small>
+                                @endif
+                            </td>
+                            <td class="p-3">
+                                <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle text-wrap text-start">
+                                    {{ $item->pubtype->pubtype_subgroup ?? $item->pubtype->pubtype_grouptype ?? '-' }}
+                                </span>
+                            </td>
+                            <td class="p-3">
+                                @if($item->authors->isNotEmpty())
+                                    @php
+                                        $firstAuthor = $item->authors->first();
+                                        $remainingCount = $item->authors->count() - 1;
+                                    @endphp
+                                    <div>
+                                        <i class="bi bi-person-circle text-primary me-1"></i>
+                                        <a href="{{ route('backend.rdb_researcher.show', $firstAuthor->researcher_id) }}" class="text-decoration-none text-body fw-bold hover-primary">
+                                            {{ $firstAuthor->researcher_fname }} {{ $firstAuthor->researcher_lname }}
+                                        </a>
+                                        @if(isset($authorTypes[$firstAuthor->pivot->pubta_id]))
+                                            <small class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1" style="font-size: 0.75rem;">
+                                                {{ $authorTypes[$firstAuthor->pivot->pubta_id] }}
+                                            </small>
+                                        @endif
+                                        @if($remainingCount > 0)
+                                            <span class="text-body-secondary small ms-1">(+{{ $remainingCount }})</span>
+                                        @endif
+                                    </div>
+                                @else
+                                    <span class="text-body-secondary">-</span>
+                                @endif
+                            </td>
+                            <td class="text-center p-3 text-nowrap">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{{ route('backend.rdb_published.show', $item->getKey()) }}" class="btn btn-outline-primary" title="ดูรายละเอียด">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ route('backend.rdb_published.edit', $item->getKey()) }}" class="btn btn-outline-secondary" title="แก้ไข">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-body-secondary">
+                                <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
+                                ไม่พบข้อมูลการตีพิมพ์
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            
+            @if($items->hasPages())
+            <div class="d-flex justify-content-center p-4">
+                {{ $items->withQueryString()->links() }}
+            </div>
+            @endif
         </div>
-        
-        @if($items->hasPages())
-        <div class="mt-3">
-            {{ $items->withQueryString()->links() }}
-        </div>
-        @endif
-    </x-card>
+    </div>
 </div>
 
 @push('scripts')

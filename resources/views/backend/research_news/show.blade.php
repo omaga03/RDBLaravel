@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="py-4">
+<div class="container-fluid py-4">
     <div class="row">
         <!-- Header & Action Buttons -->
         <x-page-header 
@@ -38,7 +38,7 @@
                     
                     <div class="mb-3">
                         @if($item->news_type)
-                            <span class="badge bg-info text-dark me-2">{{ $item->news_type }}</span>
+                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle me-2">{{ $item->news_type }}</span>
                         @endif
                         <span class="text-muted border-end pe-2 me-2">
                             <i class="bi bi-calendar3 me-1"></i> ลงข่าวเมื่อ: {{ \App\Helpers\ThaiDateHelper::format($item->news_date, false, true) }}
@@ -71,7 +71,7 @@
                     <hr>
 
                     <h6 class="fw-bold border-bottom pb-2"><i class="bi bi-file-text me-2"></i>รายละเอียด</h6>
-                    <div class="p-3 rounded border">
+                    <div class="p-3 rounded border bg-body-secondary">
                         {!! $item->news_detail !!}
                     </div>
                 </div>

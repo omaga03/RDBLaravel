@@ -232,16 +232,16 @@
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
                                     <td>
-                                        <span class="fw-bold">
+                                        <a href="{{ route('backend.rdb_researcher.show', $author->researcher_id) }}" class="fw-bold text-body hover-primary text-decoration-none">
                                              {{ $author->researcher_fname }} {{ $author->researcher_lname }}
-                                        </span>
-                                        <small class="text-muted d-block">
+                                        </a>
+                                        <small class="text-body-secondary d-block">
                                             {{ $author->department->department_nameTH ?? '-' }}
                                         </small>
                                     </td>
                                     <td>
                                         @if(isset($authorTypes[$author->pivot->pubta_id]))
-                                            <span class="badge bg-info text-dark">{{ $authorTypes[$author->pivot->pubta_id] }}</span>
+                                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">{{ $authorTypes[$author->pivot->pubta_id] }}</span>
                                         @else
                                             -
                                         @endif

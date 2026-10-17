@@ -5,7 +5,7 @@
 @endpush
 
 @section('content')
-<div class="py-4">
+<div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0"><i class="bi bi-rocket-takeoff me-2"></i>จัดการการใช้ประโยชน์ (Utilization)</h2>
         <a href="{{ route('backend.rdbprojectutilize.create') }}" class="btn btn-success d-inline-flex align-items-center">
@@ -80,128 +80,157 @@
         </div>
     </x-search-bar>
 
-    {{-- Data Table --}}
-    <x-card>
-        <div class="table-responsive">
-            <table class="table table-hover align-top mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th style="width: 65%;">📅 วันที่ / หน่วยงาน / โครงการอ้างอิง</th>
-                        <th style="width: 30%;">ผู้ใช้ประโยชน์</th>
-                        <th style="width: 5%;" class="text-center">จัดการ</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($items as $item)
-                    <tr>
-                        <td>
-                            @if($item->utz_date)
-                                <small class="text-muted">
-                                    {{ \App\Helpers\ThaiDateHelper::format($item->utz_date, false, true) }}
-                                </small>
-                                <span class="text-muted mx-1">|</span>
-                            @endif
-
-                            <!-- Department Name -->
-                            <span class="fw-bold text-primary">
-                                {{ html_entity_decode($item->utz_department_name ?? '-') }}
-                            </span>
-
-                            @if($item->changwat)
-                                <small class="text-muted d-block mt-1">
-                                    📍 
-                                    @if($item->changwat->tambon_t)
-                                        ต.{{ preg_replace('/^ต\./', '', $item->changwat->tambon_t) }}
-                                    @endif
-                                    @if($item->changwat->amphoe_t)
-                                        อ.{{ preg_replace('/^อ\./', '', $item->changwat->amphoe_t) }}
-                                    @endif
-                                    @if($item->changwat->changwat_t)
-                                        จ.{{ preg_replace('/^จ\./', '', $item->changwat->changwat_t) }}
-                                    @endif
-                                </small>
-                            @endif
-
-                            <!-- Project Reference -->
-                            @if($item->project)
-                                <div class="mt-2 p-2 bg-light rounded border-start border-3 border-info">
-                                    <div class="small fw-bold text-muted mb-1">โครงการอ้างอิง:</div>
-                                    <a href="{{ route('backend.rdb_project.show', $item->project->pro_id) }}" class="text-decoration-none text-dark small" target="_blank">
-                                        <i class="bi bi-folder-symlink me-1"></i> {{ Str::limit($item->project->pro_nameTH, 80) }}
-                                    </a>
-                                    @php
-                                        $leader = $item->project->rdbProjectWorks->where('position_id', 1)->first();
-                                    @endphp
-                                    @if($leader && $leader->researcher)
-                                        <div class="small text-muted mt-1">
-                                            👨‍🔬 {{ $leader->researcher->researcher_fname }} {{ $leader->researcher->researcher_lname }}
-                                        </div>
-                                    @endif
-                                </div>
-                            @endif
-
-                            <!-- Utilize Types Badges -->
-                            @if($item->utz_group)
-                                <div class="mt-2">
-                                    @php
-                                        $groupIds = array_map('trim', explode(',', $item->utz_group));
-                                        $types = \App\Models\RdbProjectUtilizeType::whereIn('utz_type_id', $groupIds)->get();
-                                    @endphp
-                                    @foreach($types as $type)
-                                        <span class="badge bg-white text-primary border border-primary-subtle" style="font-size: 0.75rem;">
-                                            {{ $type->utz_typr_name }}
-                                        </span>
-                                    @endforeach
-                                </div>
-                            @endif
-                        </td>
-                        <td>
-                            <!-- Leading Person -->
-                            @if($item->utz_leading)
-                                <div class="fw-semibold">
-                                    👤 {{ $item->utz_leading }}
-                                </div>
-                            @else
-                                <span class="text-muted">-</span>
-                            @endif
-
-                            <!-- Position -->
-                            @if($item->utz_leading_position)
-                                <small class="text-muted d-block">
-                                    💼 {{ $item->utz_leading_position }}
-                                </small>
-                            @endif
-
-                            @if($item->utz_budget && floatval($item->utz_budget) > 0)
-                                <small class="text-success d-block mt-1">
-                                    💰 {{ number_format($item->utz_budget, 2) }} บาท
-                                </small>
-                            @endif
-                        </td>
-                        <td class="text-center">
-                            <a href="{{ route('backend.rdbprojectutilize.show', $item->utz_id) }}" class="btn btn-sm btn-outline-primary" title="ดูรายละเอียด">
-                                <i class="bi bi-eye"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="3" class="text-center py-5 text-muted">
-                            <i class="bi bi-inbox fs-2 d-block mb-3"></i>
-                            ไม่พบข้อมูลการใช้ประโยชน์
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+    <div class="card shadow-sm border mb-4">
+        <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center py-3">
+            <h5 class="mb-0 fw-bold text-body">
+                <i class="bi bi-list-ul me-2 text-primary"></i>รายการการใช้ประโยชน์งานวิจัย
+                <span class="badge bg-primary rounded-pill ms-2">{{ number_format($items->total()) }} รายการ</span>
+            </h5>
         </div>
-        
-        @if($items->hasPages())
-            <div class="mt-3">
-                {{ $items->withQueryString()->links() }}
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-top mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 60%;">📅 วันที่ / หน่วยงาน / โครงการอ้างอิง</th>
+                            <th style="width: 30%;">ผู้ใช้ประโยชน์</th>
+                            <th style="width: 10%;" class="text-center text-nowrap">จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($items as $item)
+                        <tr>
+                            <td class="p-3">
+                                <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
+                                    @if(isset($item->data_show))
+                                        @if($item->data_show)
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle" title="เผยแพร่สู่สาธารณะ">
+                                                <i class="bi bi-eye"></i> สาธารณะ
+                                            </span>
+                                        @else
+                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle" title="ซ่อนไว้ (ไม่แสดงหน้าบ้าน)">
+                                                <i class="bi bi-eye-slash"></i> ซ่อน
+                                            </span>
+                                        @endif
+                                    @endif
+                                    @if($item->utz_date)
+                                        <small class="text-body-secondary">
+                                            <i class="bi bi-calendar-event me-1"></i>{{ \App\Helpers\ThaiDateHelper::format($item->utz_date, false, true) }}
+                                        </small>
+                                    @endif
+                                </div>
+
+                                <!-- Department Name -->
+                                <div class="fw-bold fs-6 mt-1">
+                                    <a href="{{ route('backend.rdbprojectutilize.show', $item->utz_id) }}" class="text-decoration-none text-body fw-bold hover-primary text-break">
+                                        {{ html_entity_decode($item->utz_department_name ?? '-') }}
+                                    </a>
+                                </div>
+
+                                @if($item->changwat)
+                                    <small class="text-body-secondary d-block mt-1">
+                                        <i class="bi bi-geo-alt-fill text-danger me-1"></i>
+                                        @if($item->changwat->tambon_t)
+                                            ต.{{ preg_replace('/^ต\./', '', $item->changwat->tambon_t) }}
+                                        @endif
+                                        @if($item->changwat->amphoe_t)
+                                            อ.{{ preg_replace('/^อ\./', '', $item->changwat->amphoe_t) }}
+                                        @endif
+                                        @if($item->changwat->changwat_t)
+                                            จ.{{ preg_replace('/^จ\./', '', $item->changwat->changwat_t) }}
+                                        @endif
+                                    </small>
+                                @endif
+
+                                <!-- Project Reference -->
+                                @if($item->project)
+                                    <div class="mt-2 p-2 bg-body-tertiary rounded border-start border-3 border-info">
+                                        <div class="small fw-bold text-body-secondary mb-1">โครงการอ้างอิง:</div>
+                                        <a href="{{ route('backend.rdb_project.show', $item->project->pro_id) }}" class="text-decoration-none text-body fw-bold hover-primary small text-break d-block">
+                                            <i class="bi bi-folder-symlink me-1 text-primary"></i> {{ Str::limit($item->project->pro_nameTH, 80) }}
+                                        </a>
+                                        @php
+                                            $leader = $item->project->rdbProjectWorks->where('position_id', 1)->first();
+                                        @endphp
+                                        @if($leader && $leader->researcher)
+                                            <div class="small text-body-secondary mt-1">
+                                                <i class="bi bi-person-circle text-primary me-1"></i>
+                                                <a href="{{ route('backend.rdb_researcher.show', $leader->researcher->researcher_id) }}" class="text-decoration-none text-body hover-primary">
+                                                    {{ $leader->researcher->researcher_fname }} {{ $leader->researcher->researcher_lname }}
+                                                </a>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endif
+
+                                <!-- Utilize Types Badges -->
+                                @if($item->utz_group)
+                                    <div class="mt-2 d-flex flex-wrap gap-1">
+                                        @php
+                                            $groupIds = array_map('trim', explode(',', $item->utz_group));
+                                            $types = \App\Models\RdbProjectUtilizeType::whereIn('utz_type_id', $groupIds)->get();
+                                        @endphp
+                                        @foreach($types as $type)
+                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.75rem;">
+                                                {{ $type->utz_typr_name }}
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </td>
+                            <td class="p-3">
+                                <!-- Leading Person -->
+                                @if($item->utz_leading)
+                                    <div class="fw-semibold text-body">
+                                        <i class="bi bi-person me-1"></i>{{ $item->utz_leading }}
+                                    </div>
+                                @else
+                                    <span class="text-body-secondary">-</span>
+                                @endif
+
+                                <!-- Position -->
+                                @if($item->utz_leading_position)
+                                    <small class="text-body-secondary d-block mt-1">
+                                        <i class="bi bi-briefcase me-1"></i>{{ $item->utz_leading_position }}
+                                    </small>
+                                @endif
+
+                                @if($item->utz_budget && floatval($item->utz_budget) > 0)
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle mt-2">
+                                        ฿{{ number_format($item->utz_budget, 2) }}
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="text-center p-3 text-nowrap">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{{ route('backend.rdbprojectutilize.show', $item->utz_id) }}" class="btn btn-outline-primary" title="ดูรายละเอียด">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ route('backend.rdbprojectutilize.edit', $item->utz_id) }}" class="btn btn-outline-secondary" title="แก้ไข">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="3" class="text-center py-5 text-body-secondary">
+                                <i class="bi bi-inbox fs-2 d-block mb-3 opacity-50"></i>
+                                ไม่พบข้อมูลการใช้ประโยชน์
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
-        @endif
-    </x-card>
+            
+            @if($items->hasPages())
+                <div class="d-flex justify-content-center p-4">
+                    {{ $items->withQueryString()->links() }}
+                </div>
+            @endif
+        </div>
+    </div>
 </div>
 
 @push('scripts')

@@ -92,8 +92,18 @@
                                         {{ $item->researcher->researcher_fname }} {{ $item->researcher->researcher_lname }}
                                     </a>
                                     @if($item->researcher->department)
-                                        <span class="text-muted ms-1">({{ $item->researcher->department->department_nameTH }})</span>
+                                        <span class="text-body-secondary ms-1">({{ $item->researcher->department->department_nameTH }})</span>
                                     @endif
+                                </td>
+                            </tr>
+                            @endif
+                            @if($item->project)
+                            <tr>
+                                <th>โครงการวิจัยที่เกี่ยวข้อง:</th>
+                                <td>
+                                    <a href="{{ route('backend.rdb_project.show', $item->project->pro_id) }}" class="fw-bold text-decoration-none text-body hover-primary">
+                                        <i class="bi bi-folder-symlink me-1 text-primary"></i> {{ $item->project->pro_nameTH }}
+                                    </a>
                                 </td>
                             </tr>
                             @endif

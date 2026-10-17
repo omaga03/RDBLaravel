@@ -16,6 +16,11 @@ class UserPolicy
         }
     }
 
+    public function viewDashboard(User $user): bool
+    {
+        return $user->hasRole('The Creator') || count($user->roles) > 0;
+    }
+
     public function viewAny(?User $user): bool
     {
         return false;

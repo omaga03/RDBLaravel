@@ -9,7 +9,7 @@
 @php 
     $item = $researcher; 
 @endphp
-<div class="py-4">
+<div class="container-fluid py-4">
     {{-- Page Header with Actions --}}
     <x-page-header 
         title="รายละเอียดข้อมูลนักวิจัย"
@@ -30,10 +30,10 @@
                         @if($item->researcher_picture)
                             <img src="{{ asset('storage/uploads/researchers/' . $item->researcher_picture) }}" 
                                  alt="{{ $item->researcher_fname }}" 
-                                 class="rounded-circle object-fit-cover shadow-sm bg-white"
-                                 style="width: 150px; height: 150px; border: 4px solid #fff;">
+                                 class="rounded-circle object-fit-cover shadow-sm bg-body border border-3 border-body-secondary"
+                                 style="width: 150px; height: 150px;">
                         @else
-                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto text-white shadow-sm border border-4 border-white" 
+                            <div class="rounded-circle bg-secondary-subtle text-secondary-emphasis d-flex align-items-center justify-content-center mx-auto shadow-sm border border-3 border-body-secondary" 
                                  style="width: 150px; height: 150px; font-size: 4rem;">
                                 {{ strtoupper(substr($item->researcher_fnameEN ?? 'U', 0, 1)) }}
                             </div>
@@ -41,9 +41,9 @@
                         
                         <!-- Upload Trigger Button -->
                         <a href="#" data-bs-toggle="modal" data-bs-target="#editImageModal" 
-                           class="position-absolute bottom-0 end-0 bg-white border rounded-circle d-flex align-items-center justify-content-center shadow-sm text-primary"
+                           class="position-absolute bottom-0 end-0 bg-body border rounded-circle d-flex align-items-center justify-content-center shadow-sm text-primary"
                            style="width: 40px; height: 40px; text-decoration: none; right: 5px !important; bottom: 5px !important;">
-                            <i class="bi bi-camera-fill"></i>
+                             <i class="bi bi-camera-fill"></i>
                         </a>
                     </div>
                     
@@ -59,7 +59,7 @@
                         </span>
                     </div>
 
-                    <div class="mb-3 d-flex justify-content-center align-items-center bg-light rounded p-2 mx-4 border">
+                    <div class="mb-3 d-flex justify-content-center align-items-center bg-body-secondary rounded p-2 mx-4 border border-secondary-subtle">
                         <i class="bi bi-upc-scan me-2 text-muted"></i>
                         <span class="text-secondary small font-monospace me-2 text-break fw-bold">{{ $item->researcher_codeid ?? '-' }}</span>
                          <a href="#" data-bs-toggle="modal" data-bs-target="#editCodeIdModal" class="text-secondary text-decoration-none" title="แก้ไข Code ID">
@@ -74,7 +74,7 @@
                         <p class="mb-2"><i class="bi bi-telephone-fill text-primary me-2"></i> {{ $item->researcher_tel ?? '-' }}</p>
                         <p class="mb-2"><i class="bi bi-phone-fill text-primary me-2"></i> {{ $item->researcher_mobile ?? '-' }}</p>
                         @if($item->scopus_authorId)
-                            <div class="mb-2 p-2 bg-light rounded border">
+                            <div class="mb-2 p-2 bg-body-secondary rounded border border-secondary-subtle">
                                 <div class="mb-1">
                                     <i class="bi bi-journal-bookmark-fill text-info me-2"></i> <strong>Scopus ID:</strong> 
                                     <a href="https://www.scopus.com/authid/detail.uri?authorId={{ $item->scopus_authorId }}" target="_blank" class="text-decoration-none">
@@ -82,7 +82,7 @@
                                     </a>
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between">
-                                    <span>h-index: <span class="badge bg-info text-dark">{{ $item->researcher_hindex ?? 0 }}</span></span>
+                                    <span>h-index: <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">{{ $item->researcher_hindex ?? 0 }}</span></span>
                                     <form action="{{ route('backend.rdb_researcher.sync_scopus', $item->researcher_id) }}" method="POST" class="d-inline">
                                         @csrf
                                         <button type="submit" class="btn btn-sm btn-outline-info py-0 px-2" title="Sync h-index จาก Scopus">
@@ -113,7 +113,7 @@
         <!-- Main Content: Tabs -->
         <div class="col-md-8">
             <div class="card shadow-sm">
-                <div class="card-header bg-white">
+                <div class="card-header border-bottom">
                     <ul class="nav nav-tabs card-header-tabs" id="researcherTabs" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="projects-tab" data-bs-toggle="tab" data-bs-target="#projects" type="button" role="tab">
@@ -153,7 +153,7 @@
                                         <tbody>
                                             @foreach($item->rdbProjects as $project)
                                                 <tr>
-                                                    <td><span class="badge bg-light text-dark border">{{ $project->year->year_name ?? '-' }}</span></td>
+                                                    <td><span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">{{ $project->year->year_name ?? '-' }}</span></td>
                                                     <td>
                                                         <div class="fw-bold mb-1">
                                                             @if($project->pro_code)
@@ -220,10 +220,12 @@
                                                 <tr>
                                                     <td>
                                                         @if(isset($pub->authorType))
-                                                            <span class="badge bg-info text-dark mb-1">{{ $pub->authorType->pubta_nameTH }}</span>
+                                                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle mb-1">{{ $pub->authorType->pubta_nameTH }}</span>
                                                         @endif
                                                         <div class="fw-bold text-body">
-                                                            {!! $pub->pub_name !!}
+                                                            <a href="{{ route('backend.rdb_published.show', $pub->id) }}" target="_blank" class="text-decoration-none text-body fw-bold">
+                                                                {!! $pub->pub_name !!}
+                                                            </a>
                                                         </div>
                                                         @if($pub->project)
                                                             <small class="text-muted d-block mt-1">
@@ -277,11 +279,13 @@
                                                         <div class="d-flex justify-content-between mb-2">
                                                             @if($util->utz_department_name)
                                                                 <div class="fw-bold text-primary">
-                                                                    <i class="bi bi-building"></i> {!! $util->utz_department_name !!}
+                                                                    <a href="{{ route('backend.rdbprojectutilize.show', $util->utz_id) }}" target="_blank" class="text-decoration-none text-primary fw-bold">
+                                                                        <i class="bi bi-building me-1"></i> {!! $util->utz_department_name !!}
+                                                                    </a>
                                                                 </div>
                                                             @endif
                                                             @if($util->utz_date)
-                                                                <span class="badge bg-light text-dark border">
+                                                                <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">
                                                                     {{ \App\Helpers\ThaiDateHelper::format($util->utz_date, false, true) }}
                                                                 </span>
                                                             @endif
@@ -350,7 +354,7 @@
                                                         @endif
                                                     </td>
                                                     <td>
-                                                        <span class="badge bg-light text-dark border">{{ $dip->dipType->dipt_name ?? '-' }}</span>
+                                                        <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">{{ $dip->dipType->dipt_name ?? '-' }}</span>
                                                     </td>
                                                     <td>
                                                         @if($dip->dip_request_date)

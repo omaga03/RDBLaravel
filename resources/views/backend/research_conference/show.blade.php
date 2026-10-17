@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="py-4">
+<div class="container-fluid py-4">
     <div class="row">
         <!-- Header & Action Buttons -->
         <x-page-header 
@@ -56,7 +56,7 @@
                         <div class="col-md-6">
                             @if($item->con_sub_deadline)
                             <div class="mb-2">
-                                <span class="badge bg-warning text-dark">
+                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
                                     <i class="bi bi-clock me-1"></i> ปิดรับผลงาน: {{ $item->con_sub_deadline }}
                                 </span>
                             </div>
@@ -81,7 +81,7 @@
                     <hr>
 
                     <h6 class="fw-bold border-bottom pb-2"><i class="bi bi-file-text me-2"></i>รายละเอียด</h6>
-                    <div class="p-3 rounded border">
+                    <div class="p-3 rounded border bg-body-secondary">
                         {!! $item->con_detail !!}
                     </div>
                 </div>

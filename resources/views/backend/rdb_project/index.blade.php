@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="py-4">
+<div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0"><i class="bi bi-folder2-open me-2"></i>จัดการโครงการวิจัย</h2>
         <a href="{{ route('backend.rdb_project.create') }}" class="btn btn-success d-inline-flex align-items-center">
@@ -125,111 +125,137 @@
         </div>
     </x-search-bar>
 
-    <x-card>
-        <div class="table-responsive">
-            <table class="table table-hover align-top mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th style="width: 65%;">ชื่อโครงการ</th>
-                        <th style="width: 25%;">นักวิจัย / สังกัด</th>
-                        <th style="width: 10%;" class="text-center">จัดการ</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($projects as $project)
-                    <tr>
-                        <td>
-                            <div class="fw-bold">
-                                @if($project->pro_id)
-                                    <span class="badge bg-secondary me-1">#{{ $project->pro_id }}</span>
-                                @endif
-                                <a href="{{ route('backend.rdb_project.show', $project->pro_id) }}" class="text-decoration-none text-body">
-                                    {!! $project->pro_nameTH !!}
-                                </a>
-                            </div>
-                            <small class="text-muted d-block mt-1">
-                                @if($project->year)
-                                    <span class="badge bg-info text-dark">ปี {{ $project->year->year_name }}</span>
-                                @endif
-                                @if($project->type)
-                                    <span class="badge bg-light text-dark border">{{ $project->type->pt_name }}</span>
-                                @endif
-                                @if($project->pro_budget)
-                                    <span class="badge bg-success bg-opacity-10 text-success">฿ {{ number_format($project->pro_budget, 0) }}</span>
-                                @endif
-                                @if($project->status)
-                                    <span class="badge" style="background-color: {{ $project->status->ps_color ?? '#6c757d' }}; color: #fff;">{{ $project->status->ps_name }}</span>
-                                @endif
-                                @if(request('search') && !empty($project->match_sources))
-                                    <span class="badge bg-warning text-dark" 
-                                          data-bs-toggle="tooltip" 
-                                          data-bs-placement="top" 
-                                          data-bs-html="true"
-                                          title="<strong>พบคำค้นหาใน:</strong><br>• {{ implode('<br>• ', $project->match_sources) }}">
-                                        <i class="bi bi-search"></i> {{ count($project->match_sources) }}
-                                    </span>
-                                @endif
-                            </small>
-                        </td>
-                        <td>
-                            @if($project->rdbProjectWorks->isNotEmpty())
-                                @php
-                                    $leaders = $project->rdbProjectWorks->whereIn('position_id', [1, 2]);
-                                    $firstLeader = $leaders->first();
-                                    $remainingWorks = $project->rdbProjectWorks->slice(1);
-                                    $remainingCount = $remainingWorks->count();
-                                    $remainingNames = $remainingWorks->map(function($work) {
-                                        return $work->researcher ? $work->researcher->researcher_fname . ' ' . $work->researcher->researcher_lname : '';
-                                    })->filter()->implode('<br>• ');
-                                @endphp
-                                @if($firstLeader && $firstLeader->researcher)
-                                <div>
-                                    <i class="bi bi-person-circle"></i> 
-                                    {{ $firstLeader->researcher->researcher_fname }} {{ $firstLeader->researcher->researcher_lname }}
-                                    @if($remainingCount > 0)
-                                        <span class="text-muted small" 
+    <div class="card shadow-sm border mb-4">
+        <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center py-3">
+            <h5 class="mb-0 fw-bold text-body">
+                <i class="bi bi-list-ul me-2 text-primary"></i>รายการโครงการวิจัย
+                <span class="badge bg-primary rounded-pill ms-2">{{ number_format($projects->total()) }} รายการ</span>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-top mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 60%;">ชื่อโครงการ</th>
+                            <th style="width: 25%;">นักวิจัย / สังกัด</th>
+                            <th style="width: 15%;" class="text-center text-nowrap">จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($projects as $project)
+                        <tr>
+                            <td class="p-3">
+                                <div class="fw-bold mb-1">
+                                    @if($project->pro_id)
+                                        <span class="badge bg-secondary-subtle text-secondary-emphasis border me-1">#{{ $project->pro_id }}</span>
+                                    @endif
+                                    <a href="{{ route('backend.rdb_project.show', $project->pro_id) }}" class="text-decoration-none text-body fw-bold hover-primary text-break">
+                                        {!! $project->pro_nameTH !!}
+                                    </a>
+                                </div>
+                                <div class="small d-flex flex-wrap gap-2 align-items-center mt-2">
+                                    @if(isset($project->data_show))
+                                        @if($project->data_show)
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle" title="เผยแพร่สู่สาธารณะ">
+                                                <i class="bi bi-eye"></i> สาธารณะ
+                                            </span>
+                                        @else
+                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle" title="ซ่อนไว้ (ไม่แสดงหน้าบ้าน)">
+                                                <i class="bi bi-eye-slash"></i> ซ่อน
+                                            </span>
+                                        @endif
+                                    @endif
+                                    @if($project->year)
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle">ปี {{ $project->year->year_name }}</span>
+                                    @endif
+                                    @if($project->type)
+                                        <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">{{ $project->type->pt_name }}</span>
+                                    @endif
+                                    @if($project->pro_budget)
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">฿{{ number_format($project->pro_budget, 0) }}</span>
+                                    @endif
+                                    @if($project->status)
+                                        <span class="badge" style="background-color: {{ $project->status->ps_color ?? '#6c757d' }}; color: #fff;">{{ $project->status->ps_name }}</span>
+                                    @endif
+                                    @if(request('search') && !empty($project->match_sources))
+                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" 
                                               data-bs-toggle="tooltip" 
                                               data-bs-placement="top" 
                                               data-bs-html="true"
-                                              title="<strong>นักวิจัยร่วม:</strong><br>• {{ $remainingNames }}"
-                                              style="cursor: pointer;">(+{{ $remainingCount }})</span>
+                                              title="<strong>พบคำค้นหาใน:</strong><br>• {{ implode('<br>• ', $project->match_sources) }}">
+                                            <i class="bi bi-search"></i> {{ count($project->match_sources) }}
+                                        </span>
                                     @endif
                                 </div>
+                            </td>
+                            <td class="p-3">
+                                @if($project->rdbProjectWorks->isNotEmpty())
+                                    @php
+                                        $leaders = $project->rdbProjectWorks->whereIn('position_id', [1, 2]);
+                                        $firstLeader = $leaders->first();
+                                        $remainingWorks = $project->rdbProjectWorks->slice(1);
+                                        $remainingCount = $remainingWorks->count();
+                                        $remainingNames = $remainingWorks->map(function($work) {
+                                            return $work->researcher ? $work->researcher->researcher_fname . ' ' . $work->researcher->researcher_lname : '';
+                                        })->filter()->implode('<br>• ');
+                                    @endphp
+                                    @if($firstLeader && $firstLeader->researcher)
+                                    <div>
+                                        <i class="bi bi-person-circle text-primary me-1"></i>
+                                        <a href="{{ route('backend.rdb_researcher.show', $firstLeader->researcher->researcher_id) }}" class="text-decoration-none text-body fw-bold hover-primary">
+                                            {{ $firstLeader->researcher->researcher_fname }} {{ $firstLeader->researcher->researcher_lname }}
+                                        </a>
+                                        @if($remainingCount > 0)
+                                            <span class="text-body-secondary small ms-1" 
+                                                  data-bs-toggle="tooltip" 
+                                                  data-bs-placement="top" 
+                                                  data-bs-html="true"
+                                                  title="<strong>นักวิจัยร่วม:</strong><br>• {{ $remainingNames }}"
+                                                  style="cursor: pointer;">(+{{ $remainingCount }})</span>
+                                        @endif
+                                    </div>
+                                    @endif
+                                @else
+                                    <span class="text-body-secondary">-</span>
                                 @endif
-                            @else
-                                <span class="text-muted">-</span>
-                            @endif
 
-                            @if($project->department)
-                                <div class="text-muted mt-1 small">
-                                    <i class="bi bi-geo-alt-fill"></i> {{ $project->department->department_nameTH ?? $project->department->department_name }}
+                                @if($project->department)
+                                    <div class="text-body-secondary mt-1 small">
+                                        <i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ $project->department->department_nameTH ?? $project->department->department_name }}
+                                    </div>
+                                @endif
+                            </td>
+                            <td class="text-center p-3 text-nowrap">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{{ route('backend.rdb_project.show', $project->pro_id) }}" class="btn btn-outline-primary" title="ดูรายละเอียด">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ route('backend.rdb_project.edit', $project->pro_id) }}" class="btn btn-outline-secondary" title="แก้ไข">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
                                 </div>
-                            @endif
-                        </td>
-                        <td class="text-center">
-                            <a href="{{ route('backend.rdb_project.show', $project->pro_id) }}" class="btn btn-outline-primary btn-sm" title="ดูรายละเอียด">
-                                <i class="bi bi-eye"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="3" class="text-center py-5 text-muted">
-                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                            ไม่พบข้อมูลโครงการวิจัย
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="3" class="text-center py-5 text-body-secondary">
+                                <i class="bi bi-folder-x fs-1 d-block mb-2 opacity-50"></i>
+                                ไม่พบข้อมูลโครงการวิจัย
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            
+            @if($projects->hasPages())
+            <div class="d-flex justify-content-center p-4">
+                {{ $projects->withQueryString()->links() }}
+            </div>
+            @endif
         </div>
-        
-        @if($projects->hasPages())
-        <div class="mt-3">
-            {{ $projects->withQueryString()->links() }}
-        </div>
-        @endif
-    </x-card>
+    </div>
 </div>
 @endsection
 

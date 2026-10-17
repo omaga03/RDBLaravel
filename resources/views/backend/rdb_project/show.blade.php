@@ -185,8 +185,10 @@
                                     <tr>
                                         <td>
                                             @if($work->researcher)
-                                                {{ $work->researcher->prefix->prefix_nameTH ?? '' }}{{ $work->researcher->researcher_fname }} {{ $work->researcher->researcher_lname }}
-                                                <small class="text-muted d-block">
+                                                <a href="{{ route('backend.rdb_researcher.show', $work->researcher->researcher_id) }}" class="text-decoration-none text-body fw-bold hover-primary">
+                                                    {{ $work->researcher->prefix->prefix_nameTH ?? '' }}{{ $work->researcher->researcher_fname }} {{ $work->researcher->researcher_lname }}
+                                                </a>
+                                                <small class="text-body-secondary d-block">
                                                     {{ $work->researcher->department->department_nameTH ?? $work->researcher->department->department_nameEN ?? $work->researcher->researcher_note ?? '-' }}
                                                 </small>
                                             @else
