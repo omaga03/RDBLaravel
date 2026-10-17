@@ -100,6 +100,15 @@
                                 <a href="{{ route('backend.user.edit', $user->id) }}" class="btn btn-outline-warning" title="แก้ไข">
                                     <i class="bi bi-pencil"></i>
                                 </a>
+                                @if($user->id !== auth()->id() && !$user->hasRole('The Creator'))
+                                    <form action="{{ route('backend.user.destroy', $user->id) }}" method="POST" class="d-inline delete-form">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-outline-danger" title="ลบผู้ใช้งาน">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                @endif
                             </div>
                         </td>
                     </tr>

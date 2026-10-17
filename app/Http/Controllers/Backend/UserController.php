@@ -153,9 +153,9 @@ class UserController extends Controller
                 ->with('error', 'ไม่สามารถลบบัญชีผู้ใช้ที่กำลังเข้าสู่ระบบอยู่ได้');
         }
 
-        if ($user->id === 1) {
+        if ($user->hasRole('The Creator') || $user->id === 129) {
             return redirect()->route('backend.user.index')
-                ->with('error', 'ไม่สามารถลบบัญชีผู้ดูแลระบบหลัก (ID: 1) ได้');
+                ->with('error', 'ไม่สามารถลบบัญชีผู้ดูแลระบบหลัก (The Creator) ได้');
         }
 
         AuthAssignment::where('user_id', $user->id)->delete();

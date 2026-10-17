@@ -8,7 +8,7 @@
         :backRoute="route('backend.user.index')" 
         :editRoute="route('backend.user.edit', $user->id)" 
         :deleteRoute="route('backend.user.destroy', $user->id)" 
-        :canDelete="$user->id !== auth()->id() && $user->id !== 1"
+        :canDelete="$user->id !== auth()->id() && !$user->hasRole('The Creator')"
         :showPrint="true"
     />
 

@@ -136,4 +136,41 @@ class BackendAuditTest extends TestCase
         \App\Models\AuthItemChild::where('parent', $roleName)->delete();
         $role->delete();
     }
+
+    public function test_user_deletion_and_protection()
+    {
+        $admin = \App\Models\User::find(129);
+
+        // 1. Create a temporary user to delete
+        $tempUser = new \App\Models\User();
+        $tempUser->username = 'temp_user_' . time();
+        $tempUser->email = 'temp_' . time() . '@example.com';
+        $tempUser->password_hash = \Illuminate\Support\Facades\Hash::make('password123');
+        $tempUser->auth_key = \Illuminate\Support\Str::random(32);
+        $tempUser->confirmed_at = time();
+        $tempUser->status = 10;
+        $tempUser->save();
+
+        \App\Models\AuthAssignment::create([
+            'item_name' => 'Researcher',
+            'user_id' => $tempUser->id,
+            'created_at' => time(),
+        ]);
+
+        $userId = $tempUser->id;
+
+        // 2. Delete the user
+        $response = $this->actingAs($admin)->delete(route('backend.user.destroy', $userId));
+        $response->assertRedirect(route('backend.user.index'));
+        $response->assertSessionHas('success');
+
+        // Assert deleted from database
+        $this->assertNull(\App\Models\User::find($userId));
+        $this->assertEquals(0, \App\Models\AuthAssignment::where('user_id', $userId)->count());
+
+        // 3. Test self-deletion protection
+        $selfDeleteResponse = $this->actingAs($admin)->delete(route('backend.user.destroy', $admin->id));
+        $selfDeleteResponse->assertSessionHas('error');
+        $this->assertNotNull(\App\Models\User::find($admin->id));
+    }
 }
