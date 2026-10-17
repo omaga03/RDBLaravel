@@ -586,6 +586,13 @@ class BackendAuditTest extends TestCase
         $editResponse->assertSee('เปิดดูไฟล์', false);
         $editResponse->assertSee(route('backend.rdbprojectutilize.download', ['id' => 1036, 'filename' => $utilize->utz_files]), false);
 
+        // Test edit page when old('utz_group') is an array (flashed input) does not throw TypeError htmlspecialchars
+        $editResponseWithOldArray = $this->actingAs($admin)
+            ->withSession(['_old_input' => ['utz_group' => ['1', '2']]])
+            ->get(route('backend.rdbprojectutilize.edit', 1036));
+        $editResponseWithOldArray->assertStatus(200);
+        $editResponseWithOldArray->assertSee('const selectedIds = ["1","2"];', false);
+
         // Test download / view endpoint works and returns 200 with inline disposition
         $fileResponse = $this->actingAs($admin)->get(route('backend.rdbprojectutilize.download', ['id' => 1036, 'filename' => $utilize->utz_files]));
         $this->assertStringContainsString('inline', $fileResponse->headers->get('Content-Disposition'));

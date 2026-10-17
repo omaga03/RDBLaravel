@@ -154,14 +154,23 @@ document.addEventListener('DOMContentLoaded', function() {
     // TomSelect for Utilize Type (Multi-select)
     // -------------------------------------------------------------------------
     const utzGroupSelect = document.getElementById('utz_group');
-    const oldUtzGroup = "{{ old('utz_group', $item->utz_group ?? '') }}";
+    @php
+        $rawUtzGroup = old('utz_group', $item->utz_group ?? []);
+        if (is_array($rawUtzGroup)) {
+            $selectedIds = array_values(array_map('strval', $rawUtzGroup));
+        } elseif (is_string($rawUtzGroup) && $rawUtzGroup !== '') {
+            $selectedIds = array_values(array_filter(array_map('trim', explode(',', $rawUtzGroup))));
+        } else {
+            $selectedIds = [];
+        }
+    @endphp
+    const selectedIds = @json($selectedIds);
     
     if (utzGroupSelect && typeof TomSelect !== 'undefined') {
         // Preload utilize types
         fetch('{{ route("backend.rdbprojectutilize.search_utilize_types") }}')
             .then(res => res.json())
             .then(data => {
-                const selectedIds = oldUtzGroup ? oldUtzGroup.split(',').map(s => s.trim()) : [];
                 
                 let options = '';
                 data.forEach(t => {
