@@ -124,6 +124,8 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
 
     Route::get('/rbac/{rbac}/permissions', [RbacController::class, 'permissions'])->name('rbac.permissions');
     Route::put('/rbac/{rbac}/permissions', [RbacController::class, 'updatePermissions'])->name('rbac.update_permissions');
+    Route::post('/rbac/{rbac}/impersonate', [RbacController::class, 'impersonate'])->name('rbac.impersonate');
+    Route::post('/rbac/stop-impersonate', [RbacController::class, 'stopImpersonate'])->name('rbac.stop_impersonate');
     Route::resource('rbac', RbacController::class);
     Route::resource('user', UserController::class);
 

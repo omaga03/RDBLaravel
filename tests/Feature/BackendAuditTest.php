@@ -361,4 +361,59 @@ class BackendAuditTest extends TestCase
         $this->assertEquals(-100, $dummy->testCell(-100));
         $this->assertEquals("-100", $dummy->testCell("-100"));
     }
+
+    public function test_rbac_role_impersonation_and_stop()
+    {
+        $admin = \App\Models\User::find(129);
+        $this->assertNotNull($admin);
+
+        // Impersonate 'Admin Project'
+        $response = $this->actingAs($admin)->post(route('backend.rbac.impersonate', 'Admin Project'));
+        $response->assertRedirect(route('backend.site.index'));
+        $response->assertSessionHas('success');
+        $this->assertTrue(session()->has('impersonator_id'));
+        $this->assertEquals(129, session('impersonator_id'));
+
+        // Current authenticated user should have the impersonated role
+        $impersonatedUser = auth()->user();
+        $this->assertTrue($impersonatedUser->hasRole('Admin Project'));
+
+        // Stop impersonation
+        $stopResponse = $this->actingAs($impersonatedUser)->post(route('backend.rbac.stop_impersonate'));
+        $stopResponse->assertRedirect(route('backend.rbac.index'));
+        $stopResponse->assertSessionHas('success');
+        $this->assertFalse(session()->has('impersonator_id'));
+        $this->assertEquals(129, auth()->id());
+    }
+
+    public function test_unauthorized_user_cannot_impersonate()
+    {
+        // Create standard researcher user without 'The Creator' role
+        $user = \App\Models\User::where('username', '!=', 'The Creator')->where('id', '!=', 129)->first();
+        if ($user) {
+            $response = $this->actingAs($user)->post(route('backend.rbac.impersonate', 'Admin Project'));
+            $response->assertStatus(403);
+        }
+    }
+
+    public function test_dashboard_renders_with_and_without_year_filter()
+    {
+        $admin = \App\Models\User::find(129);
+
+        // All years
+        $responseAll = $this->actingAs($admin)->get(route('backend.site.index'));
+        $responseAll->assertStatus(200);
+        $responseAll->assertSee('แดชบอร์ดภาพรวมระบบ');
+        $responseAll->assertSee('ข้อมูลสะสมทุกปี');
+        $responseAll->assertSee('แนวโน้มโครงการและงบประมาณวิจัยย้อนหลัง 5 ปีงบประมาณ');
+
+        // Filter by year 2568 (year_id = 18)
+        $year = \App\Models\RdbYear::find(18);
+        if ($year) {
+            $responseYear = $this->actingAs($admin)->get(route('backend.site.index', ['year_id' => 18]));
+            $responseYear->assertStatus(200);
+            $responseYear->assertSee('ปีงบประมาณ ' . $year->year_name);
+            $responseYear->assertSee('ล้างตัวกรอง');
+        }
+    }
 }

@@ -4,16 +4,49 @@
 <div class="container-fluid py-4">
 
     <!-- Dashboard Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
             <h2 class="mb-1 fw-bold text-body">
                 <i class="bi bi-speedometer2 me-2 text-primary"></i>แดชบอร์ดภาพรวมระบบ (Admin Dashboard)
             </h2>
-            <p class="text-body-secondary mb-0">สรุปข้อมูลสถิติและการดำเนินงานด้านการวิจัย สถาบันวิจัยและพัฒนา</p>
+            <p class="text-body-secondary mb-0 d-flex align-items-center flex-wrap gap-2">
+                <span>สรุปข้อมูลสถิติและการดำเนินงานด้านการวิจัย สถาบันวิจัยและพัฒนา</span>
+                @if($selectedYear)
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                        <i class="bi bi-funnel-fill me-1"></i>ปีงบประมาณ {{ $selectedYear->year_name }}
+                    </span>
+                @else
+                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                        <i class="bi bi-collection-fill me-1"></i>ข้อมูลสะสมทุกปี
+                    </span>
+                @endif
+            </p>
         </div>
-        <div class="d-flex gap-2">
-            <a href="{{ route('frontend.site.index') }}" target="_blank" class="btn btn-outline-primary">
-                <i class="bi bi-box-arrow-up-right me-1"></i> ดูหน้าบ้าน (Public Site)
+        <div class="d-flex align-items-center flex-wrap gap-2">
+            <!-- Year Filter Dropdown -->
+            <form method="GET" action="{{ route('backend.site.index') }}" class="d-flex align-items-center gap-2 m-0" id="dashboardYearForm">
+                <div class="input-group input-group-sm shadow-sm" style="min-width: 250px;">
+                    <span class="input-group-text bg-body-tertiary border-end-0">
+                        <i class="bi bi-calendar3 text-primary"></i>
+                    </span>
+                    <select name="year_id" id="year_id" class="form-select border-start-0" onchange="this.form.submit()">
+                        <option value="">-- ทุกปีงบประมาณ (All Years) --</option>
+                        @foreach($availableYears as $year)
+                            <option value="{{ $year->year_id }}" {{ (string)$selectedYearId === (string)$year->year_id ? 'selected' : '' }}>
+                                ปีงบประมาณ {{ $year->year_name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                @if($selectedYearId)
+                    <a href="{{ route('backend.site.index') }}" class="btn btn-sm btn-outline-secondary shadow-sm text-nowrap" title="ล้างตัวกรองปี">
+                        <i class="bi bi-x-circle me-1"></i>ดูทั้งหมด
+                    </a>
+                @endif
+            </form>
+
+            <a href="{{ route('frontend.site.index') }}" target="_blank" class="btn btn-sm btn-outline-primary shadow-sm text-nowrap">
+                <i class="bi bi-box-arrow-up-right me-1"></i> ดูหน้าบ้าน
             </a>
         </div>
     </div>
@@ -28,13 +61,20 @@
                         <div>
                             <span class="text-body-secondary small fw-bold text-uppercase d-block mb-1">โครงการวิจัย</span>
                             <h3 class="fw-bold mb-0 text-primary">{{ number_format($totalProjects) }}</h3>
+                            <small class="text-success fw-semibold text-truncate d-block mt-1" title="งบประมาณรวม ฿{{ number_format($totalProjectBudget) }}">
+                                @if($totalProjectBudget >= 1000000)
+                                    ฿{{ number_format($totalProjectBudget / 1000000, 2) }}M บาท
+                                @else
+                                    ฿{{ number_format($totalProjectBudget) }} บาท
+                                @endif
+                            </small>
                         </div>
                         <div class="p-3 rounded-circle bg-primary bg-opacity-10 text-primary">
                             <i class="bi bi-folder2-open fs-4"></i>
                         </div>
                     </div>
                 </div>
-                <a href="{{ route('backend.rdb_project.index') }}" class="card-footer bg-transparent border-top py-2 px-3 text-decoration-none small text-primary d-flex justify-content-between align-items-center">
+                <a href="{{ route('backend.rdb_project.index', $selectedYearId ? ['pro_year' => $selectedYearId] : []) }}" class="card-footer bg-transparent border-top py-2 px-3 text-decoration-none small text-primary d-flex justify-content-between align-items-center">
                     <span>จัดการโครงการ</span>
                     <i class="bi bi-arrow-right"></i>
                 </a>
@@ -49,6 +89,9 @@
                         <div>
                             <span class="text-body-secondary small fw-bold text-uppercase d-block mb-1">นักวิจัย</span>
                             <h3 class="fw-bold mb-0 text-success">{{ number_format($totalResearchers) }}</h3>
+                            <small class="text-body-secondary d-block mt-1">
+                                {{ $selectedYearId ? 'ร่วมโครงการในปีนี้' : 'นักวิจัยทั้งหมด' }}
+                            </small>
                         </div>
                         <div class="p-3 rounded-circle bg-success bg-opacity-10 text-success">
                             <i class="bi bi-people-fill fs-4"></i>
@@ -70,13 +113,16 @@
                         <div>
                             <span class="text-body-secondary small fw-bold text-uppercase d-block mb-1">ผลงานตีพิมพ์</span>
                             <h3 class="fw-bold mb-0 text-info">{{ number_format($totalPublished) }}</h3>
+                            <small class="text-body-secondary d-block mt-1">
+                                {{ $selectedYearId ? 'ตีพิมพ์ปีนี้' : 'ผลงานทั้งหมด' }}
+                            </small>
                         </div>
                         <div class="p-3 rounded-circle bg-info bg-opacity-10 text-info">
                             <i class="bi bi-file-earmark-text-fill fs-4"></i>
                         </div>
                     </div>
                 </div>
-                <a href="{{ route('backend.rdb_published.index') }}" class="card-footer bg-transparent border-top py-2 px-3 text-decoration-none small text-info d-flex justify-content-between align-items-center">
+                <a href="{{ route('backend.rdb_published.index', $selectedYearId ? ['year_id' => $selectedYearId] : []) }}" class="card-footer bg-transparent border-top py-2 px-3 text-decoration-none small text-info d-flex justify-content-between align-items-center">
                     <span>จัดการงานตีพิมพ์</span>
                     <i class="bi bi-arrow-right"></i>
                 </a>
@@ -91,13 +137,16 @@
                         <div>
                             <span class="text-body-secondary small fw-bold text-uppercase d-block mb-1">ทรัพย์สินทางปัญญา</span>
                             <h3 class="fw-bold mb-0 text-warning">{{ number_format($totalDip) }}</h3>
+                            <small class="text-body-secondary d-block mt-1">
+                                {{ $selectedYearId ? 'ยื่นคำขอปีนี้' : 'ทรัพย์สินฯ ทั้งหมด' }}
+                            </small>
                         </div>
                         <div class="p-3 rounded-circle bg-warning bg-opacity-10 text-warning">
                             <i class="bi bi-award-fill fs-4"></i>
                         </div>
                     </div>
                 </div>
-                <a href="{{ route('backend.rdb_dip.index') }}" class="card-footer bg-transparent border-top py-2 px-3 text-decoration-none small text-warning d-flex justify-content-between align-items-center">
+                <a href="{{ route('backend.rdb_dip.index', $selectedYearId ? ['year_id' => $selectedYearId] : []) }}" class="card-footer bg-transparent border-top py-2 px-3 text-decoration-none small text-warning d-flex justify-content-between align-items-center">
                     <span>จัดการทรัพย์สินฯ</span>
                     <i class="bi bi-arrow-right"></i>
                 </a>
@@ -112,13 +161,16 @@
                         <div>
                             <span class="text-body-secondary small fw-bold text-uppercase d-block mb-1">การใช้ประโยชน์</span>
                             <h3 class="fw-bold mb-0 text-danger">{{ number_format($totalUtilize) }}</h3>
+                            <small class="text-body-secondary d-block mt-1">
+                                {{ $selectedYearId ? 'นำไปใช้ปีนี้' : 'ผลงานทั้งหมด' }}
+                            </small>
                         </div>
                         <div class="p-3 rounded-circle bg-danger bg-opacity-10 text-danger">
                             <i class="bi bi-rocket-takeoff-fill fs-4"></i>
                         </div>
                     </div>
                 </div>
-                <a href="{{ route('backend.rdbprojectutilize.index') }}" class="card-footer bg-transparent border-top py-2 px-3 text-decoration-none small text-danger d-flex justify-content-between align-items-center">
+                <a href="{{ route('backend.rdbprojectutilize.index', $selectedYearId ? ['year_id' => $selectedYearId] : []) }}" class="card-footer bg-transparent border-top py-2 px-3 text-decoration-none small text-danger d-flex justify-content-between align-items-center">
                     <span>จัดการการนำไปใช้</span>
                     <i class="bi bi-arrow-right"></i>
                 </a>
@@ -133,6 +185,9 @@
                         <div>
                             <span class="text-body-secondary small fw-bold text-uppercase d-block mb-1">ข่าว & ประชุม</span>
                             <h3 class="fw-bold mb-0 text-secondary">{{ number_format($totalNews + $totalConference) }}</h3>
+                            <small class="text-body-secondary d-block mt-1">
+                                {{ $selectedYearId ? 'กิจกรรมปีนี้' : 'รายการทั้งหมด' }}
+                            </small>
                         </div>
                         <div class="p-3 rounded-circle bg-secondary bg-opacity-10 text-secondary">
                             <i class="bi bi-newspaper fs-4"></i>
@@ -152,9 +207,16 @@
         <!-- Status Chart -->
         <div class="col-lg-5">
             <div class="card shadow-sm border h-100">
-                <div class="card-header bg-body-tertiary d-flex align-items-center">
-                    <i class="bi bi-pie-chart-fill text-primary me-2"></i>
-                    <h6 class="mb-0 fw-bold text-body">สัดส่วนโครงการวิจัยตามสถานะ</h6>
+                <div class="card-header bg-body-tertiary d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-pie-chart-fill text-primary me-2"></i>
+                        <h6 class="mb-0 fw-bold text-body">สัดส่วนโครงการตามสถานะ</h6>
+                    </div>
+                    @if($selectedYear)
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle small">
+                            ปี {{ $selectedYear->year_name }}
+                        </span>
+                    @endif
                 </div>
                 <div class="card-body d-flex align-items-center justify-content-center p-3">
                     <div style="max-height: 280px; width: 100%;">
@@ -164,12 +226,17 @@
             </div>
         </div>
 
-        <!-- Year Trend Chart -->
+        <!-- 5-Year Projects & Budget Combo Chart -->
         <div class="col-lg-7">
             <div class="card shadow-sm border h-100">
-                <div class="card-header bg-body-tertiary d-flex align-items-center">
-                    <i class="bi bi-bar-chart-fill text-primary me-2"></i>
-                    <h6 class="mb-0 fw-bold text-body">จำนวนโครงการวิจัยย้อนหลัง 5 ปีงบประมาณ</h6>
+                <div class="card-header bg-body-tertiary d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-bar-chart-line-fill text-primary me-2"></i>
+                        <h6 class="mb-0 fw-bold text-body">แนวโน้มโครงการและงบประมาณวิจัยย้อนหลัง 5 ปีงบประมาณ</h6>
+                    </div>
+                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle small">
+                        5 ปีล่าสุด
+                    </span>
                 </div>
                 <div class="card-body p-3">
                     <div style="height: 280px; width: 100%;">
@@ -188,8 +255,11 @@
                 <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center py-3">
                     <h6 class="mb-0 fw-bold text-body">
                         <i class="bi bi-clock-history text-primary me-2"></i>โครงการวิจัยล่าสุด 5 รายการ
+                        @if($selectedYear)
+                            <span class="text-primary">(ปี {{ $selectedYear->year_name }})</span>
+                        @endif
                     </h6>
-                    <a href="{{ route('backend.rdb_project.index') }}" class="btn btn-sm btn-outline-primary">
+                    <a href="{{ route('backend.rdb_project.index', $selectedYearId ? ['pro_year' => $selectedYearId] : []) }}" class="btn btn-sm btn-outline-primary">
                         ดูทั้งหมด <i class="bi bi-arrow-right ms-1"></i>
                     </a>
                 </div>
@@ -236,7 +306,9 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="3" class="text-center py-4 text-body-secondary">ยังไม่มีข้อมูลโครงการวิจัย</td>
+                                    <td colspan="3" class="text-center py-4 text-body-secondary">
+                                        {{ $selectedYear ? "ไม่พบข้อมูลโครงการวิจัยสำหรับปี {$selectedYear->year_name}" : "ยังไม่มีข้อมูลโครงการวิจัย" }}
+                                    </td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -303,14 +375,17 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Status Pie Chart
+    // 1. Status Pie / Doughnut Chart
     const statusCtx = document.getElementById('statusChart').getContext('2d');
+    const statusLabels = {!! json_encode($projectsByStatus->pluck('status.ps_name')->map(fn($n) => $n ?? 'ไม่ระบุ')) !!};
+    const statusData = {!! json_encode($projectsByStatus->pluck('total')) !!};
+
     new Chart(statusCtx, {
         type: 'doughnut',
         data: {
-            labels: {!! json_encode($projectsByStatus->pluck('status.ps_name')->map(fn($n) => $n ?? 'ไม่ระบุ')) !!},
+            labels: statusLabels.length ? statusLabels : ['ไม่มีข้อมูล'],
             datasets: [{
-                data: {!! json_encode($projectsByStatus->pluck('total')) !!},
+                data: statusData.length ? statusData : [0],
                 backgroundColor: [
                     '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#6b7280'
                 ],
@@ -332,32 +407,120 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Year Bar Chart
+    // 2. 5-Year Projects & Budget Combo Chart (Bar + Line)
     const yearCtx = document.getElementById('yearChart').getContext('2d');
+    const yearLabels = {!! json_encode($projectsByYear->pluck('year.year_name')->map(fn($y) => 'ปี ' . $y)) !!};
+    const projectCountData = {!! json_encode($projectsByYear->pluck('total')) !!};
+    const projectBudgetData = {!! json_encode($projectsByYear->pluck('total_budget')) !!};
+
     new Chart(yearCtx, {
-        type: 'bar',
         data: {
-            labels: {!! json_encode($projectsByYear->pluck('year.year_name')->map(fn($y) => 'ปี ' . $y)) !!},
-            datasets: [{
-                label: 'จำนวนโครงการ',
-                data: {!! json_encode($projectsByYear->pluck('total')) !!},
-                backgroundColor: 'rgba(59, 130, 246, 0.8)',
-                borderColor: '#2563eb',
-                borderWidth: 1,
-                borderRadius: 4
-            }]
+            labels: yearLabels,
+            datasets: [
+                {
+                    type: 'bar',
+                    label: 'จำนวนโครงการ (โครงการ)',
+                    data: projectCountData,
+                    backgroundColor: 'rgba(59, 130, 246, 0.75)',
+                    borderColor: '#2563eb',
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    yAxisID: 'y',
+                    order: 2
+                },
+                {
+                    type: 'line',
+                    label: 'งบประมาณรวม (บาท)',
+                    data: projectBudgetData,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 3,
+                    pointBackgroundColor: '#10b981',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    tension: 0.3,
+                    fill: false,
+                    yAxisID: 'y1',
+                    order: 1
+                }
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
             scales: {
+                x: {
+                    grid: { display: false }
+                },
                 y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
                     beginAtZero: true,
-                    ticks: { precision: 0 }
+                    title: {
+                        display: true,
+                        text: 'จำนวนโครงการ',
+                        font: { size: 11, weight: 'bold' }
+                    },
+                    ticks: {
+                        precision: 0
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    beginAtZero: true,
+                    grid: {
+                        drawOnChartArea: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'งบประมาณ (บาท)',
+                        font: { size: 11, weight: 'bold' }
+                    },
+                    ticks: {
+                        callback: function (value) {
+                            if (value >= 1000000) {
+                                return (value / 1000000).toFixed(1) + 'M ฿';
+                            }
+                            return value.toLocaleString() + ' ฿';
+                        }
+                    }
                 }
             },
             plugins: {
-                legend: { display: false }
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        boxWidth: 14,
+                        usePointStyle: true,
+                        font: { size: 12 }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.dataset.yAxisID === 'y1') {
+                                label += Number(context.raw).toLocaleString() + ' บาท';
+                            } else {
+                                label += Number(context.raw).toLocaleString() + ' โครงการ';
+                            }
+                            return label;
+                        }
+                    }
+                }
             }
         }
     });

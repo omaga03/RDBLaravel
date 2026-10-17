@@ -129,6 +129,11 @@ class RdbResearcher extends Model
                     ->withPivot('position_id', 'ratio');
     }
 
+    public function projects()
+    {
+        return $this->rdbProjects();
+    }
+
     public function rdbPublisheds()
     {
         return $this->belongsToMany(

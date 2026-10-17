@@ -194,6 +194,27 @@
 </head>
 <body>
     <div id="app">
+        @if(session()->has('impersonator_id'))
+            <div class="alert alert-warning border-0 rounded-0 mb-0 py-2 px-4 d-flex justify-content-between align-items-center shadow-sm" style="position: sticky; top: 0; z-index: 1060; background: #fff3cd; color: #664d03;">
+                <div class="d-flex align-items-center flex-wrap gap-2">
+                    <span class="badge bg-warning text-dark border border-warning-subtle fw-bold">
+                        <i class="bi bi-person-fill-gear me-1"></i> โหมดทดสอบบทบาท (Testing Role)
+                    </span>
+                    <span>
+                        คุณกำลังทดสอบระบบในฐานะ <strong>{{ Auth::user()->username }}</strong> (บทบาท: <code>{{ session('impersonated_role', Auth::user()->roles->pluck('item_name')->implode(', ') ?: 'ไม่มีบทบาท') }}</code>)
+                    </span>
+                    <span class="text-muted small">
+                        (บัญชีหลัก: {{ session('impersonator_username', 'The Creator') }})
+                    </span>
+                </div>
+                <form action="{{ route('backend.rbac.stop_impersonate') }}" method="POST" class="m-0">
+                    @csrf
+                    <button type="submit" class="btn btn-sm btn-dark shadow-sm text-nowrap">
+                        <i class="bi bi-box-arrow-left me-1"></i> สิ้นสุดการทดสอบ (กลับสู่บัญชีหลัก)
+                    </button>
+                </form>
+            </div>
+        @endif
         <nav class="navbar navbar-expand-md shadow-sm border-bottom">
             <div class="{{ request()->is('backend*') ? 'container-fluid px-4' : 'container' }}">
                 <a class="navbar-brand" href="{{ url('/') }}">

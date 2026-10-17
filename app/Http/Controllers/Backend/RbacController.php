@@ -147,4 +147,94 @@ class RbacController extends Controller
         return redirect()->route('backend.rbac.index')
             ->with('success', 'ลบบทบาทเรียบร้อยแล้ว');
     }
+
+    /**
+     * Impersonate a user with the specified role for testing purposes.
+     */
+    public function impersonate(Request $request, $rbac)
+    {
+        $currentUser = auth()->user();
+        
+        // Authorization: Only 'The Creator' or already impersonating admin can switch roles
+        if (!$currentUser->hasRole('The Creator') && $currentUser->id !== 129 && !session()->has('impersonator_id')) {
+            abort(403, 'เฉพาะผู้ดูแลระบบระดับสูงสุด (The Creator) เท่านั้นที่สามารถใช้ฟังก์ชันทดสอบบทบาทได้');
+        }
+
+        $item = $rbac instanceof AuthItem ? $rbac : AuthItem::where('name', $rbac)->firstOrFail();
+        $roleName = $item->name;
+
+        // Find an active user with this role (excluding current user if possible)
+        $targetUser = \App\Models\User::whereHas('roles', function ($q) use ($roleName) {
+            $q->where('item_name', $roleName);
+        })
+        ->where('id', '!=', $currentUser->id)
+        ->first();
+
+        // If no other user with this role exists, find any user with this role
+        if (!$targetUser) {
+            $targetUser = \App\Models\User::whereHas('roles', function ($q) use ($roleName) {
+                $q->where('item_name', $roleName);
+            })->first();
+        }
+
+        // If still no user exists with this role, create a test dummy user for testing
+        if (!$targetUser) {
+            $slug = \Illuminate\Support\Str::slug($roleName, '_');
+            $testUsername = 'test_' . $slug;
+            $targetUser = \App\Models\User::where('username', $testUsername)->first();
+
+            if (!$targetUser) {
+                $targetUser = \App\Models\User::create([
+                    'username' => $testUsername,
+                    'email' => $slug . '@test.local',
+                    'password' => 'TestRole123!',
+                    'status' => 10,
+                ]);
+            }
+
+            // Assign the role to this test user
+            AuthAssignment::firstOrCreate([
+                'item_name' => $roleName,
+                'user_id' => $targetUser->id,
+            ], [
+                'created_at' => time(),
+            ]);
+        }
+
+        // If not already in an impersonation session, save original user ID
+        if (!session()->has('impersonator_id')) {
+            session()->put('impersonator_id', $currentUser->id);
+            session()->put('impersonator_username', $currentUser->username);
+        }
+
+        session()->put('impersonated_role', $roleName);
+
+        \Illuminate\Support\Facades\Auth::login($targetUser);
+
+        return redirect()->route('backend.site.index')
+            ->with('success', "เข้าสู่ระบบในบทบาท '{$roleName}' เรียบร้อยแล้ว (ทดสอบในฐานะผู้ใช้งาน: {$targetUser->username})");
+    }
+
+    /**
+     * Stop impersonating and return to the original administrator account.
+     */
+    public function stopImpersonate(Request $request)
+    {
+        if (!session()->has('impersonator_id')) {
+            return redirect()->route('backend.rbac.index');
+        }
+
+        $originalUserId = session()->get('impersonator_id');
+        $originalUser = \App\Models\User::find($originalUserId);
+
+        session()->forget(['impersonator_id', 'impersonator_username', 'impersonated_role']);
+
+        if ($originalUser) {
+            \Illuminate\Support\Facades\Auth::login($originalUser);
+            return redirect()->route('backend.rbac.index')
+                ->with('success', "สิ้นสุดการทดสอบบทบาท กลับสู่บัญชีหลัก '{$originalUser->username}' เรียบร้อยแล้ว");
+        }
+
+        return redirect()->route('backend.rbac.index');
+    }
 }

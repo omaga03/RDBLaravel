@@ -28,7 +28,7 @@
                         <th style="width: 20%;">ชื่อบทบาท (Role Name)</th>
                         <th>คำอธิบาย (Description)</th>
                         <th style="width: 220px;">สิทธิ์การใช้งาน (Permissions)</th>
-                        <th style="width: 220px;" class="text-center">จัดการ</th>
+                        <th style="width: 320px;" class="text-center">จัดการ</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -55,6 +55,12 @@
                             </td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
+                                    <form action="{{ route('backend.rbac.impersonate', $role->name) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-outline-info" title="เข้าสู่ระบบในบทบาทนี้ เพื่อทดสอบสิทธิ์ (Login as)">
+                                            <i class="bi bi-box-arrow-in-right me-1"></i>Login as
+                                        </button>
+                                    </form>
                                     <a href="{{ route('backend.rbac.permissions', $role->name) }}" class="btn btn-outline-primary" title="กำหนดสิทธิ์ (Permission Matrix)">
                                         <i class="bi bi-key-fill me-1"></i>กำหนดสิทธิ์
                                     </a>

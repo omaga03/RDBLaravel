@@ -59,9 +59,17 @@ class RdbDipController extends Controller
             $query->whereDate('dip_request_date', '<=', $request->end_date);
         }
 
-        // Filter: Year
+        // Filter: Year (via linked project or dip_request_date)
         if ($request->filled('year_id')) {
-            $query->where('year_id', $request->year_id);
+            $yearObj = RdbYear::find($request->year_id);
+            if ($yearObj) {
+                $ceYear = (int)$yearObj->year_name - 543;
+                $query->where(function($q) use ($request, $ceYear) {
+                    $q->whereHas('project', function($pq) use ($request) {
+                        $pq->where('year_id', $request->year_id);
+                    })->orWhereYear('dip_request_date', $ceYear);
+                });
+            }
         }
 
         return $query;
