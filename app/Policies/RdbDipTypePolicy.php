@@ -15,7 +15,7 @@ class RdbDipTypePolicy
      */
     public function before(User $user, $ability)
     {
-        if ($user->hasRole('The Creator')) {
+        if ($user->hasRole('The Creator') || $user->hasRole('Admin') || $user->hasRole('Admin Dip') || $user->hasPermission(['MasterData.Manage', 'RdbDip.View'])) {
             return true;
         }
     }
@@ -25,7 +25,7 @@ class RdbDipTypePolicy
      */
     public function viewAny(?User $user): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['MasterData.Manage', 'RdbDip.View']) || $user->hasRole('Admin') || $user->hasRole('Admin Dip'));
     }
 
     /**
@@ -33,7 +33,7 @@ class RdbDipTypePolicy
      */
     public function view(?User $user, RdbDipType $rdbDipType): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['MasterData.Manage', 'RdbDip.View']) || $user->hasRole('Admin') || $user->hasRole('Admin Dip'));
     }
 
     /**
@@ -41,7 +41,7 @@ class RdbDipTypePolicy
      */
     public function create(?User $user): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['MasterData.Manage', 'RdbDip.Create']) || $user->hasRole('Admin') || $user->hasRole('Admin Dip'));
     }
 
     /**
@@ -49,7 +49,7 @@ class RdbDipTypePolicy
      */
     public function update(?User $user, RdbDipType $rdbDipType): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['MasterData.Manage', 'RdbDip.Update']) || $user->hasRole('Admin') || $user->hasRole('Admin Dip'));
     }
 
     /**
@@ -57,7 +57,7 @@ class RdbDipTypePolicy
      */
     public function delete(?User $user, RdbDipType $rdbDipType): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['MasterData.Manage', 'RdbDip.Delete']) || $user->hasRole('Admin') || $user->hasRole('Admin Dip'));
     }
 
     /**
@@ -65,7 +65,7 @@ class RdbDipTypePolicy
      */
     public function restore(?User $user, RdbDipType $rdbDipType): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['MasterData.Manage', 'RdbDip.Delete']) || $user->hasRole('Admin') || $user->hasRole('Admin Dip'));
     }
 
     /**
@@ -73,6 +73,6 @@ class RdbDipTypePolicy
      */
     public function forceDelete(?User $user, RdbDipType $rdbDipType): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['MasterData.Manage', 'RdbDip.Delete']) || $user->hasRole('Admin') || $user->hasRole('Admin Dip'));
     }
 }

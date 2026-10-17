@@ -157,6 +157,7 @@ class FileUploadService
         return [
             'path' => $storagePath,
             'safe_name' => $safeFileName,
+            'original_name' => $file->getClientOriginalName(),
             'size' => $file->getSize(),
             'mime_type' => $file->getMimeType(),
         ];
@@ -195,6 +196,7 @@ class FileUploadService
 
         return [
             'filename' => $filename,
+            'original_name' => $file->getClientOriginalName(),
             'path' => $storagePath,
             'size' => $file->getSize(),
             'mime_type' => $mimeType,

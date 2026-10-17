@@ -28,7 +28,7 @@
 
             <div class="col-md-6">
                 <label for="password" class="form-label fw-bold">รหัสผ่าน (Password) <span class="text-danger">*</span></label>
-                <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" required placeholder="อย่างน้อย 6 ตัวอักษร">
+                <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" required placeholder="อย่างน้อย 8 ตัวอักษร">
                 @error('password')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror

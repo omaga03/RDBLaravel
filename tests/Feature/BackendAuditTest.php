@@ -173,4 +173,97 @@ class BackendAuditTest extends TestCase
         $selfDeleteResponse->assertSessionHas('error');
         $this->assertNotNull(\App\Models\User::find($admin->id));
     }
+
+    public function test_file_upload_service_returns_original_name()
+    {
+        $file = \Illuminate\Http\UploadedFile::fake()->createWithContent('paper.pdf', 'dummy pdf content');
+        $fileService = new \App\Services\FileUploadService();
+        $fileInfo = $fileService->storeFile($file, 'audit_test');
+
+        $this->assertArrayHasKey('original_name', $fileInfo);
+        $this->assertEquals('paper.pdf', $fileInfo['original_name']);
+        $this->assertArrayHasKey('safe_name', $fileInfo);
+        $this->assertArrayHasKey('path', $fileInfo);
+
+        // Clean up
+        if (\Illuminate\Support\Facades\Storage::disk('public')->exists($fileInfo['path'])) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($fileInfo['path']);
+        }
+    }
+
+    public function test_user_password_min_eight_characters_validation()
+    {
+        $admin = \App\Models\User::find(129);
+
+        // Try creating a user with 6 chars password - should fail
+        $response = $this->actingAs($admin)->post(route('backend.user.store'), [
+            'username' => 'test_pwd_' . time(),
+            'email' => 'pwd_' . time() . '@example.com',
+            'password' => '123456',
+            'role' => 'Researcher',
+            'status' => 10,
+        ]);
+        $response->assertSessionHasErrors(['password']);
+
+        // Try creating with 8 chars - should succeed
+        $validUsername = 'test_pwd_valid_' . time();
+        $validResponse = $this->actingAs($admin)->post(route('backend.user.store'), [
+            'username' => $validUsername,
+            'email' => 'pwd_val_' . time() . '@example.com',
+            'password' => 'password123',
+            'role' => 'Researcher',
+            'status' => 10,
+        ]);
+        $validResponse->assertRedirect(route('backend.user.index'));
+
+        // Clean up created user
+        $created = \App\Models\User::where('username', $validUsername)->first();
+        if ($created) {
+            \App\Models\AuthAssignment::where('user_id', $created->id)->delete();
+            $created->delete();
+        }
+    }
+
+    public function test_master_data_policy_dynamic_permission()
+    {
+        $roleName = 'News Manager ' . time();
+        $role = \App\Models\AuthItem::create([
+            'name' => $roleName,
+            'type' => 1,
+            'description' => 'Role for news testing',
+            'created_at' => time(),
+            'updated_at' => time(),
+        ]);
+
+        \App\Services\RbacService::syncRolePermissions($roleName, ['news']);
+
+        $user = new \App\Models\User();
+        $user->username = 'news_user_' . time();
+        $user->email = 'news_' . time() . '@example.com';
+        $user->password_hash = \Illuminate\Support\Facades\Hash::make('password123');
+        $user->auth_key = \Illuminate\Support\Str::random(32);
+        $user->confirmed_at = time();
+        $user->status = 10;
+        $user->save();
+
+        \App\Models\AuthAssignment::create([
+            'item_name' => $roleName,
+            'user_id' => $user->id,
+            'created_at' => time(),
+        ]);
+
+        // User with 'news' permission can access research_news index
+        $response = $this->actingAs($user)->get(route('backend.research_news.index'));
+        $this->assertEquals(200, $response->getStatusCode());
+
+        // User cannot access rdb_dip (should be 403)
+        $unauthResponse = $this->actingAs($user)->get(route('backend.rdb_dip.index'));
+        $this->assertEquals(403, $unauthResponse->getStatusCode());
+
+        // Clean up
+        \App\Models\AuthAssignment::where('user_id', $user->id)->delete();
+        $user->delete();
+        \App\Models\AuthItemChild::where('parent', $roleName)->delete();
+        $role->delete();
+    }
 }

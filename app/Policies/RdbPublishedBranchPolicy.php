@@ -19,7 +19,7 @@ class RdbPublishedBranchPolicy
      */
     public function before(User $user, $ability)
     {
-        if ($user->hasRole('The Creator')) {
+        if ($user->hasRole('The Creator') || $user->hasRole('Admin') || $user->hasPermission('MasterData.Manage')) {
             return true;
         }
     }
@@ -32,7 +32,7 @@ class RdbPublishedBranchPolicy
      */
     public function viewAny(?User $user): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('MasterData.Manage') || $user->hasRole('Admin'));
     }
 
     /**
@@ -44,7 +44,7 @@ class RdbPublishedBranchPolicy
      */
     public function view(?User $user, RdbPublishedBranch $rdbPublishedBranch): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('MasterData.Manage') || $user->hasRole('Admin'));
     }
 
     /**
@@ -55,7 +55,7 @@ class RdbPublishedBranchPolicy
      */
     public function create(?User $user): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('MasterData.Manage') || $user->hasRole('Admin'));
     }
 
     /**
@@ -67,7 +67,7 @@ class RdbPublishedBranchPolicy
      */
     public function update(?User $user, RdbPublishedBranch $rdbPublishedBranch): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('MasterData.Manage') || $user->hasRole('Admin'));
     }
 
     /**
@@ -79,7 +79,7 @@ class RdbPublishedBranchPolicy
      */
     public function delete(?User $user, RdbPublishedBranch $rdbPublishedBranch): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('MasterData.Manage') || $user->hasRole('Admin'));
     }
 
     /**
@@ -91,7 +91,7 @@ class RdbPublishedBranchPolicy
      */
     public function restore(?User $user, RdbPublishedBranch $rdbPublishedBranch): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('MasterData.Manage') || $user->hasRole('Admin'));
     }
 
     /**
@@ -103,6 +103,6 @@ class RdbPublishedBranchPolicy
      */
     public function forceDelete(?User $user, RdbPublishedBranch $rdbPublishedBranch): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('MasterData.Manage') || $user->hasRole('Admin'));
     }
 }

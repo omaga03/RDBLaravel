@@ -19,7 +19,7 @@ class RdbGroupprojectPolicy
      */
     public function before(User $user, $ability)
     {
-        if ($user->hasRole('The Creator')) {
+        if ($user->hasRole('The Creator') || $user->hasRole('Admin') || $user->hasPermission('MasterData.Manage')) {
             return true;
         }
     }
@@ -29,7 +29,7 @@ class RdbGroupprojectPolicy
      */
     public function viewAny(?User $user): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('MasterData.Manage') || $user->hasRole('Admin'));
     }
 
     /**
@@ -37,7 +37,7 @@ class RdbGroupprojectPolicy
      */
     public function view(?User $user, RdbGroupproject $rdbGroupproject): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('MasterData.Manage') || $user->hasRole('Admin'));
     }
 
     /**
@@ -45,7 +45,7 @@ class RdbGroupprojectPolicy
      */
     public function create(?User $user): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('MasterData.Manage') || $user->hasRole('Admin'));
     }
 
     /**
@@ -53,7 +53,7 @@ class RdbGroupprojectPolicy
      */
     public function update(?User $user, RdbGroupproject $rdbGroupproject): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('MasterData.Manage') || $user->hasRole('Admin'));
     }
 
     /**
@@ -61,7 +61,7 @@ class RdbGroupprojectPolicy
      */
     public function delete(?User $user, RdbGroupproject $rdbGroupproject): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('MasterData.Manage') || $user->hasRole('Admin'));
     }
 
     /**
@@ -69,7 +69,7 @@ class RdbGroupprojectPolicy
      */
     public function restore(?User $user, RdbGroupproject $rdbGroupproject): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('MasterData.Manage') || $user->hasRole('Admin'));
     }
 
     /**
@@ -77,6 +77,6 @@ class RdbGroupprojectPolicy
      */
     public function forceDelete(?User $user, RdbGroupproject $rdbGroupproject): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('MasterData.Manage') || $user->hasRole('Admin'));
     }
 }

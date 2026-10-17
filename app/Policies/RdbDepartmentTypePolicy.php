@@ -15,7 +15,7 @@ class RdbDepartmentTypePolicy
      */
     public function before(User $user, $ability)
     {
-        if ($user->hasRole('The Creator')) {
+        if ($user->hasRole('The Creator') || $user->hasRole('Admin') || $user->hasPermission(['MasterData.Manage', 'Department'])) {
             return true;
         }
     }
@@ -25,7 +25,7 @@ class RdbDepartmentTypePolicy
      */
     public function viewAny(?User $user): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['MasterData.Manage', 'Department']) || $user->hasRole('Admin'));
     }
 
     /**
@@ -33,7 +33,7 @@ class RdbDepartmentTypePolicy
      */
     public function view(?User $user, RdbDepartmentType $rdbDepartmentType): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['MasterData.Manage', 'Department']) || $user->hasRole('Admin'));
     }
 
     /**
@@ -41,7 +41,7 @@ class RdbDepartmentTypePolicy
      */
     public function create(?User $user): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['MasterData.Manage', 'Department']) || $user->hasRole('Admin'));
     }
 
     /**
@@ -49,7 +49,7 @@ class RdbDepartmentTypePolicy
      */
     public function update(?User $user, RdbDepartmentType $rdbDepartmentType): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['MasterData.Manage', 'Department']) || $user->hasRole('Admin'));
     }
 
 
@@ -59,7 +59,7 @@ class RdbDepartmentTypePolicy
      */
     public function delete(?User $user, RdbDepartmentType $rdbDepartmentType): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['MasterData.Manage', 'Department']) || $user->hasRole('Admin'));
     }
 
     /**
@@ -67,7 +67,7 @@ class RdbDepartmentTypePolicy
      */
     public function restore(?User $user, RdbDepartmentType $rdbDepartmentType): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['MasterData.Manage', 'Department']) || $user->hasRole('Admin'));
     }
 
     /**
@@ -75,6 +75,6 @@ class RdbDepartmentTypePolicy
      */
     public function forceDelete(?User $user, RdbDepartmentType $rdbDepartmentType): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['MasterData.Manage', 'Department']) || $user->hasRole('Admin'));
     }
 }

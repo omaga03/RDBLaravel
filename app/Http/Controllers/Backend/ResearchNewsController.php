@@ -52,7 +52,9 @@ class ResearchNewsController extends Controller
             $item->news_path = $fileInfo['path'];
             $item->news_size = $fileInfo['size'];
             $item->news_mime_type = $fileInfo['mime_type'];
-            $item->news_img = $request->file('news_img')->getClientOriginalName();
+            $validated['news_img'] = $fileInfo['original_name'];
+        } else {
+            unset($validated['news_img']);
         }
 
         $item->fill($validated);
@@ -96,7 +98,9 @@ class ResearchNewsController extends Controller
             $item->news_path = $fileInfo['path'];
             $item->news_size = $fileInfo['size'];
             $item->news_mime_type = $fileInfo['mime_type'];
-            $item->news_img = $request->file('news_img')->getClientOriginalName();
+            $validated['news_img'] = $fileInfo['original_name'];
+        } else {
+            unset($validated['news_img']);
         }
 
         $item->fill($validated);

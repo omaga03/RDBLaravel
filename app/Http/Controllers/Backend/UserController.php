@@ -62,7 +62,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'username' => ['required', 'string', 'max:255', 'unique:user,username'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:user,email'],
-            'password' => ['required', 'string', 'min:6'],
+            'password' => ['required', 'string', 'min:8'],
             'role' => ['required', 'string', 'exists:auth_item,name'],
             'researcher_id' => ['nullable', 'exists:rdb_researcher,researcher_id'],
             'status' => ['required', 'integer'],
@@ -116,7 +116,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'username' => ['required', 'string', 'max:255', Rule::unique('user')->ignore($user->id)],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('user')->ignore($user->id)],
-            'password' => ['nullable', 'string', 'min:6'],
+            'password' => ['nullable', 'string', 'min:8'],
             'role' => ['required', 'string', 'exists:auth_item,name'],
             'researcher_id' => ['nullable', 'exists:rdb_researcher,researcher_id'],
             'status' => ['required', 'integer'],

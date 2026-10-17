@@ -20,7 +20,7 @@ class RdbResearcherStatusPolicy
      */
     public function before(User $user, $ability)
     {
-        if ($user->hasRole('The Creator')) {
+        if ($user->hasRole('The Creator') || $user->hasRole('Admin') || $user->hasPermission('MasterData.Manage')) {
             return true;
         }
     }
@@ -37,26 +37,26 @@ class RdbResearcherStatusPolicy
 
     public function create(?User $user): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('MasterData.Manage') || $user->hasRole('Admin'));
     }
 
     public function update(?User $user, RdbResearcherStatus $rdbResearcherStatus): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('MasterData.Manage') || $user->hasRole('Admin'));
     }
 
     public function delete(?User $user, RdbResearcherStatus $rdbResearcherStatus): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('MasterData.Manage') || $user->hasRole('Admin'));
     }
 
     public function restore(?User $user, RdbResearcherStatus $rdbResearcherStatus): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('MasterData.Manage') || $user->hasRole('Admin'));
     }
 
     public function forceDelete(?User $user, RdbResearcherStatus $rdbResearcherStatus): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('MasterData.Manage') || $user->hasRole('Admin'));
     }
 }

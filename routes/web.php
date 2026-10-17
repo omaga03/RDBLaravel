@@ -90,18 +90,6 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     // AJAX Project Search (Central)
     Route::get('/rdb_project/search', [RdbProjectController::class, 'search'])->name('rdb_project.search');
 
-    // Project Files Management Routes
-    Route::post('rdb_project/{id}/upload-abstract', [RdbProjectController::class, 'uploadAbstract'])->name('rdb_project.upload_abstract');
-    Route::delete('rdb_project/{id}/delete-abstract', [RdbProjectController::class, 'deleteAbstract'])->name('rdb_project.delete_abstract');
-    Route::get('rdb_project/{id}/view-abstract', [RdbProjectController::class, 'viewAbstract'])->name('rdb_project.view_abstract');
-
-    Route::post('rdb_project/{id}/upload-report', [RdbProjectController::class, 'uploadReport'])->name('rdb_project.upload_report');
-    Route::delete('rdb_project/{id}/delete-report', [RdbProjectController::class, 'deleteReport'])->name('rdb_project.delete_report');
-    Route::get('rdb_project/{id}/view-report', [RdbProjectController::class, 'viewReport'])->name('rdb_project.view_report');
-
-    Route::post('rdb_project/{id}/file', [RdbProjectController::class, 'storeFile'])->name('rdb_project.store_file');
-    Route::put('rdb_project/{id}/file/{fileId}', [RdbProjectController::class, 'updateFile'])->name('rdb_project.update_file');
-    Route::delete('rdb_project/{id}/file/{fileId}', [RdbProjectController::class, 'destroyFile'])->name('rdb_project.destroy_file');
     // Export Routes (Must be BEFORE resource routes)
     Route::get('/rdb_project/export', [RdbProjectController::class, 'export'])->name('rdb_project.export');
     Route::get('/rdb_researcher/export', [RdbResearcherController::class, 'export'])->name('rdb_researcher.export');
