@@ -20,8 +20,12 @@ use App\Http\Requests\Backend\UpdateResearcherRequest;
 use App\Http\Requests\Backend\UpdateResearcherCodeIdRequest;
 use App\Http\Requests\Backend\UpdateResearcherImageRequest;
 
+use App\Traits\ExportsCsvSafely;
+
 class RdbResearcherController extends Controller
 {
+    use ExportsCsvSafely;
+
     private FileUploadService $fileUploadService;
 
     public function __construct(FileUploadService $fileUploadService)
@@ -91,18 +95,10 @@ class RdbResearcherController extends Controller
             $query->where('department_id', $request->department_id);
         }
 
-        $researchers = $query->orderBy('researcher_fname', 'asc')->get();
-
         $filename = 'researchers_' . date('Y-m-d_His') . '.csv';
-        $headers = [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-            'Pragma' => 'no-cache',
-            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
-            'Expires' => '0',
-        ];
+        $headers = $this->csvHeaders($filename);
 
-        return response()->stream(function () use ($researchers) {
+        return response()->stream(function () use ($query) {
             $handle = fopen('php://output', 'w');
             fputs($handle, "\xEF\xBB\xBF");
 
@@ -123,24 +119,26 @@ class RdbResearcherController extends Controller
                 'ORCID'
             ]);
 
-            foreach ($researchers as $r) {
-                fputcsv($handle, [
-                    $r->researcher_id,
-                    $r->researcher_codeid ?? '-',
-                    $r->prefix->prefix_nameTH ?? '',
-                    $r->researcher_fname,
-                    $r->researcher_lname,
-                    $r->researcher_fnameEN ?? '-',
-                    $r->researcher_lnameEN ?? '-',
-                    $r->department->department_nameTH ?? '-',
-                    $r->researcher_email ?? '-',
-                    $r->researcher_tel ?? '-',
-                    $r->researcher_mobile ?? '-',
-                    $r->scopus_authorId ?? '-',
-                    $r->researcher_hindex ?? 0,
-                    $r->orcid ?? '-'
-                ]);
-            }
+            $query->orderBy('researcher_fname', 'asc')->chunk(250, function ($researchers) use ($handle) {
+                foreach ($researchers as $r) {
+                    fputcsv($handle, $this->sanitizeCsvRow([
+                        $r->researcher_id,
+                        $r->researcher_codeid ?? '-',
+                        $r->prefix->prefix_nameTH ?? '',
+                        $r->researcher_fname,
+                        $r->researcher_lname,
+                        $r->researcher_fnameEN ?? '-',
+                        $r->researcher_lnameEN ?? '-',
+                        $r->department->department_nameTH ?? '-',
+                        $r->researcher_email ?? '-',
+                        $r->researcher_tel ?? '-',
+                        $r->researcher_mobile ?? '-',
+                        $r->scopus_authorId ?? '-',
+                        $r->researcher_hindex ?? 0,
+                        $r->orcid ?? '-'
+                    ]));
+                }
+            });
 
             fclose($handle);
         }, 200, $headers);

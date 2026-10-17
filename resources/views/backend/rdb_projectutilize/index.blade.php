@@ -14,7 +14,7 @@
     </div>
 
     {{-- Search Bar --}}
-    <x-search-bar :searchRoute="route('backend.rdbprojectutilize.index')" :collapsed="true">
+    <x-search-bar :searchRoute="route('backend.rdbprojectutilize.index')" :exportRoute="route('backend.rdbprojectutilize.export')" :collapsed="true">
         <!-- Search Keyword -->
         <div class="row g-3 mb-3">
             <div class="col-md-12">

@@ -42,11 +42,15 @@ class ProfileController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $user = $request->user();
+
+        if ($user && ($user->hasRole('The Creator') || $user->id === 129)) {
+            return back()->withErrors(['password' => 'ไม่สามารถลบบัญชีผู้ดูแลระบบหลัก (The Creator) ได้'], 'userDeletion');
+        }
+
         $request->validateWithBag('userDeletion', [
             'password' => ['required', 'current_password'],
         ]);
-
-        $user = $request->user();
 
         Auth::logout();
 

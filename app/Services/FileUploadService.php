@@ -11,15 +11,18 @@ class FileUploadService
     // ชนิดไฟล์ที่อนุญาต
     private const ALLOWED_MIME_TYPES = [
         'application/pdf' => 'pdf',
-        // 'application/msword' => 'doc',
-        // 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
-        // 'application/vnd.ms-excel' => 'xls',
-        // 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'xlsx',
+        'application/msword' => 'doc',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+        'application/vnd.ms-excel' => 'xls',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'xlsx',
+        'application/vnd.ms-powerpoint' => 'ppt',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'pptx',
+        'application/zip' => 'zip',
+        'application/x-zip-compressed' => 'zip',
+        'application/x-rar-compressed' => 'rar',
+        'application/vnd.rar' => 'rar',
         'image/jpeg' => 'jpg',
         'image/png' => 'png',
-        // 'image/gif' => 'gif',
-        // 'text/plain' => 'txt',
-        // 'text/csv' => 'csv',
     ];
 
     private const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
@@ -43,28 +46,31 @@ class FileUploadService
             throw new \Exception('ไฟล์ขนาดใหญ่เกินไป (สูงสุด 50 MB)');
         }
 
+        $extensionMap = [
+            'pdf' => 'pdf',
+            'doc' => 'doc',
+            'docx' => 'docx',
+            'xls' => 'xls',
+            'xlsx' => 'xlsx',
+            'ppt' => 'ppt',
+            'pptx' => 'pptx',
+            'zip' => 'zip',
+            'rar' => 'rar',
+            'jpg' => 'jpg',
+            'jpeg' => 'jpg',
+            'png' => 'png',
+        ];
+
         // ตรวจสอบ MIME type
         $mimeType = $file->getMimeType();
-        if (empty($mimeType)) {
-            // Fallback: try to get extension from original filename
-            $originalExtension = strtolower($file->getClientOriginalExtension());
-            $extensionMap = [
-                'pdf' => 'pdf',
-                'jpg' => 'jpg',
-                'jpeg' => 'jpg',
-                'png' => 'png',
-            ];
-            
-            if (isset($extensionMap[$originalExtension])) {
-                $extension = $extensionMap[$originalExtension];
-            } else {
-                throw new \Exception('ไม่สามารถระบุประเภทไฟล์ได้ กรุณาเลือกไฟล์ PDF, JPG หรือ PNG');
-            }
-        } elseif (!isset(self::ALLOWED_MIME_TYPES[$mimeType])) {
-            throw new \Exception('ประเภทไฟล์ไม่อนุญาต: ' . $mimeType . ' (รองรับเฉพาะ PDF, JPG, PNG)');
-        } else {
-            // ดึง extension ที่ปลอดภัย
+        $originalExtension = strtolower($file->getClientOriginalExtension());
+
+        if (!empty($mimeType) && isset(self::ALLOWED_MIME_TYPES[$mimeType])) {
             $extension = self::ALLOWED_MIME_TYPES[$mimeType];
+        } elseif (isset($extensionMap[$originalExtension])) {
+            $extension = $extensionMap[$originalExtension];
+        } else {
+            throw new \Exception('ประเภทไฟล์ไม่อนุญาต (รองรับเฉพาะ PDF, Word, Excel, PowerPoint, ZIP, JPG, PNG)');
         }
 
         // สร้างชื่อไฟล์ด้วย UUID (ป้องกัน Directory Traversal)

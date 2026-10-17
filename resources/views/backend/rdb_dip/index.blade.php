@@ -10,7 +10,7 @@
     </div>
 
     {{-- Search Bar --}}
-    <x-search-bar :searchRoute="route('backend.rdb_dip.index')" :collapsed="true">
+    <x-search-bar :searchRoute="route('backend.rdb_dip.index')" :exportRoute="route('backend.rdb_dip.export')" :collapsed="true">
         <div class="row g-3">
             <div class="col-md-3">
                 <label class="form-label">เลขที่คำขอ</label>

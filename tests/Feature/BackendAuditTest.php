@@ -266,4 +266,99 @@ class BackendAuditTest extends TestCase
         \App\Models\AuthItemChild::where('parent', $roleName)->delete();
         $role->delete();
     }
+
+    public function test_all_backend_export_routes_stream_utf8_bom()
+    {
+        $admin = \App\Models\User::find(129);
+        $exportRoutes = [
+            'backend.rdb_project.export',
+            'backend.rdb_researcher.export',
+            'backend.rdb_published.export',
+            'backend.rdb_dip.export',
+            'backend.rdbprojectutilize.export',
+        ];
+
+        foreach ($exportRoutes as $route) {
+            $response = $this->actingAs($admin)->get(route($route));
+            $this->assertEquals(200, $response->getStatusCode(), "Export route {$route} did not return 200");
+            $this->assertStringContainsString('text/csv', $response->headers->get('Content-Type'));
+            
+            // Verify UTF-8 BOM
+            $content = $response->streamedContent();
+            $this->assertTrue(str_starts_with($content, "\xEF\xBB\xBF"), "Export {$route} missing UTF-8 BOM");
+        }
+    }
+
+    public function test_user_model_mutators_and_breeze_compatibility()
+    {
+        $username = 'breeze_test_' . time();
+        $user = new \App\Models\User();
+        // Breeze style: sets 'name' and 'password'
+        $user->name = $username;
+        $user->email = $username . '@example.com';
+        $user->password = 'StrongSecret123!';
+        $user->save();
+
+        $this->assertEquals($username, $user->username);
+        $this->assertNotEmpty($user->password_hash);
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('StrongSecret123!', $user->password_hash));
+        $this->assertNotEmpty($user->auth_key);
+        $this->assertEquals(10, $user->status);
+        $this->assertNotNull($user->confirmed_at);
+
+        // Clean up
+        $user->delete();
+    }
+
+    public function test_superadmin_profile_deletion_is_blocked()
+    {
+        $admin = \App\Models\User::find(129);
+        $response = $this->actingAs($admin)->delete('/profile', [
+            'password' => 'wrong_or_right_password',
+        ]);
+
+        $response->assertSessionHasErrors(['password'], null, 'userDeletion');
+        $this->assertNotNull(\App\Models\User::find(129));
+    }
+
+    public function test_file_upload_service_allows_research_documents()
+    {
+        $service = new \App\Services\FileUploadService();
+        $doc = \Illuminate\Http\UploadedFile::fake()->createWithContent(
+            'report.docx',
+            'dummy docx content'
+        );
+        $result = $service->storeFile($doc, 'test_docs');
+
+        $this->assertArrayHasKey('path', $result);
+        $this->assertArrayHasKey('safe_name', $result);
+        $this->assertEquals('report.docx', $result['original_name']);
+
+        // Clean up
+        \Illuminate\Support\Facades\Storage::disk('public')->delete($result['path']);
+    }
+
+    public function test_csv_formula_injection_prevention()
+    {
+        $dummy = new class {
+            use \App\Traits\ExportsCsvSafely;
+
+            public function testCell($val)
+            {
+                return $this->sanitizeCsvCell($val);
+            }
+        };
+
+        // Harmful formula triggers prefixed with quote
+        $this->assertEquals("'=1+1", $dummy->testCell("=1+1"));
+        $this->assertEquals("'-2+3+cmd|' /C calc'!A0", $dummy->testCell("-2+3+cmd|' /C calc'!A0"));
+        $this->assertEquals("'+SUM(A1:A10)", $dummy->testCell("+SUM(A1:A10)"));
+        $this->assertEquals("'@cmd", $dummy->testCell("@cmd"));
+
+        // Safe values untouched
+        $this->assertEquals("Regular Title", $dummy->testCell("Regular Title"));
+        $this->assertEquals(12345, $dummy->testCell(12345));
+        $this->assertEquals(-100, $dummy->testCell(-100));
+        $this->assertEquals("-100", $dummy->testCell("-100"));
+    }
 }

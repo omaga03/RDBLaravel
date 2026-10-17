@@ -14,8 +14,12 @@ use App\Http\Requests\Backend\StoreDipRequest;
 use App\Http\Requests\Backend\UpdateDipRequest;
 use App\Http\Requests\Backend\UploadDipFileRequest;
 
+use App\Traits\ExportsCsvSafely;
+
 class RdbDipController extends Controller
 {
+    use ExportsCsvSafely;
+
     private FileUploadService $fileUploadService;
 
     public function __construct(FileUploadService $fileUploadService)
@@ -23,10 +27,9 @@ class RdbDipController extends Controller
         $this->fileUploadService = $fileUploadService;
     }
 
-    public function index(Request $request)
+    protected function getFilteredQuery(Request $request)
     {
-        $this->authorize('viewAny', RdbDip::class);
-        $query = RdbDip::with(['dipType', 'researcher', 'project']);
+        $query = RdbDip::with(['dipType', 'researcher.prefix', 'project']);
 
         // Filter: Dip Request Number
         if ($request->filled('dip_request_number')) {
@@ -61,6 +64,14 @@ class RdbDipController extends Controller
             $query->where('year_id', $request->year_id);
         }
 
+        return $query;
+    }
+
+    public function index(Request $request)
+    {
+        $this->authorize('viewAny', RdbDip::class);
+        $query = $this->getFilteredQuery($request);
+
         $items = $query->orderBy('dip_request_date', 'desc')->paginate(20);
 
         // Lookup data for filters
@@ -77,6 +88,57 @@ class RdbDipController extends Controller
         }
 
         return view('backend.rdb_dip.index', compact('items', 'dipTypes', 'selectedResearcher', 'selectedYear'));
+    }
+
+    /**
+     * Export IP records to CSV (Excel compatible with formula injection protection)
+     */
+    public function export(Request $request)
+    {
+        $this->authorize('viewAny', RdbDip::class);
+        $query = $this->getFilteredQuery($request);
+
+        $filename = 'intellectual_property_' . date('Y-m-d_His') . '.csv';
+        $headers = $this->csvHeaders($filename);
+
+        return response()->stream(function () use ($query) {
+            $handle = fopen('php://output', 'w');
+            fputs($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, [
+                'ID',
+                'เลขที่คำขอ',
+                'วันที่ยื่นคำขอ',
+                'ชื่อผลงาน/การประดิษฐ์',
+                'ประเภททรัพย์สินทางปัญญา',
+                'ผู้ประดิษฐ์/นักวิจัย',
+                'เลขที่สิทธิบัตร/อนุสิทธิบัตร',
+                'วันที่ประกาศโฆษณา',
+                'โครงการที่เกี่ยวข้อง',
+                'สถานะ'
+            ]);
+
+            $query->orderBy('dip_id', 'desc')->chunk(250, function ($items) use ($handle) {
+                foreach ($items as $item) {
+                    $inventor = $item->researcher ? (($item->researcher->prefix->prefix_nameTH ?? '') . $item->researcher->researcher_fname . ' ' . $item->researcher->researcher_lname) : '-';
+
+                    fputcsv($handle, $this->sanitizeCsvRow([
+                        $item->dip_id,
+                        $item->dip_request_number ?? '-',
+                        $item->dip_request_date ? $item->dip_request_date->format('Y-m-d') : '-',
+                        strip_tags(html_entity_decode($item->dip_data2_name ?? '', ENT_QUOTES, 'UTF-8')),
+                        $item->dipType->dipt_name ?? '-',
+                        $inventor,
+                        $item->dip_patent_number ?? ($item->dip_number ?? '-'),
+                        $item->dip_publication_date ?? '-',
+                        $item->project->pro_nameTH ?? '-',
+                        $item->dip_data2_status ?? '-'
+                    ]));
+                }
+            });
+
+            fclose($handle);
+        }, 200, $headers);
     }
 
     /**

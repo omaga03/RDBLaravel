@@ -13,18 +13,22 @@ use App\Http\Requests\Backend\UploadPublishedFileRequest;
 use App\Services\FileUploadService;
 use Illuminate\Support\Facades\Storage;
 
+use App\Traits\ExportsCsvSafely;
+
 class RdbPublishedController extends Controller
 {
+    use ExportsCsvSafely;
+
     private FileUploadService $fileUploadService;
 
     public function __construct(FileUploadService $fileUploadService)
     {
         $this->fileUploadService = $fileUploadService;
     }
-    public function index(Request $request)
+
+    protected function getFilteredQuery(Request $request)
     {
-        $this->authorize('viewAny', RdbPublished::class);
-        $query = RdbPublished::with(['year', 'pubtype', 'researcher', 'authors', 'createdBy', 'updatedBy']);
+        $query = RdbPublished::with(['year', 'pubtype', 'researcher.prefix', 'authors.prefix', 'project', 'department', 'createdBy', 'updatedBy']);
 
         // Apply 'manage own group data' filter for general admins (not 'The Creator')
         if (auth()->check() && auth()->user()->hasRole('Published') && !auth()->user()->hasRole('The Creator')) {
@@ -81,15 +85,12 @@ class RdbPublishedController extends Controller
 
             // Publication Type Hierarchy
             if ($request->filled('pubtype_id')) {
-                // Exact Subtype
                 $query->where('pubtype_id', $request->pubtype_id);
             } elseif ($request->filled('pubtype_grouptype')) {
-                // Middle Level
                 $ids = \App\Models\RdbPublishedType::where('pubtype_grouptype', $request->pubtype_grouptype)
                         ->pluck('pubtype_id');
                 $query->whereIn('pubtype_id', $ids);
             } elseif ($request->filled('pubtype_group')) {
-                // Top Level
                 $ids = \App\Models\RdbPublishedType::where('pubtype_group', $request->pubtype_group)
                         ->pluck('pubtype_id');
                 $query->whereIn('pubtype_id', $ids);
@@ -147,6 +148,14 @@ class RdbPublishedController extends Controller
             }
         }
 
+        return $query;
+    }
+
+    public function index(Request $request)
+    {
+        $this->authorize('viewAny', RdbPublished::class);
+        $query = $this->getFilteredQuery($request);
+
         $items = $query->orderBy('pub_date', 'desc')->paginate(20);
         $authorTypes = \App\Models\RdbPublishedTypeAuthor::pluck('pubta_nameTH', 'pubta_id');
         
@@ -156,6 +165,66 @@ class RdbPublishedController extends Controller
         $branches = \App\Models\RdbPublishedBranch::orderBy('branch_name')->get();
 
         return view('backend.rdb_published.index', compact('items', 'authorTypes', 'years', 'pubTypes', 'departments', 'branches'));
+    }
+
+    /**
+     * Export publications to CSV (Excel compatible with formula injection protection)
+     */
+    public function export(Request $request)
+    {
+        $this->authorize('viewAny', RdbPublished::class);
+        $query = $this->getFilteredQuery($request);
+
+        $filename = 'publications_' . date('Y-m-d_His') . '.csv';
+        $headers = $this->csvHeaders($filename);
+
+        return response()->stream(function () use ($query) {
+            $handle = fopen('php://output', 'w');
+            fputs($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, [
+                'ID',
+                'ชื่อผลงานตีพิมพ์',
+                'วารสาร/แหล่งตีพิมพ์',
+                'ประเภทผลงาน',
+                'กลุ่มประเภท',
+                'นักวิจัยหลัก',
+                'คณะผู้ร่วมวิจัย',
+                'ปี พ.ศ.',
+                'วันที่ตีพิมพ์',
+                'หน่วยงาน/คณะ',
+                'โครงการที่เกี่ยวข้อง',
+                'ค่าน้ำหนัก (Score)',
+                'งบประมาณ (บาท)'
+            ]);
+
+            $query->orderBy('id', 'desc')->chunk(250, function ($items) use ($handle) {
+                foreach ($items as $item) {
+                    $mainResearcher = $item->researcher ? (($item->researcher->prefix->prefix_nameTH ?? '') . $item->researcher->researcher_fname . ' ' . $item->researcher->researcher_lname) : '-';
+                    $coAuthors = $item->authors->map(function ($a) {
+                        return ($a->prefix->prefix_nameTH ?? '') . $a->researcher_fname . ' ' . $a->researcher_lname;
+                    })->implode(', ');
+
+                    fputcsv($handle, $this->sanitizeCsvRow([
+                        $item->id,
+                        strip_tags(html_entity_decode($item->pub_name ?? '', ENT_QUOTES, 'UTF-8')),
+                        strip_tags(html_entity_decode($item->pub_name_journal ?? '', ENT_QUOTES, 'UTF-8')),
+                        $item->pubtype->pubtype_name ?? '-',
+                        $item->pubtype->pubtype_group ?? '-',
+                        $mainResearcher,
+                        $coAuthors ?: '-',
+                        $item->year->year_name ?? '-',
+                        $item->pub_date ?? '-',
+                        $item->department->department_nameTH ?? '-',
+                        $item->project->pro_nameTH ?? '-',
+                        $item->pub_score ?? 0,
+                        $item->pub_budget ?? 0,
+                    ]));
+                }
+            });
+
+            fclose($handle);
+        }, 200, $headers);
     }
 
     public function create()

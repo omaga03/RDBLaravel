@@ -10,7 +10,7 @@
     </div>
 
     {{-- Search Bar --}}
-    <x-search-bar :searchRoute="route('backend.rdb_published.index')" :collapsed="true">
+    <x-search-bar :searchRoute="route('backend.rdb_published.index')" :exportRoute="route('backend.rdb_published.export')" :collapsed="true">
         <div class="row g-3">
             {{-- Keywords --}}
             <div class="col-md-6">

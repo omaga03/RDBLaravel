@@ -93,6 +93,9 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     // Export Routes (Must be BEFORE resource routes)
     Route::get('/rdb_project/export', [RdbProjectController::class, 'export'])->name('rdb_project.export');
     Route::get('/rdb_researcher/export', [RdbResearcherController::class, 'export'])->name('rdb_researcher.export');
+    Route::get('/rdb_published/export', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'export'])->name('rdb_published.export');
+    Route::get('/rdb_dip/export', [\App\Http\Controllers\Backend\RdbDipController::class, 'export'])->name('rdb_dip.export');
+    Route::get('/rdbprojectutilize/export', [\App\Http\Controllers\Backend\RdbProjectUtilizeController::class, 'export'])->name('rdbprojectutilize.export');
 
     Route::resource('rdb_project', RdbProjectController::class);
     Route::resource('rdb_researcher', RdbResearcherController::class);

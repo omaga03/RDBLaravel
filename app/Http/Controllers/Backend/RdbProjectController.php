@@ -27,8 +27,12 @@ use App\Http\Requests\Backend\UploadProjectAbstractRequest;
 use App\Http\Requests\Backend\UploadProjectReportRequest;
 
 
+use App\Traits\ExportsCsvSafely;
+
 class RdbProjectController extends Controller
 {
+    use ExportsCsvSafely;
+
     private FileUploadService $fileUploadService;
 
     public function __construct(FileUploadService $fileUploadService)
@@ -317,18 +321,10 @@ class RdbProjectController extends Controller
             $query->where('department_id', $request->department_id);
         }
 
-        $projects = $query->orderBy('pro_id', 'desc')->get();
-
         $filename = 'projects_' . date('Y-m-d_His') . '.csv';
-        $headers = [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-            'Pragma' => 'no-cache',
-            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
-            'Expires' => '0',
-        ];
+        $headers = $this->csvHeaders($filename);
 
-        return response()->stream(function () use ($projects) {
+        return response()->stream(function () use ($query) {
             $handle = fopen('php://output', 'w');
             fputs($handle, "\xEF\xBB\xBF");
 
@@ -348,26 +344,28 @@ class RdbProjectController extends Controller
                 'วันที่สิ้นสุด'
             ]);
 
-            foreach ($projects as $p) {
-                $headResearcher = $p->researchers->first();
-                $headName = $headResearcher ? (($headResearcher->prefix->prefix_nameTH ?? '') . $headResearcher->researcher_fname . ' ' . $headResearcher->researcher_lname) : '-';
+            $query->orderBy('pro_id', 'desc')->chunk(250, function ($projects) use ($handle) {
+                foreach ($projects as $p) {
+                    $headResearcher = $p->researchers->first();
+                    $headName = $headResearcher ? (($headResearcher->prefix->prefix_nameTH ?? '') . $headResearcher->researcher_fname . ' ' . $headResearcher->researcher_lname) : '-';
 
-                fputcsv($handle, [
-                    $p->pro_id,
-                    $p->pro_code ?? '-',
-                    $p->year->year_name ?? '-',
-                    strip_tags(html_entity_decode($p->pro_nameTH ?? '', ENT_QUOTES, 'UTF-8')),
-                    strip_tags(html_entity_decode($p->pro_nameEN ?? '', ENT_QUOTES, 'UTF-8')),
-                    $p->type->pt_name ?? '-',
-                    $p->typeSub->pts_name ?? '-',
-                    $p->pro_budget ?? 0,
-                    $p->department->department_nameTH ?? '-',
-                    $headName,
-                    $p->status->ps_name ?? '-',
-                    $p->pro_date_start ?? '-',
-                    $p->pro_date_end ?? '-'
-                ]);
-            }
+                    fputcsv($handle, $this->sanitizeCsvRow([
+                        $p->pro_id,
+                        $p->pro_code ?? '-',
+                        $p->year->year_name ?? '-',
+                        strip_tags(html_entity_decode($p->pro_nameTH ?? '', ENT_QUOTES, 'UTF-8')),
+                        strip_tags(html_entity_decode($p->pro_nameEN ?? '', ENT_QUOTES, 'UTF-8')),
+                        $p->type->pt_name ?? '-',
+                        $p->typeSub->pts_name ?? '-',
+                        $p->pro_budget ?? 0,
+                        $p->department->department_nameTH ?? '-',
+                        $headName,
+                        $p->status->ps_name ?? '-',
+                        $p->pro_date_start ?? '-',
+                        $p->pro_date_end ?? '-'
+                    ]));
+                }
+            });
 
             fclose($handle);
         }, 200, $headers);

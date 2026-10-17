@@ -15,8 +15,12 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\Backend\StoreProjectUtilizeRequest;
 use App\Http\Requests\Backend\UpdateProjectUtilizeRequest;
 
+use App\Traits\ExportsCsvSafely;
+
 class RdbProjectUtilizeController extends Controller
 {
+    use ExportsCsvSafely;
+
     private FileUploadService $fileUploadService;
 
     public function __construct(FileUploadService $fileUploadService)
@@ -24,9 +28,8 @@ class RdbProjectUtilizeController extends Controller
         $this->fileUploadService = $fileUploadService;
     }
 
-    public function index(Request $request)
+    protected function getFilteredQuery(Request $request)
     {
-        $this->authorize('viewAny', RdbProjectUtilize::class);
         $query = RdbProjectUtilize::with(['project.rdbProjectWorks.researcher', 'changwat', 'utilizeType', 'createdBy', 'updatedBy']);
         
         if ($request->filled('q')) {
@@ -78,9 +81,66 @@ class RdbProjectUtilizeController extends Controller
             }
         }
 
+        return $query;
+    }
+
+    public function index(Request $request)
+    {
+        $this->authorize('viewAny', RdbProjectUtilize::class);
+        $query = $this->getFilteredQuery($request);
+
         $items = $query->orderBy('utz_date', 'desc')->paginate(20);
 
         return view('backend.rdb_projectutilize.index', compact('items'));
+    }
+
+    /**
+     * Export project utilizations to CSV (Excel compatible with formula injection protection)
+     */
+    public function export(Request $request)
+    {
+        $this->authorize('viewAny', RdbProjectUtilize::class);
+        $query = $this->getFilteredQuery($request);
+
+        $filename = 'project_utilizations_' . date('Y-m-d_His') . '.csv';
+        $headers = $this->csvHeaders($filename);
+
+        return response()->stream(function () use ($query) {
+            $handle = fopen('php://output', 'w');
+            fputs($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, [
+                'ID',
+                'รหัสโครงการ',
+                'ชื่อโครงการวิจัย',
+                'หน่วยงานที่นำไปใช้',
+                'ผู้รับผิดชอบ/ผู้นำไปใช้',
+                'ตำแหน่ง',
+                'จังหวัด/พื้นที่',
+                'ประเภทการใช้ประโยชน์',
+                'วันที่นำไปใช้',
+                'งบประมาณ/มูลค่าผลกระทบ (บาท)'
+            ]);
+
+            $query->orderBy('utz_id', 'desc')->chunk(250, function ($items) use ($handle) {
+                foreach ($items as $item) {
+                    fputcsv($handle, $this->sanitizeCsvRow([
+                        $item->utz_id,
+                        $item->project->pro_code ?? '-',
+                        strip_tags(html_entity_decode($item->project->pro_nameTH ?? '-', ENT_QUOTES, 'UTF-8')),
+                        strip_tags(html_entity_decode($item->utz_department_name ?? '-', ENT_QUOTES, 'UTF-8')),
+                        strip_tags(html_entity_decode($item->utz_leading ?? '-', ENT_QUOTES, 'UTF-8')),
+                        $item->utz_leading_position ?? '-',
+                        $item->changwat->changwat_t ?? '-',
+                        $item->utilizeType->utz_type_name ?? '-',
+                        $item->utz_date ?? '-',
+                        $item->utz_budget ?? 0
+                    ]));
+                }
+            });
+
+            fclose($handle);
+        }, 200, $headers);
     }
 
     public function create()

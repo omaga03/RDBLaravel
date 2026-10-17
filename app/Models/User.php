@@ -16,6 +16,8 @@ class User extends Authenticatable
     protected $dateFormat = 'U'; // Unix timestamp
 
     protected $fillable = [
+        'name',
+        'password',
         'researcher_id',
         'username',
         'email',
@@ -39,6 +41,37 @@ class User extends Authenticatable
         'password_hash',
         'auth_key',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function ($user) {
+            if (empty($user->auth_key)) {
+                $user->auth_key = \Illuminate\Support\Str::random(32);
+            }
+            if (!isset($user->status)) {
+                $user->status = 10;
+            }
+            if (empty($user->confirmed_at)) {
+                $user->confirmed_at = time();
+            }
+        });
+    }
+
+    public function setPasswordAttribute($value)
+    {
+        if (!empty($value)) {
+            $this->attributes['password_hash'] = \Illuminate\Support\Facades\Hash::needsRehash($value)
+                ? \Illuminate\Support\Facades\Hash::make($value)
+                : $value;
+        }
+    }
+
+    public function setNameAttribute($value)
+    {
+        if (!empty($value)) {
+            $this->attributes['username'] = $value;
+        }
+    }
 
     public function getAuthPassword()
     {
