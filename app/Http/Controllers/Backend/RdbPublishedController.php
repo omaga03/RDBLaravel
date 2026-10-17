@@ -260,7 +260,7 @@ class RdbPublishedController extends Controller
             $data['pf_path'] = $fileInfo['path'];
             $data['pf_size'] = $fileInfo['size'];
             $data['pf_mime_type'] = $fileInfo['mime_type'];
-            $data['pub_file'] = $fileInfo['original_name'];
+            $data['pub_file'] = $fileInfo['safe_name'];
         }
         
         $item = new RdbPublished();
@@ -358,7 +358,7 @@ class RdbPublishedController extends Controller
             $data['pf_path'] = $fileInfo['path'];
             $data['pf_size'] = $fileInfo['size'];
             $data['pf_mime_type'] = $fileInfo['mime_type'];
-            $data['pub_file'] = $fileInfo['original_name'];
+            $data['pub_file'] = $fileInfo['safe_name'];
         }
 
         $item->fill($data);
@@ -593,7 +593,7 @@ class RdbPublishedController extends Controller
         $item->pf_path = $fileInfo['path'];
         $item->pf_size = $fileInfo['size'];
         $item->pf_mime_type = $fileInfo['mime_type'];
-        $item->pub_file = $fileInfo['original_name'];
+        $item->pub_file = $fileInfo['safe_name'];
         $item->user_updated = auth()->id();
         $item->save();
 

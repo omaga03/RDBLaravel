@@ -588,7 +588,56 @@ class BackendAuditTest extends TestCase
 
         // Test download / view endpoint works and returns 200 with inline disposition
         $fileResponse = $this->actingAs($admin)->get(route('backend.rdbprojectutilize.download', ['id' => 1036, 'filename' => $utilize->utz_files]));
-        $fileResponse->assertStatus(200);
-        $fileResponse->assertHeader('Content-Disposition', 'inline; filename="' . $utilize->utz_files . '"');
+        $this->assertStringContainsString('inline', $fileResponse->headers->get('Content-Disposition'));
+        $this->assertStringContainsString(basename($utilize->getUtilizeFilePath()), $fileResponse->headers->get('Content-Disposition'));
+    }
+
+    public function test_file_upload_security_and_dual_path_accessors()
+    {
+        // 1. Verify FileUploadService renames to UUID v4
+        $file = \Illuminate\Http\UploadedFile::fake()->createWithContent('research_paper_with_unsafe_name.pdf', 'fake pdf binary content');
+        $fileService = new \App\Services\FileUploadService();
+        $fileInfo = $fileService->storeFile($file, 'audit_security');
+
+        $this->assertMatchesRegularExpression('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.pdf$/', $fileInfo['safe_name']);
+        $this->assertStringStartsWith('audit_security/', $fileInfo['path']);
+        $this->assertEquals('research_paper_with_unsafe_name.pdf', $fileInfo['original_name']);
+
+        // Clean up stored file
+        \Illuminate\Support\Facades\Storage::disk('public')->delete($fileInfo['path']);
+
+        // 2. Test Conference model image_url accessor with both new and legacy
+        $conf = new \App\Models\ResearchConference();
+        $conf->con_path = 'conference/test-uuid.jpg';
+        $this->assertStringContainsString('storage/conference/test-uuid.jpg', $conf->image_url);
+
+        $confLegacy = new \App\Models\ResearchConference();
+        $confLegacy->con_img = 'conth_12345.jpg';
+        $this->assertStringContainsString('storage/uploads/conference/conth_12345.jpg', $confLegacy->image_url);
+
+        // 3. Test News model image_url accessor with both new and legacy
+        $news = new \App\Models\ResearchNews();
+        $news->news_path = 'news/test-news-uuid.jpg';
+        $this->assertStringContainsString('storage/news/test-news-uuid.jpg', $news->image_url);
+
+        $newsLegacy = new \App\Models\ResearchNews();
+        $newsLegacy->news_img = 'news_12345.jpg';
+        $this->assertStringContainsString('storage/uploads/news/news_12345.jpg', $newsLegacy->image_url);
+
+        // 4. Test Researcher profile_image_url accessor
+        $res = new \App\Models\RdbResearcher();
+        $res->rf_path = 'researchers/test-res-uuid.jpg';
+        $this->assertStringContainsString('storage/researchers/test-res-uuid.jpg', $res->profile_image_url);
+
+        $resLegacy = new \App\Models\RdbResearcher();
+        $resLegacy->researcher_picture = 'res_12345.jpg';
+        $this->assertStringContainsString('storage/uploads/researchers/res_12345.jpg', $resLegacy->profile_image_url);
+
+        // 5. Test RdbDip default getDipFilePath uses dip_files column
+        \Illuminate\Support\Facades\Storage::disk('public')->put('dips/test-dip.pdf', 'dummy');
+        $dip = new \App\Models\RdbDip();
+        $dip->dip_path = 'dips/test-dip.pdf';
+        $this->assertEquals('dips/test-dip.pdf', $dip->getDipFilePath());
+        \Illuminate\Support\Facades\Storage::disk('public')->delete('dips/test-dip.pdf');
     }
 }

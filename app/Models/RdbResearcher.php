@@ -65,6 +65,12 @@ class RdbResearcher extends Model
         return null;
     }
 
+    public function getProfileImageUrlAttribute(): ?string
+    {
+        $path = $this->getProfileFilePath();
+        return $path ? asset('storage/' . $path) : null;
+    }
+
     /**
      * Check profile file integrity
      */

@@ -42,17 +42,9 @@
                         @forelse($items as $item)
                         <tr>
                             <td class="text-center p-3">
-                                @php
-                                    $newsImg = null;
-                                    if (!empty($item->news_path)) {
-                                        $newsImg = asset('storage/' . $item->news_path);
-                                    } elseif (!empty($item->news_img)) {
-                                        $newsImg = asset('storage/uploads/news/' . $item->news_img);
-                                    }
-                                @endphp
                                 <div class="ratio ratio-16x9 rounded overflow-hidden bg-body-secondary border mx-auto" style="width: 80px;">
-                                    @if($newsImg)
-                                        <img src="{{ $newsImg }}" alt="รูปข่าว" class="object-fit-cover w-100 h-100">
+                                    @if($item->image_url)
+                                        <img src="{{ $item->image_url }}" alt="รูปข่าว" class="object-fit-cover w-100 h-100">
                                     @else
                                         <div class="d-flex align-items-center justify-content-center h-100 text-body-secondary">
                                             <i class="bi bi-image fs-5"></i>

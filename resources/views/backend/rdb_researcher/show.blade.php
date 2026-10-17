@@ -27,8 +27,8 @@
             <x-card class="sticky-top" style="top: 20px;" color="info">
                 <div class="text-center">
                     <div class="mb-3 position-relative d-inline-block">
-                        @if($item->researcher_picture)
-                            <img src="{{ asset('storage/uploads/researchers/' . $item->researcher_picture) }}" 
+                        @if($item->profile_image_url)
+                            <img src="{{ $item->profile_image_url }}" 
                                  alt="{{ $item->researcher_fname }}" 
                                  class="rounded-circle object-fit-cover shadow-sm bg-body border border-3 border-body-secondary"
                                  style="width: 150px; height: 150px;">

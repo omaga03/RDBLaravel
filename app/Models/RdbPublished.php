@@ -93,7 +93,13 @@ class RdbPublished extends Model
         }
 
         if (!empty($this->pub_file)) {
-            return 'uploads/published/' . $this->pub_file;
+            if (Storage::disk('public')->exists('uploads/rdb_published/' . $this->pub_file) || file_exists(public_path('uploads/rdb_published/' . $this->pub_file)) || file_exists(public_path('storage/uploads/rdb_published/' . $this->pub_file))) {
+                return 'uploads/rdb_published/' . $this->pub_file;
+            }
+            if (Storage::disk('public')->exists('uploads/published/' . $this->pub_file) || file_exists(public_path('uploads/published/' . $this->pub_file)) || file_exists(public_path('storage/uploads/published/' . $this->pub_file))) {
+                return 'uploads/published/' . $this->pub_file;
+            }
+            return 'uploads/rdb_published/' . $this->pub_file;
         }
 
         return null;

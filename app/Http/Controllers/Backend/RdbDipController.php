@@ -188,6 +188,7 @@ class RdbDipController extends Controller
             $data['dip_path'] = $fileInfo['path'];
             $data['dip_size'] = $fileInfo['size'];
             $data['dip_mime_type'] = $fileInfo['mime_type'];
+            $data['dip_files'] = $fileInfo['safe_name'];
         }
 
         if ($request->hasFile('dip_data1_files')) {
@@ -234,6 +235,7 @@ class RdbDipController extends Controller
             $data['dip_path'] = $fileInfo['path'];
             $data['dip_size'] = $fileInfo['size'];
             $data['dip_mime_type'] = $fileInfo['mime_type'];
+            $data['dip_files'] = $fileInfo['safe_name'];
         }
         
         $item->update($data);

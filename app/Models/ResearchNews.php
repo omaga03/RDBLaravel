@@ -36,4 +36,15 @@ class ResearchNews extends Model
     {
         return $this->resolveDualFilePath($newField, $oldField, $oldDir);
     }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if (!empty($this->news_path)) {
+            return asset('storage/' . $this->news_path);
+        }
+        if (!empty($this->news_img)) {
+            return asset('storage/uploads/news/' . $this->news_img);
+        }
+        return null;
+    }
 }

@@ -86,7 +86,7 @@ class RdbDip extends Model
         'user_updated',
     ];
 
-    public function getDipFilePath(string $newField = 'dip_path', string $oldField = 'dip_file', string $oldDir = 'uploads/dips'): ?string
+    public function getDipFilePath(string $newField = 'dip_path', string $oldField = 'dip_files', string $oldDir = 'uploads/dips'): ?string
     {
         return $this->resolveDualFilePath($newField, $oldField, $oldDir);
     }

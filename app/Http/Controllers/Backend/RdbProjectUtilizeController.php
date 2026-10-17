@@ -177,7 +177,7 @@ class RdbProjectUtilizeController extends Controller
             $data['uf_path'] = $fileInfo['path'];
             $data['uf_size'] = $fileInfo['size'];
             $data['uf_mime_type'] = $fileInfo['mime_type'];
-            $data['utz_files'] = $fileInfo['original_name'];
+            $data['utz_files'] = $fileInfo['safe_name'];
         }
 
         $item = RdbProjectUtilize::create($data);
@@ -249,7 +249,7 @@ class RdbProjectUtilizeController extends Controller
             $data['uf_path'] = $fileInfo['path'];
             $data['uf_size'] = $fileInfo['size'];
             $data['uf_mime_type'] = $fileInfo['mime_type'];
-            $data['utz_files'] = $fileInfo['original_name'];
+            $data['utz_files'] = $fileInfo['safe_name'];
         }
 
         $item->update($data);

@@ -12,8 +12,8 @@
         <div class="card mb-3">
             <div class="card-header"><i class="bi bi-image me-2"></i>รูปภาพปก</div>
             <div class="card-body text-center">
-                @if(isset($item) && $item->news_img)
-                    <img src="{{ asset('storage/uploads/news/' . $item->news_img) }}" class="img-fluid mb-2 rounded" style="max-height: 200px;">
+                @if(isset($item) && $item->image_url)
+                    <img src="{{ $item->image_url }}" class="img-fluid mb-2 rounded" style="max-height: 200px;">
                 @else
                     <div class="bg-secondary-subtle d-flex align-items-center justify-content-center mb-2 rounded" style="height: 150px;">
                         <span class="text-muted"><i class="bi bi-image fs-1"></i></span>

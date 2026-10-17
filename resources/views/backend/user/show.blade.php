@@ -63,8 +63,8 @@
                 @if($user->researcher)
                     <div class="d-flex align-items-center mb-3">
                         <div class="me-3">
-                            @if($user->researcher->researcher_picture)
-                                <img src="{{ asset('storage/uploads/researchers/' . $user->researcher->researcher_picture) }}" 
+                            @if($user->researcher->profile_image_url)
+                                <img src="{{ $user->researcher->profile_image_url }}" 
                                      alt="{{ $user->researcher->researcher_fname }}" 
                                      class="rounded-circle object-fit-cover shadow-sm border"
                                      style="width: 60px; height: 60px;">

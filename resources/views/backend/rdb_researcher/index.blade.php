@@ -60,8 +60,8 @@
                             <td class="ps-4 py-3">
                                 <div class="d-flex align-items-center">
                                     <div class="flex-shrink-0 me-3">
-                                        @if($researcher->researcher_picture)
-                                            <img src="{{ asset('storage/uploads/researchers/' . $researcher->researcher_picture) }}" 
+                                        @if($researcher->profile_image_url)
+                                            <img src="{{ $researcher->profile_image_url }}" 
                                                  alt="Profile" 
                                                  class="rounded-circle border object-fit-cover"
                                                  style="width: 55px; height: 55px;">

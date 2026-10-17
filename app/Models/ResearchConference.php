@@ -35,4 +35,15 @@ class ResearchConference extends Model
     {
         return $this->resolveDualFilePath($newField, $oldField, $oldDir);
     }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if (!empty($this->con_path)) {
+            return asset('storage/' . $this->con_path);
+        }
+        if (!empty($this->con_img)) {
+            return asset('storage/uploads/conference/' . $this->con_img);
+        }
+        return null;
+    }
 }

@@ -42,17 +42,9 @@
                         @forelse($items as $item)
                         <tr>
                             <td class="text-center p-3">
-                                @php
-                                    $conImg = null;
-                                    if (!empty($item->file_path)) {
-                                        $conImg = asset('storage/' . $item->file_path);
-                                    } elseif (!empty($item->con_img)) {
-                                        $conImg = asset('storage/uploads/conference/' . $item->con_img);
-                                    }
-                                @endphp
                                 <div class="ratio ratio-16x9 rounded overflow-hidden bg-body-secondary border mx-auto" style="width: 80px;">
-                                    @if($conImg)
-                                        <img src="{{ $conImg }}" alt="รูปงานประชุม" class="object-fit-cover w-100 h-100">
+                                    @if($item->image_url)
+                                        <img src="{{ $item->image_url }}" alt="รูปงานประชุม" class="object-fit-cover w-100 h-100">
                                     @else
                                         <div class="d-flex align-items-center justify-content-center h-100 text-body-secondary">
                                             <i class="bi bi-megaphone fs-5"></i>

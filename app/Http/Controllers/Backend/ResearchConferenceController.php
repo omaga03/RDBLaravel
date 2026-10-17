@@ -65,7 +65,9 @@ class ResearchConferenceController extends Controller
             $data['con_path'] = $fileInfo['path'];
             $data['con_size'] = $fileInfo['size'];
             $data['con_mime_type'] = $fileInfo['mime_type'];
-            $data['con_img'] = $request->file('con_img')->getClientOriginalName();
+            $origName = $request->file('con_img')->getClientOriginalName();
+            $ext = pathinfo($origName, PATHINFO_EXTENSION);
+            $data['con_img'] = mb_strlen($origName) > 30 ? (mb_substr(pathinfo($origName, PATHINFO_FILENAME), 0, 25) . ($ext ? '.' . $ext : '')) : $origName;
         }
 
         $item->fill($data);
@@ -114,7 +116,9 @@ class ResearchConferenceController extends Controller
             $data['con_path'] = $fileInfo['path'];
             $data['con_size'] = $fileInfo['size'];
             $data['con_mime_type'] = $fileInfo['mime_type'];
-            $data['con_img'] = $request->file('con_img')->getClientOriginalName();
+            $origName = $request->file('con_img')->getClientOriginalName();
+            $ext = pathinfo($origName, PATHINFO_EXTENSION);
+            $data['con_img'] = mb_strlen($origName) > 30 ? (mb_substr(pathinfo($origName, PATHINFO_FILENAME), 0, 25) . ($ext ? '.' . $ext : '')) : $origName;
         }
 
         $item->fill($data);

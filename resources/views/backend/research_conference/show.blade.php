@@ -14,14 +14,14 @@
         />
 
         <!-- รูปภาพประกอบ (ส่วนแรก) -->
-        @if($item->con_img)
+        @if($item->image_url)
         <div class="col-md-12 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-secondary text-white d-print-none">
                     <h6 class="mb-0"><i class="bi bi-image"></i> รูปภาพประกอบ</h6>
                 </div>
                 <div class="card-body text-center">
-                    <img src="{{ asset('storage/uploads/conference/' . $item->con_img) }}" class="img-fluid rounded shadow-sm" style="max-height: 400px;">
+                    <img src="{{ $item->image_url }}" class="img-fluid rounded shadow-sm" style="max-height: 400px;">
                 </div>
             </div>
         </div>
