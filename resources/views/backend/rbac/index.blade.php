@@ -25,9 +25,10 @@
             <table class="table table-hover align-middle mb-0">
                 <thead>
                     <tr>
-                        <th style="width: 25%;">ชื่อบทบาท (Role Name)</th>
+                        <th style="width: 20%;">ชื่อบทบาท (Role Name)</th>
                         <th>คำอธิบาย (Description)</th>
-                        <th style="width: 150px;" class="text-center">จัดการ</th>
+                        <th style="width: 220px;">สิทธิ์การใช้งาน (Permissions)</th>
+                        <th style="width: 220px;" class="text-center">จัดการ</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -41,9 +42,23 @@
                             <td>
                                 <span class="text-body">{{ $role->description ?? '-' }}</span>
                             </td>
+                            <td>
+                                @if($role->name === 'The Creator')
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                        <i class="bi bi-shield-shaded me-1"></i>ทุกสิทธิ์ในระบบ (Superadmin)
+                                    </span>
+                                @else
+                                    <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">
+                                        <i class="bi bi-key-fill me-1"></i>{{ $role->children_count }} สิทธิ์ที่กำหนด
+                                    </span>
+                                @endif
+                            </td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
-                                    <a href="{{ route('backend.rbac.edit', $role->name) }}" class="btn btn-outline-warning" title="แก้ไข">
+                                    <a href="{{ route('backend.rbac.permissions', $role->name) }}" class="btn btn-outline-primary" title="กำหนดสิทธิ์ (Permission Matrix)">
+                                        <i class="bi bi-key-fill me-1"></i>กำหนดสิทธิ์
+                                    </a>
+                                    <a href="{{ route('backend.rbac.edit', $role->name) }}" class="btn btn-outline-warning" title="แก้ไขข้อมูล">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
                                     <form action="{{ route('backend.rbac.destroy', $role->name) }}" method="POST" class="d-inline delete-form">

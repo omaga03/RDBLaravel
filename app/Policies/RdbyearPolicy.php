@@ -19,36 +19,36 @@ class RdbyearPolicy
 
     public function viewAny(?User $user): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['MasterData.Manage', 'Year']) || $user->hasRole('Admin'));
     }
 
     public function view(?User $user, RdbYear $rdbyear): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['MasterData.Manage', 'Year']) || $user->hasRole('Admin'));
     }
 
     public function create(?User $user): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['MasterData.Manage', 'Year']) || $user->hasRole('Admin'));
     }
 
     public function update(?User $user, RdbYear $rdbyear): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['MasterData.Manage', 'Year']) || $user->hasRole('Admin'));
     }
 
     public function delete(?User $user, RdbYear $rdbyear): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['MasterData.Manage', 'Year']) || $user->hasRole('Admin'));
     }
 
     public function restore(?User $user, RdbYear $rdbyear): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['MasterData.Manage', 'Year']) || $user->hasRole('Admin'));
     }
 
     public function forceDelete(?User $user, RdbYear $rdbyear): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['MasterData.Manage', 'Year']) || $user->hasRole('Admin'));
     }
 }

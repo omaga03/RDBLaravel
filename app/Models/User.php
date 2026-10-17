@@ -96,6 +96,33 @@ class User extends Authenticatable
         return in_array($role, $this->getAllRoles());
     }
 
+    /**
+     * Check if the user has a specific permission or any of the given permissions.
+     * Superadmin ('The Creator') automatically has all permissions.
+     *
+     * @param string|array $permissions
+     * @return bool
+     */
+    public function hasPermission(string|array $permissions): bool
+    {
+        if ($this->hasRole('The Creator')) {
+            return true;
+        }
+
+        $all = $this->getAllRoles();
+
+        if (is_array($permissions)) {
+            foreach ($permissions as $permission) {
+                if (in_array($permission, $all)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        return in_array($permissions, $all);
+    }
+
     public function researcher()
     {
         return $this->belongsTo(RdbResearcher::class, 'researcher_id', 'researcher_id');

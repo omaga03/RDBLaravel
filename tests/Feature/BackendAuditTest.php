@@ -88,5 +88,52 @@ class BackendAuditTest extends TestCase
             'researcher_id' => $admin->researcher_id,
         ]);
         $this->assertEquals(302, $userUpdateResponse->getStatusCode());
+
+        // Test RBAC Permission Matrix (Approach 2)
+        $permViewResponse = $this->actingAs($admin)->get(route('backend.rbac.permissions', 'Admin'));
+        $this->assertEquals(200, $permViewResponse->getStatusCode());
+        $permViewResponse->assertSee('Permission Matrix');
+        $permViewResponse->assertSee('RdbProject.View');
+
+        $permUpdateResponse = $this->actingAs($admin)->put(route('backend.rbac.update_permissions', 'Admin'), [
+            'permissions' => [
+                'RdbProject.View',
+                'RdbProject.Create',
+                'RdbResearcher.View',
+                'RdbPublished.View',
+                'RdbDip.View',
+                'RdbProjectUtilize.View',
+                'User Manager',
+            ]
+        ]);
+        $this->assertEquals(302, $permUpdateResponse->getStatusCode());
+
+        // Test dynamic permission check on user model
+        $this->assertTrue($admin->hasPermission('RdbProject.View'));
+        $this->assertTrue($admin->hasPermission('User Manager'));
+        $this->assertTrue($admin->hasPermission(['NonExistent', 'RdbProject.View']));
+    }
+
+    public function test_dynamic_role_permission_assignment()
+    {
+        $roleName = 'Test Role ' . time();
+        $role = \App\Models\AuthItem::create([
+            'name' => $roleName,
+            'type' => 1,
+            'description' => 'Role for dynamic testing',
+            'created_at' => time(),
+            'updated_at' => time(),
+        ]);
+
+        \App\Services\RbacService::syncRolePermissions($roleName, ['RdbProject.View', 'RdbProject.Create']);
+        $assigned = \App\Services\RbacService::getAssignedPermissions($roleName);
+
+        $this->assertContains('RdbProject.View', $assigned);
+        $this->assertContains('RdbProject.Create', $assigned);
+        $this->assertNotContains('RdbProject.Delete', $assigned);
+
+        // Clean up
+        \App\Models\AuthItemChild::where('parent', $roleName)->delete();
+        $role->delete();
     }
 }

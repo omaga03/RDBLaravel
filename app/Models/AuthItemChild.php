@@ -16,4 +16,14 @@ class AuthItemChild extends Model
         'parent',
         'child',
     ];
+
+    public function childItem()
+    {
+        return $this->belongsTo(AuthItem::class, 'child', 'name');
+    }
+
+    public function parentItem()
+    {
+        return $this->belongsTo(AuthItem::class, 'parent', 'name');
+    }
 }

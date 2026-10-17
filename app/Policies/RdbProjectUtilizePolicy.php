@@ -19,36 +19,36 @@ class RdbProjectUtilizePolicy
 
     public function viewAny(?User $user): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['RdbProjectUtilize.View', 'Utilize']) || $user->hasRole('Admin') || $user->hasRole('Admin Utilize'));
     }
 
     public function view(?User $user, RdbProjectUtilize $rdbProjectUtilize): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['RdbProjectUtilize.View', 'Utilize']) || $user->hasRole('Admin') || $user->hasRole('Admin Utilize'));
     }
 
     public function create(?User $user): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['RdbProjectUtilize.Create', 'Utilize']) || $user->hasRole('Admin') || $user->hasRole('Admin Utilize'));
     }
 
     public function update(?User $user, RdbProjectUtilize $rdbProjectUtilize): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['RdbProjectUtilize.Update', 'Utilize']) || $user->hasRole('Admin') || $user->hasRole('Admin Utilize'));
     }
 
     public function delete(?User $user, RdbProjectUtilize $rdbProjectUtilize): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['RdbProjectUtilize.Delete', 'Utilize']) || $user->hasRole('Admin') || $user->hasRole('Admin Utilize'));
     }
 
     public function restore(?User $user, RdbProjectUtilize $rdbProjectUtilize): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['RdbProjectUtilize.Delete', 'Utilize']) || $user->hasRole('Admin'));
     }
 
     public function forceDelete(?User $user, RdbProjectUtilize $rdbProjectUtilize): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['RdbProjectUtilize.Delete', 'Utilize']) || $user->hasRole('Admin'));
     }
 }

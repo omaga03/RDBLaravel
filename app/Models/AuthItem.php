@@ -26,4 +26,9 @@ class AuthItem extends Model
     {
         return $this->hasMany(AuthAssignment::class, 'item_name', 'name');
     }
+
+    public function children()
+    {
+        return $this->hasMany(AuthItemChild::class, 'parent', 'name');
+    }
 }

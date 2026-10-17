@@ -131,6 +131,8 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     Route::resource('rdbdiptype', \App\Http\Controllers\Backend\RdbDipTypeController::class);
     Route::resource('rdbprojectutilizetype', \App\Http\Controllers\Backend\RdbProjectUtilizeTypeController::class);
 
+    Route::get('/rbac/{rbac}/permissions', [RbacController::class, 'permissions'])->name('rbac.permissions');
+    Route::put('/rbac/{rbac}/permissions', [RbacController::class, 'updatePermissions'])->name('rbac.update_permissions');
     Route::resource('rbac', RbacController::class);
     Route::resource('user', UserController::class);
 

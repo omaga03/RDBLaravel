@@ -19,36 +19,36 @@ class RdbResearcherPolicy
 
     public function viewAny(?User $user): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('RdbResearcher.View') || $user->hasRole('Admin'));
     }
 
     public function view(?User $user, RdbResearcher $rdbResearcher): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('RdbResearcher.View') || $user->hasRole('Admin'));
     }
 
     public function create(?User $user): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('RdbResearcher.Create') || $user->hasRole('Admin'));
     }
 
     public function update(?User $user, RdbResearcher $rdbResearcher): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('RdbResearcher.Update') || $user->hasRole('Admin'));
     }
 
     public function delete(?User $user, RdbResearcher $rdbResearcher): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('RdbResearcher.Delete') || $user->hasRole('Admin'));
     }
 
     public function restore(?User $user, RdbResearcher $rdbResearcher): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('RdbResearcher.Delete') || $user->hasRole('Admin'));
     }
 
     public function forceDelete(?User $user, RdbResearcher $rdbResearcher): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission('RdbResearcher.Delete') || $user->hasRole('Admin'));
     }
 }

@@ -5,19 +5,11 @@ namespace App\Policies;
 use App\Models\RdbDip;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Auth\Access\Response;
 
 class RdbDipPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Perform pre-authorization checks.
-     *
-     * @param  \App\Models\User  $user
-     * @param  string  $ability
-     * @return bool|null
-     */
     public function before(User $user, $ability)
     {
         if ($user->hasRole('The Creator')) {
@@ -27,36 +19,36 @@ class RdbDipPolicy
 
     public function viewAny(?User $user): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['RdbDip.View', 'Dip']) || $user->hasRole('Admin') || $user->hasRole('Admin Dip'));
     }
 
     public function view(?User $user, RdbDip $rdbDip): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['RdbDip.View', 'Dip']) || $user->hasRole('Admin') || $user->hasRole('Admin Dip'));
     }
 
     public function create(?User $user): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['RdbDip.Create', 'Dip']) || $user->hasRole('Admin') || $user->hasRole('Admin Dip'));
     }
 
     public function update(?User $user, RdbDip $rdbDip): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['RdbDip.Update', 'Dip']) || $user->hasRole('Admin') || $user->hasRole('Admin Dip'));
     }
 
     public function delete(?User $user, RdbDip $rdbDip): bool
     {
-        return $user && $user->hasRole('Admin');
+        return $user && ($user->hasPermission(['RdbDip.Delete', 'Dip']) || $user->hasRole('Admin') || $user->hasRole('Admin Dip'));
     }
 
     public function restore(?User $user, RdbDip $rdbDip): bool
     {
-        return false;
+        return $user && ($user->hasPermission(['RdbDip.Delete', 'Dip']) || $user->hasRole('Admin'));
     }
 
     public function forceDelete(?User $user, RdbDip $rdbDip): bool
     {
-        return false;
+        return $user && ($user->hasPermission(['RdbDip.Delete', 'Dip']) || $user->hasRole('Admin'));
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AuthAssignment;
 use App\Models\AuthItem;
 use App\Models\AuthItemChild;
+use App\Services\RbacService;
 use Illuminate\Http\Request;
 use App\Http\Requests\Backend\StoreRbacRoleRequest;
 use App\Http\Requests\Backend\UpdateRbacRoleRequest;
@@ -18,7 +19,12 @@ class RbacController extends Controller
     public function index()
     {
         $this->authorize('viewAny', AuthItem::class);
-        $roles = AuthItem::where('type', 1)->orderBy('name')->get();
+        RbacService::ensurePermissionsExist();
+
+        $roles = AuthItem::where('type', 1)
+            ->withCount('children')
+            ->orderBy('name')
+            ->get();
 
         return view('backend.rbac.index', compact('roles'));
     }
@@ -43,10 +49,10 @@ class RbacController extends Controller
         $data['created_at'] = time();
         $data['updated_at'] = time();
 
-        AuthItem::create($data);
+        $role = AuthItem::create($data);
 
-        return redirect()->route('backend.rbac.index')
-            ->with('success', 'Role created successfully.');
+        return redirect()->route('backend.rbac.permissions', $role->name)
+            ->with('success', "สร้างบทบาท '{$role->name}' เรียบร้อยแล้ว กรุณากำหนดสิทธิ์การเข้าถึง");
     }
 
     /**
@@ -54,7 +60,7 @@ class RbacController extends Controller
      */
     public function show(string $id)
     {
-        return redirect()->route('backend.rbac.edit', $id);
+        return redirect()->route('backend.rbac.permissions', $id);
     }
 
     /**
@@ -83,6 +89,37 @@ class RbacController extends Controller
 
         return redirect()->route('backend.rbac.index')
             ->with('success', 'แก้ไขบทบาทเรียบร้อยแล้ว');
+    }
+
+    /**
+     * Show the form for managing role permissions (Permission Matrix).
+     */
+    public function permissions($rbac)
+    {
+        $item = $rbac instanceof AuthItem ? $rbac : AuthItem::where('name', $rbac)->firstOrFail();
+        $this->authorize('update', $item);
+
+        RbacService::ensurePermissionsExist();
+
+        $permissionGroups = RbacService::getPermissionsGrouped();
+        $assignedPermissions = RbacService::getAssignedPermissions($item->name);
+
+        return view('backend.rbac.permissions', compact('item', 'permissionGroups', 'assignedPermissions'));
+    }
+
+    /**
+     * Update permissions for a role.
+     */
+    public function updatePermissions(Request $request, $rbac)
+    {
+        $item = $rbac instanceof AuthItem ? $rbac : AuthItem::where('name', $rbac)->firstOrFail();
+        $this->authorize('update', $item);
+
+        $selectedPermissions = $request->input('permissions', []);
+        RbacService::syncRolePermissions($item->name, $selectedPermissions);
+
+        return redirect()->route('backend.rbac.permissions', $item->name)
+            ->with('success', "บันทึกการกำหนดสิทธิ์สำหรับบทบาท '{$item->name}' เรียบร้อยแล้ว");
     }
 
     /**

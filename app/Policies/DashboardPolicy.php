@@ -9,13 +9,6 @@ class DashboardPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Perform pre-authorization checks.
-     *
-     * @param  \App\Models\User  $user
-     * @param  string  $ability
-     * @return bool|null
-     */
     public function before(User $user, $ability)
     {
         if ($user->hasRole('The Creator')) {
@@ -23,14 +16,8 @@ class DashboardPolicy
         }
     }
 
-    /**
-     * Determine whether the user can view the dashboard.
-     *
-     * @param  \App\Models\User  $user
-     * @return bool
-     */
     public function viewDashboard(User $user): bool
     {
-        return $user->hasRole('Admin');
+        return $user->hasRole('Admin') || count($user->roles) > 0;
     }
 }
