@@ -7,12 +7,34 @@ use App\Models\RdbPublished;
 use Illuminate\Http\Request;
 use App\Http\Requests\Backend\StorePublishedRequest;
 use App\Http\Requests\Backend\UpdatePublishedRequest;
+use App\Http\Requests\Backend\StorePublishedAuthorRequest;
+use App\Http\Requests\Backend\UpdatePublishedAuthorRequest;
+use App\Http\Requests\Backend\UploadPublishedFileRequest;
+use App\Services\FileUploadService;
+use Illuminate\Support\Facades\Storage;
 
 class RdbPublishedController extends Controller
 {
+    private FileUploadService $fileUploadService;
+
+    public function __construct(FileUploadService $fileUploadService)
+    {
+        $this->fileUploadService = $fileUploadService;
+    }
     public function index(Request $request)
     {
-        $query = RdbPublished::with(['year', 'pubtype', 'researcher', 'authors']);
+        $this->authorize('viewAny', RdbPublished::class);
+        $query = RdbPublished::with(['year', 'pubtype', 'researcher', 'authors', 'createdBy', 'updatedBy']);
+
+        // Apply 'manage own group data' filter for general admins (not 'The Creator')
+        if (auth()->check() && auth()->user()->hasRole('Published') && !auth()->user()->hasRole('The Creator')) {
+            // Get all user IDs that have the 'Published' role
+            $publishedAdminIds = \App\Models\User::whereHas('roles', function ($q) {
+                $q->where('item_name', 'Published');
+            })->pluck('id');
+
+            $query->whereIn('user_created', $publishedAdminIds);
+        }
 
         // 1. Simple Search (Keyword 'q')
         if ($request->filled('q')) {
@@ -111,7 +133,6 @@ class RdbPublishedController extends Controller
             if ($request->filled('date_start')) {
                 $query->whereDate('pub_date', '>=', $request->date_start);
                 
-                // User Request: If End Date is empty, treat as Single Day Search (Start = End)
                 if (!$request->filled('date_end')) {
                     $query->whereDate('pub_date', '<=', $request->date_start);
                 }
@@ -121,7 +142,6 @@ class RdbPublishedController extends Controller
             }
 
         } else {
-            // Legacy
             if ($request->filled('year_id') && !$request->filled('q')) {
                 $query->where('year_id', $request->year_id);
             }
@@ -130,7 +150,6 @@ class RdbPublishedController extends Controller
         $items = $query->orderBy('pub_date', 'desc')->paginate(20);
         $authorTypes = \App\Models\RdbPublishedTypeAuthor::pluck('pubta_nameTH', 'pubta_id');
         
-        // Data for Filters
         $years = \App\Models\RdbYear::orderBy('year_name', 'desc')->get();
         $pubTypes = \App\Models\RdbPublishedType::all();
         $departments = \App\Models\RdbDepartment::orderBy('department_nameTH')->get();
@@ -141,7 +160,7 @@ class RdbPublishedController extends Controller
 
     public function create()
     {
-        \Illuminate\Support\Facades\Gate::authorize('Published');
+        $this->authorize('create', RdbPublished::class);
         $pubTypes = \App\Models\RdbPublishedType::all();
         $authorTypes = \App\Models\RdbPublishedTypeAuthor::pluck('pubta_nameTH', 'pubta_id');
         return view('backend.rdb_published.create', compact('pubTypes', 'authorTypes'));
@@ -149,112 +168,75 @@ class RdbPublishedController extends Controller
 
     public function store(StorePublishedRequest $request)
     {
-        \Illuminate\Support\Facades\Gate::authorize('Published');
-        // Validation handled by StorePublishedRequest
+        $this->authorize('create', RdbPublished::class);
+        
+        $data = $request->validated();
 
-        $item = new RdbPublished();
-
-        // Merge Abstract TH/EN
-        // Merge Abstract TH/EN
         $abstractTH = $this->cleanHtml($request->pub_abstract_th ?? '');
         $abstractEN = $this->cleanHtml($request->pub_abstract_en ?? '');
-        $combinedAbstract = $abstractTH . '<br><br><br><br>' . $abstractEN;
+        $data['pub_abstract'] = $abstractTH . '<br><br><br><br>' . $abstractEN;
         
-        // Clean HTML for Name/Journal (Remove P tags)
-        $cleanName = $this->cleanHtml($request->pub_name);
-        $cleanJournal = $this->cleanHtml($request->pub_name_journal);
+        $data['pub_name'] = $this->cleanHtml($data['pub_name']);
+        if ($request->filled('pub_name_journal')) {
+            $data['pub_name_journal'] = $this->cleanHtml($request->pub_name_journal);
+        }
 
-        $request->merge([
-            'pub_abstract' => $combinedAbstract,
-            'pub_name' => $cleanName,
-            'pub_name_journal' => $cleanJournal,
-            'data_show' => 1
-        ]);
+        $data['data_show'] = 1;
+        $data['user_created'] = auth()->id();
+        $data['user_updated'] = auth()->id(); // It's good practice to set both on creation
 
-        $item->fill($request->all());
+        if ($request->hasFile('pub_file')) {
+            $fileInfo = $this->fileUploadService->storeFile($request->file('pub_file'), 'published');
+            $data['pf_safe_name'] = $fileInfo['safe_name'];
+            $data['pf_path'] = $fileInfo['path'];
+            $data['pf_size'] = $fileInfo['size'];
+            $data['pf_mime_type'] = $fileInfo['mime_type'];
+            $data['pub_file'] = $fileInfo['original_name'];
+        }
         
-        // 1. Auto Year Calculation
+        $item = new RdbPublished();
+        $item->fill($data);
+        
         if ($request->filled('pub_date')) {
-            $date = $request->pub_date; // Y-m-d
+            $date = $request->pub_date;
             $carbonDate = \Carbon\Carbon::parse($date);
             $yearBE = $carbonDate->year + 543;
             
-            // Default Year ID (Calendar BE)
             if (empty($item->year_id)) $item->year_id = $this->getYearId($yearBE);
-
-            // Edu Year Lookup
             if (empty($item->year_edu)) {
                 $checkEdu = \App\Models\RdbPublishedCheckyear::where('rdbyearedu_start', '<=', $date)
                                                              ->where('rdbyearedu_end', '>=', $date)
                                                              ->first();
                 $item->year_edu = $checkEdu ? $checkEdu->year_id : $this->getYearId($yearBE);
             }
-
-            // Budget Year Lookup
             if (empty($item->year_bud)) {
                 $checkBud = \App\Models\RdbPublishedCheckyear::where('rdbyearbud_start', '<=', $date)
                                                              ->where('rdbyearbud_end', '>=', $date)
                                                              ->first();
-               if ($checkBud) {
-                   $item->year_bud = $checkBud->year_id;
-               } else {
-                   // Fallback: Oct 1 start
-                   $budYearBE = ($carbonDate->month >= 10) ? $yearBE + 1 : $yearBE;
-                   $item->year_bud = $this->getYearId($budYearBE);
-               }
+               $item->year_bud = $checkBud ? $checkBud->year_id : $this->getYearId(($carbonDate->month >= 10) ? $yearBE + 1 : $yearBE);
             }
         }
 
-        // 2. Auto Branch, Department & Course from Main Researcher
         if ($request->filled('researcher_id')) {
             $researcher = \App\Models\RdbResearcher::find($request->researcher_id);
             if ($researcher) {
-                // Set Branch from DepCat
-                if (empty($item->branch_id)) {
-                    $item->branch_id = $researcher->depcat_id;
-                }
-                // Set Department & Course (As per user request: derived from Main Author)
+                if (empty($item->branch_id)) $item->branch_id = $researcher->depcat_id;
                 $item->department_id = $researcher->department_id;
                 $item->depcou_id = $researcher->depcou_id;
             }
-        }
-
-        // 3. Timestamps & User Audit
-        $item->created_at = now();
-        $item->updated_at = now();
-        $item->user_created = auth()->id(); // Assume Auth is setup
-
-        // item->pub_download is a counter, do not set/reset here.
-
-        if ($request->hasFile('pub_file')) {
-            $file = $request->file('pub_file');
-            $extension = $file->getClientOriginalExtension();
-            $filename = time() . '_' . \Illuminate\Support\Str::random(10) . '.' . $extension;
-            $destinationPath = storage_path('app/public/uploads/rdb_published');
-            if (!file_exists($destinationPath)) mkdir($destinationPath, 0755, true);
-            $file->move($destinationPath, $filename);
-            $item->pub_file = $filename;
         }
 
         $item->save();
 
-        // Sync Author Pivot (Main Researcher with Main Office = 1)
         if ($request->filled('researcher_id')) {
-            $researcher = \App\Models\RdbResearcher::find($request->researcher_id);
-            
             $item->authors()->attach($request->researcher_id, [
-                'pubw_main' => 1, // Main Office = 1
-                'pubw_bud' => 1,
-                'pubta_id' => $request->pubta_id ?? 1
+                'pubw_main' => 1,
+                'pubw_bud' => $request->boolean('pubw_bud'),
+                'pubta_id' => $request->pubta_id ?? 1,
+                'user_created' => auth()->id(),
+                'user_updated' => auth()->id(),
             ]);
-
-            // Set department directly from the main office author
-            if ($researcher) {
-                $item->department_id = $researcher->department_id;
-                $item->depcou_id = $researcher->depcou_id;
-                $item->branch_id = $researcher->depcat_id;
-                $item->save();
-            }
+            $this->updateDepartmentFromMainOffice($item);
         }
 
         return redirect()->route('backend.rdb_published.show', $item->id)->with('success', 'บันทึกข้อมูลเรียบร้อยแล้ว');
@@ -262,9 +244,9 @@ class RdbPublishedController extends Controller
 
     public function show($id)
     {
-        $item = RdbPublished::findOrFail($id);
+        $item = RdbPublished::with(['year', 'pubtype', 'researcher', 'authors', 'project', 'department', 'branch', 'createdBy', 'updatedBy'])->findOrFail($id);
+        $this->authorize('view', $item);
         
-        // Increment View/Download Counter
         $item->increment('pub_download');
 
         $authorTypes = \App\Models\RdbPublishedTypeAuthor::pluck('pubta_nameTH', 'pubta_id');
@@ -273,56 +255,57 @@ class RdbPublishedController extends Controller
 
     public function edit($id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('Published');
-        $item = RdbPublished::findOrFail($id);
+        $item = RdbPublished::with(['year', 'pubtype', 'researcher', 'authors', 'project', 'department', 'branch', 'createdBy', 'updatedBy'])->findOrFail($id);
+        $this->authorize('update', $item);
         $pubTypes = \App\Models\RdbPublishedType::all();
         return view('backend.rdb_published.edit', compact('item', 'pubTypes'));
     }
 
     public function update(UpdatePublishedRequest $request, $id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('Published');
         $item = RdbPublished::findOrFail($id);
+        $this->authorize('update', $item);
         
-        // Validation handled by UpdatePublishedRequest
+        $data = $request->validated();
 
-        // Merge Abstract TH/EN
-        // Merge Abstract TH/EN
         $abstractTH = $this->cleanHtml($request->pub_abstract_th ?? '');
         $abstractEN = $this->cleanHtml($request->pub_abstract_en ?? '');
-        $combinedAbstract = $abstractTH . '<br><br><br><br>' . $abstractEN;
-        
-        // Clean HTML for Name/Journal (Remove P tags)
-        $cleanName = $this->cleanHtml($request->pub_name);
-        $cleanJournal = $this->cleanHtml($request->pub_name_journal);
+        $data['pub_abstract'] = $abstractTH . '<br><br><br><br>' . $abstractEN;
 
-        $request->merge([
-            'pub_abstract' => $combinedAbstract,
-            'pub_name' => $cleanName,
-            'pub_name_journal' => $cleanJournal
-        ]);
+        $data['pub_name'] = $this->cleanHtml($data['pub_name']);
+        if ($request->filled('pub_name_journal')) {
+            $data['pub_name_journal'] = $this->cleanHtml($request->pub_name_journal);
+        }
 
-        $item->fill($request->except(['pub_file']));
+        $data['user_updated'] = auth()->id();
 
-        // 1. Auto Year Calculation (Update if date changed and years are empty/default?)
-        // Only update logic if specifically requested or empty. 
-        // User requested: "create system... waiting". Let's apply if pub_date is present.
+        if ($request->hasFile('pub_file')) {
+            if ($item->pf_path && Storage::exists($item->pf_path)) {
+                Storage::delete($item->pf_path);
+            }
+
+            $fileInfo = $this->fileUploadService->storeFile($request->file('pub_file'), 'published');
+            $data['pf_safe_name'] = $fileInfo['safe_name'];
+            $data['pf_path'] = $fileInfo['path'];
+            $data['pf_size'] = $fileInfo['size'];
+            $data['pf_mime_type'] = $fileInfo['mime_type'];
+            $data['pub_file'] = $fileInfo['original_name'];
+        }
+
+        $item->fill($data);
+
         if ($request->filled('pub_date')) {
             $date = $request->pub_date;
             $carbonDate = \Carbon\Carbon::parse($date);
             $yearBE = $carbonDate->year + 543;
 
-            // Overwrite or fill? User said "system determine...". 
-            // Often best to overwrite if the date drives the year context.
             $item->year_id = $this->getYearId($yearBE);
 
-            // Edu Year Lookup
             $checkEdu = \App\Models\RdbPublishedCheckyear::where('rdbyearedu_start', '<=', $date)
                                                             ->where('rdbyearedu_end', '>=', $date)
                                                             ->first();
             $item->year_edu = $checkEdu ? $checkEdu->year_id : $this->getYearId($yearBE);
-
-            // Budget Year Lookup
+            
             $checkBud = \App\Models\RdbPublishedCheckyear::where('rdbyearbud_start', '<=', $date)
                                                             ->where('rdbyearbud_end', '>=', $date)
                                                             ->first();
@@ -333,71 +316,21 @@ class RdbPublishedController extends Controller
                 $item->year_bud = $this->getYearId($budYearBE);
             }
         }
-
-        // 2. Auto Branch, Department & Course from Main Researcher
+        
         if ($request->filled('researcher_id')) {
-            $researcher = \App\Models\RdbResearcher::find($request->researcher_id);
-            if ($researcher) {
-                // Set Branch from DepCat
-                $item->branch_id = $researcher->depcat_id;
-                // Set Department & Course (As per user request: derived from Main Author)
-                $item->department_id = $researcher->department_id;
-                $item->depcou_id = $researcher->depcou_id;
-            }
+            $this->updateDepartmentFromMainOffice($item);
         }
-
-        // 3. Audit
-        $item->updated_at = now();
-        $item->user_updated = auth()->id();
-
-        // item->pub_download logic removed
-
-        if ($request->hasFile('pub_file')) {
-            if ($item->pub_file) {
-                $oldPath = storage_path('app/public/uploads/rdb_published/' . $item->pub_file);
-                if (file_exists($oldPath)) unlink($oldPath);
-            }
-            $file = $request->file('pub_file');
-            $extension = $file->getClientOriginalExtension();
-            $filename = time() . '_' . \Illuminate\Support\Str::random(10) . '.' . $extension;
-            $destinationPath = storage_path('app/public/uploads/rdb_published');
-            if (!file_exists($destinationPath)) mkdir($destinationPath, 0755, true);
-            $file->move($destinationPath, $filename);
-            $item->pub_file = $filename;
-        }
-
+        
         $item->save();
         
-        // Update Author Pivot: If researcher changed? 
-        // Logic: Ensure this researcher is strictly main/bud.
-        // Complex if multiple authors exist. 
-        // Minimal logic: Update/Attach this researcher.
-        if ($request->filled('researcher_id')) {
-            // Check if exists
-            $exists = $item->authors()->where('rdb_researcher.researcher_id', $request->researcher_id)->exists();
-            if ($exists) {
-                $item->authors()->updateExistingPivot($request->researcher_id, [
-                    'pubw_main' => 1, 
-                    'pubw_bud' => 1
-                ]);
-            } else {
-                $item->authors()->attach($request->researcher_id, [
-                    'pubw_main' => 1, 
-                    'pubw_bud' => 1
-                ]);
-            }
-        }
-
         return redirect()->route('backend.rdb_published.show', $item->id)->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
     }
 
     private function cleanHtml($html)
     {
         if (empty($html)) return $html;
-        // Replace <p> with empty, </p> with <br>
         $html = str_replace('<p>', '', $html);
         $html = str_replace('</p>', '<br>', $html);
-        // Remove trailing <br>
         while (substr($html, -4) === '<br>') {
             $html = substr($html, 0, -4);
         }
@@ -412,6 +345,7 @@ class RdbPublishedController extends Controller
 
     public function searchResearcher(Request $request)
     {
+        $this->authorize('viewAny', RdbPublished::class);
         $q = $request->get('q', '');
         
         $query = \App\Models\RdbResearcher::with(['prefix', 'department']);
@@ -437,6 +371,7 @@ class RdbPublishedController extends Controller
 
     public function searchProject(Request $request)
     {
+        $this->authorize('viewAny', RdbPublished::class);
         $q = $request->get('q', '');
         
         $query = \App\Models\RdbProject::with(['year', 'researchers' => function($q) {
@@ -454,11 +389,9 @@ class RdbPublishedController extends Controller
         $results = $query->orderBy('year_id', 'desc')->limit(10)->get()->map(function($item) {
              $year = $item->year ? $item->year->year_name : '-';
              
-             // Head Researcher (First one after sorting by position)
              $head = $item->researchers->first();
              $headName = '-';
              if ($head) {
-                 // $prefix = $head->prefix ? $head->prefix->prefix_nameTH : ''; // Removed as requested
                  $headName = "{$head->researcher_fname} {$head->researcher_lname}";
              }
 
@@ -473,78 +406,58 @@ class RdbPublishedController extends Controller
 
     // --- Author Management ---
 
-    public function storeAuthor(Request $request, $id)
+    public function storeAuthor(StorePublishedAuthorRequest $request, $id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('Published');
-        
         $item = RdbPublished::findOrFail($id);
+        $this->authorize('update', $item);
+        $validated = $request->validated();
 
-        $request->validate([
-            'researcher_id' => 'required',
-            'pubta_id' => 'required',
-            'pubw_main' => 'nullable|boolean',
-            'pubw_bud' => 'nullable|boolean',
-        ]);
-
-        // Validation: Unique First Author (pubta_id = 1)
-        if ($request->pubta_id == 1) {
-             // Check if already exists in pivot
+        if ($validated['pubta_id'] == 1) {
              $exists = $item->authors()->wherePivot('pubta_id', 1)->exists();
              if ($exists) {
                  return back()->with('error', 'มีผู้เขียนหลัก (First Author) อยู่แล้ว สามารถมีได้เพียงคนเดียว');
              }
         }
 
-        // Validation: Unique Main Author (pubw_main = 1)
-        if ($request->filled('pubw_main') && $request->pubw_main == 1) {
+        if ($request->filled('pubw_main') && $validated['pubw_main'] == 1) {
             $exists = $item->authors()->wherePivot('pubw_main', 1)->exists();
             if ($exists) {
                 return back()->with('error', 'มีหน่วยงานหลัก (Main Office) อยู่แล้ว สามารถมีได้เพียงคนเดียว');
             }
         }
 
-        // Validation: Unique Budget Holder (pubw_bud = 1)
-        if ($request->filled('pubw_bud') && $request->pubw_bud == 1) {
+        if ($request->filled('pubw_bud') && $validated['pubw_bud'] == 1) {
             $exists = $item->authors()->wherePivot('pubw_bud', 1)->exists();
             if ($exists) {
                 return back()->with('error', 'มีผู้ได้รับการสนับสนุนงบประมาณอยู่แล้ว สามารถมีได้เพียงคนเดียว');
             }
         }
 
-        // Check if researcher already exists in this publication
-        if ($item->authors()->where('rdb_published_work.researcher_id', $request->researcher_id)->exists()) {
+        if ($item->authors()->where('rdb_published_work.researcher_id', $validated['researcher_id'])->exists()) {
              return back()->with('error', 'นักวิจัยท่านนี้มีชื่ออยู่ในรายการแล้ว');
         }
 
-        $item->authors()->attach($request->researcher_id, [
-            'pubta_id' => $request->pubta_id,
-            'pubw_main' => $request->pubw_main ?? 0,
-            'pubw_bud' => $request->pubw_bud ?? 0,
+        $item->authors()->attach($validated['researcher_id'], [
+            'pubta_id' => $validated['pubta_id'],
+            'pubw_main' => $validated['pubw_main'] ?? 0,
+            'pubw_bud' => $validated['pubw_bud'] ?? 0,
             'user_created' => auth()->id(),
-            'created_at' => now(),
-            'user_updated' => auth()->id(),
-            'updated_at' => now()
+            'user_updated' => auth()->id()
         ]);
 
-        // Update department_id from main office author (pubw_main = 1)
         $this->updateDepartmentFromMainOffice($item);
 
         return back()->with('success', 'เพิ่มผู้แต่งเรียบร้อยแล้ว');
     }
 
-    public function updateAuthor(Request $request, $id, $researcher_id)
+    public function updateAuthor(UpdatePublishedAuthorRequest $request, $id, $researcher_id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('Published');
         $item = RdbPublished::findOrFail($id);
+        $this->authorize('update', $item);
 
-         $request->validate([
-            'pubta_id' => 'required',
-            'pubw_main' => 'nullable',
-            'pubw_bud' => 'nullable',
-        ]);
+        $validated = $request->validated();
 
-        // Validation: Unique First Author (pubta_id = 1)
-        if ($request->pubta_id == 1) {
+        if ($validated['pubta_id'] == 1) {
              $exists = $item->authors()
                             ->where('rdb_published_work.researcher_id', '!=', $researcher_id)
                             ->wherePivot('pubta_id', 1)
@@ -554,8 +467,7 @@ class RdbPublishedController extends Controller
              }
         }
 
-        // Validation: Unique Main Author
-        if ($request->filled('pubw_main') && $request->pubw_main == 1) {
+        if ($request->filled('pubw_main') && $validated['pubw_main'] == 1) {
              $exists = $item->authors()
                             ->where('rdb_published_work.researcher_id', '!=', $researcher_id)
                             ->wherePivot('pubw_main', 1)
@@ -565,8 +477,7 @@ class RdbPublishedController extends Controller
             }
         }
 
-        // Validation: Unique Budget Holder
-        if ($request->filled('pubw_bud') && $request->pubw_bud == 1) {
+        if ($request->filled('pubw_bud') && $validated['pubw_bud'] == 1) {
              $exists = $item->authors()
                             ->where('rdb_published_work.researcher_id', '!=', $researcher_id)
                             ->wherePivot('pubw_bud', 1)
@@ -577,14 +488,12 @@ class RdbPublishedController extends Controller
         }
 
         $item->authors()->updateExistingPivot($researcher_id, [
-            'pubta_id' => $request->pubta_id,
-            'pubw_main' => $request->pubw_main ?? 0,
-            'pubw_bud' => $request->pubw_bud ?? 0,
+            'pubta_id' => $validated['pubta_id'],
+            'pubw_main' => $request->input('pubw_main', 0),
+            'pubw_bud' => $request->input('pubw_bud', 0),
             'user_updated' => auth()->id(),
-            'updated_at' => now()
         ]);
 
-        // Update department_id from main office author (pubw_main = 1)
         $this->updateDepartmentFromMainOffice($item);
 
         return back()->with('success', 'ปรับปรุงข้อมูลผู้แต่งเรียบร้อยแล้ว');
@@ -592,99 +501,88 @@ class RdbPublishedController extends Controller
 
     public function destroyAuthor($id, $researcher_id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('Published');
         $item = RdbPublished::findOrFail($id);
+        $this->authorize('update', $item);
         $item->authors()->detach($researcher_id);
         return back()->with('success', 'ลบผู้แต่งออกจากรายการเรียบร้อยแล้ว');
     }
 
-    // --- File Management (Single File) ---
-
-    public function uploadFile(Request $request, $id)
+    public function uploadFile(UploadPublishedFileRequest $request, $id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('Published');
         $item = RdbPublished::findOrFail($id);
+        $this->authorize('update', $item);
 
-        $request->validate([
-            'pub_file' => 'required|mimes:pdf|max:20480', // 20MB
-        ]);
+        $validated = $request->validated();
 
-        if ($request->hasFile('pub_file')) {
-            // Delete old file
-            if ($item->pub_file) {
-                 $oldPath = storage_path('app/public/uploads/rdb_published/' . $item->pub_file);
-                 if (file_exists($oldPath)) @unlink($oldPath);
-            }
-
-            $file = $request->file('pub_file');
-            $extension = $file->getClientOriginalExtension();
-            // Naming convention from Yii2: {id}-full{YmdHis}{randomString(50)}~.{extension}
-            $filename = $id . '-full' . date('YmdHis') . \Illuminate\Support\Str::random(50) . '~.' . $extension;
-            $destinationPath = storage_path('app/public/uploads/rdb_published');
-            if (!file_exists($destinationPath)) mkdir($destinationPath, 0755, true);
-            $file->move($destinationPath, $filename);
-            
-            $item->pub_file = $filename;
-            $item->user_updated = auth()->id();
-            $item->updated_at = now();
-            $item->save();
+        if ($item->pf_path && Storage::exists($item->pf_path)) {
+            Storage::delete($item->pf_path);
         }
+
+        $fileInfo = $this->fileUploadService->storeFile($validated['pub_file'], 'published');
+
+        $item->pf_safe_name = $fileInfo['safe_name'];
+        $item->pf_path = $fileInfo['path'];
+        $item->pf_size = $fileInfo['size'];
+        $item->pf_mime_type = $fileInfo['mime_type'];
+        $item->pub_file = $fileInfo['original_name'];
+        $item->user_updated = auth()->id();
+        $item->save();
 
         return back()->with('success', 'อัปโหลดไฟล์เรียบร้อยแล้ว');
     }
 
     public function deleteFile($id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('Published');
         $item = RdbPublished::findOrFail($id);
+        $this->authorize('update', $item);
 
-        if ($item->pub_file) {
-            $oldPath = storage_path('app/public/uploads/rdb_published/' . $item->pub_file);
-            if (file_exists($oldPath)) @unlink($oldPath);
-            
-            $item->pub_file = null;
-            $item->user_updated = auth()->id();
-            $item->updated_at = now();
-            $item->save();
+        if ($item->pf_path && Storage::exists($item->pf_path)) {
+            Storage::delete($item->pf_path);
         }
+
+        $legacyPath = 'uploads/published/' . $item->pub_file;
+        if ($item->pub_file && Storage::exists($legacyPath)) {
+            Storage::delete($legacyPath);
+        }
+        
+        $item->pub_file = null;
+        $item->pf_safe_name = null;
+        $item->pf_path = null;
+        $item->pf_size = null;
+        $item->pf_mime_type = null;
+        $item->user_updated = auth()->id();
+        $item->save();
         
         return back()->with('success', 'ลบไฟล์เรียบร้อยแล้ว');
     }
 
-    /**
-     * View/Download file and increment counter
-     */
     public function viewFile($id)
     {
         $item = RdbPublished::findOrFail($id);
+        $this->authorize('view', $item);
         
-        if (!$item->pub_file) {
+        $filePath = $item->getPublishedFilePath();
+
+        if (!$filePath || !Storage::exists($filePath)) {
             abort(404, 'ไม่พบไฟล์');
         }
         
-        // Increment file view counter
-        $item->increment('pub_view_file');
+        $item->increment('pub_download');
         
-        // Return file path for redirect
-        $filePath = asset('storage/uploads/rdb_published/' . $item->pub_file);
-        return redirect($filePath);
+        return Storage::response($filePath);
     }
 
     public function destroy($id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('Published');
         $item = RdbPublished::findOrFail($id);
+        $this->authorize('delete', $item);
         
-        // Soft Delete: Hide data instead of removing from DB
         $item->data_show = 0;
         $item->save();
 
         return redirect()->route('backend.rdb_published.index')->with('success', 'ลบข้อมูลเรียบร้อยแล้ว (Soft Delete)');
     }
 
-    /**
-     * Update department_id from main office author (pubw_main = 1)
-     */
     private function updateDepartmentFromMainOffice(RdbPublished $item)
     {
         $mainOfficeAuthor = $item->authors()->wherePivot('pubw_main', 1)->first();

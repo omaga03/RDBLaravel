@@ -8,7 +8,7 @@ class RdbTraining extends Model
 {
     protected $table = 'rdb_training';
     protected $primaryKey = 'tra_id';
-    public $timestamps = false; // Assuming no standard created_at/updated_at, change if needed
+    public $timestamps = true; // Assuming no standard created_at/updated_at, change if needed
 
     protected $fillable = [
         'tra_name',
@@ -22,8 +22,14 @@ class RdbTraining extends Model
         'tra_note',
         'tra_url',
         'user_updated',
-        'created_at',
         'user_created',
-        'updated_at',
     ];
+
+    public function creator() {
+        return $this->belongsTo(User::class, 'user_created');
+    }
+
+    public function updater() {
+        return $this->belongsTo(User::class, 'user_updated');
+    }
 }

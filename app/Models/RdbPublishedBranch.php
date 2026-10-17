@@ -23,7 +23,6 @@ class RdbPublishedBranch extends Model
     protected $fillable = [
         'branch_name',
         'user_created',
-        'user_created',
         'user_updated',
         'created_at',
         'updated_at',

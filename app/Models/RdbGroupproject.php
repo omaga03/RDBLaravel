@@ -8,7 +8,7 @@ class RdbGroupproject extends Model
 {
     protected $table = 'rdb_groupproject';
     protected $primaryKey = 'pgroup_id';
-    public $timestamps = false;
+    public $timestamps = true;
 
     public function projects()
     {
@@ -25,9 +25,17 @@ class RdbGroupproject extends Model
         'pgroup_nameEN',
         'user_created',
         'user_updated',
-        'created_at',
-        'updated_at',
     ];
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'user_created');
+    }
+
+    public function updater()
+    {
+        return $this->belongsTo(User::class, 'user_updated');
+    }
 
     const GROUP_PROJECT = 1;
 }

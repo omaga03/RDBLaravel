@@ -88,10 +88,12 @@
                             <div class="col-sm-8">
                                 @if($item->researcher)
                                     <div>
-                                        <i class="bi bi-person-fill"></i>
-                                        {{ $item->researcher->prefix->prefix_nameTH ?? '' }}{{ $item->researcher->researcher_fname }} {{ $item->researcher->researcher_lname }}
+                                        <a href="{{ route('frontend.rdbresearcher.show', $item->researcher->researcher_id) }}" class="text-decoration-none text-body fw-bold hover-primary">
+                                            <i class="bi bi-person-circle text-primary me-1"></i>
+                                            {{ $item->researcher->prefix->prefix_nameTH ?? '' }}{{ $item->researcher->researcher_fname }} {{ $item->researcher->researcher_lname }}
+                                        </a>
                                         @if($item->researcher->department)
-                                            <div class="text-muted ms-4 small"><i class="bi bi-building"></i> {{ $item->researcher->department->department_nameTH }}</div>
+                                            <div class="text-body-secondary ms-4 small"><i class="bi bi-building"></i> {{ $item->researcher->department->department_nameTH }}</div>
                                         @endif
                                     </div>
                                 @endif
@@ -117,14 +119,14 @@
                         <div class="card-body">
                             @if($item->project)
                                 <div class="mb-3">
-                                    <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" target="_blank" class="text-decoration-none text-body fw-bold">
+                                    <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" target="_blank" class="text-decoration-none text-body fw-bold hover-primary">
                                         @if($item->project->pro_code)
                                             <span class="text-primary">{!! $item->project->pro_code !!}</span>
                                         @endif
                                         {!! $item->project->pro_nameTH !!}
                                     </a>
                                 </div>
-                                <small class="text-muted d-block">
+                                <small class="text-body-secondary d-block">
                                     @if($item->project->type)
                                         {{ $item->project->type->pt_name }}
                                         @if($item->project->typeSub)
@@ -133,21 +135,23 @@
                                     @endif
                                 </small>
                                 @if($item->project->department)
-                                    <small class="text-muted d-block mt-2">
+                                    <small class="text-body-secondary d-block mt-2">
                                         <i class="bi bi-building me-1"></i>{{ $item->project->department->department_nameTH }}
                                     </small>
                                 @endif
                                 @if($item->project->rdbProjectWorks && $item->project->rdbProjectWorks->count() > 0)
                                     <hr class="my-2">
-                                    <small class="text-muted d-block">
+                                    <small class="text-body-secondary d-block">
                                         <strong>นักวิจัย:</strong>
                                     </small>
                                     @foreach($item->project->rdbProjectWorks as $work)
                                         @if($work->researcher)
-                                            <small class="text-muted d-block ms-2">
-                                                <i class="bi bi-person-circle me-1"></i>
-                                                {{ $work->researcher->prefix->prefix_nameTH ?? '' }}
-                                                {{ $work->researcher->researcher_fname }} {{ $work->researcher->researcher_lname }}
+                                            <small class="d-block ms-2 mb-1">
+                                                <a href="{{ route('frontend.rdbresearcher.show', $work->researcher->researcher_id) }}" class="text-decoration-none text-body hover-primary">
+                                                    <i class="bi bi-person-circle text-primary me-1"></i>
+                                                    {{ $work->researcher->prefix->prefix_nameTH ?? '' }}
+                                                    {{ $work->researcher->researcher_fname }} {{ $work->researcher->researcher_lname }}
+                                                </a>
                                             </small>
                                         @endif
                                     @endforeach

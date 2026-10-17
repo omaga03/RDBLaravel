@@ -93,9 +93,12 @@
 
                                         @if($mainAuthor)
                                             <div class="fw-bold">
-                                                {!! $mainAuthor->researcher_fname !!} {!! $mainAuthor->researcher_lname !!}
+                                                <a href="{{ route('frontend.rdbresearcher.show', $mainAuthor->researcher_id) }}" 
+                                                   class="text-decoration-none text-body fw-bold hover-primary">
+                                                    <i class="bi bi-person-circle text-primary me-1"></i>{!! $mainAuthor->researcher_fname !!} {!! $mainAuthor->researcher_lname !!}
+                                                </a>
                                                 @if($otherCount > 0)
-                                                    <span class="text-muted fw-normal">และ {{ $otherCount }} คน</span>
+                                                    <span class="text-body-secondary fw-normal">และ {{ $otherCount }} คน</span>
                                                 @endif
                                             </div>
                                             @if($mainAuthor->department)
@@ -108,7 +111,6 @@
                                         @endif
                                     </td>
                                     <td>
-                                        @if($item->pub_date)
                                         @if($item->pub_date)
                                             {{ \App\Helpers\ThaiDateHelper::format($item->pub_date, false, true) }}
                                         @else

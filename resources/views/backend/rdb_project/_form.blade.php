@@ -264,7 +264,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize TomSelect for researcher search
     const researcherSelect = document.getElementById('researcher_id');
     if (researcherSelect && typeof TomSelect !== 'undefined') {
-        new TomSelect(researcherSelect, {
+        let ts = new TomSelect(researcherSelect, {
             create: false,
             openOnFocus: true,
             persist: false,
@@ -298,6 +298,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
+
+        // Recover old value if validation fails
+        @if(old('researcher_id'))
+            @php
+                $oldResearcher = \App\Models\RdbResearcher::find(old('researcher_id'));
+            @endphp
+            @if($oldResearcher)
+                ts.addOption({
+                    value: "{{ $oldResearcher->researcher_id }}",
+                    text: "{{ $oldResearcher->researcher_fname . ' ' . $oldResearcher->researcher_lname }}"
+                });
+                ts.setValue("{{ $oldResearcher->researcher_id }}");
+            @endif
+        @elseif(isset($project) && $project->researchers->isNotEmpty())
+             // For Edit Mode - Pre-fill existing researchers (Handle Main Researcher Only for now)
+             // Check if we need to load pivot data? Usually handled via relation
+        @endif
+        
     }
 
     // Initialize Flatpickr for Thai Buddhist Date using global helper
@@ -341,7 +359,65 @@ document.addEventListener('DOMContentLoaded', function() {
     const yearSelect = document.getElementById('year_id');
     const typeSelect = document.getElementById('pt_id');
     const subTypeSelect = document.getElementById('pts_id');
-    const proGroupSelect = document.getElementById('pro_group'); // Added based on context from deleted code
+    const proGroupSelect = document.getElementById('pro_group');
+    
+    // TomSelect instance variable
+    let proGroupTom = null;
+
+    // Initialize TomSelect for pro_group
+    if (proGroupSelect && typeof TomSelect !== 'undefined') {
+        proGroupTom = new TomSelect(proGroupSelect, {
+            create: false,
+            sortField: { field: "text", direction: "asc" },
+            valueField: 'id',
+            labelField: 'text',
+            searchField: 'text', 
+            placeholder: 'เลือกแผนงานโครงการวิจัย...',
+            plugins: ['dropdown_input'], // Add search box inside dropdown
+            render: {
+                option: function(data, escape) {
+                    // Two lines: Project Name / Head Info with Icon
+                    let headInfo = '';
+                    if (data.head_name) {
+                        // Use custom class 'project-head-info' instead of utility classes that might conflict with active state
+                        headInfo = '<div class="project-head-info small mt-1"><i class="bi bi-person-circle me-1"></i>' + escape(data.head_name) + ' <span class="project-dept">(' + escape(data.head_dept) + ')</span></div>';
+                    }
+                    return '<div style="white-space: normal; padding: 8px; border-bottom: 1px solid #f0f0f0; line-height: 1.4;">' +
+                           '<div class="fw-bold project-title">[' + escape(data.year) + '] ' + escape(data.p_name) + '</div>' +
+                           headInfo +
+                           '</div>';
+                },
+                item: function(data, escape) {
+                    // Check if we have rich data (from AJAX) or just initial text fallback
+                    if (data.p_name) {
+                         return '<div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">[' + escape(data.year) + '] ' + escape(data.p_name) + '</div>';
+                    }
+                    return '<div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + escape(data.text) + '</div>';
+                }
+            }
+        });
+    }
+
+    // Add CSS for TomSelect Item Colors
+    const style = document.createElement('style');
+    style.innerHTML = `
+        /* Default State */
+        .ts-dropdown .project-title { color: var(--bs-body-color, #212529); }
+        .ts-dropdown .project-head-info { color: #6c757d; }
+        .ts-dropdown .project-dept { color: #6c757d; }
+
+        /* Dark Mode Adjustments (if applicable) */
+        [data-bs-theme="dark"] .ts-dropdown .project-title { color: #dee2e6; }
+        [data-bs-theme="dark"] .ts-dropdown .project-head-info { color: #adb5bd; }
+        [data-bs-theme="dark"] .ts-dropdown .project-dept { color: #adb5bd; }
+
+        /* Active State (Selected Item) */
+        .ts-dropdown .active .project-title { color: #ffffff !important; }
+        .ts-dropdown .active .project-head-info { color: rgba(255, 255, 255, 0.9) !important; }
+        .ts-dropdown .active .project-dept { color: rgba(255, 255, 255, 0.75) !important; }
+        .ts-dropdown .active i { color: rgba(255, 255, 255, 0.9) !important; }
+    `;
+    document.head.appendChild(style);
 
     // Pre-selected values
     const selectedType    = "{{ old('pt_id', $project->pt_id ?? '') }}";
@@ -351,10 +427,24 @@ document.addEventListener('DOMContentLoaded', function() {
     function loadProjectTypes(yearId, preSelectType = '', preSelectGroup = '') {
         if (typeSelect) typeSelect.innerHTML = '<option value="">กำลังโหลด...</option>';
         if (subTypeSelect) subTypeSelect.innerHTML = '<option value="">เลือกประเภทโครงการย่อย...</option>';
-        if (proGroupSelect) proGroupSelect.innerHTML = '<option value="">เลือกแผนงานโครงการวิจัย...</option>';
+        
+        // Handle TomSelect Loading State
+        if (proGroupTom) {
+            proGroupTom.clear();
+            proGroupTom.clearOptions();
+            proGroupTom.addOption({id: '', text: 'กำลังโหลด...'});
+        } else if (proGroupSelect) {
+            proGroupSelect.innerHTML = '<option value="">เลือกแผนงานโครงการวิจัย...</option>';
+        }
 
         if(!yearId) {
             if (typeSelect) typeSelect.innerHTML = '<option value="">เลือกประเภททุนอุดหนุนการวิจัย...</option>';
+            // Reset TomSelect
+            if (proGroupTom) {
+                proGroupTom.clearOptions();
+            } else if (proGroupSelect) {
+                proGroupSelect.innerHTML = '<option value="">เลือกแผนงานโครงการวิจัย...</option>';
+            }
             return;
         }
 
@@ -385,16 +475,36 @@ document.addEventListener('DOMContentLoaded', function() {
              fetch('{{ route("backend.rdb_project.search_pro_group") }}?year_id=' + yearId)
                 .then(res => res.json())
                 .then(data => {
-                    let options = '<option value="">เลือกแผนงานโครงการวิจัย...</option>';
-                    (data.results || []).forEach(item => {
-                         const isSelected = String(item.id) === String(preSelectGroup) ? 'selected' : '';
-                        options += `<option value="${item.id}" ${isSelected}>${item.text}</option>`;
-                    });
-                    proGroupSelect.innerHTML = options;
+                    if (proGroupTom) {
+                        proGroupTom.clearOptions();
+                        // Add empty option for placeholder behavior
+                        // proGroupTom.addOption({id: '', text: 'เลือกแผนงานโครงการวิจัย...'});
+                        
+                        // Add results
+                        if (data.results && data.results.length > 0) {
+                             proGroupTom.addOption(data.results);
+                        }
+                        
+                        if (preSelectGroup) {
+                            proGroupTom.setValue(preSelectGroup);
+                        }
+                    } else {
+                        // Fallback for standard Select
+                        let options = '<option value="">เลือกแผนงานโครงการวิจัย...</option>';
+                        (data.results || []).forEach(item => {
+                             const isSelected = String(item.id) === String(preSelectGroup) ? 'selected' : '';
+                            options += `<option value="${item.id}" ${isSelected}>${item.text}</option>`;
+                        });
+                        proGroupSelect.innerHTML = options;
+                    }
                 })
                 .catch(err => {
                     console.error(err);
-                    proGroupSelect.innerHTML = '<option value="">เกิดข้อผิดพลาด</option>';
+                    if (proGroupTom) {
+                         proGroupTom.clearOptions();
+                    } else {
+                        proGroupSelect.innerHTML = '<option value="">เกิดข้อผิดพลาด</option>';
+                    }
                 });
         }
     }

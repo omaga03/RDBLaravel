@@ -5,12 +5,14 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\RdbProjectType;
 use Illuminate\Http\Request;
+use App\Http\Requests\Frontend\{StoreRdbProjectTypeRequest, UpdateRdbProjectTypeRequest};
 
 class RdbprojecttypeController extends Controller
 {
     public function index(Request $request)
     {
-        $query = RdbProjectType::query();
+        $this->authorize('viewAny', RdbProjectType::class);
+        $query = RdbProjectType::with(['year', 'projectTypeGroup', 'creator', 'updater']);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -24,54 +26,10 @@ class RdbprojecttypeController extends Controller
 
     public function show($id)
     {
-        $item = RdbProjectType::findOrFail($id);
+        $item = RdbProjectType::with(['year', 'projectTypeGroup', 'creator', 'updater'])->findOrFail($id);
+        $this->authorize('view', $item);
         return view('frontend.rdbprojecttype.show', compact('item'));
     }
 
-    public function create()
-    {
-        return view('frontend.rdbprojecttype.create');
-    }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'pt_name' => 'required|string|max:255',
-            'pt_for' => 'nullable|string|max:50',
-        ]);
-
-        $validated['created_at'] = now();
-
-        RdbProjectType::create($validated);
-
-        return redirect()->route('frontend.rdbprojecttype.index')->with('success', 'Project type created successfully.');
-    }
-
-    public function edit($id)
-    {
-        $item = RdbProjectType::findOrFail($id);
-        return view('frontend.rdbprojecttype.edit', compact('item'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        $item = RdbProjectType::findOrFail($id);
-        
-        $validated = $request->validate([
-            'pt_name' => 'required|string|max:255',
-            'pt_for' => 'nullable|string|max:50',
-        ]);
-
-        $item->update($validated);
-
-        return redirect()->route('frontend.rdbprojecttype.index')->with('success', 'Project type updated successfully.');
-    }
-
-    public function destroy($id)
-    {
-        $item = RdbProjectType::findOrFail($id);
-        $item->delete();
-
-        return redirect()->route('frontend.rdbprojecttype.index')->with('success', 'Project type deleted successfully.');
-    }
 }

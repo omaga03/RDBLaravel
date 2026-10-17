@@ -43,6 +43,9 @@
     <a href="{{ route('frontend.rdbdip.index') }}" class="list-group-item list-group-item-action sidebar-menu-item {{ request()->routeIs('frontend.rdbdip.*') ? 'active bg-primary border-primary fw-bold text-white' : '' }} py-2 d-flex align-items-center rounded-2 mb-1" title="IP">
         <i class="bi bi-lightbulb-fill me-3 fs-6"></i> <span class="sidebar-text">ทรัพย์สินทางปัญญา</span>
     </a>
+    <a href="{{ route('frontend.rdbresearcher.index') }}" class="list-group-item list-group-item-action sidebar-menu-item {{ request()->routeIs('frontend.rdbresearcher.*') ? 'active bg-primary border-primary fw-bold text-white' : '' }} py-2 d-flex align-items-center rounded-2 mb-1" title="Researchers">
+        <i class="bi bi-people-fill me-3 fs-6"></i> <span class="sidebar-text">นักวิจัย</span>
+    </a>
     <a href="{{ route('frontend.rdbprojectutilize.index') }}" class="list-group-item list-group-item-action sidebar-menu-item {{ request()->routeIs('frontend.rdbprojectutilize.*') ? 'active bg-primary border-primary fw-bold text-white' : '' }} py-2 d-flex align-items-center rounded-2 mb-1" title="Utilization">
         <i class="bi bi-rocket-takeoff-fill me-3 fs-6"></i> <span class="sidebar-text">การใช้ประโยชน์</span>
     </a>

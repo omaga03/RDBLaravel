@@ -380,7 +380,9 @@
                                                     $mainAuthor = $pub->authors->sortBy('pivot.pubw_main')->first();
                                                 @endphp
                                                 @if($mainAuthor)
-                                                    ✍️ {{ $mainAuthor->researcher_fname }} {{ $mainAuthor->researcher_lname }}
+                                                    <a href="{{ route('frontend.rdbresearcher.show', $mainAuthor->researcher_id) }}" class="text-body text-decoration-none hover-primary" target="_blank">
+                                                        ✍️ {{ $mainAuthor->researcher_fname }} {{ $mainAuthor->researcher_lname }}
+                                                    </a>
                                                 @else
                                                     -
                                                 @endif

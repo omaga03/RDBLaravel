@@ -19,6 +19,7 @@
         :backRoute="route('backend.rdb_project.index')"
         :actionRoute="route('backend.rdb_project.store')"
         enctype="multipart/form-data"
+        colClass="col-12"
     >
         @include('backend.rdb_project._form')
     </x-form-wrapper>

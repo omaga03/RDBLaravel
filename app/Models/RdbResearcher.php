@@ -3,12 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Traits\HasDualFilePath;
+use App\Services\FileUploadService;
 
 class RdbResearcher extends Model
 {
+    use HasDualFilePath;
+
     protected $table = 'rdb_researcher';
     protected $primaryKey = 'researcher_id';
-    public $timestamps = false; // Assuming no standard created_at/updated_at, change if needed
+    public $timestamps = true;
 
     protected $fillable = [
         'researcher_codeid',
@@ -32,6 +36,10 @@ class RdbResearcher extends Model
         'researcher_mobile',
         'researcher_fax',
         'researcher_picture',
+        'rf_safe_name',
+        'rf_path',
+        'rf_size',
+        'rf_mime_type',
         'scopus_authorId',
         'researcher_hindex',
         'scopus_synced_at',
@@ -39,9 +47,40 @@ class RdbResearcher extends Model
         'researcher_note',
         'user_created',
         'user_updated',
-        'created_at',
-        'updated_at',
     ];
+
+    /**
+     * Get researcher picture/profile file path
+     */
+    public function getProfileFilePath(): ?string
+    {
+        if (!empty($this->rf_path)) {
+            return $this->rf_path;
+        }
+
+        if (!empty($this->researcher_picture)) {
+            return 'uploads/researchers/' . $this->researcher_picture;
+        }
+
+        return null;
+    }
+
+    /**
+     * Check profile file integrity
+     */
+    public function checkProfileFileIntegrity(): array
+    {
+        return FileUploadService::checkFileIntegrity(
+            $this->rf_path ?? '',
+            $this->researcher_picture ?? '',
+            'uploads/researchers'
+        );
+    }
+
+    public function usingNewProfilePath(): bool
+    {
+        return !empty($this->rf_path);
+    }
 
     public function creator() {
         return $this->belongsTo(User::class, 'user_created');
@@ -113,5 +152,11 @@ class RdbResearcher extends Model
                $this->rdbPublisheds()->doesntExist() && 
                $this->rdbDips()->doesntExist() &&
                $this->rdbResearcherEducations()->doesntExist();
+    }
+
+    // Example helper for researcher file (e.g. CV/photo)
+    public function getResearcherFilePath(string $newField = 'rf_path', string $oldField = 'rf_file', string $oldDir = 'uploads/researchers'): ?string
+    {
+        return $this->resolveDualFilePath($newField, $oldField, $oldDir);
     }
 }

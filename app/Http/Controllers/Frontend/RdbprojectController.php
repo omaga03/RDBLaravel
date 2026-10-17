@@ -3,17 +3,16 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use App\Models\RdbProject;
+use App\Models\RdbProjectFiles;
 use App\Models\RdbYear;
+use App\Models\RdbDepartment;
 use App\Models\RdbProjectType;
 use App\Models\RdbProjectTypeSub;
-use App\Models\RdbProjectStatus;
-use App\Models\RdbDepartment;
-use App\Models\RdbStrategic;
-use App\Models\RdbResearcher;
-use App\Models\RdbProjectPosition;
 use App\Models\RdbGroupproject;
-use Illuminate\Http\Request;
+use App\Models\RdbProjectStatus;
+use App\Models\RdbResearcher;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 
@@ -106,11 +105,23 @@ class RdbprojectController extends Controller
         }
 
         // Budget filters
-        if ($request->filled('budget_min')) {
+        // Budget filters with validation
+        $hasBudgetMin = $request->filled('budget_min');
+        $hasBudgetMax = $request->filled('budget_max');
+
+        if ($hasBudgetMin && $hasBudgetMax) {
+            if ($request->budget_max < $request->budget_min) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'งบประมาณสูงสุดต้องไม่น้อยกว่างบประมาณเริ่มต้น');
+            }
+        }
+
+        if ($hasBudgetMin) {
             $query->where('pro_budget', '>=', $request->budget_min);
         }
 
-        if ($request->filled('budget_max')) {
+        if ($hasBudgetMax) {
             $query->where('pro_budget', '<=', $request->budget_max);
         }
 
@@ -398,46 +409,79 @@ class RdbprojectController extends Controller
      */
     public function downloadFile($id, $fid)
     {
-        $fileRecord = \App\Models\RdbProjectFiles::where('pro_id', $id)
+        $project = RdbProject::findOrFail($id);
+
+        // ✅ ตรวจสอบ public status
+        if ($project->data_show != 1) {
+            abort(404);
+        }
+
+        $fileRecord = RdbProjectFiles::where('pro_id', $id)
             ->where('id', $fid)
-            ->where('rf_files_show', 1)
             ->firstOrFail();
 
-        // Increment download count
-        $fileRecord->rf_download = ($fileRecord->rf_download ?? 0) + 1;
-        $fileRecord->save();
+        // ✅ ตรวจสอบว่าไฟล์เปิดให้สาธารณะหรือไม่
+        if ($fileRecord->rf_files_show != 1) {
+            abort(404, 'ไฟล์นี้ไม่เปิดให้สาธารณะ');
+        }
 
-        // Redirect to actual file
-        return redirect(asset('storage/uploads/project_files/' . $fileRecord->rf_files));
+        $filePath = $fileRecord->getFilePath();
+        
+        if (!$filePath || !Storage::exists($filePath)) {
+            abort(404, 'ไฟล์ไม่พบ');
+        }
+
+        // ✅ เพิ่ม counter เท่านั้น (ไม่สามารถแก้ไข/ลบ)
+        $fileRecord->increment('rf_download');
+
+        return Storage::download($filePath);
     }
 
     public function viewAbstract($id)
     {
         $project = RdbProject::findOrFail($id);
-        
-        if (!$project->pro_abstract_file) {
-            abort(404, 'ไม่พบไฟล์บทคัดย่อ');
+
+        // ✅ ตรวจสอบ public status
+        if ($project->data_show != 1) {
+            abort(404);
         }
 
-        // Increment view count
+        $filePath = $project->getAbstractFilePath();
+        
+        if (!$filePath || !Storage::exists($filePath)) {
+            abort(404, 'ไม่พบไฟล์');
+        }
+
+        // ✅ เพิ่ม counter เท่านั้น (ไม่แก้ไขไฟล์)
         $project->increment('pro_count_abs');
 
-        return redirect(asset('storage/uploads/projects/' . $project->pro_abstract_file));
+        return Storage::response($filePath);
     }
 
     public function viewReport($id)
     {
         $project = RdbProject::findOrFail($id);
-        
-        // Check visibility
-        if (!$project->pro_file || !$project->pro_file_show) {
-            abort(404, 'ไม่พบไฟล์รายงานฉบับสมบูรณ์');
+
+        // ✅ ตรวจสอบ public status
+        if ($project->data_show != 1) {
+            abort(404);
         }
 
-        // Increment view count
-        $project->increment('pro_count_full');
+        // ✅ ตรวจสอบว่า report แสดงในหน้าสาธารณะหรือไม่
+        if ($project->pro_file_show != 1) {
+            abort(404, 'ไฟล์รายงานยังไม่เปิดให้สาธารณะ');
+        }
+
+        $filePath = $project->getReportFilePath();
         
-        return redirect(asset('storage/uploads/projects/' . $project->pro_file));
+        if (!$filePath || !Storage::exists($filePath)) {
+            abort(404, 'ไม่พบไฟล์');
+        }
+
+        // ✅ เพิ่ม counter เท่านั้น (ไม่แก้ไขไฟล์)
+        $project->increment('pro_count_full');
+
+        return Storage::response($filePath);
     }
 
     public function show($id)
@@ -457,218 +501,5 @@ class RdbprojectController extends Controller
             'rdbProjectWorks.researcher.prefix'
         ])->findOrFail($id);
         return view('frontend.rdbproject.show', compact('item'));
-    }
-
-    public function create()
-    {
-        \Illuminate\Support\Facades\Gate::authorize('RdbProject.Create');
-        $data = $this->getDropdownData();
-        return view('frontend.rdbproject.create', $data);
-    }
-
-    public function store(Request $request)
-    {
-        \Illuminate\Support\Facades\Gate::authorize('RdbProject.Create');
-        $validated = $this->validateRequest($request);
-
-        DB::beginTransaction();
-        try {
-            // Handle File Uploads
-            if ($request->hasFile('pro_abstract_file')) {
-                $validated['pro_abstract_file'] = $request->file('pro_abstract_file')->store('project_abstracts', 'public');
-            }
-            if ($request->hasFile('pro_file')) {
-                $validated['pro_file'] = $request->file('pro_file')->store('project_files', 'public');
-            }
-
-            $validated['created_at'] = now();
-            $project = RdbProject::create($validated);
-
-            // Sync Researchers (Pivot Table)
-            $this->syncResearchers($project, $request);
-
-            DB::commit();
-            return redirect()->route('frontend.rdbproject.index')->with('success', 'Project created successfully.');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->withInput()->with('error', 'Error creating project: ' . $e->getMessage());
-        }
-    }
-
-    public function edit($id)
-    {
-        $item = RdbProject::with('researchers')->findOrFail($id);
-        $data = $this->getDropdownData();
-        $data['item'] = $item;
-        return view('frontend.rdbproject.edit', $data);
-    }
-
-    public function update(Request $request, $id)
-    {
-        $project = RdbProject::findOrFail($id);
-        $validated = $this->validateRequest($request, $id);
-
-        DB::beginTransaction();
-        try {
-            // Handle File Uploads
-            if ($request->hasFile('pro_abstract_file')) {
-                if ($project->pro_abstract_file) Storage::disk('public')->delete($project->pro_abstract_file);
-                $validated['pro_abstract_file'] = $request->file('pro_abstract_file')->store('project_abstracts', 'public');
-            }
-            if ($request->hasFile('pro_file')) {
-                if ($project->pro_file) Storage::disk('public')->delete($project->pro_file);
-                $validated['pro_file'] = $request->file('pro_file')->store('project_files', 'public');
-            }
-
-            $project->update($validated);
-
-            // Sync Researchers (Pivot Table)
-            $this->syncResearchers($project, $request);
-
-            DB::commit();
-            return redirect()->route('frontend.rdbproject.index')->with('success', 'Project updated successfully.');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->withInput()->with('error', 'Error updating project: ' . $e->getMessage());
-        }
-    }
-
-    public function destroy($id)
-    {
-        $project = RdbProject::findOrFail($id);
-        
-        if ($project->pro_abstract_file) Storage::disk('public')->delete($project->pro_abstract_file);
-        if ($project->pro_file) Storage::disk('public')->delete($project->pro_file);
-        
-        // Pivot data will be deleted automatically if cascading delete is set in DB, 
-        // otherwise we should detach manually. Safe to detach.
-        $project->researchers()->detach();
-        
-        $project->delete();
-
-        return redirect()->route('frontend.rdbproject.index')->with('success', 'Project deleted successfully.');
-    }
-
-    public function export(Request $request)
-    {
-        $query = RdbProject::with(['year', 'type', 'department', 'status']);
-
-        // Apply same filters as index
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where('pro_nameTH', 'like', "%{$search}%")
-                  ->orWhere('pro_nameEN', 'like', "%{$search}%");
-        }
-        if ($request->filled('year_id')) {
-            $query->where('year_id', $request->year_id);
-        }
-        if ($request->filled('pro_type_id')) {
-            $query->where('pt_id', $request->pro_type_id); // Changed from pro_type_id to pt_id to match model relationship
-        }
-        if ($request->filled('department_id')) {
-            $query->where('department_id', $request->department_id);
-        }
-        if ($request->filled('ps_id')) {
-            $query->where('ps_id', $request->ps_id);
-        }
-
-        $items = $query->orderBy('pro_id', 'desc')->get(); // Changed from 'id' to 'pro_id' to match model primary key
-
-        $filename = "projects_" . date('Y-m-d_H-i-s') . ".csv";
-        $headers = [
-            "Content-type" => "text/csv",
-            "Content-Disposition" => "attachment; filename=$filename",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
-        ];
-
-        $callback = function() use ($items) {
-            $file = fopen('php://output', 'w');
-            // Add BOM for Excel to read Thai correctly
-            fputs($file, $bom = (chr(0xEF) . chr(0xBB) . chr(0xBF)));
-            
-            // Header Row
-            fputcsv($file, ['ID', 'ชื่อโครงการ (TH)', 'ชื่อโครงการ (EN)', 'ปีงบประมาณ', 'ประเภท', 'หน่วยงาน', 'สถานะ', 'งบประมาณ']);
-
-            foreach ($items as $item) {
-                fputcsv($file, [
-                    $item->pro_id,
-                    $item->pro_nameTH,
-                    $item->pro_nameEN,
-                    $item->year->year_name ?? '-',
-                    $item->type->pt_name ?? '-', // Changed from projectType->pro_type_name to type->pt_name to match model relationship
-                    $item->department->department_nameTH ?? '-',
-                    $item->status->ps_name ?? '-',
-                    $item->pro_budget
-                ]);
-            }
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
-    }
-
-    private function getDropdownData()
-    {
-        return [
-            'years' => RdbYear::orderBy('year_name', 'desc')->get(),
-            'projectTypes' => RdbProjectType::all(),
-            'projectStatuses' => RdbProjectStatus::all(),
-            'departments' => RdbDepartment::orderBy('department_nameTH')->get(),
-            'strategics' => RdbStrategic::all(),
-            'researchers' => RdbResearcher::orderBy('researcher_nameTH')->get(),
-            'positions' => RdbProjectPosition::all(),
-            'groups' => RdbGroupproject::all(),
-        ];
-    }
-
-    private function validateRequest(Request $request, $id = null)
-    {
-        return $request->validate([
-            'pro_nameTH' => 'required|string|max:255',
-            'pro_nameEN' => 'nullable|string|max:255',
-            'pro_code' => 'nullable|string|max:50',
-            'year_id' => 'required|exists:rdb_year,year_id',
-            'pt_id' => 'nullable|exists:rdb_project_type,pt_id',
-            'ps_id' => 'nullable|exists:rdb_project_status,ps_id',
-            'department_id' => 'nullable|exists:rdb_department,department_id',
-            'strategic_id' => 'nullable|exists:rdb_strategic,strategic_id',
-            'pgroup_id' => 'nullable|exists:rdb_groupproject,gp_id',
-            'pro_budget' => 'nullable|numeric|min:0',
-            'pro_date_start' => 'nullable|date',
-            'pro_date_end' => 'nullable|date|after_or_equal:pro_date_start',
-            'pro_abstract' => 'nullable|string',
-            'pro_abstract_file' => 'nullable|file|max:10240|mimes:pdf,doc,docx',
-            'pro_file' => 'nullable|file|max:20480|mimes:pdf,doc,docx,zip,rar', // 20MB
-            'data_show' => 'nullable|integer',
-            // Array validation for dynamic researchers
-            'researcher_id' => 'nullable|array',
-            'researcher_id.*' => 'exists:rdb_researcher,researcher_id',
-            'position_id' => 'nullable|array',
-            'position_id.*' => 'exists:rdb_project_position,position_id',
-            'ratio' => 'nullable|array',
-            'ratio.*' => 'nullable|numeric|min:0|max:100',
-        ]);
-    }
-
-    private function syncResearchers(RdbProject $project, Request $request)
-    {
-        if ($request->has('researcher_id')) {
-            $syncData = [];
-            foreach ($request->researcher_id as $key => $researcherId) {
-                if ($researcherId) {
-                    $syncData[$researcherId] = [
-                        'position_id' => $request->position_id[$key] ?? null,
-                        'ratio' => $request->ratio[$key] ?? 0,
-                    ];
-                }
-            }
-            $project->researchers()->sync($syncData);
-        } else {
-            $project->researchers()->detach();
-        }
     }
 }

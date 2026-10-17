@@ -8,7 +8,7 @@ class RdbYear extends Model
 {
     protected $table = 'rdb_year';
     protected $primaryKey = 'year_id';
-    public $timestamps = false;
+    public $timestamps = true;
 
     public function projects()
     {
@@ -24,7 +24,15 @@ class RdbYear extends Model
         'year_name',
         'user_created',
         'user_updated',
-        'created_at',
-        'updated_at',
     ];
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'user_created');
+    }
+
+    public function updater()
+    {
+        return $this->belongsTo(User::class, 'user_updated');
+    }
 }

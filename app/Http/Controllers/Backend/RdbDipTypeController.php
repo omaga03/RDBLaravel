@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backend;
 use App\Http\Controllers\Controller;
 use App\Models\RdbDipType;
 use Illuminate\Http\Request;
+use App\Http\Requests\Backend\{StoreRdbDipTypeRequest, UpdateRdbDipTypeRequest};
 
 class RdbDipTypeController extends Controller
 {
@@ -13,7 +14,8 @@ class RdbDipTypeController extends Controller
      */
     public function index(Request $request)
     {
-        $query = RdbDipType::query();
+        $this->authorize('viewAny', RdbDipType::class);
+        $query = RdbDipType::with(['creator', 'updater']);
 
         // Search logic
         if ($request->filled('q')) {
@@ -30,6 +32,7 @@ class RdbDipTypeController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', RdbDipType::class);
         $item = new RdbDipType();
         return view('backend.rdbdiptype.create', compact('item'));
     }
@@ -37,20 +40,15 @@ class RdbDipTypeController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreRdbDipTypeRequest $request)
     {
-        $request->validate([
-            'dipt_name' => 'required|string|max:255|unique:rdb_dip_type,dipt_name',
-        ]);
-
+        $this->authorize('create', RdbDipType::class);
+        
+        $validated = $request->validated();
+        
         $item = new RdbDipType();
-        $input = $request->all();
-        
-        $item->fill($input);
+        $item->fill($validated);
         $item->user_created = auth()->id();
-        $item->created_at = now();
-        $item->updated_at = now();
-        
         $item->save();
 
         return redirect()->route('backend.rdbdiptype.show', $item->dipt_id)
@@ -62,7 +60,8 @@ class RdbDipTypeController extends Controller
      */
     public function show($id)
     {
-        $item = RdbDipType::findOrFail($id);
+        $item = RdbDipType::with(['creator', 'updater'])->findOrFail($id);
+        $this->authorize('view', $item);
         return view('backend.rdbdiptype.show', compact('item'));
     }
 
@@ -71,25 +70,24 @@ class RdbDipTypeController extends Controller
      */
     public function edit($id)
     {
-        $item = RdbDipType::findOrFail($id);
+        $item = RdbDipType::with(['creator', 'updater'])->findOrFail($id);
+        $this->authorize('update', $item);
         return view('backend.rdbdiptype.edit', compact('item'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(UpdateRdbDipTypeRequest $request, $id)
     {
-        $request->validate([
-            'dipt_name' => 'required|string|max:255|unique:rdb_dip_type,dipt_name,'.$id.',dipt_id',
-        ]);
-
         $item = RdbDipType::findOrFail($id);
-        $input = $request->all();
-        $input['user_updated'] = auth()->id();
-        $input['updated_at'] = now();
+        $this->authorize('update', $item);
         
-        $item->update($input);
+        $validated = $request->validated();
+        
+        $item->fill($validated);
+        $item->user_updated = auth()->id();
+        $item->save();
 
         return redirect()->route('backend.rdbdiptype.show', $item->dipt_id)
                          ->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
@@ -101,6 +99,7 @@ class RdbDipTypeController extends Controller
     public function destroy($id)
     {
         $item = RdbDipType::findOrFail($id);
+        $this->authorize('delete', $item);
         
         // Dependency check
         if (\App\Models\RdbDip::where('dipt_id', $id)->exists()) {

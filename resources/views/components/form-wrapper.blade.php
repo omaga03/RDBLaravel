@@ -5,7 +5,8 @@
     'actionRoute',
     'method' => 'POST',
     'backRoute',
-    'enctype' => null
+    'enctype' => null,
+    'colClass' => 'col-lg-8'
 ])
 
 @php
@@ -17,7 +18,7 @@
 
 <div class="py-4">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
+        <div class="{{ $colClass }}">
             <div class="card shadow-sm">
                 <div class="card-header bg-{{ $headerColor }} text-white">
                     <h5 class="mb-0">

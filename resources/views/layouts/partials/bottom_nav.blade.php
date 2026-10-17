@@ -13,6 +13,12 @@
             </a>
         </li>
         <li class="nav-item">
+            <a href="{{ route('frontend.rdbresearcher.index') }}" class="nav-link {{ request()->routeIs('frontend.rdbresearcher.*') ? 'active text-primary fw-bold' : '' }} d-flex flex-column align-items-center justify-content-center h-100">
+                <span class="fs-5">🧑‍🔬</span>
+                <span style="font-size: 0.65rem;">Researchers</span>
+            </a>
+        </li>
+        <li class="nav-item">
             <a href="{{ route('frontend.rdbpublished.index') }}" class="nav-link {{ request()->routeIs('frontend.rdbpublished.*') ? 'active text-info fw-bold' : '' }} d-flex flex-column align-items-center justify-content-center h-100">
                 <span class="fs-5">📑</span>
                 <span style="font-size: 0.7rem;">Pubs</span>

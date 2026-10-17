@@ -3,14 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Traits\HasDualFilePath;
+use App\Services\FileUploadService;
 
 class RdbPublished extends Model
 {
-    use \App\Traits\HasDataShowScope;
+    use \App\Traits\HasDataShowScope, HasDualFilePath;
 
     protected $table = 'rdb_published';
     protected $primaryKey = 'id';
-    public $timestamps = false; // Assuming no standard created_at/updated_at, change if needed
+    public $timestamps = true; // Assuming no standard created_at/updated_at, change if needed
 
     protected $fillable = [
         'year_id',
@@ -30,6 +32,10 @@ class RdbPublished extends Model
         'pub_date',
         'pub_date_end',
         'pub_file',
+        'pf_safe_name',
+        'pf_path',
+        'pf_size',
+        'pf_mime_type',
         'pub_score',
         'pub_budget',
         'pub_note',
@@ -37,8 +43,6 @@ class RdbPublished extends Model
         'data_show',
         'user_created',
         'user_updated',
-        'created_at',
-        'updated_at',
     ];
     public function year()
     {
@@ -77,5 +81,48 @@ class RdbPublished extends Model
                     ->orderByPivot('pubw_bud', 'desc')
                     ->orderByPivot('pubw_main', 'desc')
                     ->orderByPivot('pubta_id', 'asc');
+    }
+
+    /**
+     * Get published file path (UUID first, then legacy fallback)
+     */
+    public function getPublishedFilePath(): ?string
+    {
+        if (!empty($this->pf_path)) {
+            return $this->pf_path;
+        }
+
+        if (!empty($this->pub_file)) {
+            return 'uploads/published/' . $this->pub_file;
+        }
+
+        return null;
+    }
+
+    /**
+     * Check file integrity
+     */
+    public function checkFileIntegrity(): array
+    {
+        return FileUploadService::checkFileIntegrity(
+            $this->pf_path ?? '',
+            $this->pub_file ?? '',
+            'uploads/published'
+        );
+    }
+
+    public function usingNewPath(): bool
+    {
+        return !empty($this->pf_path);
+    }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'user_created');
+    }
+
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'user_updated');
     }
 }

@@ -5,32 +5,82 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\RdbDip;
 use App\Models\RdbDipType;
+use App\Models\RdbDepartment;
 use App\Models\RdbProject;
 use App\Models\RdbResearcher;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Schema;
 
 class RdbdipController extends Controller
 {
     public function index(Request $request)
     {
-        $query = RdbDip::with(['dipType', 'project', 'researcher']);
+        $query = RdbDip::with([
+            'dipType', 
+            'project', 
+            'researcher',
+            'researcher.prefix',
+            'researcher.department'
+        ]);
+
+        if (Schema::hasColumn('rdb_dip', 'data_show')) {
+            $query->where(function($q) {
+                $q->where('data_show', 1)->orWhereNull('data_show');
+            });
+        }
 
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('dip_request_number', 'like', "%{$search}%")
-                  ->orWhere('dip_number', 'like', "%{$search}%")
-                  ->orWhere('dip_patent_number', 'like', "%{$search}%")
-                  ->orWhere('dip_data2_name', 'like', "%{$search}%")
-                  ->orWhereHas('project', function($query) use ($search) {
-                      $query->where('pro_nameTH', 'like', "%{$search}%");
-                  })
-                  ->orWhereHas('researcher', function($query) use ($search) {
-                      $query->where('researcher_fname', 'like', "%{$search}%")
-                            ->orWhere('researcher_lname', 'like', "%{$search}%")
-                            ->orWhereRaw("CONCAT(researcher_fname, ' ', researcher_lname) LIKE ?", ["%{$search}%"]);
-                  });
+            $searchTerm = trim($request->search);
+            $searchWords = preg_split('/[\s\/,]+/', $searchTerm);
+
+            $query->where(function($q) use ($searchTerm, $searchWords) {
+                $q->where('dip_request_number', 'like', "%{$searchTerm}%")
+                  ->orWhere('dip_number', 'like', "%{$searchTerm}%")
+                  ->orWhere('dip_patent_number', 'like', "%{$searchTerm}%")
+                  ->orWhere('dip_data2_name', 'like', "%{$searchTerm}%")
+                  ->orWhere('dip_name', 'like', "%{$searchTerm}%")
+                  ->orWhere('dip_publication_no', 'like', "%{$searchTerm}%");
+
+                foreach ($searchWords as $word) {
+                    if (empty($word)) continue;
+                    $q->orWhere('dip_data2_name', 'like', "%{$word}%")
+                      ->orWhere('dip_name', 'like', "%{$word}%");
+                }
+
+                $q->orWhereHas('project', function($query) use ($searchTerm) {
+                    $query->where('pro_nameTH', 'like', "%{$searchTerm}%")
+                          ->orWhere('pro_nameEN', 'like', "%{$searchTerm}%")
+                          ->orWhere('pro_code', 'like', "%{$searchTerm}%");
+                });
+
+                $q->orWhereHas('researcher', function($query) use ($searchWords) {
+                    foreach ($searchWords as $word) {
+                        if (empty($word)) continue;
+                        $query->where(function($wq) use ($word) {
+                            $wq->where('researcher_fname', 'like', "%{$word}%")
+                               ->orWhere('researcher_lname', 'like', "%{$word}%")
+                               ->orWhere('researcher_fnameEN', 'like', "%{$word}%")
+                               ->orWhere('researcher_lnameEN', 'like', "%{$word}%");
+                        });
+                    }
+                });
+            });
+        }
+
+        // DIP Type filter
+        if ($request->filled('dipt_id')) {
+            $query->where('dipt_id', $request->dipt_id);
+        }
+
+        // Department filter (via researcher or project)
+        if ($request->filled('department_id')) {
+            $deptId = $request->department_id;
+            $query->where(function($q) use ($deptId) {
+                $q->whereHas('researcher', function($rq) use ($deptId) {
+                    $rq->where('department_id', $deptId);
+                })->orWhereHas('project', function($pq) use ($deptId) {
+                    $pq->where('department_id', $deptId);
+                });
             });
         }
 
@@ -39,18 +89,16 @@ class RdbdipController extends Controller
         $hasDateEnd = $request->filled('date_end');
         
         if ($hasDateStart || $hasDateEnd) {
-            // Both dates must be provided
             if (!$hasDateStart || !$hasDateEnd) {
                 return redirect()->back()
                     ->withInput()
                     ->with('error', 'กรุณาระบุทั้งวันที่เริ่มและวันที่สิ้นสุด');
             }
             
-            // End date must be >= start date
             if ($request->date_end < $request->date_start) {
                 return redirect()->back()
                     ->withInput()
-                    ->with('error', 'วันที่สิ้นสุดต้องมากกว่าหรือเท่ากับวันที่เริ่ม');
+                    ->with('error', 'วันที่สิ้นสุดต้องไม่น้อยกว่าวันที่เริ่มต้น');
             }
             
             $query->whereDate('dip_request_date', '>=', $request->date_start)
@@ -63,13 +111,40 @@ class RdbdipController extends Controller
             $project = RdbProject::find($request->pro_id);
         }
 
-        // Sort by date DESC, then name ASC
+        // Sort by date DESC, then ID DESC
         $query->orderBy('dip_request_date', 'desc')
-              ->orderBy('dip_data2_name', 'asc');
+              ->orderBy('dip_id', 'desc');
 
         $items = $query->paginate(10);
+
+        // Add match sources if search
+        if ($request->filled('search')) {
+            $searchTerm = trim($request->search);
+            foreach ($items as $item) {
+                $matches = [];
+                if (stripos($item->dip_data2_name ?? '', $searchTerm) !== false || stripos($item->dip_name ?? '', $searchTerm) !== false) {
+                    $matches[] = 'ชื่อผลงาน';
+                }
+                if (stripos($item->dip_request_number ?? '', $searchTerm) !== false) {
+                    $matches[] = 'เลขที่คำขอ';
+                }
+                if (stripos($item->dip_patent_number ?? '', $searchTerm) !== false) {
+                    $matches[] = 'เลขที่สิทธิบัตร/ทะเบียน';
+                }
+                if ($item->researcher && (stripos($item->researcher->researcher_fname ?? '', $searchTerm) !== false || stripos($item->researcher->researcher_lname ?? '', $searchTerm) !== false)) {
+                    $matches[] = 'ผู้ประดิษฐ์';
+                }
+                if ($item->project && stripos($item->project->pro_nameTH ?? '', $searchTerm) !== false) {
+                    $matches[] = 'โครงการวิจัย';
+                }
+                $item->match_sources = $matches;
+            }
+        }
+
+        $dipTypes = RdbDipType::orderBy('dipt_name')->get();
+        $departments = RdbDepartment::orderBy('department_nameTH')->get();
         
-        return view('frontend.rdbdip.index', compact('items', 'project'));
+        return view('frontend.rdbdip.index', compact('items', 'project', 'dipTypes', 'departments'));
     }
 
     public function show($id)
@@ -89,149 +164,8 @@ class RdbdipController extends Controller
             'researcher.prefix',
             'researcher.department'
         ])->findOrFail($id);
+
         return view('frontend.rdbdip.show', compact('item'));
-    }
-
-    public function create()
-    {
-        $dipTypes = RdbDipType::all();
-        $projects = RdbProject::all();
-        $researchers = RdbResearcher::all();
-        return view('frontend.rdbdip.create', compact('dipTypes', 'projects', 'researchers'));
-    }
-
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'dip_type' => 'nullable|integer',
-            'dipt_id' => 'nullable|exists:rdb_dip_type,dipt_id',
-            'pro_id' => 'nullable|exists:rdb_project,pro_id',
-            'researcher_id' => 'nullable|exists:rdb_researcher,researcher_id',
-            'dip_request_number' => 'nullable|string|max:255',
-            'dip_request_date' => 'nullable|date',
-            'dip_request_dateget' => 'nullable|date',
-            'dip_number' => 'nullable|string|max:255',
-            'dip_publication_date' => 'nullable|date',
-            'dip_publication_no' => 'nullable|string|max:255',
-            'dip_patent_number' => 'nullable|string|max:255',
-            'dip_startdate' => 'nullable|date',
-            'dip_enddate' => 'nullable|date',
-            'dip_note' => 'nullable|string',
-            'data_show' => 'nullable|integer',
-            // File validations
-            'dip_files' => 'nullable|file|max:10240',
-            'dip_data1_files' => 'nullable|file|max:10240',
-            'dip_data2_files_con' => 'nullable|file|max:10240',
-            'dip_data3_filesass1' => 'nullable|file|max:10240',
-            'dip_data3_filesass2' => 'nullable|file|max:10240',
-            'dip_data3_filesass3' => 'nullable|file|max:10240',
-            'dip_data3_drawing_picture' => 'nullable|file|max:10240',
-            'dip_data_forms_request' => 'nullable|file|max:10240',
-        ]);
-
-        // Handle File Uploads
-        $fileFields = [
-            'dip_files', 'dip_data1_files', 'dip_data2_files_con', 
-            'dip_data3_filesass1', 'dip_data3_filesass2', 'dip_data3_filesass3', 
-            'dip_data3_drawing_picture', 'dip_data_forms_request'
-        ];
-
-        foreach ($fileFields as $field) {
-            if ($request->hasFile($field)) {
-                $path = $request->file($field)->store('dip_files', 'public');
-                $validated[$field] = $path;
-            }
-        }
-
-        $validated['created_at'] = now();
-
-        RdbDip::create($validated);
-
-        return redirect()->route('frontend.rdbdip.index')->with('success', 'DIP record created successfully.');
-    }
-
-    public function edit($id)
-    {
-        $item = RdbDip::findOrFail($id);
-        $dipTypes = RdbDipType::all();
-        $projects = RdbProject::all();
-        $researchers = RdbResearcher::all();
-        return view('frontend.rdbdip.edit', compact('item', 'dipTypes', 'projects', 'researchers'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        $item = RdbDip::findOrFail($id);
-        
-        $validated = $request->validate([
-            'dip_type' => 'nullable|integer',
-            'dipt_id' => 'nullable|exists:rdb_dip_type,dipt_id',
-            'pro_id' => 'nullable|exists:rdb_project,pro_id',
-            'researcher_id' => 'nullable|exists:rdb_researcher,researcher_id',
-            'dip_request_number' => 'nullable|string|max:255',
-            'dip_request_date' => 'nullable|date',
-            'dip_request_dateget' => 'nullable|date',
-            'dip_number' => 'nullable|string|max:255',
-            'dip_publication_date' => 'nullable|date',
-            'dip_publication_no' => 'nullable|string|max:255',
-            'dip_patent_number' => 'nullable|string|max:255',
-            'dip_startdate' => 'nullable|date',
-            'dip_enddate' => 'nullable|date',
-            'dip_note' => 'nullable|string',
-            'data_show' => 'nullable|integer',
-            // File validations
-            'dip_files' => 'nullable|file|max:10240',
-            'dip_data1_files' => 'nullable|file|max:10240',
-            'dip_data2_files_con' => 'nullable|file|max:10240',
-            'dip_data3_filesass1' => 'nullable|file|max:10240',
-            'dip_data3_filesass2' => 'nullable|file|max:10240',
-            'dip_data3_filesass3' => 'nullable|file|max:10240',
-            'dip_data3_drawing_picture' => 'nullable|file|max:10240',
-            'dip_data_forms_request' => 'nullable|file|max:10240',
-        ]);
-
-        // Handle File Uploads
-        $fileFields = [
-            'dip_files', 'dip_data1_files', 'dip_data2_files_con', 
-            'dip_data3_filesass1', 'dip_data3_filesass2', 'dip_data3_filesass3', 
-            'dip_data3_drawing_picture', 'dip_data_forms_request'
-        ];
-
-        foreach ($fileFields as $field) {
-            if ($request->hasFile($field)) {
-                // Delete old file
-                if ($item->$field) {
-                    Storage::disk('public')->delete($item->$field);
-                }
-                $path = $request->file($field)->store('dip_files', 'public');
-                $validated[$field] = $path;
-            }
-        }
-
-        $item->update($validated);
-
-        return redirect()->route('frontend.rdbdip.index')->with('success', 'DIP record updated successfully.');
-    }
-
-    public function destroy($id)
-    {
-        $item = RdbDip::findOrFail($id);
-        
-        $fileFields = [
-            'dip_files', 'dip_data1_files', 'dip_data2_files_con', 
-            'dip_data3_filesass1', 'dip_data3_filesass2', 'dip_data3_filesass3', 
-            'dip_data3_drawing_picture', 'dip_data_forms_request'
-        ];
-
-        foreach ($fileFields as $field) {
-            if ($item->$field) {
-                Storage::disk('public')->delete($item->$field);
-            }
-        }
-
-        $item->delete();
-
-        return redirect()->route('frontend.rdbdip.index')->with('success', 'DIP record deleted successfully.');
     }
 
     public function export(Request $request)

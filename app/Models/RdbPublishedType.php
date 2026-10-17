@@ -8,14 +8,12 @@ class RdbPublishedType extends Model
 {
     protected $table = 'rdb_published_type';
     protected $primaryKey = 'pubtype_id';
-    public $timestamps = false; // Assuming no standard created_at/updated_at, change if needed
+    public $timestamps = true; // Changed to true
 
     protected $fillable = [
         'pubtype_group',
         'pubtype_grouptype',
         'pubtype_subgroup',
         'pubtype_score',
-        'created_at',
-        'updated_at',
     ];
 }

@@ -6,83 +6,66 @@ use App\Http\Controllers\Controller;
 use App\Models\RdbProjectTypesGroup;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Http\Requests\Backend\{StoreRdbProjectTypesGroupRequest, UpdateRdbProjectTypesGroupRequest};
 
 class RdbProjectTypesGroupController extends Controller
 {
     public function index()
     {
-        $items = RdbProjectTypesGroup::orderBy('pttg_id', 'desc')->paginate(10);
+        $this->authorize('viewAny', RdbProjectTypesGroup::class);
+        $items = RdbProjectTypesGroup::with(['createdBy', 'updatedBy'])->orderBy('pttg_id', 'desc')->paginate(10);
         $groupList = RdbProjectTypesGroup::getGroupList();
         return view('backend.rdbprojecttypesgroup.index', compact('items', 'groupList'));
     }
 
     public function create()
     {
+        $this->authorize('create', RdbProjectTypesGroup::class);
         $groupList = RdbProjectTypesGroup::getGroupList();
         return view('backend.rdbprojecttypesgroup.create', compact('groupList'));
     }
 
-    public function store(Request $request)
+    public function store(StoreRdbProjectTypesGroupRequest $request)
     {
-        $request->validate([
-            'pttg_name' => 'required|max:255|unique:rdb_project_types_group,pttg_name',
-            'pttg_group' => 'required|max:1',
-        ], [
-            'pttg_name.required' => 'กรุณากรอกชื่อกลุ่มงบประมาณ',
-            'pttg_name.unique' => 'ชื่อกลุ่มงบประมาณนี้มีอยู่แล้วในระบบ',
-            'pttg_name.max' => 'ชื่อกลุ่มงบประมาณต้องไม่เกิน 255 ตัวอักษร',
-            'pttg_group.required' => 'กรุณากรอกรหัสกลุ่ม',
-            'pttg_group.max' => 'รหัสกลุ่มต้องไม่เกิน 1 ตัวอักษร',
-        ]);
+        $this->authorize('create', RdbProjectTypesGroup::class);
+        
+        $data = $request->validated();
 
-        $input = $request->all();
-        $input['user_created'] = auth()->id();
-        $input['user_updated'] = auth()->id();
-        $input['created_at'] = now();
-        $input['updated_at'] = now();
-
-        RdbProjectTypesGroup::create($input);
+        $item = new RdbProjectTypesGroup();
+        $item->fill($data);
+        $item->user_created = auth()->id();
+        $item->user_updated = auth()->id();
+        $item->save();
 
         return redirect()->route('backend.rdbprojecttypesgroup.index')->with('success', 'บันทึกข้อมูลเรียบร้อยแล้ว');
     }
 
     public function show($id)
     {
-        $item = RdbProjectTypesGroup::findOrFail($id);
+        $item = RdbProjectTypesGroup::with(['createdBy', 'updatedBy'])->findOrFail($id);
+        $this->authorize('view', $item);
         $groupList = RdbProjectTypesGroup::getGroupList();
         return view('backend.rdbprojecttypesgroup.show', compact('item', 'groupList'));
     }
 
     public function edit($id)
     {
-        $item = RdbProjectTypesGroup::findOrFail($id);
+        $item = RdbProjectTypesGroup::with(['createdBy', 'updatedBy'])->findOrFail($id);
+        $this->authorize('update', $item);
         $groupList = RdbProjectTypesGroup::getGroupList();
         return view('backend.rdbprojecttypesgroup.edit', compact('item', 'groupList'));
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateRdbProjectTypesGroupRequest $request, $id)
     {
-        $request->validate([
-            'pttg_name' => [
-                'required',
-                'max:255',
-                Rule::unique('rdb_project_types_group', 'pttg_name')->ignore($id, 'pttg_id'),
-            ],
-            'pttg_group' => 'required|max:1',
-        ], [
-            'pttg_name.required' => 'กรุณากรอกชื่อกลุ่มงบประมาณ',
-            'pttg_name.unique' => 'ชื่อกลุ่มงบประมาณนี้มีอยู่แล้วในระบบ',
-            'pttg_name.max' => 'ชื่อกลุ่มงบประมาณต้องไม่เกิน 255 ตัวอักษร',
-            'pttg_group.required' => 'กรุณากรอกรหัสกลุ่ม',
-            'pttg_group.max' => 'รหัสกลุ่มต้องไม่เกิน 1 ตัวอักษร',
-        ]);
-
         $item = RdbProjectTypesGroup::findOrFail($id);
-        $input = $request->all();
-        $input['user_updated'] = auth()->id();
-        $input['updated_at'] = now();
-
-        $item->update($input);
+        $this->authorize('update', $item);
+        
+        $data = $request->validated();
+        
+        $item->fill($data);
+        $item->user_updated = auth()->id();
+        $item->save();
 
         return redirect()->route('backend.rdbprojecttypesgroup.index')->with('success', 'ปรับปรุงข้อมูลเรียบร้อยแล้ว');
     }
@@ -90,6 +73,7 @@ class RdbProjectTypesGroupController extends Controller
     public function destroy($id)
     {
         $item = RdbProjectTypesGroup::findOrFail($id);
+        $this->authorize('delete', $item);
         if ($item->canDelete()) {
             $item->delete();
             return redirect()->route('backend.rdbprojecttypesgroup.index')->with('success', 'ลบข้อมูลเรียบร้อยแล้ว');

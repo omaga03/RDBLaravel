@@ -187,8 +187,10 @@
                                     @endphp
                                     @if($firstLeader && $firstLeader->researcher)
                                     <div>
-                                        <i class="bi bi-person-circle"></i> 
-                                        {{ $firstLeader->researcher->researcher_fname }} {{ $firstLeader->researcher->researcher_lname }}
+                                        <a href="{{ route('frontend.rdbresearcher.show', $firstLeader->researcher->researcher_id) }}" 
+                                           class="text-decoration-none text-body fw-semibold hover-primary">
+                                            <i class="bi bi-person-circle text-primary me-1"></i>{{ $firstLeader->researcher->researcher_fname }} {{ $firstLeader->researcher->researcher_lname }}
+                                        </a>
                                         @if($remainingCount > 0)
                                             <span class="text-muted small" 
                                                   data-bs-toggle="tooltip" 

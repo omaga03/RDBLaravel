@@ -6,11 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\RdbDepmajor;
 use App\Models\RdbDepartment;
 use Illuminate\Http\Request;
+use App\Http\Requests\Backend\{StoreRdbDepMajorRequest, UpdateRdbDepMajorRequest};
 
 class RdbdepmajorController extends Controller
 {
     public function index()
     {
+        $this->authorize('viewAny', RdbDepmajor::class);
         $items = RdbDepmajor::with('department')
             ->join('rdb_department', 'rdb_dep_major.department_id', '=', 'rdb_department.department_id')
             ->orderBy('rdb_department.department_nameTH', 'asc')
@@ -21,21 +23,17 @@ class RdbdepmajorController extends Controller
 
     public function create()
     {
+        $this->authorize('create', RdbDepmajor::class);
         $departments = RdbDepartment::orderBy('department_nameTH')->get();
         $item = new RdbDepmajor();
         return view('backend.rdbdepmajor.create', compact('departments', 'item'));
     }
 
-    public function store(Request $request)
+    public function store(StoreRdbDepMajorRequest $request)
     {
-        $request->validate([
-            'maj_nameTH' => 'required|max:255|unique:rdb_dep_major,maj_nameTH',
-        ], [
-            'maj_nameTH.unique' => 'ชื่อสาขานี้มีอยู่ในระบบแล้ว',
-        ]);
-
+        $this->authorize('create', RdbDepmajor::class);
         $item = new RdbDepmajor();
-        $item->fill($request->all());
+        $item->fill($request->validated());
         $item->user_created = auth()->id();
         $item->created_at = now();
         $item->save();
@@ -46,26 +44,23 @@ class RdbdepmajorController extends Controller
     public function show($id)
     {
         $item = RdbDepmajor::with('department')->findOrFail($id);
+        $this->authorize('view', $item);
         return view('backend.rdbdepmajor.show', compact('item'));
     }
 
     public function edit($id)
     {
-        $item = RdbDepmajor::findOrFail($id);
+        $item = RdbDepmajor::with('department')->findOrFail($id);
+        $this->authorize('update', $item);
         $departments = RdbDepartment::orderBy('department_nameTH')->get();
         return view('backend.rdbdepmajor.edit', compact('item', 'departments'));
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateRdbDepMajorRequest $request, $id)
     {
-        $request->validate([
-            'maj_nameTH' => 'required|max:255|unique:rdb_dep_major,maj_nameTH,' . $id . ',maj_code',
-        ], [
-            'maj_nameTH.unique' => 'ชื่อสาขานี้มีอยู่ในระบบแล้ว',
-        ]);
-
         $item = RdbDepmajor::findOrFail($id);
-        $item->fill($request->all());
+        $this->authorize('update', $item);
+        $item->fill($request->validated());
         $item->user_updated = auth()->id();
         $item->updated_at = now();
         $item->save();
@@ -76,6 +71,7 @@ class RdbdepmajorController extends Controller
     public function destroy($id)
     {
         $item = RdbDepmajor::findOrFail($id);
+        $this->authorize('delete', $item);
         
         // No data_show: Hard Delete with canDelete check
         if (!$item->canDelete()) {

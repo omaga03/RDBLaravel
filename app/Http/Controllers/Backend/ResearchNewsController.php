@@ -5,11 +5,23 @@ namespace App\Http\Controllers\Backend;
 use App\Http\Controllers\Controller;
 use App\Models\ResearchNews;
 use Illuminate\Http\Request;
+use App\Services\FileUploadService;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\Backend\StoreResearchNewsRequest;
+use App\Http\Requests\Backend\UpdateResearchNewsRequest;
 
 class ResearchNewsController extends Controller
 {
+    private FileUploadService $fileUploadService;
+
+    public function __construct(FileUploadService $fileUploadService)
+    {
+        $this->fileUploadService = $fileUploadService;
+    }
+
     public function index(Request $request)
     {
+        $this->authorize('viewAny', ResearchNews::class);
         $query = ResearchNews::query()->where('data_show', 1);
 
         if ($request->filled('news_name')) {
@@ -23,63 +35,29 @@ class ResearchNewsController extends Controller
 
     public function create()
     {
-        \Illuminate\Support\Facades\Gate::authorize('news');
+        $this->authorize('create', ResearchNews::class);
         return view('backend.research_news.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreResearchNewsRequest $request)
     {
-        \Illuminate\Support\Facades\Gate::authorize('news');
-        $validated = $request->validate([
-            'news_name' => 'required',
-        ]);
+        $this->authorize('create', ResearchNews::class);
+        $validated = $request->validated();
         
         $item = new ResearchNews();
         
-        $cleanName = $this->cleanHtml($request->news_name);
-        $cleanDetail = $this->cleanHtml($request->news_detail);
-        
-        $item->fill($request->all());
-        $item->news_name = $cleanName;
-        $item->news_detail = $cleanDetail;
-        
-        // Convert date to Thai format only if it's in standard format (not already Thai)
-        if ($request->news_date && preg_match('/^\d{4}-\d{2}-\d{2}/', $request->news_date)) {
-            $item->news_date = \App\Helpers\ThaiDateHelper::format($request->news_date, false, false);
+        if ($request->hasFile('news_img')) {
+            $fileInfo = $this->fileUploadService->storeFile($validated['news_img'], 'news');
+            $item->news_safe_name = $fileInfo['safe_name'];
+            $item->news_path = $fileInfo['path'];
+            $item->news_size = $fileInfo['size'];
+            $item->news_mime_type = $fileInfo['mime_type'];
+            $item->news_img = $request->file('news_img')->getClientOriginalName();
         }
 
-        
-        // Auto-generate news_id if not provided (10-digit int, starting at 1000000000)
-        if (empty($request->news_id)) {
-            $lastNewsId = ResearchNews::max('news_id');
-            if ($lastNewsId && $lastNewsId >= 1000000000) {
-                $item->news_id = $lastNewsId + 1;
-            } else {
-                $item->news_id = 1000000000;
-            }
-        }
-        
-        // Handle Image Upload - use news_id in filename
-        if ($request->hasFile('news_img') && $request->file('news_img')->isValid()) {
-            $file = $request->file('news_img');
-            $extension = $file->extension() ?: 'jpg';
-            $newsIdForFile = $item->news_id ?: time();
-            $filename = $newsIdForFile . '_' . time() . '.' . $extension;
-            
-            // Ensure directory exists
-            $destinationPath = storage_path('app/public/uploads/news');
-            if (!file_exists($destinationPath)) {
-                mkdir($destinationPath, 0755, true);
-            }
-            
-            // Move file directly
-            $file->move($destinationPath, $filename);
-            $item->news_img = $filename;
-        }
-
-        // Set created_at since timestamps are disabled
-        $item->created_at = now();
+        $item->fill($validated);
         $item->data_show = 1;
+        $item->news_count = 0;
         $item->save();
         
         return redirect()->route('backend.research_news.show', $item->id)->with('success', 'บันทึกข้อมูลเรียบร้อยแล้ว');
@@ -88,46 +66,40 @@ class ResearchNewsController extends Controller
     public function show($id)
     {
         $item = ResearchNews::findOrFail($id);
+        $this->authorize('view', $item);
         $item->increment('news_count');
         return view('backend.research_news.show', compact('item'));
     }
 
     public function edit($id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('news');
         $item = ResearchNews::findOrFail($id);
+        $this->authorize('update', $item);
         return view('backend.research_news.edit', compact('item'));
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateResearchNewsRequest $request, $id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('news');
         $item = ResearchNews::findOrFail($id);
+        $this->authorize('update', $item);
         
-        $cleanName = $this->cleanHtml($request->news_name);
-        $cleanDetail = $this->cleanHtml($request->news_detail);
+        $validated = $request->validated();
         
-        $item->fill($request->all());
-        $item->news_name = $cleanName;
-        $item->news_detail = $cleanDetail;
-
-        // Convert date to Thai format only if it's in standard format (not already Thai)
-        if ($request->news_date && preg_match('/^\d{4}-\d{2}-\d{2}/', $request->news_date)) {
-            $item->news_date = \App\Helpers\ThaiDateHelper::format($request->news_date, false, false);
-        }
-
-
         if ($request->hasFile('news_img')) {
-             if ($item->news_img) {
-                 \Illuminate\Support\Facades\Storage::delete('public/uploads/news/' . $item->news_img);
-             }
-             $file = $request->file('news_img');
-             $filename = time() . '_' . $file->getClientOriginalName();
-             $file->storeAs('public/uploads/news', $filename);
-             $item->news_img = $filename;
+            if ($item->news_path && Storage::exists($item->news_path)) {
+                Storage::delete($item->news_path);
+            }
+            
+            $fileInfo = $this->fileUploadService->storeFile($validated['news_img'], 'news');
+            
+            $item->news_safe_name = $fileInfo['safe_name'];
+            $item->news_path = $fileInfo['path'];
+            $item->news_size = $fileInfo['size'];
+            $item->news_mime_type = $fileInfo['mime_type'];
+            $item->news_img = $request->file('news_img')->getClientOriginalName();
         }
 
-        $item->updated_at = now();
+        $item->fill($validated);
         $item->save();
         
         return redirect()->route('backend.research_news.show', $item->id)->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
@@ -135,25 +107,24 @@ class ResearchNewsController extends Controller
 
     public function destroy($id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('news');
         $item = ResearchNews::findOrFail($id);
+        $this->authorize('delete', $item);
         $item->data_show = 0;
         $item->save();
         return redirect()->route('backend.research_news.index')->with('success', 'ลบข้อมูลเรียบร้อยแล้ว');
     }
 
-    private function cleanHtml($html)
+    public function viewNewsImage($id)
     {
-        if (empty($html)) return $html;
-        
-        // Decode HTML entities (e.g., &ldquo; &rdquo; → " ")
-        $html = html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        
-        $html = str_replace('<p>', '', $html);
-        $html = str_replace('</p>', '<br>', $html);
-        while (substr($html, -4) === '<br>') {
-            $html = substr($html, 0, -4);
+        $item = ResearchNews::findOrFail($id);
+        $this->authorize('view', $item);
+
+        $filePath = $item->getNewsFilePath(oldField: 'news_img', oldDir: 'uploads/news');
+
+        if (!$filePath || !Storage::exists($filePath)) {
+            abort(404, 'ไม่พบรูปภาพข่าว');
         }
-        return $html;
+
+        return Storage::response($filePath);
     }
 }

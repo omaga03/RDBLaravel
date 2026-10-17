@@ -1,93 +1,157 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-4">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h2 class="mb-4"><i class="bi bi-people-fill"></i> นักวิจัย (Researchers)</h2>
-            
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <form action="{{ route('frontend.rdbresearcher.index') }}" method="GET" class="row g-3">
-                        <div class="col-md-5">
-                            <label for="search" class="form-label">ค้นหา (ชื่อ-นามสกุล)</label>
-                            <input type="text" class="form-control" id="search" name="search" value="{{ request('search') }}" placeholder="ระบุชื่อ หรือนามสกุล...">
-                        </div>
-                        <div class="col-md-5">
-                            <label for="department" class="form-label">หน่วยงาน</label>
-                            <select class="form-select" id="department" name="department">
-                                <option value="">-- ทั้งหมด --</option>
-                                @foreach($departments as $dep)
-                                    <option value="{{ $dep->department_id }}" {{ request('department') == $dep->department_id ? 'selected' : '' }}>
-                                        {{ $dep->department_nameTH }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-12 d-flex justify-content-end align-items-end">
-                    <button type="submit" class="btn btn-primary me-2"><i class="bi bi-search"></i> ค้นหา</button>
-                    <a href="{{ route('frontend.rdbresearcher.index') }}" class="btn btn-secondary me-2">ล้างค่า</a>
-                    <button type="submit" formaction="{{ route('frontend.rdbresearcher.export') }}" class="btn btn-success"><i class="bi bi-file-earmark-excel"></i> Export CSV</button>
-                </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+<div class="container-fluid py-4">
+
+    <!-- Page Title -->
+    <div class="mb-4">
+        <h2 class="mb-0 text-body"><i class="bi bi-people-fill me-2 text-primary"></i> นักวิจัย (Researchers)</h2>
     </div>
 
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        @forelse($items as $item)
-        <div class="col">
-            <div class="card h-100 shadow-sm hover-card">
-                <div class="card-body text-center">
-                    <div class="mb-3">
-                        @if($item->researcher_picture)
-                            <img src="{{ asset('storage/uploads/researchers/' . $item->researcher_picture) }}" 
-                                 alt="{{ $item->researcher_fname }}" 
-                                 class="rounded-circle object-fit-cover"
-                                 style="width: 120px; height: 120px; border: 3px solid #f8f9fa;">
-                        @else
-                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto text-white" 
-                                 style="width: 120px; height: 120px; font-size: 3rem;">
-                                {{ strtoupper(substr($item->researcher_fnameEN ?? 'U', 0, 1)) }}
+    <!-- Search Component -->
+    <x-search-bar :searchRoute="route('frontend.rdbresearcher.index')"
+        simplePlaceholder="ค้นหาจาก: ชื่อ-นามสกุล (ไทย/อังกฤษ)">
+
+        <div class="row g-3">
+            {{-- Name Search --}}
+            <div class="col-md-8">
+                <label class="form-label">ชื่อ-นามสกุล (ไทย/อังกฤษ)</label>
+                <input type="text" class="form-control" name="search" value="{{ request('search') }}"
+                    placeholder="ระบุชื่อ หรือนามสกุล (ไทยหรืออังกฤษ)...">
+            </div>
+            {{-- Department --}}
+            <div class="col-md-4">
+                <label class="form-label">หน่วยงาน/คณะ</label>
+                <select class="form-select" name="department">
+                    <option value="">-- ทั้งหมด --</option>
+                    @foreach($departments as $dep)
+                        <option value="{{ $dep->department_id }}" {{ request('department') == $dep->department_id ? 'selected' : '' }}>
+                            {{ $dep->department_nameTH }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+    </x-search-bar>
+
+    <!-- Result Count -->
+    <div class="mb-3 text-body-secondary small">
+        พบ {{ number_format($items->total()) }} รายการ
+    </div>
+
+    <!-- Results Table -->
+    <div class="card shadow-sm border">
+        <div class="card-header bg-body-tertiary border-bottom py-3">
+            <h5 class="mb-0 text-body"><i class="bi bi-list-ul me-2 text-primary"></i>รายชื่อนักวิจัย</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 60px;" class="text-center text-nowrap">#</th>
+                        <th style="width: 70px;" class="text-center text-nowrap">รูป</th>
+                        <th>ชื่อ-นามสกุล</th>
+                        <th>หน่วยงาน</th>
+                        <th class="text-center text-nowrap" style="width: 100px;">H-Index</th>
+                        <th class="text-center text-nowrap" style="width: 100px;">สถานะ</th>
+                        <th class="text-center text-nowrap" style="width: 110px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($items as $index => $item)
+                    <tr>
+                        <td class="text-center text-body-secondary small">
+                            {{ ($items->currentPage() - 1) * $items->perPage() + $index + 1 }}
+                        </td>
+                        <td class="text-center">
+                            <a href="{{ route('frontend.rdbresearcher.show', $item->researcher_id) }}" class="d-inline-block text-decoration-none">
+                                @if($item->researcher_picture)
+                                    <img src="{{ asset('storage/uploads/researchers/' . $item->researcher_picture) }}"
+                                         alt="{{ $item->researcher_fname }}"
+                                         class="rounded-circle object-fit-cover shadow-sm"
+                                         style="width: 46px; height: 46px; border: 2px solid var(--bs-border-color);">
+                                @elseif($item->rf_path)
+                                    <img src="{{ asset('storage/' . $item->rf_path) }}"
+                                         alt="{{ $item->researcher_fname }}"
+                                         class="rounded-circle object-fit-cover shadow-sm"
+                                         style="width: 46px; height: 46px; border: 2px solid var(--bs-border-color);">
+                                @else
+                                    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto text-white fw-bold shadow-sm"
+                                         style="width: 46px; height: 46px; font-size: 1.1rem; border: 2px solid var(--bs-border-color);">
+                                        {{ strtoupper(mb_substr($item->researcher_fnameEN ?? $item->researcher_fname ?? 'U', 0, 1)) }}
+                                    </div>
+                                @endif
+                            </a>
+                        </td>
+                        <td>
+                            <div>
+                                <a href="{{ route('frontend.rdbresearcher.show', $item->researcher_id) }}"
+                                   class="fw-semibold text-body text-decoration-none hover-primary text-break">
+                                    {{ $item->prefix->prefix_nameTH ?? '' }}{{ $item->researcher_fname }} {{ $item->researcher_lname }}
+                                </a>
                             </div>
-                        @endif
-                    </div>
-                    <h5 class="card-title mb-1">
-                        {{ $item->prefix->prefix_nameTH ?? '' }}{{ $item->researcher_fname }} {{ $item->researcher_lname }}
-                    </h5>
-                    <p class="text-muted small mb-2">
-                        {{ $item->researcher_fnameEN }} {{ $item->researcher_lnameEN }}
-                    </p>
-                    <p class="card-text text-primary small mb-3">
-                        {{ $item->department->department_nameTH ?? '-' }}
-                    </p>
-                    <a href="{{ route('frontend.rdbresearcher.show', $item->researcher_id) }}" class="btn btn-outline-primary btn-sm rounded-pill px-4">
-                        ดูประวัติ
-                    </a>
-                </div>
-            </div>
+                            @if($item->researcher_fnameEN || $item->researcher_lnameEN)
+                                <small class="text-body-secondary d-block text-break">
+                                    {{ $item->researcher_fnameEN }} {{ $item->researcher_lnameEN }}
+                                </small>
+                            @endif
+                            @if($item->scopus_authorId)
+                                <small class="text-body-secondary d-block">
+                                    <i class="bi bi-journal-text me-1 text-primary"></i>Scopus: {{ $item->scopus_authorId }}
+                                </small>
+                            @endif
+                        </td>
+                        <td>
+                            <span class="text-primary text-break">{{ $item->department->department_nameTH ?? '-' }}</span>
+                        </td>
+                        <td class="text-center">
+                            @if($item->researcher_hindex)
+                                <span class="badge bg-info text-dark fs-6 px-3">{{ $item->researcher_hindex }}</span>
+                            @else
+                                <span class="text-body-secondary">-</span>
+                            @endif
+                        </td>
+                        <td class="text-center text-nowrap">
+                            @if($item->status)
+                                <span class="badge bg-{{ $item->status->restatus_id == 1 ? 'success' : 'secondary' }}">
+                                    {{ $item->status->rst_name }}
+                                </span>
+                            @endif
+                        </td>
+                        <td class="text-center text-nowrap">
+                            <a href="{{ route('frontend.rdbresearcher.show', $item->researcher_id) }}"
+                               class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-eye"></i> ดูข้อมูล
+                            </a>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-body-secondary">
+                            <i class="bi bi-people display-5 d-block mb-2"></i>
+                            ไม่พบข้อมูลนักวิจัย
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-        @empty
-        <div class="col-12">
-            <div class="alert alert-info text-center">
-                ไม่พบข้อมูลนักวิจัย
-            </div>
-        </div>
-        @endforelse
     </div>
 
+    <!-- Pagination -->
     <div class="d-flex justify-content-center mt-4">
-        {{ $items->withQueryString()->links() }}
+        {{ $items->withQueryString()->links('pagination::bootstrap-5') }}
     </div>
+
 </div>
 
 <style>
-.hover-card {
-    transition: transform 0.2s;
+.hover-primary {
+    transition: color 0.15s ease-in-out;
 }
-.hover-card:hover {
-    transform: translateY(-5px);
+.hover-primary:hover {
+    color: var(--bs-primary) !important;
+    text-decoration: underline !important;
 }
 </style>
 @endsection

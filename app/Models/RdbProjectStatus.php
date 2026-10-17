@@ -8,7 +8,7 @@ class RdbProjectStatus extends Model
 {
     protected $table = 'rdb_project_status';
     protected $primaryKey = 'ps_id';
-    public $timestamps = false; // Assuming no standard created_at/updated_at, change if needed
+    public $timestamps = true; // Changed to true
 
     protected $fillable = [
         'ps_icon',
@@ -17,8 +17,6 @@ class RdbProjectStatus extends Model
         'ps_rank',
         'user_created',
         'user_updated',
-        'created_at',
-        'updated_at',
     ];
 
     // Project Status Constants

@@ -8,7 +8,7 @@ class RdbDepartmentCourse extends Model
 {
     protected $table = 'rdb_department_course';
     protected $primaryKey = 'depcou_id';
-    public $timestamps = false;
+    public $timestamps = true;
 
     public function department()
     {
@@ -27,7 +27,5 @@ class RdbDepartmentCourse extends Model
         'cou_name_sh',
         'user_created',
         'user_updated',
-        'created_at',
-        'updated_at',
     ];
 }

@@ -1,0 +1,53 @@
+<?php
+
+namespace App\Http\Requests\Frontend;
+
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
+class UpdateRdbPublishedCheckyearRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return true; // Authorization handled by controller's Gate
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     */
+    public function rules(): array
+    {
+        // The primary key for RdbPublishedCheckyear is 'id'
+        // Assuming the route parameter is 'id' and represents the id
+        $id = $this->route('id');
+
+        return [
+            'year_id' => 'nullable|integer|exists:rdb_year,year_id',
+            'rdbyearedu_start' => 'nullable|integer',
+            'rdbyearedu_end' => 'nullable|integer',
+            'rdbyearbud_start' => 'nullable|integer',
+            'rdbyearbud_end' => 'nullable|integer',
+        ];
+    }
+
+    /**
+     * Get the custom validation messages.
+     *
+     * @return array
+     */
+    public function messages(): array
+    {
+        return [
+            'year_id.exists' => 'ปีงบประมาณไม่ถูกต้อง',
+            'rdbyearedu_start.integer' => 'ปีการศึกษาเริ่มต้นต้องเป็นตัวเลข',
+            'rdbyearedu_end.integer' => 'ปีการศึกษาสิ้นสุดต้องเป็นตัวเลข',
+            'rdbyearbud_start.integer' => 'ปีงบประมาณเริ่มต้นต้องเป็นตัวเลข',
+            'rdbyearbud_end.integer' => 'ปีงบประมาณสิ้นสุดต้องเป็นตัวเลข',
+        ];
+    }
+}

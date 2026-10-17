@@ -29,4 +29,12 @@ class RdbResearcherEducation extends Model
         'created_at',
         'updated_at',
     ];
+
+    public function creator() {
+        return $this->belongsTo(User::class, 'user_created');
+    }
+
+    public function updater() {
+        return $this->belongsTo(User::class, 'user_updated');
+    }
 }

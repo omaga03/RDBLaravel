@@ -3,14 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Traits\HasDualFilePath;
 
 class RdbProjectUtilize extends Model
 {
-    use \App\Traits\HasDataShowScope;
+    use \App\Traits\HasDataShowScope, HasDualFilePath;
 
     protected $table = 'rdb_project_utilize';
     protected $primaryKey = 'utz_id';
-    public $timestamps = false;
+    public $timestamps = true;
 
     public function project()
     {
@@ -55,10 +56,19 @@ class RdbProjectUtilize extends Model
         'utz_count',
         'utz_countfile',
         'utz_files',
+        'uf_safe_name',
+        'uf_path',
+        'uf_size',
+        'uf_mime_type',
         'data_show',
         'user_created',
         'user_updated',
-        'created_at',
-        'updated_at',
     ];
+
+    use HasDualFilePath;
+
+    public function getUtilizeFilePath(string $newField = 'uf_path', string $oldField = 'uf_file', string $oldDir = 'uploads/utilize'): ?string
+    {
+        return $this->resolveDualFilePath($newField, $oldField, $oldDir);
+    }
 }

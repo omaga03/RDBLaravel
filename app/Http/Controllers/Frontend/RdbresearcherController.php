@@ -42,8 +42,14 @@ class RdbresearcherController extends Controller
     {
         $item = RdbResearcher::with([
             'prefix', 
-            'department'
+            'department',
+            'status'
         ])->findOrFail($id);
+        
+        // Load educations
+        $item->load(['rdbResearcherEducations' => function($query) {
+            $query->orderBy('reedu_year', 'desc')->orderBy('reedu_id', 'desc');
+        }]);
         
         // Load projects with proper sorting and relationships
         $item->load(['rdbProjects' => function($query) {
@@ -94,68 +100,6 @@ class RdbresearcherController extends Controller
         return view('frontend.rdbresearcher.show', compact('item', 'utilizations', 'projectPositions'));
     }
 
-    public function create()
-    {
-        Gate::authorize('RdbResearcher.Create');
-        $data = $this->getDropdownData();
-        return view('frontend.rdbresearcher.create', $data);
-    }
-
-    public function store(Request $request)
-    {
-        Gate::authorize('RdbResearcher.Create');
-        $validated = $this->validateRequest($request);
-
-        if ($request->hasFile('researcher_picture')) {
-            $path = $request->file('researcher_picture')->store('researcher_pictures', 'public');
-            $validated['researcher_picture'] = $path;
-        }
-
-        $validated['created_at'] = now();
-
-        RdbResearcher::create($validated);
-
-        return redirect()->route('frontend.rdbresearcher.index')->with('success', 'Researcher created successfully.');
-    }
-
-    public function edit($id)
-    {
-        Gate::authorize('RdbResearcher.Update');
-        $item = RdbResearcher::findOrFail($id);
-        $data = $this->getDropdownData();
-        $data['item'] = $item;
-        return view('frontend.rdbresearcher.edit', $data);
-    }
-
-    public function update(Request $request, $id)
-    {
-        $item = RdbResearcher::findOrFail($id);
-        $validated = $this->validateRequest($request, $id);
-
-        if ($request->hasFile('researcher_picture')) {
-            if ($item->researcher_picture) {
-                Storage::disk('public')->delete($item->researcher_picture);
-            }
-            $path = $request->file('researcher_picture')->store('researcher_pictures', 'public');
-            $validated['researcher_picture'] = $path;
-        }
-
-        $item->update($validated);
-
-        return redirect()->route('frontend.rdbresearcher.index')->with('success', 'Researcher updated successfully.');
-    }
-
-    public function destroy($id)
-    {
-        $item = RdbResearcher::findOrFail($id);
-        if ($item->researcher_picture) {
-            Storage::disk('public')->delete($item->researcher_picture);
-        }
-        $item->delete();
-
-        return redirect()->route('frontend.rdbresearcher.index')->with('success', 'Researcher deleted successfully.');
-    }
-
     public function export(Request $request)
     {
         $query = RdbResearcher::with(['prefix', 'department', 'status']);
@@ -201,36 +145,5 @@ class RdbresearcherController extends Controller
 
         return response()->stream($callback, 200, $headers);
     }
-
-    private function getDropdownData()
-    {
-        return [
-            'prefixes' => RdbPrefix::all(),
-            'departments' => RdbDepartment::orderBy('department_nameTH')->get(),
-            'statuses' => RdbResearcherStatus::all(),
-            'majors' => RdbDepMajor::orderBy('maj_nameTH')->get(),
-        ];
-    }
-
-    private function validateRequest(Request $request, $id = null)
-    {
-        return $request->validate([
-            'prefix_id' => 'required|exists:rdb_prefix,prefix_id',
-            'researcher_fname' => 'required|string|max:255',
-            'researcher_lname' => 'required|string|max:255',
-            'researcher_fnameEN' => 'nullable|string|max:255',
-            'researcher_lnameEN' => 'nullable|string|max:255',
-            'researcher_gender' => 'nullable|string|in:M,F',
-            'department_id' => 'required|exists:rdb_department,department_id',
-            'maj_id' => 'nullable|exists:rdb_dep_major,maj_id',
-            'restatus_id' => 'nullable|exists:rdb_researcher_status,restatus_id',
-            'researcher_email' => 'nullable|email|max:255',
-            'researcher_tel' => 'nullable|string|max:50',
-            'researcher_mobile' => 'nullable|string|max:50',
-            'researcher_picture' => 'nullable|image|max:5120', // 5MB
-            'scopus_authorId' => 'nullable|string|max:255',
-            'orcid' => 'nullable|string|max:255',
-            'researcher_note' => 'nullable|string',
-        ]);
-    }
 }
+

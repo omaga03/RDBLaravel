@@ -5,11 +5,22 @@ namespace App\Http\Controllers\Backend;
 use App\Http\Controllers\Controller;
 use App\Models\ResearchConference;
 use Illuminate\Http\Request;
+use App\Services\FileUploadService;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\Backend\StoreResearchConferenceRequest;
+use App\Http\Requests\Backend\UpdateResearchConferenceRequest;
 
 class ResearchConferenceController extends Controller
 {
+    private FileUploadService $fileUploadService;
+
+    public function __construct(FileUploadService $fileUploadService)
+    {
+        $this->fileUploadService = $fileUploadService;
+    }
     public function index(Request $request)
     {
+        $this->authorize('viewAny', ResearchConference::class);
         $query = ResearchConference::query()->where('data_show', 1);
 
         if ($request->filled('con_name')) {
@@ -23,55 +34,41 @@ class ResearchConferenceController extends Controller
 
     public function create()
     {
-        \Illuminate\Support\Facades\Gate::authorize('news');
+        $this->authorize('create', ResearchConference::class);
         return view('backend.research_conference.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreResearchConferenceRequest $request)
     {
-        \Illuminate\Support\Facades\Gate::authorize('news');
-        $validated = $request->validate([
-            'con_name' => 'required',
-        ]);
+        $this->authorize('create', ResearchConference::class);
+        $data = $request->validated();
         
         $item = new ResearchConference();
         
-        $cleanName = $this->cleanHtml($request->con_name);
-        $cleanDetail = $this->cleanHtml($request->con_detail);
+        $data['con_name'] = $this->cleanHtml($data['con_name']);
+        if (isset($data['con_detail'])) {
+            $data['con_detail'] = $this->cleanHtml($data['con_detail']);
+        }
         
-        $item->fill($request->all());
-        $item->con_name = $cleanName;
-        $item->con_detail = $cleanDetail;
-        
-        // Auto-generate con_id if not provided (18-digit string, starting at 100000000000000000)
-        if (empty($request->con_id)) {
+        if (empty($data['con_id'])) {
             $lastConId = ResearchConference::max('con_id');
             if ($lastConId && strlen($lastConId) >= 18) {
-                $item->con_id = bcadd($lastConId, '1');
+                $data['con_id'] = bcadd($lastConId, '1');
             } else {
-                $item->con_id = '100000000000000000';
+                $data['con_id'] = '100000000000000000';
             }
         }
         
-        // Handle Image Upload - use timestamp only (avoid long con_id in filename)
-        if ($request->hasFile('con_img') && $request->file('con_img')->isValid()) {
-            $file = $request->file('con_img');
-            $extension = $file->extension() ?: 'jpg';
-            $filename = 'conf_' . time() . '.' . $extension;
-            
-            // Ensure directory exists
-            $destinationPath = storage_path('app/public/uploads/conference');
-            if (!file_exists($destinationPath)) {
-                mkdir($destinationPath, 0755, true);
-            }
-            
-            // Move file directly
-            $file->move($destinationPath, $filename);
-            $item->con_img = $filename;
+        if ($request->hasFile('con_img')) {
+            $fileInfo = $this->fileUploadService->storeFile($request->file('con_img'), 'conference');
+            $data['con_safe_name'] = $fileInfo['safe_name'];
+            $data['con_path'] = $fileInfo['path'];
+            $data['con_size'] = $fileInfo['size'];
+            $data['con_mime_type'] = $fileInfo['mime_type'];
+            $data['con_img'] = $request->file('con_img')->getClientOriginalName();
         }
 
-        // Set created_at since timestamps are disabled
-        $item->created_at = now();
+        $item->fill($data);
         $item->data_show = 1;
         $item->con_count = 0;
         $item->save();
@@ -82,40 +79,45 @@ class ResearchConferenceController extends Controller
     public function show($id)
     {
         $item = ResearchConference::findOrFail($id);
+        $this->authorize('view', $item);
         $item->increment('con_count');
         return view('backend.research_conference.show', compact('item'));
     }
 
     public function edit($id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('news');
         $item = ResearchConference::findOrFail($id);
+        $this->authorize('update', $item);
         return view('backend.research_conference.edit', compact('item'));
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateResearchConferenceRequest $request, $id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('news');
         $item = ResearchConference::findOrFail($id);
+        $this->authorize('update', $item);
         
-        $cleanName = $this->cleanHtml($request->con_name);
-        $cleanDetail = $this->cleanHtml($request->con_detail);
+        $data = $request->validated();
         
-        $item->fill($request->all());
-        $item->con_name = $cleanName;
-        $item->con_detail = $cleanDetail;
-
-        if ($request->hasFile('con_img')) {
-             if ($item->con_img) {
-                 \Illuminate\Support\Facades\Storage::delete('public/uploads/conference/' . $item->con_img);
-             }
-             $file = $request->file('con_img');
-             $filename = time() . '_' . $file->getClientOriginalName();
-             $file->storeAs('public/uploads/conference', $filename);
-             $item->con_img = $filename;
+        $data['con_name'] = $this->cleanHtml($data['con_name']);
+        if (isset($data['con_detail'])) {
+            $data['con_detail'] = $this->cleanHtml($data['con_detail']);
         }
 
-        $item->updated_at = now();
+        if ($request->hasFile('con_img')) {
+            if ($item->con_path && Storage::exists($item->con_path)) {
+                Storage::delete($item->con_path);
+            }
+            
+            $fileInfo = $this->fileUploadService->storeFile($request->file('con_img'), 'conference');
+            
+            $data['con_safe_name'] = $fileInfo['safe_name'];
+            $data['con_path'] = $fileInfo['path'];
+            $data['con_size'] = $fileInfo['size'];
+            $data['con_mime_type'] = $fileInfo['mime_type'];
+            $data['con_img'] = $request->file('con_img')->getClientOriginalName();
+        }
+
+        $item->fill($data);
         $item->save();
         
         return redirect()->route('backend.research_conference.show', $item->id)->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
@@ -123,18 +125,31 @@ class ResearchConferenceController extends Controller
 
     public function destroy($id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('news');
         $item = ResearchConference::findOrFail($id);
+        $this->authorize('delete', $item);
         $item->data_show = 0;
         $item->save();
         return redirect()->route('backend.research_conference.index')->with('success', 'ลบข้อมูลเรียบร้อยแล้ว');
+    }
+
+    public function viewConferenceImage($id)
+    {
+        $item = ResearchConference::findOrFail($id);
+        $this->authorize('view', $item);
+
+        $filePath = $item->getConferenceFilePath();
+
+        if (!$filePath || !Storage::exists($filePath)) {
+            abort(404, 'ไม่พบรูปภาพงานประชุม');
+        }
+
+        return Storage::response($filePath);
     }
 
     private function cleanHtml($html)
     {
         if (empty($html)) return $html;
         
-        // Decode HTML entities (e.g., &ldquo; &rdquo; → " ")
         $html = html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
         
         $html = str_replace('<p>', '', $html);

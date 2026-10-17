@@ -6,11 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\RdbTrainingRegister;
 use App\Models\RdbTraining;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use App\Http\Requests\Frontend\{StoreRdbTrainingRegisterRequest, UpdateRdbTrainingRegisterRequest};
 
 class RdbtrainingregisterController extends Controller
 {
     public function index(Request $request)
     {
+        Gate::authorize('Admin');
         $query = RdbTrainingRegister::with('training');
 
         if ($request->filled('search')) {
@@ -25,70 +28,10 @@ class RdbtrainingregisterController extends Controller
 
     public function show($id)
     {
+        Gate::authorize('Admin');
         $item = RdbTrainingRegister::with('training')->findOrFail($id);
         return view('frontend.rdbtrainingregister.show', compact('item'));
     }
 
-    public function create()
-    {
-        $trainings = RdbTraining::all();
-        return view('frontend.rdbtrainingregister.create', compact('trainings'));
-    }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'tra_id' => 'nullable|exists:rdb_training,tra_id',
-            'treg_perfix' => 'nullable|string|max:50',
-            'treg_name' => 'required|string|max:255',
-            'treg_department' => 'nullable|string|max:255',
-            'treg_position' => 'nullable|string|max:255',
-            'treg_address' => 'nullable|string',
-            'treg_tel' => 'nullable|string|max:50',
-            'treg_email' => 'nullable|email|max:255',
-            'treg_session' => 'nullable|integer',
-        ]);
-
-        $validated['created_at'] = now();
-
-        RdbTrainingRegister::create($validated);
-
-        return redirect()->route('frontend.rdbtrainingregister.index')->with('success', 'Registration created successfully.');
-    }
-
-    public function edit($id)
-    {
-        $item = RdbTrainingRegister::findOrFail($id);
-        $trainings = RdbTraining::all();
-        return view('frontend.rdbtrainingregister.edit', compact('item', 'trainings'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        $item = RdbTrainingRegister::findOrFail($id);
-        
-        $validated = $request->validate([
-            'tra_id' => 'nullable|exists:rdb_training,tra_id',
-            'treg_perfix' => 'nullable|string|max:50',
-            'treg_name' => 'required|string|max:255',
-            'treg_department' => 'nullable|string|max:255',
-            'treg_position' => 'nullable|string|max:255',
-            'treg_address' => 'nullable|string',
-            'treg_tel' => 'nullable|string|max:50',
-            'treg_email' => 'nullable|email|max:255',
-            'treg_session' => 'nullable|integer',
-        ]);
-
-        $item->update($validated);
-
-        return redirect()->route('frontend.rdbtrainingregister.index')->with('success', 'Registration updated successfully.');
-    }
-
-    public function destroy($id)
-    {
-        $item = RdbTrainingRegister::findOrFail($id);
-        $item->delete();
-
-        return redirect()->route('frontend.rdbtrainingregister.index')->with('success', 'Registration deleted successfully.');
-    }
 }

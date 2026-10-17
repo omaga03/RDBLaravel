@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backend;
 use App\Http\Controllers\Controller;
 use App\Models\RdbPublishedType;
 use Illuminate\Http\Request;
+use App\Http\Requests\Backend\{StoreRdbPublishedTypeRequest, UpdateRdbPublishedTypeRequest};
 
 class RdbPublishedTypeController extends Controller
 {
@@ -13,6 +14,7 @@ class RdbPublishedTypeController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', RdbPublishedType::class);
         $query = RdbPublishedType::query();
 
         // Search logic
@@ -34,6 +36,7 @@ class RdbPublishedTypeController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', RdbPublishedType::class);
         $item = new RdbPublishedType();
         return view('backend.rdbpublishedtype.create', compact('item'));
     }
@@ -41,26 +44,13 @@ class RdbPublishedTypeController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreRdbPublishedTypeRequest $request)
     {
-        $request->validate([
-            'pubtype_group' => 'required|string|max:255',
-            'pubtype_grouptype' => 'nullable|string|max:255',
-            'pubtype_subgroup' => 'nullable|string|max:255',
-            'pubtype_score' => 'nullable|numeric|between:0,99.99',
-        ]);
-
+        $this->authorize('create', RdbPublishedType::class);
+        $validated = $request->validated();
+        
         $item = new RdbPublishedType();
-        $input = $request->all();
-        
-        $item->fill($input);
-        // Model has no standard timestamps, but fillable suggests created_at/updated_at. 
-        // If DB table has them, uncomment below. Based on Model definition $timestamps = false, we'll respect that unless columns exist.
-        // Assuming fillable is correct and columns exist but maybe not managed by Eloquent automatically due to some reason or just simple CRUD.
-        // Let's manually set them if they are in fillable.
-        $item->created_at = now();
-        $item->updated_at = now();
-        
+        $item->fill($validated);
         $item->save();
 
         return redirect()->route('backend.rdbpublishedtype.show', $item->pubtype_id)
@@ -73,6 +63,7 @@ class RdbPublishedTypeController extends Controller
     public function show($id)
     {
         $item = RdbPublishedType::findOrFail($id);
+        $this->authorize('view', $item);
         return view('backend.rdbpublishedtype.show', compact('item'));
     }
 
@@ -82,26 +73,21 @@ class RdbPublishedTypeController extends Controller
     public function edit($id)
     {
         $item = RdbPublishedType::findOrFail($id);
+        $this->authorize('update', $item);
         return view('backend.rdbpublishedtype.edit', compact('item'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(UpdateRdbPublishedTypeRequest $request, $id)
     {
-        $request->validate([
-            'pubtype_group' => 'required|string|max:255',
-            'pubtype_grouptype' => 'nullable|string|max:255',
-            'pubtype_subgroup' => 'nullable|string|max:255',
-            'pubtype_score' => 'nullable|numeric|between:0,99.99',
-        ]);
-
         $item = RdbPublishedType::findOrFail($id);
-        $input = $request->all();
-        $input['updated_at'] = now();
+        $this->authorize('update', $item);
         
-        $item->update($input);
+        $validated = $request->validated();
+        
+        $item->update($validated);
 
         return redirect()->route('backend.rdbpublishedtype.show', $item->pubtype_id)
                          ->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
@@ -113,8 +99,8 @@ class RdbPublishedTypeController extends Controller
     public function destroy($id)
     {
         $item = RdbPublishedType::findOrFail($id);
+        $this->authorize('delete', $item);
         
-        // Check for dependencies if necessary (e.g. check if used in rdb_published)
         if (\App\Models\RdbPublished::where('pubtype_id', $id)->exists()) {
              return redirect()->route('backend.rdbpublishedtype.show', $id)
                               ->with('error', 'ไม่สามารถลบได้เนื่องจากมีการใช้งานในข้อมูลการตีพิมพ์แล้ว');

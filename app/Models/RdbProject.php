@@ -3,51 +3,66 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
+use App\Models\Traits\HasDualFilePath;
+use App\Services\FileUploadService;
 
 class RdbProject extends Model
 {
-    use \App\Traits\HasDataShowScope;
+    use \App\Traits\HasDataShowScope, HasDualFilePath;
 
     protected $table = 'rdb_project';
-    protected $primaryKey = 'pro_id';
-    public $timestamps = false; // Assuming no standard created_at/updated_at, change if needed
+    use HasDualFilePath;
 
+    /**
+     * ✅ กำหนด fillable เฉพาะฟิลด์ที่ยอมให้แก้ไข
+     * ไม่รวม: pro_id, user_created, user_updated, created_at, updated_at
+     */
     protected $fillable = [
         'pro_code',
-        'pgroup_id',
-        'pt_id',
-        'pts_id',
         'pro_nameTH',
         'pro_nameEN',
-        'department_id',
-        'depcat_id',
-        'year_id',
+        'pro_detail',
         'pro_abstract',
-        'pro_reference',
+        'pro_keyword',
+        'pro_budget',
         'pro_date_start',
         'pro_date_end',
-        'strategic_id',
-        'pro_budget',
-        'pro_keyword',
-        'pro_abstract_file',
-        'pro_file',
-        'pro_file_show',
-        'ps_id',
-        'pro_page_num',
         'pro_finish',
+        'pro_abstract_file',
+        'pro_abstract_file_path',
+        'pro_abstract_size',
+        'pro_abstract_mime',
+        'pro_file',
+        'pro_file_path',
+        'pro_file_size',
+        'pro_file_mime',
+        'pt_id',
+        'pts_id',
+        'ps_id',
+        'year_id',
+        'department_id',
+        'depcat_id',
+        'pgroup_id',
         'pro_group',
-        'pro_count_page',
+        'pro_file_show',
         'pro_count_abs',
         'pro_count_full',
         'data_show',
-        'pro_note',
-        'library_in',
+        'created_at',
         'user_created',
         'user_updated',
-        'created_at',
-        'created_at',
-        'updated_at',
     ];
+
+    /**
+     * ✅ ทำให้ pro_id เป็น primary key (custom)
+     */
+    protected $primaryKey = 'pro_id';
+
+    /**
+     * ✅ Disable timestamps เพราะ project ไม่มี created_at/updated_at
+     */
+    public $timestamps = false; // Assuming no standard created_at/updated_at, change if needed
 
     public function status()
     {
@@ -204,5 +219,77 @@ class RdbProject extends Model
         } else {
             return false;
         }
+    }
+
+    /**
+     * Get path ที่ถูกต้องสำหรับไฟล์บทคัดย่อ
+     * ลองใช้ path ใหม่ (UUID) ก่อน → fallback ใช้เก่า
+     */
+    public function getAbstractFilePath(): ?string
+    {
+        // ลองใช้ path ใหม่ก่อน
+        if (!empty($this->pro_abstract_file_path)) {
+            return $this->pro_abstract_file_path;
+        }
+
+        // Fallback ใช้ path เก่า
+        if (!empty($this->pro_abstract_file)) {
+            return 'uploads/projects/' . $this->pro_abstract_file;
+        }
+
+        return null;
+    }
+
+    /**
+     * Get path ที่ถูกต้องสำหรับไฟล์รายงาน
+     */
+    public function getReportFilePath(): ?string
+    {
+        if (!empty($this->pro_file_path)) {
+            return $this->pro_file_path;
+        }
+
+        if (!empty($this->pro_file)) {
+            return 'uploads/projects/' . $this->pro_file;
+        }
+
+        return null;
+    }
+
+    /**
+     * ตรวจสอบไฟล์บทคัดย่อ
+     */
+    public function checkAbstractFileIntegrity(): array
+    {
+        return FileUploadService::checkFileIntegrity(
+            $this->pro_abstract_file_path ?? '',
+            $this->pro_abstract_file ?? '',
+            'uploads/projects'
+        );
+    }
+
+    /**
+     * ตรวจสอบไฟล์รายงาน
+     */
+    public function checkReportFileIntegrity(): array
+    {
+        return FileUploadService::checkFileIntegrity(
+            $this->pro_file_path ?? '',
+            $this->pro_file ?? '',
+            'uploads/projects'
+        );
+    }
+
+    /**
+     * ตรวจสอบว่าใช้ path ใหม่หรือเก่า
+     */
+    public function usingNewAbstractPath(): bool
+    {
+        return !empty($this->pro_abstract_file_path);
+    }
+
+    public function usingNewReportPath(): bool
+    {
+        return !empty($this->pro_file_path);
     }
 }

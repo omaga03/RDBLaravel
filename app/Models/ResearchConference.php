@@ -3,12 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Traits\HasDualFilePath;
 
 class ResearchConference extends Model
 {
+    use HasDualFilePath;
+
     protected $table = 'research_coferenceinthai';
     protected $primaryKey = 'id';
-    public $timestamps = false;
+    public $timestamps = true;
 
     protected $fillable = [
         'con_id',
@@ -19,10 +22,17 @@ class ResearchConference extends Model
         'con_venue',
         'con_website',
         'con_img',
+        'con_safe_name',
+        'con_path',
+        'con_size',
+        'con_mime_type',
         'con_site_img',
         'con_count',
         'data_show',
-        'created_at',
-        'updated_at',
     ];
+
+    public function getConferenceFilePath(string $newField = 'con_path', string $oldField = 'con_img', string $oldDir = 'uploads/conference'): ?string
+    {
+        return $this->resolveDualFilePath($newField, $oldField, $oldDir);
+    }
 }

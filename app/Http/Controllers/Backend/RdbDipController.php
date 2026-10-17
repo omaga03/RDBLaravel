@@ -4,12 +4,28 @@ namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
 use App\Models\RdbDip;
+use App\Models\RdbDipType;
+use App\Models\RdbYear;
+use App\Models\RdbResearcher;
 use Illuminate\Http\Request;
+use App\Services\FileUploadService;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\Backend\StoreDipRequest;
+use App\Http\Requests\Backend\UpdateDipRequest;
+use App\Http\Requests\Backend\UploadDipFileRequest;
 
 class RdbDipController extends Controller
 {
+    private FileUploadService $fileUploadService;
+
+    public function __construct(FileUploadService $fileUploadService)
+    {
+        $this->fileUploadService = $fileUploadService;
+    }
+
     public function index(Request $request)
     {
+        $this->authorize('viewAny', RdbDip::class);
         $query = RdbDip::with(['dipType', 'researcher', 'project']);
 
         // Filter: Dip Request Number
@@ -48,18 +64,16 @@ class RdbDipController extends Controller
         $items = $query->orderBy('dip_request_date', 'desc')->paginate(20);
 
         // Lookup data for filters
-        $dipTypes = \App\Models\RdbDipType::all();
+        $dipTypes = RdbDipType::all();
         
-        // For researchers (Inventor), we only need the one currently selected (if any) to populate the TomSelect initially
         $selectedResearcher = null;
         if ($request->filled('researcher_id')) {
-            $selectedResearcher = \App\Models\RdbResearcher::find($request->researcher_id);
+            $selectedResearcher = RdbResearcher::find($request->researcher_id);
         }
 
-        // For years, we also only need the selected one, as they will be loaded via AJAX
         $selectedYear = null;
         if ($request->filled('year_id')) {
-            $selectedYear = \App\Models\RdbYear::find($request->year_id);
+            $selectedYear = RdbYear::find($request->year_id);
         }
 
         return view('backend.rdb_dip.index', compact('items', 'dipTypes', 'selectedResearcher', 'selectedYear'));
@@ -70,7 +84,8 @@ class RdbDipController extends Controller
      */
     public function searchYears()
     {
-        $years = \App\Models\RdbYear::orderBy('year_name', 'desc')
+        $this->authorize('viewAny', RdbDip::class);
+        $years = RdbYear::orderBy('year_name', 'desc')
             ->get()
             ->map(fn($y) => [
                 'value' => $y->year_id,
@@ -82,29 +97,34 @@ class RdbDipController extends Controller
 
     public function create()
     {
-        \Illuminate\Support\Facades\Gate::authorize('Dip');
+        $this->authorize('create', RdbDip::class);
         return view('backend.rdb_dip.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreDipRequest $request)
     {
-        \Illuminate\Support\Facades\Gate::authorize('Dip');
+        $this->authorize('create', RdbDip::class);
         
-        $request->validate([
-            'dip_request_number' => 'required|max:255',
-            'dipt_id' => 'required',
-            'dip_data2_name' => 'required',
-            'researcher_id' => 'required',
-        ]);
+        $data = $request->validated();
 
-        $data = $request->all();
-        $data['dip_type'] = 1; // Set default to 1 as per user request
+        $data['dip_type'] = 1; 
         $data['data_show'] = 1;
         $data['user_created'] = auth()->id();
         $data['user_updated'] = auth()->id();
-        $data['created_at'] = now();
-        $data['updated_at'] = now();
 
+        if ($request->hasFile('dip_files')) {
+            $fileInfo = $this->fileUploadService->storeFile($request->file('dip_files'), 'dips');
+            $data['dip_safe_name'] = $fileInfo['safe_name'];
+            $data['dip_path'] = $fileInfo['path'];
+            $data['dip_size'] = $fileInfo['size'];
+            $data['dip_mime_type'] = $fileInfo['mime_type'];
+        }
+
+        if ($request->hasFile('dip_data1_files')) {
+            $fileInfo = $this->fileUploadService->storeFile($request->file('dip_data1_files'), 'dips');
+            $data['dip_data1_files'] = $fileInfo['safe_name'];
+        }
+        
         $item = RdbDip::create($data);
 
         return redirect()->route('backend.rdb_dip.show', $item->dip_id)->with('success', 'บันทึกข้อมูลเรียบร้อยแล้ว');
@@ -112,35 +132,40 @@ class RdbDipController extends Controller
 
     public function show($id)
     {
-        $item = RdbDip::findOrFail($id);
+        $item = RdbDip::with(['dipType', 'researcher', 'project'])->findOrFail($id);
+        $this->authorize('view', $item);
         return view('backend.rdb_dip.show', compact('item'));
     }
 
     public function edit($id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('Dip');
-        $item = RdbDip::findOrFail($id);
+        $item = RdbDip::with(['dipType', 'researcher', 'project'])->findOrFail($id);
+        $this->authorize('update', $item);
         return view('backend.rdb_dip.edit', compact('item'));
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateDipRequest $request, $id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('Dip');
-        
         $item = RdbDip::findOrFail($id);
+        $this->authorize('update', $item);
         
-        $request->validate([
-            'dip_request_number' => 'required|max:255',
-            'dipt_id' => 'required',
-            'dip_data2_name' => 'required',
-            'researcher_id' => 'required',
-        ]);
+        $data = $request->validated();
 
-        $data = $request->except(['user_created', 'created_at']); // Safeguard audit logs
-        $data['dip_type'] = 1; // Ensure dip_type remains 1 as per user request
+        $data['dip_type'] = 1;
         $data['user_updated'] = auth()->id();
-        $data['updated_at'] = now();
 
+        if ($request->hasFile('dip_files')) {
+            if ($item->dip_path && Storage::exists($item->dip_path)) {
+                Storage::delete($item->dip_path);
+            }
+            
+            $fileInfo = $this->fileUploadService->storeFile($request->file('dip_files'), 'dips');
+            $data['dip_safe_name'] = $fileInfo['safe_name'];
+            $data['dip_path'] = $fileInfo['path'];
+            $data['dip_size'] = $fileInfo['size'];
+            $data['dip_mime_type'] = $fileInfo['mime_type'];
+        }
+        
         $item->update($data);
 
         return redirect()->route('backend.rdb_dip.show', $item->dip_id)->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
@@ -148,10 +173,9 @@ class RdbDipController extends Controller
 
     public function destroy($id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('Dip');
         $item = RdbDip::findOrFail($id);
+        $this->authorize('delete', $item);
 
-        // Soft Delete: has data_show column
         $item->data_show = 0;
         $item->user_updated = auth()->id();
         $item->save();
@@ -159,63 +183,62 @@ class RdbDipController extends Controller
         return redirect()->route('backend.rdb_dip.index')->with('success', 'ลบข้อมูลเรียบร้อยแล้ว (ซ่อนการแสดงผล)');
     }
 
-    public function uploadFile(Request $request, $id)
+    public function uploadFile(UploadDipFileRequest $request, $id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('Dip');
         $item = RdbDip::findOrFail($id);
+        $this->authorize('update', $item);
+        $validated = $request->validated();
 
-        $request->validate([
-            'dip_files' => 'required|file|mimes:pdf|max:20480', // limit 20MB
-        ]);
-
-        if ($request->hasFile('dip_files')) {
-            // Delete old file if exists
-            if ($item->dip_files && \Illuminate\Support\Facades\Storage::disk('public')->exists('uploads/dips/' . $item->dip_files)) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete('uploads/dips/' . $item->dip_files);
-            }
-
-            $file = $request->file('dip_files');
-            // Yii2 convention: {id}-dip{YmdHis}{random50}~.{ext}
-            $filename = $item->dip_id . '-dip' . date('YmdHis') . \Illuminate\Support\Str::random(50) . '~.' . $file->getClientOriginalExtension();
-            
-            $path = 'uploads/dips';
-            if (!\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
-                \Illuminate\Support\Facades\Storage::disk('public')->makeDirectory($path);
-            }
-
-            \Illuminate\Support\Facades\Storage::disk('public')->put($path . '/' . $filename, file_get_contents($file));
-
-            $item->update([
-                'dip_files' => $filename,
-                'user_updated' => auth()->id(),
-                'updated_at' => now(),
-            ]);
-
-            return redirect()->back()->with('success', 'อัปโหลดไฟล์เรียบร้อยแล้ว');
+        if ($item->dip_path && Storage::exists($item->dip_path)) {
+            Storage::delete($item->dip_path);
         }
 
-        return redirect()->back()->with('error', 'ไม่พบไฟล์ที่ต้องการอัปโหลด');
+        $fileInfo = $this->fileUploadService->storeFile($validated['dip_files'], 'dips');
+        
+        $item->update([
+            'dip_safe_name' => $fileInfo['safe_name'],
+            'dip_path'      => $fileInfo['path'],
+            'dip_size'      => $fileInfo['size'],
+            'dip_mime_type' => $fileInfo['mime_type'],
+            'dip_files'     => $fileInfo['safe_name'],
+            'user_updated'  => auth()->id(),
+        ]);
+
+        return redirect()->back()->with('success', 'อัปโหลดไฟล์เรียบร้อยแล้ว');
     }
 
     public function deleteFile($id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('Dip');
         $item = RdbDip::findOrFail($id);
+        $this->authorize('update', $item);
 
-        if ($item->dip_files) {
-            if (\Illuminate\Support\Facades\Storage::disk('public')->exists('uploads/dips/' . $item->dip_files)) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete('uploads/dips/' . $item->dip_files);
-            }
+        if ($item->dip_path && Storage::exists($item->dip_path)) {
+            Storage::delete($item->dip_path);
+        }
+        
+        $item->update([
+            'dip_files' => null,
+            'dip_safe_name' => null,
+            'dip_path' => null,
+            'dip_size' => null,
+            'dip_mime_type' => null,
+            'user_updated' => auth()->id(),
+        ]);
 
-            $item->update([
-                'dip_files' => null,
-                'user_updated' => auth()->id(),
-                'updated_at' => now(),
-            ]);
+        return redirect()->back()->with('success', 'ลบไฟล์เรียบร้อยแล้ว');
+    }
 
-            return redirect()->back()->with('success', 'ลบไฟล์เรียบร้อยแล้ว');
+    public function viewFile($id)
+    {
+        $item = RdbDip::findOrFail($id);
+        $this->authorize('view', $item);
+
+        $filePath = $item->getDipFilePath();
+
+        if (!$filePath || !Storage::exists($filePath)) {
+            abort(404, 'ไม่พบไฟล์');
         }
 
-        return redirect()->back()->with('error', 'ไม่พบไฟล์ที่ต้องการลบ');
+        return Storage::response($filePath);
     }
 }

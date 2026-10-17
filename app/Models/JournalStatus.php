@@ -3,10 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Traits\HasDualFilePath;
 
 class JournalStatus extends Model
 {
-    use \App\Traits\HasDataShowScope;
+    use \App\Traits\HasDataShowScope, HasDualFilePath;
 
     protected $table = 'journal_status';
     protected $primaryKey = 'id';
@@ -26,4 +27,9 @@ class JournalStatus extends Model
         'created_at',
         'updated_at',
     ];
+
+    public function getJournalStatusFilePath(string $newField = 'js_path', string $oldField = 'js_file', string $oldDir = 'uploads/journals'): ?string
+    {
+        return $this->resolveDualFilePath($newField, $oldField, $oldDir);
+    }
 }

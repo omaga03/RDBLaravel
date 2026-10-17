@@ -8,7 +8,7 @@ class RdbDepartmentType extends Model
 {
     protected $table = 'rdb_department_type';
     protected $primaryKey = 'tdepartment_id';
-    public $timestamps = false;
+    public $timestamps = true;
 
     public function departments()
     {
@@ -25,7 +25,15 @@ class RdbDepartmentType extends Model
         'tdepartment_nameEN',
         'user_created',
         'user_updated',
-        'created_at',
-        'updated_at',
     ];
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'user_created');
+    }
+
+    public function updater()
+    {
+        return $this->belongsTo(User::class, 'user_updated');
+    }
 }

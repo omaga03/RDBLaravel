@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Backend;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
 use App\Models\RdbProject;
 use App\Models\RdbResearcher;
 use App\Models\User;
@@ -14,6 +13,8 @@ class SiteController extends Controller
 {
     public function index()
     {
+        $this->authorize('viewDashboard', User::class);
+        
         $totalProjects = RdbProject::count();
         $totalResearchers = RdbResearcher::count();
         

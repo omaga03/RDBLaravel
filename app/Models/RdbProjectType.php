@@ -8,7 +8,7 @@ class RdbProjectType extends Model
 {
     protected $table = 'rdb_project_types';
     protected $primaryKey = 'pt_id';
-    public $timestamps = false;
+    public $timestamps = true;
 
     public function rdbProjects()
     {
@@ -26,9 +26,17 @@ class RdbProjectType extends Model
         'pt_note',
         'user_created',
         'user_updated',
-        'created_at',
-        'updated_at',
     ];
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'user_created');
+    }
+
+    public function updater()
+    {
+        return $this->belongsTo(User::class, 'user_updated');
+    }
 
     public function year()
     {

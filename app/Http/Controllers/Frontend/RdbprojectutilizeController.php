@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
 use App\Models\RdbProjectUtilize;
+use App\Models\RdbProjectUtilizeType;
+use App\Models\RdbDepartment;
 use App\Models\RdbProject;
 use App\Models\RdbChangwat;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Schema;
 
 class RdbprojectutilizeController extends Controller
 {
@@ -16,26 +18,63 @@ class RdbprojectutilizeController extends Controller
         $query = RdbProjectUtilize::with([
             'project', 
             'project.department',
+            'project.rdbProjectWorks' => function($q) {
+                $q->orderBy('position_id', 'asc');
+            },
             'project.rdbProjectWorks.researcher',
-            'changwat'
+            'project.rdbProjectWorks.researcher.prefix',
+            'changwat',
+            'utilizeType'
         ]);
 
+        if (Schema::hasColumn('rdb_project_utilize', 'data_show')) {
+            $query->where(function($q) {
+                $q->where('data_show', 1)->orWhereNull('data_show');
+            });
+        }
+
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('utz_detail', 'like', "%{$search}%")
-                  ->orWhere('utz_leading', 'like', "%{$search}%")
-                  ->orWhere('utz_department_name', 'like', "%{$search}%")
-                  ->orWhereHas('project', function($query) use ($search) {
-                      $query->where('pro_nameTH', 'like', "%{$search}%")
-                            ->orWhereHas('rdbProjectWorks', function($q) use ($search) {
-                                $q->whereHas('researcher', function($resQuery) use ($search) {
-                                    $resQuery->where('researcher_fname', 'like', "%{$search}%")
-                                             ->orWhere('researcher_lname', 'like', "%{$search}%")
-                                             ->orWhereRaw("CONCAT(researcher_fname, ' ', researcher_lname) LIKE ?", ["%{$search}%"]);
-                                });
-                            });
-                  });
+            $searchTerm = trim($request->search);
+            $searchWords = preg_split('/[\s\/,]+/', $searchTerm);
+
+            $query->where(function($q) use ($searchTerm, $searchWords) {
+                $q->where('utz_detail', 'like', "%{$searchTerm}%")
+                  ->orWhere('utz_leading', 'like', "%{$searchTerm}%")
+                  ->orWhere('utz_department_name', 'like', "%{$searchTerm}%");
+
+                foreach ($searchWords as $word) {
+                    if (empty($word)) continue;
+                    $q->orWhere('utz_department_name', 'like', "%{$word}%")
+                      ->orWhere('utz_detail', 'like', "%{$word}%");
+                }
+
+                $q->orWhereHas('project', function($query) use ($searchTerm, $searchWords) {
+                    $query->where('pro_nameTH', 'like', "%{$searchTerm}%")
+                          ->orWhere('pro_nameEN', 'like', "%{$searchTerm}%")
+                          ->orWhere('pro_code', 'like', "%{$searchTerm}%")
+                          ->orWhereHas('rdbProjectWorks', function($q) use ($searchWords) {
+                              $q->whereHas('researcher', function($resQuery) use ($searchWords) {
+                                  foreach ($searchWords as $word) {
+                                      if (empty($word)) continue;
+                                      $resQuery->where('researcher_fname', 'like', "%{$word}%")
+                                               ->orWhere('researcher_lname', 'like', "%{$word}%");
+                                  }
+                              });
+                          });
+                });
+            });
+        }
+
+        // Filter by Utilize Type
+        if ($request->filled('utz_group')) {
+            $query->where('utz_group', $request->utz_group);
+        }
+
+        // Filter by Department (of Project)
+        if ($request->filled('department_id')) {
+            $deptId = $request->department_id;
+            $query->whereHas('project', function($pq) use ($deptId) {
+                $pq->where('department_id', $deptId);
             });
         }
 
@@ -44,18 +83,16 @@ class RdbprojectutilizeController extends Controller
         $hasDateEnd = $request->filled('date_end');
         
         if ($hasDateStart || $hasDateEnd) {
-            // Both dates must be provided
             if (!$hasDateStart || !$hasDateEnd) {
                 return redirect()->back()
                     ->withInput()
                     ->with('error', 'กรุณาระบุทั้งวันที่เริ่มและวันที่สิ้นสุด');
             }
             
-            // End date must be >= start date
             if ($request->date_end < $request->date_start) {
                 return redirect()->back()
                     ->withInput()
-                    ->with('error', 'วันที่สิ้นสุดต้องมากกว่าหรือเท่ากับวันที่เริ่ม');
+                    ->with('error', 'วันที่สิ้นสุดต้องไม่น้อยกว่าวันที่เริ่มต้น');
             }
             
             $query->whereDate('utz_date', '>=', $request->date_start)
@@ -68,15 +105,37 @@ class RdbprojectutilizeController extends Controller
             $project = RdbProject::find($request->pro_id);
         }
 
-        // Sort by Date DESC, then Project Name ASC
-        $query->join('rdb_project', 'rdb_project_utilize.pro_id', '=', 'rdb_project.pro_id')
-              ->select('rdb_project_utilize.*')
-              ->orderBy('rdb_project_utilize.utz_date', 'desc')
-              ->orderBy('rdb_project.pro_nameTH', 'asc');
+        // Sort by Date DESC, then utz_id DESC
+        $query->orderBy('utz_date', 'desc')
+              ->orderBy('utz_id', 'desc');
 
         $items = $query->paginate(10);
+
+        // Add match sources if search
+        if ($request->filled('search')) {
+            $searchTerm = trim($request->search);
+            foreach ($items as $item) {
+                $matches = [];
+                if (stripos($item->utz_department_name ?? '', $searchTerm) !== false) {
+                    $matches[] = 'หน่วยงาน';
+                }
+                if (stripos($item->utz_leading ?? '', $searchTerm) !== false) {
+                    $matches[] = 'ผู้แทน/ผู้ลงนาม';
+                }
+                if ($item->project && stripos($item->project->pro_nameTH ?? '', $searchTerm) !== false) {
+                    $matches[] = 'โครงการวิจัย';
+                }
+                if (stripos($item->utz_detail ?? '', $searchTerm) !== false) {
+                    $matches[] = 'รายละเอียด';
+                }
+                $item->match_sources = $matches;
+            }
+        }
+
+        $utilizeTypes = RdbProjectUtilizeType::all();
+        $departments = RdbDepartment::orderBy('department_nameTH')->get();
         
-        return view('frontend.rdbprojectutilize.index', compact('items', 'project'));
+        return view('frontend.rdbprojectutilize.index', compact('items', 'project', 'utilizeTypes', 'departments'));
     }
 
     public function show($id)
@@ -91,105 +150,14 @@ class RdbprojectutilizeController extends Controller
             },
             'project.rdbProjectWorks.researcher',
             'project.rdbProjectWorks.researcher.prefix',
-            'changwat'
+            'changwat',
+            'utilizeType'
         ])->findOrFail($id);
+
+        if (Schema::hasColumn('rdb_project_utilize', 'utz_count')) {
+            $item->increment('utz_count');
+        }
+
         return view('frontend.rdbprojectutilize.show', compact('item'));
-    }
-
-    public function create()
-    {
-        $projects = RdbProject::all();
-        $changwats = RdbChangwat::all();
-        return view('frontend.rdbprojectutilize.create', compact('projects', 'changwats'));
-    }
-
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'pro_id' => 'required|exists:rdb_project,pro_id',
-            'utz_year_id' => 'nullable|integer',
-            'utz_year_bud' => 'nullable|integer',
-            'utz_year_edu' => 'nullable|integer',
-            'utz_date' => 'nullable|date',
-            'utz_leading' => 'nullable|string|max:255',
-            'utz_leading_position' => 'nullable|string|max:255',
-            'utz_department_name' => 'nullable|string|max:255',
-            'chw_id' => 'nullable|exists:rdb_changwat,chw_id',
-            'utz_group' => 'nullable|integer',
-            'utz_group_qa' => 'nullable|integer',
-            'utz_detail' => 'nullable|string',
-            'utz_budget' => 'nullable|numeric',
-            'utz_count' => 'nullable|integer',
-            'utz_countfile' => 'nullable|integer',
-            'utz_files' => 'nullable|file|max:10240', // Max 10MB
-            'data_show' => 'nullable|integer',
-        ]);
-
-        if ($request->hasFile('utz_files')) {
-            $path = $request->file('utz_files')->store('utilize_files', 'public');
-            $validated['utz_files'] = $path;
-        }
-
-        $validated['created_at'] = now();
-
-        RdbProjectUtilize::create($validated);
-
-        return redirect()->route('frontend.rdbprojectutilize.index')->with('success', 'Project Utilization created successfully.');
-    }
-
-    public function edit($id)
-    {
-        $item = RdbProjectUtilize::findOrFail($id);
-        $projects = RdbProject::all();
-        $changwats = RdbChangwat::all();
-        return view('frontend.rdbprojectutilize.edit', compact('item', 'projects', 'changwats'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        $item = RdbProjectUtilize::findOrFail($id);
-        
-        $validated = $request->validate([
-            'pro_id' => 'required|exists:rdb_project,pro_id',
-            'utz_year_id' => 'nullable|integer',
-            'utz_year_bud' => 'nullable|integer',
-            'utz_year_edu' => 'nullable|integer',
-            'utz_date' => 'nullable|date',
-            'utz_leading' => 'nullable|string|max:255',
-            'utz_leading_position' => 'nullable|string|max:255',
-            'utz_department_name' => 'nullable|string|max:255',
-            'chw_id' => 'nullable|exists:rdb_changwat,chw_id',
-            'utz_group' => 'nullable|integer',
-            'utz_group_qa' => 'nullable|integer',
-            'utz_detail' => 'nullable|string',
-            'utz_budget' => 'nullable|numeric',
-            'utz_count' => 'nullable|integer',
-            'utz_countfile' => 'nullable|integer',
-            'utz_files' => 'nullable|file|max:10240',
-            'data_show' => 'nullable|integer',
-        ]);
-
-        if ($request->hasFile('utz_files')) {
-            if ($item->utz_files) {
-                Storage::disk('public')->delete($item->utz_files);
-            }
-            $path = $request->file('utz_files')->store('utilize_files', 'public');
-            $validated['utz_files'] = $path;
-        }
-
-        $item->update($validated);
-
-        return redirect()->route('frontend.rdbprojectutilize.index')->with('success', 'Project Utilization updated successfully.');
-    }
-
-    public function destroy($id)
-    {
-        $item = RdbProjectUtilize::findOrFail($id);
-        if ($item->utz_files) {
-            Storage::disk('public')->delete($item->utz_files);
-        }
-        $item->delete();
-
-        return redirect()->route('frontend.rdbprojectutilize.index')->with('success', 'Project Utilization deleted successfully.');
     }
 }

@@ -1,222 +1,254 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-4">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h2 class="mb-4"><i class="bi bi-graph-up-arrow"></i> การนำผลงานวิจัยไปใช้ประโยชน์ (Utilization)</h2>
-            
-            @if(session('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                {{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            @endif
-            
-            @if(isset($project))
-            <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
-                <i class="bi bi-info-circle-fill me-2 fs-4"></i>
-                <div>
-                    กำลังแสดงรายการเฉพาะโครงการ: <strong>{{ $project->pro_nameTH }}</strong>
-                    <a href="{{ route('frontend.rdbprojectutilize.index') }}" class="btn btn-sm btn-outline-info ms-3 bg-white text-info text-decoration-none border-0 shadow-sm">แสดงทั้งหมด</a>
-                </div>
-            </div>
+<div class="container-fluid py-4">
+
+    <!-- Page Title -->
+    <div class="mb-4">
+        <h2 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i> การนำผลงานวิจัยไปใช้ประโยชน์ (Research Utilization)</h2>
+        <div class="text-muted small mt-1">ข้อมูลการนำองค์ความรู้ ผลงานวิจัย และนวัตกรรมไปประยุกต์ใช้ในหน่วยงาน ชุมชน และสังคม</div>
+    </div>
+
+    @if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+
+    @if(isset($project))
+    <div class="alert alert-info d-flex align-items-center justify-content-between mb-4 shadow-sm" role="alert">
+        <div>
+            <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+            กำลังแสดงรายการการนำไปใช้ประโยชน์ของโครงการ: <strong>{!! $project->pro_nameTH !!}</strong>
+        </div>
+        <a href="{{ route('frontend.rdbprojectutilize.index') }}" class="btn btn-sm btn-outline-primary bg-white">แสดงทั้งหมด</a>
+    </div>
+    @endif
+
+    <!-- Search Component (Styled like Research Projects) -->
+    <x-search-bar :searchRoute="route('frontend.rdbprojectutilize.index')" 
+        simplePlaceholder="ค้นหาจาก: ชื่อหน่วยงาน, รายละเอียด, ผู้แทน/ผู้ลงนาม, ชื่อโครงการวิจัย, นักวิจัย...">
+        
+        <div class="row g-3">
+            @if(request('pro_id'))
+                <input type="hidden" name="pro_id" value="{{ request('pro_id') }}">
             @endif
 
-            <div class="card shadow-sm mb-4">
-                <div class="card-body">
-                    <form action="{{ route('frontend.rdbprojectutilize.index') }}" method="GET" class="row g-3">
-                        @if(request('pro_id'))
-                        <input type="hidden" name="pro_id" value="{{ request('pro_id') }}">
-                        @endif
-                        <div class="col-md-6">
-                            <label for="search" class="form-label">คำค้นหา</label>
-                            <input type="text" class="form-control" id="search" name="search" value="{{ request('search') }}" placeholder="ระบุรายละเอียด, ชื่อหน่วยงาน, หรือชื่อโครงการ...">
-                        </div>
-                        <div class="col-md-2">
-                            <label for="date_start" class="form-label">วันที่เริ่ม <span class="text-danger" id="date_required_indicator" style="display:none;">*</span></label>
-                            <input type="date" class="form-control" id="date_start" name="date_start" value="{{ request('date_start') }}">
-                        </div>
-                        <div class="col-md-2">
-                            <label for="date_end" class="form-label">วันที่สิ้นสุด <span class="text-danger" id="date_end_required_indicator" style="display:none;">*</span></label>
-                            <input type="date" class="form-control" id="date_end" name="date_end" value="{{ request('date_end') }}">
-                        </div>
-                        <div class="col-md-12 d-flex justify-content-end align-items-end">
-                            <button type="submit" class="btn btn-primary me-2"><i class="bi bi-search"></i> ค้นหา</button>
-                            @if(request('pro_id'))
-                                <a href="{{ route('frontend.rdbprojectutilize.index', ['pro_id' => request('pro_id')]) }}" class="btn btn-secondary me-2">ล้างค่าค้นหา</a>
-                            @else
-                                <a href="{{ route('frontend.rdbprojectutilize.index') }}" class="btn btn-secondary me-2">ล้างค่า</a>
-                            @endif
-                        </div>
-                    </form>
-                </div>
+            {{-- Row 1: Search, Utilize Type, Department --}}
+            <div class="col-md-6">
+                <label class="form-label">คำค้นหา</label>
+                <input type="text" class="form-control" name="search" value="{{ request('search') }}" 
+                    placeholder="ระบุชื่อหน่วยงาน, รายละเอียด, ผู้แทน/ผู้ลงนาม, หรือโครงการวิจัย...">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">ประเภทการนำไปใช้ประโยชน์</label>
+                <select class="form-select" name="utz_group">
+                    <option value="">-- ทั้งหมด --</option>
+                    @foreach($utilizeTypes as $uType)
+                        <option value="{{ $uType->utz_type_id }}" {{ request('utz_group') == $uType->utz_type_id ? 'selected' : '' }}>
+                            {{ $uType->utz_typr_name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">หน่วยงาน/คณะ (โครงการวิจัย)</label>
+                <select class="form-select" name="department_id">
+                    <option value="">-- ทั้งหมด --</option>
+                    @foreach($departments as $dept)
+                        <option value="{{ $dept->department_id }}" {{ request('department_id') == $dept->department_id ? 'selected' : '' }}>
+                            {{ $dept->department_nameTH ?? $dept->department_name }}
+                        </option>
+                    @endforeach
+                </select>
             </div>
 
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-top">
-                            <thead class="table-light">
-                                <tr>
-                                    <th style="width: 35%;">🏢 หน่วยงานที่นำไปใช้ประโยชน์</th>
-                                    <th style="width: 40%;">🔬 โครงการวิจัย</th>
-                                    <th style="width: 10%;">📅 วันที่นำไปใช้</th>
-                                    <th style="width: 15%;">⚙️ จัดการ</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($items as $item)
-                                <tr>
-                                    <td>
-                                        <div class="fw-bold"><i class="bi bi-building"></i> {!! $item->utz_department_name ?? '-' !!}</div>
-                                        <div>
-                                            👥 {!! $item->utz_leading ?? '-' !!}
-                                            @if($item->utz_leading_position)
-                                                <small class="text-muted fw-normal">({!! $item->utz_leading_position !!})</small>
+            {{-- Row 2: Date Range --}}
+            <div class="col-md-6">
+                <label class="form-label">วันที่นำไปใช้ประโยชน์ (เริ่มต้น)</label>
+                <input type="date" class="form-control" id="date_start" name="date_start" value="{{ request('date_start') }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">วันที่นำไปใช้ประโยชน์ (สิ้นสุด)</label>
+                <input type="date" class="form-control" id="date_end" name="date_end" value="{{ request('date_end') }}">
+            </div>
+        </div>
+    </x-search-bar>
+
+    <!-- Results Table -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold text-dark">
+                <i class="bi bi-list-ul me-2 text-primary"></i>รายการการนำผลงานวิจัยไปใช้ประโยชน์
+                <span class="badge bg-primary rounded-pill ms-2">{{ number_format($items->total()) }} รายการ</span>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 45%;">หน่วยงานที่นำไปใช้ประโยชน์ / รายละเอียด</th>
+                            <th style="width: 40%;">โครงการวิจัย / นักวิจัย</th>
+                            <th style="width: 15%;" class="text-center">จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($items as $item)
+                        <tr>
+                            <td>
+                                <div class="fw-bold mb-1">
+                                    <span class="badge bg-secondary me-1">#{{ $item->utz_id }}</span>
+                                    <a href="{{ route('frontend.rdbprojectutilize.show', $item->utz_id) }}" class="text-decoration-none text-body hover-primary">
+                                        <i class="bi bi-building text-primary me-1"></i>{!! $item->utz_department_name ?: 'ไม่ระบุหน่วยงาน' !!}
+                                    </a>
+                                </div>
+                                
+                                @if($item->utz_leading)
+                                <div class="small text-muted mb-1">
+                                    <i class="bi bi-person-badge me-1"></i>ผู้แทน/ผู้ลงนาม: <strong>{!! $item->utz_leading !!}</strong>
+                                    @if($item->utz_leading_position)
+                                        <span class="text-secondary fw-normal">({!! $item->utz_leading_position !!})</span>
+                                    @endif
+                                </div>
+                                @endif
+
+                                <div class="small d-flex flex-wrap gap-1 align-items-center mt-1">
+                                    @if($item->utilizeType)
+                                        <span class="badge bg-info text-dark">
+                                            <i class="bi bi-tag-fill me-1"></i>{{ $item->utilizeType->utz_typr_name }}
+                                        </span>
+                                    @endif
+
+                                    @if($item->utz_date)
+                                        <span class="badge bg-light text-dark border">
+                                            <i class="bi bi-calendar3 me-1"></i>{{ \App\Helpers\ThaiDateHelper::format($item->utz_date, false, true) }}
+                                        </span>
+                                    @endif
+
+                                    @if($item->changwat)
+                                        <span class="badge bg-light text-muted border">
+                                            <i class="bi bi-geo-alt-fill me-1"></i>{!! $item->changwat->changwat_t ?? '' !!}
+                                        </span>
+                                    @endif
+
+                                    @if(request('search') && !empty($item->match_sources))
+                                        <span class="badge bg-warning text-dark" 
+                                              data-bs-toggle="tooltip" 
+                                              data-bs-placement="top" 
+                                              data-bs-html="true"
+                                              title="<strong>พบคำค้นหาใน:</strong><br>• {{ implode('<br>• ', $item->match_sources) }}">
+                                            <i class="bi bi-search"></i> {{ count($item->match_sources) }}
+                                        </span>
+                                    @endif
+                                </div>
+                            </td>
+                            <td>
+                                @if($item->project)
+                                    <div class="fw-bold mb-1">
+                                        <i class="bi bi-journal-text text-success me-1"></i>
+                                        <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" 
+                                           class="text-decoration-none text-body hover-primary">
+                                            @if($item->project->pro_code)
+                                                <span class="text-primary me-1">[{{ $item->project->pro_code }}]</span>
                                             @endif
-                                        </div>
-                                        @if($item->changwat)
-                                        <small class="text-muted d-block mt-1">
-                                            📍 {!! $item->changwat->tambon_t !!} 
-                                            {!! $item->changwat->amphoe_t !!} 
-                                            {!! $item->changwat->changwat_t !!}
-                                        </small>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <div class="fw-bold"><i class="bi bi-journal-text"></i> {!! $item->project->pro_nameTH ?? '-' !!}</div>
-                                        @if($item->project && $item->project->rdbProjectWorks->isNotEmpty())
-                                            @php
-                                                $head = $item->project->rdbProjectWorks->first();
-                                            @endphp
-                                            @if($head && $head->researcher)
-                                                <small class="text-muted d-block mt-1">
-                                                    <i class="bi bi-person"></i> {!! $head->researcher->researcher_fname !!} {!! $head->researcher->researcher_lname !!}
-                                                    @if($item->project && $item->project->department)
-                                                        • <i class="bi bi-building"></i> {!! $item->project->department->department_nameTH !!}
-                                                    @endif
-                                                </small>
-                                            @endif
-                                        @elseif($item->project && $item->project->department)
-                                            <small class="text-muted d-block mt-1">
-                                                <i class="bi bi-building"></i> {!! $item->project->department->department_nameTH !!}
-                                            </small>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if($item->utz_date)
-                                            {{ \App\Helpers\ThaiDateHelper::format($item->utz_date, false, true) }}
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <a href="{{ route('frontend.rdbprojectutilize.show', $item->utz_id) }}" class="btn btn-outline-primary btn-sm">
-                                            <i class="bi bi-eye"></i> ดูข้อมูล
+                                            {!! $item->project->pro_nameTH !!}
                                         </a>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="5" class="text-center py-4 text-muted">ไม่พบข้อมูลการนำไปใช้ประโยชน์</td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="d-flex justify-content-center mt-4">
-                        {{ $items->withQueryString()->links('pagination::bootstrap-5') }}
-                    </div>
-                </div>
+                                    </div>
+
+                                    @if($item->project->rdbProjectWorks && $item->project->rdbProjectWorks->isNotEmpty())
+                                        @php
+                                            $head = $item->project->rdbProjectWorks->first();
+                                        @endphp
+                                        @if($head && $head->researcher)
+                                            <div class="small">
+                                                <a href="{{ route('frontend.rdbresearcher.show', $head->researcher->researcher_id) }}" class="text-decoration-none text-body hover-primary">
+                                                    <i class="bi bi-person-circle text-primary me-1"></i>{{ $head->researcher->prefix->prefix_nameTH ?? '' }}{{ $head->researcher->researcher_fname }} {{ $head->researcher->researcher_lname }}
+                                                </a>
+                                            </div>
+                                        @endif
+                                    @endif
+
+                                    @if($item->project->department)
+                                        <div class="small text-muted mt-1">
+                                            <i class="bi bi-building me-1"></i>{{ $item->project->department->department_nameTH }}
+                                        </div>
+                                    @endif
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                            <td class="text-center">
+                                <a href="{{ route('frontend.rdbprojectutilize.show', $item->utz_id) }}" class="btn btn-outline-primary btn-sm" title="ดูรายละเอียด">
+                                    <i class="bi bi-eye"></i> ดูข้อมูล
+                                </a>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="3" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+                                ไม่พบข้อมูลการนำผลงานวิจัยไปใช้ประโยชน์
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
-            
-            <div class="mt-4">
-                <a href="{{ route('frontend.rdbproject.index') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> กลับหน้ารายการโครงการ</a>
+
+            <!-- Pagination -->
+            <div class="p-3 border-top d-flex justify-content-center">
+                {{ $items->withQueryString()->links('pagination::bootstrap-5') }}
             </div>
         </div>
     </div>
+
+    <div class="mt-4">
+        <a href="{{ route('frontend.rdbproject.index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> ไปหน้ารายการโครงการวิจัย
+        </a>
+    </div>
+
 </div>
+@endsection
 
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+        new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Date range validation
     const dateStart = document.getElementById('date_start');
     const dateEnd = document.getElementById('date_end');
-    const searchForm = dateStart.closest('form');
     
-    // Update required indicators
-    function updateRequiredIndicators() {
-        const startIndicator = document.getElementById('date_required_indicator');
-        const endIndicator = document.getElementById('date_end_required_indicator');
+    if (dateStart && dateEnd) {
+        dateStart.addEventListener('change', function() {
+            if (this.value) {
+                dateEnd.min = this.value;
+            } else {
+                dateEnd.removeAttribute('min');
+            }
+        });
         
-        if (dateEnd.value) {
-            startIndicator.style.display = 'inline';
-            dateStart.required = true;
-        } else {
-            startIndicator.style.display = 'none';
-            dateStart.required = false;
-        }
-        
-        if (dateStart.value) {
-            endIndicator.style.display = 'inline';
-            dateEnd.required = true;
-        } else {
-            endIndicator.style.display = 'none';
-            dateEnd.required = false;
-        }
-    }
-    
-    // Set min/max constraints
-    dateStart.addEventListener('change', function() {
-        if (this.value) {
-            dateEnd.min = this.value;
-        } else {
-            dateEnd.removeAttribute('min');
-        }
-        updateRequiredIndicators();
-    });
-    
-    dateEnd.addEventListener('change', function() {
-        if (this.value) {
-            dateStart.max = this.value;
-        } else {
-            dateStart.removeAttribute('max');
-        }
-        updateRequiredIndicators();
-    });
-    
-    // Form submission validation
-    searchForm.addEventListener('submit', function(e) {
-        const startVal = dateStart.value;
-        const endVal = dateEnd.value;
-        
-        // Check if only one date is filled
-        if ((startVal && !endVal) || (!startVal && endVal)) {
-            e.preventDefault();
-            alert('กรุณาระบุทั้งวันที่เริ่มและวันที่สิ้นสุด');
-            return false;
-        }
-        
-        // Check if end date is before start date
-        if (startVal && endVal && new Date(endVal) < new Date(startVal)) {
-            e.preventDefault();
-            alert('วันที่สิ้นสุดต้องมากกว่าหรือเท่ากับวันที่เริ่ม');
-            return false;
-        }
-    });
-    
-    // Initialize on page load
-    updateRequiredIndicators();
-    if (dateStart.value) {
-        dateEnd.min = dateStart.value;
-    }
-    if (dateEnd.value) {
-        dateStart.max = dateEnd.value;
+        dateEnd.addEventListener('change', function() {
+            if (this.value) {
+                dateStart.max = this.value;
+            } else {
+                dateStart.removeAttribute('max');
+            }
+        });
     }
 });
 </script>
+<style>
+.hover-primary:hover {
+    color: var(--bs-primary) !important;
+}
+</style>
 @endpush
-@endsection

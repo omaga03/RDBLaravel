@@ -8,7 +8,7 @@ class RdbStrategic extends Model
 {
     protected $table = 'rdb_strategic';
     protected $primaryKey = 'strategic_id';
-    public $timestamps = false;
+    public $timestamps = true; // Changed to true
 
     public function year()
     {
@@ -31,7 +31,15 @@ class RdbStrategic extends Model
         'strategic_nameEN',
         'user_created',
         'user_updated',
-        'created_at',
-        'updated_at',
     ];
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'user_created');
+    }
+
+    public function updater()
+    {
+        return $this->belongsTo(User::class, 'user_updated');
+    }
 }

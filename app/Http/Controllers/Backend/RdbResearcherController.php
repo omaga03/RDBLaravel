@@ -14,15 +14,27 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use App\Services\FileUploadService;
+use App\Http\Requests\Backend\StoreResearcherRequest;
+use App\Http\Requests\Backend\UpdateResearcherRequest;
+use App\Http\Requests\Backend\UpdateResearcherCodeIdRequest;
+use App\Http\Requests\Backend\UpdateResearcherImageRequest;
 
 class RdbResearcherController extends Controller
 {
+    private FileUploadService $fileUploadService;
+
+    public function __construct(FileUploadService $fileUploadService)
+    {
+        $this->fileUploadService = $fileUploadService;
+    }
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $query = RdbResearcher::with(['prefix', 'department', 'departmentCategory']);
+        $this->authorize('viewAny', RdbResearcher::class);
+        $query = RdbResearcher::with(['prefix', 'department', 'departmentCategory', 'creator', 'updater']);
 
         if ($request->filled('q')) {
             $q = $request->q;
@@ -44,12 +56,12 @@ class RdbResearcherController extends Controller
 
         $researchers = $query->leftJoin('rdb_department', 'rdb_researcher.department_id', '=', 'rdb_department.department_id')
                              ->select('rdb_researcher.*')
-                             ->orderByRaw('rdb_department.department_nameTH IS NULL ASC') // Push NULLs to bottom
+                             ->orderByRaw('rdb_department.department_nameTH IS NULL ASC')
                              ->orderBy('rdb_department.department_nameTH', 'asc')
                              ->orderBy('rdb_researcher.researcher_fname', 'asc')
                              ->paginate(15);
         
-        $departments = RdbDepartment::orderBy('department_nameTH')->get(); // For filter dropdown
+        $departments = RdbDepartment::orderBy('department_nameTH')->get();
         $categories = RdbDepartmentCategory::orderBy('depcat_name')->get();
 
         return view('backend.rdb_researcher.index', compact('researchers', 'departments', 'categories'));
@@ -60,7 +72,7 @@ class RdbResearcherController extends Controller
      */
     public function create()
     {
-        \Illuminate\Support\Facades\Gate::authorize('Project');
+        $this->authorize('create', RdbResearcher::class);
         $prefixes = RdbPrefix::all();
         $departments = RdbDepartment::all();
         $majors = RdbDepMajor::all();
@@ -74,57 +86,40 @@ class RdbResearcherController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreResearcherRequest $request)
     {
-        \Illuminate\Support\Facades\Gate::authorize('Project'); // Enforce RBAC
+        $this->authorize('create', RdbResearcher::class);
 
-        $request->validate([
-            'researcher_fname' => 'required|string|max:255',
-            'researcher_lname' => 'required|string|max:255',
-            'researcher_email' => 'nullable|email|unique:rdb_researcher,researcher_email',
-            'fileimg' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
-
-        $researcher = new RdbResearcher();
-        $researcher->fill($request->all());
-        $researcher->user_created = auth()->id();
-
-        // Process Code ID from Citizen ID if provided
-        if ($request->filled('citizen_id')) {
-            $citizenId = str_replace('-', '', $request->citizen_id);
+        $data = $request->validated();
+        
+        if (!empty($data['citizen_id'])) {
+            $citizenId = str_replace('-', '', $data['citizen_id']);
             if (!$this->isValidThaiCitizenId($citizenId)) {
                 return redirect()->back()->withInput()->with('error', 'หมายเลขบัตรประจำตัวประชาชนไม่ถูกต้อง');
             }
-            $researcher->researcher_codeid = $this->generateCodeId($citizenId);
+            $data['researcher_codeid'] = $this->generateCodeId($citizenId);
         }
-
-        $researcher->save();
 
         if ($request->hasFile('fileimg')) {
-            $file = $request->file('fileimg');
-            $extension = $file->getClientOriginalExtension() ?: 'jpg';
-            $filename = $researcher->researcher_id . '-' . Str::random(5) . '.' . $extension;
-            
-            $destinationPath = storage_path('app/public/uploads/researchers');
-            if (!file_exists($destinationPath)) {
-                mkdir($destinationPath, 0755, true);
-            }
-            $file->move($destinationPath, $filename);
-
-            $researcher->researcher_picture = $filename;
-            $researcher->save();
+            $fileInfo = $this->fileUploadService->storeFile($request->file('fileimg'), 'researchers');
+            $data['rf_safe_name'] = $fileInfo['safe_name'];
+            $data['rf_path'] = $fileInfo['path'];
+            $data['rf_size'] = $fileInfo['size'];
+            $data['rf_mime_type'] = $fileInfo['mime_type'];
+            $data['researcher_picture'] = $fileInfo['original_name'];
         }
+
+        $researcher = new RdbResearcher();
+        $researcher->fill($data);
+        $researcher->user_created = auth()->id();
+
+        $researcher->save();
 
         return redirect()->route('backend.rdb_researcher.show', $researcher->researcher_id)->with('success', 'Researcher created successfully.');
     }
 
-    // ... (index, show, edit methods remain unchanged, assume they are outside this block or I need to be careful with range)
-    // Actually, I am replacing store and update. But wait, I can't replace scattered methods easily with one block unless I replace the whole file or be very specific.
-    // I will replace Store first. Then Update. Then add Helper.
-
     /**
      * Helper to generate Researcher Code ID
-     * Logic: MD5(Key + CleanCitizenID)
      */
     private function generateCodeId($citizenId)
     {
@@ -145,10 +140,11 @@ class RdbResearcherController extends Controller
             'departmentCategory', 
             'departmentCourse', 
             'status', 
-            'rdbResearcherEducations'
+            'rdbResearcherEducations',
+            'creator', 'updater'
         ])->findOrFail($id);
+        $this->authorize('view', $researcher);
         
-        // Load projects with proper sorting and relationships
         $researcher->load(['rdbProjects' => function($query) {
             $query->with(['year', 'type', 'typeSub', 'status'])
                   ->orderBy('year_id', 'desc')
@@ -156,7 +152,6 @@ class RdbResearcherController extends Controller
                   ->orderBy('pro_id', 'desc');
         }]);
         
-        // Load publications
         $researcher->load(['rdbPublisheds' => function($query) use ($id) {
             $query->with([
                 'project',
@@ -166,7 +161,6 @@ class RdbResearcherController extends Controller
             ->orderBy('id', 'desc');
         }]);
         
-        // Load author types for publications manually
         $authorTypeIds = $researcher->rdbPublisheds->pluck('pivot.pubta_id')->filter()->unique();
         if ($authorTypeIds->isNotEmpty()) {
             $authorTypes = \App\Models\RdbPublishedTypeAuthor::whereIn('pubta_id', $authorTypeIds)->get()->keyBy('pubta_id');
@@ -177,21 +171,18 @@ class RdbResearcherController extends Controller
             }
         }
         
-        // Load utilizations through projects
         $utilizations = \App\Models\RdbProjectUtilize::whereHas('project.rdbProjectWorks', function($q) use ($id) {
             $q->where('researcher_id', $id);
         })->with(['project', 'changwat'])
           ->orderBy('utz_date', 'desc')
           ->get();
         
-        // Load intellectual properties
         $researcher->load(['rdbDips' => function($query) {
             $query->with(['project', 'dipType'])
                   ->orderBy('dip_request_date', 'desc')
                   ->orderBy('dip_id', 'desc');
         }]);
         
-        // Load Project Positions lookup
         $projectPositions = \App\Models\RdbProjectPosition::all()->keyBy('position_id');
 
         return view('backend.rdb_researcher.show', compact('researcher', 'utilizations', 'projectPositions'));
@@ -202,8 +193,16 @@ class RdbResearcherController extends Controller
      */
     public function edit($id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('Project');
-        $researcher = RdbResearcher::findOrFail($id);
+        $researcher = RdbResearcher::with([
+            'prefix', 
+            'department', 
+            'major', 
+            'departmentCategory', 
+            'departmentCourse', 
+            'status',
+            'creator', 'updater'
+        ])->findOrFail($id);
+        $this->authorize('update', $researcher);
         $prefixes = RdbPrefix::all();
         $departments = RdbDepartment::all();
         $majors = RdbDepMajor::all();
@@ -217,76 +216,54 @@ class RdbResearcherController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(UpdateResearcherRequest $request, $id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('Project'); // Enforce RBAC
-
         $researcher = RdbResearcher::findOrFail($id);
+        $this->authorize('update', $researcher);
         
-        $request->validate([
-            'researcher_fname' => 'required|string|max:255',
-            'researcher_lname' => 'required|string|max:255',
-            'researcher_email' => 'nullable|email|unique:rdb_researcher,researcher_email,' . $id . ',researcher_id',
-            'fileimg' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+        $data = $request->validated();
         
-        $researcher->fill($request->all());
-        $researcher->user_updated = auth()->id();
-        $researcher->updated_at = now();
-        
-        // Process Code ID from Citizen ID if provided
-        if ($request->filled('citizen_id')) {
-            $citizenId = str_replace('-', '', $request->citizen_id);
+        if (!empty($data['citizen_id'])) {
+            $citizenId = str_replace('-', '', $data['citizen_id']);
             if (!$this->isValidThaiCitizenId($citizenId)) {
                 return redirect()->back()->withInput()->with('error', 'หมายเลขบัตรประจำตัวประชาชนไม่ถูกต้อง');
             }
-            $researcher->researcher_codeid = $this->generateCodeId($citizenId);
+            $data['researcher_codeid'] = $this->generateCodeId($citizenId);
         }
 
         if ($request->hasFile('fileimg')) {
-            // Delete old image using direct unlink to match move() logic
-            if ($researcher->researcher_picture) {
-                $oldPath = storage_path('app/public/uploads/researchers/' . $researcher->researcher_picture);
-                if (file_exists($oldPath)) {
-                    unlink($oldPath);
-                }
+            if ($researcher->rf_path && Storage::exists($researcher->rf_path)) {
+                Storage::delete($researcher->rf_path);
             }
-            $file = $request->file('fileimg');
-            $extension = $file->getClientOriginalExtension() ?: 'jpg';
-            $filename = $researcher->researcher_id . '-' . Str::random(5) . '.' . $extension;
-            
-            $destinationPath = storage_path('app/public/uploads/researchers');
-            if (!file_exists($destinationPath)) {
-                mkdir($destinationPath, 0755, true);
-            }
-            $file->move($destinationPath, $filename);
 
-            $researcher->researcher_picture = $filename;
+            $fileInfo = $this->fileUploadService->storeFile($request->file('fileimg'), 'researchers');
+            $data['rf_safe_name'] = $fileInfo['safe_name'];
+            $data['rf_path'] = $fileInfo['path'];
+            $data['rf_size'] = $fileInfo['size'];
+            $data['rf_mime_type'] = $fileInfo['mime_type'];
+            $data['researcher_picture'] = $fileInfo['original_name'];
         }
 
+        $researcher->fill($data);
+        $researcher->user_updated = auth()->id();
+        
         $researcher->save();
 
         return redirect()->route('backend.rdb_researcher.show', $id)->with('success', 'Researcher updated successfully.');
     }
 
-    public function updateCodeId(Request $request, $id)
+    public function updateCodeId(UpdateResearcherCodeIdRequest $request, $id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('Project'); // Enforce RBAC
+        $researcher = RdbResearcher::findOrFail($id);
+        $this->authorize('update', $researcher);
 
-        $request->validate([
-            'citizen_id' => 'required|string',
-        ]);
-
-        // Validate Thai Citizen ID
         $citizenId = str_replace('-', '', $request->citizen_id);
         if (!$this->isValidThaiCitizenId($citizenId)) {
             return redirect()->back()->with('error', 'หมายเลขบัตรประจำตัวประชาชนไม่ถูกต้อง (Invalid Thai Citizen ID)');
         }
 
-        // Generate Code ID (Standard)
         $newCodeId = $this->generateCodeId($citizenId);
         
-        // Check for Uniqueness (Duplicate Check)
         $duplicate = RdbResearcher::where('researcher_codeid', $newCodeId)
                                   ->where('researcher_id', '!=', $id)
                                   ->exists();
@@ -295,47 +272,47 @@ class RdbResearcherController extends Controller
             return redirect()->back()->with('error', 'ไม่สามารถบันทึกได้ : หมายเลขบัตรประชาชนนี้ถูกลงทะเบียนไว้แล้วในระบบ (Duplicate Data)');
         }
 
-        $researcher = RdbResearcher::findOrFail($id);
         $researcher->researcher_codeid = $newCodeId;
         $researcher->save();
 
         return redirect()->back()->with('success', 'Researcher Code ID updated successfully.');
     }
 
-    public function updateImage(Request $request, $id)
+    public function updateImage(UpdateResearcherImageRequest $request, $id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('Project'); // Enforce RBAC
-
-        $request->validate([
-            'fileimg' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
-
         $researcher = RdbResearcher::findOrFail($id);
+        $this->authorize('update', $researcher);
 
         if ($request->hasFile('fileimg')) {
-            // Delete old image using direct unlink to match move() logic
-            if ($researcher->researcher_picture) {
-                $oldPath = storage_path('app/public/uploads/researchers/' . $researcher->researcher_picture);
-                if (file_exists($oldPath)) {
-                    unlink($oldPath);
-                }
+            if ($researcher->rf_path && Storage::exists($researcher->rf_path)) {
+                Storage::delete($researcher->rf_path);
             }
-            $file = $request->file('fileimg');
-            $extension = $file->getClientOriginalExtension() ?: 'jpg'; // Fallback ext
-            $filename = $researcher->researcher_id . '-' . Str::random(5) . '.' . $extension;
             
-            // Store using direct move to bypass Storage facade issues
-            $destinationPath = storage_path('app/public/uploads/researchers');
-            if (!file_exists($destinationPath)) {
-                mkdir($destinationPath, 0755, true);
-            }
-            $file->move($destinationPath, $filename);
+            $fileInfo = $this->fileUploadService->storeFile($request->file('fileimg'), 'researchers');
             
-            $researcher->researcher_picture = $filename;
+            $researcher->rf_safe_name = $fileInfo['safe_name'];
+            $researcher->rf_path = $fileInfo['path'];
+            $researcher->rf_size = $fileInfo['size'];
+            $researcher->rf_mime_type = $fileInfo['mime_type'];
+            $researcher->researcher_picture = $fileInfo['original_name'];
             $researcher->save();
         }
 
         return redirect()->back()->with('success', 'Profile picture updated successfully.');
+    }
+
+    public function viewProfileImage($id)
+    {
+        $researcher = RdbResearcher::findOrFail($id);
+        $this->authorize('view', $researcher);
+
+        $filePath = $researcher->getProfileFilePath();
+
+        if (!$filePath || !Storage::exists($filePath)) {
+            abort(404, 'ไม่พบรูปภาพโปรไฟล์');
+        }
+
+        return Storage::response($filePath);
     }
 
     /**
@@ -343,9 +320,9 @@ class RdbResearcherController extends Controller
      */
     public function destroy($id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('Project'); // Enforce RBAC
-
         $researcher = RdbResearcher::findOrFail($id);
+        $this->authorize('delete', $researcher);
+
         $researcher->delete();
 
         return redirect()->route('backend.rdb_researcher.index')->with('success', 'ลบข้อมูลนักวิจัยเรียบร้อยแล้ว');
@@ -356,9 +333,8 @@ class RdbResearcherController extends Controller
      */
     public function syncScopus($id)
     {
-        \Illuminate\Support\Facades\Gate::authorize('Project');
-
         $researcher = RdbResearcher::findOrFail($id);
+        $this->authorize('update', $researcher);
 
         if (!$researcher->scopus_authorId) {
             return redirect()->back()->with('error', 'ไม่พบ Scopus Author ID สำหรับนักวิจัยท่านนี้');

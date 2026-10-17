@@ -1,0 +1,50 @@
+<?php
+
+namespace App\Http\Requests\Frontend;
+
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
+class StoreRdbPublishedBranchRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return true; // Authorization handled by controller's Gate
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
+     */
+    public function rules(): array
+    {
+        return [
+            'branch_name' => [
+                'required',
+                'string',
+                'max:255',
+                // Add unique rule if needed
+                // Rule::unique('rdb_published_branch', 'branch_name'),
+            ],
+            // 'user_created', 'user_updated', 'created_at', 'updated_at' are handled by controller
+        ];
+    }
+
+    /**
+     * Get the custom validation messages.
+     *
+     * @return array
+     */
+    public function messages(): array
+    {
+        return [
+            'branch_name.required' => 'กรุณาระบุชื่อสาขา',
+            'branch_name.string' => 'ชื่อสาขาต้องเป็นตัวอักษร',
+            'branch_name.max' => 'ชื่อสาขาต้องไม่เกิน 255 ตัวอักษร',
+        ];
+    }
+}

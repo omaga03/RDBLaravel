@@ -1,0 +1,45 @@
+<?php
+
+namespace App\Http->Requests\Frontend;
+
+use Illuminate->Foundation->Http->FormRequest;
+use Illuminate->Validation->Rule;
+
+class StoreRdbDepartmentTypeRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return true; // Authorization handled by controller's Gate
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate->Contracts\Validation\ValidationRule|array|string>
+     */
+    public function rules(): array
+    {
+        return [
+            'tdepartment_nameTH' => 'required|string|max:255',
+            'tdepartment_nameEN' => 'nullable|string|max:255',
+            // 'user_created', 'user_updated' are handled by controller
+        ];
+    }
+
+    /**
+     * Get the custom validation messages.
+     *
+     * @return array
+     */
+    public function messages(): array
+    {
+        return [
+            'tdepartment_nameTH.required' => 'กรุณาระบุชื่อประเภทหน่วยงาน (ภาษาไทย)',
+            'tdepartment_nameTH.string' => 'ชื่อประเภทหน่วยงาน (ภาษาไทย) ต้องเป็นตัวอักษร',
+            'tdepartment_nameTH.max' => 'ชื่อประเภทหน่วยงาน (ภาษาไทย) ต้องไม่เกิน 255 ตัวอักษร',
+        ];
+    }
+}

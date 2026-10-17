@@ -104,10 +104,12 @@
                                     </small>
                                     @foreach($item->project->rdbProjectWorks as $work)
                                         @if($work->researcher)
-                                            <small class="text-muted d-block ms-2">
-                                                <i class="bi bi-person-circle me-1"></i>
-                                                {{ $work->researcher->prefix->prefix_nameTH ?? '' }}
-                                                {{ $work->researcher->researcher_fname }} {{ $work->researcher->researcher_lname }}
+                                            <small class="d-block ms-2 mb-1">
+                                                <a href="{{ route('frontend.rdbresearcher.show', $work->researcher->researcher_id) }}" class="text-decoration-none text-body hover-primary">
+                                                    <i class="bi bi-person-circle text-primary me-1"></i>
+                                                    {{ $work->researcher->prefix->prefix_nameTH ?? '' }}
+                                                    {{ $work->researcher->researcher_fname }} {{ $work->researcher->researcher_lname }}
+                                                </a>
                                             </small>
                                         @endif
                                     @endforeach

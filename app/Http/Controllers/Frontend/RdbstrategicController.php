@@ -31,49 +31,6 @@ class RdbstrategicController extends Controller
         return view('frontend.rdbstrategic.show', compact('item'));
     }
 
-    public function create()
-    {
-        return view('frontend.rdbstrategic.create');
-    }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'strategic_nameTH' => 'required|string|max:255',
-            'strategic_nameEN' => 'nullable|string|max:255',
-        ]);
-
-        RdbStrategic::create($validated);
-
-        return redirect()->route('frontend.rdbstrategic.index')->with('success', 'Strategic plan created successfully.');
-    }
-
-    public function edit($id)
-    {
-        $item = RdbStrategic::findOrFail($id);
-        return view('frontend.rdbstrategic.edit', compact('item'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        $item = RdbStrategic::findOrFail($id);
-        
-        $validated = $request->validate([
-            'strategic_nameTH' => 'required|string|max:255',
-            'strategic_nameEN' => 'nullable|string|max:255',
-        ]);
-
-        $item->update($validated);
-
-        return redirect()->route('frontend.rdbstrategic.index')->with('success', 'Strategic plan updated successfully.');
-    }
-
-    public function destroy($id)
-    {
-        $item = RdbStrategic::findOrFail($id);
-        $item->delete();
-
-        return redirect()->route('frontend.rdbstrategic.index')->with('success', 'Strategic plan deleted successfully.');
-    }
 }
 

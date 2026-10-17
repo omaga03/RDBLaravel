@@ -45,14 +45,55 @@ class User extends Authenticatable
         return $this->password_hash;
     }
 
+    /**
+     * The roles assigned to the user.
+     */
     public function roles()
     {
         return $this->hasMany(AuthAssignment::class, 'user_id', 'id');
     }
 
-    public function hasRole($role)
+    /**
+     * @var array|null A cache for all roles (direct and inherited) for the user.
+     */
+    protected $allRoles = null;
+
+    /**
+     * Get all roles assigned to the user, including inherited roles.
+     * Caches the result for the duration of the request.
+     *
+     * @return array
+     */
+    private function getAllRoles(): array
     {
-        return $this->roles->contains('item_name', $role);
+        if ($this->allRoles !== null) {
+            return $this->allRoles;
+        }
+
+        $directRoles = $this->roles->pluck('item_name')->toArray();
+        $allRoles = $directRoles;
+        $newRoles = $directRoles;
+
+        do {
+            $children = AuthItemChild::whereIn('parent', $newRoles)->pluck('child')->toArray();
+            $newRoles = array_diff($children, $allRoles);
+            $allRoles = array_merge($allRoles, $newRoles);
+        } while (!empty($newRoles));
+
+        $this->allRoles = array_unique($allRoles);
+
+        return $this->allRoles;
+    }
+
+    /**
+     * Check if the user has a specific role, including inherited roles.
+     *
+     * @param string $role
+     * @return bool
+     */
+    public function hasRole($role): bool
+    {
+        return in_array($role, $this->getAllRoles());
     }
 
     public function researcher()

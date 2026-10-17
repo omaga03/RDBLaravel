@@ -110,96 +110,16 @@ class RdbpublishedController extends Controller
         return view('frontend.rdbpublished.show', compact('item'));
     }
 
-    public function create()
-    {
-        \Illuminate\Support\Facades\Gate::authorize('RdbPublished.Create');
-        $data = $this->getDropdownData();
-        return view('frontend.rdbpublished.create', $data);
-    }
-
-    public function store(Request $request)
-    {
-        \Illuminate\Support\Facades\Gate::authorize('RdbPublished.Create');
-        $validated = $this->validateRequest($request);
-
-        DB::beginTransaction();
-        try {
-            if ($request->hasFile('pub_file')) {
-                $path = $request->file('pub_file')->store('published_files', 'public');
-                $validated['pub_file'] = $path;
-            }
-
-            $validated['created_at'] = now();
-            $published = RdbPublished::create($validated);
-
-            // Sync Authors
-            $this->syncAuthors($published, $request);
-
-            DB::commit();
-            return redirect()->route('frontend.rdbpublished.index')->with('success', 'Published work created successfully.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->withInput()->with('error', 'Error creating published work: ' . $e->getMessage());
-        }
-    }
-
-    public function edit($id)
-    {
-        $item = RdbPublished::with('authors')->findOrFail($id);
-        $data = $this->getDropdownData();
-        $data['item'] = $item;
-        return view('frontend.rdbpublished.edit', $data);
-    }
-
-    public function update(Request $request, $id)
-    {
-        $item = RdbPublished::findOrFail($id);
-        $validated = $this->validateRequest($request, $id);
-
-        DB::beginTransaction();
-        try {
-            if ($request->hasFile('pub_file')) {
-                if ($item->pub_file) {
-                    Storage::disk('public')->delete($item->pub_file);
-                }
-                $path = $request->file('pub_file')->store('published_files', 'public');
-                $validated['pub_file'] = $path;
-            }
-
-            $item->update($validated);
-
-            // Sync Authors
-            $this->syncAuthors($item, $request);
-
-            DB::commit();
-            return redirect()->route('frontend.rdbpublished.index')->with('success', 'Published work updated successfully.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->withInput()->with('error', 'Error updating published work: ' . $e->getMessage());
-        }
-    }
-
-    public function destroy($id)
-    {
-        $item = RdbPublished::findOrFail($id);
-        if ($item->pub_file) {
-            Storage::disk('public')->delete($item->pub_file);
-        }
-        
-        $item->authors()->detach();
-        $item->delete();
-
-        return redirect()->route('frontend.rdbpublished.index')->with('success', 'Published work deleted successfully.');
-    }
-
     public function export(Request $request)
     {
         $query = RdbPublished::with(['year', 'researcher', 'department', 'pubtype']);
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where('pub_name', 'like', "%{$search}%")
+            $query->where(function($q) use ($search) {
+                $q->where('pub_name', 'like', "%{$search}%")
                   ->orWhere('pub_name_journal', 'like', "%{$search}%");
+            });
         }
         if ($request->filled('year_id')) {
             $query->where('year_id', $request->year_id);
@@ -239,57 +159,5 @@ class RdbpublishedController extends Controller
 
         return response()->stream($callback, 200, $headers);
     }
-
-    private function getDropdownData()
-    {
-        return [
-            'years' => RdbYear::orderBy('year_name', 'desc')->get(),
-            'researchers' => RdbResearcher::orderBy('researcher_nameTH')->get(),
-            'departments' => RdbDepartment::orderBy('department_nameTH')->get(),
-            'pubtypes' => RdbPublishedType::all(),
-            'projects' => RdbProject::orderBy('pro_nameTH')->get(),
-            'authorTypes' => RdbPublishedTypeAuthor::all(),
-        ];
-    }
-
-    private function validateRequest(Request $request, $id = null)
-    {
-        return $request->validate([
-            'pub_name' => 'required|string|max:255',
-            'pub_name_journal' => 'nullable|string|max:255',
-            'year_id' => 'required|exists:rdb_year,year_id',
-            'pubtype_id' => 'nullable|exists:rdb_published_type,pubtype_id',
-            'researcher_id' => 'required|exists:rdb_researcher,researcher_id', // Main owner
-            'department_id' => 'nullable|exists:rdb_department,department_id',
-            'pro_id' => 'nullable|exists:rdb_project,pro_id',
-            'pub_date' => 'nullable|date',
-            'pub_abstract' => 'nullable|string',
-            'pub_keyword' => 'nullable|string',
-            'pub_budget' => 'nullable|numeric',
-            'pub_file' => 'nullable|file|max:10240',
-            'data_show' => 'nullable|integer',
-            // Authors
-            'author_id' => 'nullable|array',
-            'author_id.*' => 'exists:rdb_researcher,researcher_id',
-            'pubta_id' => 'nullable|array',
-            'pubta_id.*' => 'exists:rdb_published_type_author,pubta_id',
-        ]);
-    }
-
-    private function syncAuthors(RdbPublished $published, Request $request)
-    {
-        if ($request->has('author_id')) {
-            $syncData = [];
-            foreach ($request->author_id as $key => $researcherId) {
-                if ($researcherId) {
-                    $syncData[$researcherId] = [
-                        'pubta_id' => $request->pubta_id[$key] ?? null,
-                    ];
-                }
-            }
-            $published->authors()->sync($syncData);
-        } else {
-            $published->authors()->detach();
-        }
-    }
 }
+

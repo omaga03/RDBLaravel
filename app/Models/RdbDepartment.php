@@ -8,7 +8,7 @@ class RdbDepartment extends Model
 {
     protected $table = 'rdb_department';
     protected $primaryKey = 'department_id';
-    public $timestamps = false; // Assuming no standard created_at/updated_at, change if needed
+    public $timestamps = true;
 
     public function rdbResearchers()
     {
@@ -76,8 +76,6 @@ class RdbDepartment extends Model
         'department_color',
         'user_created',
         'user_updated',
-        'created_at',
-        'updated_at',
     ];
 
     public function creator() {

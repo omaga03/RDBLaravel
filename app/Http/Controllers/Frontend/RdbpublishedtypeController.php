@@ -31,54 +31,5 @@ class RdbpublishedtypeController extends Controller
         return view('frontend.rdbpublishedtype.show', compact('item'));
     }
 
-    public function create()
-    {
-        return view('frontend.rdbpublishedtype.create');
-    }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'pubtype_group' => 'nullable|string|max:255',
-            'pubtype_grouptype' => 'nullable|string|max:100',
-            'pubtype_subgroup' => 'nullable|string|max:255',
-            'pubtype_score' => 'nullable|numeric',
-        ]);
-
-        $validated['created_at'] = now();
-
-        RdbPublishedType::create($validated);
-
-        return redirect()->route('frontend.rdbpublishedtype.index')->with('success', 'Published type created successfully.');
-    }
-
-    public function edit($id)
-    {
-        $item = RdbPublishedType::findOrFail($id);
-        return view('frontend.rdbpublishedtype.edit', compact('item'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        $item = RdbPublishedType::findOrFail($id);
-        
-        $validated = $request->validate([
-            'pubtype_group' => 'nullable|string|max:255',
-            'pubtype_grouptype' => 'nullable|string|max:100',
-            'pubtype_subgroup' => 'nullable|string|max:255',
-            'pubtype_score' => 'nullable|numeric',
-        ]);
-
-        $item->update($validated);
-
-        return redirect()->route('frontend.rdbpublishedtype.index')->with('success', 'Published type updated successfully.');
-    }
-
-    public function destroy($id)
-    {
-        $item = RdbPublishedType::findOrFail($id);
-        $item->delete();
-
-        return redirect()->route('frontend.rdbpublishedtype.index')->with('success', 'Published type deleted successfully.');
-    }
 }

@@ -3,18 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Traits\HasDualFilePath;
 
 class RdbDip extends Model
 {
-    use \App\Traits\HasDataShowScope;
+    use \App\Traits\HasDataShowScope, HasDualFilePath;
 
     protected $table = 'rdb_dip';
     protected $primaryKey = 'dip_id';
-    public $timestamps = false;
+    public $timestamps = true;
 
     protected $casts = [
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
         'dip_request_date' => 'date',
         'dip_data2_dateend' => 'date',
     ];
@@ -48,6 +47,10 @@ class RdbDip extends Model
         'dip_type',
         'dipt_id',
         'dip_files',
+        'dip_safe_name',
+        'dip_path',
+        'dip_size',
+        'dip_mime_type',
         'dip_startdate',
         'dip_enddate',
         'pro_id',
@@ -81,7 +84,10 @@ class RdbDip extends Model
         'data_show',
         'user_created',
         'user_updated',
-        'created_at',
-        'updated_at',
     ];
+
+    public function getDipFilePath(string $newField = 'dip_path', string $oldField = 'dip_file', string $oldDir = 'uploads/dips'): ?string
+    {
+        return $this->resolveDualFilePath($newField, $oldField, $oldDir);
+    }
 }

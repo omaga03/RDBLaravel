@@ -4,17 +4,31 @@ namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
 use App\Models\RdbProjectUtilize;
+use App\Models\RdbChangwat;
+use App\Models\RdbProject;
+use App\Models\RdbProjectUtilizeType;
+use App\Models\RdbPublishedCheckyear;
+use App\Models\RdbYear;
 use Illuminate\Http\Request;
+use App\Services\FileUploadService;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\Backend\StoreProjectUtilizeRequest;
+use App\Http\Requests\Backend\UpdateProjectUtilizeRequest;
 
 class RdbProjectUtilizeController extends Controller
 {
+    private FileUploadService $fileUploadService;
+
+    public function __construct(FileUploadService $fileUploadService)
+    {
+        $this->fileUploadService = $fileUploadService;
+    }
+
     public function index(Request $request)
     {
-        $query = RdbProjectUtilize::with(['project.rdbProjectWorks.researcher', 'changwat']);
-
-        // Filter by data_show = 1 (Global scope handled it, but explicit just in case if needed)
+        $this->authorize('viewAny', RdbProjectUtilize::class);
+        $query = RdbProjectUtilize::with(['project.rdbProjectWorks.researcher', 'changwat', 'utilizeType', 'createdBy', 'updatedBy']);
         
-        // Simple Search
         if ($request->filled('q')) {
             $q = $request->q;
             $query->where(function($qry) use ($q) {
@@ -27,7 +41,6 @@ class RdbProjectUtilizeController extends Controller
             });
         }
 
-        // Advanced Search
         if ($request->search_mode === 'advanced') {
             if ($request->filled('utz_department_name')) {
                 $query->where('utz_department_name', 'like', '%' . $request->utz_department_name . '%');
@@ -36,7 +49,6 @@ class RdbProjectUtilizeController extends Controller
                 $query->where('utz_leading', 'like', '%' . $request->utz_leading . '%');
             }
             
-            // Utilize types (stored as comma-separated string)
             if ($request->filled('utz_group')) {
                 $group = $request->utz_group;
                 $query->where(function($q) use ($group) {
@@ -44,7 +56,6 @@ class RdbProjectUtilizeController extends Controller
                 });
             }
 
-            // Location filtering (using the new chw_id style if passed, or fallback)
             if ($request->filled('chw_id')) {
                 $query->where('chw_id', $request->chw_id);
             } elseif ($request->filled('changwat')) {
@@ -74,52 +85,42 @@ class RdbProjectUtilizeController extends Controller
 
     public function create()
     {
+        $this->authorize('create', RdbProjectUtilize::class);
         return view('backend.rdb_projectutilize.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreProjectUtilizeRequest $request)
     {
-        $request->validate([
-            'pro_id' => 'required|exists:rdb_project,pro_id',
-            'utz_department_name' => 'required|string|max:255',
-            'utz_date' => 'required|date',
-            'chw_id' => 'required|exists:rdb_changwat,id',
-            'utz_files_upload' => 'nullable|file|mimes:pdf|max:20480', // Max 20MB
-        ]);
+        $this->authorize('create', RdbProjectUtilize::class);
+        
+        $data = $request->validated();
 
-        $data = $request->except(['utz_files_upload']);
-
-        // Format Budget (remove commas)
         if (isset($data['utz_budget'])) {
             $data['utz_budget'] = str_replace(',', '', $data['utz_budget']);
         }
 
-        // Handle utz_group (Multi-select)
         if (isset($data['utz_group']) && is_array($data['utz_group'])) {
             $data['utz_group'] = implode(',', $data['utz_group']);
+        } else {
+            $data['utz_group'] = null;
         }
 
-        // Set creator and default date
         $data['user_created'] = auth()->id();
-        $data['utz_date'] = $data['utz_date'] ?? date('Y-m-d');
-
-        // Year Logic
-        $years = $this->calculateYears($data['utz_date']);
+        $data['data_show'] = 1;
+        
+        $years = $this->calculateYears($data['utz_date'] ?? date('Y-m-d'));
         $data = array_merge($data, $years);
 
-        // Default Defaults
-        $data['data_show'] = 1;
-        $data['created_at'] = now();
+        if ($request->hasFile('utz_files_upload')) {
+            $fileInfo = $this->fileUploadService->storeFile($request->file('utz_files_upload'), 'utilize');
+            $data['uf_safe_name'] = $fileInfo['safe_name'];
+            $data['uf_path'] = $fileInfo['path'];
+            $data['uf_size'] = $fileInfo['size'];
+            $data['uf_mime_type'] = $fileInfo['mime_type'];
+            $data['utz_files'] = $fileInfo['original_name'];
+        }
 
         $item = RdbProjectUtilize::create($data);
-
-        // Handle File Upload
-        if ($request->hasFile('utz_files_upload')) {
-            $file = $request->file('utz_files_upload');
-            $filename = 'utz_' . $item->utz_id . '_' . time() . '.pdf';
-            $file->move(public_path('uploads/utilize'), $filename);
-            $item->update(['utz_files' => $filename]);
-        }
 
         return redirect()->route('backend.rdbprojectutilize.show', $item->utz_id)->with('success', 'บันทึกข้อมูลเรียบร้อยแล้ว');
     }
@@ -134,8 +135,8 @@ class RdbProjectUtilizeController extends Controller
             'createdBy.researcher',
             'updatedBy.researcher'
         ])->findOrFail($id);
+        $this->authorize('view', $item);
 
-        // Increment page view counter
         $item->increment('utz_count');
 
         return view('backend.rdb_projectutilize.show', compact('item'));
@@ -146,56 +147,52 @@ class RdbProjectUtilizeController extends Controller
         $item = RdbProjectUtilize::with([
             'project.year', 
             'project.department',
-            'project.rdbProjectWorks.researcher'
+            'project.rdbProjectWorks.researcher',
+            'createdBy',
+            'updatedBy'
         ])->findOrFail($id);
+        $this->authorize('update', $item);
         
         return view('backend.rdb_projectutilize.edit', compact('item'));
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateProjectUtilizeRequest $request, $id)
     {
         $item = RdbProjectUtilize::findOrFail($id);
+        $this->authorize('update', $item);
         
-        $request->validate([
-            'utz_department_name' => 'required|string|max:255',
-            'utz_date' => 'required|date',
-            'chw_id' => 'required|exists:rdb_changwat,id',
-            'utz_files_upload' => 'nullable|file|mimes:pdf|max:20480', // Max 20MB
-        ]);
+        $data = $request->validated();
 
-        $data = $request->except(['utz_files_upload']);
-
-        // Format Budget (remove commas)
         if (isset($data['utz_budget'])) {
             $data['utz_budget'] = str_replace(',', '', $data['utz_budget']);
         }
 
-        // Handle utz_group (Multi-select)
         if (isset($data['utz_group']) && is_array($data['utz_group'])) {
             $data['utz_group'] = implode(',', $data['utz_group']);
+        } else {
+            $data['utz_group'] = null;
         }
 
         $data['user_updated'] = auth()->id();
 
-        // Year Logic (re-calculate if date changed)
         if (isset($data['utz_date'])) {
             $years = $this->calculateYears($data['utz_date']);
             $data = array_merge($data, $years);
         }
 
-        $item->update($data);
-
-        // Handle File Upload
         if ($request->hasFile('utz_files_upload')) {
-            $file = $request->file('utz_files_upload');
-            $filename = 'utz_' . $item->utz_id . '_' . time() . '.pdf';
-            $file->move(public_path('uploads/utilize'), $filename);
-            
-            // Should we delete old file? Optional but good practice.
-            // if($item->utz_files && file_exists(public_path('uploads/utilize/'.$item->utz_files))) { @unlink(...); }
-            
-            $item->update(['utz_files' => $filename]);
+            if ($item->uf_path && Storage::exists($item->uf_path)) {
+                Storage::delete($item->uf_path);
+            }
+            $fileInfo = $this->fileUploadService->storeFile($request->file('utz_files_upload'), 'utilize');
+            $data['uf_safe_name'] = $fileInfo['safe_name'];
+            $data['uf_path'] = $fileInfo['path'];
+            $data['uf_size'] = $fileInfo['size'];
+            $data['uf_mime_type'] = $fileInfo['mime_type'];
+            $data['utz_files'] = $fileInfo['original_name'];
         }
+
+        $item->update($data);
 
         return redirect()->route('backend.rdbprojectutilize.show', $item->utz_id)->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
     }
@@ -203,8 +200,8 @@ class RdbProjectUtilizeController extends Controller
     public function destroy($id)
     {
         $item = RdbProjectUtilize::findOrFail($id);
+        $this->authorize('delete', $item);
         
-        // Soft delete by hiding (Match project standard)
         $item->data_show = 0;
         $item->user_updated = auth()->id();
         $item->save();
@@ -215,30 +212,23 @@ class RdbProjectUtilizeController extends Controller
     public function downloadFile($id, $filename)
     {
         $item = RdbProjectUtilize::findOrFail($id);
+        $this->authorize('view', $item);
         
-        // Path to the file
-        $filename = trim($filename);
-        $filePath = public_path('uploads/utilize/' . $filename);
-        
-        if (file_exists($filePath)) {
-            // Increment file open counter
-            $item->increment('utz_countfile');
-            
-            // Return the file for viewing/downloading with no-cache headers
-            return response()->file($filePath, [
-                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
-                'Pragma' => 'no-cache',
-                'Expires' => '0'
-            ]);
+        $filePath = $item->getUtilizeFilePath();
+
+        if (!$filePath || !Storage::exists($filePath)) {
+            abort(404, 'ไม่พบไฟล์');
         }
         
-        return abort(404, 'File not found');
+        $item->increment('utz_countfile');
+        
+        return Storage::response($filePath);
     }
     
-    // AJAX: Get unique provinces
     public function searchProvinces()
     {
-        $provinces = \App\Models\RdbChangwat::select('changwat_t')
+        $this->authorize('viewAny', RdbProjectUtilize::class);
+        $provinces = RdbChangwat::select('changwat_t')
             ->distinct()
             ->whereNotNull('changwat_t')
             ->where('changwat_t', '!=', '')
@@ -249,15 +239,15 @@ class RdbProjectUtilizeController extends Controller
         return response()->json($provinces);
     }
 
-    // AJAX: Get amphoes by province
     public function searchAmphoes(Request $request)
     {
+        $this->authorize('viewAny', RdbProjectUtilize::class);
         $changwat = $request->get('changwat');
         if (!$changwat) {
             return response()->json([]);
         }
 
-        $amphoes = \App\Models\RdbChangwat::select('amphoe_t')
+        $amphoes = RdbChangwat::select('amphoe_t')
             ->distinct()
             ->where('changwat_t', $changwat)
             ->whereNotNull('amphoe_t')
@@ -269,15 +259,15 @@ class RdbProjectUtilizeController extends Controller
         return response()->json($amphoes);
     }
     
-    // AJAX: Global Location Search (Tambon, Amphoe, Changwat)
     public function searchLocation(Request $request)
     {
+        $this->authorize('viewAny', RdbProjectUtilize::class);
         $q = $request->get('q');
         if (strlen($q) < 2) {
             return response()->json([]);
         }
 
-        $locations = \App\Models\RdbChangwat::where('tambon_t', 'like', "%{$q}%")
+        $locations = RdbChangwat::where('tambon_t', 'like', "%{$q}%")
             ->orWhere('amphoe_t', 'like', "%{$q}%")
             ->orWhere('changwat_t', 'like', "%{$q}%")
             ->limit(20)
@@ -285,7 +275,7 @@ class RdbProjectUtilizeController extends Controller
             ->map(fn($loc) => [
                 'id' => $loc->id,
                 'value' => $loc->id,
-                'text' => "{$loc->tambon_t} {$loc->amphoe_t} {$loc->changwat_t}", // Space instead of >
+                'text' => "{$loc->tambon_t} {$loc->amphoe_t} {$loc->changwat_t}",
                 'changwat' => $loc->changwat_t,
                 'amphoe' => $loc->amphoe_t,
                 'tambon' => $loc->tambon_t
@@ -296,20 +286,17 @@ class RdbProjectUtilizeController extends Controller
 
     private function calculateYears($date)
     {
-        // Find Education Year
-        $eduYear = \App\Models\RdbPublishedCheckyear::where('rdbyearedu_start', '<=', $date)
+        $eduYear = RdbPublishedCheckyear::where('rdbyearedu_start', '<=', $date)
             ->where('rdbyearedu_end', '>=', $date)
             ->first();
 
-        // Find Budget Year
-        $budYear = \App\Models\RdbPublishedCheckyear::where('rdbyearbud_start', '<=', $date)
+        $budYear = RdbPublishedCheckyear::where('rdbyearbud_start', '<=', $date)
             ->where('rdbyearbud_end', '>=', $date)
             ->first();
 
         $utz_year_edu = $eduYear->year_id ?? null;
         $utz_year_bud = $budYear->year_id ?? null;
         
-        // utz_year_id usually follows budget year, or fallback to edu year
         $utz_year_id = $utz_year_bud ?? $utz_year_edu;
 
         return [
@@ -319,9 +306,9 @@ class RdbProjectUtilizeController extends Controller
         ];
     }
 
-    // AJAX: Get tambons by province + amphoe
     public function searchTambons(Request $request)
     {
+        $this->authorize('viewAny', RdbProjectUtilize::class);
         $changwat = $request->get('changwat');
         $amphoe = $request->get('amphoe');
         $withId = $request->get('with_id');
@@ -330,14 +317,13 @@ class RdbProjectUtilizeController extends Controller
             return response()->json([]);
         }
 
-        $query = \App\Models\RdbChangwat::where('changwat_t', $changwat)
+        $query = RdbChangwat::where('changwat_t', $changwat)
             ->where('amphoe_t', $amphoe)
             ->whereNotNull('tambon_t')
             ->where('tambon_t', '!=', '')
             ->orderBy('tambon_t');
         
         if ($withId) {
-            // Return with ID for form submission
             $tambons = $query->get()
                 ->map(fn($t) => [
                     'id' => $t->id,
@@ -345,7 +331,6 @@ class RdbProjectUtilizeController extends Controller
                     'text' => preg_replace('/^ต\./', '', $t->tambon_t)
                 ]);
         } else {
-            // Return distinct text values (for index filtering)
             $tambons = $query->select('tambon_t')
                 ->distinct()
                 ->pluck('tambon_t')
@@ -355,10 +340,10 @@ class RdbProjectUtilizeController extends Controller
         return response()->json($tambons);
     }
 
-    // AJAX: Get years
     public function searchYears()
     {
-        $years = \App\Models\RdbYear::orderBy('year_id', 'desc')
+        $this->authorize('viewAny', RdbProjectUtilize::class);
+        $years = RdbYear::orderBy('year_id', 'desc')
             ->get()
             ->map(fn($y) => [
                 'value' => $y->year_id, 
@@ -368,10 +353,10 @@ class RdbProjectUtilizeController extends Controller
         return response()->json($years);
     }
 
-    // AJAX: Get utilize types
     public function searchUtilizeTypes()
     {
-        $types = \App\Models\RdbProjectUtilizeType::orderBy('utz_type_id', 'asc')
+        $this->authorize('viewAny', RdbProjectUtilize::class);
+        $types = RdbProjectUtilizeType::orderBy('utz_type_id', 'asc')
             ->get()
             ->map(fn($t) => [
                 'value' => $t->utz_type_id, 
@@ -381,17 +366,16 @@ class RdbProjectUtilizeController extends Controller
         return response()->json($types);
     }
 
-    // AJAX: Search projects for utilize form
     public function searchProjects(Request $request)
     {
+        $this->authorize('viewAny', RdbProjectUtilize::class);
         $q = $request->get('q', '');
         
         if (strlen($q) < 2) {
             return response()->json([]);
         }
 
-        $projects = \App\Models\RdbProject::with(['year', 'department', 'rdbProjectWorks' => function($q) {
-                // Get Head or Director first
+        $projects = RdbProject::with(['year', 'department', 'rdbProjectWorks' => function($q) {
                 $q->orderBy('position_id', 'asc');
             }, 'rdbProjectWorks.researcher'])
             ->where('pro_nameTH', 'like', "%{$q}%")
@@ -411,11 +395,8 @@ class RdbProjectUtilizeController extends Controller
     private function formatProjectText($project)
     {
         $year = $project->year->year_name ?? '-';
-        // Use custom project code logic or fallback to ID/Code
-        // $code = $project->pro_code ?? $project->pro_id; // Code removed to match requested format "Year • Name • Researcher"
         $name = strip_tags($project->pro_nameTH);
         
-        // Find main researcher
         $researcherName = '-';
         if ($project->rdbProjectWorks->isNotEmpty()) {
             $mainWork = $project->rdbProjectWorks->first();
@@ -423,11 +404,6 @@ class RdbProjectUtilizeController extends Controller
                 $researcherName = $mainWork->researcher->researcher_fname . ' ' . $mainWork->researcher->researcher_lname;
             }
         }
-        
-        // $department = $project->department->department_nameTH ?? '-'; // Removed to match screenshot brevity if needed, or keep?
-        // Screenshot shows: "2568 • [Name] • [Researcher]"
-        // It does NOT show Department in the screenshot example clearly, but "Published" usually has it.
-        // Let's stick to the Screenshot: "2568 • Title • Name"
         
         return "{$year} • {$name} • {$researcherName}";
     }

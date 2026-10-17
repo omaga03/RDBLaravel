@@ -3,21 +3,26 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Traits\HasDualFilePath;
 
 class RdbProjectTypeSub extends Model
 {
+    use HasDualFilePath;
+
     protected $table = 'rdb_project_types_sub';
     protected $primaryKey = 'pts_id';
-    public $timestamps = false; // Based on Yii2 model
+    public $timestamps = true; // Based on Yii2 model
 
     protected $fillable = [
         'pt_id',
         'pts_name',
         'pts_file',
+        'pts_safe_name',
+        'pts_path',
+        'pts_size',
+        'pts_mime_type',
         'user_created',
         'user_updated',
-        'created_at',
-        'updated_at',
     ];
 
     public function rdbProjects()
@@ -43,5 +48,11 @@ class RdbProjectTypeSub extends Model
     public function updatedBy()
     {
         return $this->belongsTo(User::class, 'user_updated', 'id');
+    }
+
+    // If this model stores docs, use helper; otherwise available for future use
+    public function getTypeSubFilePath(string $newField = 'pts_path', string $oldField = 'pts_file', string $oldDir = 'uploads/project_types'): ?string
+    {
+        return $this->resolveDualFilePath($newField, $oldField, $oldDir);
     }
 }

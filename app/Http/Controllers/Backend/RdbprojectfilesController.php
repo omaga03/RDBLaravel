@@ -3,61 +3,119 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
-use App\Models\RdbProjectfiles;
+use App\Models\RdbProjectFiles;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use App\Services\FileUploadService;
+use App\Http\Requests\Backend\{StoreRdbProjectFilesRequest, UpdateRdbProjectFilesRequest};
 
 class RdbprojectfilesController extends Controller
 {
+    private FileUploadService $fileUploadService;
+
+    public function __construct(FileUploadService $fileUploadService)
+    {
+        $this->fileUploadService = $fileUploadService;
+    }
     public function index()
     {
-        $items = RdbProjectfiles::with('project')->paginate(10);
+        $this->authorize('viewAny', RdbProjectFiles::class);
+        $items = RdbProjectFiles::with(['project', 'creator', 'updater'])->paginate(10);
         return view('backend.rdbprojectfiles.index', compact('items'));
     }
 
     public function create()
     {
-        // Files are usually added via project, but if we allow creating here:
+        $this->authorize('create', RdbProjectFiles::class);
         $projects = \App\Models\RdbProject::select('pro_id', 'pro_nameTH')->get();
-        $item = new RdbProjectfiles();
+        $item = new RdbProjectFiles();
         return view('backend.rdbprojectfiles.create', compact('projects', 'item'));
     }
 
-    public function store(Request $request)
+    public function store(StoreRdbProjectFilesRequest $request)
     {
-        $item = new RdbProjectfiles();
-        $item->fill($request->all());
+        $this->authorize('create', RdbProjectFiles::class);
+        $validated = $request->validated();
+        
+        $item = new RdbProjectFiles();
+        
+        if ($request->hasFile('rf_files')) {
+            $fileInfo = $this->fileUploadService->storeFile($validated['rf_files'], 'project_files');
+            $item->prf_safe_name = $fileInfo['safe_name'];
+            $item->prf_path = $fileInfo['path'];
+            $item->prf_size = $fileInfo['size'];
+            $item->prf_mime_type = $fileInfo['mime_type'];
+            $item->rf_files = $fileInfo['original_name'];
+        }
+
+        $item->pro_id = $validated['pro_id'];
+        $item->rf_filesname = $validated['rf_filesname'];
+        $item->rf_note = $validated['rf_note'] ?? null;
+        $item->rf_files_show = $validated['rf_files_show'] ?? 0;
+        $item->rf_download = 0;
+
         $item->user_created = auth()->id();
-        $item->created_at = now();
+        
         $item->save();
         return redirect()->route('backend.rdbprojectfiles.index')->with('success', 'บันทึกข้อมูลเรียบร้อยแล้ว');
     }
 
     public function show($id)
     {
-        $item = RdbProjectfiles::with('project')->findOrFail($id);
+        $item = RdbProjectFiles::with(['project', 'creator', 'updater'])->findOrFail($id);
+        $this->authorize('view', $item);
         return view('backend.rdbprojectfiles.show', compact('item'));
     }
 
     public function edit($id)
     {
-        $item = RdbProjectfiles::findOrFail($id);
+        $item = RdbProjectFiles::with(['project', 'creator', 'updater'])->findOrFail($id);
+        $this->authorize('update', $item);
         $projects = \App\Models\RdbProject::select('pro_id', 'pro_nameTH')->get();
-        return view('backend.rdbprojectfiles.edit', compact('item', 'projects')); // Projects possibly needed if we allow changing project
+        return view('backend.rdbprojectfiles.edit', compact('item', 'projects'));
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateRdbProjectFilesRequest $request, $id)
     {
-        $item = RdbProjectfiles::findOrFail($id);
-        $item->fill($request->all());
+        $item = RdbProjectFiles::findOrFail($id);
+        $this->authorize('update', $item);
+        $validated = $request->validated();
+
+        if ($request->hasFile('rf_files')) {
+            if ($item->prf_path && Storage::exists($item->prf_path)) {
+                Storage::delete($item->prf_path);
+            }
+            $fileInfo = $this->fileUploadService->storeFile($validated['rf_files'], 'project_files');
+            $item->prf_safe_name = $fileInfo['safe_name'];
+            $item->prf_path = $fileInfo['path'];
+            $item->prf_size = $fileInfo['size'];
+            $item->prf_mime_type = $fileInfo['mime_type'];
+            $item->rf_files = $fileInfo['original_name'];
+        }
+
+        $item->pro_id = $validated['pro_id'];
+        $item->rf_filesname = $validated['rf_filesname'];
+        $item->rf_note = $validated['rf_note'] ?? null;
+        $item->rf_files_show = $validated['rf_files_show'] ?? 0;
+        
         $item->user_updated = auth()->id();
-        $item->updated_at = now();
+        
         $item->save();
         return redirect()->route('backend.rdbprojectfiles.index')->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
     }
 
     public function destroy($id)
     {
-        $item = RdbProjectfiles::findOrFail($id);
+        $item = RdbProjectFiles::findOrFail($id);
+        $this->authorize('delete', $item);
+        
+        if ($item->prf_path && Storage::exists($item->prf_path)) {
+            Storage::delete($item->prf_path);
+        }
+        if ($item->rf_files && $item->rf_files != $item->prf_safe_name && Storage::exists('uploads/project_files/' . $item->rf_files)) {
+            Storage::delete('uploads/project_files/' . $item->rf_files);
+        }
+
         $item->delete();
         return redirect()->route('backend.rdbprojectfiles.index')->with('success', 'ลบข้อมูลเรียบร้อยแล้ว');
     }

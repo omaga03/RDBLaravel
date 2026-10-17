@@ -39,7 +39,6 @@
                             <div class="col-sm-4 fw-bold">Date:</div>
                             <div class="col-sm-8">
                                 @if($item->pub_date)
-                                @if($item->pub_date)
                                     {{ \App\Helpers\ThaiDateHelper::format($item->pub_date, false, true) }}
                                 @else
                                     -

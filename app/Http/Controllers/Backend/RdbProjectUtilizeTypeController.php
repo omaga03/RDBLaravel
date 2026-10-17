@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backend;
 use App\Http\Controllers\Controller;
 use App\Models\RdbProjectUtilizeType;
 use Illuminate\Http\Request;
+use App\Http\Requests\Backend\{StoreRdbProjectUtilizeTypeRequest, UpdateRdbProjectUtilizeTypeRequest};
 
 class RdbProjectUtilizeTypeController extends Controller
 {
@@ -13,7 +14,8 @@ class RdbProjectUtilizeTypeController extends Controller
      */
     public function index(Request $request)
     {
-        $query = RdbProjectUtilizeType::query();
+        $this->authorize('viewAny', RdbProjectUtilizeType::class);
+        $query = RdbProjectUtilizeType::with(['creator', 'updater']);
 
         // Search logic
         if ($request->filled('q')) {
@@ -30,6 +32,7 @@ class RdbProjectUtilizeTypeController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', RdbProjectUtilizeType::class);
         $item = new RdbProjectUtilizeType();
         return view('backend.rdbprojectutilizetype.create', compact('item'));
     }
@@ -37,21 +40,14 @@ class RdbProjectUtilizeTypeController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreRdbProjectUtilizeTypeRequest $request)
     {
-        $request->validate([
-            'utz_typr_name' => 'required|string|max:255|unique:rdb_project_utilize_type,utz_typr_name',
-            'utz_type_index' => 'nullable|integer',
-        ]);
-
+        $this->authorize('create', RdbProjectUtilizeType::class);
         $item = new RdbProjectUtilizeType();
-        $input = $request->all();
+        $validated = $request->validated();
         
-        $item->fill($input);
+        $item->fill($validated);
         $item->user_created = auth()->id();
-        $item->created_at = now();
-        $item->updated_at = now();
-        
         $item->save();
 
         return redirect()->route('backend.rdbprojectutilizetype.show', $item->utz_type_id)
@@ -63,7 +59,8 @@ class RdbProjectUtilizeTypeController extends Controller
      */
     public function show($id)
     {
-        $item = RdbProjectUtilizeType::findOrFail($id);
+        $item = RdbProjectUtilizeType::with(['creator', 'updater'])->findOrFail($id);
+        $this->authorize('view', $item);
         return view('backend.rdbprojectutilizetype.show', compact('item'));
     }
 
@@ -72,26 +69,23 @@ class RdbProjectUtilizeTypeController extends Controller
      */
     public function edit($id)
     {
-        $item = RdbProjectUtilizeType::findOrFail($id);
+        $item = RdbProjectUtilizeType::with(['creator', 'updater'])->findOrFail($id);
+        $this->authorize('update', $item);
         return view('backend.rdbprojectutilizetype.edit', compact('item'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(UpdateRdbProjectUtilizeTypeRequest $request, $id)
     {
-        $request->validate([
-            'utz_typr_name' => 'required|string|max:255|unique:rdb_project_utilize_type,utz_typr_name,'.$id.',utz_type_id',
-            'utz_type_index' => 'nullable|integer',
-        ]);
-
         $item = RdbProjectUtilizeType::findOrFail($id);
-        $input = $request->all();
-        $input['user_updated'] = auth()->id();
-        $input['updated_at'] = now();
+        $this->authorize('update', $item);
+        $validated = $request->validated();
         
-        $item->update($input);
+        $item->fill($validated);
+        $item->user_updated = auth()->id();
+        $item->save();
 
         return redirect()->route('backend.rdbprojectutilizetype.show', $item->utz_type_id)
                          ->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
@@ -103,6 +97,7 @@ class RdbProjectUtilizeTypeController extends Controller
     public function destroy($id)
     {
         $item = RdbProjectUtilizeType::findOrFail($id);
+        $this->authorize('delete', $item);
         
         // Dependency check
         if (\App\Models\RdbProjectUtilize::where('utz_type_id', $id)->exists()) {

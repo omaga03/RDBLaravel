@@ -28,50 +28,5 @@ class RdbprojectpositionController extends Controller
         return view('frontend.rdbprojectposition.show', compact('item'));
     }
 
-    public function create()
-    {
-        return view('frontend.rdbprojectposition.create');
-    }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'position_nameTH' => 'required|string|max:255',
-            'position_desc' => 'nullable|string',
-        ]);
-
-        $validated['created_at'] = now();
-
-        RdbProjectPosition::create($validated);
-
-        return redirect()->route('frontend.rdbprojectposition.index')->with('success', 'Project position created successfully.');
-    }
-
-    public function edit($id)
-    {
-        $item = RdbProjectPosition::findOrFail($id);
-        return view('frontend.rdbprojectposition.edit', compact('item'));
-    }
-
-    public function update(Request $request, $id)
-    {
-        $item = RdbProjectPosition::findOrFail($id);
-        
-        $validated = $request->validate([
-            'position_nameTH' => 'required|string|max:255',
-            'position_desc' => 'nullable|string',
-        ]);
-
-        $item->update($validated);
-
-        return redirect()->route('frontend.rdbprojectposition.index')->with('success', 'Project position updated successfully.');
-    }
-
-    public function destroy($id)
-    {
-        $item = RdbProjectPosition::findOrFail($id);
-        $item->delete();
-
-        return redirect()->route('frontend.rdbprojectposition.index')->with('success', 'Project position deleted successfully.');
-    }
 }

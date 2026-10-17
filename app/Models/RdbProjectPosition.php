@@ -8,7 +8,7 @@ class RdbProjectPosition extends Model
 {
     protected $table = 'rdb_project_position';
     protected $primaryKey = 'position_id';
-    public $timestamps = false;
+    public $timestamps = true;
 
     public function projectWorks()
     {
@@ -25,9 +25,17 @@ class RdbProjectPosition extends Model
         'position_desc',
         'user_created',
         'user_updated',
-        'created_at',
-        'updated_at',
     ];
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'user_created');
+    }
+
+    public function updater()
+    {
+        return $this->belongsTo(User::class, 'user_updated');
+    }
 
     const DIRECTOR = 1;
     const HEAD = 2;

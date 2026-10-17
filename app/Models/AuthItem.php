@@ -21,4 +21,9 @@ class AuthItem extends Model
         'created_at',
         'updated_at',
     ];
+
+    public function assignments()
+    {
+        return $this->hasMany(AuthAssignment::class, 'item_name', 'name');
+    }
 }
