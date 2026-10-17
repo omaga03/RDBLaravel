@@ -59,5 +59,24 @@ class BackendAuditTest extends TestCase
             $showResponse->assertSee('tab-files');
             $showResponse->assertSee('tab-related');
         }
+
+        // Test RBAC Edit & Update
+        $rbacResponse = $this->actingAs($admin)->get(route('backend.rbac.edit', 'The Creator'));
+        $this->assertEquals(200, $rbacResponse->getStatusCode());
+        $rbacResponse->assertSee('The Creator');
+
+        $updateResponse = $this->actingAs($admin)->put(route('backend.rbac.update', 'The Creator'), [
+            'description' => 'Super Administrator (Full System Access)',
+        ]);
+        $this->assertEquals(302, $updateResponse->getStatusCode());
+
+        // Test User Edit & Show
+        $userEditResponse = $this->actingAs($admin)->get(route('backend.user.edit', $admin->id));
+        $this->assertEquals(200, $userEditResponse->getStatusCode());
+        $userEditResponse->assertSee($admin->username);
+
+        $userShowResponse = $this->actingAs($admin)->get(route('backend.user.show', $admin->id));
+        $this->assertEquals(200, $userShowResponse->getStatusCode());
+        $userShowResponse->assertSee($admin->username);
     }
 }

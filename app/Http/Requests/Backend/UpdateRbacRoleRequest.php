@@ -22,17 +22,8 @@ class UpdateRbacRoleRequest extends FormRequest
      */
     public function rules(): array
     {
-        // The route model binding gives us the 'item' object.
-        $role = $this->route('item');
-
         return [
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('auth_item')->ignore($role->name, 'name')
-            ],
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:1000',
         ];
     }
 }

@@ -54,14 +54,15 @@ class RbacController extends Controller
      */
     public function show(string $id)
     {
-        // Not implemented
+        return redirect()->route('backend.rbac.edit', $id);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(AuthItem $item)
+    public function edit($rbac)
     {
+        $item = $rbac instanceof AuthItem ? $rbac : AuthItem::where('name', $rbac)->firstOrFail();
         $this->authorize('update', $item);
         return view('backend.rbac.edit', compact('item'));
     }
@@ -69,39 +70,44 @@ class RbacController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateRbacRoleRequest $request, AuthItem $item)
+    public function update(UpdateRbacRoleRequest $request, $rbac)
     {
+        $item = $rbac instanceof AuthItem ? $rbac : AuthItem::where('name', $rbac)->firstOrFail();
         $this->authorize('update', $item);
         $validated = $request->validated();
 
         $item->update([
-            'description' => $validated['description'],
+            'description' => $validated['description'] ?? null,
             'updated_at' => time(),
         ]);
 
         return redirect()->route('backend.rbac.index')
-            ->with('success', 'Role updated successfully.');
+            ->with('success', 'แก้ไขบทบาทเรียบร้อยแล้ว');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(AuthItem $item)
+    public function destroy($rbac)
     {
+        $item = $rbac instanceof AuthItem ? $rbac : AuthItem::where('name', $rbac)->firstOrFail();
         $this->authorize('delete', $item);
         $coreRoles = ['The Creator', 'Admin', 'Admin Project', 'Admin Published', 'Admin Dip', 'Admin Utilize', 'Staff', 'Researcher'];
         if (in_array($item->name, $coreRoles)) {
             return redirect()->route('backend.rbac.index')
-                ->with('error', 'Cannot delete core roles.');
+                ->with('error', 'ไม่สามารถลบบทบาทหลักของระบบได้');
         }
 
         // Delete all assignments of this role to users
         AuthAssignment::where('item_name', $item->name)->delete();
 
+        // Delete child relationships
+        AuthItemChild::where('parent', $item->name)->orWhere('child', $item->name)->delete();
+
         // Finally, delete the item itself
         $item->delete();
 
         return redirect()->route('backend.rbac.index')
-            ->with('success', 'Role deleted successfully.');
+            ->with('success', 'ลบบทบาทเรียบร้อยแล้ว');
     }
 }

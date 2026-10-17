@@ -43,10 +43,10 @@
                             </td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
-                                    <a href="{{ route('backend.rbac.edit', $role) }}" class="btn btn-outline-warning" title="แก้ไข">
+                                    <a href="{{ route('backend.rbac.edit', $role->name) }}" class="btn btn-outline-warning" title="แก้ไข">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
-                                    <form action="{{ route('backend.rbac.destroy', $role) }}" method="POST" class="d-inline delete-form">
+                                    <form action="{{ route('backend.rbac.destroy', $role->name) }}" method="POST" class="d-inline delete-form">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-outline-danger" title="ลบ">

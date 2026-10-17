@@ -6,7 +6,7 @@
         title="แก้ไขบทบาท (Edit Role): {{ $item->name }}" 
         icon="bi-shield-check"
         mode="edit" 
-        :actionRoute="route('backend.rbac.update', $item)"
+        :actionRoute="route('backend.rbac.update', $item->name)"
         method="PUT"
         :backRoute="route('backend.rbac.index')"
     >
