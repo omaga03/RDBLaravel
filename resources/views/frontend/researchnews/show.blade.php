@@ -1,134 +1,194 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="py-4">
-    <div class="card shadow-sm">
-        <div class="card-header bg-dark text-white py-3">
-            <h4 class="mb-0 fw-bold"><i class="bi bi-newspaper me-2"></i>{{ $item->news_name }}</h4>
+<div class="container-fluid py-4">
+
+    <!-- Breadcrumb & Navigation -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ route('frontend.site.index') }}" class="text-decoration-none">หน้าหลัก</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('frontend.researchnews.index') }}" class="text-decoration-none">ข่าวกิจกรรมงานวิจัย</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">รายละเอียดข่าว</li>
+                </ol>
+            </nav>
+            <h3 class="mb-0 fw-bold text-body">
+                <i class="bi bi-newspaper me-2 text-primary"></i>รายละเอียดข่าวกิจกรรม
+            </h3>
         </div>
-        <div class="card-body">
-            <div class="row g-4">
-                <!-- Main Content -->
-                <div class="col-lg-12">
-                    <!-- Meta Info (Moved above image) -->
-                    <div class="d-flex flex-wrap gap-4 mb-4 pb-3 border-bottom small text-muted">
-                        <!-- Publish Date -->
+        <div class="d-flex gap-2">
+            <a href="{{ route('frontend.researchnews.index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> กลับหน้ารายการ
+            </a>
+            <button onclick="window.print()" class="btn btn-outline-secondary">
+                <i class="bi bi-printer me-1"></i> พิมพ์
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Main News Content (Left Column) -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm border mb-4">
+                <div class="card-header text-white" style="background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+                        @if($item->news_type)
+                            <span class="badge bg-light text-dark fw-semibold">
+                                <i class="bi bi-tag-fill me-1"></i>{{ $item->news_type }}
+                            </span>
+                        @endif
+                        <span class="small text-white-50">
+                            <i class="bi bi-eye me-1"></i>เข้าชม {{ number_format($item->news_count ?? 0) }} ครั้ง
+                        </span>
+                    </div>
+                    <h4 class="card-title mb-0 fw-bold text-white text-break">
+                        {{ html_entity_decode(strip_tags($item->news_name)) }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Metadata Info Bar -->
+                    <div class="p-3 mb-4 rounded bg-body-tertiary border d-flex flex-wrap gap-4 align-items-center">
+                        @if($item->news_date)
                         <div class="d-flex align-items-center">
-                            <i class="bi bi-calendar-check text-primary me-2"></i>
+                            <i class="bi bi-calendar-check-fill text-primary fs-4 me-2"></i>
                             <div>
-                                <span class="d-block lh-1 text-uppercase" style="font-size: 0.75rem;">วันที่ลงข่าว</span>
+                                <small class="text-body-secondary d-block">วันที่ประกาศ</small>
                                 <span class="fw-bold text-body">
-                                     @php
-                                        try {
-                                            echo \Carbon\Carbon::parse($item->news_date)->locale('th')->addYears(543)->isoFormat('LL');
-                                        } catch (\Exception $e) {
-                                            echo $item->news_date;
-                                        }
-                                    @endphp
+                                    {{ \App\Helpers\ThaiDateHelper::format($item->news_date, false, true) }}
                                 </span>
                             </div>
                         </div>
+                        @endif
 
-                        <!-- Event Date -->
                         @if($item->news_event_start)
                         <div class="d-flex align-items-center">
-                            <i class="bi bi-calendar-event text-success me-2"></i>
+                            <i class="bi bi-calendar-range text-success fs-4 me-2"></i>
                             <div>
-                                <span class="d-block lh-1 text-uppercase" style="font-size: 0.75rem;">ระยะเวลากิจกรรม</span>
+                                <small class="text-body-secondary d-block">ระยะเวลากิจกรรม</small>
                                 <span class="fw-bold text-body">
-                                    @php
-                                        try {
-                                            echo \Carbon\Carbon::parse($item->news_event_start)->locale('th')->addYears(543)->isoFormat('D MMM YY');
-                                        } catch (\Exception $e) {
-                                            echo $item->news_event_start;
-                                        }
-                                    @endphp
+                                    {{ \App\Helpers\ThaiDateHelper::format($item->news_event_start) }}
                                     @if($item->news_event_end)
-                                     - 
-                                     @php
-                                        try {
-                                            echo \Carbon\Carbon::parse($item->news_event_end)->locale('th')->addYears(543)->isoFormat('D MMM YY');
-                                        } catch (\Exception $e) {
-                                            echo $item->news_event_end;
-                                        }
-                                    @endphp
+                                        - {{ \App\Helpers\ThaiDateHelper::format($item->news_event_end) }}
                                     @endif
                                 </span>
                             </div>
                         </div>
                         @endif
-
-                        <!-- Views -->
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-eye-fill text-info me-2"></i>
-                            <div>
-                                <span class="d-block lh-1 text-uppercase" style="font-size: 0.75rem;">จำนวนผู้เข้าชม</span>
-                                <span class="fw-bold text-body">{{ number_format($item->news_count) }} ครั้ง</span>
-                            </div>
-                        </div>
-
-                         <!-- Type -->
-                        @if($item->news_type)
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-tag-fill text-secondary me-2"></i>
-                            <div>
-                                <span class="d-block lh-1 text-uppercase" style="font-size: 0.75rem;">ประเภท</span>
-                                <span class="badge bg-secondary rounded-pill">{{ $item->news_type }}</span>
-                            </div>
-                        </div>
-                        @endif
                     </div>
 
-                    <!-- Image -->
-                    @if($item->news_img)
-                        <div class="mb-4 rounded-3 overflow-hidden shadow-sm border position-relative">
-                            <img src="{{ Storage::url($item->news_img) }}" class="img-fluid w-100 object-fit-cover" alt="{{ $item->news_name }}">
+                    <!-- Main News Image -->
+                    @php
+                        $newsImg = null;
+                        if (!empty($item->news_path)) {
+                            $newsImg = asset('storage/' . $item->news_path);
+                        } elseif (!empty($item->news_img)) {
+                            $newsImg = Storage::url($item->news_img);
+                        }
+                    @endphp
+                    @if($newsImg)
+                        <div class="mb-4 rounded overflow-hidden shadow-sm border text-center bg-body-tertiary">
+                            <img src="{{ $newsImg }}" class="img-fluid w-100 object-fit-cover" style="max-height: 480px;" alt="{{ $item->news_name }}">
                         </div>
                     @endif
 
-                    <!-- Detail -->
-                    <div class="content-body">
-                         <h5 class="fw-bold text-primary mb-3"><i class="bi bi-file-text me-2"></i>รายละเอียด</h5>
-                         <div class="text-break lh-lg">
-                             {!! html_entity_decode($item->news_detail) !!}
-                         </div>
+                    <!-- Detailed Content -->
+                    <div class="content-body py-2">
+                        <h5 class="fw-bold text-primary mb-3">
+                            <i class="bi bi-file-text me-2"></i>รายละเอียดเนื้อหา
+                        </h5>
+                        <div class="text-body text-break lh-lg fs-6">
+                            {!! html_entity_decode($item->news_detail) !!}
+                        </div>
                     </div>
 
-                     <!-- Reference/Link -->
+                    <!-- Reference and Links -->
                     @if($item->news_reference || $item->news_link)
-                        <div class="mt-4 pt-4 border-top">
-                             @if($item->news_reference)
-                                <div class="mb-3">
-                                    <strong class="d-block text-muted mb-1"><i class="bi bi-bookmark-fill me-1"></i>อ้างอิง:</strong>
-                                    <span class="text-body">{{ $item->news_reference }}</span>
-                                </div>
-                             @endif
-                             @if($item->news_link)
-                                <a href="{{ $item->news_link }}" target="_blank" class="btn btn-outline-primary"><i class="bi bi-link-45deg me-1"></i> ลิงก์ที่เกี่ยวข้อง</a>
-                             @endif
-                        </div>
+                    <div class="mt-4 pt-3 border-top">
+                        @if($item->news_reference)
+                            <div class="mb-3">
+                                <span class="fw-bold text-body-secondary d-block mb-1">
+                                    <i class="bi bi-bookmark-fill me-1 text-primary"></i>แหล่งข้อมูลอ้างอิง:
+                                </span>
+                                <span class="text-body text-break">{{ $item->news_reference }}</span>
+                            </div>
+                        @endif
+                        @if($item->news_link)
+                            <div>
+                                <a href="{{ $item->news_link }}" target="_blank" class="btn btn-outline-primary">
+                                    <i class="bi bi-box-arrow-up-right me-1"></i> ลิงก์ที่เกี่ยวข้อง / รายละเอียดเพิ่มเติม
+                                </a>
+                            </div>
+                        @endif
+                    </div>
                     @endif
                 </div>
             </div>
-            
-            <div class="mt-4 pt-3 border-top d-flex gap-2">
-                <a href="{{ route('frontend.researchnews.index') }}" class="btn btn-secondary px-4 rounded-pill">
-                    <i class="bi bi-arrow-left me-1"></i> ย้อนกลับ
+        </div>
+
+        <!-- Sidebar (Right Column) -->
+        <div class="col-lg-4">
+            <!-- Recent News Card -->
+            @if(isset($recentNews) && $recentNews->count() > 0)
+            <div class="card shadow-sm border mb-4">
+                <div class="card-header bg-body-tertiary d-flex align-items-center">
+                    <i class="bi bi-newspaper text-primary me-2 fs-5"></i>
+                    <h5 class="mb-0 fw-bold text-body">ข่าวกิจกรรมอื่นๆ</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        @foreach($recentNews as $other)
+                            @php
+                                $otherImg = null;
+                                if (!empty($other->news_path)) {
+                                    $otherImg = asset('storage/' . $other->news_path);
+                                } elseif (!empty($other->news_img)) {
+                                    $otherImg = Storage::url($other->news_img);
+                                }
+                            @endphp
+                            <a href="{{ route('frontend.researchnews.show', $other->id) }}" class="list-group-item list-group-item-action bg-transparent py-3 px-3">
+                                <div class="d-flex gap-3">
+                                    @if($otherImg)
+                                        <div class="ratio ratio-1x1 rounded overflow-hidden flex-shrink-0 bg-body-secondary" style="width: 60px; height: 60px;">
+                                            <img src="{{ $otherImg }}" class="object-fit-cover w-100 h-100" alt="{{ $other->news_name }}">
+                                        </div>
+                                    @endif
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1 text-body fw-bold hover-primary text-break" style="font-size: 0.9rem; line-height: 1.4;">
+                                            {{ Str::limit(html_entity_decode(strip_tags($other->news_name)), 70) }}
+                                        </h6>
+                                        <small class="text-body-secondary d-block">
+                                            <i class="bi bi-calendar3 me-1"></i>{{ \App\Helpers\ThaiDateHelper::format($other->news_date) }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            <!-- Navigation Button -->
+            <div class="d-grid gap-2">
+                <a href="{{ route('frontend.researchnews.index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> กลับไปหน้ารายการข่าว
                 </a>
-                <button onclick="window.print()" class="btn btn-outline-secondary px-4 rounded-pill">
-                    <i class="bi bi-printer me-1"></i> พิมพ์
-                </button>
             </div>
         </div>
     </div>
 </div>
 
 <style>
+    .hover-primary:hover {
+        color: var(--bs-primary) !important;
+    }
     .content-body img {
         max-width: 100%;
         height: auto;
         border-radius: 0.5rem;
         margin: 1rem 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 </style>
 @endsection

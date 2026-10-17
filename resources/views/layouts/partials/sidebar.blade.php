@@ -19,7 +19,7 @@
         content: '';
         flex: 1;
         height: 1px;
-        background: #e9ecef;
+        background: var(--bs-border-color, #e9ecef);
         margin-left: 10px;
     }
 </style>
@@ -64,9 +64,9 @@
 
 {{-- Add some additional links or info if needed --}}
 <div class="mt-auto pt-4 shadow-sm border-0 d-none d-lg-block sidebar-footer">
-    <div class="card-body bg-light rounded-3 text-center p-2">
-        <small class="text-muted d-block sidebar-text" style="font-size: 0.7rem;">Research Database System</small>
-        <div class="mt-1 text-muted small" style="font-size: 0.7rem;">
+    <div class="card-body bg-body-secondary rounded-3 text-center p-2">
+        <small class="text-body-secondary d-block sidebar-text" style="font-size: 0.7rem;">Research Database System</small>
+        <div class="mt-1 text-body-secondary small" style="font-size: 0.7rem;">
             © {{ date('Y') }} <span class="sidebar-text">RDB</span>
         </div>
     </div>

@@ -1,163 +1,220 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="py-4">
-    <div class="card shadow-sm">
-        <div class="card-header bg-dark text-white py-3">
-            <h4 class="mb-0 fw-bold"><i class="bi bi-megaphone-fill me-2"></i>{{ $item->con_name }}</h4>
+<div class="container-fluid py-4">
+
+    <!-- Breadcrumb & Navigation -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ route('frontend.site.index') }}" class="text-decoration-none">หน้าหลัก</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('frontend.researchcoferenceinthai.index') }}" class="text-decoration-none">การประชุมวิชาการ</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">รายละเอียดการประชุม</li>
+                </ol>
+            </nav>
+            <h3 class="mb-0 fw-bold text-body">
+                <i class="bi bi-megaphone-fill me-2 text-primary"></i>รายละเอียดการประชุมวิชาการ
+            </h3>
         </div>
-        <div class="card-body">
-            <div class="row g-4">
-                <!-- Main Content -->
-                <div class="col-lg-12">
-                    <!-- Meta Info (2 Columns) -->
-                    <div class="mb-5">
-                        <div class="row g-0 border rounded-4 overflow-hidden shadow-sm">
-                            <!-- Left Column: Date, Venue, Views -->
-                            <div class="col-lg-8 p-4 bg-body-tertiary"> <!-- Adaptive light bg -->
-                                <div class="d-flex flex-column gap-4">
-                                    <!-- Event Date -->
-                                    @if($item->con_even_date)
-                                    <div class="d-flex align-items-start">
-                                        <div class="me-3 mt-1">
-                                            <i class="bi bi-calendar-check text-primary fs-4"></i>
-                                        </div>
-                                        <div>
-                                            <span class="d-block text-uppercase text-muted fw-bold small mb-1">วันจัดงาน</span>
-                                            <span class="fw-bold text-body fs-5">
-                                                @php
-                                                    try {
-                                                        echo \Carbon\Carbon::parse($item->con_even_date)->locale('th')->addYears(543)->isoFormat('LL');
-                                                    } catch (\Exception $e) {
-                                                        echo $item->con_even_date;
-                                                    }
-                                                @endphp
-                                            </span>
-                                        </div>
-                                    </div>
-                                    @endif
+        <div class="d-flex gap-2">
+            <a href="{{ route('frontend.researchcoferenceinthai.index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> กลับหน้ารายการ
+            </a>
+            <button onclick="window.print()" class="btn btn-outline-secondary">
+                <i class="bi bi-printer me-1"></i> พิมพ์
+            </button>
+        </div>
+    </div>
 
-                                    <!-- Venue -->
-                                    @if($item->con_venue)
-                                    <div class="d-flex align-items-start">
-                                        <div class="me-3 mt-1">
-                                            <i class="bi bi-geo-alt-fill text-danger fs-4"></i>
-                                        </div>
-                                        <div>
-                                            <span class="d-block text-uppercase text-muted fw-bold small mb-1">สถานที่จัดงาน</span>
-                                            <span class="fw-bold text-body fs-5 lh-sm">{{ $item->con_venue }}</span>
-                                        </div>
-                                    </div>
-                                    @endif
-
-                                    <!-- Views -->
-                                    <div class="d-flex align-items-center">
-                                         <div class="me-3">
-                                            <i class="bi bi-eye-fill text-info fs-4"></i>
-                                        </div>
-                                        <div>
-                                            <span class="d-block text-uppercase text-muted fw-bold small mb-1">จำนวนผู้เข้าชม</span>
-                                            <span class="fw-bold text-body fs-5">{{ number_format($item->con_count) }} ครั้ง</span>
-                                        </div>
+    <div class="row g-4">
+        <!-- Main Conference Content (Left Column) -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm border mb-4">
+                <div class="card-header text-white" style="background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+                        <span class="badge bg-light text-dark fw-semibold">
+                            <i class="bi bi-megaphone me-1"></i>การประชุมวิชาการ
+                        </span>
+                        <span class="small text-white-50">
+                            <i class="bi bi-eye me-1"></i>เข้าชม {{ number_format($item->con_count ?? 0) }} ครั้ง
+                        </span>
+                    </div>
+                    <h4 class="card-title mb-0 fw-bold text-white text-break">
+                        {{ html_entity_decode(strip_tags($item->con_name)) }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Key Information Bar -->
+                    <div class="p-3 mb-4 rounded bg-body-tertiary border">
+                        <div class="row g-3">
+                            @if($item->con_even_date)
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-calendar-event-fill text-primary fs-3 me-3"></i>
+                                    <div>
+                                        <small class="text-body-secondary d-block">วันจัดงานประชุม</small>
+                                        <span class="fw-bold text-body">
+                                            {{ \App\Helpers\ThaiDateHelper::format($item->con_even_date, false, true) }}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
+                            @endif
 
-                            <!-- Right Column: Deadline (Highlighted) -->
-                            <div class="col-lg-4 p-4 bg-body d-flex align-items-center justify-content-center border-start-lg">
-                                <div class="card w-100 h-100 border-2 border-warning shadow-none rounded-3 d-flex align-items-center justify-content-center text-center p-3">
-                                    @if($item->con_sub_deadline)
-                                        <div>
-                                            <div class="mb-2">
-                                                <i class="bi bi-stopwatch-fill text-warning display-4"></i>
-                                            </div>
-                                            <span class="d-block text-warning fw-bold text-uppercase mb-2">ส่งบทความภายใน</span>
-                                            <h5 class="fw-bolder text-body mb-0">
-                                                @php
-                                                    try {
-                                                        echo \Carbon\Carbon::parse($item->con_sub_deadline)->locale('th')->addYears(543)->isoFormat('D MMMM YYYY');
-                                                    } catch (\Exception $e) {
-                                                        echo $item->con_sub_deadline;
-                                                    }
-                                                @endphp
-                                            </h5>
-                                        </div>
-                                    @else
-                                        <div class="text-muted">
-                                            <i class="bi bi-check-circle display-4 mb-2 d-block"></i>
-                                            <span>ไม่ระบุวันหมดเขต</span>
-                                        </div>
-                                    @endif
+                            @if($item->con_venue)
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-geo-alt-fill text-danger fs-3 me-3"></i>
+                                    <div>
+                                        <small class="text-body-secondary d-block">สถานที่จัดงาน</small>
+                                        <span class="fw-bold text-body text-break">{{ $item->con_venue }}</span>
+                                    </div>
                                 </div>
                             </div>
+                            @endif
                         </div>
                     </div>
 
-                    <!-- Image -->
-                    @if($item->con_img)
-                        <div class="mb-4 rounded-3 overflow-hidden shadow-sm border position-relative">
-                            <img src="{{ Storage::url($item->con_img) }}" class="img-fluid w-100 object-fit-cover" alt="{{ $item->con_name }}">
+                    <!-- Conference Banner/Image -->
+                    @php
+                        $conImg = null;
+                        if (!empty($item->file_path)) {
+                            $conImg = asset('storage/' . $item->file_path);
+                        } elseif (!empty($item->con_img)) {
+                            $conImg = Storage::url($item->con_img);
+                        }
+                    @endphp
+                    @if($conImg)
+                        <div class="mb-4 rounded overflow-hidden shadow-sm border text-center bg-body-tertiary">
+                            <img src="{{ $conImg }}" class="img-fluid w-100 object-fit-cover" style="max-height: 480px;" alt="{{ $item->con_name }}">
                         </div>
                     @endif
 
-                    <!-- Detail -->
-                     <div class="content-body">
-                         <h5 class="fw-bold text-primary mb-3"><i class="bi bi-file-text me-2"></i>รายละเอียดการประชุม</h5>
-                         @php
-                             $content = html_entity_decode($item->con_detail);
-                             
-                             // 1. Remove specific HTML patterns for "dot lines" or empty lines
-                             $patterns = [
-                                 '/<p>\s*[\.•\-]\s*<\/p>/iu',       // <p>.</p>
-                                 '/<p>\s*&nbsp;\s*<\/p>/iu',      // <p>&nbsp;</p>
-                                 '/<br\s*\/?>\s*[\.•\-]\s*/iu',   // <br>.
-                                 '/<div[^>]*>\s*[\.•\-]\s*<\/div>/iu', // <div>.</div>
-                             ];
-                             $content = preg_replace($patterns, '', $content);
-
-                             // 2. Remove standard text-based "dot lines" and separators (multiline)
-                             $content = preg_replace('/^\s*[\.•\-]\s*$/m', '', $content);
-                             $content = preg_replace('/^\s*[=_]{3,}\s*$/m', '', $content);
-
-                             // 3. AGGRESSIVE: Collapse ALL multiple vertical whitespace to single
-                             $content = preg_replace('/(<br\s*\/?>\s*)+/iu', '<br>', $content); // Any number of <br> -> single <br>
-                             $content = preg_replace('/(\r?\n)+/', "\n", $content); // Any number of \n -> single \n
-                             
-                             // 4. Remove empty <p></p> entirely if consistent
-                             $content = preg_replace('/<p>\s*<\/p>/iu', '', $content);
-                         @endphp
-                         <div class="text-break lh-lg">
-                             {!! $content !!}
-                         </div>
+                    <!-- Detailed Content -->
+                    <div class="content-body py-2">
+                        <h5 class="fw-bold text-primary mb-3">
+                            <i class="bi bi-file-text me-2"></i>รายละเอียดการประชุม
+                        </h5>
+                        @php
+                            $content = html_entity_decode($item->con_detail ?? '');
+                            $patterns = [
+                                '/<p>\s*[\.•\-]\s*<\/p>/iu',
+                                '/<p>\s*&nbsp;\s*<\/p>/iu',
+                                '/<br\s*\/?>\s*[\.•\-]\s*/iu',
+                                '/<div[^>]*>\s*[\.•\-]\s*<\/div>/iu',
+                            ];
+                            $content = preg_replace($patterns, '', $content);
+                            $content = preg_replace('/^\s*[\.•\-]\s*$/m', '', $content);
+                            $content = preg_replace('/^\s*[=_]{3,}\s*$/m', '', $content);
+                            $content = preg_replace('/(<br\s*\/?>\s*)+/iu', '<br>', $content);
+                            $content = preg_replace('/(\r?\n)+/', "\n", $content);
+                            $content = preg_replace('/<p>\s*<\/p>/iu', '', $content);
+                        @endphp
+                        <div class="text-body text-break lh-lg fs-6">
+                            {!! $content !!}
+                        </div>
                     </div>
 
-                     <!-- Website -->
+                    <!-- Website Link -->
                     @if($item->con_website)
-                        <div class="mt-4 pt-4 border-top">
-                             <a href="{{ $item->con_website }}" target="_blank" class="btn btn-outline-primary"><i class="bi bi-globe me-1"></i> เว็บไซต์การประชุม</a>
+                        <div class="mt-4 pt-3 border-top">
+                            <a href="{{ $item->con_website }}" target="_blank" class="btn btn-outline-primary">
+                                <i class="bi bi-globe me-1"></i> เข้าสู่เว็บไซต์การประชุม / ลงทะเบียน
+                            </a>
                         </div>
                     @endif
                 </div>
             </div>
-            
-            <div class="mt-4 pt-3 border-top d-flex gap-2">
-                <a href="{{ route('frontend.researchcoferenceinthai.index') }}" class="btn btn-secondary px-4 rounded-pill">
-                    <i class="bi bi-arrow-left me-1"></i> ย้อนกลับ
+        </div>
+
+        <!-- Sidebar (Right Column) -->
+        <div class="col-lg-4">
+            <!-- Deadline Card -->
+            <div class="card shadow-sm border mb-4">
+                <div class="card-header bg-body-tertiary d-flex align-items-center">
+                    <i class="bi bi-clock-history text-warning me-2 fs-5"></i>
+                    <h5 class="mb-0 fw-bold text-body">กำหนดการส่งบทความ</h5>
+                </div>
+                <div class="card-body text-center p-4">
+                    @if($item->con_sub_deadline)
+                        <div class="mb-2">
+                            <i class="bi bi-stopwatch-fill text-warning fs-1"></i>
+                        </div>
+                        <span class="d-block text-body-secondary fw-bold text-uppercase mb-1 small">ส่งบทความวิชาการภายใน</span>
+                        <h5 class="fw-bold text-danger mb-0">
+                            {{ \App\Helpers\ThaiDateHelper::format($item->con_sub_deadline, false, true) }}
+                        </h5>
+                    @else
+                        <div class="text-body-secondary py-2">
+                            <i class="bi bi-check-circle fs-2 mb-2 d-block text-success"></i>
+                            <span>ไม่ระบุวันหมดเขตรับบทความ</span>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Other Conferences Card -->
+            @if(isset($recentConferences) && $recentConferences->count() > 0)
+            <div class="card shadow-sm border mb-4">
+                <div class="card-header bg-body-tertiary d-flex align-items-center">
+                    <i class="bi bi-megaphone text-primary me-2 fs-5"></i>
+                    <h5 class="mb-0 fw-bold text-body">การประชุมวิชาการอื่นๆ</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        @foreach($recentConferences as $other)
+                            @php
+                                $otherImg = null;
+                                if (!empty($other->file_path)) {
+                                    $otherImg = asset('storage/' . $other->file_path);
+                                } elseif (!empty($other->con_img)) {
+                                    $otherImg = Storage::url($other->con_img);
+                                }
+                            @endphp
+                            <a href="{{ route('frontend.researchcoferenceinthai.show', $other->id) }}" class="list-group-item list-group-item-action bg-transparent py-3 px-3">
+                                <div class="d-flex gap-3">
+                                    @if($otherImg)
+                                        <div class="ratio ratio-1x1 rounded overflow-hidden flex-shrink-0 bg-body-secondary" style="width: 60px; height: 60px;">
+                                            <img src="{{ $otherImg }}" class="object-fit-cover w-100 h-100" alt="{{ $other->con_name }}">
+                                        </div>
+                                    @endif
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1 text-body fw-bold hover-primary text-break" style="font-size: 0.9rem; line-height: 1.4;">
+                                            {{ Str::limit(html_entity_decode(strip_tags($other->con_name)), 70) }}
+                                        </h6>
+                                        <small class="text-body-secondary d-block">
+                                            <i class="bi bi-calendar3 me-1"></i>{{ \App\Helpers\ThaiDateHelper::format($other->con_even_date) }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            <!-- Navigation Button -->
+            <div class="d-grid gap-2">
+                <a href="{{ route('frontend.researchcoferenceinthai.index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> กลับไปหน้ารายการการประชุม
                 </a>
-                <button onclick="window.print()" class="btn btn-outline-secondary px-4 rounded-pill">
-                    <i class="bi bi-printer me-1"></i> พิมพ์
-                </button>
             </div>
         </div>
     </div>
 </div>
 
 <style>
+    .hover-primary:hover {
+        color: var(--bs-primary) !important;
+    }
     .content-body img {
         max-width: 100%;
         height: auto;
         border-radius: 0.5rem;
         margin: 1rem 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 </style>
 @endsection

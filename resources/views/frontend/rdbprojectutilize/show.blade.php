@@ -1,17 +1,43 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="card mb-4">
-        <div class="card-header">
-            <h4>รายละเอียดการนำไปใช้ประโยชน์</h4>
+<div class="container-fluid py-4">
+
+    <!-- Breadcrumb & Navigation -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ route('frontend.site.index') }}" class="text-decoration-none">หน้าหลัก</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('frontend.rdbprojectutilize.index') }}" class="text-decoration-none">การนำไปใช้ประโยชน์</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">รายละเอียด</li>
+                </ol>
+            </nav>
+            <h3 class="mb-0 fw-bold text-body">
+                <i class="bi bi-gear-wide-connected me-2 text-primary"></i>รายละเอียดการนำไปใช้ประโยชน์
+            </h3>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ route('frontend.rdbprojectutilize.index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> กลับหน้ารายการ
+            </a>
+            <button onclick="window.print()" class="btn btn-outline-secondary">
+                <i class="bi bi-printer me-1"></i> พิมพ์
+            </button>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4 border">
+        <div class="card-header text-white" style="background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);">
+            <span class="small text-white-50"><i class="bi bi-gear me-1"></i> ข้อมูลการนำไปใช้ประโยชน์</span>
+            <h4 class="card-title mb-0 mt-1 fw-bold text-white text-break">{{ $item->project->pro_nameTH ?? 'การนำงานวิจัยไปใช้ประโยชน์' }}</h4>
         </div>
         <div class="card-body">
             <!-- Utilization Info & Project -->
             <div class="row g-4 mb-4">
                 <div class="col-md-7">
                     <div class="p-3 border rounded h-100 bg-body-tertiary">
-                        <h5 class="mb-3 text-primary border-bottom pb-2"><i class="bi bi-info-circle-fill me-2"></i>Utilization Info</h5>
+                        <h5 class="mb-3 text-primary border-bottom pb-2"><i class="bi bi-info-circle-fill me-2"></i>ข้อมูลการนำไปใช้ประโยชน์</h5>
                         
                         <div class="row mb-2">
                             <div class="col-sm-4 fw-bold">วันที่นำไปใช้:</div>
@@ -164,7 +190,7 @@
             @endif
 
             <div class="mt-4 d-flex gap-2">
-                <a href="{{ route('frontend.rdbprojectutilize.index') }}" class="btn btn-outline-secondary px-4"><i class="bi bi-arrow-left me-1"></i> Back to List</a>
+                <a href="{{ route('frontend.rdbprojectutilize.index') }}" class="btn btn-outline-secondary px-4"><i class="bi bi-arrow-left me-1"></i> กลับหน้ารายการ</a>
                 <button onclick="window.print()" class="btn btn-outline-secondary px-4"><i class="bi bi-printer me-1"></i> พิมพ์</button>
             </div>
         </div>

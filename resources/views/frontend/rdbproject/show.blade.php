@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="py-4">
+<div class="container-fluid py-4">
     @php
         if (!function_exists('getFrontendUserName')) {
             function getFrontendUserName($user) {
@@ -14,14 +14,25 @@
             }
         }
     @endphp
-    {{-- Page Header --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="mb-0"><i class="bi bi-folder2-open me-2"></i>รายละเอียดโครงการวิจัย</h4>
+    <!-- Breadcrumb & Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ route('frontend.site.index') }}" class="text-decoration-none">หน้าหลัก</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('frontend.rdbproject.index') }}" class="text-decoration-none">โครงการวิจัย</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">รายละเอียดโครงการ</li>
+                </ol>
+            </nav>
+            <h3 class="mb-0 fw-bold text-body">
+                <i class="bi bi-folder2-open me-2 text-primary"></i>รายละเอียดโครงการวิจัย
+            </h3>
+        </div>
+        <div class="d-flex gap-2">
             <a href="{{ route('frontend.rdbproject.index') }}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i> ย้อนกลับ
+                <i class="bi bi-arrow-left me-1"></i> กลับหน้ารายการ
             </a>
-            <button onclick="window.print()" class="btn btn-outline-secondary ms-2">
+            <button onclick="window.print()" class="btn btn-outline-secondary">
                 <i class="bi bi-printer me-1"></i> พิมพ์
             </button>
         </div>

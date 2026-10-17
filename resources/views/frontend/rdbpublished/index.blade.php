@@ -1,232 +1,223 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-4">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h2 class="mb-4"><i class="bi bi-journal-text"></i> ผลงานตีพิมพ์ (Published Works)</h2>
-            
-            @if(session('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                {{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            @endif
-            
-            @if(isset($project))
-            <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
-                <i class="bi bi-info-circle-fill me-2 fs-4"></i>
-                <div>
-                    กำลังแสดงรายการเฉพาะโครงการ: <strong>{!! $project->pro_nameTH !!}</strong>
-                    <a href="{{ route('frontend.rdbpublished.index') }}" class="btn btn-sm btn-outline-info ms-3 bg-white text-info text-decoration-none border-0 shadow-sm">แสดงทั้งหมด</a>
-                </div>
-            </div>
-            @endif
+<div class="container-fluid py-4">
 
-            <div class="card shadow-sm mb-4">
-                <div class="card-body">
-                    <form action="{{ route('frontend.rdbpublished.index') }}" method="GET" class="row g-3">
-                        @if(request('pro_id'))
-                        <input type="hidden" name="pro_id" value="{{ request('pro_id') }}">
-                        @endif
-                        <div class="col-md-6">
-                            <label for="search" class="form-label">คำค้นหา</label>
-                            <input type="text" class="form-control" id="search" name="search" value="{{ request('search') }}" placeholder="ระบุชื่อผลงาน, วารสาร, นักวิจัย, หรือชื่อโครงการ...">
-                        </div>
-                        <div class="col-md-2">
-                            <label for="date_start" class="form-label">วันที่เริ่ม <span class="text-danger" id="date_required_indicator" style="display:none;">*</span></label>
-                            <input type="date" class="form-control" id="date_start" name="date_start" value="{{ request('date_start') }}">
-                        </div>
-                        <div class="col-md-2">
-                            <label for="date_end" class="form-label">วันที่สิ้นสุด <span class="text-danger" id="date_end_required_indicator" style="display:none;">*</span></label>
-                            <input type="date" class="form-control" id="date_end" name="date_end" value="{{ request('date_end') }}">
-                        </div>
-                        <div class="col-md-12 d-flex justify-content-end align-items-end">
-                            <button type="submit" class="btn btn-primary me-2"><i class="bi bi-search"></i> ค้นหา</button>
-                            @if(request('pro_id'))
-                                <a href="{{ route('frontend.rdbpublished.index', ['pro_id' => request('pro_id')]) }}" class="btn btn-secondary me-2">ล้างค่าค้นหา</a>
-                            @else
-                                <a href="{{ route('frontend.rdbpublished.index') }}" class="btn btn-secondary me-2">ล้างค่า</a>
-                            @endif
-                            <button type="submit" formaction="{{ route('frontend.rdbpublished.export') }}" class="btn btn-success"><i class="bi bi-file-earmark-excel"></i> Export CSV</button>
-                        </div>
-                    </form>
-                </div>
+    <!-- Page Title -->
+    <div class="mb-4">
+        <h2 class="mb-0 text-body"><i class="bi bi-journal-text me-2 text-primary"></i> ผลงานตีพิมพ์ (Published Works)</h2>
+    </div>
+
+    @if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+    
+    @if(isset($project))
+    <div class="alert alert-info d-flex align-items-center justify-content-between mb-4 border" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+            <div>
+                กำลังแสดงรายการเฉพาะโครงการ: <strong>{!! $project->pro_nameTH !!}</strong>
+            </div>
+        </div>
+        <a href="{{ route('frontend.rdbpublished.index') }}" class="btn btn-sm btn-outline-info bg-body text-info text-decoration-none shadow-sm">
+            แสดงทั้งหมด
+        </a>
+    </div>
+    @endif
+
+    <!-- Search Component -->
+    <x-search-bar :searchRoute="route('frontend.rdbpublished.index')"
+        simplePlaceholder="ค้นหาจาก: ชื่อผลงาน, วารสาร, นักวิจัย, หรือชื่อโครงการ...">
+
+        @if(request('pro_id'))
+            <input type="hidden" name="pro_id" value="{{ request('pro_id') }}">
+        @endif
+
+        <div class="row g-3">
+            {{-- Row 1: Search, Type, Year --}}
+            <div class="col-md-6">
+                <label class="form-label">คำค้นหา</label>
+                <input type="text" class="form-control" name="search" value="{{ request('search') }}" 
+                    placeholder="ระบุชื่อผลงาน, วารสาร, นักวิจัย, หรือชื่อโครงการ...">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">ประเภทผลงาน</label>
+                <select class="form-select" name="pubtype_id">
+                    <option value="">-- ทั้งหมด --</option>
+                    @if(isset($pubTypes))
+                        @foreach($pubTypes as $type)
+                            <option value="{{ $type->pubtype_id }}" {{ request('pubtype_id') == $type->pubtype_id ? 'selected' : '' }}>
+                                {{ $type->pubtype_group }}{{ $type->pubtype_subgroup ? ' (' . $type->pubtype_subgroup . ')' : '' }}
+                            </option>
+                        @endforeach
+                    @endif
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">ปีงบประมาณ</label>
+                <select class="form-select" name="year_id">
+                    <option value="">-- ทั้งหมด --</option>
+                    @foreach($years as $year)
+                        <option value="{{ $year->year_id }}" {{ request('year_id') == $year->year_id ? 'selected' : '' }}>
+                            {{ $year->year_name }}
+                        </option>
+                    @endforeach
+                </select>
             </div>
 
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-top">
-                            <thead class="table-light">
-                                <tr>
-                                    <th style="width: 40%;">ชื่อผลงาน / วารสาร</th>
-                                    <th style="width: 25%;">ผู้เขียนบทความ</th>
-                                    <th style="width: 20%;">วันที่ตีพิมพ์</th>
-                                    <th style="width: 15%;">จัดการ</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($items as $item)
-                                <tr>
-                                    <td>
-                                        <div class="fw-bold"><i class="bi bi-file-earmark-text-fill text-primary"></i> {!! $item->pub_name !!}</div>
-                                        @if($item->pub_name_journal)
-                                        <small class="text-muted d-block mt-1">
-                                            <i class="bi bi-journal-bookmark"></i> {!! $item->pub_name_journal !!}
-                                        </small>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @php
-                                            $mainAuthor = null;
-                                            $otherCount = 0;
-                                            
-                                            if ($item->authors && $item->authors->count() > 0) {
-                                                $mainAuthor = $item->authors->first();
-                                                $otherCount = $item->authors->count() - 1;
-                                            } elseif ($item->researcher) {
-                                                $mainAuthor = $item->researcher;
-                                            }
-                                        @endphp
+            {{-- Row 2: Date Range --}}
+            <div class="col-md-6">
+                <label class="form-label">วันที่ตีพิมพ์ (เริ่มต้น)</label>
+                <input type="date" class="form-control" name="date_start" value="{{ request('date_start') }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">วันที่ตีพิมพ์ (สิ้นสุด)</label>
+                <input type="date" class="form-control" name="date_end" value="{{ request('date_end') }}">
+            </div>
+        </div>
+    </x-search-bar>
 
-                                        @if($mainAuthor)
-                                            <div class="fw-bold">
-                                                <a href="{{ route('frontend.rdbresearcher.show', $mainAuthor->researcher_id) }}" 
-                                                   class="text-decoration-none text-body fw-bold hover-primary">
-                                                    <i class="bi bi-person-circle text-primary me-1"></i>{!! $mainAuthor->researcher_fname !!} {!! $mainAuthor->researcher_lname !!}
-                                                </a>
-                                                @if($otherCount > 0)
-                                                    <span class="text-body-secondary fw-normal">และ {{ $otherCount }} คน</span>
-                                                @endif
-                                            </div>
-                                            @if($mainAuthor->department)
-                                            <small class="text-muted d-block">
-                                                <i class="bi bi-building"></i> {!! $mainAuthor->department->department_nameTH !!}
-                                            </small>
-                                            @endif
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if($item->pub_date)
-                                            {{ \App\Helpers\ThaiDateHelper::format($item->pub_date, false, true) }}
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <a href="{{ route('frontend.rdbpublished.show', $item->id) }}" class="btn btn-outline-primary btn-sm">
-                                            <i class="bi bi-eye"></i> ดูข้อมูล
+    <!-- Results Table Card -->
+    <div class="card shadow-sm border">
+        <div class="card-header bg-body-tertiary border-bottom py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 text-body">
+                <i class="bi bi-list-ul me-2 text-primary"></i>รายการผลงานตีพิมพ์
+                <span class="badge bg-primary rounded-pill ms-2">{{ number_format($items->total()) }} รายการ</span>
+            </h5>
+            <div>
+                <a href="{{ route('frontend.rdbpublished.export', request()->query()) }}" class="btn btn-outline-success btn-sm">
+                    <i class="bi bi-file-earmark-excel me-1"></i> Export CSV
+                </a>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 50%;">รายละเอียดผลงาน</th>
+                            <th style="width: 25%;">ผู้ประพันธ์ / สังกัด</th>
+                            <th style="width: 15%;" class="text-center text-nowrap">วันที่ตีพิมพ์</th>
+                            <th style="width: 10%;" class="text-center text-nowrap">จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($items as $item)
+                        <tr>
+                            <td>
+                                <div class="fw-bold mb-1">
+                                    <a href="{{ route('frontend.rdbpublished.show', $item->id) }}" class="text-body fw-bold text-decoration-none hover-primary text-break">
+                                        {!! $item->pub_name !!}
+                                    </a>
+                                </div>
+                                @if($item->pub_name_journal)
+                                    <small class="text-body-secondary d-block mb-1 text-break">
+                                        <i class="bi bi-book me-1"></i>{!! $item->pub_name_journal !!}
+                                    </small>
+                                @endif
+                                <div class="small d-flex flex-wrap gap-2 align-items-center mt-1">
+                                    @if($item->pubtype)
+                                        <span class="badge bg-body-secondary text-body border">
+                                            {{ $item->pubtype->pubtype_name ?? $item->pubtype->pubtype_subgroup ?? '-' }}
+                                        </span>
+                                    @endif
+                                    @if($item->year)
+                                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary">
+                                            ปี {{ $item->year->year_name }}
+                                        </span>
+                                    @endif
+                                    @if($item->project)
+                                        <span class="text-body-secondary text-break">
+                                            <i class="bi bi-link-45deg"></i>โครงการ:
+                                            <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" target="_blank" class="text-primary text-decoration-none hover-underline">
+                                                {!! $item->project->pro_nameTH !!}
+                                            </a>
+                                        </span>
+                                    @endif
+                                </div>
+                            </td>
+                            <td>
+                                @php
+                                    $mainAuthor = null;
+                                    $otherCount = 0;
+                                    
+                                    if ($item->authors && $item->authors->count() > 0) {
+                                        $mainAuthor = $item->authors->first();
+                                        $otherCount = $item->authors->count() - 1;
+                                    } elseif ($item->researcher) {
+                                        $mainAuthor = $item->researcher;
+                                    }
+                                @endphp
+
+                                @if($mainAuthor)
+                                    <div class="fw-bold">
+                                        <a href="{{ route('frontend.rdbresearcher.show', $mainAuthor->researcher_id) }}" 
+                                           class="text-decoration-none text-body fw-bold hover-primary">
+                                            <i class="bi bi-person-circle text-primary me-1"></i>{!! $mainAuthor->researcher_fname !!} {!! $mainAuthor->researcher_lname !!}
                                         </a>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="4" class="text-center py-4 text-muted">ไม่พบข้อมูลผลงานตีพิมพ์</td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="d-flex justify-content-center mt-4">
-                        {{ $items->withQueryString()->links('pagination::bootstrap-5') }}
-                    </div>
-                </div>
-            </div>
-            
-            <div class="mt-4">
-                <a href="{{ route('frontend.rdbproject.index') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> กลับหน้ารายการโครงการ</a>
+                                        @if($otherCount > 0)
+                                            <span class="text-body-secondary fw-normal">และ {{ $otherCount }} คน</span>
+                                        @endif
+                                    </div>
+                                    @if($mainAuthor->department)
+                                    <small class="text-body-secondary d-block mt-1">
+                                        <i class="bi bi-building me-1"></i>{!! $mainAuthor->department->department_nameTH !!}
+                                    </small>
+                                    @endif
+                                @else
+                                    <span class="text-body-secondary">-</span>
+                                @endif
+                            </td>
+                            <td class="text-center text-body-secondary small text-nowrap">
+                                @if($item->pub_date)
+                                    <i class="bi bi-calendar3 me-1"></i>
+                                    {{ \App\Helpers\ThaiDateHelper::format($item->pub_date, false, true) }}
+                                @else
+                                    -
+                                @endif
+                            </td>
+                            <td class="text-center text-nowrap">
+                                <a href="{{ route('frontend.rdbpublished.show', $item->id) }}" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-eye"></i> ดูข้อมูล
+                                </a>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-body-secondary">
+                                <i class="bi bi-journal-x display-6 d-block mb-2"></i>
+                                ไม่พบข้อมูลผลงานตีพิมพ์
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
+    
+    <!-- Pagination -->
+    <div class="d-flex justify-content-center mt-4">
+        {{ $items->withQueryString()->links('pagination::bootstrap-5') }}
+    </div>
+
 </div>
 
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const dateStart = document.getElementById('date_start');
-    const dateEnd = document.getElementById('date_end');
-    const searchForm = dateStart.closest('form');
-    
-    // Update required indicators
-    function updateRequiredIndicators() {
-        const startIndicator = document.getElementById('date_required_indicator');
-        const endIndicator = document.getElementById('date_end_required_indicator');
-        
-        if (dateEnd.value) {
-            startIndicator.style.display = 'inline';
-            dateStart.required = true;
-        } else {
-            startIndicator.style.display = 'none';
-            dateStart.required = false;
-        }
-        
-        if (dateStart.value) {
-            endIndicator.style.display = 'inline';
-            dateEnd.required = true;
-        } else {
-            endIndicator.style.display = 'none';
-            dateEnd.required = false;
-        }
-    }
-    
-    // Set min/max constraints
-    dateStart.addEventListener('change', function() {
-        if (this.value) {
-            dateEnd.min = this.value;
-        } else {
-            dateEnd.removeAttribute('min');
-        }
-        updateRequiredIndicators();
-    });
-    
-    dateEnd.addEventListener('change', function() {
-        if (this.value) {
-            dateStart.max = this.value;
-        } else {
-            dateStart.removeAttribute('max');
-        }
-        updateRequiredIndicators();
-    });
-    
-    // Form submission validation
-    searchForm.addEventListener('submit', function(e) {
-        // Skip validation for export button
-        if (e.submitter && e.submitter.formAction && e.submitter.formAction.includes('export')) {
-            return true;
-        }
-        
-        const startVal = dateStart.value;
-        const endVal = dateEnd.value;
-        
-        // Check if only one date is filled
-        if ((startVal && !endVal) || (!startVal && endVal)) {
-            e.preventDefault();
-            alert('กรุณาระบุทั้งวันที่เริ่มและวันที่สิ้นสุด');
-            return false;
-        }
-        
-        // Check if end date is before start date
-        if (startVal && endVal && new Date(endVal) < new Date(startVal)) {
-            e.preventDefault();
-            alert('วันที่สิ้นสุดต้องมากกว่าหรือเท่ากับวันที่เริ่ม');
-            return false;
-        }
-    });
-    
-    // Initialize on page load
-    updateRequiredIndicators();
-    if (dateStart.value) {
-        dateEnd.min = dateStart.value;
-    }
-    if (dateEnd.value) {
-        dateStart.max = dateEnd.value;
-    }
-});
-</script>
-@endpush
+<style>
+.hover-primary {
+    transition: color 0.15s ease-in-out;
+}
+.hover-primary:hover {
+    color: var(--bs-primary) !important;
+    text-decoration: underline !important;
+}
+.hover-underline:hover {
+    text-decoration: underline !important;
+}
+</style>
 @endsection

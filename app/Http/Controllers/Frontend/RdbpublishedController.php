@@ -66,6 +66,10 @@ class RdbpublishedController extends Controller
             $project = RdbProject::find($request->pro_id);
         }
 
+        if ($request->filled('pubtype_id')) {
+            $query->where('pubtype_id', $request->pubtype_id);
+        }
+
         if ($request->filled('year_id')) {
             $query->where('year_id', $request->year_id);
         }
@@ -77,8 +81,9 @@ class RdbpublishedController extends Controller
         $items = $query->paginate(10);
         
         $years = RdbYear::orderBy('year_name', 'desc')->get();
+        $pubTypes = RdbPublishedType::orderBy('pubtype_group')->orderBy('pubtype_subgroup')->get();
 
-        return view('frontend.rdbpublished.index', compact('items', 'years', 'project'));
+        return view('frontend.rdbpublished.index', compact('items', 'years', 'project', 'pubTypes'));
     }
 
     public function show($id)

@@ -1,10 +1,36 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="card mb-4">
-        <div class="card-header">
-            <h4>รายละเอียดทรัพย์สินทางปัญญา</h4>
+<div class="container-fluid py-4">
+
+    <!-- Breadcrumb & Navigation -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ route('frontend.site.index') }}" class="text-decoration-none">หน้าหลัก</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('frontend.rdbdip.index') }}" class="text-decoration-none">ทรัพย์สินทางปัญญา</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">รายละเอียด</li>
+                </ol>
+            </nav>
+            <h3 class="mb-0 fw-bold text-body">
+                <i class="bi bi-award-fill me-2 text-primary"></i>รายละเอียดทรัพย์สินทางปัญญา
+            </h3>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ route('frontend.rdbdip.index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> กลับหน้ารายการ
+            </a>
+            <button onclick="window.print()" class="btn btn-outline-secondary">
+                <i class="bi bi-printer me-1"></i> พิมพ์
+            </button>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4 border">
+        <div class="card-header text-white" style="background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);">
+            <span class="small text-white-50"><i class="bi bi-award me-1"></i> ข้อมูลทรัพย์สินทางปัญญา</span>
+            <h4 class="card-title mb-0 mt-1 fw-bold text-white text-break">{{ $item->dip_name ?: ($item->dip_data2_name ?? 'ทรัพย์สินทางปัญญา') }}</h4>
         </div>
         <div class="card-body">
             <!-- IP Info & Project -->
@@ -223,7 +249,7 @@
             @endif
 
             <div class="mt-4">
-                <a href="{{ route('frontend.rdbdip.index') }}" class="btn btn-outline-secondary px-4"><i class="bi bi-arrow-left me-1"></i> Back to List</a>
+                <a href="{{ route('frontend.rdbdip.index') }}" class="btn btn-outline-secondary px-4"><i class="bi bi-arrow-left me-1"></i> กลับหน้ารายการ</a>
             </div>
         </div>
     </div>
