@@ -37,7 +37,7 @@
             <div class="col-md-6">
                 <label for="role" class="form-label fw-bold">บทบาท (Role) <span class="text-danger">*</span></label>
                 <select name="role" id="role" class="form-select @error('role') is-invalid @enderror" required>
-                    <option value="">-- เลือกบทบาท --</option>
+                    <option value="">-- ค้นหาและเลือกบทบาท --</option>
                     @foreach($roles as $r)
                         <option value="{{ $r->name }}" {{ old('role') == $r->name ? 'selected' : '' }}>
                             {{ $r->name }} {{ $r->description ? '('.$r->description.')' : '' }}
@@ -78,3 +78,24 @@
     </x-form-wrapper>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof TomSelect !== 'undefined') {
+            new TomSelect('#role', {
+                placeholder: '-- ค้นหาและเลือกบทบาท --',
+                allowEmptyOption: true,
+                plugins: ['clear_button'],
+            });
+
+            new TomSelect('#researcher_id', {
+                placeholder: '-- ค้นหาชื่อนักวิจัย หรือคณะ/หน่วยงาน --',
+                allowEmptyOption: true,
+                maxOptions: 1000,
+                plugins: ['clear_button'],
+            });
+        }
+    });
+</script>
+@endpush

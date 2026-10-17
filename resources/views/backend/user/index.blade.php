@@ -36,10 +36,10 @@
     <div class="card shadow-sm border">
         <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center py-3">
             <h6 class="mb-0 fw-bold text-body">
-                <i class="bi bi-list-check me-2"></i>รายชื่อผู้ใช้งานทั้งหมด
+                <i class="bi bi-people me-2"></i>รายชื่อผู้ใช้งานที่มีบทบาทในระบบ
             </h6>
             <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
-                ทั้งหมด {{ number_format($users->total()) }} รายการ
+                ทั้งหมด {{ number_format($users->total()) }} บัญชี
             </span>
         </div>
         <div class="table-responsive">

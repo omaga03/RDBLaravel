@@ -18,7 +18,7 @@ class UserController extends Controller
     {
         $this->authorize('viewAny', User::class);
 
-        $query = User::with(['roles', 'researcher']);
+        $query = User::has('roles')->with(['roles', 'researcher.department', 'researcher.prefix']);
 
         if ($request->filled('search')) {
             $search = trim($request->search);
@@ -50,7 +50,7 @@ class UserController extends Controller
         $this->authorize('create', User::class);
 
         $roles = AuthItem::where('type', 1)->orderBy('name')->get();
-        $researchers = RdbResearcher::orderBy('researcher_fname')->get();
+        $researchers = RdbResearcher::with(['prefix', 'department'])->orderBy('researcher_fname')->get();
 
         return view('backend.user.create', compact('roles', 'researchers'));
     }
@@ -103,7 +103,7 @@ class UserController extends Controller
         $this->authorize('update', $user);
 
         $roles = AuthItem::where('type', 1)->orderBy('name')->get();
-        $researchers = RdbResearcher::orderBy('researcher_fname')->get();
+        $researchers = RdbResearcher::with(['prefix', 'department'])->orderBy('researcher_fname')->get();
         $userRole = $user->roles()->first()?->item_name;
 
         return view('backend.user.edit', compact('user', 'roles', 'researchers', 'userRole'));
