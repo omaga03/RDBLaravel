@@ -572,4 +572,23 @@ class BackendAuditTest extends TestCase
         $response->assertSee('การแสดงผล', false);
         $response->assertSee('Public Visible', false);
     }
+
+    public function test_rdbprojectutilize_edit_page_contains_blank_url_and_download_works()
+    {
+        $admin = \App\Models\User::find(129);
+        $utilize = \App\Models\RdbProjectUtilize::find(1036);
+        $this->assertNotNull($utilize);
+
+        // Test edit page contains target="_blank" and download route
+        $editResponse = $this->actingAs($admin)->get(route('backend.rdbprojectutilize.edit', 1036));
+        $editResponse->assertStatus(200);
+        $editResponse->assertSee('target="_blank"', false);
+        $editResponse->assertSee('เปิดดูไฟล์', false);
+        $editResponse->assertSee(route('backend.rdbprojectutilize.download', ['id' => 1036, 'filename' => $utilize->utz_files]), false);
+
+        // Test download / view endpoint works and returns 200 with inline disposition
+        $fileResponse = $this->actingAs($admin)->get(route('backend.rdbprojectutilize.download', ['id' => 1036, 'filename' => $utilize->utz_files]));
+        $fileResponse->assertStatus(200);
+        $fileResponse->assertHeader('Content-Disposition', 'inline; filename="' . $utilize->utz_files . '"');
+    }
 }

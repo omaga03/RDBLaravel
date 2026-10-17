@@ -23,6 +23,9 @@ trait HasDualFilePath
             if (file_exists($fullNewPath)) {
                 return $this->{$newField};
             }
+            if (file_exists(public_path($this->{$newField}))) {
+                return $this->{$newField};
+            }
         }
 
         // Fallback to legacy filename under oldDir
@@ -31,6 +34,9 @@ trait HasDualFilePath
             // Resolve to absolute path for direct file existence check
             $fullOldPath = Storage::disk('public')->path($oldPath);
             if (file_exists($fullOldPath)) {
+                return $oldPath;
+            }
+            if (file_exists(public_path($oldPath))) {
                 return $oldPath;
             }
         }

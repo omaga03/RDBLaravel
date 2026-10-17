@@ -79,17 +79,32 @@
                 </select>
             </div>
             <div class="col-md-6 mb-3">
-                <label for="utz_files_upload" class="form-label">ไฟล์แนบ</label>
+                <label for="utz_files_upload" class="form-label fw-bold">ไฟล์แนบ</label>
                 @if($isEdit && $item->utz_files)
-                    <div class="mb-2">
-                        <small class="text-muted">ไฟล์ปัจจุบัน:</small>
-                        <span class="badge bg-secondary me-1">
-                            <i class="bi bi-file-earmark-pdf"></i> {{ $item->utz_files }}
-                        </span>
+                    <div class="mb-2 p-2 bg-light rounded border">
+                        <small class="text-muted d-block mb-1 fw-semibold"><i class="bi bi-paperclip"></i> ไฟล์ปัจจุบัน:</small>
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach(explode(',', $item->utz_files) as $file)
+                                @if(trim($file))
+                                    @php $trimmedFile = trim($file); @endphp
+                                    <div class="d-inline-flex align-items-center gap-2 bg-white px-2 py-1 rounded border shadow-sm">
+                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                                            <i class="bi bi-file-earmark-pdf text-danger me-1"></i> {{ $trimmedFile }}
+                                        </span>
+                                        <a href="{{ route('backend.rdbprojectutilize.download', ['id' => $item->utz_id, 'filename' => $trimmedFile]) }}" 
+                                           target="_blank" 
+                                           class="btn btn-sm btn-outline-primary py-0 px-2 d-inline-flex align-items-center"
+                                           title="เปิดดูไฟล์ {{ $trimmedFile }} ในแท็บใหม่">
+                                            <i class="bi bi-box-arrow-up-right me-1"></i> เปิดดูไฟล์
+                                        </a>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
                     </div>
                 @endif
                 <input type="file" class="form-control" id="utz_files_upload" name="utz_files_upload" accept=".pdf">
-                <small class="text-muted">รองรับไฟล์ PDF เท่านั้น</small>
+                <small class="text-muted">รองรับไฟล์ PDF เท่านั้น (เลือกไฟล์ใหม่หากต้องการเปลี่ยน)</small>
             </div>
         </div>
 

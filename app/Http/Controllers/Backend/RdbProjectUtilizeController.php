@@ -274,7 +274,25 @@ class RdbProjectUtilizeController extends Controller
         $item = RdbProjectUtilize::findOrFail($id);
         $this->authorize('view', $item);
         
-        $filePath = $item->getUtilizeFilePath();
+        $filePath = null;
+
+        // 1. Try getUtilizeFilePath from model
+        $candidate = $item->getUtilizeFilePath();
+        if ($candidate && (Storage::disk('public')->exists($candidate) || file_exists(public_path($candidate)))) {
+            $filePath = $candidate;
+        }
+
+        // 2. Fallback to specific $filename under uploads/utilize
+        if (!$filePath && $filename) {
+            $safeName = basename(trim($filename));
+            if ($safeName) {
+                if (Storage::disk('public')->exists('uploads/utilize/' . $safeName)) {
+                    $filePath = 'uploads/utilize/' . $safeName;
+                } elseif (file_exists(public_path('uploads/utilize/' . $safeName))) {
+                    $filePath = 'uploads/utilize/' . $safeName;
+                }
+            }
+        }
 
         if ($filePath && Storage::disk('public')->exists($filePath)) {
             $item->increment('utz_countfile');
@@ -283,7 +301,12 @@ class RdbProjectUtilizeController extends Controller
 
         if ($filePath && file_exists(public_path($filePath))) {
             $item->increment('utz_countfile');
-            return response()->download(public_path($filePath));
+            $fullPath = public_path($filePath);
+            $mimeType = mime_content_type($fullPath) ?: 'application/pdf';
+            return response()->file($fullPath, [
+                'Content-Type' => $mimeType,
+                'Content-Disposition' => 'inline; filename="' . basename($filePath) . '"'
+            ]);
         }
 
         abort(404, 'ไม่พบไฟล์');

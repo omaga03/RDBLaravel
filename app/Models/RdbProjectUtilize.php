@@ -67,7 +67,7 @@ class RdbProjectUtilize extends Model
 
     use HasDualFilePath;
 
-    public function getUtilizeFilePath(string $newField = 'uf_path', string $oldField = 'uf_file', string $oldDir = 'uploads/utilize'): ?string
+    public function getUtilizeFilePath(string $newField = 'uf_path', string $oldField = 'utz_files', string $oldDir = 'uploads/utilize'): ?string
     {
         return $this->resolveDualFilePath($newField, $oldField, $oldDir);
     }
