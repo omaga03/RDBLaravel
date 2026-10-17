@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="py-4">
+<div class="container-fluid py-4">
     {{-- Page Header with Actions --}}
     <x-page-header 
         title="รายละเอียดคำนำหน้า"

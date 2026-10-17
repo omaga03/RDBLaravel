@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid py-4">
     @if ($errors->any())
         <div class="alert alert-danger mb-4 shadow-sm">
             <ul class="mb-0">
@@ -14,9 +14,10 @@
     
     <x-form-wrapper 
         title="เพิ่มข่าวงานประชุมวิชาการใหม่" 
-        icon="bi-calendar-event"
+        icon="bi-calendar-plus"
         mode="create" 
-        action="{{ route('backend.research_conference.store') }}" 
+        :actionRoute="route('backend.research_conference.store')" 
+        :backRoute="route('backend.research_conference.index')" 
         enctype="multipart/form-data"
     >
         @include('backend.research_conference._form')

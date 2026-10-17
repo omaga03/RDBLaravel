@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid py-4">
     <x-form-wrapper 
         title="แก้ไขกลุ่มประเภทงบประมาณ: {{ $item->pttg_name }}" 
         icon="bi-pencil-square"

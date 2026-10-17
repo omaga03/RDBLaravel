@@ -2,44 +2,29 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header pb-0">
-                    <div class="d-flex align-items-center">
-                        <p class="mb-0">Add New Role</p>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <form method="POST" action="{{ route('backend.rbac.store') }}">
-                        @csrf
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label for="name" class="form-control-label">Name</label>
-                                    <input class="form-control @error('name') is-invalid @enderror" type="text" id="name" name="name" value="{{ old('name') }}" required>
-                                    @error('name')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label for="description" class="form-control-label">Description</label>
-                                    <input class="form-control @error('description') is-invalid @enderror" type="text" id="description" name="description" value="{{ old('description') }}">
-                                    @error('description')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-                        <hr class="horizontal dark">
-                        <button type="submit" class="btn btn-primary">Create Role</button>
-                        <a href="{{ route('backend.rbac.index') }}" class="btn btn-secondary">Cancel</a>
-                    </form>
-                </div>
+    <x-form-wrapper 
+        title="เพิ่มบทบาทใหม่ (Add New Role)" 
+        icon="bi-shield-plus"
+        mode="create" 
+        :actionRoute="route('backend.rbac.store')"
+        :backRoute="route('backend.rbac.index')"
+    >
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label for="name" class="form-label">Role Name <span class="text-danger">*</span></label>
+                <input class="form-control @error('name') is-invalid @enderror" type="text" id="name" name="name" value="{{ old('name') }}" required placeholder="e.g. Admin, Editor">
+                @error('name')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+            <div class="col-md-6">
+                <label for="description" class="form-label">Description</label>
+                <input class="form-control @error('description') is-invalid @enderror" type="text" id="description" name="description" value="{{ old('description') }}" placeholder="Role description...">
+                @error('description')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
             </div>
         </div>
-    </div>
+    </x-form-wrapper>
 </div>
 @endsection

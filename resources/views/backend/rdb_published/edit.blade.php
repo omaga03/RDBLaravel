@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid py-4">
     <x-form-wrapper 
         title="แก้ไขข้อมูลการตีพิมพ์" 
         icon="bi-pencil-square"

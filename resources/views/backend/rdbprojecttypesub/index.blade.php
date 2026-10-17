@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="py-4">
+<div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="mb-0"><i class="bi bi-diagram-3 me-2"></i>จัดการประเภทโครงการทุนย่อย</h2>
         <a href="{{ route('backend.rdbprojecttypesub.create') }}" class="btn btn-success d-inline-flex align-items-center">
@@ -22,60 +22,73 @@
         </div>
     </x-search-bar>
 
-    <x-card>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th style="width: 60px;">ID</th>
-                        <th>ชื่อโครงการทุนสนับสนุน</th>
-                        <th style="width: 120px;">ไฟล์แนบ</th>
-                        <th style="width: 80px;" class="text-center">จัดการ</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($items as $item)
-                    <tr>
-                        <td><code>{{ $item->pts_id }}</code></td>
-                        <td>
-                            <div class="fw-bold">
-                                @if(isset($item->projectType->year->year_name))
-                                    <span class="badge bg-secondary me-1">
-                                        <i class="bi bi-calendar-event me-1"></i> {{ $item->projectType->year->year_name }}
-                                    </span>
+    <div class="card shadow-sm border mb-4">
+        <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center py-3">
+            <h6 class="m-0 font-weight-bold text-primary"><i class="bi bi-table me-2"></i>รายการประเภทโครงการทุนย่อย</h6>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">{{ number_format($items->total()) }} รายการ</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 60px;">ID</th>
+                            <th>ชื่อโครงการทุนสนับสนุน</th>
+                            <th style="width: 120px;">ไฟล์แนบ</th>
+                            <th style="width: 100px;" class="text-center">จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($items as $item)
+                        <tr>
+                            <td><code>{{ $item->pts_id }}</code></td>
+                            <td>
+                                <div class="fw-bold">
+                                    @if(isset($item->projectType->year->year_name))
+                                        <span class="badge bg-secondary me-1">
+                                            <i class="bi bi-calendar-event me-1"></i> {{ $item->projectType->year->year_name }}
+                                        </span>
+                                    @endif
+                                    {{ $item->pts_name }}
+                                </div>
+                                <div class="small text-muted ms-3">
+                                    <i class="bi bi-arrow-return-right"></i> {{ $item->projectType->pt_name ?? '-' }}
+                                </div>
+                            </td>
+                            <td>
+                                @if($item->pts_file)
+                                    <a href="{{ asset('storage/uploads/project_types_sub/' . $item->pts_file) }}" target="_blank" class="text-decoration-none">
+                                        <i class="bi bi-file-earmark-text"></i> ดาวน์โหลด
+                                    </a>
+                                @else
+                                    <span class="text-muted">-</span>
                                 @endif
-                                {{ $item->pts_name }}
-                            </div>
-                            <div class="small text-muted ms-3">
-                                <i class="bi bi-arrow-return-right"></i> {{ $item->projectType->pt_name ?? '-' }}
-                            </div>
-                        </td>
-                        <td>
-                            @if($item->pts_file)
-                                <a href="{{ asset('storage/uploads/project_types_sub/' . $item->pts_file) }}" target="_blank" class="text-decoration-none">
-                                    <i class="bi bi-file-earmark-text"></i> ดาวน์โหลด
-                                </a>
-                            @else
-                                <span class="text-muted">-</span>
-                            @endif
-                        </td>
-                        <td class="text-center">
-                            <a href="{{ route('backend.rdbprojecttypesub.show', $item->pts_id) }}" class="btn btn-outline-primary btn-sm" title="ดูรายละเอียด">
-                                <i class="bi bi-eye"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="4" class="text-center text-muted py-4">ไม่พบข้อมูล</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ route('backend.rdbprojecttypesub.show', $item->pts_id) }}" class="btn btn-outline-primary" title="ดูรายละเอียด">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ route('backend.rdbprojecttypesub.edit', $item->pts_id) }}" class="btn btn-outline-warning" title="แก้ไข">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">ไม่พบข้อมูล</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
         @if($items->hasPages())
-        <div class="mt-3">{{ $items->withQueryString()->links() }}</div>
+        <div class="card-footer bg-body-tertiary py-3">
+            {{ $items->withQueryString()->links() }}
+        </div>
         @endif
-    </x-card>
+    </div>
 </div>
 @endsection

@@ -107,15 +107,6 @@
             <textarea class="form-control" id="dip_note" name="dip_note" rows="2" placeholder="ระบุหมายเหตุเพิ่มเติม...">{{ old('dip_note', $item->dip_note ?? '') }}</textarea>
         </div>
 
-        {{-- Buttons --}}
-        <div class="form-group mt-4 border-top pt-3">
-            <button type="submit" class="btn btn-{{ $isEdit ? 'primary' : 'success' }} px-4">
-                <i class="bi bi-save"></i> บันทึกข้อมูล
-            </button>
-            <a href="{{ $isEdit ? route('backend.rdb_dip.show', $item->dip_id) : route('backend.rdb_dip.index') }}" class="btn btn-warning">
-                <i class="bi bi-arrow-left"></i> ย้อนกลับ
-            </a>
-        </div>
 
 @push('scripts')
 <!-- TomSelect CDN -->

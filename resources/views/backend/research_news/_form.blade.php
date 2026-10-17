@@ -72,16 +72,7 @@
     </div>
 </div>
 
-<hr>
-<div class="d-flex justify-content-end">
-    @if(isset($item) && $item->id)
-        <a href="{{ route('backend.research_news.show', $item->id) }}" class="btn btn-secondary me-2">ยกเลิก</a>
-    @else
-        <a href="{{ route('backend.research_news.index') }}" class="btn btn-secondary me-2">ยกเลิก</a>
-    @endif
-    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> บันทึกข้อมูล</button>
-</div>
-</div>
+
 @push('scripts')
     @include('layouts.partials.ckeditor_setup')
     <script>

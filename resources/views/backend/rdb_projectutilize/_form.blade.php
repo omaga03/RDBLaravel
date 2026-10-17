@@ -117,15 +117,6 @@
             </div>
         </div>
 
-        {{-- Buttons --}}
-        <div class="form-group mt-4 border-top pt-3">
-            <button type="submit" class="btn btn-{{ $isEdit ? 'primary' : 'success' }}">
-                <i class="bi bi-save"></i> บันทึกข้อมูล
-            </button>
-            <a href="{{ $isEdit ? route('backend.rdbprojectutilize.show', $item->utz_id) : route('backend.rdbprojectutilize.index') }}" class="btn btn-warning">
-                <i class="bi bi-arrow-left"></i> ย้อนกลับ
-            </a>
-        </div>
 
 
 

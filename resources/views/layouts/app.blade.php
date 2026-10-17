@@ -193,7 +193,7 @@
 <body>
     <div id="app">
         <nav class="navbar navbar-expand-md shadow-sm border-bottom">
-            <div class="container">
+            <div class="{{ request()->is('backend*') ? 'container-fluid px-4' : 'container' }}">
                 <a class="navbar-brand" href="{{ url('/') }}">
                     {{ config('app.name', 'Laravel') }}
                 </a>

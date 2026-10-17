@@ -1,5 +1,5 @@
 <nav class="navbar navbar-expand-md shadow-sm border-bottom py-0" style="z-index: 1050;">
-    <div class="container">
+    <div class="container-fluid px-4">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#backendMenuContent" aria-controls="backendMenuContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon" style="font-size: 0.8rem;"></span>
         </button>

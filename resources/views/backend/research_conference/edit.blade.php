@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid py-4">
     @if ($errors->any())
         <div class="alert alert-danger mb-4 shadow-sm">
             <ul class="mb-0">
@@ -16,7 +16,8 @@
         title="แก้ไขข่าวงานประชุมวิชาการ" 
         icon="bi-pencil-square"
         mode="edit" 
-        action="{{ route('backend.research_conference.update', $item->id) }}" 
+        :actionRoute="route('backend.research_conference.update', $item->id)" 
+        :backRoute="route('backend.research_conference.show', $item->id)" 
         method="PUT"
         enctype="multipart/form-data"
     >

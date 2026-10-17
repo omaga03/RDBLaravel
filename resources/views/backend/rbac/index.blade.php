@@ -2,67 +2,67 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="card my-4">
-                <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
-                    <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
-                        <h6 class="text-white text-capitalize ps-3">Role Management</h6>
-                    </div>
-                </div>
-                <div class="card-body px-0 pb-2">
-                    <div class="px-4 py-3">
-                        <a href="{{ route('backend.rbac.create') }}" class="btn btn-primary">
-                            <i class="bi bi-plus-lg me-1"></i> Add New Role
-                        </a>
-                    </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-0 text-primary">
+                <i class="bi bi-shield-lock me-2"></i>การจัดการบทบาท (Role Management)
+            </h4>
+            <div class="text-muted small">กำหนดสิทธิ์และบทบาทผู้ใช้งานในระบบ</div>
+        </div>
+        <a href="{{ route('backend.rbac.create') }}" class="btn btn-success d-inline-flex align-items-center shadow-sm">
+            <i class="bi bi-plus-circle me-1"></i> เพิ่มบทบาทใหม่
+        </a>
+    </div>
 
-                    {{-- Roles Table --}}
-                    <div class="px-4 py-3">
-                        <h5>Roles</h5>
-                        <div class="table-responsive p-0">
-                            <table class="table align-items-center mb-0">
-                                <thead>
-                                    <tr>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Name</th>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Description</th>
-                                        <th class="text-secondary opacity-7"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($roles as $role)
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex px-2 py-1">
-                                                    <div class="d-flex flex-column justify-content-center">
-                                                        <h6 class="mb-0 text-sm">{{ $role->name }}</h6>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <p class="text-xs font-weight-bold mb-0">{{ $role->description }}</p>
-                                            </td>
-                                            <td class="align-middle">
-                                                <a href="{{ route('backend.rbac.edit', $role) }}" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Role">
-                                                    Edit
-                                                </a>
-                                                <form action="{{ route('backend.rbac.destroy', $role) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this item?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete Role">
-                                                        Delete
-                                                    </button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
+    <div class="card shadow-sm border">
+        <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center py-3">
+            <h6 class="mb-0 fw-bold">
+                <i class="bi bi-list-check me-2"></i>รายการบทบาท (Roles)
+            </h6>
+            <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle">{{ count($roles) }} บทบาท</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 25%;">ชื่อบทบาท (Role Name)</th>
+                        <th>คำอธิบาย (Description)</th>
+                        <th style="width: 150px;" class="text-center">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($roles as $role)
+                        <tr>
+                            <td>
+                                <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle fs-6 font-monospace">
+                                    {{ $role->name }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="text-body">{{ $role->description ?? '-' }}</span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ route('backend.rbac.edit', $role) }}" class="btn btn-outline-warning" title="แก้ไข">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <form action="{{ route('backend.rbac.destroy', $role) }}" method="POST" class="d-inline delete-form">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-outline-danger" title="ลบ">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="3" class="text-center py-4 text-muted">ไม่พบข้อมูลบทบาท</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

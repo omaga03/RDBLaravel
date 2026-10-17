@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="py-4">
+<div class="container-fluid py-4">
     <x-form-wrapper 
         title="แก้ไขประเภทผลงานตีพิมพ์" 
         icon="bi-journal-text"

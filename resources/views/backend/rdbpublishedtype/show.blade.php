@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="py-4">
+<div class="container-fluid py-4">
     <x-page-header 
         title="รายละเอียดประเภทผลงานตีพิมพ์"
         icon="bi-journal-text"
