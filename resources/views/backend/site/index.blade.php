@@ -375,21 +375,26 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+    const textColor = isDark ? '#94A3B8' : '#475569';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
+
     // 1. Status Pie / Doughnut Chart
     const statusCtx = document.getElementById('statusChart').getContext('2d');
     const statusLabels = {!! json_encode($projectsByStatus->pluck('status.ps_name')->map(fn($n) => $n ?? 'ไม่ระบุ')) !!};
     const statusData = {!! json_encode($projectsByStatus->pluck('total')) !!};
 
-    new Chart(statusCtx, {
+    const statusChart = new Chart(statusCtx, {
         type: 'doughnut',
         data: {
             labels: statusLabels.length ? statusLabels : ['ไม่มีข้อมูล'],
             datasets: [{
                 data: statusData.length ? statusData : [0],
                 backgroundColor: [
-                    '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#6b7280'
+                    '#2563EB', '#059669', '#D97706', '#DC2626', '#6366F1', '#0D9488', '#64748B'
                 ],
-                borderWidth: 1
+                borderColor: isDark ? '#111D38' : '#FFFFFF',
+                borderWidth: 2
             }]
         },
         options: {
@@ -400,7 +405,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     position: 'bottom',
                     labels: {
                         boxWidth: 12,
-                        font: { size: 11 }
+                        color: textColor,
+                        font: { family: 'Plus Jakarta Sans, Prompt', size: 11 }
                     }
                 }
             }
@@ -413,7 +419,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const projectCountData = {!! json_encode($projectsByYear->pluck('total')) !!};
     const projectBudgetData = {!! json_encode($projectsByYear->pluck('total_budget')) !!};
 
-    new Chart(yearCtx, {
+    const yearChart = new Chart(yearCtx, {
         data: {
             labels: yearLabels,
             datasets: [
@@ -421,8 +427,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     type: 'bar',
                     label: 'จำนวนโครงการ (โครงการ)',
                     data: projectCountData,
-                    backgroundColor: 'rgba(59, 130, 246, 0.75)',
-                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.75)',
+                    borderColor: '#1E3A5F',
                     borderWidth: 1,
                     borderRadius: 6,
                     yAxisID: 'y',
@@ -432,10 +438,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     type: 'line',
                     label: 'งบประมาณรวม (บาท)',
                     data: projectBudgetData,
-                    borderColor: '#10b981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderColor: '#D97706',
+                    backgroundColor: 'rgba(217, 119, 6, 0.15)',
                     borderWidth: 3,
-                    pointBackgroundColor: '#10b981',
+                    pointBackgroundColor: '#D97706',
                     pointBorderColor: '#ffffff',
                     pointBorderWidth: 2,
                     pointRadius: 5,
@@ -456,6 +462,7 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             scales: {
                 x: {
+                    ticks: { color: textColor, font: { family: 'Plus Jakarta Sans, Prompt', size: 11 } },
                     grid: { display: false }
                 },
                 y: {
@@ -466,11 +473,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     title: {
                         display: true,
                         text: 'จำนวนโครงการ',
-                        font: { size: 11, weight: 'bold' }
+                        color: textColor,
+                        font: { family: 'Plus Jakarta Sans, Prompt', size: 11, weight: 'bold' }
                     },
                     ticks: {
+                        color: textColor,
                         precision: 0
-                    }
+                    },
+                    grid: { color: gridColor }
                 },
                 y1: {
                     type: 'linear',
@@ -483,9 +493,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     title: {
                         display: true,
                         text: 'งบประมาณ (บาท)',
-                        font: { size: 11, weight: 'bold' }
+                        color: textColor,
+                        font: { family: 'Plus Jakarta Sans, Prompt', size: 11, weight: 'bold' }
                     },
                     ticks: {
+                        color: textColor,
                         callback: function (value) {
                             if (value >= 1000000) {
                                 return (value / 1000000).toFixed(1) + 'M ฿';
@@ -502,7 +514,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     labels: {
                         boxWidth: 14,
                         usePointStyle: true,
-                        font: { size: 12 }
+                        color: textColor,
+                        font: { family: 'Plus Jakarta Sans, Prompt', size: 12 }
                     }
                 },
                 tooltip: {
@@ -523,6 +536,28 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
         }
+    });
+
+    // Theme Switch Listener
+    window.addEventListener('themeChanged', (e) => {
+        const isDarkMode = e.detail.theme === 'dark';
+        const newTextColor = isDarkMode ? '#94A3B8' : '#475569';
+        const newGridColor = isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
+
+        // Update status chart
+        statusChart.options.plugins.legend.labels.color = newTextColor;
+        statusChart.data.datasets[0].borderColor = isDarkMode ? '#111D38' : '#FFFFFF';
+        statusChart.update();
+
+        // Update year chart
+        yearChart.options.scales.x.ticks.color = newTextColor;
+        yearChart.options.scales.y.ticks.color = newTextColor;
+        yearChart.options.scales.y.title.color = newTextColor;
+        yearChart.options.scales.y.grid.color = newGridColor;
+        yearChart.options.scales.y1.ticks.color = newTextColor;
+        yearChart.options.scales.y1.title.color = newTextColor;
+        yearChart.options.plugins.legend.labels.color = newTextColor;
+        yearChart.update();
     });
 });
 </script>

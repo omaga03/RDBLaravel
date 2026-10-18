@@ -15,11 +15,11 @@
                     </li>
                 </ol>
             </nav>
-            <h3 class="mb-0 fw-bold text-body">
+            <h3 class="mb-0 fw-semibold text-body page-title">
                 <i class="bi bi-person-badge me-2 text-primary"></i>ข้อมูลประวัตินักวิจัย
             </h3>
         </div>
-        <a href="{{ route('frontend.rdbresearcher.index') }}" class="btn btn-outline-secondary">
+        <a href="{{ route('frontend.rdbresearcher.index') }}" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center">
             <i class="bi bi-arrow-left me-1"></i> กลับหน้ารายการ
         </a>
     </div>
@@ -53,7 +53,7 @@
                     </div>
 
                     <!-- Name (visible in both light & dark themes) -->
-                    <h5 class="card-title mb-1 fw-bold text-body text-break">
+                    <h5 class="card-title mb-1 fw-semibold text-body text-break" style="font-size: 1.1rem;">
                         {{ $item->prefix->prefix_nameTH ?? '' }}{{ $item->researcher_fname }} {{ $item->researcher_lname }}
                     </h5>
                     @if($item->researcher_fnameEN || $item->researcher_lnameEN)
@@ -65,7 +65,7 @@
                     <!-- Department (wrapped to prevent overflow) -->
                     @if($item->department)
                         <div class="mb-2">
-                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary px-3 py-2 text-wrap text-break"
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary px-2.5 py-1.5 text-wrap text-break"
                                   style="max-width: 100%; white-space: normal; line-height: 1.4;">
                                 <i class="bi bi-building me-1"></i>{{ $item->department->department_nameTH }}
                             </span>
@@ -173,12 +173,12 @@
                         <div class="tab-pane fade show active" id="projects" role="tabpanel">
                             @if($item->rdbProjects && $item->rdbProjects->count() > 0)
                                 <div class="table-responsive">
-                                    <table class="table table-hover align-middle mb-0">
+                                    <table class="table table-hover align-middle mb-0 table-paginated" id="projects-table" data-page-size="10">
                                         <thead class="table-light">
                                             <tr>
                                                 <th style="width: 90px;" class="text-center text-nowrap">ปีงบฯ</th>
                                                 <th>โครงการวิจัย</th>
-                                                <th style="width: 170px;" class="text-center text-nowrap">บทบาทในโครงการ</th>
+                                                <th style="width: 160px;" class="text-center text-nowrap">บทบาทในโครงการ</th>
                                                 <th style="width: 120px;" class="text-center text-nowrap">สถานะ</th>
                                             </tr>
                                         </thead>
@@ -232,28 +232,13 @@
                                                             <span class="badge {{ $badgeClass }} px-2 py-1 text-nowrap">
                                                                 {{ $roleName }}
                                                             </span>
-                                                            @if($project->pivot->ratio && $project->pivot->ratio > 0)
-                                                                <small class="text-body-secondary d-block mt-1">
-                                                                    สัดส่วน {{ number_format($project->pivot->ratio, 0) }}%
-                                                                </small>
-                                                            @endif
                                                         @else
                                                             <span class="text-body-secondary">-</span>
                                                         @endif
                                                     </td>
                                                     <td class="text-center text-nowrap">
                                                         @if($project->status)
-                                                            @php
-                                                                $statusColor = match($project->status->ps_id) {
-                                                                    1, 5 => 'success',
-                                                                    2 => 'warning text-dark',
-                                                                    3 => 'info text-dark',
-                                                                    4 => 'primary',
-                                                                    6 => 'danger',
-                                                                    default => 'secondary'
-                                                                };
-                                                            @endphp
-                                                            <span class="badge bg-{{ $statusColor }} px-2 py-1">
+                                                            <span class="badge px-2.5 py-1" style="background-color: {{ $project->status->ps_color ?? '#6c757d' }}; color: #fff;">
                                                                 {{ $project->status->ps_name }}
                                                             </span>
                                                         @else
@@ -277,7 +262,7 @@
                         <div class="tab-pane fade" id="publications" role="tabpanel">
                             @if($item->rdbPublisheds && $item->rdbPublisheds->count() > 0)
                                 <div class="table-responsive">
-                                    <table class="table table-hover align-middle mb-0">
+                                    <table class="table table-hover align-middle mb-0 table-paginated" id="publications-table" data-page-size="10">
                                         <thead class="table-light">
                                             <tr>
                                                 <th>ชื่อผลงานตีพิมพ์</th>
@@ -358,7 +343,7 @@
                         <div class="tab-pane fade" id="utilizations" role="tabpanel">
                             @if($utilizations && $utilizations->count() > 0)
                                 <div class="table-responsive">
-                                    <table class="table table-hover align-middle mb-0">
+                                    <table class="table table-hover align-middle mb-0 table-paginated" id="utilizations-table" data-page-size="10">
                                         <thead class="table-light">
                                             <tr>
                                                 <th style="width: 140px;" class="text-center text-nowrap">วันที่นำไปใช้</th>
@@ -430,7 +415,7 @@
                         <div class="tab-pane fade" id="ip" role="tabpanel">
                             @if($item->rdbDips && $item->rdbDips->count() > 0)
                                 <div class="table-responsive">
-                                    <table class="table table-hover align-middle mb-0">
+                                    <table class="table table-hover align-middle mb-0 table-paginated" id="ip-table" data-page-size="10">
                                         <thead class="table-light">
                                             <tr>
                                                 <th style="width: 180px;" class="text-nowrap">เลขที่คำขอ / ทะเบียน</th>
@@ -502,7 +487,7 @@
                         @if($item->rdbResearcherEducations && $item->rdbResearcherEducations->count() > 0)
                         <div class="tab-pane fade" id="education" role="tabpanel">
                             <div class="table-responsive">
-                                <table class="table table-hover align-middle mb-0">
+                                <table class="table table-hover align-middle mb-0 table-paginated" id="education-table" data-page-size="10">
                                     <thead class="table-light">
                                         <tr>
                                             <th style="width: 90px;" class="text-center text-nowrap">ปีที่จบ</th>
@@ -560,5 +545,230 @@
 .hover-underline:hover {
     text-decoration: underline !important;
 }
+.table-paginated-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding-top: 0.85rem;
+    margin-top: 0.5rem;
+    border-top: 1px solid var(--bs-border-color);
+}
+.table-paginated-footer .pagination .page-link {
+    cursor: pointer;
+    font-size: 0.82rem;
+    padding: 0.28rem 0.65rem;
+}
+.table-paginated-footer .form-select-sm {
+    cursor: pointer;
+}
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // 1. Initialize pagination for all paginated tables
+    document.querySelectorAll('table.table-paginated').forEach(table => {
+        initTablePagination(table, 10);
+    });
+
+    // 2. Tab URL hash synchronization
+    const hash = window.location.hash;
+    if (hash) {
+        const targetBtn = document.querySelector(`#researcherTabs button[data-bs-target="${hash}"]`);
+        if (targetBtn && typeof bootstrap !== 'undefined' && bootstrap.Tab) {
+            bootstrap.Tab.getOrCreateInstance(targetBtn).show();
+        }
+    }
+
+    document.querySelectorAll('#researcherTabs button[data-bs-toggle="tab"]').forEach(btn => {
+        btn.addEventListener('shown.bs.tab', function (e) {
+            const target = e.target.getAttribute('data-bs-target');
+            if (target && history.replaceState) {
+                history.replaceState(null, null, target);
+            }
+        });
+    });
+
+    function initTablePagination(table, initialPageSize = 10) {
+        if (!table) return;
+        const tbody = table.querySelector('tbody');
+        if (!tbody) return;
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const totalRows = rows.length;
+        if (totalRows === 0) return;
+
+        let pageSize = parseInt(table.getAttribute('data-page-size')) || initialPageSize;
+        let currentPage = 1;
+
+        const wrapper = table.closest('.table-responsive') || table;
+        const footer = document.createElement('div');
+        footer.className = 'table-paginated-footer';
+
+        const leftContainer = document.createElement('div');
+        leftContainer.className = 'd-flex align-items-center flex-wrap gap-2 gap-sm-3';
+
+        const infoEl = document.createElement('span');
+        infoEl.className = 'small text-body-secondary';
+        leftContainer.appendChild(infoEl);
+
+        const sizeSelectContainer = document.createElement('div');
+        sizeSelectContainer.className = 'd-flex align-items-center gap-1.5';
+        sizeSelectContainer.innerHTML = `
+            <label class="small text-body-secondary text-nowrap me-1">แสดง</label>
+            <select class="form-select form-select-sm py-0 px-2 text-center" style="width: 75px; height: 28px; font-size: 0.82rem;">
+                <option value="10"${pageSize === 10 ? ' selected' : ''}>10</option>
+                <option value="25"${pageSize === 25 ? ' selected' : ''}>25</option>
+                <option value="50"${pageSize === 50 ? ' selected' : ''}>50</option>
+                <option value="-1"${pageSize === -1 ? ' selected' : ''}>ทั้งหมด</option>
+            </select>
+            <label class="small text-body-secondary text-nowrap ms-1">รายการ/หน้า</label>
+        `;
+        const sizeSelect = sizeSelectContainer.querySelector('select');
+        sizeSelect.addEventListener('change', function (e) {
+            pageSize = parseInt(e.target.value);
+            currentPage = 1;
+            render();
+        });
+        leftContainer.appendChild(sizeSelectContainer);
+        footer.appendChild(leftContainer);
+
+        const navEl = document.createElement('nav');
+        navEl.setAttribute('aria-label', 'การแบ่งหน้าข้อมูล');
+        const ulEl = document.createElement('ul');
+        ulEl.className = 'pagination pagination-sm mb-0';
+        navEl.appendChild(ulEl);
+        footer.appendChild(navEl);
+
+        wrapper.parentNode.insertBefore(footer, wrapper.nextSibling);
+
+        function render(shouldScroll = false) {
+            let totalPages = pageSize === -1 ? 1 : Math.ceil(totalRows / pageSize);
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const startIndex = pageSize === -1 ? 0 : (currentPage - 1) * pageSize;
+            const endIndex = pageSize === -1 ? totalRows : Math.min(startIndex + pageSize, totalRows);
+
+            rows.forEach((row, idx) => {
+                row.style.display = (idx >= startIndex && idx < endIndex) ? '' : 'none';
+            });
+
+            if (totalPages <= 1) {
+                infoEl.innerHTML = `<i class="bi bi-list-check me-1 text-primary"></i> ทั้งหมด <strong>${totalRows}</strong> รายการ`;
+            } else {
+                infoEl.innerHTML = `<i class="bi bi-list-check me-1 text-primary"></i> แสดง <strong>${startIndex + 1} - ${endIndex}</strong> จาก <strong>${totalRows}</strong> รายการ`;
+            }
+
+            if (totalRows <= 10) {
+                sizeSelectContainer.style.display = 'none';
+                navEl.style.display = 'none';
+            } else {
+                sizeSelectContainer.style.display = 'flex';
+                navEl.style.display = totalPages <= 1 ? 'none' : '';
+            }
+
+            if (totalPages > 1) {
+                ulEl.innerHTML = '';
+
+                // Prev
+                const prevLi = document.createElement('li');
+                prevLi.className = `page-item${currentPage === 1 ? ' disabled' : ''}`;
+                prevLi.innerHTML = `<a class="page-link" href="javascript:void(0)" aria-label="Previous"><i class="bi bi-chevron-left me-1"></i>ก่อนหน้า</a>`;
+                if (currentPage > 1) {
+                    prevLi.querySelector('a').addEventListener('click', function (e) {
+                        e.preventDefault();
+                        currentPage--;
+                        render(true);
+                    });
+                }
+                ulEl.appendChild(prevLi);
+
+                // Page numbers
+                const maxVisibleButtons = 5;
+                let startPage = Math.max(1, currentPage - 2);
+                let endPage = Math.min(totalPages, startPage + maxVisibleButtons - 1);
+                if (endPage - startPage < maxVisibleButtons - 1) {
+                    startPage = Math.max(1, endPage - maxVisibleButtons + 1);
+                }
+
+                if (startPage > 1) {
+                    const li = document.createElement('li');
+                    li.className = 'page-item';
+                    li.innerHTML = `<a class="page-link" href="javascript:void(0)">1</a>`;
+                    li.querySelector('a').addEventListener('click', function (e) {
+                        e.preventDefault();
+                        currentPage = 1;
+                        render(true);
+                    });
+                    ulEl.appendChild(li);
+
+                    if (startPage > 2) {
+                        const dotsLi = document.createElement('li');
+                        dotsLi.className = 'page-item disabled';
+                        dotsLi.innerHTML = `<span class="page-link">…</span>`;
+                        ulEl.appendChild(dotsLi);
+                    }
+                }
+
+                for (let p = startPage; p <= endPage; p++) {
+                    const li = document.createElement('li');
+                    li.className = `page-item${p === currentPage ? ' active' : ''}`;
+                    li.innerHTML = `<a class="page-link" href="javascript:void(0)">${p}</a>`;
+                    if (p !== currentPage) {
+                        const pageNum = p;
+                        li.querySelector('a').addEventListener('click', function (e) {
+                            e.preventDefault();
+                            currentPage = pageNum;
+                            render(true);
+                        });
+                    }
+                    ulEl.appendChild(li);
+                }
+
+                if (endPage < totalPages) {
+                    if (endPage < totalPages - 1) {
+                        const dotsLi = document.createElement('li');
+                        dotsLi.className = 'page-item disabled';
+                        dotsLi.innerHTML = `<span class="page-link">…</span>`;
+                        ulEl.appendChild(dotsLi);
+                    }
+
+                    const li = document.createElement('li');
+                    li.className = 'page-item';
+                    li.innerHTML = `<a class="page-link" href="javascript:void(0)">${totalPages}</a>`;
+                    li.querySelector('a').addEventListener('click', function (e) {
+                        e.preventDefault();
+                        currentPage = totalPages;
+                        render(true);
+                    });
+                    ulEl.appendChild(li);
+                }
+
+                // Next
+                const nextLi = document.createElement('li');
+                nextLi.className = `page-item${currentPage === totalPages ? ' disabled' : ''}`;
+                nextLi.innerHTML = `<a class="page-link" href="javascript:void(0)" aria-label="Next">ถัดไป<i class="bi bi-chevron-right ms-1"></i></a>`;
+                if (currentPage < totalPages) {
+                    nextLi.querySelector('a').addEventListener('click', function (e) {
+                        e.preventDefault();
+                        currentPage++;
+                        render(true);
+                    });
+                }
+                ulEl.appendChild(nextLi);
+            }
+
+            if (shouldScroll) {
+                const navTabs = document.getElementById('researcherTabs');
+                if (navTabs) {
+                    navTabs.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+        }
+
+        render();
+    }
+});
+</script>
 @endsection

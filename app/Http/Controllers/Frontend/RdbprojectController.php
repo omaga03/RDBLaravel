@@ -13,6 +13,7 @@ use App\Models\RdbProjectTypeSub;
 use App\Models\RdbGroupproject;
 use App\Models\RdbProjectStatus;
 use App\Models\RdbResearcher;
+use App\Models\SystemSetting;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 
@@ -425,6 +426,21 @@ class RdbprojectController extends Controller
             abort(404, 'ไฟล์นี้ไม่เปิดให้สาธารณะ');
         }
 
+        // 🛡️ ตรวจสอบนโยบายความปลอดภัยการดาวน์โหลดไฟล์แนบ (Layer 2 Security Policy)
+        $attachPolicy = SystemSetting::get('download_policy_attachments', 'members_only');
+        if ($attachPolicy === 'members_only' && !auth()->check()) {
+            return redirect()->route('login')->with('warning', 'กรุณาเข้าสู่ระบบก่อนเพื่อดาวน์โหลดไฟล์เอกสารแนบ');
+        }
+        if ($attachPolicy === 'admin_only') {
+            if (!auth()->check()) {
+                return redirect()->route('login')->with('warning', 'เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถดาวน์โหลดไฟล์นี้ได้');
+            }
+            $user = auth()->user();
+            if (!$user->hasRole('The Creator') && !$user->hasRole('Admin')) {
+                abort(403, 'เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถดาวน์โหลดไฟล์นี้ได้');
+            }
+        }
+
         $filePath = $fileRecord->getFilePath();
         
         if ($filePath && Storage::disk('public')->exists($filePath)) {
@@ -445,6 +461,12 @@ class RdbprojectController extends Controller
         // ✅ ตรวจสอบ public status
         if ($project->data_show != 1) {
             abort(404);
+        }
+
+        // 🛡️ ตรวจสอบนโยบายการเปิดอ่านบทคัดย่อ
+        $absPolicy = SystemSetting::get('download_policy_abstract', 'public');
+        if ($absPolicy === 'members_only' && !auth()->check()) {
+            return redirect()->route('login')->with('warning', 'กรุณาเข้าสู่ระบบก่อนเพื่อเปิดอ่านบทคัดย่อ');
         }
 
         $filePath = $project->getAbstractFilePath();
@@ -469,9 +491,26 @@ class RdbprojectController extends Controller
             abort(404);
         }
 
-        // ✅ ตรวจสอบว่า report แสดงในหน้าสาธารณะหรือไม่
+        // ✅ ตรวจสอบว่า report แสดงในหน้าสาธารณะหรือไม่ (Project Level Security)
         if ($project->pro_file_show != 1) {
             abort(404, 'ไฟล์รายงานยังไม่เปิดให้สาธารณะ');
+        }
+
+        // 🛡️ ตรวจสอบนโยบายความปลอดภัยการดาวน์โหลดเล่มรายงานฉบับสมบูรณ์ (System Policy - Layer 2 Security)
+        $reportPolicy = SystemSetting::get('download_policy_full_report', 'members_only');
+        if ($reportPolicy === 'members_only' && !auth()->check()) {
+            $msg = SystemSetting::get('download_require_login_message', 'กรุณาเข้าสู่ระบบก่อนเพื่อดาวน์โหลดเอกสารเล่มรายงานวิจัยฉบับสมบูรณ์');
+            return redirect()->route('login')->with('warning', $msg);
+        }
+        if ($reportPolicy === 'admin_only') {
+            if (!auth()->check()) {
+                return redirect()->route('login')->with('warning', 'เฉพาะผู้ดูแลระบบและเจ้าของโครงการเท่านั้น');
+            }
+            $user = auth()->user();
+            $isOwner = $user->researcher_id && $project->researchers()->where('rdb_researcher.researcher_id', $user->researcher_id)->exists();
+            if (!$user->hasRole('The Creator') && !$user->hasRole('Admin') && !$isOwner) {
+                abort(403, 'เฉพาะผู้ดูแลระบบและคณะผู้วิจัยของโครงการเท่านั้นที่สามารถเข้าถึงไฟล์นี้ได้');
+            }
         }
 
         $filePath = $project->getReportFilePath();
@@ -492,6 +531,7 @@ class RdbprojectController extends Controller
         $item = RdbProject::with([
             'year', 
             'type', 
+            'typeSub',
             'status', 
             'department', 
             'strategic', 
@@ -500,8 +540,15 @@ class RdbprojectController extends Controller
             'rdbProjectWorks' => function($q) {
                 $q->orderBy('position_id', 'asc');
             },
-            'rdbProjectWorks.researcher',
-            'rdbProjectWorks.researcher.prefix'
+            'rdbProjectWorks.researcher.prefix',
+            'rdbProjectWorks.researcher.department',
+            'rdbProjectWorks.position',
+            'files',
+            'utilizations',
+            'publisheds',
+            'dips',
+            'createdBy.researcher',
+            'updatedBy.researcher'
         ])->findOrFail($id);
         return view('frontend.rdbproject.show', compact('item'));
     }

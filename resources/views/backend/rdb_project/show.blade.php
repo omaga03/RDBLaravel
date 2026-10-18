@@ -1,52 +1,51 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid">
-    <div class="row mb-3">
-        <div class="col">
-            <h2>{{ strip_tags(html_entity_decode($project->pro_nameTH, ENT_QUOTES, 'UTF-8')) }}</h2>
-        </div>
-    </div>
-
     <!-- TomSelect CSS -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
-    <div class="py-4">
-        {{-- Page Header with Actions --}}
-        <x-page-header 
-            title="รายละเอียดโครงการวิจัย"
-            icon="bi-folder2-open"
-            :backRoute="route('backend.rdb_project.index')"
-            :editRoute="route('backend.rdb_project.edit', $project->pro_id)"
-            :deleteRoute="route('backend.rdb_project.destroy', $project->pro_id)"
-            :canDelete="true"
-            :showPrint="true"
-        />
 
-        <div class="row g-4">
-            <!-- Left Column: Project Summary & Quick Info -->
-            <div class="col-lg-4">
-                <div class="card shadow-sm border mb-4 sticky-top" style="top: 20px;">
-                    <div class="card-header bg-primary text-white py-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="badge bg-light text-primary fw-bold font-monospace fs-6">
-                                {{ $project->pro_code ?? 'ID: ' . $project->pro_id }}
-                            </span>
-                            <div class="d-flex align-items-center gap-1">
-                                @if($project->status)
-                                    <span class="badge" style="background-color: {{ $project->status->ps_color ?? '#6c757d' }}; color: #fff;">
-                                        {{ $project->status->ps_name }}
-                                    </span>
-                                @else
-                                    <span class="badge bg-secondary">ไม่ระบุสถานะ</span>
-                                @endif
-                                @can('update', $project)
-                                <button type="button" class="btn btn-sm btn-light py-0 px-2 text-dark shadow-sm" data-bs-toggle="modal" data-bs-target="#projectStatusModal" title="ปรับปรุงสถานะโครงการ">
-                                    <i class="bi bi-pencil-square"></i>
-                                </button>
-                                @endcan
-                            </div>
+    {{-- Page Header with Actions --}}
+    <x-page-header 
+        title="รายละเอียดโครงการวิจัย"
+        icon="bi-folder2-open"
+        :backRoute="route('backend.rdb_project.index')"
+        :editRoute="route('backend.rdb_project.edit', $project->pro_id)"
+        :deleteRoute="route('backend.rdb_project.destroy', $project->pro_id)"
+        :canDelete="true"
+        :showPrint="true"
+    />
+
+    <div class="row g-4">
+        <!-- Left Column: Project Summary & Quick Info -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border mb-4 sticky-top" style="top: 20px;">
+                <div class="card-header text-white py-3" style="background: var(--rdb-gradient-primary);">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-light text-primary fw-bold font-monospace fs-6">
+                            {{ $project->pro_code ?? 'ID: ' . $project->pro_id }}
+                        </span>
+                        <div class="d-flex align-items-center gap-1">
+                            @if($project->status)
+                                <span class="badge" style="background-color: {{ $project->status->ps_color ?? '#6c757d' }}; color: #fff;">
+                                    {{ $project->status->ps_name }}
+                                </span>
+                            @else
+                                <span class="badge bg-secondary">ไม่ระบุสถานะ</span>
+                            @endif
+                            @can('update', $project)
+                            <button type="button" class="btn btn-sm btn-light py-0 px-2 text-dark shadow-sm" data-bs-toggle="modal" data-bs-target="#projectStatusModal" title="ปรับปรุงสถานะโครงการ">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            @endcan
                         </div>
                     </div>
+                    <h5 class="card-title mb-0 mt-2 fw-semibold text-white text-break" style="font-size: 1.05rem; line-height: 1.5;">
+                        {{ strip_tags(html_entity_decode($project->pro_nameTH, ENT_QUOTES, 'UTF-8')) }}
+                    </h5>
+                    @if($project->pro_nameEN)
+                        <p class="text-white-50 small mb-0 mt-1 text-break">{{ strip_tags(html_entity_decode($project->pro_nameEN, ENT_QUOTES, 'UTF-8')) }}</p>
+                    @endif
+                </div>
                     <div class="card-body">
                         <!-- Budget Highlight -->
                         <div class="text-center p-3 mb-3 bg-body-secondary rounded border border-secondary-subtle">
@@ -591,7 +590,7 @@
         <div class="modal fade" id="projectStatusModal" tabindex="-1" aria-labelledby="projectStatusModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content shadow border-0">
-                    <div class="modal-header bg-primary text-white">
+                    <div class="modal-header text-white" style="background: var(--rdb-gradient-primary);">
                         <h5 class="modal-title" id="projectStatusModalLabel">
                             <i class="bi bi-flag-fill me-2"></i> ปรับปรุงสถานะโครงการวิจัย
                         </h5>
@@ -647,7 +646,7 @@
         <div class="modal fade" id="projectFilesModal" tabindex="-1" aria-labelledby="projectFilesModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-lg">
                         <div class="modal-content">
-                            <div class="modal-header bg-secondary text-white">
+                            <div class="modal-header text-white" style="background: var(--rdb-gradient-primary);">
                                 <h5 class="modal-title" id="projectFilesModalLabel"><i class="bi bi-file-earmark-arrow-up"></i> จัดการไฟล์เอกสารโครงการ (Manage Project Files)</h5>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
@@ -899,9 +898,9 @@
 <div class="modal fade" id="researcherModal" tabindex="-1" aria-labelledby="researcherModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header text-white" style="background: var(--rdb-gradient-primary);">
                 <h5 class="modal-title" id="researcherModalLabel"><i class="bi bi-people-fill"></i> จัดการนักวิจัยในโครงการ (Manage Researchers)</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <!-- Add/Edit Form -->

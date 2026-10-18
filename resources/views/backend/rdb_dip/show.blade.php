@@ -36,15 +36,14 @@
         <div class="col-lg-8">
             <!-- General Information -->
             <div class="card shadow-sm mb-4 border">
-                <div class="card-header bg-primary text-white d-print-none border-0">
-                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> ข้อมูลทั่วไป (General Information)</h5>
+                <div class="card-header text-white p-3 p-md-4 d-print-none border-0" style="background: var(--rdb-gradient-primary);">
+                    <span class="small text-white-50"><i class="bi bi-award me-1"></i> ข้อมูลทรัพย์สินทางปัญญา</span>
+                    <h4 class="card-title mb-0 mt-1 fw-semibold text-white text-break" style="font-size: 1.15rem; line-height: 1.55;">{{ $item->dip_data2_name ?? ($item->dip_name ?? 'ทรัพย์สินทางปัญญา') }}</h4>
+                    @if($item->dip_nameEN)
+                        <p class="text-white-50 small mb-0 mt-1 text-break">{{ $item->dip_nameEN }}</p>
+                    @endif
                 </div>
                 <div class="card-body">
-                    <h4 class="text-primary fw-bold mb-3">{{ $item->dip_data2_name ?? '-' }}</h4>
-                    @if($item->dip_nameEN)
-                        <h5 class="text-muted mb-4 fs-6">{{ $item->dip_nameEN }}</h5>
-                    @endif
-
                     <h6 class="fw-bold border-bottom pb-2 mb-3">รายละเอียดเพิ่มเติม</h6>
                     <div class="table-responsive">
                         <table class="table table-sm table-borderless">
@@ -201,7 +200,7 @@
             <div class="modal fade" id="fileModal" tabindex="-1" aria-labelledby="fileModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content border-primary">
-                        <div class="modal-header bg-primary text-white">
+                        <div class="modal-header text-white" style="background: var(--rdb-gradient-primary);">
                             <h5 class="modal-title" id="fileModalLabel"><i class="bi bi-folder-fill"></i> จัดการไฟล์แนบหลัก</h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
@@ -253,7 +252,7 @@
             <!-- Related Project -->
             @if($item->project)
             <div class="card shadow-sm mb-4 border">
-                <div class="card-header bg-info text-white border-0">
+                <div class="card-header text-white border-0" style="background: var(--rdb-gradient-primary);">
                     <h5 class="mb-0"><i class="bi bi-folder-symlink"></i> โครงการที่เกี่ยวข้อง</h5>
                 </div>
                 <div class="card-body border-top">

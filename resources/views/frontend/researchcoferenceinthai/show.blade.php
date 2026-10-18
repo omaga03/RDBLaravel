@@ -13,15 +13,15 @@
                     <li class="breadcrumb-item active" aria-current="page">รายละเอียดการประชุม</li>
                 </ol>
             </nav>
-            <h3 class="mb-0 fw-bold text-body">
+            <h3 class="mb-0 fw-semibold text-body page-title">
                 <i class="bi bi-megaphone-fill me-2 text-primary"></i>รายละเอียดการประชุมวิชาการ
             </h3>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('frontend.researchcoferenceinthai.index') }}" class="btn btn-outline-secondary">
+            <a href="{{ route('frontend.researchcoferenceinthai.index') }}" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center">
                 <i class="bi bi-arrow-left me-1"></i> กลับหน้ารายการ
             </a>
-            <button onclick="window.print()" class="btn btn-outline-secondary">
+            <button onclick="window.print()" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center">
                 <i class="bi bi-printer me-1"></i> พิมพ์
             </button>
         </div>
@@ -31,7 +31,7 @@
         <!-- Main Conference Content (Left Column) -->
         <div class="col-lg-8">
             <div class="card shadow-sm border mb-4">
-                <div class="card-header text-white" style="background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);">
+                <div class="card-header text-white p-3 p-md-4" style="background: var(--rdb-gradient-primary);">
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
                         <span class="badge bg-light text-dark fw-semibold">
                             <i class="bi bi-megaphone me-1"></i>การประชุมวิชาการ
@@ -40,7 +40,7 @@
                             <i class="bi bi-eye me-1"></i>เข้าชม {{ number_format($item->con_count ?? 0) }} ครั้ง
                         </span>
                     </div>
-                    <h4 class="card-title mb-0 fw-bold text-white text-break">
+                    <h4 class="card-title mb-0 fw-semibold text-white text-break" style="font-size: 1.15rem; line-height: 1.55;">
                         {{ html_entity_decode(strip_tags($item->con_name)) }}
                     </h4>
                 </div>

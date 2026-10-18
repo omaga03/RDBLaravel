@@ -1,4 +1,51 @@
-<nav class="navbar navbar-expand-md shadow-sm border-bottom py-0" style="z-index: 1050;">
+<nav class="navbar navbar-expand-md shadow-sm border-bottom py-0 backend-subnav" style="z-index: 1045; background-color: var(--bs-tertiary-bg);">
+    <style>
+        .backend-subnav .nav-link {
+            padding: 0.65rem 0.95rem !important;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--bs-body-color) !important;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .backend-subnav .nav-link:hover {
+            color: var(--rdb-secondary) !important;
+            background-color: rgba(37, 99, 235, 0.08);
+        }
+        .backend-subnav .nav-link.active {
+            color: var(--rdb-secondary) !important;
+            font-weight: 600;
+        }
+        .backend-subnav .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0.75rem;
+            right: 0.75rem;
+            height: 2px;
+            background: var(--rdb-secondary);
+        }
+        .backend-subnav .dropdown-menu {
+            border-radius: var(--rdb-radius-md);
+            border: 1px solid var(--bs-border-color);
+            box-shadow: var(--rdb-shadow-md);
+            padding: 0.5rem;
+        }
+        .backend-subnav .dropdown-item {
+            border-radius: var(--rdb-radius-sm);
+            padding: 0.45rem 0.85rem;
+            font-size: 0.85rem;
+            transition: background-color 0.15s ease;
+        }
+        .backend-subnav .dropdown-item:hover {
+            background-color: var(--rdb-primary-subtle);
+            color: var(--rdb-primary);
+        }
+        [data-bs-theme="dark"] .backend-subnav .dropdown-item:hover {
+            background-color: rgba(37, 99, 235, 0.2);
+            color: #60A5FA;
+        }
+    </style>
     <div class="container-fluid px-4">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#backendMenuContent" aria-controls="backendMenuContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon" style="font-size: 0.8rem;"></span>
@@ -138,7 +185,7 @@
                     <!-- 8. ผู้ดูแลระบบ -->
                     @if($isSuperAdmin || ($currentUser && $currentUser->hasPermission(['User Manager', 'Rbac.Management', 'RBAC Manager'])))
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle {{ request()->is('backend/user*') || request()->is('backend/rbac*') ? 'active fw-bold' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle {{ request()->is('backend/user*') || request()->is('backend/rbac*') || request()->is('backend/settings*') ? 'active fw-bold' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-shield-lock"></i> ผู้ดูแลระบบ
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
@@ -147,6 +194,10 @@
                             @endif
                             @if($isSuperAdmin || ($currentUser && $currentUser->hasPermission(['Rbac.Management', 'RBAC Manager'])))
                             <li><a class="dropdown-item {{ request()->is('backend/rbac*') ? 'active' : '' }}" href="{{ route('backend.rbac.index') }}"><i class="bi bi-shield-check me-2"></i> จัดการบทบาทและสิทธิ์ (RBAC)</a></li>
+                            @endif
+                            @if($isSuperAdmin)
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item {{ request()->is('backend/settings/access-control*') ? 'active' : '' }}" href="{{ route('backend.settings.access_control') }}"><i class="bi bi-shield-lock-fill me-2 text-primary"></i> ควบคุมล็อกอิน & นโยบายดาวน์โหลด</a></li>
                             @endif
                         </ul>
                     </li>

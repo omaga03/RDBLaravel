@@ -20,7 +20,6 @@
     [data-bs-theme="light"] .bg-light-styled { background-color: #f8f9fa !important; color: #212529; }
 </style>
 
-<div class="container-fluid py-4">
     <div class="row">
         <!-- Header & Action Buttons -->
         <x-page-header 
@@ -35,12 +34,12 @@
         <!-- Left Column -->
         <div class="col-lg-8">
             <!-- General Info Card -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-primary text-white d-print-none border-0">
-                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> ข้อมูลทั่วไป (General Information)</h5>
+            <div class="card shadow-sm mb-4 border">
+                <div class="card-header text-white p-3 p-md-4 d-print-none border-0" style="background: var(--rdb-gradient-primary);">
+                    <span class="small text-white-50"><i class="bi bi-rocket-takeoff me-1"></i> ข้อมูลการนำไปใช้ประโยชน์</span>
+                    <h4 class="card-title mb-0 mt-1 fw-semibold text-white text-break" style="font-size: 1.15rem; line-height: 1.55;">{{ html_entity_decode($item->utz_department_name) }}</h4>
                 </div>
                 <div class="card-body">
-                    <h4 class="text-primary fw-bold mb-3">{{ html_entity_decode($item->utz_department_name) }}</h4>
                     
                     @if($item->utz_group)
                         <div class="mb-4">
@@ -200,7 +199,7 @@
             <!-- Related Project -->
             @if($item->project)
             <div class="card shadow-sm mb-4 border">
-                <div class="card-header bg-success text-white border-0">
+                <div class="card-header text-white border-0" style="background: var(--rdb-gradient-primary);">
                     <h5 class="mb-0"><i class="bi bi-folder-symlink"></i> โครงการวิจัยต้นแบบ</h5>
                 </div>
                 <div class="card-body border-top">
@@ -218,7 +217,7 @@
             <!-- Map Card -->
             @if($item->changwat && $item->changwat->lat && $item->changwat->long)
             <div class="card shadow-sm mb-4 border">
-                <div class="card-header bg-info text-white border-0">
+                <div class="card-header text-white border-0" style="background: var(--rdb-gradient-primary);">
                     <h5 class="mb-0"><i class="bi bi-geo-alt"></i> พิกัดสถานที่</h5>
                 </div>
                 <div class="card-body p-0 border-top">
@@ -249,5 +248,4 @@
         :deleteRoute="route('backend.rdbprojectutilize.destroy', $item->utz_id)"
         :showPrint="true"
     />
-</div>
 @endsection

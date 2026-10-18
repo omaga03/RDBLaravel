@@ -72,6 +72,7 @@ use App\Http\Controllers\Frontend\RdbyearController as FrontendRdbyearController
 use App\Http\Controllers\Frontend\ResearchcoferenceinthaiController;
 use App\Http\Controllers\Frontend\ResearchnewsController;
 use App\Http\Controllers\Frontend\SiteController as FrontendSiteController;
+use App\Http\Controllers\Frontend\DashboardController;
 
 Route::get('/', [FrontendSiteController::class, 'index'])->name('home');
 
@@ -125,6 +126,10 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     Route::post('/rbac/stop-impersonate', [RbacController::class, 'stopImpersonate'])->name('rbac.stop_impersonate');
     Route::resource('rbac', RbacController::class);
     Route::resource('user', UserController::class);
+
+    // System Settings: Login & Access Control
+    Route::get('/settings/access-control', [\App\Http\Controllers\Backend\AccessControlSettingsController::class, 'index'])->name('settings.access_control');
+    Route::put('/settings/access-control', [\App\Http\Controllers\Backend\AccessControlSettingsController::class, 'update'])->name('settings.access_control.update');
 
     Route::resource('rdbyear', RdbyearController::class);
     Route::get('/rdb_published/search/researcher', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'searchResearcher'])->name('rdb_published.search_researcher');
@@ -273,12 +278,19 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [\App\Http\Controllers\Auth\RegisteredUserController::class, 'store']);
 });
 
+// Research Intelligence Dashboards (Option B: Dedicated Pages for Each Domain)
+Route::prefix('dashboard')->group(function () {
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/overview', [DashboardController::class, 'index'])->name('frontend.dashboard.index');
+    Route::get('/projects', [DashboardController::class, 'projects'])->name('frontend.dashboard.projects');
+    Route::get('/publications', [DashboardController::class, 'publications'])->name('frontend.dashboard.publications');
+    Route::get('/utilizations', [DashboardController::class, 'utilizations'])->name('frontend.dashboard.utilizations');
+    Route::get('/ip', [DashboardController::class, 'ip'])->name('frontend.dashboard.ip');
+    Route::get('/researchers', [DashboardController::class, 'researchers'])->name('frontend.dashboard.researchers');
+});
+
 // Authenticated Routes
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

@@ -39,6 +39,7 @@ class BackendAuditTest extends TestCase
             'backend.rdb_published.index',
             'backend.rdb_dip.index',
             'backend.rdbprojectutilize.index',
+            'backend.settings.access_control',
         ];
 
         foreach ($routes as $route) {
@@ -663,5 +664,155 @@ class BackendAuditTest extends TestCase
         $responseSite->assertSee('ระบบฐานข้อมูลงานวิจัย');
         $responseSite->assertSee('สถาบันวิจัยและพัฒนา มหาวิทยาลัยราชภัฏเพชรบูรณ์');
         $responseSite->assertDontSee("Let's get started");
+    }
+
+    public function test_access_control_settings_page_and_update()
+    {
+        $admin = User::find(129);
+        $this->actingAs($admin);
+
+        // 1. GET access control settings page
+        $response = $this->get(route('backend.settings.access_control'));
+        $response->assertStatus(200);
+        $response->assertSee('Google Workspace SSO');
+        $response->assertSee('download_policy_full_report');
+
+        // 2. PUT update settings
+        $updateResponse = $this->put(route('backend.settings.access_control.update'), [
+            'google_login_enabled' => '1',
+            'google_client_id' => 'test-client-id.apps.googleusercontent.com',
+            'google_allowed_domains' => 'pcru.ac.th',
+            'google_auto_register' => '1',
+            'standard_login_enabled' => '1',
+            'download_policy_full_report' => 'members_only',
+            'download_policy_abstract' => 'public',
+            'download_policy_attachments' => 'members_only',
+            'download_require_login_message' => 'กรุณาเข้าสู่ระบบก่อนเพื่อดาวน์โหลดเอกสารเล่มรายงานวิจัยฉบับสมบูรณ์',
+            'download_logging_enabled' => '1',
+        ]);
+
+        $updateResponse->assertRedirect(route('backend.settings.access_control'));
+        $this->assertEquals('members_only', \App\Models\SystemSetting::get('download_policy_full_report'));
+        $this->assertEquals('test-client-id.apps.googleusercontent.com', \App\Models\SystemSetting::get('google_client_id'));
+    }
+
+    public function test_login_page_renders_google_sso_and_collapsible_form()
+    {
+        $response = $this->get(route('login'));
+        $response->assertStatus(200);
+        $response->assertSee('เข้าสู่ระบบด้วย Google Workspace');
+        $response->assertSee('@pcru.ac.th');
+        $response->assertSee('เข้าสู่ระบบด้วยชื่อผู้ใช้และรหัสผ่าน');
+        $response->assertSee('standardLoginForm');
+        $response->assertSee('images/logo.png');
+        $response->assertSee('max-height: 84px');
+    }
+
+    public function test_register_page_is_google_sso_only_and_blocks_manual_post()
+    {
+        // 1. Register page loads properly
+        $response = $this->get(route('register'));
+        $response->assertStatus(200);
+        $response->assertSee('ลงทะเบียนเข้าใช้งานระบบ');
+        $response->assertSee('ลงทะเบียนด้วย Google Workspace');
+        $response->assertSee('@pcru.ac.th');
+        $response->assertSee('เข้าสู่ระบบที่นี่');
+        $response->assertDontSee('name="password_confirmation"');
+
+        // 2. Direct POST to register is blocked and redirected with warning
+        $postResponse = $this->post(route('register'), [
+            'name' => 'Spam Bot',
+            'email' => 'bot@example.com',
+            'password' => 'secret123',
+            'password_confirmation' => 'secret123',
+        ]);
+        $postResponse->assertRedirect(route('register'));
+        $postResponse->assertSessionHas('warning');
+    }
+
+    public function test_document_download_policy_enforcement()
+    {
+        $this->app['auth']->forgetGuards();
+        $this->flushSession();
+        \Illuminate\Support\Facades\Auth::logout();
+        \App\Models\SystemSetting::set('download_policy_full_report', 'members_only');
+
+        $project = RdbProject::where('data_show', 1)
+            ->where('pro_file_show', 1)
+            ->whereNotNull('pro_file')
+            ->where('pro_file', '!=', '')
+            ->first();
+
+        if ($project) {
+            // Unauthenticated guest user attempting to view full report should be redirected to login
+            $guestResponse = $this->get(route('frontend.rdbproject.view_report', $project->pro_id));
+            $guestResponse->assertRedirect(route('login'));
+
+            // Public show page should display login requirement message or badge
+            $showResponse = $this->get(route('frontend.rdbproject.show', $project->pro_id));
+            $showResponse->assertStatus(200);
+            $showResponse->assertSee('ต้องเข้าสู่ระบบ');
+        }
+    }
+
+    public function test_research_intelligence_dashboards_render_with_contextual_filters()
+    {
+        // 1. Overview Dashboard with 5 filters
+        $resOverview = $this->get(route('frontend.dashboard.index', [
+            'year_id' => 18,
+            'department_id' => 2,
+            'ps_id' => 2,
+            'pt_id' => 1,
+            'has_report' => '1',
+        ]));
+        $resOverview->assertStatus(200);
+        $resOverview->assertSee('ตัวกรองข้อมูลสารสนเทศ');
+        $resOverview->assertSee('ภาพรวมยุทธศาสตร์งานวิจัย');
+
+        // 2. Projects Dashboard with budget range and faculty
+        $resProjects = $this->get(route('frontend.dashboard.projects', [
+            'department_id' => 2,
+            'budget_range' => '100k-500k',
+        ]));
+        $resProjects->assertStatus(200);
+        $resProjects->assertSee('โครงการวิจัยและงบประมาณ');
+        $resProjects->assertSee('budget_range');
+
+        // 3. Publications Dashboard with quality tier & project linkage
+        $resPubs = $this->get(route('frontend.dashboard.publications', [
+            'quality_group' => 'scopus',
+            'has_project' => '1',
+        ]));
+        $resPubs->assertStatus(200);
+        $resPubs->assertSee('ผลงานตีพิมพ์');
+        $resPubs->assertSee('quality_group');
+
+        // 4. Utilizations Dashboard with 4 pillars, amphoe, QA
+        $resUtils = $this->get(route('frontend.dashboard.utilizations', [
+            'utz_pillar' => '4',
+            'amphoe' => 'อ.เมืองเพชรบูรณ์',
+            'qa_status' => '1',
+        ]));
+        $resUtils->assertStatus(200);
+        $resUtils->assertSee('การใช้ประโยชน์');
+        $resUtils->assertSee('utz_pillar');
+
+        // 5. Intellectual Property Dashboard with IP category & registration status
+        $resIP = $this->get(route('frontend.dashboard.ip', [
+            'dipt_id' => 1,
+            'reg_status' => 'registered',
+        ]));
+        $resIP->assertStatus(200);
+        $resIP->assertSee('ทรัพย์สินทางปัญญา');
+        $resIP->assertSee('reg_status');
+
+        // 6. Researchers Matrix Dashboard with title and profile tier
+        $resResearchers = $this->get(route('frontend.dashboard.researchers', [
+            'prefix_id' => 1,
+            'profile_tier' => 'both',
+        ]));
+        $resResearchers->assertStatus(200);
+        $resResearchers->assertSee('ศักยภาพนักวิจัย');
+        $resResearchers->assertSee('profile_tier');
     }
 }

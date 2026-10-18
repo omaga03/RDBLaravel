@@ -52,28 +52,38 @@
 
         <div class="col-lg-8 order-1 order-lg-1">
             <!-- General Information -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-primary text-white d-print-none">
-                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> ข้อมูลทั่วไป (General Information)</h5>
+            <div class="card shadow-sm mb-4 border">
+                <div class="card-header text-white p-3 p-md-4 d-print-none" style="background: var(--rdb-gradient-primary);">
+                    <span class="small text-white-50"><i class="bi bi-file-earmark-text me-1"></i> ชื่อบทความ / ผลงานตีพิมพ์</span>
+                    <h4 class="card-title mb-0 mt-1 fw-semibold text-white text-break" style="font-size: 1.15rem; line-height: 1.55;">{{ $item->pub_name }}</h4>
+                    @if($item->pub_name_journal)
+                        <p class="text-white-50 small mb-0 mt-1 text-break"><i class="bi bi-journal-bookmark me-1"></i> {{ $item->pub_name_journal }}</p>
+                    @endif
                 </div>
                 <div class="card-body">
-                    <h4 class="text-primary fw-bold mb-3">{{ $item->pub_name }}</h4>
-                    @if($item->pub_name_journal)
-                        <h5 class="text-muted mb-4"><i class="bi bi-journal-bookmark"></i> {{ $item->pub_name_journal }}</h5>
-                    @endif
-
-                    <div class="row g-3">
-                        <div class="col-md-12">
-                            @if($item->year)
-                                <span class="badge bg-secondary me-2">ปี: {{ $item->year->year_name }}</span>
+                    <!-- Badges Row -->
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        @if($item->year)
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1">
+                                <i class="bi bi-calendar3 me-1"></i> ปี {{ $item->year->year_name }}
+                            </span>
+                        @endif
+                        @if($item->pubtype)
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1">
+                                <i class="bi bi-bookmark me-1"></i> {{ $item->pubtype->pubtype_group }}
+                            </span>
+                            @if($item->pubtype->pubtype_subgroup)
+                                <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-2.5 py-1">
+                                    {{ $item->pubtype->pubtype_subgroup }}
+                                </span>
                             @endif
-                            @if($item->pubtype)
-                                <span class="badge bg-info text-dark me-2">{{ $item->pubtype->pubtype_name ?? $item->pubtype->pubtype_group }}</span>
-                            @endif
-                             @if($item->pub_score && floatval($item->pub_score) > 0)
-                                <span class="badge bg-success me-2">คะแนน: {{ $item->pub_score }}</span>
-                            @endif
-                        </div>
+                        @endif
+                        @if($item->pub_score && floatval($item->pub_score) > 0)
+                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-2.5 py-1">
+                                <i class="bi bi-star me-1"></i> คะแนน: {{ $item->pub_score }}
+                            </span>
+                        @endif
+                    </div>
 
                         <div class="col-md-12 mt-4">
                             <h6 class="fw-bold border-bottom pb-2">รายละเอียดเพิ่มเติม</h6>
@@ -425,9 +435,9 @@
 <div class="modal fade" id="uploadFileModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">อัปโหลดไฟล์ Full Paper</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header text-white" style="background: var(--rdb-gradient-primary);">
+                <h5 class="modal-title"><i class="bi bi-file-earmark-arrow-up me-2"></i>อัปโหลดไฟล์ Full Paper</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form action="{{ route('backend.rdb_published.upload_file', $item->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
@@ -450,9 +460,9 @@
 <div class="modal fade" id="editAuthorModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">แก้ไขข้อมูลผู้แต่ง/นักวิจัย</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header text-white" style="background: var(--rdb-gradient-primary);">
+                <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>แก้ไขข้อมูลผู้แต่ง/นักวิจัย</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <form id="editAuthorForm" method="POST">
                 @csrf

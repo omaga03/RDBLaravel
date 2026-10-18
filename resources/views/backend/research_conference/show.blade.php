@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid py-4">
     <div class="row">
         <!-- Header & Action Buttons -->
         <x-page-header 
@@ -16,9 +15,9 @@
         <!-- รูปภาพประกอบ (ส่วนแรก) -->
         @if($item->image_url)
         <div class="col-md-12 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-secondary text-white d-print-none">
-                    <h6 class="mb-0"><i class="bi bi-image"></i> รูปภาพประกอบ</h6>
+            <div class="card shadow-sm border">
+                <div class="card-header text-white d-print-none" style="background: var(--rdb-gradient-primary);">
+                    <h6 class="mb-0"><i class="bi bi-image me-1"></i> รูปภาพประกอบ</h6>
                 </div>
                 <div class="card-body text-center">
                     <img src="{{ $item->image_url }}" class="img-fluid rounded shadow-sm" style="max-height: 400px;">
@@ -29,13 +28,14 @@
 
         <!-- ข้อมูลงานประชุม -->
         <div class="col-md-12 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white d-print-none">
-                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> ข้อมูลงานประชุมวิชาการ</h5>
+            <div class="card shadow-sm border">
+                <div class="card-header text-white p-3 p-md-4 d-print-none border-0" style="background: var(--rdb-gradient-primary);">
+                    <span class="small text-white-50"><i class="bi bi-megaphone-fill me-1"></i> ข้อมูลงานประชุมวิชาการ</span>
+                    <h4 class="card-title mb-0 mt-1 fw-semibold text-white text-break" style="font-size: 1.15rem; line-height: 1.55;">
+                        {{ strip_tags($item->con_name) }}
+                    </h4>
                 </div>
                 <div class="card-body">
-                    <h4 class="text-primary fw-bold mb-3">{{ strip_tags($item->con_name) }}</h4>
-                    
                     <div class="row mb-3">
                         <div class="col-md-6">
                             @if($item->con_even_date)
@@ -103,5 +103,4 @@
             />
         </div>
     </div>
-</div>
 @endsection

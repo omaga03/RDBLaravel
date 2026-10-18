@@ -7,18 +7,23 @@
 
 @php
     $headerClass = match($color) {
-        'blue' => 'bg-gradient-blue text-white',
-        'success' => 'bg-success text-white',
-        'primary' => 'bg-primary text-white', 
+        'blue' => 'text-white',
+        'primary' => 'text-white',
+        'success' => 'text-white', 
         'info' => 'bg-info text-white',
-        'warning' => 'bg-warning text-dark',
+        'warning' => 'text-white',
+        'accent' => 'text-white',
         'danger' => 'bg-danger text-white',
-        default => 'bg-light text-dark'
+        default => 'bg-body-tertiary text-body'
     };
     
-    // Gradient Blue Custom Style
-    if($color === 'blue') {
-        $style = 'background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #3949ab 100%) !important; color: #fff; border-color: #1a237e;';
+    // UI/UX Pro Max Gradients
+    if($color === 'blue' || $color === 'primary') {
+        $style = 'background: var(--rdb-gradient-primary) !important; color: #fff; border-color: #0F2744;';
+    } elseif($color === 'success') {
+        $style = 'background: var(--rdb-gradient-emerald) !important; color: #fff; border-color: #059669;';
+    } elseif($color === 'warning' || $color === 'accent') {
+        $style = 'background: var(--rdb-gradient-gold) !important; color: #fff; border-color: #D97706;';
     } else {
         $style = '';
     }

@@ -1,11 +1,27 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid py-4">
-
-    <!-- Page Title -->
-    <div class="mb-4">
-        <h2 class="mb-0 text-body"><i class="bi bi-people-fill me-2 text-primary"></i> นักวิจัย (Researchers)</h2>
+    <!-- Page Header & Breadcrumb -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ route('frontend.site.index') }}" class="text-decoration-none">หน้าหลัก</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">นักวิจัย</li>
+                </ol>
+            </nav>
+            <h3 class="mb-0 fw-semibold text-body page-title">
+                <i class="bi bi-people-fill me-2 text-primary"></i>นักวิจัย (Researchers)
+            </h3>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-body border text-body-secondary px-3 py-2">
+                <i class="bi bi-database me-1 text-primary"></i> ทั้งหมด {{ number_format($items->total()) }} รายการ
+            </span>
+            <a href="{{ route('frontend.rdbresearcher.export', request()->query()) }}" class="btn btn-outline-success btn-sm d-inline-flex align-items-center" style="height: 38px;">
+                <i class="bi bi-file-earmark-excel me-1"></i> Export CSV
+            </a>
+        </div>
     </div>
 
     <!-- Search Component -->
@@ -34,15 +50,13 @@
         </div>
     </x-search-bar>
 
-    <!-- Result Count -->
-    <div class="mb-3 text-body-secondary small">
-        พบ {{ number_format($items->total()) }} รายการ
-    </div>
-
     <!-- Results Table -->
-    <div class="card shadow-sm border">
-        <div class="card-header bg-body-tertiary border-bottom py-3">
-            <h5 class="mb-0 text-body"><i class="bi bi-list-ul me-2 text-primary"></i>รายชื่อนักวิจัย</h5>
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-body-tertiary border-bottom py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-semibold text-body">
+                <i class="bi bi-list-ul me-2 text-primary"></i>รายชื่อนักวิจัย
+                <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle rounded-pill ms-2">{{ number_format($items->total()) }} รายการ</span>
+            </h5>
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
@@ -106,14 +120,14 @@
                         </td>
                         <td class="text-center">
                             @if($item->researcher_hindex)
-                                <span class="badge bg-info text-dark fs-6 px-3">{{ $item->researcher_hindex }}</span>
+                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle fs-6 px-3">{{ $item->researcher_hindex }}</span>
                             @else
                                 <span class="text-body-secondary">-</span>
                             @endif
                         </td>
                         <td class="text-center text-nowrap">
                             @if($item->status)
-                                <span class="badge bg-{{ $item->status->restatus_id == 1 ? 'success' : 'secondary' }}">
+                                <span class="badge bg-{{ $item->status->restatus_id == 1 ? 'success-subtle text-success-emphasis border border-success-subtle' : 'secondary-subtle text-secondary-emphasis border border-secondary-subtle' }}">
                                     {{ $item->status->rst_name }}
                                 </span>
                             @endif
@@ -142,8 +156,6 @@
     <div class="d-flex justify-content-center mt-4">
         {{ $items->withQueryString()->links('pagination::bootstrap-5') }}
     </div>
-
-</div>
 
 <style>
 .hover-primary {

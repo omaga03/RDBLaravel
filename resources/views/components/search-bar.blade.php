@@ -9,9 +9,9 @@
          data-bs-target="#searchCollapse" 
          aria-expanded="{{ $collapsed ? 'false' : 'true' }}" 
          aria-controls="searchCollapse"
-         style="cursor: pointer; background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #3949ab 100%); color: #fff;">
+         style="cursor: pointer; background: var(--rdb-gradient-primary); color: #fff;">
         
-        <h5 class="mb-0"><i class="bi bi-search me-2"></i> ค้นหาข้อมูล (Search)</h5>
+        <h5 class="mb-0 fw-bold"><i class="bi bi-search me-2"></i> ค้นหาข้อมูล (Search)</h5>
         
         <div class="d-flex align-items-center gap-2">
             @if($exportRoute)
@@ -23,29 +23,29 @@
                 </a>
             @endif
             @if(request()->except(['page']))
-                <a href="{{ $action }}" class="btn btn-sm btn-warning" title="ล้างค่าการค้นหา" onclick="event.stopPropagation();">
+                <a href="{{ $action }}" class="btn btn-sm btn-warning shadow-sm" title="ล้างค่าการค้นหา" onclick="event.stopPropagation();">
                     <i class="bi bi-arrow-counterclockwise"></i> ล้างตัวกรอง
                 </a>
             @endif
-            <button type="button" class="btn btn-sm btn-light">
+            <button type="button" class="btn btn-sm btn-light border-0 shadow-sm" style="width: 32px; height: 32px; padding: 0;">
                 <i class="bi bi-chevron-{{ $collapsed ? 'down' : 'up' }}"></i>
             </button>
         </div>
     </div>
     
     <div class="collapse {{ $collapsed ? '' : 'show' }}" id="searchCollapse">
-        <div class="card-body">
+        <div class="card-body p-4">
             <form action="{{ $action }}" method="GET">
                 
                 {{-- Tabs for switching modes --}}
                 <ul class="nav nav-tabs mb-4 border-bottom-0" id="searchTabs" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active px-4 py-2 border-0 fw-bold d-flex align-items-center" id="simple-tab" data-bs-toggle="tab" data-bs-target="#simple-search" type="button" role="tab" aria-controls="simple-search" aria-selected="true" style="transition: all 0.3s ease;">
+                        <button class="nav-link active px-4 py-2 border-0 fw-bold d-flex align-items-center" id="simple-tab" data-bs-toggle="tab" data-bs-target="#simple-search" type="button" role="tab" aria-controls="simple-search" aria-selected="true" style="transition: all 0.25s ease;">
                             <i class="bi bi-search me-2"></i> ค้นหาทั่วไป
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link px-4 py-2 border-0 fw-bold d-flex align-items-center" id="advanced-tab" data-bs-toggle="tab" data-bs-target="#advanced-search" type="button" role="tab" aria-controls="advanced-search" aria-selected="false" style="transition: all 0.3s ease;">
+                        <button class="nav-link px-4 py-2 border-0 fw-bold d-flex align-items-center" id="advanced-tab" data-bs-toggle="tab" data-bs-target="#advanced-search" type="button" role="tab" aria-controls="advanced-search" aria-selected="false" style="transition: all 0.25s ease;">
                             <i class="bi bi-sliders me-2"></i> ค้นหาละเอียด
                         </button>
                     </li>
@@ -55,24 +55,23 @@
                         background: transparent !important;
                         border-radius: 0;
                         border-bottom: 2px solid transparent !important;
-                        color: #6c757d !important; /* Standard secondary gray */
+                        color: var(--bs-secondary-color) !important;
                     }
                     #searchTabs .nav-link.active {
-                        border-bottom: 2px solid #1a237e !important;
+                        border-bottom: 2px solid var(--rdb-secondary) !important;
                         background: transparent !important;
-                        color: #1a237e !important;
+                        color: var(--rdb-secondary) !important;
                     }
                     #searchTabs .nav-link:hover {
-                        border-bottom: 2px solid #3949ab !important;
-                        color: #3949ab !important;
+                        border-bottom: 2px solid var(--rdb-primary) !important;
+                        color: var(--rdb-primary) !important;
                     }
-                    /* Dark Mode Support */
                     [data-bs-theme="dark"] #searchTabs .nav-link.active {
-                        border-bottom: 2px solid #60a5fa !important;
-                        color: #60a5fa !important;
+                        border-bottom: 2px solid #60A5FA !important;
+                        color: #60A5FA !important;
                     }
                     [data-bs-theme="dark"] #searchTabs .nav-link:not(.active) {
-                        color: #adb5bd !important;
+                        color: var(--bs-secondary-color) !important;
                     }
                 </style>
                 

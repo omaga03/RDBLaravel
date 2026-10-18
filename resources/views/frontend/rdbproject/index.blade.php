@@ -1,11 +1,24 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid py-4">
-
-    <!-- Page Title -->
-    <div class="mb-4">
-        <h2 class="mb-0"><i class="bi bi-folder2-open me-2"></i> โครงการวิจัย (Research Projects)</h2>
+    <!-- Page Header & Breadcrumb -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ route('frontend.site.index') }}" class="text-decoration-none">หน้าหลัก</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">โครงการวิจัย</li>
+                </ol>
+            </nav>
+            <h3 class="mb-0 fw-semibold text-body page-title">
+                <i class="bi bi-folder2-open me-2 text-success"></i>โครงการวิจัย (Research Projects)
+            </h3>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-body border text-body-secondary px-3 py-2">
+                <i class="bi bi-database me-1 text-primary"></i> ทั้งหมด {{ number_format($projects->total()) }} โครงการ
+            </span>
+        </div>
     </div>
 
     <!-- Search Component -->
@@ -131,7 +144,7 @@
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-hover align-top mb-0">
-                    <thead class="text-white" style="background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #3949ab 100%);">
+                    <thead class="table-light">
                         <tr>
                             <th style="width: 65%;">ชื่อโครงการ</th>
                             <th style="width: 25%;">นักวิจัย / สังกัด</th>
@@ -144,24 +157,24 @@
                             <td>
                                 <div class="fw-bold">
                                     @if($project->pro_id)
-                                        <span class="badge bg-secondary me-1">#{{ $project->pro_id }}</span>
+                                        <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-2 py-0.5 me-1">#{{ $project->pro_id }}</span>
                                     @endif
-                                    <a href="{{ route('frontend.rdbproject.show', $project->pro_id) }}" class="text-decoration-none text-body">
+                                    <a href="{{ route('frontend.rdbproject.show', $project->pro_id) }}" class="text-decoration-none text-body fw-bold hover-primary">
                                         {!! $project->pro_nameTH !!}
                                     </a>
                                 </div>
-                                <small class="text-muted d-block mt-1">
+                                <div class="d-flex flex-wrap gap-1 align-items-center mt-1">
                                     @if($project->year)
-                                        <span class="badge bg-primary">ปี {{ $project->year->year_name }}</span>
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-0.5">ปี {{ $project->year->year_name }}</span>
                                     @endif
                                     @if($project->type)
-                                        <span class="badge bg-light text-dark border">{{ $project->type->pt_name }}</span>
+                                        <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-2 py-0.5">{{ $project->type->pt_name }}</span>
                                     @endif
                                     @if($project->pro_budget)
-                                        <span class="badge bg-success bg-opacity-10 text-success">฿ {{ number_format($project->pro_budget, 0) }}</span>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0.5">฿{{ number_format($project->pro_budget, 0) }}</span>
                                     @endif
                                     @if($project->status)
-                                        <span class="badge" style="background-color: {{ $project->status->ps_color ?? '#6c757d' }}; color: #fff;">{{ $project->status->ps_name }}</span>
+                                        <span class="badge" style="background-color: {{ $project->status->ps_color ?? '#6c757d' }}; color: #fff; font-size: 0.75rem;">{{ $project->status->ps_name }}</span>
                                     @endif
                                     @if(request('search') && !empty($project->match_sources))
                                         <span class="badge bg-warning text-dark" 
@@ -234,8 +247,6 @@
             </div>
         </div>
     </div>
-
-</div> 
 @endsection
 
 @push('scripts')

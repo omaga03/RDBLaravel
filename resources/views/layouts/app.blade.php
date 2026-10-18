@@ -9,121 +9,274 @@
 
     <title>@yield('title', 'ระบบฐานข้อมูลงานวิจัย - มหาวิทยาลัยราชภัฏเพชรบูรณ์')</title>
 
-    <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
+    <!-- Google Fonts: Plus Jakarta Sans, Prompt & Sarabun for Academic Thai/English UI -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- TomSelect Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 
     <style>
-        /* Custom styles to ensure readability in both modes */
-        [data-bs-theme="dark"] body {
-            background-color: #212529;
-            color: #f8f9fa;
+        /* ==========================================================================
+           UI/UX Pro Max: Academic Scholarly & Swiss Modernism 2.0 Design System
+           ========================================================================== */
+        :root {
+            /* Scholarly Color Palette */
+            --rdb-primary: #1E3A5F;
+            --rdb-primary-hover: #152B47;
+            --rdb-primary-subtle: #EBF3FA;
+            --rdb-secondary: #2563EB;
+            --rdb-secondary-hover: #1D4ED8;
+            --rdb-accent: #D97706; /* Citation Gold / Warm Amber */
+            --rdb-accent-hover: #B45309;
+            --rdb-success: #059669;
+            --rdb-danger: #DC2626;
+            --rdb-warning: #D97706;
+            --rdb-info: #0284C7;
+
+            /* Radius & Shadows */
+            --rdb-radius-sm: 8px;
+            --rdb-radius-md: 14px;
+            --rdb-radius-lg: 18px;
+            --rdb-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+            --rdb-shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.06);
+            --rdb-shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.06);
+
+            /* Gradients */
+            --rdb-gradient-primary: linear-gradient(135deg, #0F2744 0%, #1E3A5F 55%, #2563EB 100%);
+            --rdb-gradient-navy: linear-gradient(135deg, #0A192F 0%, #1E3A5F 100%);
+            --rdb-gradient-gold: linear-gradient(135deg, #D97706 0%, #F59E0B 100%);
+            --rdb-gradient-emerald: linear-gradient(135deg, #059669 0%, #10B981 100%);
         }
+
+        /* Base Typography Calibration for Thai & English Academic UI */
+        html {
+            font-size: 15px; /* Proportional scaling for Thai fonts to prevent oversized appearance */
+        }
+        @media (min-width: 1400px) {
+            html {
+                font-size: 15px;
+            }
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Prompt', 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 0.94rem;
+            line-height: 1.55;
+            letter-spacing: -0.005em;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        /* Harmonious Scholarly Heading Hierarchy */
+        h1, .h1 {
+            font-size: 1.5rem !important;
+            font-weight: 700;
+            line-height: 1.35;
+            letter-spacing: -0.015em;
+        }
+
+        h2, .h2 {
+            font-size: 1.3rem !important;
+            font-weight: 700;
+            line-height: 1.35;
+            letter-spacing: -0.01em;
+        }
+
+        h3, .h3, .page-title {
+            font-size: 1.15rem !important;
+            font-weight: 600;
+            line-height: 1.4;
+            letter-spacing: -0.01em;
+        }
+
+        h4, .h4 {
+            font-size: 1.05rem !important;
+            font-weight: 600;
+            line-height: 1.45;
+        }
+
+        h5, .h5 {
+            font-size: 0.95rem !important;
+            font-weight: 600;
+            line-height: 1.45;
+        }
+
+        h6, .h6 {
+            font-size: 0.88rem !important;
+            font-weight: 600;
+            line-height: 1.45;
+        }
+
+        /* Card Headers & Title Scaling */
+        .card-title {
+            font-size: 1.1rem !important;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .card-header h4, .card-header .h4 {
+            font-size: 1.12rem !important;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .card-header h5, .card-header .h5 {
+            font-size: 0.95rem !important;
+            font-weight: 600;
+            margin-bottom: 0;
+        }
+
+        .card-header h6, .card-header .h6 {
+            font-size: 0.88rem !important;
+            font-weight: 600;
+            margin-bottom: 0;
+        }
+
+        /* Clean Metadata Badges */
+        .badge {
+            font-size: 0.76rem !important;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+            padding: 0.32rem 0.6rem;
+            border-radius: 6px;
+        }
+
+        /* Breadcrumbs */
+        .breadcrumb {
+            font-size: 0.8rem;
+            margin-bottom: 0.35rem;
+        }
+        .breadcrumb-item + .breadcrumb-item::before {
+            font-size: 0.75rem;
+        }
+
+        /* Light Theme (Clean Academic Slate) */
+        [data-bs-theme="light"] {
+            --bs-body-bg: #F8FAFC;
+            --bs-body-color: #0F172A;
+            --bs-secondary-color: #475569;
+            --bs-tertiary-bg: #F1F5F9;
+            --bs-border-color: #E2E8F0;
+            --bs-card-bg: #FFFFFF;
+            --rdb-nav-bg: rgba(255, 255, 255, 0.95);
+            --rdb-card-border: #E2E8F0;
+            --rdb-table-stripe: #F8FAFC;
+            --rdb-table-hover: #F1F5F9;
+        }
+
+        /* Dark Theme (Deep Navy Slate) */
+        [data-bs-theme="dark"] {
+            --bs-body-bg: #0B1329;
+            --bs-body-color: #F8FAFC;
+            --bs-secondary-color: #94A3B8;
+            --bs-tertiary-bg: #131F3A;
+            --bs-border-color: #1E293B;
+            --bs-card-bg: #111D38;
+            --rdb-nav-bg: rgba(17, 29, 56, 0.95);
+            --rdb-card-border: #1E2E4E;
+            --rdb-table-stripe: rgba(19, 31, 58, 0.4);
+            --rdb-table-hover: rgba(30, 46, 78, 0.5);
+        }
+
         /* Dark Mode Scrollbar */
         [data-bs-theme="dark"] ::-webkit-scrollbar {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
         }
         [data-bs-theme="dark"] ::-webkit-scrollbar-track {
-            background: #212529; 
+            background: #0B1329; 
         }
         [data-bs-theme="dark"] ::-webkit-scrollbar-thumb {
-            background-color: #495057;
-            border-radius: 10px;
-            border: 3px solid #212529;
+            background-color: #26385C;
+            border-radius: 8px;
+            border: 2px solid #0B1329;
         }
-        [data-bs-theme="dark"] ::-webkit-scrollbar-corner {
-            background: #212529;
-        }
-
-        [data-bs-theme="light"] body {
-            background-color: #f8f9fa;
-            color: #212529;
-        }
-        .navbar-brand {
-            font-weight: bold;
+        [data-bs-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+            background-color: #38507D;
         }
 
-        /* --- Global Custom Styles for Dark Mode --- */
-        
-        /* 1. Dark Mode Tabs */
-        [data-bs-theme="dark"] .nav-tabs .nav-link {
-            color: #0d6efd; /* Default Blue for inactive */
+        /* Global Card Refinement */
+        .card {
+            border-radius: var(--rdb-radius-md) !important;
+            border: 1px solid var(--rdb-card-border) !important;
+            box-shadow: var(--rdb-shadow-sm);
+            background-color: var(--bs-card-bg);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         }
-        [data-bs-theme="dark"] .nav-tabs .nav-link:hover {
-            border-color: #495057 #495057 #dee2e6;
+        .card:hover {
+            box-shadow: var(--rdb-shadow-md);
         }
-        [data-bs-theme="dark"] .nav-tabs .nav-link.active {
-            color: #fff !important;
-            background-color: #343a40 !important;
-            border-color: #343a40 #343a40 #fff !important;
+        .card-header {
+            border-bottom: 1px solid var(--rdb-card-border);
+            border-top-left-radius: calc(var(--rdb-radius-md) - 1px) !important;
+            border-top-right-radius: calc(var(--rdb-radius-md) - 1px) !important;
         }
 
-        /* 2. Global Table Header Styling - Gradient Blue */
+        /* Global Table Styling - Scholarly Navy Gradient */
         .table thead th,
         .table-light,
         .table .thead-light th {
-            background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #3949ab 100%) !important;
-            color: #fff !important;
-            border-color: #1a237e !important;
+            background: var(--rdb-gradient-primary) !important;
+            color: #FFFFFF !important;
+            border-color: #0F2744 !important;
             font-weight: 600;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            letter-spacing: 0.02em;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+            padding: 0.85rem 1rem;
+            vertical-align: middle;
         }
-        
-        /* Both themes use the same gradient header */
-        [data-bs-theme="dark"] .table thead th,
-        [data-bs-theme="dark"] .table-light,
-        [data-bs-theme="dark"] .table .thead-light th,
-        [data-bs-theme="light"] .table thead th,
-        [data-bs-theme="light"] .table-light,
-        [data-bs-theme="light"] .table .thead-light th {
-            background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #3949ab 100%) !important;
-            color: #fff !important;
-            border-color: #1a237e !important;
+        .table thead th:first-child {
+            border-top-left-radius: 10px;
         }
-        
-        /* Table border adjustments */
-        [data-bs-theme="dark"] .table thead th {
-            border-bottom-color: #3949ab !important;
+        .table thead th:last-child {
+            border-top-right-radius: 10px;
         }
-        [data-bs-theme="light"] .table thead th {
-            border-bottom-color: #3949ab !important;
+        .table tbody tr {
+            transition: background-color 0.15s ease;
         }
-        
-        /* 3. Global Search Box Styling - Collapsible with Gradient Header */
+        .table tbody tr:hover {
+            background-color: var(--rdb-table-hover) !important;
+        }
+        .table tbody td {
+            padding: 0.85rem 1rem;
+            vertical-align: middle;
+            border-color: var(--bs-border-color);
+        }
+
+        /* Global Search Box Styling */
         .search-box .card-header,
         .card.search-box > .card-header,
         .card-header.search-header {
-            background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #3949ab 100%) !important;
-            color: #fff !important;
-            border-color: #1a237e !important;
+            background: var(--rdb-gradient-primary) !important;
+            color: #FFFFFF !important;
+            border-color: #0F2744 !important;
             cursor: pointer;
+            border-top-left-radius: calc(var(--rdb-radius-md) - 1px) !important;
+            border-top-right-radius: calc(var(--rdb-radius-md) - 1px) !important;
         }
         .search-box .card-header h5,
         .search-box .card-header h6,
         .card-header.search-header h5,
         .card-header.search-header h6 {
-            color: #fff !important;
+            color: #FFFFFF !important;
         }
         .search-box .btn-toggle-search,
         .btn-toggle-search {
-            background: rgba(255,255,255,0.15) !important;
+            background: rgba(255,255,255,0.18) !important;
             border: 1px solid rgba(255,255,255,0.3) !important;
-            color: #fff !important;
+            color: #FFFFFF !important;
+            border-radius: var(--rdb-radius-sm);
             transition: all 0.2s ease;
         }
         .search-box .btn-toggle-search:hover,
         .btn-toggle-search:hover {
-            background: rgba(255,255,255,0.25) !important;
+            background: rgba(255,255,255,0.28) !important;
         }
-        /* Rotate chevron when expanded */
         .btn-toggle-search[aria-expanded="true"] .bi-chevron-down {
             transform: rotate(180deg);
             transition: transform 0.2s ease;
@@ -132,61 +285,119 @@
             transform: rotate(0deg);
             transition: transform 0.2s ease;
         }
-        /* Search box tabs styling */
-        .search-box .nav-tabs .nav-link,
-        .card-header.search-header .nav-tabs .nav-link {
-            color: rgba(255,255,255,0.8) !important;
-            border: none;
+
+        /* Buttons Styling */
+        .btn {
+            border-radius: var(--rdb-radius-sm);
+            font-weight: 500;
+            padding: 0.45rem 1rem;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .search-box .nav-tabs .nav-link.active,
-        .card-header.search-header .nav-tabs .nav-link.active {
-            background-color: #fff !important;
-            color: #1a237e !important;
+        .btn:hover {
+            transform: translateY(-1px);
         }
-        .search-box .nav-tabs .nav-link:hover:not(.active),
-        .card-header.search-header .nav-tabs .nav-link:hover:not(.active) {
-            color: #fff !important;
-            background-color: rgba(255,255,255,0.1) !important;
+        .btn:active {
+            transform: translateY(0);
         }
-        
-        /* Fix card header text in dark mode if needed */
-        [data-bs-theme="dark"] .card-header {
-            border-bottom-color: #495057;
+        .btn-primary {
+            background-color: var(--rdb-primary);
+            border-color: var(--rdb-primary);
+            color: #FFFFFF;
+        }
+        .btn-primary:hover, .btn-primary:focus {
+            background-color: var(--rdb-primary-hover);
+            border-color: var(--rdb-primary-hover);
+            color: #FFFFFF;
+        }
+        .btn-success {
+            background-color: var(--rdb-success);
+            border-color: var(--rdb-success);
+        }
+        .btn-warning {
+            background-color: var(--rdb-accent);
+            border-color: var(--rdb-accent);
+            color: #FFFFFF;
+        }
+        .btn-warning:hover {
+            background-color: var(--rdb-accent-hover);
+            border-color: var(--rdb-accent-hover);
+            color: #FFFFFF;
         }
 
-        /* 4. Global TomSelect Highlighting - User Requested Style (Yellow Text, No Bg) */
+        /* Form Inputs */
+        .form-control, .form-select {
+            border-radius: var(--rdb-radius-sm);
+            border: 1px solid var(--bs-border-color);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--rdb-secondary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+        }
+        [data-bs-theme="dark"] .form-control,
+        [data-bs-theme="dark"] .form-select {
+            background-color: #14223F;
+            border-color: #27385E;
+            color: #F8FAFC;
+        }
+
+        /* TomSelect Highlighting & Dark Mode */
         .ts-dropdown .highlight {
             background: transparent !important;
-            color: #d9a406 !important; /* Darker Yellow/Gold for Light Mode readability */
+            color: #D97706 !important;
             font-weight: bold !important;
             padding: 0 !important;
         }
-        
         [data-bs-theme="dark"] .ts-dropdown .highlight {
-            color: #ffc107 !important; /* Bright Yellow for Dark Mode */
+            color: #FBBF24 !important;
             text-shadow: none !important;
         }
-
-        /* Fix TomSelect Input Text Color to match theme */
         .ts-wrapper .ts-control, 
         .ts-wrapper .ts-control input {
             color: var(--bs-body-color) !important;
+            border-radius: var(--rdb-radius-sm);
         }
         [data-bs-theme="dark"] .ts-wrapper .ts-control,
         [data-bs-theme="dark"] .ts-wrapper .ts-control input {
-            color: #fff !important;
+            color: #F8FAFC !important;
+            background-color: #14223F !important;
+            border-color: #27385E !important;
         }
         [data-bs-theme="dark"] .ts-dropdown {
-            background-color: #2b3035 !important;
-            color: #fff !important;
-            border-color: #495057 !important;
+            background-color: #14223F !important;
+            color: #F8FAFC !important;
+            border-color: #27385E !important;
         }
         [data-bs-theme="dark"] .ts-dropdown .option {
-            color: #fff !important;
+            color: #F8FAFC !important;
         }
         [data-bs-theme="dark"] .ts-dropdown .active {
-            background-color: #0d6efd !important;
-            color: #fff !important;
+            background-color: #2563EB !important;
+            color: #FFFFFF !important;
+        }
+
+        /* Navbar Styling */
+        .rdb-navbar {
+            background-color: var(--rdb-nav-bg) !important;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--bs-border-color) !important;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--bs-body-color) !important;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .navbar-brand .brand-badge {
+            background: var(--rdb-gradient-primary);
+            color: #FFFFFF;
+            font-size: 0.72rem;
+            padding: 0.2rem 0.55rem;
+            border-radius: 6px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
         }
     </style>
     <!-- IMask CDN -->
@@ -215,10 +426,12 @@
                 </form>
             </div>
         @endif
-        <nav class="navbar navbar-expand-md shadow-sm border-bottom">
+        <nav class="navbar navbar-expand-md shadow-sm rdb-navbar sticky-top">
             <div class="{{ request()->is('backend*') ? 'container-fluid px-4' : 'container' }}">
                 <a class="navbar-brand" href="{{ url('/') }}">
-                    {{ config('app.name', 'Laravel') }}
+                    <img src="https://research.pcru.ac.th/rdb/images/pcru.png" alt="PCRU Logo" style="height: 32px;" class="me-2">
+                    <span class="d-none d-sm-inline">{{ config('app.name', 'ระบบฐานข้อมูลงานวิจัย') }}</span>
+                    <span class="brand-badge ms-1">PCRU RDB</span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
@@ -297,38 +510,25 @@
             </div>
         </nav>
 
-        <!-- Row 2: Backend Menu Items -->
-        @auth
-            @if(request()->is('backend*'))
+        <!-- Row 2: Subnav Menu (Backend vs Frontend) -->
+        @if(request()->is('backend*'))
+            @auth
             <x-backend-menu />
-            @endif
-        @endauth
+            @endauth
+        @else
+            <x-frontend-menu />
+        @endif
 
         <main class="py-4">
-            <div class="container-fluid">
-                <div class="row">
-                    @if(!request()->is('backend*'))
-                    <!-- Sidebar (Desktop only) -->
-                    <div class="col-md-3 col-lg-2 d-none d-md-block" id="sidebar-col">
-                        <div class="sticky-top d-flex flex-column" style="top: 20px; height: calc(100vh - 100px);">
-                            @include('layouts.partials.sidebar')
-                        </div>
-                    </div>
-                    @endif
-                    
-                    <!-- Main Content -->
-                    <div class="@if(request()->is('backend*')) col-12 @else col-md-9 col-lg-10 @endif" id="main-content-col">
-                        
-                        <!-- Alerts handled by SweetAlert2 Toast now -->
-                        <div id="flash-messages" style="display: none;" 
-                             data-success="{{ session('success') }}" 
-                             data-error="{{ session('error') }}"
-                             data-errors="{{ $errors->any() ? json_encode($errors->all()) : '' }}">
-                        </div>
-
-                        @yield('content')
-                    </div>
+            <div class="container-fluid px-4">
+                <!-- Alerts handled by SweetAlert2 Toast now -->
+                <div id="flash-messages" style="display: none;" 
+                     data-success="{{ session('success') }}" 
+                     data-error="{{ session('error') }}"
+                     data-errors="{{ $errors->any() ? json_encode($errors->all()) : '' }}">
                 </div>
+
+                @yield('content')
             </div>
         </main>
         
@@ -350,16 +550,15 @@
             if (sidebarToggle && sidebarCol && mainContentCol) {
                 sidebarToggle.addEventListener('click', () => {
                     // Toggle Sidebar Width Logic
-                    // Check if expanded (default col-md-3)
-                    const isExpanded = sidebarCol.classList.contains('col-md-3');
+                    const isExpanded = sidebarCol.classList.contains('col-md-4') || sidebarCol.classList.contains('col-md-3');
 
                     if (isExpanded) {
                         // Shrink Sidebar
-                        sidebarCol.classList.remove('col-md-3', 'col-lg-2');
+                        sidebarCol.classList.remove('col-md-4', 'col-lg-3', 'col-xl-2', 'col-md-3', 'col-lg-2');
                         sidebarCol.classList.add('col-auto');
                         
                         // Expand Main Content to fill space
-                        mainContentCol.classList.remove('col-md-9', 'col-lg-10');
+                        mainContentCol.classList.remove('col-md-8', 'col-lg-9', 'col-xl-10', 'col-md-9', 'col-lg-10');
                         mainContentCol.classList.add('col');
                         
                         // Hide Texts
@@ -370,11 +569,11 @@
                     } else {
                         // Expand Sidebar
                         sidebarCol.classList.remove('col-auto');
-                        sidebarCol.classList.add('col-md-3', 'col-lg-2');
+                        sidebarCol.classList.add('col-md-4', 'col-lg-3', 'col-xl-2');
                         
                         // Restore Main Content Width
                         mainContentCol.classList.remove('col');
-                        mainContentCol.classList.add('col-md-9', 'col-lg-10');
+                        mainContentCol.classList.add('col-md-8', 'col-lg-9', 'col-xl-10');
                         
                         // Show Texts
                         sidebarTexts.forEach(el => el.classList.remove('d-none'));
@@ -401,6 +600,7 @@
                 htmlElement.setAttribute('data-bs-theme', newTheme);
                 localStorage.setItem('theme', newTheme);
                 updateIcon(newTheme);
+                window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: newTheme } }));
             });
 
             function updateIcon(theme) {

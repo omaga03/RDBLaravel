@@ -9,7 +9,6 @@
 @php 
     $item = $researcher; 
 @endphp
-<div class="container-fluid py-4">
     {{-- Page Header with Actions --}}
     <x-page-header 
         title="รายละเอียดข้อมูลนักวิจัย"
@@ -399,7 +398,6 @@
         :canDelete="$item->canDelete()"
         :showPrint="false"
     />
-</div>
 
 <!-- Edit Code ID Modal -->
 <div class="modal fade" id="editCodeIdModal" tabindex="-1" aria-labelledby="editCodeIdModalLabel" aria-hidden="true">
@@ -407,9 +405,9 @@
         <div class="modal-content">
             <form action="{{ route('backend.rdb_researcher.update_codeid', $item->researcher_id) }}" method="POST">
                 @csrf
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editCodeIdModalLabel">จัดการ Researcher Code ID</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header text-white" style="background: var(--rdb-gradient-primary);">
+                    <h5 class="modal-title" id="editCodeIdModalLabel"><i class="bi bi-upc-scan me-2"></i>จัดการ Researcher Code ID</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
@@ -435,9 +433,9 @@
         <div class="modal-content">
             <form action="{{ route('backend.rdb_researcher.update_image', $item->researcher_id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editImageModalLabel">เปลี่ยนรูปโปรไฟล์</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header text-white" style="background: var(--rdb-gradient-primary);">
+                    <h5 class="modal-title" id="editImageModalLabel"><i class="bi bi-camera me-2"></i>เปลี่ยนรูปโปรไฟล์</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-center">
                     <div class="mb-3">

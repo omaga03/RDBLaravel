@@ -96,6 +96,10 @@ class RdbpublishedController extends Controller
             'pubtype', 
             'branch',
             'project',
+            'project.type',
+            'project.typeSub',
+            'project.department',
+            'project.rdbProjectWorks.researcher.prefix',
             'authors',
             'authors.prefix',
             'authors.department'

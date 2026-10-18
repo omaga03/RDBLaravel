@@ -150,6 +150,8 @@ class RdbprojectutilizeController extends Controller
             },
             'project.rdbProjectWorks.researcher',
             'project.rdbProjectWorks.researcher.prefix',
+            'project.rdbProjectWorks.researcher.department',
+            'project.rdbProjectWorks.position',
             'changwat',
             'utilizeType'
         ])->findOrFail($id);

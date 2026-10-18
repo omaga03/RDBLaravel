@@ -13,192 +13,506 @@
                     <li class="breadcrumb-item active" aria-current="page">รายละเอียด</li>
                 </ol>
             </nav>
-            <h3 class="mb-0 fw-bold text-body">
+            <h3 class="mb-0 fw-semibold text-body page-title">
                 <i class="bi bi-gear-wide-connected me-2 text-primary"></i>รายละเอียดการนำไปใช้ประโยชน์
             </h3>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('frontend.rdbprojectutilize.index') }}" class="btn btn-outline-secondary">
+            <a href="{{ route('frontend.rdbprojectutilize.index') }}" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center">
                 <i class="bi bi-arrow-left me-1"></i> กลับหน้ารายการ
             </a>
-            <button onclick="window.print()" class="btn btn-outline-secondary">
+            <button onclick="window.print()" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center">
                 <i class="bi bi-printer me-1"></i> พิมพ์
             </button>
         </div>
     </div>
 
-    <div class="card shadow-sm mb-4 border">
-        <div class="card-header text-white" style="background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);">
-            <span class="small text-white-50"><i class="bi bi-gear me-1"></i> ข้อมูลการนำไปใช้ประโยชน์</span>
-            <h4 class="card-title mb-0 mt-1 fw-bold text-white text-break">{{ $item->project->pro_nameTH ?? 'การนำงานวิจัยไปใช้ประโยชน์' }}</h4>
-        </div>
-        <div class="card-body">
-            <!-- Utilization Info & Project -->
-            <div class="row g-4 mb-4">
-                <div class="col-md-7">
-                    <div class="p-3 border rounded h-100 bg-body-tertiary">
-                        <h5 class="mb-3 text-primary border-bottom pb-2"><i class="bi bi-info-circle-fill me-2"></i>ข้อมูลการนำไปใช้ประโยชน์</h5>
-                        
-                        <div class="row mb-2">
-                            <div class="col-sm-4 fw-bold">วันที่นำไปใช้:</div>
-                            <div class="col-sm-8">
-                                @if($item->utz_date)
-                                    <div><i class="bi bi-calendar-check me-2 text-primary"></i> <strong>วันที่นำไปใช้:</strong> {{ \App\Helpers\ThaiDateHelper::format($item->utz_date, false, true) }}</div>
-                                @else
-                                    -
-                                @endif
-                            </div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-sm-4 fw-bold">หน่วยงาน:</div>
-                            <div class="col-sm-8">{{ $item->utz_department_name ?? '-' }}</div>
-                        </div>
-                        @if($item->utz_department_address || $item->changwat)
-                        <div class="row mb-2">
-                            <div class="col-sm-4 fw-bold">ที่อยู่:</div>
-                            <div class="col-sm-8">
-                                @if($item->utz_department_address)
-                                    {!! $item->utz_department_address !!}
-                                @endif
-                                @if($item->changwat)
-                                    @if($item->changwat->tambon_t)
-                                        {{ $item->changwat->tambon_t }}
-                                    @endif
-                                    @if($item->changwat->amphoe_t)
-                                        {{ $item->changwat->amphoe_t }}
-                                    @endif
-                                    @if($item->changwat->changwat_t)
-                                        {{ $item->changwat->changwat_t }}
-                                    @endif
-                                @endif
-                            </div>
-                        </div>
+    <div class="row g-4">
+        <!-- Main Content (Left Column: col-lg-8) -->
+        <div class="col-lg-8">
+            <!-- Title & Metadata Card -->
+            <div class="card shadow-sm border mb-4">
+                <div class="card-header text-white p-3 p-md-4" style="background: var(--rdb-gradient-primary);">
+                    <span class="small text-white-50"><i class="bi bi-gear me-1"></i> ข้อมูลการนำไปใช้ประโยชน์</span>
+                    <h4 class="card-title mb-0 mt-1 fw-semibold text-white text-break" style="font-size: 1.15rem; line-height: 1.55;">
+                        {{ $item->project->pro_nameTH ?? 'การนำงานวิจัยไปใช้ประโยชน์' }}
+                    </h4>
+                    @if($item->project && $item->project->pro_nameEN)
+                        <p class="text-white-50 small mb-0 mt-1 text-break">{!! $item->project->pro_nameEN !!}</p>
+                    @endif
+                </div>
+                <div class="card-body">
+                    <!-- Badges Row -->
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        @if($item->utilizeType)
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1">
+                                <i class="bi bi-tag-fill me-1"></i> {{ $item->utilizeType->ut_name }}
+                            </span>
                         @endif
-                        @if($item->utz_leading)
-                        <div class="row mb-2">
-                            <div class="col-sm-4 fw-bold">ผู้ลงนาม:</div>
-                            <div class="col-sm-8">
-                                {!! $item->utz_leading !!}
-                                @if($item->utz_leading_position)
-                                    ({{ $item->utz_leading_position }})
-                                @endif
-                            </div>
-                        </div>
+                        @if($item->utz_date)
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1">
+                                <i class="bi bi-calendar-check me-1"></i> วันที่นำไปใช้: {{ \App\Helpers\ThaiDateHelper::format($item->utz_date, false, true) }}
+                            </span>
                         @endif
                         @if($item->utz_budget)
-                        <div class="row">
-                            <div class="col-sm-4 fw-bold">งบประมาณ:</div>
-                            <div class="col-sm-8 text-success fw-bold">{{ number_format($item->utz_budget, 2) }} บาท</div>
-                        </div>
+                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-2.5 py-1">
+                                <i class="bi bi-cash-stack me-1"></i> งบประมาณ: {{ number_format($item->utz_budget, 2) }} บาท
+                            </span>
                         @endif
                     </div>
-                </div>
 
-                <!-- Project Info -->
-                <div class="col-md-5">
-                    <div class="card h-100 border-success border-opacity-25 shadow-sm">
-                        <div class="card-header bg-success bg-opacity-10 text-success fw-bold">
-                            <i class="bi bi-folder-fill me-2"></i>โครงการวิจัย
-                        </div>
-                        <div class="card-body">
-                            @if($item->project)
-                                <div class="mb-3">
-                                    <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" target="_blank" class="text-decoration-none text-body fw-bold">
-                                        @if($item->project->pro_code)
-                                            <span class="text-primary">{!! $item->project->pro_code !!}</span>
-                                        @endif
-                                        {!! $item->project->pro_nameTH !!}
-                                    </a>
-                                </div>
-                                <small class="text-muted d-block">
-                                    @if($item->project->type)
-                                        {{ $item->project->type->pt_name }}
-                                        @if($item->project->typeSub)
-                                            • {{ $item->project->typeSub->pts_name }}
-                                        @endif
-                                    @endif
-                                </small>
-                                @if($item->project->department)
-                                    <small class="text-muted d-block mt-2">
-                                        <i class="bi bi-building me-1"></i>{{ $item->project->department->department_nameTH }}
-                                    </small>
+                    <!-- Additional Details Table -->
+                    <div class="table-responsive">
+                        <table class="table table-sm table-borderless mb-0">
+                            <tbody>
+                                <tr>
+                                    <th class="text-body-secondary fw-semibold" style="width: 28%;">หน่วยงานที่นำไปใช้:</th>
+                                    <td class="text-body fw-bold">{{ $item->utz_department_name ?? '-' }}</td>
+                                </tr>
+                                @if($item->utz_date)
+                                <tr>
+                                    <th class="text-body-secondary fw-semibold">วันที่นำไปใช้ประโยชน์:</th>
+                                    <td class="text-body">{{ \App\Helpers\ThaiDateHelper::format($item->utz_date, false, true) }}</td>
+                                </tr>
                                 @endif
-                                @if($item->project->rdbProjectWorks && $item->project->rdbProjectWorks->count() > 0)
-                                    <hr class="my-2">
-                                    <small class="text-muted d-block">
-                                        <strong>นักวิจัย:</strong>
-                                    </small>
-                                    @foreach($item->project->rdbProjectWorks as $work)
-                                        @if($work->researcher)
-                                            <small class="d-block ms-2 mb-1">
-                                                <a href="{{ route('frontend.rdbresearcher.show', $work->researcher->researcher_id) }}" class="text-decoration-none text-body hover-primary">
-                                                    <i class="bi bi-person-circle text-primary me-1"></i>
-                                                    {{ $work->researcher->prefix->prefix_nameTH ?? '' }}
-                                                    {{ $work->researcher->researcher_fname }} {{ $work->researcher->researcher_lname }}
-                                                </a>
-                                            </small>
+                                @if($item->utz_department_address || $item->changwat)
+                                <tr>
+                                    <th class="text-body-secondary fw-semibold">สถานที่ / ที่อยู่:</th>
+                                    <td class="text-body">
+                                        @if($item->utz_department_address)
+                                            <div>{!! $item->utz_department_address !!}</div>
                                         @endif
-                                    @endforeach
+                                        @if($item->changwat)
+                                            <div class="text-body-secondary small mt-0.5">
+                                                <i class="bi bi-geo-alt me-1 text-danger"></i>
+                                                {{ $item->changwat->tambon_t ? 'ต.' . $item->changwat->tambon_t : '' }}
+                                                {{ $item->changwat->amphoe_t ? 'อ.' . $item->changwat->amphoe_t : '' }}
+                                                {{ $item->changwat->changwat_t ? 'จ.' . $item->changwat->changwat_t : '' }}
+                                            </div>
+                                        @endif
+                                    </td>
+                                </tr>
                                 @endif
-                            @else
-                                <span class="text-muted">-</span>
-                            @endif
-                        </div>
+                                @if($item->utz_leading)
+                                <tr>
+                                    <th class="text-body-secondary fw-semibold">ผู้แทน / ผู้ลงนาม:</th>
+                                    <td class="text-body">
+                                        <span class="fw-semibold">{!! $item->utz_leading !!}</span>
+                                        @if($item->utz_leading_position)
+                                            <span class="text-body-secondary ms-1">({{ $item->utz_leading_position }})</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                                @endif
+                                @if($item->utz_budget)
+                                <tr>
+                                    <th class="text-body-secondary fw-semibold">งบประมาณ:</th>
+                                    <td>
+                                        <span class="text-success fw-bold">{{ number_format($item->utz_budget, 2) }}</span>
+                                        <span class="text-body-secondary small ms-1">บาท</span>
+                                    </td>
+                                </tr>
+                                @endif
+                                @if($item->project && $item->project->department)
+                                <tr>
+                                    <th class="text-body-secondary fw-semibold">สังกัดหน่วยงานเจ้าของงาน:</th>
+                                    <td class="text-body">{{ $item->project->department->department_nameTH }}</td>
+                                </tr>
+                                @endif
+                                @if(isset($item->utz_count))
+                                <tr>
+                                    <th class="text-body-secondary fw-semibold">จำนวนการเข้าดู:</th>
+                                    <td>
+                                        <span class="badge bg-secondary-subtle text-secondary-emphasis px-2 py-1" style="font-size: 0.76rem;">
+                                            <i class="bi bi-eye me-1"></i> {{ number_format($item->utz_count ?? 0) }} ครั้ง
+                                        </span>
+                                    </td>
+                                </tr>
+                                @endif
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Detail -->
-            @if($item->utz_detail)
-            <div class="card mb-4 border-0 shadow-sm bg-transparent">
-                <div class="card-header bg-transparent border-bottom-0 pt-3 ps-0">
-                    <h5 class="fw-bold text-body"><i class="bi bi-file-text-fill me-2"></i>รายละเอียดการนำไปใช้ประโยชน์</h5>
+            <!-- Detail Card -->
+            <div class="card shadow-sm border mb-4">
+                <div class="card-header bg-body-tertiary d-flex align-items-center py-2.5 px-3">
+                    <i class="bi bi-file-text-fill text-primary me-2"></i>
+                    <h6 class="mb-0 fw-semibold text-body">รายละเอียดการนำไปใช้ประโยชน์ (Utilization Details)</h6>
                 </div>
-                <div class="card-body ps-0 pt-0">
-                    <div class="p-3 bg-body-tertiary border rounded">
-                        <p class="mb-0 text-break">{!! $item->utz_detail !!}</p>
+                <div class="card-body p-3 p-md-4">
+                    @if($item->utz_detail)
+                        <div class="abstract-box p-3 p-md-4 border border-start border-4 border-primary rounded-3 bg-body-tertiary shadow-xs">
+                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary-subtle border-opacity-50">
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 fw-semibold" style="font-size: 0.78rem;">
+                                    <i class="bi bi-info-circle me-1"></i> ข้อมูลรายละเอียด
+                                </span>
+                                <button type="button" class="btn btn-sm btn-outline-secondary py-0.5 px-2.5 rounded-pill copy-abstract-btn d-inline-flex align-items-center" style="font-size: 0.75rem;" onclick="copyAbstractText(this, 'utz-detail-text')">
+                                    <i class="bi bi-clipboard me-1"></i> คัดลอกรายละเอียด
+                                </button>
+                            </div>
+                            <div id="utz-detail-text" class="abstract-content abstract-indent">
+                                {!! $item->utz_detail !!}
+                            </div>
+                        </div>
+                    @else
+                        <div class="abstract-box p-4 border rounded-3 bg-body-tertiary text-center text-body-secondary">
+                            <i class="bi bi-file-earmark-text text-muted fs-3 d-block mb-2"></i>
+                            <span class="fst-italic">ไม่มีข้อมูลรายละเอียดการนำไปใช้ประโยชน์</span>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar / Right Column (col-lg-4) -->
+        <div class="col-lg-4">
+            {{-- 1. Related Project Card --}}
+            @if($item->project)
+            <div class="card shadow-sm border mb-4">
+                <div class="card-header bg-body-tertiary d-flex align-items-center py-2.5 px-3">
+                    <i class="bi bi-folder-symlink-fill text-primary me-2"></i>
+                    <h6 class="mb-0 fw-semibold text-body">โครงการวิจัยที่เกี่ยวข้อง</h6>
+                </div>
+                <div class="card-body">
+                    @if($item->project->pro_code)
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-0.5 mb-1.5" style="font-size: 0.72rem;">
+                            {{ $item->project->pro_code }}
+                        </span>
+                    @endif
+                    <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" class="text-decoration-none fw-bold text-body hover-primary d-block mb-1.5" style="font-size: 0.92rem; line-height: 1.5;">
+                        {!! $item->project->pro_nameTH !!}
+                    </a>
+                    @if($item->project->pro_nameEN)
+                        <p class="text-body-secondary small mb-2 text-break" style="font-size: 0.8rem;">{!! $item->project->pro_nameEN !!}</p>
+                    @endif
+
+                    @if($item->project->type || $item->project->typeSub)
+                    <div class="text-body-secondary small mb-1" style="font-size: 0.78rem;">
+                        {{ $item->project->type->pt_name ?? '' }}
+                        @if($item->project->type && $item->project->typeSub) • @endif
+                        {{ $item->project->typeSub->pts_name ?? '' }}
+                    </div>
+                    @endif
+
+                    @if($item->project->department)
+                    <div class="text-body-secondary small mb-2" style="font-size: 0.78rem;">
+                        <i class="bi bi-building me-1"></i>{{ $item->project->department->department_nameTH }}
+                    </div>
+                    @endif
+
+                    {{-- Project Researchers List --}}
+                    @if($item->project->rdbProjectWorks && $item->project->rdbProjectWorks->count() > 0)
+                        <hr class="my-2 border-secondary-subtle">
+                        <div class="small fw-semibold text-body mb-2" style="font-size: 0.78rem;">คณะผู้วิจัย:</div>
+                        <div class="list-group list-group-flush mb-2">
+                            @foreach($item->project->rdbProjectWorks as $work)
+                                @if($work->researcher)
+                                    <div class="list-group-item bg-transparent px-0 py-1.5 border-0">
+                                        <div class="d-flex align-items-start">
+                                            <i class="bi bi-person-circle text-primary me-2 fs-6 mt-0.5"></i>
+                                            <div class="flex-grow-1 min-w-0">
+                                                <div class="d-flex flex-wrap align-items-center gap-1.5">
+                                                    <a href="{{ route('frontend.rdbresearcher.show', $work->researcher->researcher_id) }}" class="text-decoration-none text-body hover-primary fw-medium small">
+                                                        {{ $work->researcher->prefix->prefix_nameTH ?? '' }}{{ $work->researcher->researcher_fname }} {{ $work->researcher->researcher_lname }}
+                                                    </a>
+                                                    @if($work->position)
+                                                        <span class="badge {{ $work->position_id == 2 ? 'bg-primary-subtle text-primary border border-primary-subtle' : 'bg-secondary-subtle text-secondary-emphasis' }}" 
+                                                              style="font-size: 0.68rem; font-weight: 500; padding: 0.14rem 0.4rem;">
+                                                            {{ $work->position->position_nameTH }}
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    @endif
+
+                    <div class="mt-3">
+                        <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" class="btn btn-sm btn-outline-primary w-100">
+                            <i class="bi bi-box-arrow-up-right me-1"></i> ดูรายละเอียดโครงการ
+                        </a>
                     </div>
                 </div>
             </div>
             @endif
 
-            <!-- Files -->
-            @if($item->utz_files)
-            <div class="card shadow-sm mb-4 border-0">
-                <div class="card-header text-white" style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);">
-                    <h5 class="mb-0"><i class="bi bi-download me-2"></i>ไฟล์แนบ (Attachments)</h5>
+            {{-- 2. Utilization Focus / Types Card (ประเด็นการนำไปใช้ประโยชน์) --}}
+            @php
+                $utzGroupIds = !empty($item->utz_group) ? array_filter(array_map('trim', explode(',', $item->utz_group))) : [];
+                $utzTypes = !empty($utzGroupIds) ? \App\Models\RdbProjectUtilizeType::whereIn('utz_type_id', $utzGroupIds)->get() : collect();
+            @endphp
+            @if($utzTypes->isNotEmpty() || $item->utz_group_qa)
+            <div class="card shadow-sm border mb-4">
+                <div class="card-header bg-body-tertiary d-flex align-items-center justify-content-between py-2.5 px-3">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-bookmark-check-fill text-primary me-2"></i>
+                        <h6 class="mb-0 fw-semibold text-body">ประเด็นการนำไปใช้ประโยชน์</h6>
+                    </div>
+                    @if($utzTypes->count() > 0)
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.7rem;">{{ $utzTypes->count() }} ด้าน</span>
+                    @endif
+                </div>
+                <div class="card-body p-3">
+                    @if($utzTypes->isNotEmpty())
+                        <div class="d-flex flex-column gap-2 {{ $item->utz_group_qa ? 'mb-2.5' : '' }}">
+                            @foreach($utzTypes as $type)
+                                <div class="d-flex align-items-center p-2 rounded-2 bg-body-tertiary border">
+                                    <i class="bi bi-check-circle-fill text-success me-2 fs-6 flex-shrink-0"></i>
+                                    <span class="text-body fw-medium" style="font-size: 0.82rem; line-height: 1.4;">{{ $type->utz_typr_name }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    @if($item->utz_group_qa)
+                        <div class="d-flex align-items-center p-2 rounded-2 bg-success-subtle text-success-emphasis border border-success-subtle" style="font-size: 0.78rem;">
+                            <i class="bi bi-shield-check text-success fs-5 me-2 flex-shrink-0"></i>
+                            <span>เป็นไปตามเกณฑ์การประกันคุณภาพการศึกษา (QA)</span>
+                        </div>
+                    @endif
+                </div>
+            </div>
+            @endif
+
+            {{-- 3. Files Card (High-Impact CTA Card) --}}
+            <div class="card shadow-sm border mb-4">
+                <div class="card-header bg-body-tertiary d-flex align-items-center py-2.5 px-3">
+                    <i class="bi bi-file-earmark-arrow-down-fill text-primary me-2"></i>
+                    <h6 class="mb-0 fw-semibold text-body">ไฟล์เอกสาร (Files)</h6>
+                </div>
+                <div class="card-body p-3">
+                    @if($item->utz_files)
+                        <a href="{{ asset('storage/' . $item->utz_files) }}" 
+                           target="_blank" 
+                           class="file-cta-card card border border-success-subtle text-decoration-none shadow-sm"
+                           style="background: rgba(16, 185, 129, 0.04);">
+                            <div class="card-body p-3">
+                                <div class="d-flex align-items-center justify-content-between mb-2.5">
+                                    <div class="d-flex align-items-center min-w-0 me-2">
+                                        <div class="file-icon-box bg-success-subtle text-success rounded-3 d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 48px; height: 48px;">
+                                            <i class="bi bi-file-earmark-pdf-fill fs-2"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <h6 class="fw-bold text-success mb-0 text-truncate" style="font-size: 0.98rem;">เอกสารการนำไปใช้ประโยชน์</h6>
+                                            <small class="text-body-secondary d-block" style="font-size: 0.78rem;">Utilization Document (PDF)</small>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 flex-shrink-0" title="ดาวน์โหลด: {{ number_format($item->utz_countfile ?? 0) }} ครั้ง" style="font-size: 0.76rem;">
+                                        <i class="bi bi-download me-1"></i>{{ number_format($item->utz_countfile ?? 0) }}
+                                    </span>
+                                </div>
+                                <div class="btn btn-sm btn-success w-100 rounded-2 fw-medium d-flex align-items-center justify-content-center gap-1.5 py-1.5 text-white shadow-sm">
+                                    <i class="bi bi-cloud-arrow-down-fill"></i> ดาวน์โหลดเอกสารแนบ
+                                </div>
+                            </div>
+                        </a>
+                    @else
+                        <div class="p-2.5 border border-dashed rounded bg-body-tertiary mb-0 text-body-secondary small d-flex align-items-center justify-content-center">
+                            <i class="bi bi-file-earmark text-muted fs-5 me-2"></i>
+                            <span>ไม่มีไฟล์เอกสารแนบ</span>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- 4. Location & Map Card (พิกัดสถานที่นำไปใช้ประโยชน์) --}}
+            @php
+                $hasCoords = $item->changwat && !empty($item->changwat->lat) && !empty($item->changwat->long);
+                $locationName = $item->changwat 
+                    ? trim(($item->changwat->tambon_t ? $item->changwat->tambon_t . ' ' : '') . 
+                           ($item->changwat->amphoe_t ? $item->changwat->amphoe_t . ' ' : '') . 
+                           ($item->changwat->changwat_t ?? ''))
+                    : '';
+                $mapQuery = $hasCoords 
+                    ? ($item->changwat->lat . ',' . $item->changwat->long) 
+                    : ($locationName ?: ($item->utz_department_name ?? ''));
+            @endphp
+            @if($hasCoords || !empty($locationName))
+            <div class="card shadow-sm border mb-4">
+                <div class="card-header bg-body-tertiary d-flex align-items-center justify-content-between py-2.5 px-3">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-geo-alt-fill text-danger me-2"></i>
+                        <h6 class="mb-0 fw-semibold text-body">พิกัดสถานที่นำไปใช้ประโยชน์</h6>
+                    </div>
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle" style="font-size: 0.7rem;">Map</span>
                 </div>
                 <div class="card-body p-0">
-                    <div class="list-group list-group-flush">
-                        <div class="list-group-item d-flex align-items-center justify-content-between p-3">
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-file-earmark-text text-primary fs-4 me-3"></i>
-                                <div>
-                                    <a href="{{ asset('storage/' . $item->utz_files) }}" class="text-decoration-none fw-bold text-primary hover-underline" target="_blank">
-                                        <i class="bi bi-box-arrow-up-right me-1 small"></i> เอกสารการนำไปใช้ประโยชน์
-                                    </a>
-                                    <small class="text-muted d-block">คลิกเพื่อดาวน์โหลด/เปิดไฟล์</small>
-                                </div>
+                    <div class="ratio ratio-16x9">
+                        <iframe style="border:0;" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"
+                            src="https://maps.google.com/maps?q={{ urlencode($mapQuery) }}&z=13&output=embed">
+                        </iframe>
+                    </div>
+                    <div class="p-3 bg-body-tertiary border-top">
+                        <div class="d-flex align-items-start justify-content-between gap-2">
+                            <div class="min-w-0">
+                                @if(!empty($locationName))
+                                    <span class="fw-semibold text-body d-block small">
+                                        <i class="bi bi-pin-map text-danger me-1"></i>{{ $locationName }}
+                                    </span>
+                                @endif
+                                @if($hasCoords)
+                                    <small class="text-body-secondary font-monospace d-block" style="font-size: 0.74rem;">
+                                        พิกัด: {{ $item->changwat->lat }}, {{ $item->changwat->long }}
+                                    </small>
+                                @endif
                             </div>
-                            <div class="text-muted" title="จำนวนดาวน์โหลด">
-                                <i class="bi bi-eye"></i> {{ $item->utz_countfile ?? 0 }}
-                            </div>
+                            <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($mapQuery) }}" 
+                               target="_blank" 
+                               class="btn btn-sm btn-outline-danger py-1 px-2.5 rounded-2 d-inline-flex align-items-center flex-shrink-0"
+                               style="font-size: 0.75rem;">
+                                <i class="bi bi-box-arrow-up-right me-1"></i> Google Maps
+                            </a>
+                        </div>
+                        <div class="mt-2 pt-2 border-top text-body-secondary fst-italic d-flex align-items-start gap-1.5" style="font-size: 0.72rem; line-height: 1.45;">
+                            <i class="bi bi-info-circle text-muted mt-0.5 flex-shrink-0"></i>
+                            <span>หมายเหตุ: พิกัดบนแผนที่เป็นตำแหน่งโดยประมาณระดับพื้นที่/ตำบล อาจไม่ใช่พิกัดของสถานที่ที่นำไปใช้ประโยชน์จริง</span>
                         </div>
                     </div>
                 </div>
             </div>
             @endif
-
-            <div class="mt-4 d-flex gap-2">
-                <a href="{{ route('frontend.rdbprojectutilize.index') }}" class="btn btn-outline-secondary px-4"><i class="bi bi-arrow-left me-1"></i> กลับหน้ารายการ</a>
-                <button onclick="window.print()" class="btn btn-outline-secondary px-4"><i class="bi bi-printer me-1"></i> พิมพ์</button>
-            </div>
         </div>
     </div>
 </div>
+
 <style>
+    .hover-primary:hover {
+        color: var(--bs-primary) !important;
+    }
     .hover-underline:hover {
         text-decoration: underline !important;
     }
+
+    /* High-Impact File CTA Card Styling */
+    .file-cta-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        border-radius: 10px;
+    }
+    .file-cta-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.12) !important;
+    }
+    .file-cta-card:active {
+        transform: translateY(0);
+    }
+
+    /* Longform Typography & Box Styling */
+    .abstract-box {
+        border-radius: 12px;
+        transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .abstract-box:hover {
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    }
+    .abstract-content {
+        font-size: 0.96rem;
+        line-height: 1.88;
+        letter-spacing: 0.012em;
+        text-align: justify;
+        text-justify: inter-word;
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+    .abstract-indent {
+        text-indent: 2.25rem;
+    }
+    .abstract-content p {
+        margin-bottom: 0.85rem;
+        text-indent: 2.25rem;
+    }
+    [data-bs-theme="dark"] .abstract-content {
+        color: #d1d5db; /* Softer, comfortable reading tone in dark mode */
+    }
+    [data-bs-theme="light"] .abstract-content {
+        color: #334155; /* Slate-700 for optimal contrast without eye strain */
+    }
+    .copy-abstract-btn {
+        transition: all 0.15s ease;
+    }
+    .copy-abstract-btn:hover {
+        background-color: var(--bs-secondary-bg);
+        color: var(--bs-body-color);
+    }
 </style>
+
+<script>
+    function copyTextToClipboard(text, onSuccess, onError) {
+        if (!text) return;
+        text = text.trim();
+
+        // 1. Modern Clipboard API (available in HTTPS or localhost)
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(() => {
+                if (typeof onSuccess === 'function') onSuccess();
+            }).catch(() => {
+                execFallback(text, onSuccess, onError);
+            });
+        } else {
+            // 2. Fallback for non-secure contexts (e.g. http:// domain in Laragon / local dev)
+            execFallback(text, onSuccess, onError);
+        }
+
+        function execFallback(str, successCb, errorCb) {
+            let textarea = document.createElement('textarea');
+            textarea.value = str;
+            textarea.style.position = 'fixed';
+            textarea.style.top = '0';
+            textarea.style.left = '0';
+            textarea.style.width = '2em';
+            textarea.style.height = '2em';
+            textarea.style.padding = '0';
+            textarea.style.border = 'none';
+            textarea.style.outline = 'none';
+            textarea.style.boxShadow = 'none';
+            textarea.style.background = 'transparent';
+            textarea.style.opacity = '0';
+            textarea.setAttribute('readonly', '');
+            document.body.appendChild(textarea);
+
+            textarea.focus();
+            textarea.select();
+
+            let successful = false;
+            try {
+                successful = document.execCommand('copy');
+            } catch (err) {
+                console.error('execCommand copy failed:', err);
+            }
+            document.body.removeChild(textarea);
+
+            if (successful) {
+                if (typeof successCb === 'function') successCb();
+            } else {
+                if (typeof errorCb === 'function') errorCb();
+            }
+        }
+    }
+
+    function copyAbstractText(target, triggerBtn) {
+        let btn = (triggerBtn && triggerBtn.nodeType) ? triggerBtn : (target && target.nodeType ? target : null);
+        let elId = (typeof target === 'string') ? target : (typeof triggerBtn === 'string' ? triggerBtn : null);
+        if (!elId) return;
+        const el = document.getElementById(elId);
+        if (!el) return;
+        const text = el.innerText || el.textContent || '';
+
+        copyTextToClipboard(text, () => {
+            if (!btn) return;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check2 text-success me-1"></i> คัดลอกแล้ว';
+            btn.classList.add('border-success');
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.classList.remove('border-success');
+            }, 2000);
+        }, () => {
+            window.prompt("กด Ctrl+C เพื่อคัดลอกข้อความ:", text);
+        });
+    }
+</script>
 @endsection

@@ -1,17 +1,25 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid py-4">
-
-    <!-- Page Title & Actions -->
-    <div class="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <!-- Page Header & Breadcrumb -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
         <div>
-            <h2 class="mb-0"><i class="bi bi-award me-2"></i> ทรัพย์สินทางปัญญา (Intellectual Property)</h2>
-            <div class="text-muted small mt-1">สิทธิบัตร อนุสิทธิบัตร ลิขสิทธิ์ และเครื่องหมายการค้า</div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ route('frontend.site.index') }}" class="text-decoration-none">หน้าหลัก</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">ทรัพย์สินทางปัญญา</li>
+                </ol>
+            </nav>
+            <h3 class="mb-0 fw-semibold text-body page-title">
+                <i class="bi bi-lightbulb-fill me-2 text-warning"></i>ทรัพย์สินทางปัญญา (Intellectual Property)
+            </h3>
         </div>
-        <div>
-            <a href="{{ route('frontend.rdbdip.export', request()->query()) }}" class="btn btn-outline-success">
-                <i class="bi bi-file-earmark-excel me-1"></i> ส่งออกข้อมูล (CSV)
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-body border text-body-secondary px-3 py-2">
+                <i class="bi bi-database me-1 text-primary"></i> ทั้งหมด {{ number_format($items->total()) }} รายการ
+            </span>
+            <a href="{{ route('frontend.rdbdip.export', request()->query()) }}" class="btn btn-outline-success btn-sm d-inline-flex align-items-center" style="height: 38px;">
+                <i class="bi bi-file-earmark-excel me-1"></i> Export CSV
             </a>
         </div>
     </div>
@@ -86,10 +94,10 @@
 
     <!-- Results Table -->
     <div class="card shadow-sm border-0">
-        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 fw-bold text-dark">
+        <div class="card-header bg-body-tertiary border-bottom py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-semibold text-body">
                 <i class="bi bi-list-ul me-2 text-primary"></i>รายการทรัพย์สินทางปัญญา
-                <span class="badge bg-primary rounded-pill ms-2">{{ number_format($items->total()) }} รายการ</span>
+                <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle rounded-pill ms-2">{{ number_format($items->total()) }} รายการ</span>
             </h5>
         </div>
         <div class="card-body p-0">
@@ -107,36 +115,36 @@
                         <tr>
                             <td>
                                 <div class="fw-bold mb-1">
-                                    <span class="badge bg-secondary me-1">#{{ $item->dip_id }}</span>
+                                    <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle me-1">#{{ $item->dip_id }}</span>
                                     <a href="{{ route('frontend.rdbdip.show', $item->dip_id) }}" class="text-decoration-none text-body hover-primary">
                                         {!! $item->dip_data2_name ?: ($item->dip_name ?: 'ไม่มีชื่อผลงาน') !!}
                                     </a>
                                 </div>
                                 <div class="small d-flex flex-wrap gap-1 align-items-center mt-1">
                                     @if($item->dipType)
-                                        <span class="badge bg-info text-dark">{{ $item->dipType->dipt_name }}</span>
+                                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">{{ $item->dipType->dipt_name }}</span>
                                     @endif
 
                                     @if($item->dip_request_number)
-                                        <span class="badge bg-light text-dark border">
+                                        <span class="badge bg-body-secondary text-body-secondary border">
                                             <i class="bi bi-file-earmark-text me-1"></i>คำขอ: {{ $item->dip_request_number }}
                                         </span>
                                     @endif
 
                                     @if($item->dip_patent_number)
-                                        <span class="badge bg-success bg-opacity-10 text-success border border-success">
+                                        <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle">
                                             <i class="bi bi-patch-check-fill me-1"></i>ทะเบียน: {{ $item->dip_patent_number }}
                                         </span>
                                     @endif
 
                                     @if($item->dip_request_date)
-                                        <span class="badge bg-light text-muted border">
+                                        <span class="badge bg-body-secondary text-body-secondary border">
                                             <i class="bi bi-calendar3 me-1"></i>{{ \App\Helpers\ThaiDateHelper::format($item->dip_request_date, false, true) }}
                                         </span>
                                     @endif
 
                                     @if(request('search') && !empty($item->match_sources))
-                                        <span class="badge bg-warning text-dark" 
+                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" 
                                               data-bs-toggle="tooltip" 
                                               data-bs-placement="top" 
                                               data-bs-html="true"
@@ -204,8 +212,6 @@
             <i class="bi bi-arrow-left me-1"></i> ไปหน้ารายการโครงการวิจัย
         </a>
     </div>
-
-</div>
 @endsection
 
 @push('scripts')

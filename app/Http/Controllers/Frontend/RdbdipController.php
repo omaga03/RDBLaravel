@@ -160,6 +160,8 @@ class RdbdipController extends Controller
             },
             'project.rdbProjectWorks.researcher',
             'project.rdbProjectWorks.researcher.prefix',
+            'project.rdbProjectWorks.researcher.department',
+            'project.rdbProjectWorks.position',
             'researcher',
             'researcher.prefix',
             'researcher.department'

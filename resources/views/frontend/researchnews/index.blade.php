@@ -1,13 +1,24 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid py-4">
-
-    <!-- Page Title -->
-    <div class="mb-4">
-        <h2 class="mb-0 fw-bold text-body">
-            <i class="bi bi-newspaper me-2 text-primary"></i> ข่าวกิจกรรมงานวิจัย (Research News)
-        </h2>
+    <!-- Page Header & Breadcrumb -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ route('frontend.site.index') }}" class="text-decoration-none">หน้าหลัก</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">ข่าวกิจกรรมงานวิจัย</li>
+                </ol>
+            </nav>
+            <h3 class="mb-0 fw-semibold text-body page-title">
+                <i class="bi bi-newspaper me-2 text-primary"></i>ข่าวกิจกรรมงานวิจัย (Research News)
+            </h3>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-body border text-body-secondary px-3 py-2">
+                <i class="bi bi-database me-1 text-primary"></i> ทั้งหมด {{ number_format($items->total()) }} รายการ
+            </span>
+        </div>
     </div>
 
     <!-- Search Component -->
@@ -45,11 +56,11 @@
     </x-search-bar>
 
     <!-- Results Card -->
-    <div class="card shadow-sm border mb-4">
+    <div class="card shadow-sm border-0 mb-4">
         <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center py-3">
-            <h5 class="mb-0 fw-bold text-body">
+            <h5 class="mb-0 fw-semibold text-body">
                 <i class="bi bi-list-ul me-2 text-primary"></i>รายการข่าวกิจกรรม
-                <span class="badge bg-primary rounded-pill ms-2">{{ number_format($items->total()) }} รายการ</span>
+                <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle rounded-pill ms-2">{{ number_format($items->total()) }} รายการ</span>
             </h5>
         </div>
         <div class="card-body p-0">
@@ -133,7 +144,6 @@
             </div>
         </div>
     </div>
-</div>
 
 <style>
     .hover-primary:hover {

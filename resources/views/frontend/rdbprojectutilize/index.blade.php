@@ -1,12 +1,24 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid py-4">
-
-    <!-- Page Title -->
-    <div class="mb-4">
-        <h2 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i> การนำผลงานวิจัยไปใช้ประโยชน์ (Research Utilization)</h2>
-        <div class="text-muted small mt-1">ข้อมูลการนำองค์ความรู้ ผลงานวิจัย และนวัตกรรมไปประยุกต์ใช้ในหน่วยงาน ชุมชน และสังคม</div>
+    <!-- Page Header & Breadcrumb -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ route('frontend.site.index') }}" class="text-decoration-none">หน้าหลัก</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">การนำไปใช้ประโยชน์</li>
+                </ol>
+            </nav>
+            <h3 class="mb-0 fw-semibold text-body page-title">
+                <i class="bi bi-graph-up-arrow me-2 text-primary"></i>การนำผลงานวิจัยไปใช้ประโยชน์ (Research Utilization)
+            </h3>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-body border text-body-secondary px-3 py-2">
+                <i class="bi bi-database me-1 text-primary"></i> ทั้งหมด {{ number_format($items->total()) }} รายการ
+            </span>
+        </div>
     </div>
 
     @if(session('error'))
@@ -79,10 +91,10 @@
 
     <!-- Results Table -->
     <div class="card shadow-sm border-0">
-        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 fw-bold text-dark">
+        <div class="card-header bg-body-tertiary border-bottom py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-semibold text-body">
                 <i class="bi bi-list-ul me-2 text-primary"></i>รายการการนำผลงานวิจัยไปใช้ประโยชน์
-                <span class="badge bg-primary rounded-pill ms-2">{{ number_format($items->total()) }} รายการ</span>
+                <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle rounded-pill ms-2">{{ number_format($items->total()) }} รายการ</span>
             </h5>
         </div>
         <div class="card-body p-0">
@@ -100,7 +112,7 @@
                         <tr>
                             <td>
                                 <div class="fw-bold mb-1">
-                                    <span class="badge bg-secondary me-1">#{{ $item->utz_id }}</span>
+                                    <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle me-1">#{{ $item->utz_id }}</span>
                                     <a href="{{ route('frontend.rdbprojectutilize.show', $item->utz_id) }}" class="text-decoration-none text-body hover-primary">
                                         <i class="bi bi-building text-primary me-1"></i>{!! $item->utz_department_name ?: 'ไม่ระบุหน่วยงาน' !!}
                                     </a>
@@ -117,25 +129,25 @@
 
                                 <div class="small d-flex flex-wrap gap-1 align-items-center mt-1">
                                     @if($item->utilizeType)
-                                        <span class="badge bg-info text-dark">
+                                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">
                                             <i class="bi bi-tag-fill me-1"></i>{{ $item->utilizeType->utz_typr_name }}
                                         </span>
                                     @endif
 
                                     @if($item->utz_date)
-                                        <span class="badge bg-light text-dark border">
+                                        <span class="badge bg-body-secondary text-body-secondary border">
                                             <i class="bi bi-calendar3 me-1"></i>{{ \App\Helpers\ThaiDateHelper::format($item->utz_date, false, true) }}
                                         </span>
                                     @endif
 
                                     @if($item->changwat)
-                                        <span class="badge bg-light text-muted border">
+                                        <span class="badge bg-body-secondary text-body-secondary border">
                                             <i class="bi bi-geo-alt-fill me-1"></i>{!! $item->changwat->changwat_t ?? '' !!}
                                         </span>
                                     @endif
 
                                     @if(request('search') && !empty($item->match_sources))
-                                        <span class="badge bg-warning text-dark" 
+                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" 
                                               data-bs-toggle="tooltip" 
                                               data-bs-placement="top" 
                                               data-bs-html="true"
@@ -210,8 +222,6 @@
             <i class="bi bi-arrow-left me-1"></i> ไปหน้ารายการโครงการวิจัย
         </a>
     </div>
-
-</div>
 @endsection
 
 @push('scripts')

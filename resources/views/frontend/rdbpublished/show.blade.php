@@ -13,15 +13,15 @@
                     <li class="breadcrumb-item active" aria-current="page">รายละเอียดผลงาน</li>
                 </ol>
             </nav>
-            <h3 class="mb-0 fw-bold text-body">
+            <h3 class="mb-0 fw-semibold text-body page-title">
                 <i class="bi bi-journal-bookmark-fill me-2 text-primary"></i>รายละเอียดผลงานตีพิมพ์
             </h3>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('frontend.rdbpublished.index') }}" class="btn btn-outline-secondary">
+            <a href="{{ route('frontend.rdbpublished.index') }}" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center">
                 <i class="bi bi-arrow-left me-1"></i> กลับหน้ารายการ
             </a>
-            <button onclick="window.print()" class="btn btn-outline-secondary">
+            <button onclick="window.print()" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center">
                 <i class="bi bi-printer me-1"></i> พิมพ์
             </button>
         </div>
@@ -32,30 +32,30 @@
         <div class="col-lg-8">
             <!-- Title & Metadata Card -->
             <div class="card shadow-sm border mb-4">
-                <div class="card-header text-white" style="background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);">
+                <div class="card-header text-white p-3 p-md-4" style="background: var(--rdb-gradient-primary);">
                     <span class="small text-white-50"><i class="bi bi-file-earmark-text me-1"></i> ชื่อบทความ / ผลงานตีพิมพ์</span>
-                    <h4 class="card-title mb-0 mt-1 fw-bold text-white text-break">{!! $item->pub_name !!}</h4>
+                    <h4 class="card-title mb-0 mt-1 fw-semibold text-white text-break" style="font-size: 1.15rem; line-height: 1.55;">{!! $item->pub_name !!}</h4>
                 </div>
                 <div class="card-body">
                     <!-- Badges Row -->
                     <div class="d-flex flex-wrap gap-2 mb-3">
                         @if($item->year)
-                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2">
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1">
                                 <i class="bi bi-calendar3 me-1"></i> ปี {{ $item->year->year_name }}
                             </span>
                         @endif
                         @if($item->pubtype)
-                            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1">
                                 <i class="bi bi-bookmark me-1"></i> {{ $item->pubtype->pubtype_group }}
                             </span>
                             @if($item->pubtype->pubtype_subgroup)
-                                <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-3 py-2">
+                                <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-2.5 py-1">
                                     {{ $item->pubtype->pubtype_subgroup }}
                                 </span>
                             @endif
                         @endif
                         @if($item->branch)
-                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-3 py-2">
+                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-2.5 py-1">
                                 <i class="bi bi-diagram-3 me-1"></i> {{ $item->branch->branch_name }}
                             </span>
                         @endif
@@ -108,103 +108,114 @@
 
             <!-- Abstract Card -->
             <div class="card shadow-sm border mb-4">
-                <div class="card-header bg-body-tertiary d-flex align-items-center">
-                    <i class="bi bi-file-text-fill text-primary me-2 fs-5"></i>
-                    <h5 class="mb-0 fw-bold text-body">บทคัดย่อ (Abstract)</h5>
+                <div class="card-header bg-body-tertiary d-flex align-items-center py-2.5 px-3">
+                    <i class="bi bi-file-text-fill text-primary me-2"></i>
+                    <h6 class="mb-0 fw-semibold text-body">บทคัดย่อ (Abstract)</h6>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-3 p-md-4">
                     @php
-                        // Split abstract by 3 or more consecutive <br> tags if bilingual
-                        $abstracts = preg_split('/(<br\s*\/?>\\s*){3,}/i', $item->pub_abstract ?? '');
+                        // Split abstract by 4 or more consecutive <br> tags if bilingual
+                        $abstracts = preg_split('/(?:\s*<br\s*\/?>\s*){4,}/i', $item->pub_abstract ?? '', 2);
                     @endphp
 
-                    @if(count($abstracts) >= 2)
-                        <div class="p-3 bg-body-tertiary border rounded mb-3">
-                            <h6 class="fw-bold text-primary mb-2"><i class="bi bi-card-text me-1"></i> บทคัดย่อ (ภาษาไทย)</h6>
-                            <div class="text-body text-break lh-base">{!! $abstracts[0] !!}</div>
+                    @if(count($abstracts) >= 2 && !empty(trim(strip_tags($abstracts[0]))) && !empty(trim(strip_tags($abstracts[1]))))
+                        <div class="abstract-box p-3 p-md-4 border border-start border-4 border-primary rounded-3 mb-3 bg-body-tertiary shadow-xs">
+                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary-subtle border-opacity-50">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 fw-semibold" style="font-size: 0.78rem;">
+                                        <i class="bi bi-card-text me-1"></i> บทคัดย่อ (ภาษาไทย)
+                                    </span>
+                                    <span class="badge bg-secondary-subtle text-secondary-emphasis" style="font-size: 0.7rem;">TH</span>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-secondary py-0.5 px-2.5 rounded-pill copy-abstract-btn d-inline-flex align-items-center" style="font-size: 0.75rem;" onclick="copyAbstractText(this, 'pub-abstract-th')">
+                                    <i class="bi bi-clipboard me-1"></i> คัดลอกบทคัดย่อ
+                                </button>
+                            </div>
+                            <div id="pub-abstract-th" class="abstract-content abstract-indent">
+                                {!! $abstracts[0] !!}
+                            </div>
                         </div>
                         
-                        <div class="p-3 bg-body-secondary border rounded">
-                            <h6 class="fw-bold text-primary mb-2"><i class="bi bi-translate me-1"></i> Abstract (English)</h6>
-                            <div class="text-body text-break lh-base">{!! $abstracts[1] !!}</div>
+                        <div class="abstract-box p-3 p-md-4 border border-start border-4 border-info rounded-3 bg-body-tertiary shadow-xs">
+                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary-subtle border-opacity-50">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-2.5 py-1 fw-semibold" style="font-size: 0.78rem;">
+                                        <i class="bi bi-translate me-1"></i> Abstract (English)
+                                    </span>
+                                    <span class="badge bg-secondary-subtle text-secondary-emphasis" style="font-size: 0.7rem;">EN</span>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-secondary py-0.5 px-2.5 rounded-pill copy-abstract-btn d-inline-flex align-items-center" style="font-size: 0.75rem;" onclick="copyAbstractText(this, 'pub-abstract-en')">
+                                    <i class="bi bi-clipboard me-1"></i> Copy Abstract
+                                </button>
+                            </div>
+                            <div id="pub-abstract-en" class="abstract-content abstract-indent">
+                                {!! $abstracts[1] !!}
+                            </div>
                         </div>
                     @else
-                        <div class="p-3 bg-body-tertiary border rounded">
-                            <div class="text-body text-break lh-base">
-                                {!! !empty(trim(strip_tags($item->pub_abstract ?? ''))) ? $item->pub_abstract : '<span class="text-body-secondary">ไม่มีข้อมูลบทคัดย่อ</span>' !!}
+                        <div class="abstract-box p-3 p-md-4 border border-start border-4 border-primary rounded-3 bg-body-tertiary shadow-xs">
+                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary-subtle border-opacity-50">
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 fw-semibold" style="font-size: 0.78rem;">
+                                    <i class="bi bi-file-text me-1"></i> บทคัดย่อ
+                                </span>
+                                @if(!empty(trim(strip_tags($item->pub_abstract ?? ''))))
+                                <button type="button" class="btn btn-sm btn-outline-secondary py-0.5 px-2.5 rounded-pill copy-abstract-btn d-inline-flex align-items-center" style="font-size: 0.75rem;" onclick="copyAbstractText(this, 'pub-abstract-single')">
+                                    <i class="bi bi-clipboard me-1"></i> คัดลอกบทคัดย่อ
+                                </button>
+                                @endif
+                            </div>
+                            <div id="pub-abstract-single" class="abstract-content abstract-indent">
+                                {!! !empty(trim(strip_tags($item->pub_abstract ?? ''))) ? $item->pub_abstract : '<span class="text-body-secondary fst-italic">ไม่มีข้อมูลบทคัดย่อ</span>' !!}
                             </div>
                         </div>
                     @endif
                 </div>
             </div>
 
-            <!-- Full Paper / Downloads -->
-            @php
-                $filePath = $item->getPublishedFilePath();
-            @endphp
-            @if($filePath)
-            <div class="card shadow-sm border mb-4">
-                <div class="card-header bg-body-tertiary d-flex align-items-center">
-                    <i class="bi bi-download text-primary me-2 fs-5"></i>
-                    <h5 class="mb-0 fw-bold text-body">เอกสารแนบ / ไฟล์บทความฉบับเต็ม</h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between p-3 border rounded bg-body-tertiary flex-wrap gap-2">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-file-earmark-pdf-fill text-danger fs-2 me-3"></i>
-                            <div>
-                                <a href="{{ asset('storage/' . $filePath) }}" class="text-decoration-none fw-bold text-primary fs-6" target="_blank">
-                                    <i class="bi bi-box-arrow-up-right me-1 small"></i> Full Paper / บทความฉบับเต็ม
-                                </a>
-                                <small class="text-body-secondary d-block">คลิกเพื่อเปิดอ่านหรือดาวน์โหลดเอกสาร</small>
-                            </div>
-                        </div>
-                        <div class="text-body-secondary small">
-                            <span class="badge bg-secondary-subtle text-secondary-emphasis px-2 py-1">
-                                <i class="bi bi-eye me-1"></i> ดาวน์โหลด: {{ number_format($item->pub_download ?? 0) }} ครั้ง
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            @endif
         </div>
 
         <!-- Sidebar / Right Column -->
         <div class="col-lg-4">
-            <!-- Authors Card -->
+            {{-- 1. Authors Card --}}
             <div class="card shadow-sm border mb-4">
-                <div class="card-header bg-body-tertiary d-flex align-items-center">
-                    <i class="bi bi-people-fill text-primary me-2 fs-5"></i>
-                    <h5 class="mb-0 fw-bold text-body">ผู้เขียนบทความ (Authors)</h5>
+                <div class="card-header bg-body-tertiary d-flex align-items-center py-2.5 px-3">
+                    <i class="bi bi-people-fill text-primary me-2"></i>
+                    <h6 class="mb-0 fw-semibold text-body">ผู้เขียนบทความ (Authors)</h6>
+                    @if($item->authors && $item->authors->count() > 0)
+                        <span class="badge bg-primary-subtle text-primary ms-auto">{{ $item->authors->count() }}</span>
+                    @elseif($item->researcher)
+                        <span class="badge bg-primary-subtle text-primary ms-auto">1</span>
+                    @endif
                 </div>
                 <div class="card-body p-0">
                     @if($item->authors && $item->authors->count() > 0)
                         <div class="list-group list-group-flush">
                             @foreach($item->authors as $author)
-                                <div class="list-group-item bg-transparent py-3 px-3">
+                                <div class="list-group-item bg-transparent py-2.5 px-3">
                                     <div class="d-flex align-items-start">
-                                        <div class="me-2 text-primary fs-5">
+                                        <div class="me-2 text-primary fs-5 mt-0.5">
                                             <i class="bi bi-person-circle"></i>
                                         </div>
-                                        <div class="flex-grow-1">
-                                            <a href="{{ route('frontend.rdbresearcher.show', $author->researcher_id) }}" class="text-decoration-none fw-bold text-body hover-primary d-block">
-                                                {{ $author->prefix->prefix_nameTH ?? '' }}{{ $author->researcher_fname }} {{ $author->researcher_lname }}
-                                            </a>
-                                            <div class="mt-1 d-flex flex-wrap gap-1 align-items-center">
+                                        <div class="flex-grow-1 min-w-0">
+                                            <div class="d-flex flex-wrap align-items-center gap-1.5 mb-0.5">
+                                                <a href="{{ route('frontend.rdbresearcher.show', $author->researcher_id) }}" class="text-decoration-none fw-bold text-body hover-primary">
+                                                    {{ $author->prefix->prefix_nameTH ?? '' }}{{ $author->researcher_fname }} {{ $author->researcher_lname }}
+                                                </a>
                                                 @if(isset($author->authorType))
-                                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.75rem;">
+                                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.7rem; font-weight: 500; padding: 0.16rem 0.45rem;">
                                                         {{ $author->authorType->pubta_nameTH }}
                                                     </span>
                                                 @endif
-                                                @if($author->department)
-                                                    <span class="badge bg-secondary-subtle text-secondary-emphasis" style="font-size: 0.75rem;">
-                                                        {{ $author->department->department_nameTH }}
-                                                    </span>
-                                                @elseif($author->researcher_note)
-                                                    <span class="text-body-secondary small">({{ $author->researcher_note }})</span>
-                                                @endif
                                             </div>
+                                            @if($author->department)
+                                                <small class="text-body-secondary d-block" style="font-size: 0.78rem;">
+                                                    <i class="bi bi-building me-1"></i>{{ $author->department->department_nameTH }}
+                                                </small>
+                                            @elseif($author->researcher_note)
+                                                <small class="text-body-secondary d-block" style="font-size: 0.78rem;">
+                                                    {{ $author->researcher_note }}
+                                                </small>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -212,17 +223,21 @@
                         </div>
                     @elseif($item->researcher)
                         <div class="list-group list-group-flush">
-                            <div class="list-group-item bg-transparent py-3 px-3">
+                            <div class="list-group-item bg-transparent py-2.5 px-3">
                                 <div class="d-flex align-items-start">
-                                    <div class="me-2 text-primary fs-5">
+                                    <div class="me-2 text-primary fs-5 mt-0.5">
                                         <i class="bi bi-person-circle"></i>
                                     </div>
-                                    <div>
-                                        <a href="{{ route('frontend.rdbresearcher.show', $item->researcher->researcher_id) }}" class="text-decoration-none fw-bold text-body hover-primary">
-                                            {{ $item->researcher->prefix->prefix_nameTH ?? '' }}{{ $item->researcher->researcher_fname }} {{ $item->researcher->researcher_lname }}
-                                        </a>
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex flex-wrap align-items-center gap-1.5 mb-0.5">
+                                            <a href="{{ route('frontend.rdbresearcher.show', $item->researcher->researcher_id) }}" class="text-decoration-none fw-bold text-body hover-primary">
+                                                {{ $item->researcher->prefix->prefix_nameTH ?? '' }}{{ $item->researcher->researcher_fname }} {{ $item->researcher->researcher_lname }}
+                                            </a>
+                                        </div>
                                         @if($item->department)
-                                            <span class="d-block text-body-secondary small">{{ $item->department->department_nameTH }}</span>
+                                            <small class="text-body-secondary d-block" style="font-size: 0.78rem;">
+                                                <i class="bi bi-building me-1"></i>{{ $item->department->department_nameTH }}
+                                            </small>
                                         @endif
                                     </div>
                                 </div>
@@ -234,15 +249,174 @@
                 </div>
             </div>
 
-            <!-- Related Project Card -->
+            {{-- 2. Files Card (High-Impact CTA Card) --}}
+            <div class="card shadow-sm border mb-4">
+                <div class="card-header bg-body-tertiary d-flex align-items-center py-2.5 px-3">
+                    <i class="bi bi-file-earmark-arrow-down-fill text-primary me-2"></i>
+                    <h6 class="mb-0 fw-semibold text-body">ไฟล์เอกสาร (Files)</h6>
+                </div>
+                <div class="card-body p-3">
+                    @php
+                        $filePath = $item->getPublishedFilePath();
+                    @endphp
+                    @if($filePath)
+                        <a href="{{ asset('storage/' . $filePath) }}" 
+                           target="_blank" 
+                           class="file-cta-card card border border-success-subtle text-decoration-none shadow-sm"
+                           style="background: rgba(16, 185, 129, 0.04);">
+                            <div class="card-body p-3">
+                                <div class="d-flex align-items-center justify-content-between mb-2.5">
+                                    <div class="d-flex align-items-center min-w-0 me-2">
+                                        <div class="file-icon-box bg-success-subtle text-success rounded-3 d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 48px; height: 48px;">
+                                            <i class="bi bi-file-earmark-pdf-fill fs-2"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <h6 class="fw-bold text-success mb-0 text-truncate" style="font-size: 0.98rem;">บทความฉบับเต็ม</h6>
+                                            <small class="text-body-secondary d-block" style="font-size: 0.78rem;">Full Paper / Publication (PDF)</small>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 flex-shrink-0" title="ดาวน์โหลด: {{ number_format($item->pub_download ?? 0) }} ครั้ง" style="font-size: 0.76rem;">
+                                        <i class="bi bi-download me-1"></i>{{ number_format($item->pub_download ?? 0) }}
+                                    </span>
+                                </div>
+                                <div class="btn btn-sm btn-success w-100 rounded-2 fw-medium d-flex align-items-center justify-content-center gap-1.5 py-1.5 text-white shadow-sm">
+                                    <i class="bi bi-cloud-arrow-down-fill"></i> ดาวน์โหลดบทความฉบับเต็ม
+                                </div>
+                            </div>
+                        </a>
+                    @else
+                        <div class="p-2.5 border border-dashed rounded bg-body-tertiary mb-0 text-body-secondary small d-flex align-items-center justify-content-center">
+                            <i class="bi bi-file-earmark text-muted fs-5 me-2"></i>
+                            <span>ไม่มีไฟล์เอกสารแนบ</span>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Citations Card (Academic Standards: APA 7, IEEE, MLA 9) -->
+            @php
+                $pubAuthorsList = [];
+                if ($item->authors && $item->authors->count() > 0) {
+                    foreach ($item->authors as $a) {
+                        $name = trim($a->researcher_fname . ' ' . $a->researcher_lname);
+                        if (!empty($name)) {
+                            $pubAuthorsList[] = $name;
+                        }
+                    }
+                } elseif ($item->researcher) {
+                    $pubAuthorsList[] = trim($item->researcher->researcher_fname . ' ' . $item->researcher->researcher_lname);
+                }
+                if (empty($pubAuthorsList)) {
+                    $pubAuthorsList[] = 'มหาวิทยาลัยราชภัฏเพชรบูรณ์';
+                }
+
+                $pubYearBE = $item->year->year_name ?? (date('Y') + 543);
+                $pubCleanTitle = trim(preg_replace('/\s+/', ' ', strip_tags($item->pub_name)));
+                $journalName = $item->pub_name_journal ? trim(strip_tags($item->pub_name_journal)) : 'มหาวิทยาลัยราชภัฏเพชรบูรณ์';
+
+                // APA 7: Author. (Year). Article title. Journal Name.
+                $countPubAuthors = count($pubAuthorsList);
+                if ($countPubAuthors === 1) {
+                    $apaPubAuthors = $pubAuthorsList[0];
+                } elseif ($countPubAuthors === 2) {
+                    $apaPubAuthors = $pubAuthorsList[0] . ' และ ' . $pubAuthorsList[1];
+                } else {
+                    $apaPubAuthors = implode(', ', array_slice($pubAuthorsList, 0, -1)) . ', และ ' . end($pubAuthorsList);
+                }
+                $pubCitationApa = $apaPubAuthors . '. (' . $pubYearBE . '). ' . $pubCleanTitle . '. <i>' . $journalName . '</i>.';
+
+                // IEEE: [1] Author, "Article title," Journal Name, Year.
+                if ($countPubAuthors === 1) {
+                    $ieeePubAuthors = $pubAuthorsList[0];
+                } elseif ($countPubAuthors === 2) {
+                    $ieeePubAuthors = $pubAuthorsList[0] . ' และ ' . $pubAuthorsList[1];
+                } else {
+                    $ieeePubAuthors = $pubAuthorsList[0] . ' และคณะ';
+                }
+                $pubCitationIeee = '[1] ' . $ieeePubAuthors . ', "' . $pubCleanTitle . '," <i>' . $journalName . '</i>, ' . $pubYearBE . '.';
+
+                // MLA 9: Author. "Article Title." Journal Name, Year.
+                if ($countPubAuthors === 1) {
+                    $mlaPubAuthors = $pubAuthorsList[0];
+                } elseif ($countPubAuthors === 2) {
+                    $mlaPubAuthors = $pubAuthorsList[0] . ', และ ' . $pubAuthorsList[1];
+                } else {
+                    $mlaPubAuthors = $pubAuthorsList[0] . ', และคณะ';
+                }
+                $pubCitationMla = $mlaPubAuthors . '. "' . $pubCleanTitle . '." <i>' . $journalName . '</i>, ' . $pubYearBE . '.';
+            @endphp
+            <div class="card shadow-sm border mb-4">
+                <div class="card-header bg-body-tertiary d-flex align-items-center justify-content-between py-2.5 px-3">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-quote text-primary me-2 fs-5"></i>
+                        <h6 class="mb-0 fw-semibold text-body">การอ้างอิง (Citations)</h6>
+                    </div>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.7rem;">3 รูปแบบ</span>
+                </div>
+                <div class="card-body p-3">
+                    <!-- Segmented Small Tabs -->
+                    <ul class="nav nav-pills nav-fill gap-1 p-1 bg-body-tertiary rounded-2 mb-2.5 border" id="pubCitationTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active py-1 px-2 rounded-2 fw-semibold" id="tab-pub-apa7" data-bs-toggle="pill" data-bs-target="#pane-pub-apa7" type="button" role="tab" aria-controls="pane-pub-apa7" aria-selected="true" style="font-size: 0.78rem;">
+                                APA 7
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link py-1 px-2 rounded-2 fw-semibold" id="tab-pub-ieee" data-bs-toggle="pill" data-bs-target="#pane-pub-ieee" type="button" role="tab" aria-controls="pane-pub-ieee" aria-selected="false" style="font-size: 0.78rem;">
+                                IEEE
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link py-1 px-2 rounded-2 fw-semibold" id="tab-pub-mla9" data-bs-toggle="pill" data-bs-target="#pane-pub-mla9" type="button" role="tab" aria-controls="pane-pub-mla9" aria-selected="false" style="font-size: 0.78rem;">
+                                MLA 9
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Tab Panes -->
+                    <div class="tab-content" id="pubCitationTabContent">
+                        <!-- APA 7 Pane -->
+                        <div class="tab-pane fade show active" id="pane-pub-apa7" role="tabpanel" aria-labelledby="tab-pub-apa7" tabindex="0">
+                            <div class="p-2.5 rounded bg-body-tertiary border text-body text-break mb-2" id="text-pub-apa7" style="font-size: 0.82rem; line-height: 1.65; user-select: all;">
+                                {!! $pubCitationApa !!}
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary w-100 py-1.5 d-flex align-items-center justify-content-center gap-1.5" style="font-size: 0.78rem;" onclick="copyCitation('text-pub-apa7', this)">
+                                <i class="bi bi-clipboard"></i> คัดลอก APA 7
+                            </button>
+                        </div>
+
+                        <!-- IEEE Pane -->
+                        <div class="tab-pane fade" id="pane-pub-ieee" role="tabpanel" aria-labelledby="tab-pub-ieee" tabindex="0">
+                            <div class="p-2.5 rounded bg-body-tertiary border text-body text-break mb-2" id="text-pub-ieee" style="font-size: 0.82rem; line-height: 1.65; user-select: all;">
+                                {!! $pubCitationIeee !!}
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary w-100 py-1.5 d-flex align-items-center justify-content-center gap-1.5" style="font-size: 0.78rem;" onclick="copyCitation('text-pub-ieee', this)">
+                                <i class="bi bi-clipboard"></i> คัดลอก IEEE
+                            </button>
+                        </div>
+
+                        <!-- MLA 9 Pane -->
+                        <div class="tab-pane fade" id="pane-pub-mla9" role="tabpanel" aria-labelledby="tab-pub-mla9" tabindex="0">
+                            <div class="p-2.5 rounded bg-body-tertiary border text-body text-break mb-2" id="text-pub-mla9" style="font-size: 0.82rem; line-height: 1.65; user-select: all;">
+                                {!! $pubCitationMla !!}
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary w-100 py-1.5 d-flex align-items-center justify-content-center gap-1.5" style="font-size: 0.78rem;" onclick="copyCitation('text-pub-mla9', this)">
+                                <i class="bi bi-clipboard"></i> คัดลอก MLA 9
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Project Card (Styled like Image 3) -->
             @if($item->project)
             <div class="card shadow-sm border mb-4">
-                <div class="card-header bg-body-tertiary d-flex align-items-center">
-                    <i class="bi bi-folder2-open text-primary me-2 fs-5"></i>
-                    <h5 class="mb-0 fw-bold text-body">โครงการวิจัยที่เกี่ยวข้อง</h5>
+                <div class="card-header bg-body-tertiary d-flex align-items-center py-2.5 px-3">
+                    <i class="bi bi-folder-fill text-success me-2 fs-5"></i>
+                    <h6 class="mb-0 fw-semibold text-success">โครงการวิจัยที่เกี่ยวข้อง</h6>
                 </div>
                 <div class="card-body">
-                    <h6 class="fw-bold mb-2">
+                    <h6 class="fw-semibold mb-2" style="font-size: 0.95rem; line-height: 1.5;">
                         <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" class="text-decoration-none text-body hover-primary text-break">
                             {!! $item->project->pro_nameTH !!}
                         </a>
@@ -250,17 +424,38 @@
                     @if($item->project->pro_nameEN)
                         <p class="text-body-secondary small mb-2 text-break">{!! $item->project->pro_nameEN !!}</p>
                     @endif
-                    <div class="d-flex flex-wrap gap-1 mt-2">
-                        @if($item->project->pro_code)
-                            <span class="badge bg-secondary-subtle text-secondary-emphasis">รหัส: {{ $item->project->pro_code }}</span>
-                        @endif
-                        @if($item->project->year)
-                            <span class="badge bg-info-subtle text-info-emphasis">ปี {{ $item->project->year->year_name }}</span>
-                        @endif
-                        @if($item->project->pro_budget)
-                            <span class="badge bg-success-subtle text-success">฿{{ number_format($item->project->pro_budget, 2) }}</span>
-                        @endif
+
+                    @if($item->project->type || $item->project->typeSub)
+                    <div class="text-body-secondary small mb-1">
+                        {{ $item->project->type->pt_name ?? '' }}
+                        @if($item->project->type && $item->project->typeSub) • @endif
+                        {{ $item->project->typeSub->pts_name ?? '' }}
                     </div>
+                    @endif
+
+                    @if($item->project->department)
+                    <div class="text-body-secondary small mb-2">
+                        <i class="bi bi-building me-1"></i>{{ $item->project->department->department_nameTH }}
+                    </div>
+                    @endif
+
+                    @php
+                        $headWork = $item->project->rdbProjectWorks->firstWhere('position_id', 2) 
+                                 ?? $item->project->rdbProjectWorks->firstWhere('position_id', 1) 
+                                 ?? $item->project->rdbProjectWorks->first();
+                        $headResearcher = $headWork?->researcher;
+                    @endphp
+                    @if($headResearcher)
+                    <hr class="my-2 border-secondary-subtle">
+                    <div class="small fw-semibold text-body mb-1">นักวิจัย:</div>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-person-circle text-primary me-2 fs-6"></i>
+                        <a href="{{ route('frontend.rdbresearcher.show', $headResearcher->researcher_id) }}" class="text-decoration-none text-body hover-primary fw-medium small">
+                            {{ $headResearcher->prefix->prefix_nameTH ?? '' }}{{ $headResearcher->researcher_fname }} {{ $headResearcher->researcher_lname }}
+                        </a>
+                    </div>
+                    @endif
+
                     <div class="mt-3">
                         <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" class="btn btn-sm btn-outline-primary w-100">
                             <i class="bi bi-box-arrow-up-right me-1"></i> ดูรายละเอียดโครงการ
@@ -273,9 +468,9 @@
             <!-- Keywords Card -->
             @if($item->pub_keyword)
             <div class="card shadow-sm border mb-4">
-                <div class="card-header bg-body-tertiary d-flex align-items-center">
-                    <i class="bi bi-tags-fill text-primary me-2 fs-5"></i>
-                    <h5 class="mb-0 fw-bold text-body">คำสำคัญ (Keywords)</h5>
+                <div class="card-header bg-body-tertiary d-flex align-items-center py-2.5 px-3">
+                    <i class="bi bi-tags-fill text-primary me-2"></i>
+                    <h6 class="mb-0 fw-semibold text-body">คำสำคัญ (Keywords)</h6>
                 </div>
                 <div class="card-body">
                     <div class="d-flex flex-wrap gap-1">
@@ -291,12 +486,6 @@
             </div>
             @endif
 
-            <!-- Navigation Back Button -->
-            <div class="d-grid gap-2">
-                <a href="{{ route('frontend.rdbpublished.index') }}" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left me-1"></i> กลับหน้ารายการผลงานตีพิมพ์
-                </a>
-            </div>
         </div>
     </div>
 </div>
@@ -305,5 +494,159 @@
     .hover-primary:hover {
         color: var(--bs-primary) !important;
     }
+    .hover-underline:hover {
+        text-decoration: underline !important;
+    }
+
+    /* High-Impact File CTA Card Styling */
+    .file-cta-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        border-radius: 10px;
+    }
+    .file-cta-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.12) !important;
+    }
+    .file-cta-card:active {
+        transform: translateY(0);
+    }
+
+    /* Abstract Typography & Box Styling */
+    .abstract-box {
+        border-radius: 12px;
+        transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .abstract-box:hover {
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    }
+    .abstract-content {
+        font-size: 0.96rem;
+        line-height: 1.88;
+        letter-spacing: 0.012em;
+        text-align: justify;
+        text-justify: inter-word;
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+    .abstract-indent {
+        text-indent: 2.25rem;
+    }
+    .abstract-content p {
+        margin-bottom: 0.85rem;
+        text-indent: 2.25rem;
+    }
+    [data-bs-theme="dark"] .abstract-content {
+        color: #d1d5db; /* Softer, comfortable reading tone in dark mode */
+    }
+    [data-bs-theme="light"] .abstract-content {
+        color: #334155; /* Slate-700 for optimal contrast without eye strain */
+    }
+    .copy-abstract-btn {
+        transition: all 0.15s ease;
+    }
+    .copy-abstract-btn:hover {
+        background-color: var(--bs-secondary-bg);
+        color: var(--bs-body-color);
+    }
 </style>
+
+<script>
+    function copyTextToClipboard(text, onSuccess, onError) {
+        if (!text) return;
+        text = text.trim();
+
+        // 1. Modern Clipboard API (available in HTTPS or localhost)
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(() => {
+                if (typeof onSuccess === 'function') onSuccess();
+            }).catch(() => {
+                execFallback(text, onSuccess, onError);
+            });
+        } else {
+            // 2. Fallback for non-secure contexts (e.g. http:// domain in Laragon / local dev)
+            execFallback(text, onSuccess, onError);
+        }
+
+        function execFallback(str, successCb, errorCb) {
+            let textarea = document.createElement('textarea');
+            textarea.value = str;
+            textarea.style.position = 'fixed';
+            textarea.style.top = '0';
+            textarea.style.left = '0';
+            textarea.style.width = '2em';
+            textarea.style.height = '2em';
+            textarea.style.padding = '0';
+            textarea.style.border = 'none';
+            textarea.style.outline = 'none';
+            textarea.style.boxShadow = 'none';
+            textarea.style.background = 'transparent';
+            textarea.style.opacity = '0';
+            textarea.setAttribute('readonly', '');
+            document.body.appendChild(textarea);
+
+            textarea.focus();
+            textarea.select();
+
+            let successful = false;
+            try {
+                successful = document.execCommand('copy');
+            } catch (err) {
+                console.error('execCommand copy failed:', err);
+            }
+            document.body.removeChild(textarea);
+
+            if (successful) {
+                if (typeof successCb === 'function') successCb();
+            } else {
+                if (typeof errorCb === 'function') errorCb();
+            }
+        }
+    }
+
+    function copyAbstractText(target, triggerBtn) {
+        let btn = (triggerBtn && triggerBtn.nodeType) ? triggerBtn : (target && target.nodeType ? target : null);
+        let elId = (typeof target === 'string') ? target : (typeof triggerBtn === 'string' ? triggerBtn : null);
+        if (!elId) return;
+        const el = document.getElementById(elId);
+        if (!el) return;
+        const text = el.innerText || el.textContent || '';
+
+        copyTextToClipboard(text, () => {
+            if (!btn) return;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check2 text-success me-1"></i> คัดลอกแล้ว';
+            btn.classList.add('border-success');
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.classList.remove('border-success');
+            }, 2000);
+        }, () => {
+            window.prompt("กด Ctrl+C เพื่อคัดลอกข้อความ:", text);
+        });
+    }
+
+    function copyCitation(target, triggerBtn) {
+        let btn = (triggerBtn && triggerBtn.nodeType) ? triggerBtn : (target && target.nodeType ? target : null);
+        let elId = (typeof target === 'string') ? target : (typeof triggerBtn === 'string' ? triggerBtn : null);
+        if (!elId) return;
+        const el = document.getElementById(elId);
+        if (!el) return;
+        const text = el.innerText || el.textContent || '';
+
+        copyTextToClipboard(text, () => {
+            if (!btn) return;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check2 text-success me-1"></i> คัดลอกการอ้างอิงแล้ว';
+            btn.classList.add('btn-success');
+            btn.classList.remove('btn-outline-primary');
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-outline-primary');
+            }, 2000);
+        }, () => {
+            window.prompt("กด Ctrl+C เพื่อคัดลอกข้อความการอ้างอิง:", text);
+        });
+    }
+</script>
 @endsection
