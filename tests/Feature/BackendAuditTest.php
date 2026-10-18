@@ -647,4 +647,21 @@ class BackendAuditTest extends TestCase
         $this->assertEquals('dips/test-dip.pdf', $dip->getDipFilePath());
         \Illuminate\Support\Facades\Storage::disk('public')->delete('dips/test-dip.pdf');
     }
+
+    public function test_home_and_site_index_renders_research_database_and_not_welcome_page()
+    {
+        // 1. Root route '/'
+        $responseHome = $this->get('/');
+        $responseHome->assertStatus(200);
+        $responseHome->assertSee('ระบบฐานข้อมูลงานวิจัย');
+        $responseHome->assertSee('สถาบันวิจัยและพัฒนา มหาวิทยาลัยราชภัฏเพชรบูรณ์');
+        $responseHome->assertDontSee("Let's get started");
+
+        // 2. '/site' route
+        $responseSite = $this->get('/site');
+        $responseSite->assertStatus(200);
+        $responseSite->assertSee('ระบบฐานข้อมูลงานวิจัย');
+        $responseSite->assertSee('สถาบันวิจัยและพัฒนา มหาวิทยาลัยราชภัฏเพชรบูรณ์');
+        $responseSite->assertDontSee("Let's get started");
+    }
 }

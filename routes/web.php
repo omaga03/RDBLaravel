@@ -75,11 +75,6 @@ use App\Http\Controllers\Frontend\SiteController as FrontendSiteController;
 
 Route::get('/', [FrontendSiteController::class, 'index'])->name('home');
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
 
 // Backend Routes (Protected)
 Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function () {
@@ -267,10 +262,6 @@ Route::name('frontend.')->group(function () {
     Route::get('/site', [FrontendSiteController::class, 'index'])->name('site.index');
 });
 
-// Public Routes (ไม่ต้อง authentication)
-Route::get('/', function () {
-    return view('welcome');
-});
 
 // Authentication Routes
 Route::middleware('guest')->group(function () {

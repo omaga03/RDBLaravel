@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'หน้าแรก - ระบบฐานข้อมูลงานวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์')
+
 @section('content')
 <div class="container-fluid py-4">
     <!-- Header -->
@@ -14,7 +16,7 @@
     <!-- Year Filter -->
     <div class="row mb-4">
         <div class="col-md-12">
-            <form action="{{ route('frontend.site.index') }}" method="GET" class="d-flex justify-content-end align-items-center">
+            <form action="{{ url()->current() }}" method="GET" class="d-flex justify-content-end align-items-center">
                 <label for="year_id" class="me-2 fw-bold">เลือกปีงบประมาณ:</label>
                 <select name="year_id" id="year_id" class="form-select w-auto" onchange="this.form.submit()">
                     @foreach($years_list as $y)
