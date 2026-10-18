@@ -57,3 +57,8 @@ update_*.php
 
 # Assets/Uploads
 /public/uploads/*
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
