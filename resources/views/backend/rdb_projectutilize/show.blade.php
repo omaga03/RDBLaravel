@@ -13,24 +13,78 @@
         }
         .badge { border: 1px solid #000; color: #000 !important; }
     }
-    
-    /* Dark Mode Support */
-    [data-bs-theme="dark"] .text-gray-800 { color: #e9ecef !important; }
-    [data-bs-theme="dark"] .bg-light-styled { background-color: #2b3035 !important; color: #dee2e6; }
-    [data-bs-theme="light"] .bg-light-styled { background-color: #f8f9fa !important; color: #212529; }
 </style>
 
-    <div class="row">
-        <!-- Header & Action Buttons -->
-        <x-page-header 
-            title="รายละเอียดการใช้ประโยชน์ (Utilization Details)"
-            icon="bi-rocket-takeoff"
-            :backRoute="route('backend.rdbprojectutilize.index')"
-            :editRoute="route('backend.rdbprojectutilize.edit', $item->utz_id)"
-            :deleteRoute="route('backend.rdbprojectutilize.destroy', $item->utz_id)"
-            :showPrint="true"
-        />
+<div class="container-fluid py-4">
+    <!-- Header & Action Buttons -->
+    <x-page-header 
+        title="รายละเอียดการใช้ประโยชน์ (Utilization Details)"
+        icon="bi-rocket-takeoff"
+        :backRoute="route('backend.rdbprojectutilize.index')"
+        :editRoute="auth()->user()->can('update', $item) ? route('backend.rdbprojectutilize.edit', $item->utz_id) : null"
+        :deleteRoute="auth()->user()->can('delete', $item) ? route('backend.rdbprojectutilize.destroy', $item->utz_id) : null"
+        :canDelete="auth()->user()->can('delete', $item)"
+        :showPrint="true"
+        :breadcrumbs="[
+            'แดชบอร์ด' => route('backend.site.index'),
+            'จัดการการใช้ประโยชน์' => route('backend.rdbprojectutilize.index'),
+            'รายละเอียดผลงาน' => ''
+        ]"
+    >
+        @if($item->workflow_status === 'published' && auth()->user()->can('requestUnlock', $item))
+            <button type="button" class="btn btn-warning d-inline-flex justify-content-center align-items-center" style="min-width: 105px; height: 38px; font-size: 0.85rem;" data-bs-toggle="modal" data-bs-target="#requestUnlockModal" data-id="{{ $item->utz_id }}" data-type="utilize" data-title="การนำไปใช้ประโยชน์: {{ $item->utz_department_name }}">
+                <i class="bi bi-unlock me-1.5"></i> ขอแก้ไข
+            </button>
+        @elseif($item->workflow_status === 'unlock_requested')
+            @if(auth()->user()->can('approveUnlock', $item))
+                <form action="{{ route('backend.workflow.approve_unlock', ['type' => 'utilize', 'id' => $item->utz_id]) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันอนุมัติให้แก้ไข และย้ายผลงานนี้ไปยังฉบับร่างหรือไม่?');">
+                    @csrf
+                    <button type="submit" class="btn btn-success d-inline-flex justify-content-center align-items-center" style="height: 38px; font-size: 0.85rem;">
+                        <i class="bi bi-unlock me-1.5"></i> อนุมัติย้ายไปฉบับร่าง
+                    </button>
+                </form>
+            @else
+                <span class="btn btn-warning disabled d-inline-flex justify-content-center align-items-center" style="height: 38px; font-size: 0.85rem;">
+                    <i class="bi bi-hourglass-split me-1.5"></i> รอ Admin อนุมัติการขอแก้ไข
+                </span>
+            @endif
+        @elseif(in_array($item->workflow_status, ['draft', 'revision_required']))
+            <form action="{{ route('backend.workflow.submit', ['type' => 'utilize', 'id' => $item->utz_id]) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันส่งผลงานนี้เข้าสู่กระบวนการตรวจรับ?');">
+                @csrf
+                <button type="submit" class="btn btn-primary d-inline-flex justify-content-center align-items-center" style="height: 38px; font-size: 0.85rem;">
+                    <i class="bi bi-send me-1.5"></i> ส่งตรวจสอบ
+                </button>
+            </form>
+        @endif
+    </x-page-header>
 
+    @if($item->workflow_status === 'unlock_requested')
+        <div class="alert alert-warning border-0 shadow-sm d-flex align-items-center mb-4">
+            <i class="bi bi-unlock-fill fs-3 me-3 text-warning-emphasis"></i>
+            <div>
+                <h6 class="alert-heading fw-bold mb-1">ผลงานนี้อยู่ระหว่างยื่นคำขอเปิดสิทธิ์แก้ไข (รอการอนุมัติจากผู้ดูแลระบบ)</h6>
+                <div class="small"><strong>เหตุผลที่ระบุ:</strong> {{ $item->unlock_reason }} (ยื่นเมื่อ {{ \Carbon\Carbon::parse($item->unlock_requested_at)->format('d/m/Y H:i') }})</div>
+            </div>
+        </div>
+    @elseif($item->workflow_status === 'draft' && $item->reviewed_at)
+        <div class="alert alert-info border-0 shadow-sm d-flex align-items-center mb-4">
+            <i class="bi bi-info-circle-fill fs-3 me-3 text-info"></i>
+            <div>
+                <h6 class="alert-heading fw-bold mb-1">ผลงานถูกย้ายมาที่ "ฉบับร่าง" เพื่อให้ท่านดำเนินการแก้ไข</h6>
+                <div class="small">เมื่อแก้ไขข้อมูลเรียบร้อยแล้ว กรุณากดปุ่ม <strong>"ส่งตรวจสอบ"</strong> เพื่อส่งให้ผู้ดูแลระบบอนุมัติเผยแพร่อีกครั้ง</div>
+            </div>
+        </div>
+    @elseif($item->workflow_status === 'revision_required')
+        <div class="alert alert-danger border-0 shadow-sm d-flex align-items-center mb-4">
+            <i class="bi bi-exclamation-octagon-fill fs-3 me-3 text-danger"></i>
+            <div>
+                <h6 class="alert-heading fw-bold mb-1">ผู้ดูแลระบบส่งผลงานกลับมาให้แก้ไขเพิ่มเติม</h6>
+                <div class="small"><strong>ข้อเสนอแนะ:</strong> {{ $item->rejection_remarks }}</div>
+            </div>
+        </div>
+    @endif
+
+    <div class="row g-4">
         <!-- Left Column -->
         <div class="col-lg-8">
             <!-- General Info Card -->
@@ -125,13 +179,18 @@
 
             <!-- Detail Content Card -->
             @if($item->utz_detail)
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-secondary text-white border-0">
-                    <h5 class="mb-0"><i class="bi bi-file-text"></i> รายละเอียดการดำเนินงาน (Utilization Details)</h5>
+            <div class="card shadow-sm mb-4 border">
+                <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center py-2.5 px-3 border-0">
+                    <h6 class="mb-0 fw-semibold text-body"><i class="bi bi-file-text-fill text-primary me-2"></i>รายละเอียดการดำเนินงาน (Utilization Details)</h6>
+                    <button type="button" class="btn btn-sm btn-outline-secondary py-0.5 px-2.5 rounded-pill copy-abstract-btn d-inline-flex align-items-center" style="font-size: 0.75rem;" onclick="copyAbstractText('utilize-backend-detail-text', this)">
+                        <i class="bi bi-clipboard me-1"></i> คัดลอกรายละเอียด
+                    </button>
                 </div>
-                <div class="card-body">
-                    <div class="bg-body-secondary p-3 rounded border">
-                        {!! strip_tags($item->utz_detail, '<p><br><b><strong><i><em><u><ul><ol><li><a>') !!}
+                <div class="card-body p-3 p-md-4">
+                    <div class="abstract-box p-3 p-md-4 border border-start border-4 border-primary rounded-3 bg-body-tertiary shadow-xs">
+                        <div id="utilize-backend-detail-text" class="abstract-content abstract-indent">
+                            {!! strip_tags($item->utz_detail, '<p><br><b><strong><i><em><u><ul><ol><li><a><span>') !!}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -139,13 +198,15 @@
 
             <!-- Note Card -->
             @if($item->utz_note)
-            <div class="card shadow-sm mb-4 border-0">
-                <div class="card-header bg-warning text-dark border-0">
-                    <h5 class="mb-0"><i class="bi bi-sticky"></i> หมายเหตุ (Note)</h5>
+            <div class="card shadow-sm mb-4 border">
+                <div class="card-header bg-body-tertiary py-2.5 px-3 border-0">
+                    <h6 class="mb-0 fw-semibold text-body"><i class="bi bi-sticky text-primary me-2"></i>หมายเหตุ (Note)</h6>
                 </div>
-                <div class="card-body">
-                    <div class="text-muted small">
-                        {!! nl2br(e($item->utz_note)) !!}
+                <div class="card-body p-3">
+                    <div class="abstract-box p-3 border border-start border-4 border-info rounded-3 bg-body-tertiary shadow-xs">
+                        <div class="text-body-secondary small" style="line-height: 1.7;">
+                            {!! nl2br(e($item->utz_note)) !!}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -156,8 +217,8 @@
         <div class="col-lg-4">
             <!-- File Attachment -->
             <div class="card shadow-sm mb-4 d-print-none border">
-                <div class="card-header bg-warning text-dark border-0">
-                    <h5 class="mb-0"><i class="bi bi-paperclip"></i> ไฟล์แนบ (File Attachment)</h5>
+                <div class="card-header bg-body-tertiary py-3 border-0">
+                    <h5 class="mb-0 fw-bold text-body"><i class="bi bi-paperclip text-primary me-2"></i>ไฟล์แนบ (File Attachment)</h5>
                 </div>
                 <div class="card-body text-center p-4 border-top">
                     @if($item->utz_files)
@@ -179,18 +240,18 @@
                                    target="_blank" 
                                    class="btn btn-outline-primary btn-sm w-100 mb-1"
                                    title="{{ $trimmedFile }}">
-                                    <i class="bi bi-eye"></i> {{ $displayName }}
+                                    <i class="bi bi-eye me-1"></i> {{ $displayName }}
                                 </a>
                             @endif
                         @endforeach
                         </div>
                         @if($item->utz_countfile)
-                            <p class="text-muted small mb-0"><i class="bi bi-download"></i> ดาวน์โหลดรวม {{ number_format($item->utz_countfile) }} ครั้ง</p>
+                            <p class="text-muted small mb-0"><i class="bi bi-download me-1"></i>ดาวน์โหลดรวม {{ number_format($item->utz_countfile) }} ครั้ง</p>
                         @endif
                     @else
                         <div class="text-muted py-3">
-                             <i class="bi bi-file-earmark-x" style="font-size: 2rem;"></i><br>
-                             ไม่มีไฟล์แนบ
+                             <i class="bi bi-file-earmark-x" style="font-size: 2.5rem;"></i>
+                             <div class="mt-2">ไม่มีไฟล์แนบ</div>
                         </div>
                     @endif
                 </div>
@@ -200,7 +261,7 @@
             @if($item->project)
             <div class="card shadow-sm mb-4 border">
                 <div class="card-header text-white border-0" style="background: var(--rdb-gradient-primary);">
-                    <h5 class="mb-0"><i class="bi bi-folder-symlink"></i> โครงการวิจัยต้นแบบ</h5>
+                    <h5 class="mb-0"><i class="bi bi-folder-symlink me-2"></i>โครงการวิจัยต้นแบบ</h5>
                 </div>
                 <div class="card-body border-top">
                     <h6 class="fw-bold text-success mb-2">{{ $item->project->pro_nameTH }}</h6>
@@ -218,7 +279,7 @@
             @if($item->changwat && $item->changwat->lat && $item->changwat->long)
             <div class="card shadow-sm mb-4 border">
                 <div class="card-header text-white border-0" style="background: var(--rdb-gradient-primary);">
-                    <h5 class="mb-0"><i class="bi bi-geo-alt"></i> พิกัดสถานที่</h5>
+                    <h5 class="mb-0"><i class="bi bi-geo-alt me-2"></i>พิกัดสถานที่</h5>
                 </div>
                 <div class="card-body p-0 border-top">
                     <div class="ratio ratio-16x9">
@@ -244,8 +305,67 @@
     <!-- Bottom Actions -->
     <x-action-buttons 
         :backRoute="route('backend.rdbprojectutilize.index')"
-        :editRoute="route('backend.rdbprojectutilize.edit', $item->utz_id)"
-        :deleteRoute="route('backend.rdbprojectutilize.destroy', $item->utz_id)"
+        :editRoute="auth()->user()->can('update', $item) ? route('backend.rdbprojectutilize.edit', $item->utz_id) : null"
+        :deleteRoute="auth()->user()->can('delete', $item) ? route('backend.rdbprojectutilize.destroy', $item->utz_id) : null"
+        :canDelete="auth()->user()->can('delete', $item)"
         :showPrint="true"
     />
+</div>
+
+<!-- Request Unlock Modal -->
+<div class="modal fade" id="requestUnlockModal" tabindex="-1" aria-labelledby="requestUnlockModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3 shadow border-0">
+            <form id="requestUnlockForm" method="POST" action="">
+                @csrf
+                <div class="modal-header bg-warning text-dark py-3">
+                    <h6 class="modal-title fw-bold" id="requestUnlockModalLabel">
+                        <i class="bi bi-unlock-fill me-1"></i> ยื่นคำขอเปิดสิทธิ์แก้ไขผลงานที่เผยแพร่แล้ว
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="alert alert-info small py-2 px-3 mb-3 border-0 bg-info-subtle text-info-emphasis">
+                        <i class="bi bi-info-circle me-1"></i> ผลงานที่เผยแพร่แล้วถูกล็อกการแก้ไขตามระเบียบ หากได้รับการอนุมัติจาก Admin <strong>ระบบจะย้ายผลงานนี้ไปยัง "ฉบับร่าง"</strong> เพื่อให้ท่านดำเนินการแก้ไขและส่งตรวจใหม่อีกครั้ง
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-body-secondary small">รายการผลงาน:</label>
+                        <div class="fw-bold text-body" id="modalUnlockItemTitle">-</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="unlockReason" class="form-label fw-bold text-body small">
+                            ระบุเหตุผลความจำเป็นในการแก้ไขผลงาน <span class="text-danger">*</span>
+                        </label>
+                        <textarea class="form-control" id="unlockReason" name="reason" rows="4" placeholder="ระบุเหตุผลในการขอแก้ไขข้อมูล..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-body-tertiary py-2 px-4 border-top">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                    <button type="submit" class="btn btn-sm btn-warning px-3 fw-bold">
+                        <i class="bi bi-send me-1"></i> ส่งคำขอเปิดสิทธิ์แก้ไข
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const unlockModal = document.getElementById('requestUnlockModal');
+    if (unlockModal) {
+        unlockModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const type = button.getAttribute('data-type');
+            const id = button.getAttribute('data-id');
+            const title = button.getAttribute('data-title');
+
+            document.getElementById('modalUnlockItemTitle').textContent = title || ('ID #' + id);
+            document.getElementById('requestUnlockForm').action = '/backend/workflow/' + type + '/' + id + '/request-unlock';
+        });
+    }
+});
+</script>
+@endpush
 @endsection

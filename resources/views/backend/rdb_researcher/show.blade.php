@@ -14,11 +14,25 @@
         title="รายละเอียดข้อมูลนักวิจัย"
         icon="bi-person-badge"
         :backRoute="route('backend.rdb_researcher.index')"
-        :editRoute="route('backend.rdb_researcher.edit', $item->researcher_id)"
-        :deleteRoute="route('backend.rdb_researcher.destroy', $item->researcher_id)"
-        :canDelete="$item->canDelete()"
+        :editRoute="auth()->user()->can('update', $item) ? route('backend.rdb_researcher.edit', $item->researcher_id) : null"
+        :deleteRoute="auth()->user()->can('delete', $item) ? route('backend.rdb_researcher.destroy', $item->researcher_id) : null"
+        :canDelete="auth()->user()->can('delete', $item) && $item->canDelete()"
         :showPrint="false"
-    />
+        :breadcrumbs="[
+            'แดชบอร์ด' => route('backend.site.index'),
+            'จัดการข้อมูลนักวิจัย' => route('backend.rdb_researcher.index'),
+            'ข้อมูลนักวิจัย' => ''
+        ]"
+    >
+        @if(auth()->user()->hasRole('The Creator') || auth()->user()->id === 129)
+            <form action="{{ route('backend.rdb_researcher.impersonate', $item->researcher_id) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันการสวมสิทธิ์เข้าใช้งานในฐานะ {{ $item->prefix->prefix_nameTH ?? '' }}{{ $item->researcher_fname }} {{ $item->researcher_lname }} หรือไม่?');">
+                @csrf
+                <button type="submit" class="btn btn-warning d-inline-flex justify-content-center align-items-center" style="min-width: 135px; height: 38px; font-size: 0.85rem;">
+                    <i class="bi bi-person-fill-gear me-1.5"></i> สวมสิทธิ์ (Login As)
+                </button>
+            </form>
+        @endif
+    </x-page-header>
 
     <div class="row">
         <!-- Sidebar: Profile Image & Contact -->
@@ -39,11 +53,13 @@
                         @endif
                         
                         <!-- Upload Trigger Button -->
+                        @can('update', $item)
                         <a href="#" data-bs-toggle="modal" data-bs-target="#editImageModal" 
                            class="position-absolute bottom-0 end-0 bg-body border rounded-circle d-flex align-items-center justify-content-center shadow-sm text-primary"
                            style="width: 40px; height: 40px; text-decoration: none; right: 5px !important; bottom: 5px !important;">
                              <i class="bi bi-camera-fill"></i>
                         </a>
+                        @endcan
                     </div>
                     
                     <h4 class="card-title mb-1 fw-bold text-primary">
@@ -61,9 +77,11 @@
                     <div class="mb-3 d-flex justify-content-center align-items-center bg-body-secondary rounded p-2 mx-4 border border-secondary-subtle">
                         <i class="bi bi-upc-scan me-2 text-muted"></i>
                         <span class="text-secondary small font-monospace me-2 text-break fw-bold">{{ $item->researcher_codeid ?? '-' }}</span>
-                         <a href="#" data-bs-toggle="modal" data-bs-target="#editCodeIdModal" class="text-secondary text-decoration-none" title="แก้ไข Code ID">
+                        @can('update', $item)
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#editCodeIdModal" class="text-secondary text-decoration-none" title="แก้ไข Code ID">
                             <i class="bi bi-pencil-square"></i>
                         </a>
+                        @endcan
                     </div>
                     
                     <hr>
@@ -393,9 +411,9 @@
     {{-- Bottom Action Buttons --}}
     <x-action-buttons 
         :backRoute="route('backend.rdb_researcher.index')"
-        :editRoute="route('backend.rdb_researcher.edit', $item->researcher_id)"
-        :deleteRoute="route('backend.rdb_researcher.destroy', $item->researcher_id)"
-        :canDelete="$item->canDelete()"
+        :editRoute="auth()->user()->can('update', $item) ? route('backend.rdb_researcher.edit', $item->researcher_id) : null"
+        :deleteRoute="auth()->user()->can('delete', $item) ? route('backend.rdb_researcher.destroy', $item->researcher_id) : null"
+        :canDelete="auth()->user()->can('delete', $item) && $item->canDelete()"
         :showPrint="false"
     />
 

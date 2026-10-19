@@ -310,6 +310,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 ts.setValue("{{ $oldResearcher->researcher_id }}");
             @endif
+        @elseif(!$isEdit && auth()->user() && auth()->user()->researcher)
+            @php
+                $currentResearcher = auth()->user()->researcher;
+            @endphp
+            ts.addOption({
+                value: "{{ $currentResearcher->researcher_id }}",
+                text: "{{ $currentResearcher->full_name ?? ($currentResearcher->researcher_fname . ' ' . $currentResearcher->researcher_lname) }}"
+            });
+            ts.setValue("{{ $currentResearcher->researcher_id }}");
         @elseif(isset($project) && $project->researchers->isNotEmpty())
              // For Edit Mode - Pre-fill existing researchers (Handle Main Researcher Only for now)
              // Check if we need to load pivot data? Usually handled via relation

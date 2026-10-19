@@ -815,4 +815,653 @@ class BackendAuditTest extends TestCase
         $resResearchers->assertSee('ศักยภาพนักวิจัย');
         $resResearchers->assertSee('profile_tier');
     }
+
+    public function test_user_impersonation_and_stop()
+    {
+        $admin = User::find(129);
+        $targetUser = User::where('id', '!=', 129)->first();
+        if (!$admin || !$targetUser) {
+            $this->markTestSkipped('Admin or target user not found.');
+        }
+
+        // Impersonate
+        $res = $this->actingAs($admin)->post(route('backend.user.impersonate', $targetUser->id));
+        $res->assertRedirect();
+        $this->assertEquals($targetUser->id, session('impersonated_user_id'));
+        $this->assertEquals($admin->id, session('impersonator_id'));
+
+        // Check impersonate audit log
+        $this->assertDatabaseHas('audit_logs', [
+            'event' => 'impersonate',
+            'auditable_id' => $targetUser->id,
+        ]);
+
+        // Stop impersonating
+        $stopRes = $this->actingAs($targetUser)->post(route('backend.user.stop_impersonate'));
+        $stopRes->assertRedirect();
+        $this->assertNull(session('impersonated_user_id'));
+        $this->assertNull(session('impersonator_id'));
+
+        // Check stop impersonate audit log
+        $this->assertDatabaseHas('audit_logs', [
+            'event' => 'impersonate',
+            'auditable_id' => $admin->id,
+        ]);
+    }
+
+    public function test_scoped_rbac_and_role_switch()
+    {
+        $admin = User::find(129);
+        if (!$admin) {
+            $this->markTestSkipped('Admin not found.');
+        }
+
+        $scope = \App\Models\UserRoleScope::firstOrCreate([
+            'user_id' => $admin->id,
+            'role_name' => 'The Creator',
+        ], [
+            'is_active' => true,
+            'notes' => 'Test Scoped Role',
+        ]);
+
+        $res = $this->actingAs($admin)->post(route('backend.rbac.switch_scope'), [
+            'scope_id' => $scope->id,
+        ]);
+        $res->assertRedirect();
+        $this->assertEquals($scope->id, session('active_role_scope_id'));
+    }
+
+    public function test_audit_log_records_diff_and_ui()
+    {
+        $admin = User::find(129);
+        $project = RdbProject::first();
+        if (!$admin || !$project) {
+            $this->markTestSkipped('Admin or project not found.');
+        }
+
+        $originalTitle = $project->pro_nameTH;
+        $testTitle = $originalTitle . ' (Audit Log Test)';
+
+        // Update project to trigger Auditable trait
+        $this->actingAs($admin);
+        $project->pro_nameTH = $testTitle;
+        $project->save();
+
+        // Restore original title
+        $project->pro_nameTH = $originalTitle;
+        $project->save();
+
+        // Check audit_logs table has update record
+        $log = \App\Models\AuditLog::where('auditable_type', 'RdbProject')
+            ->where('auditable_id', $project->pro_id)
+            ->where('event', 'update')
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($log);
+
+        // Test Audit Log Index
+        $indexRes = $this->actingAs($admin)->get(route('backend.audit_log.index'));
+        $indexRes->assertStatus(200);
+        $indexRes->assertSee('Audit Trail');
+
+        // Test Audit Log Show (Visual Diff)
+        $showRes = $this->actingAs($admin)->get(route('backend.audit_log.show', $log->id));
+        $showRes->assertStatus(200);
+        $showRes->assertSee('รายละเอียดการเปลี่ยนแปลง');
+        $showRes->assertSee('ค่าเดิม');
+        $showRes->assertSee('ค่าใหม่');
+    }
+
+    public function test_workflow_review_queue_and_status_transitions()
+    {
+        $admin = User::find(129);
+        $project = RdbProject::first();
+        if (!$admin || !$project) {
+            $this->markTestSkipped('Admin or project not found.');
+        }
+
+        // Test Workflow Queue page access
+        $queueRes = $this->actingAs($admin)->get(route('backend.workflow.queue'));
+        $queueRes->assertStatus(200);
+        $queueRes->assertSee('Review Queue');
+
+        // Test Workflow Submit
+        $submitRes = $this->actingAs($admin)->post(route('backend.workflow.submit', ['type' => 'project', 'id' => $project->pro_id]));
+        $submitRes->assertRedirect();
+        $project->refresh();
+        $this->assertEquals('pending_review', $project->workflow_status);
+        $this->assertNotNull($project->submitted_at);
+
+        // Test Workflow Reject
+        $rejectRes = $this->actingAs($admin)->post(route('backend.workflow.reject', ['type' => 'project', 'id' => $project->pro_id]), [
+            'remarks' => 'เอกสารแนบไม่ครบถ้วน กรุณาแนบรายงานฉบับสมบูรณ์ใหม่',
+        ]);
+        $rejectRes->assertRedirect();
+        $project->refresh();
+        $this->assertEquals('revision_required', $project->workflow_status);
+        $this->assertEquals('เอกสารแนบไม่ครบถ้วน กรุณาแนบรายงานฉบับสมบูรณ์ใหม่', $project->rejection_remarks);
+
+        // Test Workflow Approve
+        $approveRes = $this->actingAs($admin)->post(route('backend.workflow.approve', ['type' => 'project', 'id' => $project->pro_id]));
+        $approveRes->assertRedirect();
+        $project->refresh();
+        $this->assertEquals('published', $project->workflow_status);
+        $this->assertEquals($admin->id, $project->reviewed_by);
+        $this->assertNotNull($project->reviewed_at);
+        $this->assertNull($project->rejection_remarks);
+    }
+
+    public function test_notification_inbox_and_mark_as_read()
+    {
+        $admin = User::find(129);
+        if (!$admin) {
+            $this->markTestSkipped('Admin not found.');
+        }
+
+        // Create a test notification
+        $notificationId = (string) \Illuminate\Support\Str::uuid();
+        \Illuminate\Support\Facades\DB::table('notifications')->insert([
+            'id' => $notificationId,
+            'type' => 'App\Notifications\ResearchItemSubmittedNotification',
+            'notifiable_type' => 'App\Models\User',
+            'notifiable_id' => $admin->id,
+            'data' => json_encode([
+                'title' => 'มีผลงานวิจัยใหม่ส่งเข้ามาตรวจรับ',
+                'message' => 'โครงการทดสอบได้รับการส่งเข้าสู่ระบบ',
+                'url' => route('backend.workflow.queue'),
+                'action_text' => 'ตรวจสอบผลงาน',
+            ]),
+            'read_at' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Access notifications index
+        $indexRes = $this->actingAs($admin)->get(route('notifications.index'));
+        $indexRes->assertStatus(200);
+        $indexRes->assertSee('ศูนย์การแจ้งเตือน');
+        $indexRes->assertSee('มีผลงานวิจัยใหม่ส่งเข้ามาตรวจรับ');
+
+        // Mark as read
+        $readRes = $this->actingAs($admin)->post(route('notifications.read', $notificationId));
+        $readRes->assertRedirect(route('backend.workflow.queue'));
+
+        $this->assertNotNull(\Illuminate\Support\Facades\DB::table('notifications')->where('id', $notificationId)->value('read_at'));
+
+        // Mark all as read
+        $readAllRes = $this->actingAs($admin)->post(route('notifications.read_all'));
+        $readAllRes->assertRedirect();
+
+        // Cleanup
+        \Illuminate\Support\Facades\DB::table('notifications')->where('id', $notificationId)->delete();
+    }
+
+    public function test_researcher_impersonation()
+    {
+        $admin = User::find(129);
+        $researcher = \App\Models\RdbResearcher::whereHas('user', function ($q) {
+            $q->where('id', '!=', 129);
+        })->first();
+
+        if (!$admin || !$researcher) {
+            $this->markTestSkipped('Admin or linked researcher not found.');
+        }
+
+        // Impersonate researcher via endpoint
+        $res = $this->actingAs($admin)->post(route('backend.rdb_researcher.impersonate', $researcher->researcher_id));
+        $res->assertRedirect(route('backend.site.index'));
+        $this->assertEquals($researcher->user->id, session('impersonated_user_id'));
+        $this->assertEquals($admin->id, session('impersonator_id'));
+
+        // Check index page renders impersonate button for admin
+        $indexRes = $this->actingAs($admin)->get(route('backend.rdb_researcher.index'));
+        $indexRes->assertStatus(200);
+        $indexRes->assertSee('bi-person-fill-gear');
+
+        // Stop impersonating
+        $stopRes = $this->actingAs($researcher->user)->post(route('backend.user.stop_impersonate'));
+        $stopRes->assertRedirect();
+        $this->assertNull(session('impersonated_user_id'));
+        $this->assertNull(session('impersonator_id'));
+    }
+
+    public function test_impersonated_researcher_can_view_backend_dashboard()
+    {
+        $admin = User::find(129);
+        $user = User::where('username', '655169')->first();
+        if (!$admin || !$user) {
+            $this->markTestSkipped('Admin or user 655169 not found.');
+        }
+
+        // Impersonate user 655169
+        $impersonateRes = $this->actingAs($admin)->post(route('backend.user.impersonate', $user->id));
+        $impersonateRes->assertRedirect(route('backend.site.index'));
+
+        // Access backend dashboard as user 655169
+        $dashRes = $this->actingAs($user)->get(route('backend.site.index'));
+        $dashRes->assertStatus(200);
+        $dashRes->assertDontSee('403');
+        $dashRes->assertSee('แดชบอร์ดผลงานวิจัยของฉัน');
+        $dashRes->assertSee('ชลธิชา ระลึก');
+    }
+
+    public function test_researcher_can_access_research_modules_and_create_records()
+    {
+        $user = User::where('username', '655169')->first();
+        if (!$user) {
+            $this->markTestSkipped('User 655169 not found.');
+        }
+
+        // 1. Projects Index and Create
+        $projIndex = $this->actingAs($user)->get(route('backend.rdb_project.index'));
+        $projIndex->assertStatus(200);
+        $projIndex->assertSee('จัดการโครงการวิจัย');
+        $projIndex->assertSee('เพิ่มโครงการใหม่');
+
+        $projCreate = $this->actingAs($user)->get(route('backend.rdb_project.create'));
+        $projCreate->assertStatus(200);
+        $projCreate->assertSee('เพิ่มโครงการวิจัย');
+
+        // 2. Publications Index and Create
+        $pubIndex = $this->actingAs($user)->get(route('backend.rdb_published.index'));
+        $pubIndex->assertStatus(200);
+        $pubIndex->assertSee('เพิ่มข้อมูลตีพิมพ์');
+
+        $pubCreate = $this->actingAs($user)->get(route('backend.rdb_published.create'));
+        $pubCreate->assertStatus(200);
+        $pubCreate->assertSee('เพิ่มข้อมูลการตีพิมพ์ใหม่');
+
+        // 3. IP (DIP) Index and Create
+        $dipIndex = $this->actingAs($user)->get(route('backend.rdb_dip.index'));
+        $dipIndex->assertStatus(200);
+        $dipIndex->assertSee('เพิ่มข้อมูลใหม่');
+
+        $dipCreate = $this->actingAs($user)->get(route('backend.rdb_dip.create'));
+        $dipCreate->assertStatus(200);
+
+        // 4. Utilization Index and Create
+        $utilizeIndex = $this->actingAs($user)->get(route('backend.rdbprojectutilize.index'));
+        $utilizeIndex->assertStatus(200);
+        $utilizeIndex->assertSee('เพิ่มข้อมูลใหม่');
+
+        $utilizeCreate = $this->actingAs($user)->get(route('backend.rdbprojectutilize.create'));
+        $utilizeCreate->assertStatus(200);
+    }
+
+    public function test_user_edit_page_restricts_role_and_status_for_researchers()
+    {
+        $user = User::where('username', '655169')->first();
+        if (!$user) {
+            $this->markTestSkipped('User 655169 not found.');
+        }
+
+        // 1. Visit edit page as researcher
+        $editRes = $this->actingAs($user)->get(route('backend.user.edit', $user->id));
+        $editRes->assertStatus(200);
+        $editRes->assertSee('เฉพาะผู้ดูแลระบบ');
+        $editRes->assertDontSee('name="role"', false);
+        $editRes->assertDontSee('name="status"', false);
+
+        // 2. Submit update attempting privilege escalation
+        $updateRes = $this->actingAs($user)->put(route('backend.user.update', $user->id), [
+            'username' => $user->username,
+            'email' => $user->email,
+            'role' => 'The Creator',
+            'status' => 0,
+        ]);
+        $updateRes->assertSessionDoesntHaveErrors();
+        
+        // Assert role was NOT changed
+        $this->assertFalse($user->fresh()->hasRole('The Creator'));
+    }
+
+    public function test_navigation_drafts_and_pending_submenus()
+    {
+        $user = User::where('username', '655169')->first();
+        if (!$user) {
+            $this->markTestSkipped('User 655169 not found.');
+        }
+
+        $res = $this->actingAs($user)->get(route('backend.site.index'));
+        $res->assertStatus(200);
+        $res->assertSee('ฉบับร่าง / รออนุมัติ');
+
+        // Test filtering unapproved projects
+        $unapprovedRes = $this->actingAs($user)->get(route('backend.rdb_project.index', ['workflow_status' => 'unapproved']));
+        $unapprovedRes->assertStatus(200);
+    }
+
+    public function test_researcher_cannot_edit_others_projects()
+    {
+        $user = User::where('username', '655169')->first();
+        if (!$user) {
+            $this->markTestSkipped('User 655169 not found.');
+        }
+
+        // Find a project where user 655169 is NOT author or creator
+        $otherProject = RdbProject::whereDoesntHave('researchers', function($q) use ($user) {
+            $q->where('rdb_researcher.researcher_id', $user->researcher_id);
+        })->where('user_created', '!=', $user->id)->first();
+
+        if ($otherProject) {
+            $editRes = $this->actingAs($user)->get(route('backend.rdb_project.edit', $otherProject->pro_id));
+            $this->assertEquals(403, $editRes->getStatusCode());
+        }
+    }
+
+    public function test_published_work_cannot_be_edited_without_admin_approval_and_moves_to_draft()
+    {
+        $user = User::where('username', '655169')->first();
+        $admin = User::find(129) ?? User::whereHas('roles', function($q) { $q->where('item_name', 'The Creator'); })->first();
+
+        if (!$user || !$admin) {
+            $this->markTestSkipped('User 655169 or Admin not found.');
+        }
+
+        // Find or create a project authored/created by user 655169
+        $project = RdbProject::where('user_created', $user->id)->first();
+        if (!$project && $user->researcher_id) {
+            $project = RdbProject::whereHas('researchers', function($q) use ($user) {
+                $q->where('rdb_researcher.researcher_id', $user->researcher_id);
+            })->first();
+        }
+
+        if (!$project) {
+            $this->markTestSkipped('No project found for user 655169.');
+        }
+
+        // 1. Set project as 'published'
+        $project->workflow_status = 'published';
+        $project->save();
+
+        // 2. Researcher CANNOT edit published project directly (Must return 403 Forbidden)
+        $editAttempt = $this->actingAs($user)->get(route('backend.rdb_project.edit', $project->pro_id));
+        $this->assertEquals(403, $editAttempt->getStatusCode(), 'Published project must be strictly locked from researcher direct edit');
+
+        // 2.1 Admin of the domain can edit directly without requesting unlock
+        $adminEditAttempt = $this->actingAs($admin)->get(route('backend.rdb_project.edit', $project->pro_id));
+        $this->assertEquals(200, $adminEditAttempt->getStatusCode(), 'Admin of the domain can edit published project directly without requesting');
+        $this->assertFalse($admin->can('requestUnlock', $project), 'Admin does not need to request unlock');
+
+        // 3. Researcher submits unlock request
+        $unlockReq = $this->actingAs($user)->post(route('backend.workflow.request_unlock', ['type' => 'project', 'id' => $project->pro_id]), [
+            'reason' => 'ต้องการปรับปรุงรายละเอียดและงบประมาณเพิ่มเติมตามข้อตกลงใหม่',
+        ]);
+        $unlockReq->assertSessionHas('success');
+
+        $project->refresh();
+        $this->assertEquals('unlock_requested', $project->workflow_status);
+        $this->assertEquals('ต้องการปรับปรุงรายละเอียดและงบประมาณเพิ่มเติมตามข้อตกลงใหม่', $project->unlock_reason);
+
+        // 4. Researcher STILL cannot edit while unlock is pending
+        $pendingAttempt = $this->actingAs($user)->get(route('backend.rdb_project.edit', $project->pro_id));
+        $this->assertEquals(403, $pendingAttempt->getStatusCode());
+
+        // 5. Admin approves unlock -> Must move item back to 'draft'
+        $approveUnlock = $this->actingAs($admin)->post(route('backend.workflow.approve_unlock', ['type' => 'project', 'id' => $project->pro_id]));
+        $approveUnlock->assertSessionHas('success');
+
+        $project->refresh();
+        $this->assertEquals('draft', $project->workflow_status, 'Approved unlock must move work to draft for editing');
+
+        // 6. Now researcher CAN access edit page
+        $editUrl = route('backend.rdb_project.edit', $project->pro_id);
+        $draftEdit = $this->actingAs($user)->get($editUrl);
+        $draftEdit->assertStatus(200);
+
+        // 7. Researcher submits edited item for review
+        $submitRes = $this->actingAs($user)->post(route('backend.workflow.submit', ['type' => 'project', 'id' => $project->pro_id]));
+        $submitRes->assertSessionHas('success');
+        $project->refresh();
+        $this->assertEquals('pending_review', $project->workflow_status);
+
+        // 8. Admin approves item back to 'published'
+        $finalApprove = $this->actingAs($admin)->post(route('backend.workflow.approve', ['type' => 'project', 'id' => $project->pro_id]));
+        $finalApprove->assertSessionHas('success');
+        $project->refresh();
+        $this->assertEquals('published', $project->workflow_status);
+        $this->assertEquals(1, $project->data_show);
+    }
+
+    public function test_domain_admins_can_edit_all_published_modules_directly()
+    {
+        $admin = User::find(129);
+        $this->assertNotNull($admin);
+
+        // 1. Published article
+        $pub = \App\Models\RdbPublished::first();
+        if ($pub) {
+            $pub->workflow_status = 'published';
+            $pub->save();
+            $this->assertTrue($admin->can('update', $pub), 'Admin can update published publication');
+            $this->assertFalse($admin->can('requestUnlock', $pub), 'Admin does not need to request unlock for publication');
+            $this->actingAs($admin)->get(route('backend.rdb_published.edit', $pub->id))->assertStatus(200);
+        }
+
+        // 2. Intellectual Property (DIP)
+        $dip = \App\Models\RdbDip::first();
+        if ($dip) {
+            $dip->workflow_status = 'published';
+            $dip->save();
+            $this->assertTrue($admin->can('update', $dip), 'Admin can update published IP');
+            $this->assertFalse($admin->can('requestUnlock', $dip), 'Admin does not need to request unlock for IP');
+            $this->actingAs($admin)->get(route('backend.rdb_dip.edit', $dip->dip_id))->assertStatus(200);
+        }
+
+        // 3. Utilization (Project Utilize)
+        $utilize = \App\Models\RdbProjectUtilize::first();
+        if ($utilize) {
+            $utilize->workflow_status = 'published';
+            $utilize->save();
+            $this->assertTrue($admin->can('update', $utilize), 'Admin can update published utilization');
+            $this->assertFalse($admin->can('requestUnlock', $utilize), 'Admin does not need to request unlock for utilization');
+            $this->actingAs($admin)->get(route('backend.rdbprojectutilize.edit', $utilize->utz_id))->assertStatus(200);
+        }
+    }
+
+    public function test_locked_or_unauthorized_records_hide_all_edit_delete_buttons_across_modules()
+    {
+        $researcherUser = \App\Models\User::where('username', '655169')->first() 
+            ?? \App\Models\User::whereNotNull('researcher_id')->first();
+        $this->assertNotNull($researcherUser, 'A researcher user must exist');
+
+        // 1. RdbPublished show page when published
+        $pub = \App\Models\RdbPublished::first();
+        if ($pub) {
+            $pub->workflow_status = 'published';
+            $pub->user_created = $researcherUser->id;
+            $pub->save();
+
+            $response = $this->actingAs($researcherUser)->get(route('backend.rdb_published.show', $pub->getKey()));
+            $response->assertStatus(200);
+            $response->assertSee('ขอแก้ไข');
+            $response->assertDontSee(route('backend.rdb_published.edit', $pub->getKey()));
+            $response->assertDontSee('delete-form-header');
+            $response->assertDontSee('delete-form-bottom');
+            $response->assertDontSee('> ลบ</button>', false);
+            $response->assertDontSee('ลบไฟล์');
+            $response->assertDontSee('#uploadFileModal');
+            $response->assertDontSee('data-mode="add"');
+            $response->assertDontSee('data-mode="edit"');
+        }
+
+        // 2. RdbProject show page when published
+        $project = \App\Models\RdbProject::first();
+        if ($project) {
+            $project->workflow_status = 'published';
+            $project->user_created = $researcherUser->id;
+            $project->save();
+
+            $response = $this->actingAs($researcherUser)->get(route('backend.rdb_project.show', $project->pro_id));
+            $response->assertStatus(200);
+            $response->assertSee('ขอแก้ไข');
+            $response->assertDontSee(route('backend.rdb_project.edit', $project->pro_id));
+            $response->assertDontSee('delete-form-header');
+            $response->assertDontSee('delete-form-bottom');
+            $response->assertDontSee('> ลบ</button>', false);
+            $response->assertDontSee('#projectStatusModal');
+            $response->assertDontSee('#researcherModal');
+            $response->assertDontSee('#projectFilesModal');
+        }
+
+        // 3. RdbDip show page when published
+        $dip = \App\Models\RdbDip::first();
+        if ($dip) {
+            $dip->workflow_status = 'published';
+            $dip->user_created = $researcherUser->id;
+            $dip->save();
+
+            $response = $this->actingAs($researcherUser)->get(route('backend.rdb_dip.show', $dip->dip_id));
+            $response->assertStatus(200);
+            $response->assertSee('ขอแก้ไข');
+            $response->assertDontSee(route('backend.rdb_dip.edit', $dip->dip_id));
+            $response->assertDontSee('delete-form-header');
+            $response->assertDontSee('delete-form-bottom');
+            $response->assertDontSee('> ลบ</button>', false);
+            $response->assertDontSee('#fileModal');
+        }
+
+        // 4. RdbProjectUtilize show page when published
+        $utilize = \App\Models\RdbProjectUtilize::first();
+        if ($utilize) {
+            $utilize->workflow_status = 'published';
+            $utilize->user_created = $researcherUser->id;
+            $utilize->save();
+
+            $response = $this->actingAs($researcherUser)->get(route('backend.rdbprojectutilize.show', $utilize->utz_id));
+            $response->assertStatus(200);
+            $response->assertSee('ขอแก้ไข');
+            $response->assertDontSee(route('backend.rdbprojectutilize.edit', $utilize->utz_id));
+            $response->assertDontSee('delete-form-header');
+            $response->assertDontSee('delete-form-bottom');
+            $response->assertDontSee('> ลบ</button>', false);
+        }
+    }
+
+    public function test_context_aware_links_and_strict_backend_view_scoping_for_researchers()
+    {
+        $researcherUser = \App\Models\User::where('username', '655169')->first()
+            ?? \App\Models\User::whereNotNull('researcher_id')->first();
+        $this->assertNotNull($researcherUser);
+
+        // 1. Find or pick another researcher
+        $otherResearcher = \App\Models\RdbResearcher::where('researcher_id', '!=', $researcherUser->researcher_id)->first();
+        $this->assertNotNull($otherResearcher);
+
+        // Regular researcher cannot view other researcher in backend
+        $this->actingAs($researcherUser)
+            ->get(route('backend.rdb_researcher.show', $otherResearcher->researcher_id))
+            ->assertStatus(403);
+
+        // But regular researcher CAN view their own profile in backend
+        $this->actingAs($researcherUser)
+            ->get(route('backend.rdb_researcher.show', $researcherUser->researcher_id))
+            ->assertStatus(200);
+
+        // 2. A project where researcher is not creator and not an author -> 403
+        $unrelatedProject = \App\Models\RdbProject::whereDoesntHave('rdbProjectWorks', function ($q) use ($researcherUser) {
+            $q->where('rdb_project_work.researcher_id', $researcherUser->researcher_id);
+        })->where('user_created', '!=', $researcherUser->id)->first();
+
+        if ($unrelatedProject) {
+            $this->actingAs($researcherUser)
+                ->get(route('backend.rdb_project.show', $unrelatedProject->pro_id))
+                ->assertStatus(403);
+        }
+
+        // 3. A project where researcher IS an author -> 200, and other researcher is not linked
+        $coProject = \App\Models\RdbProject::whereHas('rdbProjectWorks', function ($q) use ($researcherUser) {
+            $q->where('rdb_project_work.researcher_id', $researcherUser->researcher_id);
+        })->first();
+
+        if ($coProject) {
+            $response = $this->actingAs($researcherUser)->get(route('backend.rdb_project.show', $coProject->pro_id));
+            $response->assertStatus(200);
+            // Self profile link is present
+            $response->assertSee(route('backend.rdb_researcher.show', $researcherUser->researcher_id));
+            if ($otherResearcher && $coProject->rdbProjectWorks()->where('rdb_project_work.researcher_id', $otherResearcher->researcher_id)->exists()) {
+                // Other researcher is plain text, not a link to backend
+                $response->assertDontSee(route('backend.rdb_researcher.show', $otherResearcher->researcher_id));
+            }
+        }
+    }
+
+    public function test_abstract_and_long_text_formatting_and_splitting_across_modules()
+    {
+        $admin = \App\Models\User::find(129) ?? \App\Models\User::role('Admin')->first();
+        $this->assertNotNull($admin);
+
+        // 1. Test project abstract splitting and frontend-like styling
+        $thaiPart = "นี่คือเนื้อหาบทคัดย่อภาษาไทยสำหรับทดสอบความถูกต้องของระบบ";
+        $engPart = "This is the English abstract content for testing system accuracy.";
+        $project = \App\Models\RdbProject::first();
+        if ($project) {
+            $origAbstract = $project->pro_abstract;
+            $project->pro_abstract = $thaiPart . '<br><br><br><br>' . $engPart;
+            $project->save();
+
+            $res = $this->actingAs($admin)->get(route('backend.rdb_project.show', $project->pro_id));
+            $res->assertStatus(200);
+            $res->assertSee('บทคัดย่อ (ภาษาไทย)');
+            $res->assertSee('Abstract (English)');
+            $res->assertSee('abstract-box');
+            $res->assertSee('abstract-content');
+            $res->assertSee('abstract-indent');
+            $res->assertSee('copy-abstract-btn');
+            $res->assertSee('copyAbstractText');
+            $res->assertSee($thaiPart);
+            $res->assertSee($engPart);
+
+            // 2. Also verify frontend project show splits the same abstract
+            $feRes = $this->get(route('frontend.rdbproject.show', $project->pro_id));
+            $feRes->assertStatus(200);
+            $feRes->assertSee('บทคัดย่อ (ภาษาไทย)');
+            $feRes->assertSee('Abstract (English)');
+
+            // Restore original abstract
+            $project->pro_abstract = $origAbstract;
+            $project->save();
+        }
+
+        // 3. Test published item abstract splitting with 5 newlines
+        $pub = \App\Models\RdbPublished::first();
+        if ($pub) {
+            $origPubAbstract = $pub->pub_abstract;
+            $pub->pub_abstract = $thaiPart . "\n\n\n\n\n" . $engPart;
+            $pub->save();
+
+            $pubRes = $this->actingAs($admin)->get(route('backend.rdb_published.show', $pub->id));
+            $pubRes->assertStatus(200);
+            $pubRes->assertSee('บทคัดย่อ (ภาษาไทย)');
+            $pubRes->assertSee('Abstract (English)');
+            $pubRes->assertSee('abstract-box');
+            $pubRes->assertSee('copy-abstract-btn');
+
+            // Restore original abstract
+            $pub->pub_abstract = $origPubAbstract;
+            $pub->save();
+        }
+
+        // 4. Test Project 2141 explicitly: Items 1, 2, 3 must be in Thai box, and English must be in English box
+        $p2141 = \App\Models\RdbProject::find(2141);
+        if ($p2141) {
+            $split2141 = \App\Helpers\AbstractHelper::split($p2141->pro_abstract);
+            $this->assertCount(2, $split2141);
+            // Item 2 and 3 must belong to Thai abstract
+            $this->assertStringContainsString('ผู้สูงวัยที่ได้รับการจัดกิจกรรมการเล่นบอร์ดเกมฝึกสมอง', $split2141[0]);
+            $this->assertStringContainsString('ผู้สูงวัยที่ได้รับการจัดกิจกรรมการออกกำลังกายโดยใช้สมองเป็นฐาน', $split2141[0]);
+            // English part must be in English abstract, not Thai
+            $this->assertStringContainsString('Research and development of innovative dementia prevention', $split2141[1]);
+            $this->assertStringNotContainsString('Research and development of innovative dementia prevention', $split2141[0]);
+
+            // Test backend show response for project 2141
+            $res2141 = $this->actingAs($admin)->get(route('backend.rdb_project.show', 2141));
+            $res2141->assertStatus(200);
+            $res2141->assertSee('บทคัดย่อ (ภาษาไทย)');
+            $res2141->assertSee('Abstract (English)');
+        }
+    }
 }
+
+

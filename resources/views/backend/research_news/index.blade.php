@@ -2,13 +2,29 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <h2 class="mb-0 fw-bold text-body">
-            <i class="bi bi-newspaper me-2 text-primary"></i>จัดการข่าว/กิจกรรม (News & Activities)
-        </h2>
-        <a href="{{ route('backend.research_news.create') }}" class="btn btn-success d-inline-flex align-items-center">
-            <i class="bi bi-plus-circle me-2"></i> เพิ่มข่าวใหม่
-        </a>
+    <!-- Page Header & Breadcrumb -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ route('backend.site.index') }}" class="text-decoration-none">แดชบอร์ด</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">จัดการข่าวและกิจกรรม</li>
+                </ol>
+            </nav>
+            <h3 class="mb-0 fw-semibold text-body page-title">
+                <i class="bi bi-newspaper me-2 text-primary"></i>จัดการข่าวและกิจกรรม <span class="text-body-secondary small fw-normal">(News & Activities)</span>
+            </h3>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-body border text-body-secondary px-3 py-2 shadow-sm">
+                <i class="bi bi-database me-1 text-primary"></i> ทั้งหมด {{ number_format($items->total()) }} รายการ
+            </span>
+            @can('create', \App\Models\ResearchNews::class)
+            <a href="{{ route('backend.research_news.create') }}" class="btn btn-primary d-inline-flex align-items-center shadow-sm" style="height: 38px;">
+                <i class="bi bi-plus-circle me-1.5"></i> เพิ่มข่าวใหม่
+            </a>
+            @endcan
+        </div>
     </div>
 
     <!-- Search Bar -->
@@ -77,9 +93,11 @@
                                     <a href="{{ route('backend.research_news.show', $item->id) }}" class="btn btn-outline-primary" title="ดูรายละเอียด">
                                         <i class="bi bi-eye"></i>
                                     </a>
+                                    @can('update', $item)
                                     <a href="{{ route('backend.research_news.edit', $item->id) }}" class="btn btn-outline-secondary" title="แก้ไข">
                                         <i class="bi bi-pencil"></i>
                                     </a>
+                                    @endcan
                                 </div>
                             </td>
                         </tr>

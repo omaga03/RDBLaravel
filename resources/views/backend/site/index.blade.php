@@ -7,10 +7,22 @@
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
             <h2 class="mb-1 fw-bold text-body">
-                <i class="bi bi-speedometer2 me-2 text-primary"></i>แดชบอร์ดภาพรวมระบบ (Admin Dashboard)
+                @if($userRoleType === 'faculty')
+                    <i class="bi bi-building me-2 text-primary"></i>แดชบอร์ดภาพรวมงานวิจัยระดับคณะ {{ $facultyDeptName ? "($facultyDeptName)" : "" }}
+                @elseif($userRoleType === 'researcher')
+                    <i class="bi bi-person-workspace me-2 text-primary"></i>แดชบอร์ดผลงานวิจัยของฉัน (Researcher Dashboard)
+                @else
+                    <i class="bi bi-speedometer2 me-2 text-primary"></i>แดชบอร์ดภาพรวมระบบ (Admin Dashboard)
+                @endif
             </h2>
             <p class="text-body-secondary mb-0 d-flex align-items-center flex-wrap gap-2">
-                <span>สรุปข้อมูลสถิติและการดำเนินงานด้านการวิจัย สถาบันวิจัยและพัฒนา</span>
+                @if($userRoleType === 'faculty')
+                    <span>สรุปข้อมูลสถิติและการดำเนินงานด้านการวิจัย สังกัดคณะ/หน่วยงานของคุณ</span>
+                @elseif($userRoleType === 'researcher')
+                    <span>สรุปข้อมูลสถิติผลงานวิจัย งานตีพิมพ์ ทรัพย์สินทางปัญญา และการนำไปใช้ประโยชน์ของคุณ</span>
+                @else
+                    <span>สรุปข้อมูลสถิติและการดำเนินงานด้านการวิจัย สถาบันวิจัยและพัฒนา</span>
+                @endif
                 @if($selectedYear)
                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
                         <i class="bi bi-funnel-fill me-1"></i>ปีงบประมาณ {{ $selectedYear->year_name }}
@@ -322,7 +334,13 @@
         <div class="col-lg-4">
             <div class="card shadow-sm border mb-4">
                 <div class="card-header bg-body-tertiary">
-                    <h6 class="mb-0 fw-bold text-body"><i class="bi bi-grid-fill text-primary me-2"></i>เมนูลัดผู้ดูแลระบบ</h6>
+                    @if($userRoleType === 'admin')
+                        <h6 class="mb-0 fw-bold text-body"><i class="bi bi-grid-fill text-primary me-2"></i>เมนูลัดผู้ดูแลระบบ</h6>
+                    @elseif($userRoleType === 'faculty')
+                        <h6 class="mb-0 fw-bold text-body"><i class="bi bi-grid-fill text-primary me-2"></i>เมนูลัดผู้ประสานงานระดับคณะ</h6>
+                    @else
+                        <h6 class="mb-0 fw-bold text-body"><i class="bi bi-lightning-charge-fill text-warning me-2"></i>เมนูลัดผลงานวิจัยของฉัน</h6>
+                    @endif
                 </div>
                 <div class="list-group list-group-flush">
                     <a href="{{ route('backend.rdb_project.create') }}" class="list-group-item list-group-item-action bg-transparent d-flex align-items-center py-3">
@@ -339,20 +357,37 @@
                             <small class="text-body-secondary">บันทึกบทความวิจัย วารสาร และการอ้างอิง</small>
                         </div>
                     </a>
-                    <a href="{{ route('backend.rdb_researcher.create') }}" class="list-group-item list-group-item-action bg-transparent d-flex align-items-center py-3">
-                        <i class="bi bi-person-plus-fill text-success fs-5 me-3"></i>
-                        <div>
-                            <div class="fw-bold text-body">เพิ่มข้อมูลนักวิจัย</div>
-                            <small class="text-body-secondary">บันทึกประวัติ สังกัด และวุฒิการศึกษา</small>
-                        </div>
-                    </a>
-                    <a href="{{ route('backend.research_news.create') }}" class="list-group-item list-group-item-action bg-transparent d-flex align-items-center py-3">
-                        <i class="bi bi-megaphone-fill text-warning fs-5 me-3"></i>
-                        <div>
-                            <div class="fw-bold text-body">สร้างข่าวสารประชาสัมพันธ์</div>
-                            <small class="text-body-secondary">เผยแพร่ข่าวสารและกิจกรรมงานวิจัย</small>
-                        </div>
-                    </a>
+                    @if($userRoleType === 'admin')
+                        <a href="{{ route('backend.rdb_researcher.create') }}" class="list-group-item list-group-item-action bg-transparent d-flex align-items-center py-3">
+                            <i class="bi bi-person-plus-fill text-success fs-5 me-3"></i>
+                            <div>
+                                <div class="fw-bold text-body">เพิ่มข้อมูลนักวิจัย</div>
+                                <small class="text-body-secondary">บันทึกประวัติ สังกัด และวุฒิการศึกษา</small>
+                            </div>
+                        </a>
+                        <a href="{{ route('backend.research_news.create') }}" class="list-group-item list-group-item-action bg-transparent d-flex align-items-center py-3">
+                            <i class="bi bi-megaphone-fill text-warning fs-5 me-3"></i>
+                            <div>
+                                <div class="fw-bold text-body">สร้างข่าวสารประชาสัมพันธ์</div>
+                                <small class="text-body-secondary">เผยแพร่ข่าวสารและกิจกรรมงานวิจัย</small>
+                            </div>
+                        </a>
+                    @else
+                        <a href="{{ route('backend.rdb_dip.create') }}" class="list-group-item list-group-item-action bg-transparent d-flex align-items-center py-3">
+                            <i class="bi bi-award-fill text-success fs-5 me-3"></i>
+                            <div>
+                                <div class="fw-bold text-body">เพิ่มทรัพย์สินทางปัญญา</div>
+                                <small class="text-body-secondary">บันทึกข้อมูลสิทธิบัตร/อนุสิทธิบัตร/ลิขสิทธิ์</small>
+                            </div>
+                        </a>
+                        <a href="{{ route('backend.rdbprojectutilize.create') }}" class="list-group-item list-group-item-action bg-transparent d-flex align-items-center py-3">
+                            <i class="bi bi-rocket-takeoff-fill text-danger fs-5 me-3"></i>
+                            <div>
+                                <div class="fw-bold text-body">เพิ่มการนำไปใช้ประโยชน์</div>
+                                <small class="text-body-secondary">บันทึกการนำผลงานวิจัยไปใช้ในพื้นที่</small>
+                            </div>
+                        </a>
+                    @endif
                 </div>
             </div>
         </div>

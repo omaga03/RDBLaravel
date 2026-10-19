@@ -59,14 +59,43 @@ class RdbProjectController extends Controller
             'updatedBy'
         ]);
 
-        // Apply 'manage own group data' filter for general admins (not 'The Creator')
-        if (auth()->check() && auth()->user()->hasRole('Admin') && !auth()->user()->hasRole('The Creator')) {
-            // Get all user IDs that have the 'Admin' role
-            $adminIds = \App\Models\User::whereHas('roles', function ($q) {
-                $q->where('item_name', 'Admin');
-            })->pluck('id');
+        // Apply RBAC Scoping:
+        // 1. Super Admin ('The Creator') and 'Admin Project' can view all projects across the university.
+        // 2. Legacy 'Admin' manages own group data.
+        // 3. 'Faculty Coordinator' manages projects in their department.
+        // 4. 'Researcher' views projects they authored/created or projects in their faculty.
+        $currentUser = auth()->user();
+        if ($currentUser && !$currentUser->hasRole('The Creator') && !$currentUser->hasRole('Admin Project')) {
+            if ($currentUser->hasRole('Admin')) {
+                $adminIds = \App\Models\User::whereHas('roles', function ($q) {
+                    $q->where('item_name', 'Admin');
+                })->pluck('id');
+                $query->whereIn('user_created', $adminIds);
+            } elseif ($currentUser->hasRole('Faculty Coordinator')) {
+                $deptId = $currentUser->getActiveRoleScope()?->department_id ?? $currentUser->researcher?->department_id;
+                if ($deptId) {
+                    $query->where('department_id', $deptId);
+                }
+            } elseif ($currentUser->hasRole('Researcher') || $currentUser->researcher_id) {
+                $researcherId = $currentUser->researcher_id;
+                $query->where(function($q) use ($researcherId, $currentUser) {
+                    $q->where('user_created', $currentUser->id);
+                    if ($researcherId) {
+                        $q->orWhereHas('rdbProjectWorks', function($wq) use ($researcherId) {
+                            $wq->where('rdb_project_work.researcher_id', $researcherId);
+                        });
+                    }
+                });
+            }
+        }
 
-            $query->whereIn('user_created', $adminIds);
+        // Workflow Status filter (e.g. Drafts & Pending)
+        if ($request->filled('workflow_status')) {
+            if ($request->workflow_status === 'unapproved') {
+                $query->whereIn('workflow_status', ['draft', 'pending_review', 'rejected']);
+            } else {
+                $query->where('workflow_status', $request->workflow_status);
+            }
         }
 
         // General Search - searches across ALL fields

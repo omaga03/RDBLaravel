@@ -71,6 +71,12 @@ class RdbResearcher extends Model
         return $path ? asset('storage/' . $path) : null;
     }
 
+    public function getFullNameAttribute(): string
+    {
+        $prefix = $this->prefix ? $this->prefix->prefix_nameTH : '';
+        return trim($prefix . ' ' . $this->researcher_fname . ' ' . $this->researcher_lname);
+    }
+
     /**
      * Check profile file integrity
      */
@@ -86,6 +92,11 @@ class RdbResearcher extends Model
     public function usingNewProfilePath(): bool
     {
         return !empty($this->rf_path);
+    }
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'researcher_id', 'researcher_id');
     }
 
     public function creator() {

@@ -31,6 +31,38 @@ class RdbProjectUtilizeController extends Controller
     protected function getFilteredQuery(Request $request)
     {
         $query = RdbProjectUtilize::with(['project.rdbProjectWorks.researcher', 'changwat', 'utilizeType', 'createdBy', 'updatedBy']);
+
+        // Apply RBAC Scoping:
+        $currentUser = auth()->user();
+        if ($currentUser && !$currentUser->hasRole('The Creator') && !$currentUser->hasRole('Admin') && !$currentUser->hasRole('Admin Utilize')) {
+            if ($currentUser->hasRole('Faculty Coordinator')) {
+                $deptId = $currentUser->getActiveRoleScope()?->department_id ?? $currentUser->researcher?->department_id;
+                if ($deptId) {
+                    $query->whereHas('project', function($q) use ($deptId) {
+                        $q->where('department_id', $deptId);
+                    });
+                }
+            } elseif ($currentUser->hasRole('Researcher') || $currentUser->researcher_id) {
+                $researcherId = $currentUser->researcher_id;
+                $query->where(function($q) use ($researcherId, $currentUser) {
+                    $q->where('user_created', $currentUser->id);
+                    if ($researcherId) {
+                        $q->orWhereHas('project.rdbProjectWorks', function($wq) use ($researcherId) {
+                            $wq->where('rdb_project_work.researcher_id', $researcherId);
+                        });
+                    }
+                });
+            }
+        }
+
+        // Workflow Status filter
+        if ($request->filled('workflow_status')) {
+            if ($request->workflow_status === 'unapproved') {
+                $query->whereIn('workflow_status', ['draft', 'pending_review', 'rejected']);
+            } else {
+                $query->where('workflow_status', $request->workflow_status);
+            }
+        }
         
         if ($request->filled('q')) {
             $q = $request->q;

@@ -10,9 +10,14 @@ use App\Models\RdbDepMajor;
 use App\Models\RdbDepartmentCategory;
 use App\Models\RdbDepartmentCourse;
 use App\Models\RdbResearcherStatus;
+use App\Models\User;
+use App\Models\AuthAssignment;
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use App\Services\FileUploadService;
 use App\Http\Requests\Backend\StoreResearcherRequest;
@@ -38,7 +43,7 @@ class RdbResearcherController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', RdbResearcher::class);
-        $query = RdbResearcher::with(['prefix', 'department', 'departmentCategory', 'creator', 'updater']);
+        $query = RdbResearcher::with(['prefix', 'department', 'departmentCategory', 'creator', 'updater', 'user']);
 
         if ($request->filled('q')) {
             $q = $request->q;
@@ -492,5 +497,77 @@ class RdbResearcherController extends Controller
         $check = (11 - ($sum % 11)) % 10;
         
         return $check == (int)$id[12];
+    }
+
+    /**
+     * Login As (Impersonate) a researcher directly from the researcher list or detail page.
+     */
+    public function impersonate(Request $request, $id)
+    {
+        $currentUser = auth()->user();
+        if (!$currentUser->hasRole('The Creator') && $currentUser->id !== 129 && !session()->has('impersonator_id')) {
+            abort(403, 'เฉพาะผู้ดูแลระบบสูงสุด (Super Admin) เท่านั้นที่สามารถสวมสิทธิ์ผู้ใช้งานได้');
+        }
+
+        $researcher = RdbResearcher::with(['user', 'prefix'])->findOrFail($id);
+        $targetUser = $researcher->user;
+
+        if (!$targetUser && !empty($researcher->researcher_email)) {
+            $targetUser = User::where('email', $researcher->researcher_email)->first();
+            if ($targetUser && empty($targetUser->researcher_id)) {
+                $targetUser->researcher_id = $researcher->researcher_id;
+                $targetUser->save();
+            }
+        }
+
+        if (!$targetUser) {
+            $username = $researcher->researcher_codeid ?: ('researcher_' . $researcher->researcher_id);
+            if (User::where('username', $username)->exists()) {
+                $username = 'res_' . $researcher->researcher_id . '_' . Str::random(4);
+            }
+            $targetUser = User::create([
+                'username' => $username,
+                'email' => $researcher->researcher_email ?: ($username . '@pcru.ac.th'),
+                'password_hash' => Hash::make(Str::random(16)),
+                'status' => 10,
+                'researcher_id' => $researcher->researcher_id,
+                'created_at' => time(),
+                'updated_at' => time(),
+            ]);
+            AuthAssignment::create([
+                'item_name' => 'Researcher',
+                'user_id' => $targetUser->id,
+                'created_at' => time(),
+            ]);
+        }
+
+        if ($targetUser->hasRole('The Creator') || $targetUser->id === 129) {
+            return redirect()->back()->with('error', 'ไม่สามารถสวมสิทธิ์ผู้ดูแลระบบสูงสุดด้วยกันเองได้');
+        }
+
+        if ($targetUser->id === $currentUser->id) {
+            return redirect()->back()->with('warning', 'ท่านกำลังใช้งานบัญชีนี้อยู่แล้ว');
+        }
+
+        if (!session()->has('impersonator_id')) {
+            session()->put('impersonator_id', $currentUser->id);
+            session()->put('impersonator_username', $currentUser->username);
+        }
+
+        session()->put('impersonated_user_id', $targetUser->id);
+        session()->forget('active_role_scope_id');
+
+        Auth::login($targetUser);
+
+        $fullName = trim(($researcher->prefix->prefix_nameTH ?? '') . ' ' . $researcher->researcher_fname . ' ' . $researcher->researcher_lname);
+
+        AuditLog::record(
+            event: 'impersonate',
+            auditable: $targetUser,
+            remarks: "Admin '{$currentUser->username}' สวมสิทธิ์เข้าใช้งานเป็นนักวิจัย '{$fullName}' ({$targetUser->username})"
+        );
+
+        return redirect()->route('backend.site.index')
+            ->with('success', "ท่านกำลังเข้าใช้งานในฐานะนักวิจัย: '{$fullName}' ({$targetUser->username})");
     }
 }

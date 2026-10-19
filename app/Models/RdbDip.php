@@ -7,7 +7,7 @@ use App\Models\Traits\HasDualFilePath;
 
 class RdbDip extends Model
 {
-    use \App\Traits\HasDataShowScope, HasDualFilePath;
+    use \App\Traits\HasDataShowScope, HasDualFilePath, \App\Traits\Auditable;
 
     protected $table = 'rdb_dip';
     protected $primaryKey = 'dip_id';
@@ -82,6 +82,13 @@ class RdbDip extends Model
         'dip_url',
         'dip_note',
         'data_show',
+        'workflow_status',
+        'submitted_at',
+        'reviewed_by',
+        'reviewed_at',
+        'rejection_remarks',
+        'unlock_reason',
+        'unlock_requested_at',
         'user_created',
         'user_updated',
     ];

@@ -2,11 +2,29 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0"><i class="bi bi-people-fill me-2"></i>จัดการนักวิจัย (Researchers)</h2>
-        <a href="{{ route('backend.rdb_researcher.create') }}" class="btn btn-success d-inline-flex align-items-center">
-            <i class="bi bi-plus-circle me-2"></i> เพิ่มนักวิจัยใหม่
-        </a>
+    <!-- Page Header & Breadcrumb -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ route('backend.site.index') }}" class="text-decoration-none">แดชบอร์ด</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">จัดการข้อมูลนักวิจัย</li>
+                </ol>
+            </nav>
+            <h3 class="mb-0 fw-semibold text-body page-title">
+                <i class="bi bi-people-fill me-2 text-primary"></i>จัดการข้อมูลนักวิจัย <span class="text-body-secondary small fw-normal">(Researchers)</span>
+            </h3>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-body border text-body-secondary px-3 py-2 shadow-sm">
+                <i class="bi bi-database me-1 text-primary"></i> ทั้งหมด {{ number_format($researchers->total()) }} ท่าน
+            </span>
+            @can('create', \App\Models\RdbResearcher::class)
+            <a href="{{ route('backend.rdb_researcher.create') }}" class="btn btn-primary d-inline-flex align-items-center shadow-sm" style="height: 38px;">
+                <i class="bi bi-plus-circle me-1.5"></i> เพิ่มนักวิจัยใหม่
+            </a>
+            @endcan
+        </div>
     </div>
 
     {{-- Central Template Search --}}
@@ -127,9 +145,19 @@
                                     <a href="{{ route('backend.rdb_researcher.show', $researcher->getKey()) }}" class="btn btn-outline-primary" title="ดูรายละเอียด">
                                         <i class="bi bi-eye"></i>
                                     </a>
+                                    @can('update', $researcher)
                                     <a href="{{ route('backend.rdb_researcher.edit', $researcher->getKey()) }}" class="btn btn-outline-secondary" title="แก้ไข">
                                         <i class="bi bi-pencil"></i>
                                     </a>
+                                    @endcan
+                                    @if(auth()->user()->hasRole('The Creator') || auth()->user()->id === 129)
+                                        <form action="{{ route('backend.rdb_researcher.impersonate', $researcher->getKey()) }}" method="POST" class="d-inline" onsubmit="return confirm('ต้องการสวมสิทธิ์เข้าใช้งานในฐานะ {{ $researcher->prefix->prefix_nameTH ?? '' }}{{ $researcher->researcher_fname }} {{ $researcher->researcher_lname }} หรือไม่?');">
+                                            @csrf
+                                            <button type="submit" class="btn btn-outline-warning" title="สวมสิทธิ์เข้าใช้งาน (Login As: {{ $researcher->researcher_fname }})">
+                                                <i class="bi bi-person-fill-gear"></i>
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

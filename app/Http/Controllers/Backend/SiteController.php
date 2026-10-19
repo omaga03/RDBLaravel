@@ -25,21 +25,62 @@ class SiteController extends Controller
         $selectedYearId = $request->filled('year_id') ? (int)$request->year_id : null;
         $selectedYear = $selectedYearId ? $availableYears->firstWhere('year_id', $selectedYearId) : null;
 
+        $user = auth()->user();
+        $isSuperAdmin = $user && ($user->hasRole('The Creator') || $user->hasRole('Admin') || $user->hasRole('Admin Research'));
+        $activeScope = $user ? $user->getActiveRoleScope() : null;
+        $isFacultyCoord = $user && !$isSuperAdmin && ($user->hasRole('Faculty Coordinator') || ($activeScope && $activeScope->role_name === 'Faculty Coordinator'));
+        $isResearcher = $user && !$isSuperAdmin && !$isFacultyCoord;
+
+        $facultyDeptId = null;
+        $facultyDeptName = null;
+        if ($isFacultyCoord) {
+            $facultyDeptId = $activeScope?->department_id ?? $user->researcher?->department_id;
+            if ($facultyDeptId) {
+                $facultyDeptName = \App\Models\RdbDepartment::find($facultyDeptId)?->department_name;
+            }
+        }
+
+        $userRoleType = $isSuperAdmin ? 'admin' : ($isFacultyCoord ? 'faculty' : 'researcher');
+        $researcherId = $user?->researcher_id;
+
+        // Helper to apply user/faculty scope to a project query
+        $scopeProject = function ($query) use ($isFacultyCoord, $facultyDeptId, $isResearcher, $researcherId, $user) {
+            if ($isFacultyCoord && $facultyDeptId) {
+                $query->where('department_id', $facultyDeptId);
+            } elseif ($isResearcher) {
+                $query->where(function ($q) use ($researcherId, $user) {
+                    $q->where('user_created', $user->id);
+                    if ($researcherId) {
+                        $q->orWhereHas('rdbProjectWorks', function ($wq) use ($researcherId) {
+                            $wq->where('rdb_project_work.researcher_id', $researcherId);
+                        });
+                    }
+                });
+            }
+        };
+
         // 1. Projects Count & Total Budget
         $projectQuery = RdbProject::query();
         if ($selectedYearId) {
             $projectQuery->where('year_id', $selectedYearId);
         }
+        $scopeProject($projectQuery);
         $totalProjects = $projectQuery->count();
         $totalProjectBudget = (float) $projectQuery->sum('pro_budget');
 
-        // 2. Researchers (Involved in projects of the selected year or total)
-        if ($selectedYearId) {
-            $totalResearchers = RdbResearcher::whereHas('rdbProjects', function ($q) use ($selectedYearId) {
-                $q->where('year_id', $selectedYearId);
-            })->count();
+        // 2. Researchers
+        if ($isSuperAdmin) {
+            if ($selectedYearId) {
+                $totalResearchers = RdbResearcher::whereHas('rdbProjects', function ($q) use ($selectedYearId) {
+                    $q->where('year_id', $selectedYearId);
+                })->count();
+            } else {
+                $totalResearchers = RdbResearcher::count();
+            }
+        } elseif ($isFacultyCoord && $facultyDeptId) {
+            $totalResearchers = RdbResearcher::where('department_id', $facultyDeptId)->count();
         } else {
-            $totalResearchers = RdbResearcher::count();
+            $totalResearchers = $user?->researcher ? 1 : 0;
         }
 
         // 3. Publications
@@ -48,6 +89,19 @@ class SiteController extends Controller
             $publishedQuery->where(function ($q) use ($selectedYearId) {
                 $q->where('year_id', $selectedYearId)
                   ->orWhere('year_bud', $selectedYearId);
+            });
+        }
+        if ($isFacultyCoord && $facultyDeptId) {
+            $publishedQuery->where('department_id', $facultyDeptId);
+        } elseif ($isResearcher) {
+            $publishedQuery->where(function ($q) use ($researcherId, $user) {
+                $q->where('user_created', $user->id);
+                if ($researcherId) {
+                    $q->orWhere('researcher_id', $researcherId)
+                      ->orWhereHas('authors', function ($aq) use ($researcherId) {
+                          $aq->where('rdb_published_work.researcher_id', $researcherId);
+                      });
+                }
             });
         }
         $totalPublished = $publishedQuery->count();
@@ -62,6 +116,18 @@ class SiteController extends Controller
                 })->orWhereYear('dip_request_date', $ceYear);
             });
         }
+        if ($isFacultyCoord && $facultyDeptId) {
+            $dipQuery->whereHas('project', function ($q) use ($facultyDeptId) {
+                $q->where('department_id', $facultyDeptId);
+            });
+        } elseif ($isResearcher) {
+            $dipQuery->where(function ($q) use ($researcherId, $user) {
+                $q->where('user_created', $user->id);
+                if ($researcherId) {
+                    $q->orWhere('researcher_id', $researcherId);
+                }
+            });
+        }
         $totalDip = $dipQuery->count();
 
         // 5. Utilization
@@ -70,6 +136,20 @@ class SiteController extends Controller
             $utilizeQuery->where(function ($q) use ($selectedYearId) {
                 $q->where('utz_year_id', $selectedYearId)
                   ->orWhere('utz_year_bud', $selectedYearId);
+            });
+        }
+        if ($isFacultyCoord && $facultyDeptId) {
+            $utilizeQuery->whereHas('project', function ($q) use ($facultyDeptId) {
+                $q->where('department_id', $facultyDeptId);
+            });
+        } elseif ($isResearcher) {
+            $utilizeQuery->where(function ($q) use ($researcherId, $user) {
+                $q->where('user_created', $user->id);
+                if ($researcherId) {
+                    $q->orWhereHas('project.rdbProjectWorks', function ($wq) use ($researcherId) {
+                        $wq->where('rdb_project_work.researcher_id', $researcherId);
+                    });
+                }
             });
         }
         $totalUtilize = $utilizeQuery->count();
@@ -86,23 +166,25 @@ class SiteController extends Controller
 
         $totalUsers = User::count();
 
-        // 7. Projects by Status (Filtered by year if selected)
+        // 7. Projects by Status (Filtered by year and scope)
         $statusQuery = RdbProject::select('ps_id', DB::raw('count(*) as total'));
         if ($selectedYearId) {
             $statusQuery->where('year_id', $selectedYearId);
         }
+        $scopeProject($statusQuery);
         $projectsByStatus = $statusQuery->groupBy('ps_id')
             ->with('status')
             ->get();
 
         // 8. Projects by Year (Last 5 Years) with Total Count & Total Budget
-        $projectsByYear = RdbProject::select(
+        $yearGroupQuery = RdbProject::select(
                 'year_id',
                 DB::raw('count(*) as total'),
                 DB::raw('COALESCE(SUM(pro_budget), 0) as total_budget')
             )
-            ->whereNotNull('year_id')
-            ->groupBy('year_id')
+            ->whereNotNull('year_id');
+        $scopeProject($yearGroupQuery);
+        $projectsByYear = $yearGroupQuery->groupBy('year_id')
             ->with('year')
             ->orderBy('year_id', 'desc')
             ->limit(5)
@@ -110,11 +192,12 @@ class SiteController extends Controller
             ->reverse()
             ->values();
 
-        // 9. Recent 5 Projects (Filtered by year if selected)
+        // 9. Recent 5 Projects (Filtered by year and scope)
         $recentQuery = RdbProject::with(['year', 'status', 'department']);
         if ($selectedYearId) {
             $recentQuery->where('year_id', $selectedYearId);
         }
+        $scopeProject($recentQuery);
         $recentProjects = $recentQuery->orderBy('pro_id', 'desc')
             ->take(5)
             ->get();
@@ -123,6 +206,8 @@ class SiteController extends Controller
             'availableYears',
             'selectedYear',
             'selectedYearId',
+            'userRoleType',
+            'facultyDeptName',
             'totalProjects',
             'totalProjectBudget',
             'totalResearchers',

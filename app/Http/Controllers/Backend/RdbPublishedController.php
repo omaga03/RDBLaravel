@@ -30,14 +30,40 @@ class RdbPublishedController extends Controller
     {
         $query = RdbPublished::with(['year', 'pubtype', 'researcher.prefix', 'authors.prefix', 'project', 'department', 'createdBy', 'updatedBy']);
 
-        // Apply 'manage own group data' filter for general admins (not 'The Creator')
-        if (auth()->check() && auth()->user()->hasRole('Published') && !auth()->user()->hasRole('The Creator')) {
-            // Get all user IDs that have the 'Published' role
-            $publishedAdminIds = \App\Models\User::whereHas('roles', function ($q) {
-                $q->where('item_name', 'Published');
-            })->pluck('id');
+        // Apply RBAC Scoping:
+        $currentUser = auth()->user();
+        if ($currentUser && !$currentUser->hasRole('The Creator') && !$currentUser->hasRole('Admin') && !$currentUser->hasRole('Admin Published')) {
+            if ($currentUser->hasRole('Published')) {
+                $publishedAdminIds = \App\Models\User::whereHas('roles', function ($q) {
+                    $q->where('item_name', 'Published');
+                })->pluck('id');
+                $query->whereIn('user_created', $publishedAdminIds);
+            } elseif ($currentUser->hasRole('Faculty Coordinator')) {
+                $deptId = $currentUser->getActiveRoleScope()?->department_id ?? $currentUser->researcher?->department_id;
+                if ($deptId) {
+                    $query->where('department_id', $deptId);
+                }
+            } elseif ($currentUser->hasRole('Researcher') || $currentUser->researcher_id) {
+                $researcherId = $currentUser->researcher_id;
+                $query->where(function($q) use ($researcherId, $currentUser) {
+                    $q->where('user_created', $currentUser->id);
+                    if ($researcherId) {
+                        $q->orWhere('researcher_id', $researcherId)
+                          ->orWhereHas('authors', function($aq) use ($researcherId) {
+                              $aq->where('rdb_published_work.researcher_id', $researcherId);
+                          });
+                    }
+                });
+            }
+        }
 
-            $query->whereIn('user_created', $publishedAdminIds);
+        // Workflow Status filter (e.g. Drafts & Pending)
+        if ($request->filled('workflow_status')) {
+            if ($request->workflow_status === 'unapproved') {
+                $query->whereIn('workflow_status', ['draft', 'pending_review', 'rejected']);
+            } else {
+                $query->where('workflow_status', $request->workflow_status);
+            }
         }
 
         // 1. Simple Search (Keyword 'q')

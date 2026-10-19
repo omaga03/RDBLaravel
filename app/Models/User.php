@@ -87,6 +87,63 @@ class User extends Authenticatable
     }
 
     /**
+     * Scoped roles assigned to the user.
+     */
+    public function roleScopes()
+    {
+        return $this->hasMany(UserRoleScope::class, 'user_id', 'id')->where('is_active', true);
+    }
+
+    /**
+     * Get currently active role scope for this user session.
+     */
+    public function getActiveRoleScope(): ?UserRoleScope
+    {
+        $activeScopeId = session('active_role_scope_id');
+        if ($activeScopeId) {
+            $scope = $this->roleScopes()->with('department')->find($activeScopeId);
+            if ($scope) {
+                return $scope;
+            }
+        }
+
+        $first = $this->roleScopes()->with('department')->first();
+        if ($first) {
+            session(['active_role_scope_id' => $first->id]);
+            return $first;
+        }
+
+        return null;
+    }
+
+    /**
+     * Check if user can manage or review data in a specific department/faculty.
+     */
+    public function canAccessDepartment(?int $departmentId): bool
+    {
+        if ($this->hasRole('The Creator') || $this->hasRole('Admin Research')) {
+            return true;
+        }
+
+        $activeScope = $this->getActiveRoleScope();
+        if ($activeScope) {
+            if (in_array($activeScope->role_name, ['The Creator', 'Admin Project', 'Admin Research', 'Admin Publication', 'Admin Utilize', 'Admin Researcher'])) {
+                return true;
+            }
+
+            if ($activeScope->department_id && $activeScope->department_id == $departmentId) {
+                return true;
+            }
+        }
+
+        if ($this->researcher && $this->researcher->department_id == $departmentId) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * @var array|null A cache for all roles (direct and inherited) for the user.
      */
     protected $allRoles = null;
@@ -104,6 +161,9 @@ class User extends Authenticatable
         }
 
         $directRoles = $this->roles->pluck('item_name')->toArray();
+        if (empty($directRoles) && $this->researcher_id) {
+            $directRoles[] = 'Researcher';
+        }
         $allRoles = $directRoles;
         $newRoles = $directRoles;
 
@@ -124,8 +184,11 @@ class User extends Authenticatable
      * @param string $role
      * @return bool
      */
-    public function hasRole($role): bool
+    public function hasRole(string|array $role): bool
     {
+        if (is_array($role)) {
+            return !empty(array_intersect($role, $this->getAllRoles()));
+        }
         return in_array($role, $this->getAllRoles());
     }
 

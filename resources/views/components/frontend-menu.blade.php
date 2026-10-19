@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg shadow-sm border-bottom py-0 frontend-subnav" style="z-index: 1045; background-color: var(--bs-tertiary-bg);">
+<nav class="navbar navbar-expand-lg shadow-sm border-bottom py-0 frontend-subnav" style="z-index: 1030; background-color: var(--bs-tertiary-bg);">
     <style>
         .frontend-subnav .nav-link {
             padding: 0.65rem 0.95rem !important;
@@ -34,6 +34,7 @@
             box-shadow: var(--rdb-shadow-md);
             padding: 0.5rem;
             background-color: var(--bs-card-bg);
+            z-index: 1040 !important;
         }
         .frontend-subnav .dropdown-item {
             border-radius: var(--rdb-radius-sm);

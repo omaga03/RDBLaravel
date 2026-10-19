@@ -114,8 +114,7 @@
                 </div>
                 <div class="card-body p-3 p-md-4">
                     @php
-                        // Split abstract by 4 or more consecutive <br> tags if bilingual
-                        $abstracts = preg_split('/(?:\s*<br\s*\/?>\s*){4,}/i', $item->pub_abstract ?? '', 2);
+                        $abstracts = \App\Helpers\AbstractHelper::split($item->pub_abstract);
                     @endphp
 
                     @if(count($abstracts) >= 2 && !empty(trim(strip_tags($abstracts[0]))) && !empty(trim(strip_tags($abstracts[1]))))

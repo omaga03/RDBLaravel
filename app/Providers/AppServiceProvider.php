@@ -22,6 +22,9 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Pagination\Paginator::useBootstrapFive();
 
         \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
+            if ($ability === 'requestUnlock') {
+                return null;
+            }
             return (new \App\Services\RbacService())->checkPermission($user->id, $ability) ? true : null;
         });
     }

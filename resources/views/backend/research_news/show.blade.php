@@ -7,9 +7,15 @@
             title="รายละเอียดข่าว/กิจกรรม"
             icon="bi-newspaper"
             :backRoute="route('backend.research_news.index')"
-            :editRoute="route('backend.research_news.edit', $item->id)"
-            :deleteRoute="route('backend.research_news.destroy', $item->id)"
+            :editRoute="auth()->user()->can('update', $item) ? route('backend.research_news.edit', $item->id) : null"
+            :deleteRoute="auth()->user()->can('delete', $item) ? route('backend.research_news.destroy', $item->id) : null"
+            :canDelete="auth()->user()->can('delete', $item)"
             :showPrint="true"
+            :breadcrumbs="[
+                'แดชบอร์ด' => route('backend.site.index'),
+                'จัดการข่าว/กิจกรรม' => route('backend.research_news.index'),
+                'รายละเอียดข่าว' => ''
+            ]"
         />
 
         <!-- รูปภาพประกอบ (ส่วนแรก) -->
@@ -73,9 +79,16 @@
 
                     <hr>
 
-                    <h6 class="fw-bold border-bottom pb-2"><i class="bi bi-file-text me-2"></i>รายละเอียด</h6>
-                    <div class="p-3 rounded border bg-body-secondary">
-                        {!! strip_tags($item->news_detail, '<p><br><b><strong><i><em><u><ul><ol><li><a>') !!}
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                        <h6 class="fw-bold mb-0 text-body"><i class="bi bi-file-text-fill text-primary me-2"></i>รายละเอียด</h6>
+                        <button type="button" class="btn btn-sm btn-outline-secondary py-0.5 px-2.5 rounded-pill copy-abstract-btn d-inline-flex align-items-center" style="font-size: 0.75rem;" onclick="copyAbstractText('news-backend-detail-text', this)">
+                            <i class="bi bi-clipboard me-1"></i> คัดลอกข้อความ
+                        </button>
+                    </div>
+                    <div class="abstract-box p-3 p-md-4 border border-start border-4 border-primary rounded-3 bg-body-tertiary shadow-xs">
+                        <div id="news-backend-detail-text" class="abstract-content abstract-indent">
+                            {!! strip_tags($item->news_detail, '<p><br><b><strong><i><em><u><ul><ol><li><a><span>') !!}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -90,8 +103,9 @@
         <div class="col-md-12">
             <x-action-buttons 
                 :backRoute="route('backend.research_news.index')"
-                :editRoute="route('backend.research_news.edit', $item->id)"
-                :deleteRoute="route('backend.research_news.destroy', $item->id)"
+                :editRoute="auth()->user()->can('update', $item) ? route('backend.research_news.edit', $item->id) : null"
+                :deleteRoute="auth()->user()->can('delete', $item) ? route('backend.research_news.destroy', $item->id) : null"
+                :canDelete="auth()->user()->can('delete', $item)"
                 :showPrint="true"
             />
         </div>

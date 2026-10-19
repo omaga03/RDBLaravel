@@ -101,6 +101,7 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     Route::post('/rdb_researcher/{id}/update-image', [RdbResearcherController::class, 'updateImage'])->name('rdb_researcher.update_image');
     Route::get('/rdb_researcher/{id}/view-image', [RdbResearcherController::class, 'viewProfileImage'])->name('rdb_researcher.view_image');
     Route::post('/rdb_researcher/{id}/sync-scopus', [RdbResearcherController::class, 'syncScopus'])->name('rdb_researcher.sync_scopus');
+    Route::post('/rdb_researcher/{id}/impersonate', [RdbResearcherController::class, 'impersonate'])->name('rdb_researcher.impersonate');
     Route::resource('rdbbranch', RdbbranchController::class);
     Route::resource('rdbdepartment', RdbdepartmentController::class);
     Route::resource('rdbdepartmenttype', RdbdepartmenttypeController::class);
@@ -124,8 +125,24 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     Route::put('/rbac/{rbac}/permissions', [RbacController::class, 'updatePermissions'])->name('rbac.update_permissions');
     Route::post('/rbac/{rbac}/impersonate', [RbacController::class, 'impersonate'])->name('rbac.impersonate');
     Route::post('/rbac/stop-impersonate', [RbacController::class, 'stopImpersonate'])->name('rbac.stop_impersonate');
+    Route::post('/rbac/switch-scope', [\App\Http\Controllers\Backend\RbacController::class, 'switchScope'])->name('rbac.switch_scope');
+    Route::post('/user/{user}/impersonate', [\App\Http\Controllers\Backend\UserController::class, 'impersonate'])->name('user.impersonate');
+    Route::post('/user/stop-impersonate', [\App\Http\Controllers\Backend\UserController::class, 'stopImpersonate'])->name('user.stop_impersonate');
     Route::resource('rbac', RbacController::class);
     Route::resource('user', UserController::class);
+
+    // Review & Approval Workflow Queue
+    Route::get('/workflow/queue', [\App\Http\Controllers\Backend\WorkflowController::class, 'queue'])->name('workflow.queue');
+    Route::post('/workflow/{type}/{id}/submit', [\App\Http\Controllers\Backend\WorkflowController::class, 'submit'])->name('workflow.submit');
+    Route::post('/workflow/{type}/{id}/approve', [\App\Http\Controllers\Backend\WorkflowController::class, 'approve'])->name('workflow.approve');
+    Route::post('/workflow/{type}/{id}/reject', [\App\Http\Controllers\Backend\WorkflowController::class, 'reject'])->name('workflow.reject');
+    Route::post('/workflow/{type}/{id}/request-unlock', [\App\Http\Controllers\Backend\WorkflowController::class, 'requestUnlock'])->name('workflow.request_unlock');
+    Route::post('/workflow/{type}/{id}/approve-unlock', [\App\Http\Controllers\Backend\WorkflowController::class, 'approveUnlock'])->name('workflow.approve_unlock');
+    Route::post('/workflow/{type}/{id}/reject-unlock', [\App\Http\Controllers\Backend\WorkflowController::class, 'rejectUnlock'])->name('workflow.reject_unlock');
+
+    // Audit Trail & Activity Logs
+    Route::get('/audit-logs', [\App\Http\Controllers\Backend\AuditLogController::class, 'index'])->name('audit_log.index');
+    Route::get('/audit-logs/{id}', [\App\Http\Controllers\Backend\AuditLogController::class, 'show'])->name('audit_log.show');
 
     // System Settings: Login & Access Control
     Route::get('/settings/access-control', [\App\Http\Controllers\Backend\AccessControlSettingsController::class, 'index'])->name('settings.access_control');
@@ -294,6 +311,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // In-App Notifications
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.read_all');
 });
 
 // ✅ Debug Routes - เฉพาะ Local Environment เท่านั้น

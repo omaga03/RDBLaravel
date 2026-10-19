@@ -382,6 +382,18 @@
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--bs-border-color) !important;
+            z-index: 1030 !important;
+        }
+        .rdb-navbar .dropdown-menu {
+            z-index: 1040 !important;
+        }
+
+        /* Modal & Backdrop Layering: Ensure Modals always sit above sticky navbars */
+        .modal {
+            z-index: 1065 !important;
+        }
+        .modal-backdrop {
+            z-index: 1060 !important;
         }
         .navbar-brand {
             font-weight: 700;
@@ -399,6 +411,47 @@
             font-weight: 700;
             letter-spacing: 0.04em;
         }
+
+        /* Abstract & Long-Text Typography & Box Styling */
+        .abstract-box {
+            border-radius: 12px;
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .abstract-box:hover {
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+        }
+        .abstract-content {
+            font-size: 0.96rem;
+            line-height: 1.88;
+            letter-spacing: 0.012em;
+            text-align: justify;
+            text-justify: inter-word;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+        .abstract-indent {
+            text-indent: 2.25rem;
+        }
+        .abstract-content p {
+            margin-bottom: 0.85rem;
+            text-indent: 2.25rem;
+        }
+        .abstract-content p:last-child {
+            margin-bottom: 0;
+        }
+        [data-bs-theme="dark"] .abstract-content {
+            color: #d1d5db; /* Softer, comfortable reading tone in dark mode */
+        }
+        [data-bs-theme="light"] .abstract-content {
+            color: #334155; /* Slate-700 for optimal contrast without eye strain */
+        }
+        .copy-abstract-btn {
+            transition: all 0.15s ease;
+        }
+        .copy-abstract-btn:hover {
+            background-color: var(--bs-secondary-bg);
+            color: var(--bs-body-color);
+        }
     </style>
     <!-- IMask CDN -->
     <script src="https://unpkg.com/imask"></script>
@@ -406,27 +459,27 @@
 <body>
     <div id="app">
         @if(session()->has('impersonator_id'))
-            <div class="alert alert-warning border-0 rounded-0 mb-0 py-2 px-4 d-flex justify-content-between align-items-center shadow-sm" style="position: sticky; top: 0; z-index: 1060; background: #fff3cd; color: #664d03;">
+            <div class="alert alert-warning border-0 rounded-0 mb-0 py-2 px-4 d-flex justify-content-between align-items-center shadow-sm" style="position: sticky; top: 0; z-index: 1035; background: #fff3cd; color: #664d03;">
                 <div class="d-flex align-items-center flex-wrap gap-2">
-                    <span class="badge bg-warning text-dark border border-warning-subtle fw-bold">
-                        <i class="bi bi-person-fill-gear me-1"></i> โหมดทดสอบบทบาท (Testing Role)
+                    <span class="badge {{ session()->has('impersonated_user_id') ? 'bg-danger text-white' : 'bg-warning text-dark' }} border fw-bold">
+                        <i class="bi bi-person-fill-gear me-1"></i> {{ session()->has('impersonated_user_id') ? 'โหมดสวมสิทธิ์ผู้ใช้งาน (Login As)' : 'โหมดทดสอบบทบาท (Testing Role)' }}
                     </span>
                     <span>
-                        คุณกำลังทดสอบระบบในฐานะ <strong>{{ Auth::user()->username }}</strong> (บทบาท: <code>{{ session('impersonated_role', Auth::user()->roles->pluck('item_name')->implode(', ') ?: 'ไม่มีบทบาท') }}</code>)
+                        คุณกำลังใช้งานในฐานะ <strong>{{ Auth::user()->username }}</strong> ({{ (Auth::user()->researcher && !empty(Auth::user()->researcher->full_name)) ? Auth::user()->researcher->full_name : 'นักวิจัย/ผู้ใช้งานระบบ' }})
                     </span>
                     <span class="text-muted small">
-                        (บัญชีหลัก: {{ session('impersonator_username', 'The Creator') }})
+                        (บัญชีจริง: {{ session('impersonator_username', 'Admin') }})
                     </span>
                 </div>
-                <form action="{{ route('backend.rbac.stop_impersonate') }}" method="POST" class="m-0">
+                <form action="{{ session()->has('impersonated_user_id') ? route('backend.user.stop_impersonate') : route('backend.rbac.stop_impersonate') }}" method="POST" class="m-0">
                     @csrf
                     <button type="submit" class="btn btn-sm btn-dark shadow-sm text-nowrap">
-                        <i class="bi bi-box-arrow-left me-1"></i> สิ้นสุดการทดสอบ (กลับสู่บัญชีหลัก)
+                        <i class="bi bi-box-arrow-left me-1"></i> สิ้นสุดการสวมสิทธิ์ (กลับสู่บัญชีหลัก)
                     </button>
                 </form>
             </div>
         @endif
-        <nav class="navbar navbar-expand-md shadow-sm rdb-navbar sticky-top">
+        <nav class="navbar navbar-expand-md shadow-sm rdb-navbar sticky-top" style="z-index: 1030;">
             <div class="{{ request()->is('backend*') ? 'container-fluid px-4' : 'container' }}">
                 <a class="navbar-brand" href="{{ url('/') }}">
                     <img src="https://research.pcru.ac.th/rdb/images/pcru.png" alt="PCRU Logo" style="height: 32px;" class="me-2">
@@ -474,18 +527,90 @@
                                 </li>
                             @endif
                         @else
-                            <li class="nav-item dropdown">
-                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                    {{ Auth::user()->username ?? Auth::user()->name }}
+                            <!-- Notifications Bell -->
+                            <li class="nav-item dropdown me-2">
+                                <a class="nav-link position-relative p-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="การแจ้งเตือน">
+                                    <i class="bi bi-bell fs-5"></i>
+                                    @php
+                                        $unreadNotifCount = Auth::user()->unreadNotifications()->count();
+                                    @endphp
+                                    @if($unreadNotifCount > 0)
+                                        <span class="position-absolute top-1 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                                            {{ $unreadNotifCount > 99 ? '99+' : $unreadNotifCount }}
+                                        </span>
+                                    @endif
                                 </a>
-
-                                <div class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="navbarDropdown">
-                                    <div class="dropdown-header small text-body-secondary fw-bold">
-                                        <i class="bi bi-person me-1"></i> {{ Auth::user()->username }}
-                                        @if(Auth::user()->roles->count())
-                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1 font-monospace">{{ Auth::user()->roles->first()->item_name }}</span>
+                                <div class="dropdown-menu dropdown-menu-end shadow-lg py-0 border-0 rounded-3" style="width: 320px; max-height: 420px; overflow-y: auto;">
+                                    <div class="p-3 bg-light border-bottom d-flex align-items-center justify-content-between">
+                                        <h6 class="mb-0 fw-bold small"><i class="bi bi-bell-fill text-primary me-1"></i> การแจ้งเตือน</h6>
+                                        @if($unreadNotifCount > 0)
+                                            <form action="{{ route('notifications.read_all') }}" method="POST" class="m-0">
+                                                @csrf
+                                                <button type="submit" class="btn btn-link btn-sm p-0 text-decoration-none small">อ่านทั้งหมด</button>
+                                            </form>
                                         @endif
                                     </div>
+                                    <div class="list-group list-group-flush small">
+                                        @forelse(Auth::user()->notifications()->take(6)->get() as $n)
+                                            <form action="{{ route('notifications.read', $n->id) }}" method="POST" class="m-0">
+                                                @csrf
+                                                <button type="submit" class="list-group-item list-group-item-action py-2.5 px-3 border-bottom text-start {{ $n->read_at ? 'text-muted' : 'bg-primary-subtle' }}">
+                                                    <div class="fw-semibold text-dark">{{ $n->data['title'] ?? 'การแจ้งเตือน' }}</div>
+                                                    <div class="small text-secondary text-truncate" style="max-width: 280px;">{{ $n->data['message'] ?? '' }}</div>
+                                                    <div class="text-muted" style="font-size: 0.7rem;">{{ $n->created_at ? $n->created_at->diffForHumans() : '' }}</div>
+                                                </button>
+                                            </form>
+                                        @empty
+                                            <div class="p-4 text-center text-muted small">
+                                                <i class="bi bi-bell-slash fs-4 d-block mb-1 text-secondary opacity-50"></i>
+                                                ไม่มีการแจ้งเตือนในขณะนี้
+                                            </div>
+                                        @endforelse
+                                    </div>
+                                </div>
+                            </li>
+
+                            <!-- User Profile & Multi-Role Dropdown -->
+                            <li class="nav-item dropdown">
+                                <a id="navbarDropdown" class="nav-link dropdown-toggle d-flex align-items-center gap-1.5" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                                    <i class="bi bi-person-circle"></i>
+                                    <span>{{ Auth::user()->username ?? Auth::user()->name }}</span>
+                                </a>
+
+                                <div class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="navbarDropdown" style="min-width: 260px;">
+                                    <div class="dropdown-header small text-body-secondary fw-bold">
+                                        <div class="text-dark">{{ (Auth::user()->researcher && !empty(Auth::user()->researcher->full_name)) ? Auth::user()->researcher->full_name : Auth::user()->username }}</div>
+                                        @php
+                                            $activeScope = Auth::user()->getActiveRoleScope();
+                                        @endphp
+                                        <div class="text-primary small mt-0.5">
+                                            {{ $activeScope ? $activeScope->label : (Auth::user()->roles->first()->item_name ?? 'User') }}
+                                        </div>
+                                    </div>
+
+                                    @if(Auth::user()->roleScopes && Auth::user()->roleScopes->count() > 1)
+                                        <div class="dropdown-divider"></div>
+                                        <div class="dropdown-header small text-body-secondary fw-bold text-uppercase py-1" style="font-size: 0.72rem;">
+                                            <i class="bi bi-arrow-repeat me-1"></i> สลับบทบาทการทำงาน (Multi-Role)
+                                        </div>
+                                        @foreach(Auth::user()->roleScopes as $scope)
+                                            @php
+                                                $isActive = ($activeScope && $activeScope->id === $scope->id);
+                                            @endphp
+                                            <form action="{{ route('backend.rbac.switch_scope') }}" method="POST" class="m-0">
+                                                @csrf
+                                                <input type="hidden" name="scope_id" value="{{ $scope->id }}">
+                                                <button type="submit" class="dropdown-item d-flex align-items-center justify-content-between py-1.5 {{ $isActive ? 'active bg-primary text-white' : '' }}">
+                                                    <span class="text-truncate me-2 small">{{ $scope->label }}</span>
+                                                    @if($isActive)
+                                                        <i class="bi bi-check2"></i>
+                                                    @endif
+                                                </button>
+                                            </form>
+                                        @endforeach
+                                    @endif
+
+                                    <div class="dropdown-divider"></div>
                                     <a class="dropdown-item" href="{{ route('backend.user.show', Auth::id()) }}">
                                         <i class="bi bi-person-circle me-2"></i> บัญชีของฉัน
                                     </a>
@@ -506,6 +631,7 @@
                             </li>
                         @endguest
                     </ul>
+                </div>
                 </div>
             </div>
         </nav>
@@ -750,4 +876,77 @@
                 }
             });
         });
+
+        // Global Copy Text & Abstract Helpers
+        function copyTextToClipboard(text, onSuccess, onError) {
+            if (!text) return;
+            text = text.trim();
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    if (typeof onSuccess === 'function') onSuccess();
+                }).catch(() => {
+                    execFallback(text, onSuccess, onError);
+                });
+            } else {
+                execFallback(text, onSuccess, onError);
+            }
+
+            function execFallback(str, successCb, errorCb) {
+                let textarea = document.createElement('textarea');
+                textarea.value = str;
+                textarea.style.position = 'fixed';
+                textarea.style.top = '0';
+                textarea.style.left = '0';
+                textarea.style.width = '2em';
+                textarea.style.height = '2em';
+                textarea.style.padding = '0';
+                textarea.style.border = 'none';
+                textarea.style.outline = 'none';
+                textarea.style.boxShadow = 'none';
+                textarea.style.background = 'transparent';
+                textarea.style.opacity = '0';
+                textarea.setAttribute('readonly', '');
+                document.body.appendChild(textarea);
+
+                textarea.focus();
+                textarea.select();
+
+                let successful = false;
+                try {
+                    successful = document.execCommand('copy');
+                } catch (err) {
+                    console.error('execCommand copy failed:', err);
+                }
+                document.body.removeChild(textarea);
+
+                if (successful) {
+                    if (typeof successCb === 'function') successCb();
+                } else {
+                    if (typeof errorCb === 'function') errorCb();
+                }
+            }
+        }
+
+        function copyAbstractText(target, triggerBtn) {
+            let btn = (triggerBtn && triggerBtn.nodeType) ? triggerBtn : (target && target.nodeType ? target : null);
+            let elId = (typeof target === 'string') ? target : (typeof triggerBtn === 'string' ? triggerBtn : null);
+            if (!elId) return;
+            const el = document.getElementById(elId);
+            if (!el) return;
+            const text = el.innerText || el.textContent || '';
+
+            copyTextToClipboard(text, () => {
+                if (!btn) return;
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<i class="bi bi-check2 text-success me-1"></i> คัดลอกแล้ว';
+                btn.classList.add('border-success');
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.classList.remove('border-success');
+                }, 2000);
+            }, () => {
+                window.prompt("กด Ctrl+C เพื่อคัดลอกข้อความ:", text);
+            });
+        }
     </script>

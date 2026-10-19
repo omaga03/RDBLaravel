@@ -7,7 +7,7 @@ use App\Models\Traits\HasDualFilePath;
 
 class RdbProjectUtilize extends Model
 {
-    use \App\Traits\HasDataShowScope, HasDualFilePath;
+    use \App\Traits\HasDataShowScope, HasDualFilePath, \App\Traits\Auditable;
 
     protected $table = 'rdb_project_utilize';
     protected $primaryKey = 'utz_id';
@@ -61,6 +61,13 @@ class RdbProjectUtilize extends Model
         'uf_size',
         'uf_mime_type',
         'data_show',
+        'workflow_status',
+        'submitted_at',
+        'reviewed_by',
+        'reviewed_at',
+        'rejection_remarks',
+        'unlock_reason',
+        'unlock_requested_at',
         'user_created',
         'user_updated',
     ];

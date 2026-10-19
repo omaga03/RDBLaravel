@@ -9,10 +9,9 @@ use App\Services\FileUploadService;
 
 class RdbProject extends Model
 {
-    use \App\Traits\HasDataShowScope, HasDualFilePath;
+    use \App\Traits\HasDataShowScope, HasDualFilePath, \App\Traits\Auditable;
 
     protected $table = 'rdb_project';
-    use HasDualFilePath;
 
     /**
      * ✅ กำหนด fillable เฉพาะฟิลด์ที่ยอมให้แก้ไข
@@ -49,6 +48,13 @@ class RdbProject extends Model
         'pro_count_abs',
         'pro_count_full',
         'data_show',
+        'workflow_status',
+        'submitted_at',
+        'reviewed_by',
+        'reviewed_at',
+        'rejection_remarks',
+        'unlock_reason',
+        'unlock_requested_at',
         'created_at',
         'user_created',
         'user_updated',

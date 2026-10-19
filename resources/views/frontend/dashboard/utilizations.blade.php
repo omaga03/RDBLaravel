@@ -4,22 +4,41 @@
 
 @section('content')
 <!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <style>
     #pcruGisMap {
-        height: 480px;
+        height: 520px;
         width: 100%;
         border-radius: var(--rdb-radius-md);
-        z-index: 10;
+        z-index: 1;
+        background-color: #e2e8f0;
     }
     .leaflet-popup-content-wrapper {
         border-radius: var(--rdb-radius-sm);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.25);
     }
     .leaflet-popup-content {
         font-family: 'Plus Jakarta Sans', 'Prompt', sans-serif;
         font-size: 0.85rem;
         line-height: 1.4;
+    }
+    .custom-div-icon {
+        background: transparent !important;
+        border: none !important;
+    }
+    .gis-pin-pulse {
+        background-color: #EF4444;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 2.5px solid #FFFFFF;
+        box-shadow: 0 0 8px rgba(239, 68, 68, 0.7);
+        cursor: pointer;
+        transition: transform 0.15s ease;
+    }
+    .gis-pin-pulse:hover {
+        transform: scale(1.35);
+        background-color: #DC2626;
     }
 </style>
 
@@ -107,11 +126,19 @@
                         <h5 class="mb-0 fw-bold text-body">
                             <i class="bi bi-map-fill text-danger me-2"></i> แผนที่สารสนเทศภูมิศาสตร์การนำผลงานวิจัยไปใช้ประโยชน์ (GIS Interactive Map)
                         </h5>
-                        <small class="text-body-secondary">ปักหมุดพิกัดจริงระดับตำบล/อำเภอทั่วจังหวัดเพชรบูรณ์และพื้นที่ข้างเคียง</small>
+                        <small class="text-body-secondary">ปักหมุดพิกัดจริงระดับตำบล/อำเภอทั่วจังหวัดเพชรบูรณ์และพื้นที่ข้างเคียง (สไตล์ Google Maps คมชัด ภาษาไทย)</small>
                     </div>
-                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1.5">
-                        <i class="bi bi-geo-alt-fill me-1"></i> {{ number_format($mapMarkers->count()) }} จุดพิกัดในแผนที่
-                    </span>
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btnResetMapView" title="รีเซ็ตมุมมองและซูมครอบคลุมทุกจุด">
+                            <i class="bi bi-arrows-fullscreen me-1"></i> จัดมุมมองภาพรวม
+                        </button>
+                        <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode('จังหวัดเพชรบูรณ์') }}" target="_blank" class="btn btn-sm btn-outline-danger" title="เปิดดูแผนที่จังหวัดเพชรบูรณ์บน Google Maps">
+                            <i class="bi bi-box-arrow-up-right me-1"></i> Google Maps
+                        </a>
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1.5">
+                            <i class="bi bi-geo-alt-fill me-1"></i> {{ number_format($mapMarkers->count()) }} จุดพิกัดในแผนที่
+                        </span>
+                    </div>
                 </div>
                 <div class="card-body p-3">
                     <div id="pcruGisMap"></div>
@@ -246,7 +273,7 @@
 </div>
 
 <!-- Leaflet JS & Chart.js -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
@@ -256,42 +283,107 @@ document.addEventListener('DOMContentLoaded', function () {
     const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
 
     // 1. Initialize Leaflet Map (Centered on Phetchabun)
-    const map = L.map('pcruGisMap').setView([16.42, 101.15], 9);
+    const map = L.map('pcruGisMap', {
+        center: [16.42, 101.15],
+        zoom: 9,
+        scrollWheelZoom: false
+    });
 
-    // OpenStreetMap Tile Layer
-    const tileUrl = isDark 
-        ? 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
-        : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    // Tile Layers: Google Maps & CartoDB (High-Speed & Reliable in Thailand)
+    const googleRoadmap = L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['0', '1', '2', '3'],
+        attribution: '&copy; Google Maps'
+    });
 
-    L.tileLayer(tileUrl, {
-        maxZoom: 18,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
+    const googleHybrid = L.tileLayer('https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['0', '1', '2', '3'],
+        attribution: '&copy; Google Maps'
+    });
 
-    // Custom Marker Icon
+    const cartoVoyager = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        subdomains: 'abcd',
+        attribution: '&copy; CARTO'
+    });
+
+    const cartoDark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        subdomains: 'abcd',
+        attribution: '&copy; CARTO'
+    });
+
+    // Set Default Active Layer
+    const defaultLayer = isDark ? googleHybrid : googleRoadmap;
+    defaultLayer.addTo(map);
+
+    // Layer Switcher Control
+    const baseLayers = {
+        '🗺️ แผนที่ Google Maps': googleRoadmap,
+        '🛰️ ภาพดาวเทียม Google': googleHybrid,
+        '🎨 แผนที่ CartoDB': cartoVoyager,
+        '🌙 แผนที่ธีมมืด (Dark)': cartoDark
+    };
+    L.control.layers(baseLayers, null, { position: 'topright' }).addTo(map);
+
+    // Invalidate Size to ensure tiles render immediately across container
+    setTimeout(function () {
+        map.invalidateSize();
+    }, 250);
+
+    // Custom Marker Icon with Pulse Animation
     const customIcon = L.divIcon({
         className: 'custom-div-icon',
-        html: '<div style="background-color: #EF4444; width: 14px; height: 14px; border-radius: 50%; border: 2.5px solid #FFFFFF; box-shadow: 0 0 6px rgba(0,0,0,0.4);"></div>',
-        iconSize: [14, 14],
-        iconAnchor: [7, 7]
+        html: '<div class="gis-pin-pulse"></div>',
+        iconSize: [16, 16],
+        iconAnchor: [8, 8],
+        popupAnchor: [0, -8]
     });
 
     const markersData = @json($mapMarkers);
+    const bounds = [];
+
     markersData.forEach(function (pt) {
         if (pt.lat && pt.long) {
-            const marker = L.marker([parseFloat(pt.lat), parseFloat(pt.long)], { icon: customIcon }).addTo(map);
-            const popupHtml = `
-                <div style="min-width: 170px;">
-                    <strong style="color: #EF4444; font-size: 0.95rem;">${pt.amphoe_t || 'เพชรบูรณ์'}</strong>
-                    <div style="color: #64748B; font-size: 0.8rem; margin-bottom: 4px;">ต.${pt.tambon_t || '-'}, ${pt.changwat_t || 'จ.เพชรบูรณ์'}</div>
-                    <div style="background: #F1F5F9; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 0.82rem; margin-top: 4px;">
-                        📌 ผลงานวิจัยลงพื้นที่: <strong>${pt.count}</strong> โครงการ
+            const lat = parseFloat(pt.lat);
+            const lng = parseFloat(pt.long);
+            if (!isNaN(lat) && !isNaN(lng)) {
+                bounds.push([lat, lng]);
+                const marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
+                const popupHtml = `
+                    <div style="min-width: 180px;">
+                        <strong style="color: #DC2626; font-size: 0.95rem;">${pt.amphoe_t || 'เพชรบูรณ์'}</strong>
+                        <div style="color: #64748B; font-size: 0.8rem; margin-bottom: 4px;">ต.${pt.tambon_t || '-'}, ${pt.changwat_t || 'จ.เพชรบูรณ์'}</div>
+                        <div style="background: #F1F5F9; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 0.82rem; margin-top: 4px; color: #1E293B;">
+                            📌 ผลงานวิจัยลงพื้นที่: <strong>${pt.count}</strong> โครงการ
+                        </div>
+                        <div style="font-size: 0.72rem; color: #94A3B8; margin-top: 4px;">
+                            พิกัด: ${lat.toFixed(4)}, ${lng.toFixed(4)}
+                        </div>
                     </div>
-                </div>
-            `;
-            marker.bindPopup(popupHtml);
+                `;
+                marker.bindPopup(popupHtml);
+            }
         }
     });
+
+    // Auto-fit map to markers bounds
+    if (bounds.length > 0) {
+        map.fitBounds(L.latLngBounds(bounds), { padding: [35, 35], maxZoom: 12 });
+    }
+
+    // Reset View Button Handler
+    const btnReset = document.getElementById('btnResetMapView');
+    if (btnReset) {
+        btnReset.addEventListener('click', function () {
+            if (bounds.length > 0) {
+                map.fitBounds(L.latLngBounds(bounds), { padding: [35, 35], maxZoom: 12 });
+            } else {
+                map.setView([16.42, 101.15], 9);
+            }
+        });
+    }
 
     // 2. 4 Pillars Doughnut Chart
     const pillars = @json($fourPillars);

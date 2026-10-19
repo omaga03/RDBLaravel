@@ -9,11 +9,68 @@
         title="รายละเอียดโครงการวิจัย"
         icon="bi-folder2-open"
         :backRoute="route('backend.rdb_project.index')"
-        :editRoute="route('backend.rdb_project.edit', $project->pro_id)"
-        :deleteRoute="route('backend.rdb_project.destroy', $project->pro_id)"
-        :canDelete="true"
+        :editRoute="auth()->user()->can('update', $project) ? route('backend.rdb_project.edit', $project->pro_id) : null"
+        :deleteRoute="auth()->user()->can('delete', $project) ? route('backend.rdb_project.destroy', $project->pro_id) : null"
+        :canDelete="auth()->user()->can('delete', $project)"
         :showPrint="true"
-    />
+        :breadcrumbs="[
+            'แดชบอร์ด' => route('backend.site.index'),
+            'จัดการโครงการวิจัย' => route('backend.rdb_project.index'),
+            'รายละเอียดโครงการ' => ''
+        ]"
+    >
+        @if($project->workflow_status === 'published' && auth()->user()->can('requestUnlock', $project))
+            <button type="button" class="btn btn-warning d-inline-flex justify-content-center align-items-center" style="min-width: 105px; height: 38px; font-size: 0.85rem;" data-bs-toggle="modal" data-bs-target="#requestUnlockModal" data-id="{{ $project->pro_id }}" data-type="project" data-title="{{ $project->pro_nameTH }}">
+                <i class="bi bi-unlock me-1.5"></i> ขอแก้ไข
+            </button>
+        @elseif($project->workflow_status === 'unlock_requested')
+            @if(auth()->user()->can('approveUnlock', $project))
+                <form action="{{ route('backend.workflow.approve_unlock', ['type' => 'project', 'id' => $project->pro_id]) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันอนุมัติให้แก้ไข และย้ายโครงการนี้ไปยังฉบับร่างหรือไม่?');">
+                    @csrf
+                    <button type="submit" class="btn btn-success d-inline-flex justify-content-center align-items-center" style="height: 38px; font-size: 0.85rem;">
+                        <i class="bi bi-unlock me-1.5"></i> อนุมัติย้ายไปฉบับร่าง
+                    </button>
+                </form>
+            @else
+                <span class="btn btn-warning disabled d-inline-flex justify-content-center align-items-center" style="height: 38px; font-size: 0.85rem;">
+                    <i class="bi bi-hourglass-split me-1.5"></i> รอ Admin อนุมัติการขอแก้ไข
+                </span>
+            @endif
+        @elseif(in_array($project->workflow_status, ['draft', 'revision_required']))
+            <form action="{{ route('backend.workflow.submit', ['type' => 'project', 'id' => $project->pro_id]) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันส่งโครงการนี้เข้าสู่กระบวนการตรวจรับ?');">
+                @csrf
+                <button type="submit" class="btn btn-primary d-inline-flex justify-content-center align-items-center" style="height: 38px; font-size: 0.85rem;">
+                    <i class="bi bi-send me-1.5"></i> ส่งตรวจสอบ
+                </button>
+            </form>
+        @endif
+    </x-page-header>
+
+    @if($project->workflow_status === 'unlock_requested')
+        <div class="alert alert-warning border-0 shadow-sm d-flex align-items-center mb-4">
+            <i class="bi bi-unlock-fill fs-3 me-3 text-warning-emphasis"></i>
+            <div>
+                <h6 class="alert-heading fw-bold mb-1">ผลงานนี้อยู่ระหว่างยื่นคำขอเปิดสิทธิ์แก้ไข (รอการอนุมัติจากผู้ดูแลระบบ)</h6>
+                <div class="small"><strong>เหตุผลที่ระบุ:</strong> {{ $project->unlock_reason }} (ยื่นเมื่อ {{ \Carbon\Carbon::parse($project->unlock_requested_at)->format('d/m/Y H:i') }})</div>
+            </div>
+        </div>
+    @elseif($project->workflow_status === 'draft' && $project->reviewed_at)
+        <div class="alert alert-info border-0 shadow-sm d-flex align-items-center mb-4">
+            <i class="bi bi-info-circle-fill fs-3 me-3 text-info"></i>
+            <div>
+                <h6 class="alert-heading fw-bold mb-1">ผลงานถูกย้ายมาที่ "ฉบับร่าง" เพื่อให้ท่านดำเนินการแก้ไข</h6>
+                <div class="small">เมื่อแก้ไขข้อมูลเรียบร้อยแล้ว กรุณากดปุ่ม <strong>"ส่งตรวจสอบ"</strong> เพื่อส่งให้ผู้ดูแลระบบอนุมัติเผยแพร่อีกครั้ง</div>
+            </div>
+        </div>
+    @elseif($project->workflow_status === 'revision_required')
+        <div class="alert alert-danger border-0 shadow-sm d-flex align-items-center mb-4">
+            <i class="bi bi-exclamation-octagon-fill fs-3 me-3 text-danger"></i>
+            <div>
+                <h6 class="alert-heading fw-bold mb-1">ผู้ดูแลระบบส่งผลงานกลับมาให้แก้ไขเพิ่มเติม</h6>
+                <div class="small"><strong>ข้อเสนอแนะ:</strong> {{ $project->rejection_remarks }}</div>
+            </div>
+        </div>
+    @endif
 
     <div class="row g-4">
         <!-- Left Column: Project Summary & Quick Info -->
@@ -116,8 +173,8 @@
                         </div>
 
                         <!-- Quick Shortcuts -->
+                        @can('update', $project)
                         <div class="d-grid gap-2">
-                            @can('update', $project)
                             <button type="button" class="btn btn-outline-warning btn-sm d-flex justify-content-between align-items-center" data-bs-toggle="modal" data-bs-target="#projectStatusModal">
                                 <span><i class="bi bi-flag-fill me-2"></i> ปรับปรุงสถานะโครงการ</span>
                                 @if($project->status)
@@ -128,7 +185,6 @@
                                     <span class="badge bg-secondary">ยังไม่ระบุ</span>
                                 @endif
                             </button>
-                            @endcan
                             <button type="button" class="btn btn-outline-success btn-sm d-flex justify-content-between align-items-center" data-bs-toggle="modal" data-bs-target="#researcherModal">
                                 <span><i class="bi bi-people-fill me-2"></i> จัดการคณะผู้วิจัย</span>
                                 <span class="badge bg-success">{{ $project->rdbProjectWorks->count() }} ท่าน</span>
@@ -138,6 +194,7 @@
                                 <span class="badge bg-primary">{{ ($project->pro_abstract_file ? 1 : 0) + ($project->pro_file ? 1 : 0) + $project->files->count() }} ไฟล์</span>
                             </button>
                         </div>
+                        @endcan
                     </div>
 
                     <!-- System Info Footer -->
@@ -248,33 +305,63 @@
 
                                 @if($project->pro_abstract)
                                 <div class="mt-4">
-                                    <h6 class="fw-bold border-bottom pb-2 mb-3">
-                                        <i class="bi bi-file-text me-1 text-primary"></i> บทคัดย่อ (Abstract)
-                                    </h6>
+                                    <div class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-3">
+                                        <h6 class="fw-bold mb-0 text-body">
+                                            <i class="bi bi-file-text-fill me-1 text-primary"></i> บทคัดย่อ (Abstract)
+                                        </h6>
+                                    </div>
                                     @php
-                                        $separator = '<br><br><br><br>';
-                                        if (!str_contains($project->pro_abstract, $separator) && str_contains($project->pro_abstract, '<br><br><br>')) {
-                                            $separator = '<br><br><br>';
-                                        }
-                                        $abstractParts = explode($separator, $project->pro_abstract);
+                                        $abstractParts = \App\Helpers\AbstractHelper::split($project->pro_abstract);
                                     @endphp
 
-                                    @if(!empty($abstractParts[0]))
-                                    <div class="mb-3">
-                                        <span class="badge bg-primary mb-2">บทคัดย่อภาษาไทย</span>
-                                        <div class="p-3 rounded border bg-body-tertiary" style="line-height: 1.8; overflow-wrap: break-word;">
-                                            {!! strip_tags($abstractParts[0], '<p><br><b><strong><i><em><u>') !!}
+                                    @if(count($abstractParts) >= 2 && !empty(trim(strip_tags($abstractParts[0]))) && !empty(trim(strip_tags($abstractParts[1]))))
+                                        <div class="abstract-box p-3 p-md-4 border border-start border-4 border-primary rounded-3 mb-3 bg-body-tertiary shadow-xs">
+                                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary-subtle border-opacity-50">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 fw-semibold" style="font-size: 0.78rem;">
+                                                        <i class="bi bi-card-text me-1"></i> บทคัดย่อ (ภาษาไทย)
+                                                    </span>
+                                                    <span class="badge bg-secondary-subtle text-secondary-emphasis" style="font-size: 0.7rem;">TH</span>
+                                                </div>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary py-0.5 px-2.5 rounded-pill copy-abstract-btn d-inline-flex align-items-center" style="font-size: 0.75rem;" onclick="copyAbstractText('project-abstract-th-content', this)">
+                                                    <i class="bi bi-clipboard me-1"></i> คัดลอกบทคัดย่อ
+                                                </button>
+                                            </div>
+                                            <div id="project-abstract-th-content" class="abstract-content abstract-indent">
+                                                {!! strip_tags($abstractParts[0], '<p><br><b><strong><i><em><u><span>') !!}
+                                            </div>
                                         </div>
-                                    </div>
-                                    @endif
 
-                                    @if(!empty($abstractParts[1]))
-                                    <div>
-                                        <span class="badge bg-info text-dark mb-2">บทคัดย่อภาษาอังกฤษ</span>
-                                        <div class="p-3 rounded border bg-body-tertiary" style="line-height: 1.8; overflow-wrap: break-word;">
-                                            {!! strip_tags($abstractParts[1], '<p><br><b><strong><i><em><u>') !!}
+                                        <div class="abstract-box p-3 p-md-4 border border-start border-4 border-info rounded-3 bg-body-tertiary shadow-xs">
+                                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary-subtle border-opacity-50">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-2.5 py-1 fw-semibold" style="font-size: 0.78rem;">
+                                                        <i class="bi bi-translate me-1"></i> Abstract (English)
+                                                    </span>
+                                                    <span class="badge bg-secondary-subtle text-secondary-emphasis" style="font-size: 0.7rem;">EN</span>
+                                                </div>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary py-0.5 px-2.5 rounded-pill copy-abstract-btn d-inline-flex align-items-center" style="font-size: 0.75rem;" onclick="copyAbstractText('project-abstract-en-content', this)">
+                                                    <i class="bi bi-clipboard me-1"></i> Copy Abstract
+                                                </button>
+                                            </div>
+                                            <div id="project-abstract-en-content" class="abstract-content abstract-indent">
+                                                {!! strip_tags($abstractParts[1], '<p><br><b><strong><i><em><u><span>') !!}
+                                            </div>
                                         </div>
-                                    </div>
+                                    @else
+                                        <div class="abstract-box p-3 p-md-4 border border-start border-4 border-primary rounded-3 bg-body-tertiary shadow-xs">
+                                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary-subtle border-opacity-50">
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 fw-semibold" style="font-size: 0.78rem;">
+                                                    <i class="bi bi-file-text me-1"></i> บทคัดย่อ
+                                                </span>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary py-0.5 px-2.5 rounded-pill copy-abstract-btn d-inline-flex align-items-center" style="font-size: 0.75rem;" onclick="copyAbstractText('project-abstract-single-content', this)">
+                                                    <i class="bi bi-clipboard me-1"></i> คัดลอกบทคัดย่อ
+                                                </button>
+                                            </div>
+                                            <div id="project-abstract-single-content" class="abstract-content abstract-indent">
+                                                {!! strip_tags($project->pro_abstract, '<p><br><b><strong><i><em><u><span>') !!}
+                                            </div>
+                                        </div>
                                     @endif
                                 </div>
                                 @endif
@@ -286,9 +373,11 @@
                                     <h6 class="fw-bold mb-0 text-body">
                                         <i class="bi bi-people-fill text-success me-2"></i>รายชื่อผู้วิจัยและสัดส่วนงานวิจัย
                                     </h6>
+                                    @can('update', $project)
                                     <button type="button" class="btn btn-sm btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#researcherModal">
                                         <i class="bi bi-gear-fill me-1"></i> จัดการคณะผู้วิจัย
                                     </button>
+                                    @endcan
                                 </div>
                                 <div class="table-responsive">
                                     <table class="table table-hover align-middle mb-0">
@@ -304,9 +393,22 @@
                                             <tr>
                                                 <td>
                                                     @if($work->researcher)
-                                                        <a href="{{ route('backend.rdb_researcher.show', $work->researcher->researcher_id) }}" class="text-decoration-none text-body fw-bold">
-                                                            {{ $work->researcher->prefix->prefix_nameTH ?? '' }}{{ $work->researcher->researcher_fname }} {{ $work->researcher->researcher_lname }}
-                                                        </a>
+                                                        @php
+                                                            $canManageRes = auth()->user()->hasRole(['Admin', 'The Creator', 'Admin Research', 'Admin Project']) || auth()->user()->id === 129;
+                                                            $isSelfRes = (int)auth()->user()->researcher_id === (int)$work->researcher->researcher_id;
+                                                        @endphp
+                                                        @if($canManageRes || $isSelfRes)
+                                                            <a href="{{ route('backend.rdb_researcher.show', $work->researcher->researcher_id) }}" class="text-decoration-none text-body fw-bold hover-primary">
+                                                                {{ $work->researcher->prefix->prefix_nameTH ?? '' }}{{ $work->researcher->researcher_fname }} {{ $work->researcher->researcher_lname }}
+                                                                @if($isSelfRes)
+                                                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1" style="font-size: 0.72rem;">(คุณ)</span>
+                                                                @endif
+                                                            </a>
+                                                        @else
+                                                            <span class="fw-bold text-body">
+                                                                {{ $work->researcher->prefix->prefix_nameTH ?? '' }}{{ $work->researcher->researcher_fname }} {{ $work->researcher->researcher_lname }}
+                                                            </span>
+                                                        @endif
                                                         <small class="text-body-secondary d-block">
                                                             {{ $work->researcher->department->department_nameTH ?? $work->researcher->department->department_nameEN ?? '-' }}
                                                         </small>
@@ -352,9 +454,11 @@
                                     <h6 class="fw-bold mb-0 text-body">
                                         <i class="bi bi-folder-check text-primary me-2"></i>เอกสารและไฟล์แนบโครงการ
                                     </h6>
+                                    @can('update', $project)
                                     <button type="button" class="btn btn-sm btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#projectFilesModal">
                                         <i class="bi bi-upload me-1"></i> อัปโหลด / จัดการไฟล์
                                     </button>
+                                    @endcan
                                 </div>
 
                                 <div class="row g-3 mb-4">
@@ -586,6 +690,17 @@
             </div>
         </div>
 
+        <!-- Bottom Action Buttons -->
+        <div class="col-12 mt-2">
+            <x-action-buttons 
+                :backRoute="route('backend.rdb_project.index')"
+                :editRoute="auth()->user()->can('update', $project) ? route('backend.rdb_project.edit', $project->pro_id) : null"
+                :deleteRoute="auth()->user()->can('delete', $project) ? route('backend.rdb_project.destroy', $project->pro_id) : null"
+                :canDelete="auth()->user()->can('delete', $project)"
+                :showPrint="true"
+            />
+        </div>
+
         <!-- Project Status Modal -->
         <div class="modal fade" id="projectStatusModal" tabindex="-1" aria-labelledby="projectStatusModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -744,10 +859,10 @@
                                                     <i class="bi bi-upload me-1"></i> {{ $project->pro_file ? 'เปลี่ยนไฟล์รายงาน' : 'อัปโหลดรายงาน' }}
                                                 </button>
                                             </div>
-                                            <div class="d-flex justify-content-between align-items-center mt-2 p-2 bg-light rounded border flex-wrap gap-2">
+                                            <div class="d-flex justify-content-between align-items-center mt-2 p-2 bg-body-tertiary rounded border flex-wrap gap-2">
                                                 <div class="form-check form-switch m-0">
                                                     <input class="form-check-input" type="checkbox" name="pro_file_show" value="1" id="proFileShow" checked>
-                                                    <label class="form-check-label small fw-bold text-dark" for="proFileShow">
+                                                    <label class="form-check-label small fw-bold text-body" for="proFileShow">
                                                         <i class="bi bi-globe me-1 text-primary"></i> เปิดให้บุคคลทั่วไปเข้าถึงได้ (Public Visible)
                                                     </label>
                                                 </div>
@@ -793,9 +908,9 @@
                                                     </div>
                                                     <div class="row g-2 mt-2">
                                                         <div class="col-12">
-                                                            <div class="form-check form-switch p-2 bg-light rounded border">
+                                                            <div class="form-check form-switch p-2 bg-body-tertiary rounded border">
                                                                 <input class="form-check-input ms-0 me-2" type="checkbox" name="rf_files_show" value="1" id="rfFilesShow" checked>
-                                                                <label class="form-check-label small fw-bold text-dark" for="rfFilesShow">
+                                                                <label class="form-check-label small fw-bold text-body" for="rfFilesShow">
                                                                     <i class="bi bi-globe me-1 text-primary"></i> เปิดให้บุคคลทั่วไปดาวน์โหลดเอกสารนี้ได้ (Public Visible)
                                                                 </label>
                                                             </div>
@@ -1337,7 +1452,60 @@
                 });
             });
         });
+
+        // Request Unlock Modal Handler
+        const unlockModal = document.getElementById('requestUnlockModal');
+        if (unlockModal) {
+            unlockModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const type = button.getAttribute('data-type');
+                const id = button.getAttribute('data-id');
+                const title = button.getAttribute('data-title');
+
+                document.getElementById('modalUnlockItemTitle').textContent = title || ('ID #' + id);
+                document.getElementById('requestUnlockForm').action = '/backend/workflow/' + type + '/' + id + '/request-unlock';
+            });
+        }
     });
 </script>
+
+<!-- Request Unlock Modal -->
+<div class="modal fade" id="requestUnlockModal" tabindex="-1" aria-labelledby="requestUnlockModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3 shadow border-0">
+            <form id="requestUnlockForm" method="POST" action="">
+                @csrf
+                <div class="modal-header bg-warning text-dark py-3">
+                    <h6 class="modal-title fw-bold" id="requestUnlockModalLabel">
+                        <i class="bi bi-unlock-fill me-1"></i> ยื่นคำขอเปิดสิทธิ์แก้ไขผลงานที่เผยแพร่แล้ว
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="alert alert-info small py-2 px-3 mb-3 border-0 bg-info-subtle text-info-emphasis">
+                        <i class="bi bi-info-circle me-1"></i> ผลงานที่เผยแพร่แล้วถูกล็อกการแก้ไขตามระเบียบ หากได้รับการอนุมัติจาก Admin <strong>ระบบจะย้ายผลงานนี้ไปยัง "ฉบับร่าง"</strong> เพื่อให้ท่านดำเนินการแก้ไขและส่งตรวจใหม่อีกครั้ง
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-body-secondary small">รายการผลงาน:</label>
+                        <div class="fw-bold text-body" id="modalUnlockItemTitle">-</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="unlockReason" class="form-label fw-bold text-body small">
+                            ระบุเหตุผลความจำเป็นในการแก้ไขผลงาน <span class="text-danger">*</span>
+                        </label>
+                        <textarea class="form-control" id="unlockReason" name="reason" rows="4" placeholder="ระบุเหตุผล เช่น ต้องการปรับปรุงงบประมาณตามสัญญาเพิ่มเติม, เพิ่มเติมรายชื่อผู้ร่วมวิจัย..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-body-tertiary py-2 px-4 border-top">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                    <button type="submit" class="btn btn-sm btn-warning px-3 fw-bold">
+                        <i class="bi bi-send me-1"></i> ส่งคำขอเปิดสิทธิ์แก้ไข
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- TomSelect JS -->
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>

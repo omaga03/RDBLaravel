@@ -151,11 +151,7 @@
                 </div>
                 <div class="card-body p-3 p-md-4">
                     @php
-                        // Split by 4 or more consecutive <br> tags (handles <br>, <br/>, <br />, whitespace and newlines)
-                        $abstractParts = preg_split('/(?:\s*<br\s*\/?>\s*){4,}/i', trim($item->pro_abstract ?? ''));
-                        if (count($abstractParts) < 2) {
-                            $abstractParts = preg_split('/(?:\s*<br\s*\/?>\s*){3,}/i', trim($item->pro_abstract ?? ''));
-                        }
+                        $abstractParts = \App\Helpers\AbstractHelper::split($item->pro_abstract);
                     @endphp
 
                     @if(count($abstractParts) >= 2 && !empty(trim(strip_tags($abstractParts[0]))) && !empty(trim(strip_tags($abstractParts[1]))))

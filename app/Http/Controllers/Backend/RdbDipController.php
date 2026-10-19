@@ -31,6 +31,36 @@ class RdbDipController extends Controller
     {
         $query = RdbDip::with(['dipType', 'researcher.prefix', 'project']);
 
+        // Apply RBAC Scoping:
+        $currentUser = auth()->user();
+        if ($currentUser && !$currentUser->hasRole('The Creator') && !$currentUser->hasRole('Admin') && !$currentUser->hasRole('Admin Dip')) {
+            if ($currentUser->hasRole('Faculty Coordinator')) {
+                $deptId = $currentUser->getActiveRoleScope()?->department_id ?? $currentUser->researcher?->department_id;
+                if ($deptId) {
+                    $query->whereHas('project', function($q) use ($deptId) {
+                        $q->where('department_id', $deptId);
+                    });
+                }
+            } elseif ($currentUser->hasRole('Researcher') || $currentUser->researcher_id) {
+                $researcherId = $currentUser->researcher_id;
+                $query->where(function($q) use ($researcherId, $currentUser) {
+                    $q->where('user_created', $currentUser->id);
+                    if ($researcherId) {
+                        $q->orWhere('researcher_id', $researcherId);
+                    }
+                });
+            }
+        }
+
+        // Workflow Status filter
+        if ($request->filled('workflow_status')) {
+            if ($request->workflow_status === 'unapproved') {
+                $query->whereIn('workflow_status', ['draft', 'pending_review', 'rejected']);
+            } else {
+                $query->where('workflow_status', $request->workflow_status);
+            }
+        }
+
         // Filter: Dip Request Number
         if ($request->filled('dip_request_number')) {
             $query->where('dip_request_number', 'like', '%' . $request->dip_request_number . '%');

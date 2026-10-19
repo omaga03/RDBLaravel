@@ -100,6 +100,14 @@
                                 <a href="{{ route('backend.user.edit', $user->id) }}" class="btn btn-outline-warning" title="แก้ไข">
                                     <i class="bi bi-pencil"></i>
                                 </a>
+                                @if($user->id !== auth()->id() && !$user->hasRole('The Creator') && (auth()->user()->hasRole('The Creator') || auth()->id() === 129))
+                                    <form action="{{ route('backend.user.impersonate', $user->id) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันการเข้าสู่ระบบในฐานะ (Login As): {{ $user->username }}?');">
+                                        @csrf
+                                        <button type="submit" class="btn btn-outline-info" title="สวมสิทธิ์เข้าใช้งาน (Login As: {{ $user->username }})">
+                                            <i class="bi bi-box-arrow-in-right"></i>
+                                        </button>
+                                    </form>
+                                @endif
                                 @if($user->id !== auth()->id() && !$user->hasRole('The Creator'))
                                     <form action="{{ route('backend.user.destroy', $user->id) }}" method="POST" class="d-inline delete-form">
                                         @csrf

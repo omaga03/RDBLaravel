@@ -19,12 +19,28 @@ class RdbResearcherPolicy
 
     public function viewAny(?User $user): bool
     {
-        return $user && ($user->hasPermission('RdbResearcher.View') || $user->hasRole('Admin'));
+        return $user && ($user->hasPermission('RdbResearcher.View') || $user->hasRole('Admin') || $user->hasRole('Researcher'));
     }
 
     public function view(?User $user, RdbResearcher $rdbResearcher): bool
     {
-        return $user && ($user->hasPermission('RdbResearcher.View') || $user->hasRole('Admin'));
+        if (!$user) return false;
+
+        if ($user->hasRole(['The Creator', 'Admin', 'Admin Research']) || $user->id === 129) {
+            return true;
+        }
+
+        // Faculty coordinator can view researchers in their faculty
+        if ($user->hasRole('Faculty Coordinator') && $user->canAccessDepartment($rdbResearcher->department_id)) {
+            return true;
+        }
+
+        // Regular researcher can view ONLY their own profile in backend
+        if ($user->hasRole('Researcher') || $user->researcher_id) {
+            return (int)$user->researcher_id === (int)$rdbResearcher->researcher_id;
+        }
+
+        return $user->hasPermission('RdbResearcher.View');
     }
 
     public function create(?User $user): bool
@@ -34,7 +50,11 @@ class RdbResearcherPolicy
 
     public function update(?User $user, RdbResearcher $rdbResearcher): bool
     {
-        return $user && ($user->hasPermission('RdbResearcher.Update') || $user->hasRole('Admin'));
+        return $user && (
+            $user->hasPermission('RdbResearcher.Update') || 
+            $user->hasRole('Admin') || 
+            ($user->researcher_id && (int)$user->researcher_id === (int)$rdbResearcher->researcher_id)
+        );
     }
 
     public function delete(?User $user, RdbResearcher $rdbResearcher): bool

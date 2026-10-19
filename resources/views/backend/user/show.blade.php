@@ -6,9 +6,9 @@
         title="รายละเอียดผู้ใช้งาน: {{ $user->username }}" 
         icon="bi-person-badge"
         :backRoute="route('backend.user.index')" 
-        :editRoute="route('backend.user.edit', $user->id)" 
-        :deleteRoute="route('backend.user.destroy', $user->id)" 
-        :canDelete="$user->id !== auth()->id() && !$user->hasRole('The Creator')"
+        :editRoute="auth()->user()->can('update', $user) ? route('backend.user.edit', $user->id) : null" 
+        :deleteRoute="auth()->user()->can('delete', $user) ? route('backend.user.destroy', $user->id) : null" 
+        :canDelete="auth()->user()->can('delete', $user) && $user->id !== auth()->id() && !$user->hasRole('The Creator')" 
         :showPrint="true"
     />
 

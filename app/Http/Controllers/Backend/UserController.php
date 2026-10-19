@@ -102,46 +102,68 @@ class UserController extends Controller
     {
         $this->authorize('update', $user);
 
-        $roles = AuthItem::where('type', 1)->orderBy('name')->get();
-        $researchers = RdbResearcher::with(['prefix', 'department'])->orderBy('researcher_fname')->get();
-        $userRole = $user->roles()->first()?->item_name;
+        $currentUser = auth()->user();
+        $canManageRoles = $currentUser && ($currentUser->hasRole('The Creator') || $currentUser->hasRole('Admin') || $currentUser->hasPermission('User Manager'));
 
-        return view('backend.user.edit', compact('user', 'roles', 'researchers', 'userRole'));
+        $roles = $canManageRoles ? AuthItem::where('type', 1)->orderBy('name')->get() : collect();
+        $researchers = $canManageRoles ? RdbResearcher::with(['prefix', 'department'])->orderBy('researcher_fname')->get() : collect();
+        $userRole = $user->roles()->first()?->item_name ?? ($user->researcher_id ? 'Researcher' : 'General User');
+
+        return view('backend.user.edit', compact('user', 'roles', 'researchers', 'userRole', 'canManageRoles'));
     }
 
     public function update(Request $request, User $user)
     {
         $this->authorize('update', $user);
 
-        $validated = $request->validate([
+        $currentUser = auth()->user();
+        $canManageRoles = $currentUser && ($currentUser->hasRole('The Creator') || $currentUser->hasRole('Admin') || $currentUser->hasPermission('User Manager'));
+
+        $rules = [
             'username' => ['required', 'string', 'max:255', Rule::unique('user')->ignore($user->id)],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('user')->ignore($user->id)],
             'password' => ['nullable', 'string', 'min:8'],
-            'role' => ['required', 'string', 'exists:auth_item,name'],
-            'researcher_id' => ['nullable', 'exists:rdb_researcher,researcher_id'],
-            'status' => ['required', 'integer'],
-        ]);
+        ];
+
+        if ($canManageRoles) {
+            $rules['role'] = ['required', 'string', 'exists:auth_item,name'];
+            $rules['researcher_id'] = ['nullable', 'exists:rdb_researcher,researcher_id'];
+            $rules['status'] = ['required', 'integer'];
+        }
+
+        $validated = $request->validate($rules);
 
         $user->username = $validated['username'];
         $user->email = $validated['email'];
         if (!empty($validated['password'])) {
             $user->password_hash = Hash::make($validated['password']);
         }
-        $user->status = $validated['status'];
-        $user->researcher_id = $validated['researcher_id'] ?? null;
+
+        if ($canManageRoles) {
+            $user->status = $validated['status'];
+            $user->researcher_id = $validated['researcher_id'] ?? null;
+        }
+
         $user->user_updated = auth()->id();
         $user->save();
 
-        // Sync Role
-        AuthAssignment::where('user_id', $user->id)->delete();
-        AuthAssignment::create([
-            'item_name' => $validated['role'],
-            'user_id' => $user->id,
-            'created_at' => time(),
-        ]);
+        // Sync Role only if user has management permissions
+        if ($canManageRoles && isset($validated['role'])) {
+            AuthAssignment::where('user_id', $user->id)->delete();
+            AuthAssignment::create([
+                'item_name' => $validated['role'],
+                'user_id' => $user->id,
+                'created_at' => time(),
+            ]);
+        }
 
-        return redirect()->route('backend.user.index')
-            ->with('success', 'ปรับปรุงข้อมูลผู้ใช้งานเรียบร้อยแล้ว');
+        if ($canManageRoles) {
+            return redirect()->route('backend.user.index')
+                ->with('success', 'ปรับปรุงข้อมูลผู้ใช้งานเรียบร้อยแล้ว');
+        }
+
+        return redirect()->back()
+            ->with('success', 'ปรับปรุงข้อมูลส่วนตัวเรียบร้อยแล้ว');
     }
 
     public function destroy(User $user)
@@ -163,5 +185,74 @@ class UserController extends Controller
 
         return redirect()->route('backend.user.index')
             ->with('success', 'ลบผู้ใช้งานเรียบร้อยแล้ว');
+    }
+
+    /**
+     * Login As (Impersonate) a specific user for testing/troubleshooting.
+     */
+    public function impersonate(Request $request, User $user)
+    {
+        $currentUser = auth()->user();
+        if (!$currentUser->hasRole('The Creator') && $currentUser->id !== 129 && !session()->has('impersonator_id')) {
+            abort(403, 'เฉพาะผู้ดูแลระบบสูงสุด (Super Admin) เท่านั้นที่สามารถสวมสิทธิ์ผู้ใช้งานได้');
+        }
+
+        if ($user->hasRole('The Creator') || $user->id === 129) {
+            return redirect()->back()->with('error', 'ไม่สามารถสวมสิทธิ์ผู้ดูแลระบบสูงสุดด้วยกันเองได้');
+        }
+
+        if ($user->id === $currentUser->id) {
+            return redirect()->back()->with('warning', 'ท่านกำลังใช้งานบัญชีนี้อยู่แล้ว');
+        }
+
+        if (!session()->has('impersonator_id')) {
+            session()->put('impersonator_id', $currentUser->id);
+            session()->put('impersonator_username', $currentUser->username);
+        }
+
+        session()->put('impersonated_user_id', $user->id);
+        session()->forget('active_role_scope_id');
+
+        \Illuminate\Support\Facades\Auth::login($user);
+
+        \App\Models\AuditLog::record(
+            event: 'impersonate',
+            auditable: $user,
+            remarks: "Admin '{$currentUser->username}' สวมสิทธิ์เข้าใช้งานเป็น '{$user->username}'"
+        );
+
+        return redirect()->route('backend.site.index')
+            ->with('success', "ท่านกำลังเข้าใช้งานในฐานะ: '{$user->username}' (โหมดสวมสิทธิ์)");
+    }
+
+    /**
+     * Stop impersonating and return to original admin account.
+     */
+    public function stopImpersonate(Request $request)
+    {
+        if (!session()->has('impersonator_id')) {
+            return redirect()->route('backend.user.index');
+        }
+
+        $originalUserId = session()->get('impersonator_id');
+        $originalUser = User::find($originalUserId);
+        $impersonatedUser = auth()->user();
+
+        session()->forget(['impersonator_id', 'impersonator_username', 'impersonated_user_id', 'active_role_scope_id']);
+
+        if ($originalUser) {
+            \Illuminate\Support\Facades\Auth::login($originalUser);
+
+            \App\Models\AuditLog::record(
+                event: 'impersonate',
+                auditable: $originalUser,
+                remarks: "Admin '{$originalUser->username}' สิ้นสุดการสวมสิทธิ์ผู้ใช้ '{$impersonatedUser->username}' กลับสู่บัญชีเดิม"
+            );
+
+            return redirect()->route('backend.user.index')
+                ->with('success', "สิ้นสุดการสวมสิทธิ์ กลับสู่บัญชีผู้ดูแลระบบ '{$originalUser->username}' เรียบร้อยแล้ว");
+        }
+
+        return redirect()->route('backend.user.index');
     }
 }

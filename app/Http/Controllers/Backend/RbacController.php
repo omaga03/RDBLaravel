@@ -237,4 +237,21 @@ class RbacController extends Controller
 
         return redirect()->route('backend.rbac.index');
     }
+
+    /**
+     * Switch active role scope (Multi-Role Switcher).
+     */
+    public function switchScope(Request $request)
+    {
+        $request->validate([
+            'scope_id' => 'required|integer',
+        ]);
+
+        $user = auth()->user();
+        $scope = $user->roleScopes()->with('department')->findOrFail($request->scope_id);
+
+        session(['active_role_scope_id' => $scope->id]);
+
+        return redirect()->back()->with('success', "สลับโหมดการทำงานเป็น: {$scope->label} เรียบร้อยแล้ว");
+    }
 }

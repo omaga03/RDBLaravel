@@ -5,12 +5,29 @@
 @endpush
 
 @section('content')
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0"><i class="bi bi-rocket-takeoff me-2"></i>จัดการการใช้ประโยชน์ (Utilization)</h2>
-        <a href="{{ route('backend.rdbprojectutilize.create') }}" class="btn btn-success d-inline-flex align-items-center">
-            <i class="bi bi-plus-circle me-2"></i> เพิ่มข้อมูลใหม่
-        </a>
+    <!-- Page Header & Breadcrumb -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ route('backend.site.index') }}" class="text-decoration-none">แดชบอร์ด</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">จัดการการใช้ประโยชน์</li>
+                </ol>
+            </nav>
+            <h3 class="mb-0 fw-semibold text-body page-title">
+                <i class="bi bi-rocket-takeoff me-2 text-primary"></i>จัดการการใช้ประโยชน์ <span class="text-body-secondary small fw-normal">(Research Utilization)</span>
+            </h3>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-body border text-body-secondary px-3 py-2 shadow-sm">
+                <i class="bi bi-database me-1 text-primary"></i> ทั้งหมด {{ number_format($items->total()) }} รายการ
+            </span>
+            @can('create', \App\Models\RdbProjectUtilize::class)
+            <a href="{{ route('backend.rdbprojectutilize.create') }}" class="btn btn-primary d-inline-flex align-items-center shadow-sm" style="height: 38px;">
+                <i class="bi bi-plus-circle me-1.5"></i> เพิ่มข้อมูลใหม่
+            </a>
+            @endcan
+        </div>
     </div>
 
     {{-- Search Bar --}}
@@ -102,6 +119,17 @@
                         <tr>
                             <td class="p-3">
                                 <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
+                                    @if($item->workflow_status === 'published')
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle" title="เผยแพร่แล้ว (ล็อกการแก้ไข)"><i class="bi bi-shield-check"></i> เผยแพร่แล้ว</span>
+                                    @elseif($item->workflow_status === 'unlock_requested')
+                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" title="ยื่นขอเปิดสิทธิ์แก้ไขแล้ว"><i class="bi bi-unlock"></i> ยื่นขอแก้ไข</span>
+                                    @elseif($item->workflow_status === 'pending_review')
+                                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" title="รอการตรวจสอบ"><i class="bi bi-clock-history"></i> รอตรวจรับ</span>
+                                    @elseif($item->workflow_status === 'revision_required')
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle" title="ส่งกลับแก้ไข"><i class="bi bi-exclamation-triangle-fill"></i> ส่งกลับแก้ไข</span>
+                                    @else
+                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle" title="ฉบับร่าง"><i class="bi bi-pencil"></i> ฉบับร่าง</span>
+                                    @endif
                                     @if(isset($item->data_show))
                                         @if($item->data_show)
                                             <span class="badge bg-success-subtle text-success border border-success-subtle" title="เผยแพร่สู่สาธารณะ">
@@ -153,11 +181,24 @@
                                             $leader = $item->project->rdbProjectWorks->where('position_id', 1)->first();
                                         @endphp
                                         @if($leader && $leader->researcher)
+                                            @php
+                                                $canManageUtzLeader = auth()->user()->hasRole(['Admin', 'The Creator', 'Admin Research', 'Admin Utilize', 'Utilize']) || auth()->user()->id === 129;
+                                                $isSelfUtzLeader = (int)auth()->user()->researcher_id === (int)$leader->researcher->researcher_id;
+                                            @endphp
                                             <div class="small text-body-secondary mt-1">
                                                 <i class="bi bi-person-circle text-primary me-1"></i>
-                                                <a href="{{ route('backend.rdb_researcher.show', $leader->researcher->researcher_id) }}" class="text-decoration-none text-body hover-primary">
-                                                    {{ $leader->researcher->researcher_fname }} {{ $leader->researcher->researcher_lname }}
-                                                </a>
+                                                @if($canManageUtzLeader || $isSelfUtzLeader)
+                                                    <a href="{{ route('backend.rdb_researcher.show', $leader->researcher->researcher_id) }}" class="text-decoration-none text-body hover-primary">
+                                                        {{ $leader->researcher->researcher_fname }} {{ $leader->researcher->researcher_lname }}
+                                                        @if($isSelfUtzLeader)
+                                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1" style="font-size: 0.7rem;">(คุณ)</span>
+                                                        @endif
+                                                    </a>
+                                                @else
+                                                    <span class="text-body fw-bold">
+                                                        {{ $leader->researcher->researcher_fname }} {{ $leader->researcher->researcher_lname }}
+                                                    </span>
+                                                @endif
                                             </div>
                                         @endif
                                     </div>
@@ -206,9 +247,28 @@
                                     <a href="{{ route('backend.rdbprojectutilize.show', $item->utz_id) }}" class="btn btn-outline-primary" title="ดูรายละเอียด">
                                         <i class="bi bi-eye"></i>
                                     </a>
+                                    @can('update', $item)
                                     <a href="{{ route('backend.rdbprojectutilize.edit', $item->utz_id) }}" class="btn btn-outline-secondary" title="แก้ไข">
                                         <i class="bi bi-pencil"></i>
                                     </a>
+                                    @else
+                                        @if($item->workflow_status === 'published' && auth()->user()->can('requestUnlock', $item))
+                                            <button type="button" class="btn btn-outline-warning text-dark" data-bs-toggle="modal" data-bs-target="#requestUnlockModal" data-id="{{ $item->utz_id }}" data-type="utilize" data-title="การนำไปใช้ประโยชน์: {{ $item->utz_department_name }}" title="ผลงานนี้เผยแพร่แล้ว ยื่นขอเปิดสิทธิ์แก้ไขจาก Admin">
+                                                <i class="bi bi-unlock"></i> ขอแก้ไข
+                                            </button>
+                                        @elseif($item->workflow_status === 'unlock_requested')
+                                            <span class="btn btn-sm btn-outline-warning disabled" title="ยื่นขอเปิดสิทธิ์แก้ไขแล้ว รอ Admin อนุมัติ">
+                                                <i class="bi bi-hourglass-split"></i> รออนุมัติ
+                                            </span>
+                                        @endif
+                                    @endcan
+
+                                    @if(auth()->user()->can('approveUnlock', $item) && $item->workflow_status === 'unlock_requested')
+                                        <form action="{{ route('backend.workflow.approve_unlock', ['type' => 'utilize', 'id' => $item->utz_id]) }}" method="POST" class="d-inline" onsubmit="return confirm('อนุมัติให้แก้ไข และย้ายผลงานนี้ไปฉบับร่างหรือไม่?');">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-success" title="อนุมัติให้แก้ไข (ย้ายไปฉบับร่าง)"><i class="bi bi-unlock"></i> ปลดล็อก</button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -233,10 +293,62 @@
     </div>
 </div>
 
+<!-- Request Unlock Modal -->
+<div class="modal fade" id="requestUnlockModal" tabindex="-1" aria-labelledby="requestUnlockModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3 shadow border-0">
+            <form id="requestUnlockForm" method="POST" action="">
+                @csrf
+                <div class="modal-header bg-warning text-dark py-3">
+                    <h6 class="modal-title fw-bold" id="requestUnlockModalLabel">
+                        <i class="bi bi-unlock-fill me-1"></i> ยื่นคำขอเปิดสิทธิ์แก้ไขผลงานที่เผยแพร่แล้ว
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="alert alert-info small py-2 px-3 mb-3 border-0 bg-info-subtle text-info-emphasis">
+                        <i class="bi bi-info-circle me-1"></i> ผลงานที่เผยแพร่แล้วถูกล็อกการแก้ไขตามระเบียบ หากได้รับการอนุมัติจาก Admin <strong>ระบบจะย้ายผลงานนี้ไปยัง "ฉบับร่าง"</strong> เพื่อให้ท่านดำเนินการแก้ไขและส่งตรวจใหม่อีกครั้ง
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-body-secondary small">รายการผลงาน:</label>
+                        <div class="fw-bold text-body" id="modalUnlockItemTitle">-</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="unlockReason" class="form-label fw-bold text-body small">
+                            ระบุเหตุผลความจำเป็นในการแก้ไขผลงาน <span class="text-danger">*</span>
+                        </label>
+                        <textarea class="form-control" id="unlockReason" name="reason" rows="4" placeholder="ระบุเหตุผลในการขอแก้ไขข้อมูล..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-body-tertiary py-2 px-4 border-top">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                    <button type="submit" class="btn btn-sm btn-warning px-3 fw-bold">
+                        <i class="bi bi-send me-1"></i> ส่งคำขอเปิดสิทธิ์แก้ไข
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Request Unlock Modal Handler
+    const unlockModal = document.getElementById('requestUnlockModal');
+    if (unlockModal) {
+        unlockModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const type = button.getAttribute('data-type');
+            const id = button.getAttribute('data-id');
+            const title = button.getAttribute('data-title');
+
+            document.getElementById('modalUnlockItemTitle').textContent = title || ('ID #' + id);
+            document.getElementById('requestUnlockForm').action = '/backend/workflow/' + type + '/' + id + '/request-unlock';
+        });
+    }
+
     const sChangwat = document.getElementById('s_changwat');
     const sAmphoe = document.getElementById('s_amphoe');
     const sTambon = document.getElementById('s_tambon');
