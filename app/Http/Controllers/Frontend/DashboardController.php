@@ -689,11 +689,11 @@ class DashboardController extends Controller
             $selectedAmphoes = [];
         }
 
-        // Available provinces (prioritize จ.เพชรบูรณ์ first, then alphabetical)
+        // Available provinces (prioritize จ.เพชรบูรณ์ and จ.พิจิตร first, then alphabetical)
         $allProvinces = RdbChangwat::whereNotNull('changwat_t')
             ->where('changwat_t', '!=', '')
             ->distinct()
-            ->orderByRaw("CASE WHEN changwat_t = 'จ.เพชรบูรณ์' THEN 0 ELSE 1 END")
+            ->orderByRaw("CASE WHEN changwat_t = 'จ.เพชรบูรณ์' THEN 0 WHEN changwat_t = 'จ.พิจิตร' THEN 1 ELSE 2 END")
             ->orderBy('changwat_t')
             ->pluck('changwat_t');
 

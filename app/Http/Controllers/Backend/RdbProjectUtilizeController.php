@@ -351,6 +351,7 @@ class RdbProjectUtilizeController extends Controller
             ->distinct()
             ->whereNotNull('changwat_t')
             ->where('changwat_t', '!=', '')
+            ->orderByRaw("CASE WHEN changwat_t = 'จ.เพชรบูรณ์' THEN 0 WHEN changwat_t = 'จ.พิจิตร' THEN 1 ELSE 2 END")
             ->orderBy('changwat_t')
             ->pluck('changwat_t')
             ->map(fn($p) => ['value' => $p, 'text' => preg_replace('/^จ\./', '', $p)]);
