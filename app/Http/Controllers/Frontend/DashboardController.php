@@ -78,6 +78,14 @@ class DashboardController extends Controller
         $ptId = $request->filled('pt_id') && $request->pt_id !== 'all' ? (int)$request->pt_id : null;
         $hasReport = $request->filled('has_report') && $request->has_report !== 'all' ? $request->has_report : null;
 
+        // Project types are scoped to selected year
+        if ($selectedYearId) {
+            $lookups['projectTypes'] = RdbProjectType::where('year_id', $selectedYearId)->orderBy('pt_name')->get();
+        } else {
+            $lookups['projectTypes'] = collect();
+            $ptId = null;
+        }
+
         // Active filter counter
         $activeFilterCount = count(array_filter([$selectedYearId, $deptId, $psId, $ptId, $hasReport]));
 
@@ -162,15 +170,53 @@ class DashboardController extends Controller
               ->orWhere('pubtype_subgroup', 'like', '%PubMed%');
         })->count();
 
-        // Active Researchers
-        $resQuery = RdbResearcher::query();
-        if ($deptId) {
-            $resQuery->where('department_id', $deptId);
-        }
+        // Active Researchers (Distinct researchers participating in projects, respecting filters)
+        $resWorkQuery = DB::table('rdb_project_work')
+            ->join('rdb_project', 'rdb_project_work.pro_id', '=', 'rdb_project.pro_id')
+            ->where('rdb_project.data_show', 1)
+            ->where(function ($q) {
+                $q->whereNull('rdb_project.ps_id')
+                  ->orWhere('rdb_project.ps_id', '<>', RdbProjectStatus::REFUNDED);
+            })
+            ->whereNotNull('rdb_project_work.researcher_id')
+            ->where('rdb_project_work.researcher_id', '>', 0);
+
         if ($selectedYearId) {
-            $resQuery->whereHas('rdbProjects', fn($q) => $q->where('year_id', $selectedYearId));
+            $resWorkQuery->where('rdb_project.year_id', $selectedYearId);
         }
-        $totalResearchers = $resQuery->count();
+
+        if ($deptId) {
+            $resWorkQuery->where('rdb_project.department_id', $deptId);
+        }
+
+        if ($psId) {
+            $resWorkQuery->where('rdb_project.ps_id', $psId);
+        }
+
+        if ($ptId) {
+            $resWorkQuery->where('rdb_project.pt_id', $ptId);
+        }
+
+        if ($hasReport !== null) {
+            if ($hasReport === '1') {
+                $resWorkQuery->where(function ($q) {
+                    $q->whereNotNull('rdb_project.pro_file_path')->where('rdb_project.pro_file_path', '!=', '')
+                      ->orWhere(function ($sq) {
+                          $sq->whereNotNull('rdb_project.pro_file')->where('rdb_project.pro_file', '!=', '');
+                      });
+                });
+            } elseif ($hasReport === '0') {
+                $resWorkQuery->where(function ($q) {
+                    $q->where(function ($sq) {
+                        $sq->whereNull('rdb_project.pro_file_path')->orWhere('rdb_project.pro_file_path', '');
+                    })->where(function ($sq) {
+                        $sq->whereNull('rdb_project.pro_file')->orWhere('rdb_project.pro_file', '');
+                    });
+                });
+            }
+        }
+
+        $totalResearchers = $resWorkQuery->distinct()->count('rdb_project_work.researcher_id');
 
         // Projects by Status
         $statusQuery = (clone $proQuery)->select('ps_id', DB::raw('count(*) as total'));
@@ -207,8 +253,12 @@ class DashboardController extends Controller
                 ];
             });
 
-        // Faculty Performance Comparison
-        $facultyStats = $lookups['departments']->map(function ($dept) use ($selectedYearId, $psId, $ptId) {
+        // Faculty Performance Comparison (If deptId is selected, show only that faculty; otherwise show all)
+        $targetDepartments = $deptId
+            ? $lookups['departments']->where('department_id', $deptId)
+            : $lookups['departments'];
+
+        $facultyStats = $targetDepartments->map(function ($dept) use ($selectedYearId, $psId, $ptId) {
             $pq = RdbProject::where('department_id', $dept->department_id);
             $pubq = RdbPublished::where('department_id', $dept->department_id);
             $uq = RdbProjectUtilize::whereHas('project', fn($q) => $q->where('department_id', $dept->department_id));
@@ -233,7 +283,7 @@ class DashboardController extends Controller
                 'publications' => $pubq->count(),
                 'utilizations' => $uq->count(),
             ];
-        });
+        })->values();
 
         // Recent / Top Projects
         $recentProjects = (clone $proQuery)->with(['year', 'department', 'status'])
@@ -278,6 +328,14 @@ class DashboardController extends Controller
         $ptId = $request->filled('pt_id') && $request->pt_id !== 'all' ? (int)$request->pt_id : null;
         $budgetRange = $request->filled('budget_range') && $request->budget_range !== 'all' ? $request->budget_range : null;
         $hasReport = $request->filled('has_report') && $request->has_report !== 'all' ? $request->has_report : null;
+
+        // Project types are scoped to selected year
+        if ($selectedYearId) {
+            $lookups['projectTypes'] = RdbProjectType::where('year_id', $selectedYearId)->orderBy('pt_name')->get();
+        } else {
+            $lookups['projectTypes'] = collect();
+            $ptId = null;
+        }
 
         $activeFilterCount = count(array_filter([$selectedYearId, $deptId, $psId, $ptId, $budgetRange, $hasReport]));
 

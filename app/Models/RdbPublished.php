@@ -50,6 +50,9 @@ class RdbPublished extends Model
         'unlock_requested_at',
         'user_created',
         'user_updated',
+        'todspace',
+        'dspace_uuid',
+        'deleted_at',
     ];
     public function year()
     {

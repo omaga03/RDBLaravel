@@ -74,6 +74,8 @@ class RdbDepartment extends Model
         'department_nameTH',
         'department_nameEN',
         'department_color',
+        'dspace_org_unit',
+        'dspace_org_col_research',
         'user_created',
         'user_updated',
     ];

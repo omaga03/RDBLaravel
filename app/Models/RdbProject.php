@@ -58,6 +58,10 @@ class RdbProject extends Model
         'created_at',
         'user_created',
         'user_updated',
+        'todspace',
+        'dspace_uuid',
+        'library_in',
+        'deleted_at',
     ];
 
     /**

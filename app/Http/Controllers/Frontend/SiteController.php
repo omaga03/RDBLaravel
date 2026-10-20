@@ -45,108 +45,133 @@ class SiteController extends Controller
             return view('frontend.site.index', ['no_data' => true]);
         }
 
-        // 2. Get Project Types (Type 1 = Academic)
-        $ptid = RdbProjectType::getProTyTeaChart($max_year->year_id, 1);
+        // 3. Departments for Chart (Type 1 = Academic faculties + central divisions)
+        $depIds = RdbDepartment::getProDepTea(1);
+        $departments = RdbDepartment::whereIn('department_id', $depIds)
+                                    ->orderBy('department_nameTH', 'asc')
+                                    ->pluck('department_nameTH', 'department_id')
+                                    ->toArray();
 
-        // 3. Get Departments (Type 1 = Academic)
-        $dep = RdbDepartment::getProDepTea(1);
+        // 4. Determine 4 comparison years up to $max_year (sorted ascending)
+        $chartYears = RdbYear::where('year_id', '<=', $latest_active_year_id)
+                             ->where('year_name', '<=', $max_year->year_name)
+                             ->orderBy('year_name', 'desc')
+                             ->take(4)
+                             ->get()
+                             ->sortBy('year_name')
+                             ->values();
+        $chartYearIds = $chartYears->pluck('year_id')->toArray();
 
-        // 4. Fetch Chart Data
-        $sql = RdbProject::getReportProjectChartSplit($dep, $ptid);
-        
-        // Execute Raw SQL
-        $chartDataRaw = DB::select($sql);
+        // 5. Query Project counts and budgets grouped by year and department
+        $chartDataRows = DB::table('rdb_project')
+            ->select(
+                'year_id',
+                'department_id',
+                DB::raw('COUNT(pro_id) as cpro'),
+                DB::raw('SUM(pro_budget) as sum_budget')
+            )
+            ->whereIn('year_id', $chartYearIds)
+            ->whereIn('department_id', array_keys($departments))
+            ->where('data_show', 1)
+            ->where(function ($q) {
+                $q->whereNull('ps_id')
+                  ->orWhere('ps_id', '<>', RdbProjectStatus::REFUNDED);
+            })
+            ->groupBy('year_id', 'department_id')
+            ->get();
 
-        // Process Data for Chart.js
-        $departments = [];
-        $years = [];
-        $dataPoints = []; // [year][department] = count
-        $budgetPoints = []; // [department] = total_budget
+        $matrix = [];
+        $budgetPoints = [];
 
-        foreach ($chartDataRaw as $row) {
-            $depName = trim($row->department_nameTH);
-            $yearName = trim($row->year_name);
-            
-            if (!in_array($depName, $departments)) {
-                $departments[] = $depName;
+        foreach ($chartDataRows as $row) {
+            $matrix[$row->year_id][$row->department_id] = (int)$row->cpro;
+            if ($row->year_id == $max_year->year_id) {
+                $budgetPoints[$row->department_id] = (float)$row->sum_budget;
             }
-            if (!in_array($yearName, $years)) {
-                $years[] = $yearName;
-            }
-
-            $dataPoints[$yearName][$depName] = (int)$row->cpro;
-            
-            if (!isset($budgetPoints[$depName])) {
-                $budgetPoints[$depName] = 0;
-            }
-            $budgetPoints[$depName] += (float)$row->sum_budget;
         }
-
-        // Limit to last 4 years based on LATEST ACTIVE YEAR
-        rsort($years); // Sort Descending to get latest years first
-        
-        // Filter out years greater than max_year (latest active year)
-        if ($max_year) {
-             $years = array_filter($years, function($y) use ($max_year) {
-                 return $y <= $max_year->year_name;
-             });
-        }
-        
-        $years = array_slice($years, 0, 4); 
-        sort($years); // Sort Ascending for Chart Display
 
         // Prepare Chart.js Data
-        $chartData = [
-            'labels' => $departments,
-            'datasets' => []
-        ];
-
-        // Add Year Columns
-        $colors = ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b']; 
+        $chartColors = ['#1E3A5F', '#2563EB', '#0D9488', '#D97706', '#059669'];
+        $datasets = [];
         $i = 0;
-        foreach ($years as $year) {
-            $dataset = [
-                'label' => $year,
-                'data' => [],
-                'backgroundColor' => $colors[$i % count($colors)],
+
+        foreach ($chartYears as $yr) {
+            $barData = [];
+            foreach ($departments as $dId => $dName) {
+                $barData[] = $matrix[$yr->year_id][$dId] ?? 0;
+            }
+            $datasets[] = [
+                'label' => (string)$yr->year_name,
+                'data' => $barData,
+                'backgroundColor' => $chartColors[$i % count($chartColors)],
                 'type' => 'bar'
             ];
-            foreach ($departments as $dep) {
-                $dataset['data'][] = $dataPoints[$year][$dep] ?? 0;
-            }
-            $chartData['datasets'][] = $dataset;
             $i++;
         }
 
-        // Add Budget Line (Optional, legacy had it)
-        $budgetDataset = [
-            'label' => 'งบประมาณสนับสนุน (บาท)',
-            'data' => [],
-            'borderColor' => '#e74a3b',
-            'type' => 'line',
-            'yAxisID' => 'y1' // Secondary Axis
-        ];
-        foreach ($departments as $dep) {
-            $budgetDataset['data'][] = $budgetPoints[$dep] ?? 0;
+        // Add Budget Line for the selected year ($max_year)
+        $lineData = [];
+        foreach ($departments as $dId => $dName) {
+            $lineData[] = $budgetPoints[$dId] ?? 0;
         }
-        $chartData['datasets'][] = $budgetDataset;
+        $datasets[] = [
+            'label' => 'งบประมาณสนับสนุน (บาท)',
+            'data' => $lineData,
+            'borderColor' => '#D97706',
+            'type' => 'line',
+            'yAxisID' => 'y1'
+        ];
 
-        // 5. Latest Data
+        $chartData = [
+            'labels' => array_values($departments),
+            'datasets' => $datasets
+        ];
+
+        // 6. Latest Data
         $latestProjects = RdbProject::where('data_show', 1)
-                                    ->where('ps_id', '<>', RdbProjectStatus::REFUNDED)
-                                    // Eager load researchers sorted by position (1,2 pivot)
+                                    ->where(function ($q) {
+                                        $q->whereNull('ps_id')
+                                          ->orWhere('ps_id', '<>', RdbProjectStatus::REFUNDED);
+                                    })
+                                    // Eager load researchers sorted by position (1, 2 first)
                                     ->with(['rdbProjectWorks' => function($q) {
-                                        $q->orderBy('position_id', 'asc') // 1, 2 first
+                                        $q->orderBy('position_id', 'asc')
                                           ->orderBy('ratio', 'desc');
                                     }, 'rdbProjectWorks.researcher', 'type', 'typeSub'])
                                     ->orderBy('created_at', 'desc')
                                     ->limit(5)
                                     ->get();
 
-        // Stats for Top Cards
-        $sumProject = RdbProject::where('year_id', $max_year->year_id)->where('data_show', 1)->count();
-        $sumBudget = RdbProject::where('year_id', $max_year->year_id)->where('data_show', 1)->sum('pro_budget');
-        $countResearcher = \App\Models\RdbResearcher::count(); 
+        // 7. Stats for Top Cards
+        $sumProject = RdbProject::where('year_id', $max_year->year_id)
+                                ->where('data_show', 1)
+                                ->where(function ($q) {
+                                    $q->whereNull('ps_id')
+                                      ->orWhere('ps_id', '<>', RdbProjectStatus::REFUNDED);
+                                })
+                                ->count();
+
+        $sumBudget = RdbProject::where('year_id', $max_year->year_id)
+                               ->where('data_show', 1)
+                               ->where(function ($q) {
+                                   $q->whereNull('ps_id')
+                                     ->orWhere('ps_id', '<>', RdbProjectStatus::REFUNDED);
+                               })
+                               ->sum('pro_budget');
+
+        // Count distinct researchers who have their names in projects of this fiscal year in ANY status
+        $countResearcher = DB::table('rdb_project_work')
+            ->join('rdb_project', 'rdb_project_work.pro_id', '=', 'rdb_project.pro_id')
+            ->where('rdb_project.year_id', $max_year->year_id)
+            ->where('rdb_project.data_show', 1)
+            ->where(function ($q) {
+                $q->whereNull('rdb_project.ps_id')
+                  ->orWhere('rdb_project.ps_id', '<>', RdbProjectStatus::REFUNDED);
+            })
+            ->whereNotNull('rdb_project_work.researcher_id')
+            ->where('rdb_project_work.researcher_id', '>', 0)
+            ->distinct()
+            ->count('rdb_project_work.researcher_id'); 
 
         // 6. Latest Publications
         $latestPublications = \App\Models\RdbPublished::with(['project', 'pubtype', 'authors' => function($q) {

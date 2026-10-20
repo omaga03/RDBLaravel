@@ -12,29 +12,29 @@
     <!-- 6 Executive KPI Bento Cards -->
     <div class="row g-3 mb-4">
         <!-- 1. Total Budget -->
-        <div class="col-xl-4 col-md-6">
+        <div class="col-xxl-2 col-xl-4 col-md-6 col-sm-12">
             <div class="card h-100 border-0 shadow-sm text-white overflow-hidden position-relative" 
                  style="background: var(--rdb-gradient-primary); border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-4 position-relative" style="z-index: 1;">
+                <div class="card-body p-3.5 position-relative" style="z-index: 1;">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <span class="badge bg-white bg-opacity-25 text-white border-0">
                             <i class="bi bi-cash-stack me-1"></i> งบประมาณวิจัย
                         </span>
                         <i class="bi bi-graph-up text-white-50"></i>
                     </div>
-                    <h3 class="display-6 fw-bold mb-1 text-white text-nowrap">
+                    <h3 class="fw-bold mb-1 text-white text-nowrap" style="font-size: 1.55rem;">
                         ฿{{ number_format($totalBudget, 0) }}
                     </h3>
-                    <div class="small text-white-50 mt-1 d-flex align-items-center">
-                        <i class="bi bi-info-circle me-1"></i> งบประมาณที่ได้รับการสนับสนุนจัดสรร
+                    <div class="small text-white-50 mt-1 d-flex align-items-center text-truncate" title="งบประมาณที่ได้รับการสนับสนุนจัดสรร">
+                        <i class="bi bi-info-circle me-1"></i> งบประมาณจัดสรร
                     </div>
                 </div>
-                <i class="bi bi-cash-coin position-absolute end-0 bottom-0 text-white" style="font-size: 5rem; opacity: 0.12; transform: translate(10px, 15px);"></i>
+                <i class="bi bi-cash-coin position-absolute end-0 bottom-0 text-white" style="font-size: 4rem; opacity: 0.12; transform: translate(10px, 10px);"></i>
             </div>
         </div>
 
         <!-- 2. Projects -->
-        <div class="col-xl-2 col-md-6 col-sm-6">
+        <div class="col-xxl-2 col-xl-4 col-md-6 col-sm-6">
             <div class="card h-100 border-0 shadow-sm text-white overflow-hidden position-relative" 
                  style="background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5 position-relative" style="z-index: 1;">
@@ -49,7 +49,7 @@
         </div>
 
         <!-- 3. Publications -->
-        <div class="col-xl-2 col-md-6 col-sm-6">
+        <div class="col-xxl-2 col-xl-4 col-md-6 col-sm-6">
             <div class="card h-100 border-0 shadow-sm text-white overflow-hidden position-relative" 
                  style="background: linear-gradient(135deg, #065F46 0%, #10B981 100%); border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5 position-relative" style="z-index: 1;">
@@ -68,7 +68,7 @@
         </div>
 
         <!-- 4. Utilizations -->
-        <div class="col-xl-2 col-md-6 col-sm-6">
+        <div class="col-xxl-2 col-xl-4 col-md-6 col-sm-6">
             <div class="card h-100 border-0 shadow-sm text-white overflow-hidden position-relative" 
                  style="background: linear-gradient(135deg, #991B1B 0%, #EF4444 100%); border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5 position-relative" style="z-index: 1;">
@@ -82,8 +82,8 @@
             </div>
         </div>
 
-        <!-- 5. IP & Researchers -->
-        <div class="col-xl-2 col-md-6 col-sm-6">
+        <!-- 5. Intellectual Property (IP) -->
+        <div class="col-xxl-2 col-xl-4 col-md-6 col-sm-6">
             <div class="card h-100 border-0 shadow-sm text-white overflow-hidden position-relative" 
                  style="background: linear-gradient(135deg, #7C2D12 0%, #F59E0B 100%); border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5 position-relative" style="z-index: 1;">
@@ -94,6 +94,21 @@
                     <small class="text-white-50 d-block">สิทธิบัตร/อนุฯ/ลิขสิทธิ์</small>
                 </div>
                 <i class="bi bi-patch-check position-absolute end-0 bottom-0 text-white" style="font-size: 4rem; opacity: 0.15; transform: translate(10px, 10px);"></i>
+            </div>
+        </div>
+
+        <!-- 6. Researchers -->
+        <div class="col-xxl-2 col-xl-4 col-md-6 col-sm-6">
+            <div class="card h-100 border-0 shadow-sm text-white overflow-hidden position-relative" 
+                 style="background: linear-gradient(135deg, #4338CA 0%, #6366F1 100%); border-radius: var(--rdb-radius-md) !important;">
+                <div class="card-body p-3.5 position-relative" style="z-index: 1;">
+                    <span class="badge bg-white bg-opacity-25 text-white border-0 mb-2">
+                        <i class="bi bi-people-fill me-1"></i> นักวิจัย
+                    </span>
+                    <h2 class="fw-bold mb-1 text-white">{{ number_format($totalResearchers) }}</h2>
+                    <small class="text-white-50 d-block">นักวิจัยทั้งหมด (ไม่นับซ้ำ)</small>
+                </div>
+                <i class="bi bi-people position-absolute end-0 bottom-0 text-white" style="font-size: 4rem; opacity: 0.15; transform: translate(10px, 10px);"></i>
             </div>
         </div>
     </div>
@@ -158,9 +173,17 @@
                 <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <h5 class="mb-0 fw-bold text-body">
                         <i class="bi bi-bar-chart-steps text-success me-2"></i> ผลผลิตงานวิจัยเปรียบเทียบจำแนกรายคณะ
+                        @if(!empty($deptId) && $facultyStats->isNotEmpty())
+                            <span class="text-primary fw-normal fs-6">({{ $facultyStats->first()['name'] }})</span>
+                        @endif
                     </h5>
                     <span class="badge bg-success-subtle text-success border border-success-subtle">
                         <i class="bi bi-layers me-1"></i> โครงการ • บทความตีพิมพ์ • การใช้ประโยชน์
+                        @if(!empty($selectedYear))
+                            • ปี {{ $selectedYear->year_name }}
+                        @else
+                            • ทุกปีงบประมาณ
+                        @endif
                     </span>
                 </div>
                 <div class="card-body p-3 p-md-4">

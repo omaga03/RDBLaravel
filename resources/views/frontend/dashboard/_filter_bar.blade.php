@@ -1,5 +1,10 @@
 <div class="card border shadow-sm mb-4 bg-body-tertiary" style="border-radius: var(--rdb-radius-md) !important;">
-    <div class="card-header bg-transparent border-bottom d-flex align-items-center justify-content-between py-2.5 px-3">
+    <div class="card-header bg-transparent border-bottom d-flex align-items-center justify-content-between py-2.5 px-3"
+         style="cursor: pointer;"
+         data-bs-toggle="collapse" 
+         data-bs-target="#intelligenceFiltersCollapse" 
+         aria-expanded="{{ (isset($activeFilterCount) && $activeFilterCount > 0) ? 'true' : 'false' }}" 
+         aria-controls="intelligenceFiltersCollapse">
         <div class="d-flex align-items-center gap-2">
             <i class="bi bi-sliders text-primary fs-5"></i>
             <span class="fw-bold text-body" style="font-size: 0.95rem;">ตัวกรองข้อมูลสารสนเทศ (Intelligence Filters)</span>
@@ -7,16 +12,26 @@
                 <span class="badge bg-primary text-white rounded-pill px-2.5 py-1" style="font-size: 0.75rem;">
                     <i class="bi bi-funnel-fill me-1"></i> ใช้งาน {{ $activeFilterCount }} ตัวกรอง
                 </span>
+            @else
+                <span class="badge bg-secondary-subtle text-body-secondary rounded-pill px-2 py-0.5" style="font-size: 0.72rem;">
+                    <i class="bi bi-chevron-expand me-1"></i>คลิกเพื่อเปิด/ซ่อนตัวกรอง
+                </span>
             @endif
         </div>
-        @if(isset($activeFilterCount) && $activeFilterCount > 0)
-            <a href="{{ url()->current() }}" class="btn btn-sm btn-outline-secondary py-0.5 px-2 text-nowrap" style="font-size: 0.78rem;" title="ล้างตัวกรองทั้งหมด">
-                <i class="bi bi-x-circle me-1"></i> ล้างตัวกรอง
-            </a>
-        @endif
+        <div class="d-flex align-items-center gap-2">
+            @if(isset($activeFilterCount) && $activeFilterCount > 0)
+                <a href="{{ url()->current() }}" class="btn btn-sm btn-outline-secondary py-0.5 px-2 text-nowrap" style="font-size: 0.78rem;" title="ล้างตัวกรองทั้งหมด" onclick="event.stopPropagation();">
+                    <i class="bi bi-x-circle me-1"></i> ล้างตัวกรอง
+                </a>
+            @endif
+            <button type="button" class="btn btn-sm btn-light border py-0.5 px-2 text-body-secondary" aria-label="Toggle filters">
+                <i class="bi bi-chevron-down filter-collapse-icon {{ (isset($activeFilterCount) && $activeFilterCount > 0) ? 'rotate-180' : '' }}"></i>
+            </button>
+        </div>
     </div>
-    <div class="card-body p-3">
-        <form action="{{ url()->current() }}" method="GET" id="dashboardFiltersForm">
+    <div class="collapse {{ (isset($activeFilterCount) && $activeFilterCount > 0) ? 'show' : '' }}" id="intelligenceFiltersCollapse">
+        <div class="card-body p-3">
+            <form action="{{ url()->current() }}" method="GET" id="dashboardFiltersForm">
             <div class="row g-2.5 align-items-end">
 
                 {{-- ========================================================= --}}
@@ -62,16 +77,25 @@
                         </select>
                     </div>
 
-                    <!-- Filter 4: Project Type -->
+                    <!-- Filter 4: Project Type (Dependent on Year) -->
                     <div class="col-12 col-sm-6 col-md-4 col-lg-2">
-                        <label class="form-label text-body-secondary small fw-medium mb-1"><i class="bi bi-tags text-primary me-1"></i> ประเภททุน</label>
-                        <select name="pt_id" class="form-select form-select-sm fw-medium">
-                            <option value="all" {{ empty($ptId) ? 'selected' : '' }}>-- ทุกประเภททุน --</option>
-                            @foreach($projectTypes as $pt)
-                                <option value="{{ $pt->pt_id }}" {{ (isset($ptId) && $ptId == $pt->pt_id) ? 'selected' : '' }}>
-                                    {{ $pt->pt_name }}
-                                </option>
-                            @endforeach
+                        <label class="form-label text-body-secondary small fw-medium mb-1">
+                            <i class="bi bi-tags text-primary me-1"></i> ประเภททุน
+                            @if(empty($selectedYearId))
+                                <span class="badge bg-warning-subtle text-warning-emphasis p-0 px-1" style="font-size: 0.65rem;">เลือกปีก่อน</span>
+                            @endif
+                        </label>
+                        <select name="pt_id" id="filter_pt_id" class="form-select form-select-sm fw-medium" {{ empty($selectedYearId) ? 'disabled' : '' }}>
+                            @if(empty($selectedYearId))
+                                <option value="all">-- กรุณาเลือกปีงบประมาณก่อน --</option>
+                            @else
+                                <option value="all" {{ empty($ptId) ? 'selected' : '' }}>-- ทุกประเภททุน --</option>
+                                @foreach($projectTypes as $pt)
+                                    <option value="{{ $pt->pt_id }}" {{ (isset($ptId) && $ptId == $pt->pt_id) ? 'selected' : '' }}>
+                                        {{ $pt->pt_name }}
+                                    </option>
+                                @endforeach
+                            @endif
                         </select>
                     </div>
 
@@ -368,3 +392,46 @@
         </form>
     </div>
 </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('dashboardFiltersForm');
+    if (!form) return;
+
+    const ptSelect = document.getElementById('filter_pt_id');
+
+    // Auto-submit on change for any select in the filter form
+    form.querySelectorAll('select').forEach(function(select) {
+        select.addEventListener('change', function() {
+            // If year was changed, reset pt_id to 'all' so it doesn't send mismatched type ID
+            if (this.name === 'year_id' && ptSelect) {
+                ptSelect.value = 'all';
+                ptSelect.disabled = true; // prevent sending stale pt_id
+            }
+            form.submit();
+        });
+    });
+
+    // Handle collapse icon rotation
+    const collapseEl = document.getElementById('intelligenceFiltersCollapse');
+    const iconEl = document.querySelector('.filter-collapse-icon');
+    if (collapseEl && iconEl) {
+        collapseEl.addEventListener('show.bs.collapse', function () {
+            iconEl.classList.add('rotate-180');
+        });
+        collapseEl.addEventListener('hide.bs.collapse', function () {
+            iconEl.classList.remove('rotate-180');
+        });
+    }
+});
+</script>
+<style>
+.filter-collapse-icon {
+    transition: transform 0.25s ease-in-out;
+    display: inline-block;
+}
+.filter-collapse-icon.rotate-180 {
+    transform: rotate(180deg);
+}
+</style>

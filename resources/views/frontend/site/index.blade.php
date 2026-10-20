@@ -145,10 +145,10 @@
                                 <i class="bi bi-person-badge me-1"></i>กำลังคนด้านวิจัย
                             </span>
                         </div>
-                        <h6 class="text-white-50 text-uppercase fw-bold mb-1" style="font-size: 0.8rem; letter-spacing: 0.04em;">นักวิจัยทั้งหมด</h6>
+                        <h6 class="text-white-50 text-uppercase fw-bold mb-1" style="font-size: 0.8rem; letter-spacing: 0.04em;">นักวิจัยในโครงการ (ทุกสถานะ)</h6>
                         <div class="display-5 fw-bold my-1">{{ number_format($countResearcher) }}</div>
                         <div class="small text-white-50 mt-1 d-flex align-items-center">
-                            <i class="bi bi-mortarboard me-1"></i> คณาจารย์และบุคลากรวิจัย
+                            <i class="bi bi-mortarboard me-1"></i> คณาจารย์และบุคลากรวิจัยในปี {{ $max_year->year_name }}
                         </div>
                     </div>
                 </div>
