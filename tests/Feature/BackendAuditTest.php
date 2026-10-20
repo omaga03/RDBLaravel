@@ -508,7 +508,7 @@ class BackendAuditTest extends TestCase
 
         $response = $this->actingAs($admin)->post(route('backend.rdb_project.upload_report', $project->pro_id), [
             'pro_file' => $fakePdf,
-            'pro_file_show' => 1,
+            'pro_file_show' => 0, // 0 = เปิด (Public)
         ]);
 
         $response->assertRedirect();
@@ -517,7 +517,7 @@ class BackendAuditTest extends TestCase
         $project->refresh();
         $this->assertEquals(2, $project->ps_id, 'Project status should be automatically set to completed (ps_id = 2) when report is uploaded.');
         $this->assertNotNull($project->pro_file);
-        $this->assertEquals(1, $project->pro_file_show);
+        $this->assertEquals(0, $project->pro_file_show);
     }
 
     public function test_toggle_report_and_file_status()
@@ -738,9 +738,10 @@ class BackendAuditTest extends TestCase
         \App\Models\SystemSetting::set('download_policy_full_report', 'members_only');
 
         $project = RdbProject::where('data_show', 1)
-            ->where('pro_file_show', 1)
+            ->where('pro_file_show', 0)
             ->whereNotNull('pro_file')
             ->where('pro_file', '!=', '')
+            ->where('pro_file', '!=', '0')
             ->first();
 
         if ($project) {
@@ -753,6 +754,50 @@ class BackendAuditTest extends TestCase
             $showResponse->assertStatus(200);
             $showResponse->assertSee('ต้องเข้าสู่ระบบ');
         }
+    }
+
+    public function test_pro_file_show_three_states_logic()
+    {
+        $project = RdbProject::where('data_show', 1)
+            ->whereNotNull('pro_file')
+            ->where('pro_file', '!=', '')
+            ->where('pro_file', '!=', '0')
+            ->first();
+
+        $this->assertNotNull($project);
+        $originalShow = $project->pro_file_show;
+
+        // State 0 = เปิด (Public)
+        $project->pro_file_show = 0;
+        $project->save();
+        $this->assertTrue($project->isReportOpen());
+        $res0 = $this->get(route('frontend.rdbproject.show', $project->pro_id));
+        $res0->assertStatus(200);
+        $res0->assertSee('รายงานฉบับสมบูรณ์');
+
+        // State 1 = ปิด (Concealed)
+        $project->pro_file_show = 1;
+        $project->save();
+        $this->assertTrue($project->isReportClosed());
+        $res1 = $this->get(route('frontend.rdbproject.show', $project->pro_id));
+        $res1->assertStatus(200);
+        $res1->assertSee('เล่มรายงานวิจัยถูกปกปิด');
+        $viewRes1 = $this->get(route('frontend.rdbproject.view_report', $project->pro_id));
+        $viewRes1->assertStatus(403);
+
+        // State 2 = ร่าง (Draft)
+        $project->pro_file_show = 2;
+        $project->save();
+        $this->assertTrue($project->isReportDraft());
+        $res2 = $this->get(route('frontend.rdbproject.show', $project->pro_id));
+        $res2->assertStatus(200);
+        $res2->assertSee('เล่มรายงานวิจัยอยู่ในสถานะฉบับร่าง');
+        $viewRes2 = $this->get(route('frontend.rdbproject.view_report', $project->pro_id));
+        $viewRes2->assertStatus(403);
+
+        // Restore original
+        $project->pro_file_show = $originalShow;
+        $project->save();
     }
 
     public function test_research_intelligence_dashboards_render_with_contextual_filters()

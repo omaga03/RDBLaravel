@@ -171,18 +171,45 @@ class RdbprojectController extends Controller
             });
         }
 
-        // Project Name (multi-word OR search)
-        if ($request->filled('pro_nameTH')) {
-            $words = preg_split('/[\s\/,]+/', trim($request->pro_nameTH));
-            $query->where(function($q) use ($words) {
-                foreach ($words as $word) {
-                    if (empty($word)) continue;
-                    $q->orWhere(function($wq) use ($word) {
-                        $wq->where('pro_nameTH', 'like', '%' . $word . '%')
-                           ->orWhere('pro_nameEN', 'like', '%' . $word . '%');
+        // Project ID / Title Autocomplete Search
+        if ($request->filled('pro_id') && $request->pro_id !== 'pre') {
+            $query->where('pro_id', $request->pro_id);
+        } elseif ($request->filled('pro_nameTH')) {
+            $proName = trim($request->pro_nameTH);
+            $query->where(function($q) use ($proName) {
+                $q->where('pro_nameTH', 'like', "%{$proName}%")
+                  ->orWhere('pro_nameEN', 'like', "%{$proName}%");
+            });
+        }
+
+        // Title Multi-Keyword Search (กลุ่มคำคั่นด้วยช่องว่าง + ตัวเลือก เจอทั้งหมด/เจอบางคำ)
+        if ($request->filled('title_keywords')) {
+            $keywords = array_values(array_filter(preg_split('/\s+/', trim($request->title_keywords))));
+            $mode = $request->input('title_keywords_mode', 'all');
+
+            if (!empty($keywords)) {
+                if ($mode === 'all') {
+                    // เจอทั้งหมด (ตรงทุกคำ - AND)
+                    $query->where(function($q) use ($keywords) {
+                        foreach ($keywords as $kw) {
+                            $q->where(function($sub) use ($kw) {
+                                $sub->where('pro_nameTH', 'like', "%{$kw}%")
+                                    ->orWhere('pro_nameEN', 'like', "%{$kw}%");
+                            });
+                        }
+                    });
+                } else {
+                    // เจอบางคำ (ตรงคำใดคำหนึ่ง - OR)
+                    $query->where(function($q) use ($keywords) {
+                        foreach ($keywords as $kw) {
+                            $q->orWhere(function($sub) use ($kw) {
+                                $sub->where('pro_nameTH', 'like', "%{$kw}%")
+                                    ->orWhere('pro_nameEN', 'like', "%{$kw}%");
+                            });
+                        }
                     });
                 }
-            });
+            }
         }
 
         // Abstract (multi-word OR search)
@@ -406,6 +433,91 @@ class RdbprojectController extends Controller
     }
 
     /**
+     * Search projects for Frontend TomSelect Autocomplete
+     */
+    public function searchProjects(Request $request)
+    {
+        $term = trim($request->q);
+        if (empty($term) || mb_strlen($term) < 2) {
+            return response()->json([]);
+        }
+
+        $projects = RdbProject::with([
+                'year', 
+                'department', 
+                'type', 
+                'typeSub', 
+                'rdbProjectWorks' => function($wq) {
+                    $wq->orderBy('position_id', 'asc');
+                },
+                'rdbProjectWorks.researcher.prefix'
+            ])
+            ->where(function($q) use ($term) {
+                $q->where('pro_nameTH', 'LIKE', "%{$term}%")
+                  ->orWhere('pro_nameEN', 'LIKE', "%{$term}%")
+                  ->orWhere('pro_code', 'LIKE', "%{$term}%")
+                  ->orWhereHas('type', function($tq) use ($term) {
+                      $tq->where('pt_name', 'LIKE', "%{$term}%");
+                  })
+                  ->orWhereHas('typeSub', function($tsq) use ($term) {
+                      $tsq->where('pts_name', 'LIKE', "%{$term}%");
+                  })
+                  ->orWhereHas('researchers', function($rq) use ($term) {
+                      $rq->where('researcher_fname', 'LIKE', "%{$term}%")
+                         ->orWhere('researcher_lname', 'LIKE', "%{$term}%")
+                         ->orWhere('researcher_fnameEN', 'LIKE', "%{$term}%")
+                         ->orWhere('researcher_lnameEN', 'LIKE', "%{$term}%")
+                         ->orWhereRaw("CONCAT(researcher_fname, ' ', researcher_lname) LIKE ?", ["%{$term}%"]);
+                  });
+            })
+            ->orderBy('pro_id', 'desc')
+            ->limit(20)
+            ->get();
+
+        $results = [];
+        foreach ($projects as $p) {
+            $yearPrefix = ($p->year && $p->year->year_name) ? "[{$p->year->year_name}] " : '';
+            $typeName = $p->type ? $p->type->pt_name : '';
+            if ($p->typeSub && $p->typeSub->pts_name) {
+                $typeName .= ($typeName ? ' (' . $p->typeSub->pts_name . ')' : $p->typeSub->pts_name);
+            }
+            $dept = $p->department ? ($p->department->department_nameTH ?? $p->department->department_name) : '';
+
+            $researcherNames = [];
+            if ($p->rdbProjectWorks && $p->rdbProjectWorks->isNotEmpty()) {
+                foreach ($p->rdbProjectWorks as $pw) {
+                    if ($pw->researcher) {
+                        $researcherNames[] = trim($pw->researcher->researcher_fname . ' ' . $pw->researcher->researcher_lname);
+                    }
+                }
+            } elseif ($p->researchers && $p->researchers->isNotEmpty()) {
+                foreach ($p->researchers as $r) {
+                    $researcherNames[] = trim($r->researcher_fname . ' ' . $r->researcher_lname);
+                }
+            }
+            $resText = !empty($researcherNames) ? implode(', ', array_slice($researcherNames, 0, 2)) . (count($researcherNames) > 2 ? '...' : '') : '';
+
+            $meta = array_filter([
+                $typeName ? "ทุน: {$typeName}" : '', 
+                $dept, 
+                $resText ? "ผู้วิจัย: {$resText}" : ''
+            ]);
+            $sub = !empty($meta) ? ' [' . implode(', ', $meta) . ']' : '';
+
+            $cleanName = strip_tags($p->pro_nameTH);
+            $results[] = [
+                'value' => $p->pro_id,
+                'text' => $yearPrefix . $cleanName . $sub,
+                'pro_nameTH' => $cleanName,
+                'pt_name' => $typeName,
+                'researcher_name' => $resText,
+            ];
+        }
+
+        return response()->json($results);
+    }
+
+    /**
      * Track file download and redirect to file (Frontend)
      */
     public function downloadFile($id, $fid)
@@ -479,7 +591,19 @@ class RdbprojectController extends Controller
             return response()->file(public_path($filePath));
         }
 
-        abort(404, 'ไม่พบไฟล์');
+        // Support legacy folder: datafiles/{pro_id}/{pro_abstract_file}
+        if (!empty($project->pro_abstract_file)) {
+            $legacyRelative = 'datafiles/' . $project->pro_id . '/' . $project->pro_abstract_file;
+            if (Storage::disk('public')->exists($legacyRelative)) {
+                $project->increment('pro_count_abs');
+                return Storage::disk('public')->response($legacyRelative);
+            } elseif (file_exists(public_path($legacyRelative))) {
+                $project->increment('pro_count_abs');
+                return response()->file(public_path($legacyRelative));
+            }
+        }
+
+        abort(404, 'ไม่พบไฟล์บทคัดย่อบนเซิร์ฟเวอร์');
     }
 
     public function viewReport($id)
@@ -491,8 +615,14 @@ class RdbprojectController extends Controller
             abort(404);
         }
 
-        // ✅ ตรวจสอบว่า report แสดงในหน้าสาธารณะหรือไม่ (Project Level Security)
-        if ($project->pro_file_show != 1) {
+        // ✅ ตรวจสอบว่า report แสดงในหน้าสาธารณะหรือไม่ (0 = เปิด, 1 = ปิด, 2 = ร่าง)
+        if ((int) $project->pro_file_show !== 0) {
+            if ((int) $project->pro_file_show === 1) {
+                abort(403, 'ไฟล์รายงานนี้ถูกปกปิด ไม่สามารถเปิดเผยข้อมูลได้');
+            }
+            if ((int) $project->pro_file_show === 2) {
+                abort(403, 'ไฟล์รายงานนี้อยู่ในสถานะฉบับร่าง ยังไม่เปิดให้ดาวน์โหลด');
+            }
             abort(404, 'ไฟล์รายงานยังไม่เปิดให้สาธารณะ');
         }
 
@@ -523,7 +653,19 @@ class RdbprojectController extends Controller
             return response()->file(public_path($filePath));
         }
 
-        abort(404, 'ไม่พบไฟล์');
+        // Support legacy folder: datafiles/{pro_id}/{pro_file}
+        if (!empty($project->pro_file)) {
+            $legacyRelative = 'datafiles/' . $project->pro_id . '/' . $project->pro_file;
+            if (Storage::disk('public')->exists($legacyRelative)) {
+                $project->increment('pro_count_full');
+                return Storage::disk('public')->response($legacyRelative);
+            } elseif (file_exists(public_path($legacyRelative))) {
+                $project->increment('pro_count_full');
+                return response()->file(public_path($legacyRelative));
+            }
+        }
+
+        abort(404, 'ไม่พบไฟล์รายงานบนเซิร์ฟเวอร์');
     }
 
     public function show($id)

@@ -61,14 +61,38 @@ class RdbDipController extends Controller
             }
         }
 
+        // Filter: Dip ID / Autocomplete
+        if ($request->filled('dip_id') && $request->dip_id !== 'pre') {
+            $query->where('dip_id', $request->dip_id);
+        } elseif ($request->filled('dip_name')) {
+            $query->where('dip_data2_name', 'like', '%' . $request->dip_name . '%');
+        }
+
+        // Title Multi-Keyword Search
+        if ($request->filled('title_keywords')) {
+            $keywords = array_values(array_filter(preg_split('/\s+/', trim($request->title_keywords))));
+            $mode = $request->input('title_keywords_mode', 'all');
+
+            if (!empty($keywords)) {
+                if ($mode === 'all') {
+                    $query->where(function($q) use ($keywords) {
+                        foreach ($keywords as $kw) {
+                            $q->where('dip_data2_name', 'like', "%{$kw}%");
+                        }
+                    });
+                } else {
+                    $query->where(function($q) use ($keywords) {
+                        foreach ($keywords as $kw) {
+                            $q->orWhere('dip_data2_name', 'like', "%{$kw}%");
+                        }
+                    });
+                }
+            }
+        }
+
         // Filter: Dip Request Number
         if ($request->filled('dip_request_number')) {
             $query->where('dip_request_number', 'like', '%' . $request->dip_request_number . '%');
-        }
-
-        // Filter: Dip Name (Invention Name)
-        if ($request->filled('dip_name')) {
-            $query->where('dip_data2_name', 'like', '%' . $request->dip_name . '%');
         }
 
         // Filter: Dip Type
@@ -330,19 +354,53 @@ class RdbDipController extends Controller
         return redirect()->back()->with('success', 'ลบไฟล์เรียบร้อยแล้ว');
     }
 
-    public function viewFile($id)
+    public function viewFile($id, Request $request)
     {
         $item = RdbDip::findOrFail($id);
         $this->authorize('view', $item);
 
-        $filePath = $item->getDipFilePath();
+        $field = $request->query('field', 'dip_files');
+        $allowedFields = [
+            'dip_files',
+            'dip_data1_files',
+            'dip_data2_files_con',
+            'dip_data3_drawing_picture',
+            'dip_data_forms_request',
+            'dip_data3_filesass1',
+            'dip_data3_filesass2',
+            'dip_data3_filesass3',
+        ];
+
+        if (!in_array($field, $allowedFields)) {
+            abort(400, 'คำขอไฟล์ไม่ถูกต้อง');
+        }
+
+        $filename = $item->{$field};
+        if (empty($filename)) {
+            abort(404, 'ไม่มีไฟล์เอกสารนี้');
+        }
+
+        $filePath = $item->getDipFilePath($field);
 
         if ($filePath && Storage::disk('public')->exists($filePath)) {
             return Storage::disk('public')->response($filePath);
         }
 
+        if ($filePath && file_exists(public_path('storage/' . $filePath))) {
+            return response()->file(public_path('storage/' . $filePath));
+        }
+
         if ($filePath && file_exists(public_path($filePath))) {
             return response()->file(public_path($filePath));
+        }
+
+        // Support legacy yii2 datadip
+        $legacyPath = 'datadip/' . $item->dip_id . '/' . basename($filename);
+        if (file_exists(public_path($legacyPath))) {
+            return response()->file(public_path($legacyPath));
+        }
+        if (file_exists(base_path('yii2_rdb-main/frontend/web/' . $legacyPath))) {
+            return response()->file(base_path('yii2_rdb-main/frontend/web/' . $legacyPath));
         }
 
         abort(404, 'ไม่พบไฟล์');

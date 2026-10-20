@@ -38,8 +38,9 @@ class ResearchConference extends Model
 
     public function getImageUrlAttribute(): ?string
     {
-        if (!empty($this->con_path)) {
-            return asset('storage/' . $this->con_path);
+        $path = $this->con_path ?: $this->file_path;
+        if (!empty($path)) {
+            return asset('storage/' . $path);
         }
         if (!empty($this->con_img)) {
             return asset('storage/uploads/conference/' . $this->con_img);

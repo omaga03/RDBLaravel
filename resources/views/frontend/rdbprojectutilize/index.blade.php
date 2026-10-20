@@ -48,25 +48,57 @@
                 <input type="hidden" name="pro_id" value="{{ request('pro_id') }}">
             @endif
 
-            {{-- Row 1: Search, Utilize Type, Department --}}
+        <div class="row g-3">
+            {{-- Row 1: Utilize / Project Title Autocomplete Search --}}
+            <div class="col-md-12">
+                <label class="form-label d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-diagram-3 text-primary me-1"></i> ชื่อโครงการวิจัย / การนำไปใช้ประโยชน์</span>
+                    <span class="badge bg-secondary-subtle text-body-secondary" style="font-size: 0.7rem;">พิมพ์เพื่อค้นหาการใช้ประโยชน์/ชื่อโครงการ</span>
+                </label>
+                <select class="form-select" id="search_utz_id" name="utz_id"></select>
+                <input type="hidden" name="utz_name" id="search_utz_name" value="{{ request('utz_name') }}">
+            </div>
+
+            {{-- Row 2: Multi-Keyword Title Search (กลุ่มคำคั่นด้วยช่องว่าง + เจอทั้งหมด / เจอบางคำ) --}}
+            <div class="col-md-12">
+                <div class="p-3 rounded-3 border bg-body-tertiary">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-1.5 gap-2">
+                        <label class="form-label mb-0 fw-semibold text-body" style="font-size: 0.88rem;">
+                            <i class="bi bi-fonts text-primary me-1"></i> ค้นหาชื่อเรื่องแบบกลุ่มคำ (คั่นด้วยช่องว่าง)
+                        </label>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="form-check form-check-inline mb-0">
+                                <input class="form-check-input" type="radio" name="title_keywords_mode" id="utz_mode_all" value="all" 
+                                    {{ request('title_keywords_mode', 'all') === 'all' ? 'checked' : '' }}>
+                                <label class="form-check-label small fw-medium" for="utz_mode_all">
+                                    <i class="bi bi-check-all text-success me-1"></i>เจอทั้งหมด (ตรงทุกคำ - AND)
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline mb-0">
+                                <input class="form-check-input" type="radio" name="title_keywords_mode" id="utz_mode_any" value="any" 
+                                    {{ request('title_keywords_mode') === 'any' ? 'checked' : '' }}>
+                                <label class="form-check-label small fw-medium" for="utz_mode_any">
+                                    <i class="bi bi-intersect text-primary me-1"></i>เจอบางคำ (ตรงคำใดคำหนึ่ง - OR)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="text" class="form-control" name="title_keywords" value="{{ request('title_keywords') }}" 
+                        placeholder="เช่น ชุมชน ท้องถิ่น ถ่ายทอด (พิมพ์หลายคำคั่นด้วยช่องว่าง)...">
+                    <div class="form-text small text-body-secondary mt-1">
+                        <i class="bi bi-info-circle me-1"></i>ระบบจะค้นหาข้อมูลการใช้ประโยชน์หรือชื่อโครงการที่มีกลุ่มคำดังกล่าวตามเงื่อนไขที่เลือก (เจอทั้งหมด หรือ เจอบางคำ)
+                    </div>
+                </div>
+            </div>
+
+            {{-- Row 3: Researcher & Department --}}
             <div class="col-md-6">
-                <label class="form-label">คำค้นหา</label>
-                <input type="text" class="form-control" name="search" value="{{ request('search') }}" 
-                    placeholder="ระบุชื่อหน่วยงาน, รายละเอียด, ผู้แทน/ผู้ลงนาม, หรือโครงการวิจัย...">
+                <label class="form-label"><i class="bi bi-person text-primary me-1"></i>นักวิจัย / ผู้แทนลงนาม</label>
+                <select class="form-select" id="search_researcher_id" name="researcher_id"></select>
+                <input type="hidden" name="researcher_name" id="search_researcher_name" value="{{ request('researcher_name') }}">
             </div>
-            <div class="col-md-3">
-                <label class="form-label">ประเภทการนำไปใช้ประโยชน์</label>
-                <select class="form-select" name="utz_group">
-                    <option value="">-- ทั้งหมด --</option>
-                    @foreach($utilizeTypes as $uType)
-                        <option value="{{ $uType->utz_type_id }}" {{ request('utz_group') == $uType->utz_type_id ? 'selected' : '' }}>
-                            {{ $uType->utz_typr_name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">หน่วยงาน/คณะ (โครงการวิจัย)</label>
+            <div class="col-md-6">
+                <label class="form-label"><i class="bi bi-building text-primary me-1"></i>หน่วยงาน/คณะ (โครงการวิจัย)</label>
                 <select class="form-select" name="department_id">
                     <option value="">-- ทั้งหมด --</option>
                     @foreach($departments as $dept)
@@ -77,7 +109,20 @@
                 </select>
             </div>
 
-            {{-- Row 2: Date Range --}}
+            {{-- Row 4: Utilize Type --}}
+            <div class="col-md-12">
+                <label class="form-label">ประเภทการนำไปใช้ประโยชน์</label>
+                <select class="form-select" name="utz_group">
+                    <option value="">-- ทั้งหมด --</option>
+                    @foreach($utilizeTypes as $uType)
+                        <option value="{{ $uType->utz_type_id }}" {{ request('utz_group') == $uType->utz_type_id ? 'selected' : '' }}>
+                            {{ $uType->utz_typr_name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Row 5: Date Range --}}
             <div class="col-md-6">
                 <label class="form-label">วันที่นำไปใช้ประโยชน์ (เริ่มต้น)</label>
                 <input type="date" class="form-control" id="date_start" name="date_start" value="{{ request('date_start') }}">
@@ -232,6 +277,99 @@ document.addEventListener('DOMContentLoaded', function() {
     tooltipTriggerList.forEach(function(tooltipTriggerEl) {
         new bootstrap.Tooltip(tooltipTriggerEl);
     });
+
+    // TomSelect: Utilize / Project Autocomplete
+    const utzSelect = document.getElementById('search_utz_id');
+    const utzNameHidden = document.getElementById('search_utz_name');
+
+    if (utzSelect && typeof TomSelect !== 'undefined') {
+        const tsUtz = new TomSelect(utzSelect, {
+            create: false,
+            openOnFocus: true,
+            persist: false,
+            maxOptions: 20,
+            valueField: 'value',
+            labelField: 'text',
+            searchField: 'text',
+            placeholder: '-- พิมพ์เพื่อค้นหาการใช้ประโยชน์/ชื่อโครงการ --',
+            loadThrottle: 300,
+            load: function(query, callback) {
+                if (!query.length || query.length < 2) return callback();
+                fetch('{{ route("frontend.rdbprojectutilize.search_utilizes") }}?q=' + encodeURIComponent(query))
+                    .then(response => response.json())
+                    .then(json => callback(json.results || json))
+                    .catch(() => callback());
+            },
+            onChange: function(value) {
+                const item = this.options[value];
+                if (item && utzNameHidden) {
+                    utzNameHidden.value = item.utz_name || item.text.split(' [')[0];
+                } else if (utzNameHidden) {
+                    utzNameHidden.value = '';
+                }
+            },
+            render: {
+                option: function(data, escape) { return '<div>' + (data._highlight || escape(data.text)) + '</div>'; },
+                item: function(data, escape) { return '<div>' + escape(data.text) + '</div>'; },
+                no_results: function() { return '<div class="no-results p-2 text-muted">ไม่พบข้อมูลการใช้ประโยชน์ (พิมพ์อย่างน้อย 2 ตัวอักษร)</div>'; }
+            }
+        });
+
+        const preUtzId = "{{ request('utz_id') }}";
+        const preUtzName = @json(request('utz_name') ?: '');
+        if (preUtzId || preUtzName) {
+            const val = preUtzId || 'pre';
+            const label = preUtzName || ('การใช้ประโยชน์ #' + preUtzId);
+            tsUtz.addOption({ value: val, text: label, utz_name: preUtzName });
+            tsUtz.setValue(val);
+        }
+    }
+
+    // TomSelect: Researcher Autocomplete
+    const researcherSelect = document.getElementById('search_researcher_id');
+    const researcherNameHidden = document.getElementById('search_researcher_name');
+
+    if (researcherSelect && typeof TomSelect !== 'undefined') {
+        const tsRes = new TomSelect(researcherSelect, {
+            create: false,
+            openOnFocus: true,
+            persist: false,
+            maxOptions: 15,
+            valueField: 'value',
+            labelField: 'text',
+            searchField: 'text',
+            placeholder: '-- พิมพ์เพื่อค้นหานักวิจัย/ผู้แทนลงนาม --',
+            loadThrottle: 300,
+            load: function(query, callback) {
+                if (!query.length || query.length < 2) return callback();
+                fetch('{{ route("frontend.rdbprojectutilize.search_researchers") }}?q=' + encodeURIComponent(query))
+                    .then(response => response.json())
+                    .then(json => callback(json.results || json))
+                    .catch(() => callback());
+            },
+            onChange: function(value) {
+                const item = this.options[value];
+                if (item && researcherNameHidden) {
+                    researcherNameHidden.value = item.text.split(' [')[0];
+                } else if (researcherNameHidden) {
+                    researcherNameHidden.value = '';
+                }
+            },
+            render: {
+                option: function(data, escape) { return '<div>' + (data._highlight || escape(data.text)) + '</div>'; },
+                item: function(data, escape) { return '<div>' + escape(data.text) + '</div>'; },
+                no_results: function() { return '<div class="no-results p-2 text-muted">ไม่พบข้อมูลนักวิจัย (พิมพ์อย่างน้อย 2 ตัวอักษร)</div>'; }
+            }
+        });
+
+        const preResearcherId = "{{ request('researcher_id') }}";
+        const preResearcherName = @json(request('researcher_name') ?: '');
+        if (preResearcherId || preResearcherName) {
+            const val = preResearcherId || 'pre';
+            tsRes.addOption({ value: val, text: preResearcherName || ('นักวิจัย #' + preResearcherId) });
+            tsRes.setValue(val);
+        }
+    }
 
     // Date range validation
     const dateStart = document.getElementById('date_start');

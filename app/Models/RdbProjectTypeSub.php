@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Traits\HasDualFilePath;
 
 class RdbProjectTypeSub extends Model
@@ -50,9 +51,31 @@ class RdbProjectTypeSub extends Model
         return $this->belongsTo(User::class, 'user_updated', 'id');
     }
 
-    // If this model stores docs, use helper; otherwise available for future use
-    public function getTypeSubFilePath(string $newField = 'pts_path', string $oldField = 'pts_file', string $oldDir = 'uploads/project_types'): ?string
+    /**
+     * Get path ที่ถูกต้องสำหรับไฟล์ประเภทย่อยโครงการ
+     */
+    public function getTypeSubFilePath(): ?string
     {
-        return $this->resolveDualFilePath($newField, $oldField, $oldDir);
+        if (!empty($this->pts_path)) {
+            return $this->pts_path;
+        }
+
+        if (!empty($this->pts_safe_name)) {
+            if (Storage::disk('public')->exists('project_types_sub/' . $this->pts_safe_name) || file_exists(public_path('storage/project_types_sub/' . $this->pts_safe_name))) {
+                return 'project_types_sub/' . $this->pts_safe_name;
+            }
+            if (Storage::disk('public')->exists('uploads/project_types_sub/' . $this->pts_safe_name) || file_exists(public_path('storage/uploads/project_types_sub/' . $this->pts_safe_name))) {
+                return 'uploads/project_types_sub/' . $this->pts_safe_name;
+            }
+        }
+
+        if (!empty($this->pts_file)) {
+            if (Storage::disk('public')->exists('uploads/project_types_sub/' . $this->pts_file) || file_exists(public_path('storage/uploads/project_types_sub/' . $this->pts_file)) || file_exists(public_path('uploads/project_types_sub/' . $this->pts_file))) {
+                return 'uploads/project_types_sub/' . $this->pts_file;
+            }
+            return 'uploads/project_types_sub/' . $this->pts_file;
+        }
+
+        return null;
     }
 }

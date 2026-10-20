@@ -237,16 +237,16 @@
             @php
                 $additionalFiles = [];
                 if($item->dip_data1_files) {
-                    $additionalFiles[] = ['name' => 'ไฟล์ข้อมูล 1 (Date Start)', 'sub' => 'Filing Document', 'path' => $item->dip_data1_files, 'icon' => 'bi-file-earmark-text'];
+                    $additionalFiles[] = ['field' => 'dip_data1_files', 'name' => 'ไฟล์ข้อมูล 1 (Date Start)', 'sub' => 'Filing Document', 'icon' => 'bi-file-earmark-text'];
                 }
                 if($item->dip_data2_files_con) {
-                    $additionalFiles[] = ['name' => 'ไฟล์ข้อมูล 2 (Conclusion)', 'sub' => 'Invention Summary', 'path' => $item->dip_data2_files_con, 'icon' => 'bi-file-earmark-text'];
+                    $additionalFiles[] = ['field' => 'dip_data2_files_con', 'name' => 'ไฟล์ข้อมูล 2 (Conclusion)', 'sub' => 'Invention Summary', 'icon' => 'bi-file-earmark-text'];
                 }
                 if($item->dip_data3_drawing_picture) {
-                    $additionalFiles[] = ['name' => 'ไฟล์แบบแสดง (Drawing)', 'sub' => 'Technical Drawing', 'path' => $item->dip_data3_drawing_picture, 'icon' => 'bi-file-earmark-image'];
+                    $additionalFiles[] = ['field' => 'dip_data3_drawing_picture', 'name' => 'ไฟล์แบบแสดง (Drawing)', 'sub' => 'Technical Drawing', 'icon' => 'bi-file-earmark-image'];
                 }
                 if($item->dip_data_forms_request) {
-                    $additionalFiles[] = ['name' => 'ไฟล์แบบฟอร์มคำขอ', 'sub' => 'Application Form', 'path' => $item->dip_data_forms_request, 'icon' => 'bi-file-earmark-text'];
+                    $additionalFiles[] = ['field' => 'dip_data_forms_request', 'name' => 'ไฟล์แบบฟอร์มคำขอ', 'sub' => 'Application Form', 'icon' => 'bi-file-earmark-text'];
                 }
             @endphp
             <div class="card shadow-sm border mb-4">
@@ -255,8 +255,8 @@
                     <h6 class="mb-0 fw-semibold text-body">ไฟล์เอกสาร (Files)</h6>
                 </div>
                 <div class="card-body p-3">
-                    @if($item->dip_files)
-                        <a href="{{ asset('storage/' . $item->dip_files) }}" 
+                    @if($item->dip_files || $item->dip_path)
+                        <a href="{{ route('frontend.rdbdip.view_file', $item->dip_id) }}" 
                            target="_blank" 
                            class="file-cta-card card border border-success-subtle text-decoration-none shadow-sm mb-3"
                            style="background: rgba(16, 185, 129, 0.04);">
@@ -296,13 +296,13 @@
                                             <div class="d-flex align-items-center min-w-0 me-2">
                                                 <i class="bi {{ $f['icon'] }} text-primary fs-5 me-2 flex-shrink-0"></i>
                                                 <div class="min-w-0">
-                                                    <a href="{{ asset('storage/' . $f['path']) }}" target="_blank" class="text-decoration-none fw-medium text-body hover-primary text-truncate d-block" style="font-size: 0.82rem;">
+                                                    <a href="{{ route('frontend.rdbdip.view_file', ['id' => $item->dip_id, 'field' => $f['field']]) }}" target="_blank" class="text-decoration-none fw-medium text-body hover-primary text-truncate d-block" style="font-size: 0.82rem;">
                                                         {{ $f['name'] }}
                                                     </a>
                                                     <small class="text-body-secondary d-block" style="font-size: 0.72rem;">{{ $f['sub'] }}</small>
                                                 </div>
                                             </div>
-                                            <a href="{{ asset('storage/' . $f['path']) }}" target="_blank" class="btn btn-sm btn-outline-primary py-1 px-2 rounded-2 flex-shrink-0" style="font-size: 0.74rem;">
+                                            <a href="{{ route('frontend.rdbdip.view_file', ['id' => $item->dip_id, 'field' => $f['field']]) }}" target="_blank" class="btn btn-sm btn-outline-primary py-1 px-2 rounded-2 flex-shrink-0" style="font-size: 0.74rem;">
                                                 <i class="bi bi-box-arrow-up-right me-1"></i> เปิดดู
                                             </a>
                                         </div>
@@ -312,7 +312,7 @@
                         </div>
                     @endif
 
-                    @if(!$item->dip_files && count($additionalFiles) === 0)
+                    @if(!$item->dip_files && !$item->dip_path && count($additionalFiles) === 0)
                         <div class="p-2.5 border border-dashed rounded bg-body-tertiary mb-0 text-body-secondary small d-flex align-items-center justify-content-center">
                             <i class="bi bi-file-earmark text-muted fs-5 me-2"></i>
                             <span>ไม่มีไฟล์เอกสารแนบ</span>

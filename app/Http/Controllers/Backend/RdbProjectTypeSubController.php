@@ -132,6 +132,10 @@ class RdbProjectTypeSubController extends Controller
             return Storage::disk('public')->response($filePath);
         }
 
+        if ($filePath && file_exists(public_path('storage/' . $filePath))) {
+            return response()->file(public_path('storage/' . $filePath));
+        }
+
         if ($filePath && file_exists(public_path($filePath))) {
             return response()->file(public_path($filePath));
         }

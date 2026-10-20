@@ -38,8 +38,8 @@
                     <tr>
                         <th>ไฟล์แนบ:</th>
                         <td>
-                            @if($item->pts_file)
-                                <a href="{{ asset('storage/uploads/project_types_sub/' . $item->pts_file) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            @if($item->pts_file || $item->pts_path)
+                                <a href="{{ route('backend.rdbprojecttypesub.view_file', $item->pts_id) }}" target="_blank" class="btn btn-sm btn-outline-primary">
                                     <i class="bi bi-file-earmark-text me-1"></i> ดาวน์โหลดไฟล์
                                 </a>
                             @else

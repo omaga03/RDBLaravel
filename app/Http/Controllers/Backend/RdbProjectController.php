@@ -138,17 +138,43 @@ class RdbProjectController extends Controller
             });
         }
 
-        if ($request->filled('pro_nameTH')) {
-            $words = preg_split('/[\s\/,]+/', trim($request->pro_nameTH));
-            $query->where(function($q) use ($words) {
-                foreach ($words as $word) {
-                    if (empty($word)) continue;
-                    $q->orWhere(function($wq) use ($word) {
-                        $wq->where('pro_nameTH', 'like', '%' . $word . '%')
-                           ->orWhere('pro_nameEN', 'like', '%' . $word . '%');
+        // Project ID / Title Autocomplete Search
+        if ($request->filled('pro_id') && $request->pro_id !== 'pre') {
+            $query->where('pro_id', $request->pro_id);
+        } elseif ($request->filled('pro_nameTH')) {
+            $proName = trim($request->pro_nameTH);
+            $query->where(function($q) use ($proName) {
+                $q->where('pro_nameTH', 'like', "%{$proName}%")
+                  ->orWhere('pro_nameEN', 'like', "%{$proName}%");
+            });
+        }
+
+        // Title Multi-Keyword Search (กลุ่มคำคั่นด้วยช่องว่าง + ตัวเลือก เจอทั้งหมด/เจอบางคำ)
+        if ($request->filled('title_keywords')) {
+            $keywords = array_values(array_filter(preg_split('/\s+/', trim($request->title_keywords))));
+            $mode = $request->input('title_keywords_mode', 'all');
+
+            if (!empty($keywords)) {
+                if ($mode === 'all') {
+                    $query->where(function($q) use ($keywords) {
+                        foreach ($keywords as $kw) {
+                            $q->where(function($sub) use ($kw) {
+                                $sub->where('pro_nameTH', 'like', "%{$kw}%")
+                                    ->orWhere('pro_nameEN', 'like', "%{$kw}%");
+                            });
+                        }
+                    });
+                } else {
+                    $query->where(function($q) use ($keywords) {
+                        foreach ($keywords as $kw) {
+                            $q->orWhere(function($sub) use ($kw) {
+                                $sub->where('pro_nameTH', 'like', "%{$kw}%")
+                                    ->orWhere('pro_nameEN', 'like', "%{$kw}%");
+                            });
+                        }
                     });
                 }
-            });
+            }
         }
         if ($request->filled('year_id')) {
             $query->where('year_id', $request->year_id);
@@ -825,11 +851,19 @@ class RdbProjectController extends Controller
             $project->pro_file_mime = $fileInfo['mime_type'];
             $project->pro_file = $fileInfo['safe_name'];
 
-            // Public visibility
-            if ($request->has('pro_file_show')) {
-                $project->pro_file_show = $request->boolean('pro_file_show') ? 1 : 0;
+            // Public visibility: 0 = เปิด, 1 = ปิด, 2 = ร่าง (Default: 0 = เปิด)
+            if ($request->filled('pro_file_show') || $request->has('pro_file_show')) {
+                $rawShow = $request->input('pro_file_show');
+                if ($rawShow === 'true' || $rawShow === true) {
+                    $project->pro_file_show = 0; // เปิด
+                } elseif ($rawShow === 'false' || $rawShow === false) {
+                    $project->pro_file_show = 1; // ปิด
+                } else {
+                    $val = (int) $rawShow;
+                    $project->pro_file_show = in_array($val, [0, 1, 2], true) ? $val : 0;
+                }
             } else {
-                $project->pro_file_show = 1;
+                $project->pro_file_show = 0; // Default: เปิด
             }
 
             // หากมีการแนบไฟล์เล่มรายงานฉบับสมบูรณ์ ให้ปรับสถานะเป็น "ดำเนินการเสร็จสิ้น" ทันที
@@ -852,28 +886,40 @@ class RdbProjectController extends Controller
     public function viewAbstract($id)
     {
         $project = RdbProject::findOrFail($id);
-        $this->authorize('view', $project); // Authorize viewing project to view its abstract
+        $this->authorize('view', $project);
         $filePath = $project->getAbstractFilePath();
         
-        $fileContents = null;
         if ($filePath && Storage::disk('public')->exists($filePath)) {
-            $fileContents = Storage::disk('public')->get($filePath);
-        } elseif ($filePath && file_exists(public_path($filePath))) {
-            $fileContents = file_get_contents(public_path($filePath));
+            $project->increment('pro_count_abs');
+            return Storage::disk('public')->response($filePath);
+        }
+        if ($filePath && file_exists(public_path('storage/' . $filePath))) {
+            $project->increment('pro_count_abs');
+            return response()->file(public_path('storage/' . $filePath));
+        }
+        if ($filePath && file_exists(public_path($filePath))) {
+            $project->increment('pro_count_abs');
+            return response()->file(public_path($filePath));
         }
 
-        if ($fileContents === null) {
-            abort(404, 'ไม่พบไฟล์บทคัดย่อ');
+        // Support legacy folder: datafiles/{pro_id}/{pro_abstract_file}
+        if (!empty($project->pro_abstract_file)) {
+            $legacyRelative = 'datafiles/' . $project->pro_id . '/' . $project->pro_abstract_file;
+            if (Storage::disk('public')->exists($legacyRelative)) {
+                $project->increment('pro_count_abs');
+                return Storage::disk('public')->response($legacyRelative);
+            }
+            if (file_exists(public_path($legacyRelative))) {
+                $project->increment('pro_count_abs');
+                return response()->file(public_path($legacyRelative));
+            }
+            if (file_exists(base_path('yii2_rdb-main/frontend/web/' . $legacyRelative))) {
+                $project->increment('pro_count_abs');
+                return response()->file(base_path('yii2_rdb-main/frontend/web/' . $legacyRelative));
+            }
         }
 
-        $project->increment('pro_count_abs');
-
-        $mimeType = $project->pro_abstract_mime ?? 'application/pdf'; // Fallback to PDF
-        
-        return response($fileContents, 200, [
-            'Content-Type' => $mimeType,
-            'Content-Disposition' => 'inline; filename="' . ($project->pro_abstract_file ?? 'abstract') . '.' . pathinfo($filePath, PATHINFO_EXTENSION) . '";',
-        ]);
+        abort(404, 'ไม่พบไฟล์บทคัดย่อบนเซิร์ฟเวอร์');
     }
 
     /**
@@ -882,28 +928,40 @@ class RdbProjectController extends Controller
     public function viewReport($id)
     {
         $project = RdbProject::findOrFail($id);
-        $this->authorize('view', $project); // Authorize viewing project to view its report
+        $this->authorize('view', $project);
         $filePath = $project->getReportFilePath();
         
-        $fileContents = null;
         if ($filePath && Storage::disk('public')->exists($filePath)) {
-            $fileContents = Storage::disk('public')->get($filePath);
-        } elseif ($filePath && file_exists(public_path($filePath))) {
-            $fileContents = file_get_contents(public_path($filePath));
+            $project->increment('pro_count_full');
+            return Storage::disk('public')->response($filePath);
+        }
+        if ($filePath && file_exists(public_path('storage/' . $filePath))) {
+            $project->increment('pro_count_full');
+            return response()->file(public_path('storage/' . $filePath));
+        }
+        if ($filePath && file_exists(public_path($filePath))) {
+            $project->increment('pro_count_full');
+            return response()->file(public_path($filePath));
         }
 
-        if ($fileContents === null) {
-            abort(404, 'ไม่พบไฟล์รายงาน');
+        // Support legacy folder: datafiles/{pro_id}/{pro_file}
+        if (!empty($project->pro_file)) {
+            $legacyRelative = 'datafiles/' . $project->pro_id . '/' . $project->pro_file;
+            if (Storage::disk('public')->exists($legacyRelative)) {
+                $project->increment('pro_count_full');
+                return Storage::disk('public')->response($legacyRelative);
+            }
+            if (file_exists(public_path($legacyRelative))) {
+                $project->increment('pro_count_full');
+                return response()->file(public_path($legacyRelative));
+            }
+            if (file_exists(base_path('yii2_rdb-main/frontend/web/' . $legacyRelative))) {
+                $project->increment('pro_count_full');
+                return response()->file(base_path('yii2_rdb-main/frontend/web/' . $legacyRelative));
+            }
         }
 
-        $project->increment('pro_count_full');
-
-        $mimeType = $project->pro_file_mime ?? 'application/pdf'; // Fallback to PDF
-        
-        return response($fileContents, 200, [
-            'Content-Type' => $mimeType,
-            'Content-Disposition' => 'inline; filename="' . ($project->pro_file ?? 'report') . '.' . pathinfo($filePath, PATHINFO_EXTENSION) . '";',
-        ]);
+        abort(404, 'ไม่พบไฟล์รายงานบนเซิร์ฟเวอร์');
     }
 
     /**
@@ -918,14 +976,23 @@ class RdbProjectController extends Controller
             return response()->json([]);
         }
 
-        $projects = RdbProject::with(['year', 'department', 'rdbProjectWorks' => function($q) {
+        $projects = RdbProject::with(['year', 'department', 'type', 'typeSub', 'rdbProjectWorks' => function($q) {
                 $q->orderBy('position_id', 'asc');
             }, 'rdbProjectWorks.researcher', 'utilizations'])
             ->withCount('utilizations')
-            ->where('pro_nameTH', 'like', "%{$q}%")
-            ->orWhere('pro_nameEN', 'like', "%{$q}%")
-            ->orWhere('pro_code', 'like', "%{$q}%")
-            ->orderBy('created_at', 'desc')
+            ->where(function($sub) use ($q) {
+                $sub->where('pro_nameTH', 'like', "%{$q}%")
+                    ->orWhere('pro_nameEN', 'like', "%{$q}%")
+                    ->orWhere('pro_code', 'like', "%{$q}%")
+                    ->orWhereHas('type', fn($t) => $t->where('pt_name', 'like', "%{$q}%"))
+                    ->orWhereHas('typeSub', fn($ts) => $ts->where('pts_name', 'like', "%{$q}%"))
+                    ->orWhereHas('researchers', function($rq) use ($q) {
+                        $rq->where('researcher_fname', 'like', "%{$q}%")
+                           ->orWhere('researcher_lname', 'like', "%{$q}%")
+                           ->orWhereRaw("CONCAT(researcher_fname, ' ', researcher_lname) LIKE ?", ["%{$q}%"]);
+                    });
+            })
+            ->orderBy('pro_id', 'desc')
             ->limit(20)
             ->get()
             ->map(fn($p) => [
@@ -947,6 +1014,10 @@ class RdbProjectController extends Controller
     {
         $year = $project->year->year_name ?? '-';
         $name = strip_tags($project->pro_nameTH);
+        $typeName = $project->type ? $project->type->pt_name : '';
+        if ($project->typeSub && $project->typeSub->pts_name) {
+            $typeName .= ($typeName ? ' (' . $project->typeSub->pts_name . ')' : $project->typeSub->pts_name);
+        }
         
         $researcherName = '-';
         $departmentName = '';
@@ -958,7 +1029,8 @@ class RdbProjectController extends Controller
             }
         }
         
-        return "[{$year}] {$name} โดย : {$researcherName} " . ($departmentName ? "({$departmentName})" : "");
+        $typeMeta = $typeName ? " [ทุน: {$typeName}]" : '';
+        return "[{$year}]{$typeMeta} {$name} โดย : {$researcherName} " . ($departmentName ? "({$departmentName})" : "");
     }
 
     /**
@@ -1232,20 +1304,40 @@ class RdbProjectController extends Controller
     }
 
     /**
-     * Toggle full report visibility (pro_file_show)
+     * Toggle or set full report visibility (pro_file_show: 0 = เปิด, 1 = ปิด, 2 = ร่าง)
      */
-    public function toggleReportStatus($id)
+    public function toggleReportStatus(Request $request, $id)
     {
         $project = RdbProject::findOrFail($id);
         $this->authorize('update', $project);
 
-        $project->pro_file_show = $project->pro_file_show ? 0 : 1;
+        if ($request->has('status')) {
+            $newStatus = (int) $request->input('status');
+            if (in_array($newStatus, [0, 1, 2], true)) {
+                $project->pro_file_show = $newStatus;
+            }
+        } else {
+            // Cycle: 0 (เปิด) -> 1 (ปิด) -> 2 (ร่าง) -> 0 (เปิด)
+            $project->pro_file_show = match ((int) $project->pro_file_show) {
+                0 => 1,
+                1 => 2,
+                2 => 0,
+                default => 0,
+            };
+        }
+
         $project->user_updated = auth()->id();
         $project->save();
 
         return response()->json([
             'success' => true,
             'status' => (int) $project->pro_file_show,
+            'status_label' => match ((int) $project->pro_file_show) {
+                0 => 'เปิด (Public)',
+                1 => 'ปิด (Concealed)',
+                2 => 'ร่าง (Draft)',
+                default => 'เปิด (Public)',
+            },
             'message' => 'ปรับปรุงสถานะการแสดงผลรายงานฉบับสมบูรณ์เรียบร้อยแล้ว'
         ]);
     }

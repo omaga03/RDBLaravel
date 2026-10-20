@@ -55,13 +55,70 @@
         @endif
 
         <div class="row g-3">
-            {{-- Row 1: Search, Type, Year --}}
-            <div class="col-md-6">
-                <label class="form-label">คำค้นหา</label>
-                <input type="text" class="form-control" name="search" value="{{ request('search') }}" 
-                    placeholder="ระบุชื่อผลงาน, วารสาร, นักวิจัย, หรือชื่อโครงการ...">
+            {{-- Row 1: Publication Title Autocomplete Search --}}
+            <div class="col-md-12">
+                <label class="form-label d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-journal-text text-info me-1"></i> ชื่อผลงานตีพิมพ์ / วารสาร</span>
+                    <span class="badge bg-secondary-subtle text-body-secondary" style="font-size: 0.7rem;">พิมพ์เพื่อค้นหาชื่อผลงาน</span>
+                </label>
+                <select class="form-select" id="search_pub_id" name="pub_id"></select>
+                <input type="hidden" name="pub_name" id="search_pub_name" value="{{ request('pub_name') }}">
             </div>
-            <div class="col-md-3">
+
+            {{-- Row 2: Multi-Keyword Title Search (กลุ่มคำคั่นด้วยช่องว่าง + เจอทั้งหมด / เจอบางคำ) --}}
+            <div class="col-md-12">
+                <div class="p-3 rounded-3 border bg-body-tertiary">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-1.5 gap-2">
+                        <label class="form-label mb-0 fw-semibold text-body" style="font-size: 0.88rem;">
+                            <i class="bi bi-fonts text-info me-1"></i> ค้นหาชื่อเรื่องแบบกลุ่มคำ (คั่นด้วยช่องว่าง)
+                        </label>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="form-check form-check-inline mb-0">
+                                <input class="form-check-input" type="radio" name="title_keywords_mode" id="pub_mode_all" value="all" 
+                                    {{ request('title_keywords_mode', 'all') === 'all' ? 'checked' : '' }}>
+                                <label class="form-check-label small fw-medium" for="pub_mode_all">
+                                    <i class="bi bi-check-all text-success me-1"></i>เจอทั้งหมด (ตรงทุกคำ - AND)
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline mb-0">
+                                <input class="form-check-input" type="radio" name="title_keywords_mode" id="pub_mode_any" value="any" 
+                                    {{ request('title_keywords_mode') === 'any' ? 'checked' : '' }}>
+                                <label class="form-check-label small fw-medium" for="pub_mode_any">
+                                    <i class="bi bi-intersect text-primary me-1"></i>เจอบางคำ (ตรงคำใดคำหนึ่ง - OR)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="text" class="form-control" name="title_keywords" value="{{ request('title_keywords') }}" 
+                        placeholder="เช่น เทคโนโลยี การศึกษา ชุมชน (พิมพ์หลายคำคั่นด้วยช่องว่าง)...">
+                    <div class="form-text small text-body-secondary mt-1">
+                        <i class="bi bi-info-circle me-1"></i>ระบบจะค้นหาชื่อผลงานหรือวารสารที่มีกลุ่มคำดังกล่าวตามเงื่อนไขที่เลือก (เจอทั้งหมด หรือ เจอบางคำ)
+                    </div>
+                </div>
+            </div>
+
+            {{-- Row 3: Researcher & Department --}}
+            <div class="col-md-6">
+                <label class="form-label"><i class="bi bi-person text-primary me-1"></i>นักวิจัย / ผู้ประพันธ์</label>
+                <select class="form-select" id="search_researcher_id" name="researcher_id"></select>
+                <input type="hidden" name="researcher_name" id="search_researcher_name" value="{{ request('researcher_name') }}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label"><i class="bi bi-building text-primary me-1"></i>หน่วยงาน/คณะ</label>
+                <select class="form-select" name="department_id">
+                    <option value="">-- ทั้งหมด --</option>
+                    @if(isset($departments))
+                        @foreach($departments as $dept)
+                            <option value="{{ $dept->department_id }}" {{ request('department_id') == $dept->department_id ? 'selected' : '' }}>
+                                {{ $dept->department_nameTH ?? $dept->department_name }}
+                            </option>
+                        @endforeach
+                    @endif
+                </select>
+            </div>
+
+            {{-- Row 4: Type & Year --}}
+            <div class="col-md-6">
                 <label class="form-label">ประเภทผลงาน</label>
                 <select class="form-select" name="pubtype_id">
                     <option value="">-- ทั้งหมด --</option>
@@ -74,7 +131,7 @@
                     @endif
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-6">
                 <label class="form-label">ปีงบประมาณ</label>
                 <select class="form-select" name="year_id">
                     <option value="">-- ทั้งหมด --</option>
@@ -86,7 +143,7 @@
                 </select>
             </div>
 
-            {{-- Row 2: Date Range --}}
+            {{-- Row 5: Date Range --}}
             <div class="col-md-6">
                 <label class="form-label">วันที่ตีพิมพ์ (เริ่มต้น)</label>
                 <input type="date" class="form-control" name="date_start" value="{{ request('date_start') }}">
@@ -125,11 +182,6 @@
                                         {!! $item->pub_name !!}
                                     </a>
                                 </div>
-                                @if($item->pub_name_journal)
-                                    <small class="text-body-secondary d-block mb-1 text-break">
-                                        <i class="bi bi-book me-1"></i>{!! $item->pub_name_journal !!}
-                                    </small>
-                                @endif
                                 <div class="small d-flex flex-wrap gap-2 align-items-center mt-1">
                                     @if($item->pubtype)
                                         <span class="badge bg-body-secondary text-body border">
@@ -139,14 +191,6 @@
                                     @if($item->year)
                                         <span class="badge bg-primary bg-opacity-10 text-primary border border-primary">
                                             ปี {{ $item->year->year_name }}
-                                        </span>
-                                    @endif
-                                    @if($item->project)
-                                        <span class="text-body-secondary text-break">
-                                            <i class="bi bi-link-45deg"></i>โครงการ:
-                                            <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" target="_blank" class="text-primary text-decoration-none hover-underline">
-                                                {!! $item->project->pro_nameTH !!}
-                                            </a>
                                         </span>
                                     @endif
                                 </div>
@@ -229,3 +273,102 @@
 }
 </style>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // TomSelect: Publication Title Autocomplete
+    const pubSelect = document.getElementById('search_pub_id');
+    const pubNameHidden = document.getElementById('search_pub_name');
+
+    if (pubSelect && typeof TomSelect !== 'undefined') {
+        const tsPub = new TomSelect(pubSelect, {
+            create: false,
+            openOnFocus: true,
+            persist: false,
+            maxOptions: 20,
+            valueField: 'value',
+            labelField: 'text',
+            searchField: 'text',
+            placeholder: '-- พิมพ์เพื่อค้นหาชื่อผลงานตีพิมพ์ --',
+            loadThrottle: 300,
+            load: function(query, callback) {
+                if (!query.length || query.length < 2) return callback();
+                fetch('{{ route("frontend.rdbpublished.search_publications") }}?q=' + encodeURIComponent(query))
+                    .then(response => response.json())
+                    .then(json => callback(json.results || json))
+                    .catch(() => callback());
+            },
+            onChange: function(value) {
+                const item = this.options[value];
+                if (item && pubNameHidden) {
+                    pubNameHidden.value = item.pub_name || item.text.split(' [')[0];
+                } else if (pubNameHidden) {
+                    pubNameHidden.value = '';
+                }
+            },
+            render: {
+                option: function(data, escape) { return '<div>' + (data._highlight || escape(data.text)) + '</div>'; },
+                item: function(data, escape) { return '<div>' + escape(data.text) + '</div>'; },
+                no_results: function() { return '<div class="no-results p-2 text-muted">ไม่พบข้อมูลผลงาน (พิมพ์อย่างน้อย 2 ตัวอักษร)</div>'; }
+            }
+        });
+
+        const prePubId = "{{ request('pub_id') }}";
+        const prePubName = @json(request('pub_name') ?: '');
+        if (prePubId || prePubName) {
+            const val = prePubId || 'pre';
+            const label = prePubName || ('ผลงาน #' + prePubId);
+            tsPub.addOption({ value: val, text: label, pub_name: prePubName });
+            tsPub.setValue(val);
+        }
+    }
+
+    // TomSelect: Researcher Autocomplete
+    const researcherSelect = document.getElementById('search_researcher_id');
+    const researcherNameHidden = document.getElementById('search_researcher_name');
+
+    if (researcherSelect && typeof TomSelect !== 'undefined') {
+        const tsRes = new TomSelect(researcherSelect, {
+            create: false,
+            openOnFocus: true,
+            persist: false,
+            maxOptions: 15,
+            valueField: 'value',
+            labelField: 'text',
+            searchField: 'text',
+            placeholder: '-- พิมพ์เพื่อค้นหานักวิจัย/ผู้ประพันธ์ --',
+            loadThrottle: 300,
+            load: function(query, callback) {
+                if (!query.length || query.length < 2) return callback();
+                fetch('{{ route("frontend.rdbpublished.search_researchers") }}?q=' + encodeURIComponent(query))
+                    .then(response => response.json())
+                    .then(json => callback(json.results || json))
+                    .catch(() => callback());
+            },
+            onChange: function(value) {
+                const item = this.options[value];
+                if (item && researcherNameHidden) {
+                    researcherNameHidden.value = item.text.split(' [')[0];
+                } else if (researcherNameHidden) {
+                    researcherNameHidden.value = '';
+                }
+            },
+            render: {
+                option: function(data, escape) { return '<div>' + (data._highlight || escape(data.text)) + '</div>'; },
+                item: function(data, escape) { return '<div>' + escape(data.text) + '</div>'; },
+                no_results: function() { return '<div class="no-results p-2 text-muted">ไม่พบข้อมูลนักวิจัย (พิมพ์อย่างน้อย 2 ตัวอักษร)</div>'; }
+            }
+        });
+
+        const preResearcherId = "{{ request('researcher_id') }}";
+        const preResearcherName = @json(request('researcher_name') ?: '');
+        if (preResearcherId || preResearcherName) {
+            const val = preResearcherId || 'pre';
+            tsRes.addOption({ value: val, text: preResearcherName || ('นักวิจัย #' + preResearcherId) });
+            tsRes.setValue(val);
+        }
+    }
+});
+</script>
+@endpush

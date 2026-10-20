@@ -31,8 +31,99 @@ class RdbpublishedController extends Controller
                             ->orWhere('researcher_lname', 'like', "%{$search}%")
                             ->orWhereRaw("CONCAT(researcher_fname, ' ', researcher_lname) LIKE ?", ["%{$search}%"]);
                   })
+                  ->orWhereHas('authors', function($query) use ($search) {
+                      $query->where('researcher_fname', 'like', "%{$search}%")
+                            ->orWhere('researcher_lname', 'like', "%{$search}%")
+                            ->orWhereRaw("CONCAT(researcher_fname, ' ', researcher_lname) LIKE ?", ["%{$search}%"]);
+                  })
                   ->orWhereHas('project', function($query) use ($search) {
                       $query->where('pro_nameTH', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Publication ID / Title Autocomplete Search
+        if ($request->filled('pub_id') && $request->pub_id !== 'pre') {
+            $query->where('id', $request->pub_id);
+        } elseif ($request->filled('pub_name')) {
+            $pubName = trim($request->pub_name);
+            $query->where(function($q) use ($pubName) {
+                $q->where('pub_name', 'like', "%{$pubName}%")
+                  ->orWhere('pub_name_journal', 'like', "%{$pubName}%");
+            });
+        }
+
+        // Title Multi-Keyword Search (กลุ่มคำคั่นด้วยช่องว่าง + เจอทั้งหมด / เจอบางคำ)
+        if ($request->filled('title_keywords')) {
+            $keywords = array_values(array_filter(preg_split('/\s+/', trim($request->title_keywords))));
+            $mode = $request->input('title_keywords_mode', 'all');
+
+            if (!empty($keywords)) {
+                if ($mode === 'all') {
+                    $query->where(function($q) use ($keywords) {
+                        foreach ($keywords as $kw) {
+                            $q->where(function($sub) use ($kw) {
+                                $sub->where('pub_name', 'like', "%{$kw}%")
+                                    ->orWhere('pub_name_journal', 'like', "%{$kw}%");
+                            });
+                        }
+                    });
+                } else {
+                    $query->where(function($q) use ($keywords) {
+                        foreach ($keywords as $kw) {
+                            $q->orWhere(function($sub) use ($kw) {
+                                $sub->where('pub_name', 'like', "%{$kw}%")
+                                    ->orWhere('pub_name_journal', 'like', "%{$kw}%");
+                            });
+                        }
+                    });
+                }
+            }
+        }
+
+        // Researcher / Author Search
+        if ($request->filled('researcher_id') && $request->researcher_id !== 'pre') {
+            $resId = $request->researcher_id;
+            $query->where(function($q) use ($resId) {
+                $q->where('researcher_id', $resId)
+                  ->orWhereHas('authors', function($aq) use ($resId) {
+                      $aq->where('rdb_researcher.researcher_id', $resId);
+                  });
+            });
+        } elseif ($request->filled('researcher_name')) {
+            $cleanName = preg_replace('/^(นาย|นาง|นางสาว|ดร\.|ผศ\.|รศ\.|ศ\.)\s*/u', '', trim($request->researcher_name));
+            $searchWords = array_values(array_filter(preg_split('/\s+/', $cleanName)));
+            if (!empty($searchWords)) {
+                $query->where(function($q) use ($searchWords) {
+                    $q->whereHas('researcher', function($rq) use ($searchWords) {
+                        foreach ($searchWords as $word) {
+                            $rq->where(function($wq) use ($word) {
+                                $wq->where('researcher_fname', 'like', "%{$word}%")
+                                   ->orWhere('researcher_lname', 'like', "%{$word}%");
+                            });
+                        }
+                    })->orWhereHas('authors', function($aq) use ($searchWords) {
+                        foreach ($searchWords as $word) {
+                            $aq->where(function($wq) use ($word) {
+                                $wq->where('researcher_fname', 'like', "%{$word}%")
+                                   ->orWhere('researcher_lname', 'like', "%{$word}%");
+                            });
+                        }
+                    });
+                });
+            }
+        }
+
+        // Department filter
+        if ($request->filled('department_id')) {
+            $deptId = $request->department_id;
+            $query->where(function($q) use ($deptId) {
+                $q->where('department_id', $deptId)
+                  ->orWhereHas('researcher', function($rq) use ($deptId) {
+                      $rq->where('department_id', $deptId);
+                  })
+                  ->orWhereHas('authors', function($aq) use ($deptId) {
+                      $aq->where('department_id', $deptId);
                   });
             });
         }
@@ -82,8 +173,79 @@ class RdbpublishedController extends Controller
         
         $years = RdbYear::orderBy('year_name', 'desc')->get();
         $pubTypes = RdbPublishedType::orderBy('pubtype_group')->orderBy('pubtype_subgroup')->get();
+        $departments = RdbDepartment::orderBy('department_nameTH')->get();
 
-        return view('frontend.rdbpublished.index', compact('items', 'years', 'project', 'pubTypes'));
+        return view('frontend.rdbpublished.index', compact('items', 'years', 'project', 'pubTypes', 'departments'));
+    }
+
+    /**
+     * Search publications for Frontend TomSelect Autocomplete
+     */
+    public function searchPublications(Request $request)
+    {
+        $term = trim($request->q);
+        if (empty($term) || mb_strlen($term) < 2) {
+            return response()->json([]);
+        }
+
+        $pubs = RdbPublished::with(['year', 'pubtype', 'department', 'researcher.prefix', 'authors.prefix'])
+            ->where(function($q) use ($term) {
+                $q->where('pub_name', 'LIKE', "%{$term}%")
+                  ->orWhere('pub_name_journal', 'LIKE', "%{$term}%")
+                  ->orWhereHas('pubtype', function($tq) use ($term) {
+                      $tq->where('pubtype_group', 'LIKE', "%{$term}%")
+                         ->orWhere('pubtype_grouptype', 'LIKE', "%{$term}%")
+                         ->orWhere('pubtype_subgroup', 'LIKE', "%{$term}%");
+                  })
+                  ->orWhereHas('researcher', function($rq) use ($term) {
+                      $rq->where('researcher_fname', 'LIKE', "%{$term}%")
+                         ->orWhere('researcher_lname', 'LIKE', "%{$term}%")
+                         ->orWhereRaw("CONCAT(researcher_fname, ' ', researcher_lname) LIKE ?", ["%{$term}%"]);
+                  })
+                  ->orWhereHas('authors', function($aq) use ($term) {
+                      $aq->where('researcher_fname', 'LIKE', "%{$term}%")
+                         ->orWhere('researcher_lname', 'LIKE', "%{$term}%")
+                         ->orWhereRaw("CONCAT(researcher_fname, ' ', researcher_lname) LIKE ?", ["%{$term}%"]);
+                  });
+            })
+            ->orderBy('id', 'desc')
+            ->limit(20)
+            ->get();
+
+        $results = [];
+        foreach ($pubs as $p) {
+            $yearPrefix = ($p->year && $p->year->year_name) ? "[{$p->year->year_name}] " : '';
+            $type = $p->pubtype ? ($p->pubtype->pubtype_subgroup ?? $p->pubtype->pubtype_group) : '';
+            $dept = $p->department ? ($p->department->department_nameTH ?? $p->department->department_name) : '';
+
+            $authorNames = [];
+            if ($p->authors && $p->authors->isNotEmpty()) {
+                foreach ($p->authors as $a) {
+                    $authorNames[] = trim($a->researcher_fname . ' ' . $a->researcher_lname);
+                }
+            } elseif ($p->researcher) {
+                $authorNames[] = trim($p->researcher->researcher_fname . ' ' . $p->researcher->researcher_lname);
+            }
+            $authText = !empty($authorNames) ? implode(', ', array_slice($authorNames, 0, 2)) . (count($authorNames) > 2 ? '...' : '') : '';
+
+            $meta = array_filter([
+                $type ? "ประเภท: {$type}" : '', 
+                $dept, 
+                $authText ? "ผู้ประพันธ์: {$authText}" : ''
+            ]);
+            $sub = !empty($meta) ? ' [' . implode(', ', $meta) . ']' : '';
+
+            $cleanName = strip_tags($p->pub_name);
+            $results[] = [
+                'value' => $p->id,
+                'text' => $yearPrefix . $cleanName . $sub,
+                'pub_name' => $cleanName,
+                'pubtype' => $type,
+                'author' => $authText,
+            ];
+        }
+
+        return response()->json($results);
     }
 
     public function show($id)
@@ -117,6 +279,46 @@ class RdbpublishedController extends Controller
         }
         
         return view('frontend.rdbpublished.show', compact('item'));
+    }
+
+    public function viewFile($id)
+    {
+        $item = RdbPublished::findOrFail($id);
+
+        if ($item->data_show != 1) {
+            abort(404);
+        }
+
+        $filePath = $item->getPublishedFilePath();
+
+        if ($filePath && Storage::disk('public')->exists($filePath)) {
+            $item->increment('pub_download');
+            return Storage::disk('public')->response($filePath);
+        }
+
+        if ($filePath && file_exists(public_path($filePath))) {
+            $item->increment('pub_download');
+            return response()->file(public_path($filePath));
+        }
+
+        if ($filePath && file_exists(public_path('storage/' . $filePath))) {
+            $item->increment('pub_download');
+            return response()->file(public_path('storage/' . $filePath));
+        }
+
+        // Support legacy folder: datapublished/{id}/{pub_file}
+        if (!empty($item->pub_file)) {
+            $legacyRelative = 'datapublished/' . $item->id . '/' . $item->pub_file;
+            if (Storage::disk('public')->exists($legacyRelative)) {
+                $item->increment('pub_download');
+                return Storage::disk('public')->response($legacyRelative);
+            } elseif (file_exists(public_path($legacyRelative))) {
+                $item->increment('pub_download');
+                return response()->file(public_path($legacyRelative));
+            }
+        }
+
+        abort(404, 'ไม่พบไฟล์เอกสารบนเซิร์ฟเวอร์ (ยังไม่ได้นำไฟล์จริงมาติดตั้งในเครื่องนี้)');
     }
 
     public function export(Request $request)

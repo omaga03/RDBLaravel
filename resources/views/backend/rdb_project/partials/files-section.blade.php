@@ -75,11 +75,13 @@
                         <small class="text-danger">{{ $message }}</small>
                     @enderror
                 </div>
-                <div class="form-check mb-2">
-                    <input type="checkbox" name="pro_file_show" class="form-check-input" id="proFileShow" value="1">
-                    <label class="form-check-label" for="proFileShow">
-                        แสดงในหน้าสาธารณะ
-                    </label>
+                <div class="form-group mb-2">
+                    <label class="small fw-bold">สถานะการแสดงผล:</label>
+                    <select name="pro_file_show" class="form-select form-select-sm">
+                        <option value="0" selected>🟢 เปิด (เผยแพร่สาธารณะ)</option>
+                        <option value="1">🔴 ปิด (ปกปิดเล่มรายงาน)</option>
+                        <option value="2">🟡 ร่าง (ฉบับร่าง)</option>
+                    </select>
                 </div>
                 <button type="submit" class="btn btn-primary btn-sm">
                     <i class="fa fa-upload"></i> อัปโหลดรายงาน

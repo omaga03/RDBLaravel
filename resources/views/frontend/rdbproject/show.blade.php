@@ -365,64 +365,81 @@
                         </div>
                     @endif
 
-                    {{-- Full Report File --}}
-                    @if(($item->pro_file || $item->pro_file_path) && $item->pro_file_show)
-                        @php
-                            $reportPolicy = \App\Models\SystemSetting::get('download_policy_full_report', 'members_only');
-                            $needsLogin = ($reportPolicy === 'members_only' || $reportPolicy === 'admin_only') && !auth()->check();
-                        @endphp
+                    {{-- Full Report File (0 = เปิด, 1 = ปิด, 2 = ร่าง) --}}
+                    @if($item->pro_file || $item->pro_file_path)
+                        @if((int) $item->pro_file_show === 0)
+                            @php
+                                $reportPolicy = \App\Models\SystemSetting::get('download_policy_full_report', 'members_only');
+                                $needsLogin = ($reportPolicy === 'members_only' || $reportPolicy === 'admin_only') && !auth()->check();
+                            @endphp
 
-                        @if($needsLogin)
-                            <a href="{{ route('login') }}" 
-                               class="file-cta-card card border border-warning-subtle text-decoration-none shadow-sm"
-                               style="background: rgba(245, 158, 11, 0.05);"
-                               title="ต้องเข้าสู่ระบบก่อนเพื่อดาวน์โหลดเอกสารฉบับสมบูรณ์">
-                                <div class="card-body p-3">
-                                    <div class="d-flex align-items-center justify-content-between mb-2.5">
-                                        <div class="d-flex align-items-center min-w-0 me-2">
-                                            <div class="file-icon-box bg-warning-subtle text-warning rounded-3 d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 48px; height: 48px;">
-                                                <i class="bi bi-file-earmark-lock-fill fs-2"></i>
+                            @if($needsLogin)
+                                <a href="{{ route('login') }}" 
+                                   class="file-cta-card card border border-warning-subtle text-decoration-none shadow-sm"
+                                   style="background: rgba(245, 158, 11, 0.05);"
+                                   title="ต้องเข้าสู่ระบบก่อนเพื่อดาวน์โหลดเอกสารฉบับสมบูรณ์">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex align-items-center justify-content-between mb-2.5">
+                                            <div class="d-flex align-items-center min-w-0 me-2">
+                                                <div class="file-icon-box bg-warning-subtle text-warning rounded-3 d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 48px; height: 48px;">
+                                                    <i class="bi bi-file-earmark-lock-fill fs-2"></i>
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <h6 class="fw-bold text-body mb-0 text-truncate" style="font-size: 0.98rem;">รายงานฉบับสมบูรณ์</h6>
+                                                    <small class="text-body-secondary d-block" style="font-size: 0.78rem;">Full Report (สำหรับสมาชิก)</small>
+                                                </div>
                                             </div>
-                                            <div class="min-w-0">
-                                                <h6 class="fw-bold text-body mb-0 text-truncate" style="font-size: 0.98rem;">รายงานฉบับสมบูรณ์</h6>
-                                                <small class="text-body-secondary d-block" style="font-size: 0.78rem;">Full Report (สำหรับสมาชิก)</small>
-                                            </div>
+                                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1 flex-shrink-0" style="font-size: 0.74rem;">
+                                                <i class="bi bi-shield-lock me-1"></i>ต้องเข้าสู่ระบบ
+                                            </span>
                                         </div>
-                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1 flex-shrink-0" style="font-size: 0.74rem;">
-                                            <i class="bi bi-shield-lock me-1"></i>ต้องเข้าสู่ระบบ
-                                        </span>
-                                    </div>
-                                    <div class="btn btn-sm btn-outline-warning w-100 rounded-2 fw-medium d-flex align-items-center justify-content-center gap-1.5 py-1.5 shadow-sm text-dark">
-                                        <i class="bi bi-box-arrow-in-right"></i> เข้าสู่ระบบเพื่อดาวน์โหลดรายงาน
-                                    </div>
-                                </div>
-                            </a>
-                        @else
-                            <a href="{{ route('frontend.rdbproject.view_report', $item->pro_id) }}" 
-                               target="_blank" 
-                               class="file-cta-card card border border-success-subtle text-decoration-none shadow-sm"
-                               style="background: rgba(16, 185, 129, 0.04);">
-                                <div class="card-body p-3">
-                                    <div class="d-flex align-items-center justify-content-between mb-2.5">
-                                        <div class="d-flex align-items-center min-w-0 me-2">
-                                            <div class="file-icon-box bg-success-subtle text-success rounded-3 d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 48px; height: 48px;">
-                                                <i class="bi bi-file-earmark-pdf-fill fs-2"></i>
-                                            </div>
-                                            <div class="min-w-0">
-                                                <h6 class="fw-bold text-success mb-0 text-truncate" style="font-size: 0.98rem;">รายงานฉบับสมบูรณ์</h6>
-                                                <small class="text-body-secondary d-block" style="font-size: 0.78rem;">Full Research Report (PDF)</small>
-                                            </div>
+                                        <div class="btn btn-sm btn-outline-warning w-100 rounded-2 fw-medium d-flex align-items-center justify-content-center gap-1.5 py-1.5 shadow-sm text-dark">
+                                            <i class="bi bi-box-arrow-in-right"></i> เข้าสู่ระบบเพื่อดาวน์โหลดรายงาน
                                         </div>
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 flex-shrink-0" title="ดาวน์โหลด: {{ number_format($item->pro_count_full ?? 0) }} ครั้ง" style="font-size: 0.76rem;">
-                                            <i class="bi bi-download me-1"></i>{{ number_format($item->pro_count_full ?? 0) }}
-                                        </span>
                                     </div>
-                                    <div class="btn btn-sm btn-success w-100 rounded-2 fw-medium d-flex align-items-center justify-content-center gap-1.5 py-1.5 text-white shadow-sm">
-                                        <i class="bi bi-cloud-arrow-down-fill"></i> ดาวน์โหลดรายงานฉบับสมบูรณ์
+                                </a>
+                            @else
+                                <a href="{{ route('frontend.rdbproject.view_report', $item->pro_id) }}" 
+                                   target="_blank" 
+                                   class="file-cta-card card border border-success-subtle text-decoration-none shadow-sm"
+                                   style="background: rgba(16, 185, 129, 0.04);">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex align-items-center justify-content-between mb-2.5">
+                                            <div class="d-flex align-items-center min-w-0 me-2">
+                                                <div class="file-icon-box bg-success-subtle text-success rounded-3 d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 48px; height: 48px;">
+                                                    <i class="bi bi-file-earmark-pdf-fill fs-2"></i>
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <h6 class="fw-bold text-success mb-0 text-truncate" style="font-size: 0.98rem;">รายงานฉบับสมบูรณ์</h6>
+                                                    <small class="text-body-secondary d-block" style="font-size: 0.78rem;">Full Research Report (PDF)</small>
+                                                </div>
+                                            </div>
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 flex-shrink-0" title="ดาวน์โหลด: {{ number_format($item->pro_count_full ?? 0) }} ครั้ง" style="font-size: 0.76rem;">
+                                                <i class="bi bi-download me-1"></i>{{ number_format($item->pro_count_full ?? 0) }}
+                                            </span>
+                                        </div>
+                                        <div class="btn btn-sm btn-success w-100 rounded-2 fw-medium d-flex align-items-center justify-content-center gap-1.5 py-1.5 text-white shadow-sm">
+                                            <i class="bi bi-cloud-arrow-down-fill"></i> ดาวน์โหลดรายงานฉบับสมบูรณ์
+                                        </div>
                                     </div>
-                                </div>
-                            </a>
+                                </a>
+                            @endif
+                        @elseif((int) $item->pro_file_show === 1)
+                            <div class="p-2.5 border border-dashed rounded bg-body-tertiary mb-3 text-secondary small d-flex align-items-center justify-content-center">
+                                <i class="bi bi-shield-lock-fill text-danger fs-5 me-2"></i>
+                                <span>เล่มรายงานวิจัยถูกปกปิด (ไม่สามารถเปิดเผยข้อมูลได้)</span>
+                            </div>
+                        @elseif((int) $item->pro_file_show === 2)
+                            <div class="p-2.5 border border-dashed rounded bg-body-tertiary mb-3 text-secondary small d-flex align-items-center justify-content-center">
+                                <i class="bi bi-pencil-square text-warning fs-5 me-2"></i>
+                                <span>เล่มรายงานวิจัยอยู่ในสถานะฉบับร่าง (ยังไม่เผยแพร่)</span>
+                            </div>
                         @endif
+                    @else
+                        <div class="p-2.5 border border-dashed rounded bg-body-tertiary mb-3 text-body-secondary small d-flex align-items-center justify-content-center">
+                            <i class="bi bi-file-earmark text-muted fs-5 me-2"></i>
+                            <span>ไม่มีไฟล์เล่มรายงาน</span>
+                        </div>
                     @endif
                 </div>
             </div>

@@ -259,7 +259,7 @@
                         $filePath = $item->getPublishedFilePath();
                     @endphp
                     @if($filePath)
-                        <a href="{{ asset('storage/' . $filePath) }}" 
+                        <a href="{{ route('frontend.rdbpublished.view_file', $item->id) }}" 
                            target="_blank" 
                            class="file-cta-card card border border-success-subtle text-decoration-none shadow-sm"
                            style="background: rgba(16, 185, 129, 0.04);">

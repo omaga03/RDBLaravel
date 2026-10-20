@@ -297,19 +297,18 @@
                     <h5 class="mb-0 fw-bold text-body"><i class="bi bi-paperclip text-primary me-2"></i>ไฟล์แนบ (File Attachment)</h5>
                 </div>
                 <div class="card-body text-center p-4">
-                    @if($item->pub_file)
+                    @if($item->pub_file || $item->pf_path)
                         <div class="mb-3">
                             <i class="bi bi-file-earmark-pdf text-danger" style="font-size: 3rem;"></i>
                         </div>
-                        <h6 class="text-break mb-2">{{ $item->pub_file }}</h6>
+                        <h6 class="text-break mb-2">{{ $item->pub_file ?: basename($item->pf_path) }}</h6>
                         <p class="text-muted small mb-3">
-                            <i class="bi bi-eye"></i> เปิดดูไฟล์ {{ number_format($item->pub_view_file ?? 0) }} ครั้ง
+                            <i class="bi bi-eye"></i> ดาวน์โหลดไฟล์ {{ number_format($item->pub_download ?? ($item->pub_view_file ?? 0)) }} ครั้ง
                         </p>
                         <div class="d-grid gap-2">
-                            <a href="{{ asset('storage/uploads/rdb_published/' . $item->pub_file) }}" 
+                            <a href="{{ route('backend.rdb_published.view_file', $item->id) }}" 
                                target="_blank" 
-                               class="btn btn-primary"
-                               onclick="fetch('{{ route('backend.rdb_published.view_file', $item->id) }}');">
+                               class="btn btn-primary">
                                 <i class="bi bi-eye me-1"></i> เปิดดูไฟล์
                             </a>
                             @if(auth()->user()->can('update', $item))

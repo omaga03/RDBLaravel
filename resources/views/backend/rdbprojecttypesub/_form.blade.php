@@ -40,9 +40,9 @@
     <div class="col-md-12">
         <label for="pts_file" class="form-label">ไฟล์แนบ (PDF, Word, Zip)</label>
         <input type="file" class="form-control @error('pts_file') is-invalid @enderror" id="pts_file" name="pts_file">
-        @if(isset($item) && $item->pts_file)
+        @if(isset($item) && ($item->pts_file || $item->pts_path))
             <div class="form-text mt-2">
-                ไฟล์ปัจจุบัน: <a href="{{ asset('storage/uploads/project_types_sub/' . $item->pts_file) }}" target="_blank">{{ $item->pts_file }}</a>
+                ไฟล์ปัจจุบัน: <a href="{{ route('backend.rdbprojecttypesub.view_file', $item->pts_id) }}" target="_blank">{{ $item->pts_file ?: basename($item->pts_path) }}</a>
             </div>
         @endif
         @error('pts_file')

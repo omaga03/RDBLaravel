@@ -15,10 +15,16 @@
                     <h1 class="display-5 fw-bold text-warning mb-2">404</h1>
                     <h3 class="fw-bold text-body mb-3">ไม่พบหน้าที่คุณต้องการ (Page Not Found)</h3>
 
-                    <p class="text-body-secondary mb-4 fs-6 leading-relaxed">
-                        ขออภัย หน้าเว็บหรือข้อมูลที่คุณกำลังเรียกหาไม่มีอยู่ในระบบ ย้ายตำแหน่ง หรือถูกลบออกแล้ว<br>
-                        กรุณาตรวจสอบ URL อีกครั้ง หรือกลับไปยังหน้าหลัก
-                    </p>
+                    @if(!empty($exception) && $exception->getMessage())
+                        <div class="alert alert-warning border-warning-subtle small mb-4 py-2.5 px-3 text-center">
+                            <i class="bi bi-info-circle-fill me-1"></i> {{ $exception->getMessage() }}
+                        </div>
+                    @else
+                        <p class="text-body-secondary mb-4 fs-6 leading-relaxed">
+                            ขออภัย หน้าเว็บหรือข้อมูลที่คุณกำลังเรียกหาไม่มีอยู่ในระบบ ย้ายตำแหน่ง หรือถูกลบออกแล้ว<br>
+                            กรุณาตรวจสอบ URL อีกครั้ง หรือกลับไปยังหน้าหลัก
+                        </p>
+                    @endif
 
                     <div class="d-flex justify-content-center gap-2 flex-wrap">
                         <a href="javascript:history.back()" class="btn btn-outline-secondary px-4 py-2">

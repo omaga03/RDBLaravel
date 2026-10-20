@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Traits\HasDualFilePath;
 
 class RdbProjectUtilize extends Model
@@ -74,8 +75,32 @@ class RdbProjectUtilize extends Model
 
     use HasDualFilePath;
 
-    public function getUtilizeFilePath(string $newField = 'uf_path', string $oldField = 'utz_files', string $oldDir = 'uploads/utilize'): ?string
+    /**
+     * Get path ที่ถูกต้องสำหรับไฟล์การนำไปใช้ประโยชน์
+     */
+    public function getUtilizeFilePath(?string $filename = null): ?string
     {
-        return $this->resolveDualFilePath($newField, $oldField, $oldDir);
+        if (!empty($this->uf_path)) {
+            return $this->uf_path;
+        }
+
+        $file = $filename ?: $this->utz_files;
+        if (!empty($file)) {
+            $safeName = basename(trim($file));
+            if ($safeName) {
+                if (Storage::disk('public')->exists('utilize/' . $safeName) || file_exists(public_path('storage/utilize/' . $safeName))) {
+                    return 'utilize/' . $safeName;
+                }
+                if (Storage::disk('public')->exists('uploads/utilize/' . $safeName) || file_exists(public_path('storage/uploads/utilize/' . $safeName)) || file_exists(public_path('uploads/utilize/' . $safeName))) {
+                    return 'uploads/utilize/' . $safeName;
+                }
+                if (file_exists(public_path('datautilize/' . $this->utz_id . '/' . $safeName)) || file_exists(base_path('yii2_rdb-main/frontend/web/datautilize/' . $this->utz_id . '/' . $safeName))) {
+                    return 'datautilize/' . $this->utz_id . '/' . $safeName;
+                }
+                return 'uploads/utilize/' . $safeName;
+            }
+        }
+
+        return null;
     }
 }

@@ -332,8 +332,8 @@
                         <i class="bi bi-file-earmark-check"></i> เอกสารทรัพย์สินทางปัญญาหลัก
                     </div>
                     <div class="d-grid gap-2 mt-3">
-                        @if($item->dip_files)
-                            <a href="{{ asset('storage/uploads/dips/' . $item->dip_files) }}" target="_blank" class="btn btn-primary d-flex align-items-center justify-content-center">
+                        @if($item->dip_files || $item->dip_path)
+                            <a href="{{ route('backend.rdb_dip.view_file', $item->dip_id) }}" target="_blank" class="btn btn-primary d-flex align-items-center justify-content-center">
                                 <i class="bi bi-eye me-2"></i> เปิดดูไฟล์
                             </a>
                         @else

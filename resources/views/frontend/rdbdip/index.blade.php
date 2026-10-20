@@ -51,46 +51,91 @@
                 <input type="hidden" name="pro_id" value="{{ request('pro_id') }}">
             @endif
 
-            {{-- Row 1: Search, Type, Department --}}
-            <div class="col-md-6">
-                <label class="form-label">คำค้นหา</label>
-                <input type="text" class="form-control" name="search" value="{{ request('search') }}" 
-                    placeholder="ระบุเลขที่คำขอ, เลขที่ทะเบียน, ชื่อผลงาน, หรือผู้ประดิษฐ์...">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">ประเภททรัพย์สินทางปัญญา</label>
-                <select class="form-select" name="dipt_id">
-                    <option value="">-- ทั้งหมด --</option>
-                    @foreach($dipTypes as $type)
-                        <option value="{{ $type->dipt_id }}" {{ request('dipt_id') == $type->dipt_id ? 'selected' : '' }}>
-                            {{ $type->dipt_name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">หน่วยงาน/คณะ</label>
-                <select class="form-select" name="department_id">
-                    <option value="">-- ทั้งหมด --</option>
-                    @foreach($departments as $dept)
-                        <option value="{{ $dept->department_id }}" {{ request('department_id') == $dept->department_id ? 'selected' : '' }}>
-                            {{ $dept->department_nameTH ?? $dept->department_name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
+            <div class="row g-3">
+                {{-- Row 1: DIP Title Autocomplete Search --}}
+                <div class="col-md-12">
+                    <label class="form-label d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-award text-primary me-1"></i> ชื่อผลงาน / ทรัพย์สินทางปัญญา</span>
+                        <span class="badge bg-secondary-subtle text-body-secondary" style="font-size: 0.7rem;">พิมพ์เพื่อค้นหาชื่อผลงาน/เลขที่คำขอ</span>
+                    </label>
+                    <select class="form-select" id="search_dip_id" name="dip_id"></select>
+                    <input type="hidden" name="dip_name" id="search_dip_name" value="{{ request('dip_name') }}">
+                </div>
 
-            {{-- Row 2: Date Range --}}
-            <div class="col-md-6">
-                <label class="form-label">วันที่ยื่นคำขอ (เริ่มต้น)</label>
-                <input type="date" class="form-control" id="date_start" name="date_start" value="{{ request('date_start') }}">
+                {{-- Row 2: Multi-Keyword Title Search (กลุ่มคำคั่นด้วยช่องว่าง + เจอทั้งหมด / เจอบางคำ) --}}
+                <div class="col-md-12">
+                    <div class="p-3 rounded-3 border bg-body-tertiary">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center mb-1.5 gap-2">
+                            <label class="form-label mb-0 fw-semibold text-body" style="font-size: 0.88rem;">
+                                <i class="bi bi-fonts text-primary me-1"></i> ค้นหาชื่อเรื่องแบบกลุ่มคำ (คั่นด้วยช่องว่าง)
+                            </label>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="form-check form-check-inline mb-0">
+                                    <input class="form-check-input" type="radio" name="title_keywords_mode" id="dip_mode_all" value="all" 
+                                        {{ request('title_keywords_mode', 'all') === 'all' ? 'checked' : '' }}>
+                                    <label class="form-check-label small fw-medium" for="dip_mode_all">
+                                        <i class="bi bi-check-all text-success me-1"></i>เจอทั้งหมด (ตรงทุกคำ - AND)
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline mb-0">
+                                    <input class="form-check-input" type="radio" name="title_keywords_mode" id="dip_mode_any" value="any" 
+                                        {{ request('title_keywords_mode') === 'any' ? 'checked' : '' }}>
+                                    <label class="form-check-label small fw-medium" for="dip_mode_any">
+                                        <i class="bi bi-intersect text-primary me-1"></i>เจอบางคำ (ตรงคำใดคำหนึ่ง - OR)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="text" class="form-control" name="title_keywords" value="{{ request('title_keywords') }}" 
+                            placeholder="เช่น อุปกรณ์ เครื่องมือ ระบบ (พิมพ์หลายคำคั่นด้วยช่องว่าง)...">
+                        <div class="form-text small text-body-secondary mt-1">
+                            <i class="bi bi-info-circle me-1"></i>ระบบจะค้นหาชื่อผลงานทรัพย์สินทางปัญญาที่มีกลุ่มคำดังกล่าวตามเงื่อนไขที่เลือก (เจอทั้งหมด หรือ เจอบางคำ)
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Row 3: Researcher & Department --}}
+                <div class="col-md-6">
+                    <label class="form-label"><i class="bi bi-person text-primary me-1"></i>ผู้ทรงสิทธิ / ผู้ประดิษฐ์</label>
+                    <select class="form-select" id="search_researcher_id" name="researcher_id"></select>
+                    <input type="hidden" name="researcher_name" id="search_researcher_name" value="{{ request('researcher_name') }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label"><i class="bi bi-building text-primary me-1"></i>หน่วยงาน/คณะ</label>
+                    <select class="form-select" name="department_id">
+                        <option value="">-- ทั้งหมด --</option>
+                        @foreach($departments as $dept)
+                            <option value="{{ $dept->department_id }}" {{ request('department_id') == $dept->department_id ? 'selected' : '' }}>
+                                {{ $dept->department_nameTH ?? $dept->department_name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Row 4: Type --}}
+                <div class="col-md-12">
+                    <label class="form-label">ประเภททรัพย์สินทางปัญญา</label>
+                    <select class="form-select" name="dipt_id">
+                        <option value="">-- ทั้งหมด --</option>
+                        @foreach($dipTypes as $type)
+                            <option value="{{ $type->dipt_id }}" {{ request('dipt_id') == $type->dipt_id ? 'selected' : '' }}>
+                                {{ $type->dipt_name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- Row 5: Date Range --}}
+                <div class="col-md-6">
+                    <label class="form-label">วันที่ยื่นคำขอ (เริ่มต้น)</label>
+                    <input type="date" class="form-control" id="date_start" name="date_start" value="{{ request('date_start') }}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">วันที่ยื่นคำขอ (สิ้นสุด)</label>
+                    <input type="date" class="form-control" id="date_end" name="date_end" value="{{ request('date_end') }}">
+                </div>
             </div>
-            <div class="col-md-6">
-                <label class="form-label">วันที่ยื่นคำขอ (สิ้นสุด)</label>
-                <input type="date" class="form-control" id="date_end" name="date_end" value="{{ request('date_end') }}">
-            </div>
-        </div>
-    </x-search-bar>
+        </x-search-bar>
 
     <!-- Results Table -->
     <div class="card shadow-sm border-0">
@@ -222,6 +267,99 @@ document.addEventListener('DOMContentLoaded', function() {
     tooltipTriggerList.forEach(function(tooltipTriggerEl) {
         new bootstrap.Tooltip(tooltipTriggerEl);
     });
+
+    // TomSelect: DIP Title Autocomplete
+    const dipSelect = document.getElementById('search_dip_id');
+    const dipNameHidden = document.getElementById('search_dip_name');
+
+    if (dipSelect && typeof TomSelect !== 'undefined') {
+        const tsDip = new TomSelect(dipSelect, {
+            create: false,
+            openOnFocus: true,
+            persist: false,
+            maxOptions: 20,
+            valueField: 'value',
+            labelField: 'text',
+            searchField: 'text',
+            placeholder: '-- พิมพ์เพื่อค้นหาชื่อผลงาน/เลขที่คำขอ --',
+            loadThrottle: 300,
+            load: function(query, callback) {
+                if (!query.length || query.length < 2) return callback();
+                fetch('{{ route("frontend.rdbdip.search_dips") }}?q=' + encodeURIComponent(query))
+                    .then(response => response.json())
+                    .then(json => callback(json.results || json))
+                    .catch(() => callback());
+            },
+            onChange: function(value) {
+                const item = this.options[value];
+                if (item && dipNameHidden) {
+                    dipNameHidden.value = item.dip_name || item.text.split(' [')[0];
+                } else if (dipNameHidden) {
+                    dipNameHidden.value = '';
+                }
+            },
+            render: {
+                option: function(data, escape) { return '<div>' + (data._highlight || escape(data.text)) + '</div>'; },
+                item: function(data, escape) { return '<div>' + escape(data.text) + '</div>'; },
+                no_results: function() { return '<div class="no-results p-2 text-muted">ไม่พบข้อมูลทรัพย์สินทางปัญญา (พิมพ์อย่างน้อย 2 ตัวอักษร)</div>'; }
+            }
+        });
+
+        const preDipId = "{{ request('dip_id') }}";
+        const preDipName = @json(request('dip_name') ?: '');
+        if (preDipId || preDipName) {
+            const val = preDipId || 'pre';
+            const label = preDipName || ('ทรัพย์สินทางปัญญา #' + preDipId);
+            tsDip.addOption({ value: val, text: label, dip_name: preDipName });
+            tsDip.setValue(val);
+        }
+    }
+
+    // TomSelect: Researcher Autocomplete
+    const researcherSelect = document.getElementById('search_researcher_id');
+    const researcherNameHidden = document.getElementById('search_researcher_name');
+
+    if (researcherSelect && typeof TomSelect !== 'undefined') {
+        const tsRes = new TomSelect(researcherSelect, {
+            create: false,
+            openOnFocus: true,
+            persist: false,
+            maxOptions: 15,
+            valueField: 'value',
+            labelField: 'text',
+            searchField: 'text',
+            placeholder: '-- พิมพ์เพื่อค้นหาผู้ทรงสิทธิ/ผู้ประดิษฐ์ --',
+            loadThrottle: 300,
+            load: function(query, callback) {
+                if (!query.length || query.length < 2) return callback();
+                fetch('{{ route("frontend.rdbdip.search_researchers") }}?q=' + encodeURIComponent(query))
+                    .then(response => response.json())
+                    .then(json => callback(json.results || json))
+                    .catch(() => callback());
+            },
+            onChange: function(value) {
+                const item = this.options[value];
+                if (item && researcherNameHidden) {
+                    researcherNameHidden.value = item.text.split(' [')[0];
+                } else if (researcherNameHidden) {
+                    researcherNameHidden.value = '';
+                }
+            },
+            render: {
+                option: function(data, escape) { return '<div>' + (data._highlight || escape(data.text)) + '</div>'; },
+                item: function(data, escape) { return '<div>' + escape(data.text) + '</div>'; },
+                no_results: function() { return '<div class="no-results p-2 text-muted">ไม่พบข้อมูลนักวิจัย (พิมพ์อย่างน้อย 2 ตัวอักษร)</div>'; }
+            }
+        });
+
+        const preResearcherId = "{{ request('researcher_id') }}";
+        const preResearcherName = @json(request('researcher_name') ?: '');
+        if (preResearcherId || preResearcherName) {
+            const val = preResearcherId || 'pre';
+            tsRes.addOption({ value: val, text: preResearcherName || ('นักวิจัย #' + preResearcherId) });
+            tsRes.setValue(val);
+        }
+    }
 
     // Date range validation
     const dateStart = document.getElementById('date_start');

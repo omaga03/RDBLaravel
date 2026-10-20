@@ -495,10 +495,12 @@
                                                     <div class="d-flex align-items-center gap-1">
                                                         @if($project->pro_file)
                                                             <span class="badge bg-success-subtle text-success border border-success-subtle">มีไฟล์</span>
-                                                            @if($project->pro_file_show)
-                                                                <span class="badge bg-success text-white" title="เปิดเผยต่อสาธารณะ"><i class="bi bi-globe me-1"></i>สาธารณะ (Public)</span>
+                                                            @if((int)$project->pro_file_show === 0)
+                                                                <span class="badge bg-success text-white" title="เปิดเผยต่อสาธารณะ"><i class="bi bi-globe me-1"></i>เปิด (Public)</span>
+                                                            @elseif((int)$project->pro_file_show === 1)
+                                                                <span class="badge bg-danger text-white" title="ปกปิดเล่มรายงาน"><i class="bi bi-lock-fill me-1"></i>ปิด (Concealed)</span>
                                                             @else
-                                                                <span class="badge bg-secondary text-white" title="ซ่อนเฉพาะผู้ดูแล"><i class="bi bi-lock-fill me-1"></i>ซ่อน (Private)</span>
+                                                                <span class="badge bg-warning text-dark" title="ฉบับร่าง"><i class="bi bi-pencil me-1"></i>ร่าง (Draft)</span>
                                                             @endif
                                                         @else
                                                             <span class="badge bg-secondary-subtle text-secondary">ไม่มีไฟล์</span>
@@ -509,10 +511,12 @@
                                                     <div class="small text-body-secondary text-truncate mb-2">{{ $project->pro_file }}</div>
                                                     <div class="d-flex align-items-center justify-content-between small text-body-secondary mb-3 p-2 bg-body-tertiary rounded">
                                                         <span><i class="bi bi-shield-check me-1 text-primary"></i>การแสดงผลสาธารณะ:</span>
-                                                        @if($project->pro_file_show)
-                                                            <strong class="text-success"><i class="bi bi-eye me-1"></i>เปิดเผยต่อบุคคลทั่วไป (Public)</strong>
+                                                        @if((int)$project->pro_file_show === 0)
+                                                            <strong class="text-success"><i class="bi bi-eye me-1"></i>เปิดเผยต่อบุคคลทั่วไป (เปิด)</strong>
+                                                        @elseif((int)$project->pro_file_show === 1)
+                                                            <strong class="text-danger"><i class="bi bi-eye-slash me-1"></i>ปกปิดเล่มรายงาน (ปิด)</strong>
                                                         @else
-                                                            <strong class="text-secondary"><i class="bi bi-eye-slash me-1"></i>ซ่อนเฉพาะผู้ดูแลระบบ (Private)</strong>
+                                                            <strong class="text-warning"><i class="bi bi-pencil me-1"></i>ฉบับร่าง (ร่าง)</strong>
                                                         @endif
                                                     </div>
                                                     <a href="{{ route('backend.rdb_project.view_report', $project->pro_id) }}" target="_blank" class="btn btn-outline-success btn-sm w-100">
@@ -777,14 +781,14 @@
                                         @endif
                                     </div>
                                     <div class="card-body">
-                                        @if($project->pro_abstract_file)
+                                        @if($project->pro_abstract_file || $project->pro_abstract_file_path)
                                             <div class="d-flex justify-content-between align-items-center mb-3 p-2 rounded" style="background: rgba(0,0,0,0.05);">
                                                 <div class="text-truncate me-2" style="max-width: 70%;">
                                                     <i class="bi bi-file-earmark-pdf text-danger fs-4 me-2"></i>
-                                                    <small class="text-muted">{{ $project->pro_abstract_file }}</small>
+                                                    <small class="text-muted">{{ $project->pro_abstract_file ?: basename($project->pro_abstract_file_path) }}</small>
                                                 </div>
                                                 <div class="d-flex gap-1">
-                                                    <a href="{{ asset('storage/uploads/projects/' . $project->pro_abstract_file) }}" target="_blank" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center justify-content-center" style="width: 70px; height: 32px;">
+                                                    <a href="{{ route('backend.rdb_project.view_abstract', $project->pro_id) }}" target="_blank" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center justify-content-center" style="width: 70px; height: 32px;">
                                                         <i class="bi bi-eye me-1"></i> ดู
                                                     </a>
                                                     <form action="{{ route('backend.rdb_project.delete_abstract', $project->pro_id) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันลบไฟล์บทคัดย่อ?');">
@@ -814,31 +818,29 @@
                                 <div class="card">
                                     <div class="card-header d-flex justify-content-between align-items-center">
                                         <span><i class="bi bi-file-earmark-richtext"></i> ไฟล์รายงานฉบับสมบูรณ์ (Full Report)</span>
-                                        @if($project->pro_file)
+                                        @if($project->pro_file || $project->pro_file_path)
                                             <span class="badge bg-success"><i class="bi bi-check-circle"></i> มีไฟล์แล้ว</span>
                                         @else
                                             <span class="badge bg-secondary">ยังไม่มีไฟล์</span>
                                         @endif
                                     </div>
                                     <div class="card-body">
-                                        @if($project->pro_file)
+                                        @if($project->pro_file || $project->pro_file_path)
                                             <div class="d-flex justify-content-between align-items-center mb-3 p-3 rounded border bg-body-tertiary">
                                                 <div class="text-truncate me-2" style="max-width: 55%;">
                                                     <i class="bi bi-file-earmark-pdf text-danger fs-4 me-2 align-middle"></i>
-                                                    <strong class="text-body">{{ $project->pro_file }}</strong>
+                                                    <strong class="text-body">{{ $project->pro_file ?: basename($project->pro_file_path) }}</strong>
                                                 </div>
                                                 <div class="d-flex gap-2 align-items-center">
-                                                    <div class="form-check form-switch m-0 d-flex align-items-center px-2 py-1 rounded border bg-white" title="ปรับการแสดงผลไฟล์นี้">
-                                                        <input class="form-check-input toggle-report-status me-2" type="checkbox" id="toggleReportStatus" data-id="{{ $project->pro_id }}" role="button" {{ $project->pro_file_show ? 'checked' : '' }}>
-                                                        <label class="form-check-label small fw-bold mb-0 cursor-pointer" for="toggleReportStatus" id="reportStatusLabel">
-                                                            @if($project->pro_file_show)
-                                                                <span class="text-success"><i class="bi bi-globe me-1"></i>สาธารณะ (Public)</span>
-                                                            @else
-                                                                <span class="text-secondary"><i class="bi bi-lock-fill me-1"></i>ซ่อน (Private)</span>
-                                                            @endif
-                                                        </label>
+                                                    <div class="d-flex align-items-center px-2 py-1 rounded border bg-white shadow-sm" title="ปรับการแสดงผลไฟล์นี้ (0 = เปิด, 1 = ปิด, 2 = ร่าง)">
+                                                        <label class="small fw-bold text-muted mb-0 me-1"><i class="bi bi-shield-check"></i></label>
+                                                        <select class="form-select form-select-sm border-0 py-0 ps-1 pe-4 fw-bold select-report-status" id="selectReportStatus" data-id="{{ $project->pro_id }}" style="font-size: 0.82rem; cursor: pointer; width: auto;">
+                                                            <option value="0" {{ (int)$project->pro_file_show === 0 ? 'selected' : '' }}>🟢 เปิด (Public)</option>
+                                                            <option value="1" {{ (int)$project->pro_file_show === 1 ? 'selected' : '' }}>🔴 ปิด (ปกปิด)</option>
+                                                            <option value="2" {{ (int)$project->pro_file_show === 2 ? 'selected' : '' }}>🟡 ร่าง (Draft)</option>
+                                                        </select>
                                                     </div>
-                                                    <a href="{{ asset('storage/uploads/projects/' . $project->pro_file) }}" target="_blank" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center justify-content-center" style="min-width: 70px; height: 32px;">
+                                                    <a href="{{ route('backend.rdb_project.view_report', $project->pro_id) }}" target="_blank" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center justify-content-center" style="min-width: 70px; height: 32px;">
                                                         <i class="bi bi-eye me-1"></i> ดู
                                                     </a>
                                                     <form action="{{ route('backend.rdb_project.delete_report', $project->pro_id) }}" method="POST" class="d-inline-flex m-0 p-0" onsubmit="return confirm('ยืนยันลบไฟล์รายงานฉบับสมบูรณ์?');">
@@ -860,11 +862,15 @@
                                                 </button>
                                             </div>
                                             <div class="d-flex justify-content-between align-items-center mt-2 p-2 bg-body-tertiary rounded border flex-wrap gap-2">
-                                                <div class="form-check form-switch m-0">
-                                                    <input class="form-check-input" type="checkbox" name="pro_file_show" value="1" id="proFileShow" checked>
-                                                    <label class="form-check-label small fw-bold text-body" for="proFileShow">
-                                                        <i class="bi bi-globe me-1 text-primary"></i> เปิดให้บุคคลทั่วไปเข้าถึงได้ (Public Visible)
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <label class="small fw-bold text-body mb-0" for="proFileShow">
+                                                        <i class="bi bi-shield-check me-1 text-primary"></i>สถานะการแสดงผล:
                                                     </label>
+                                                    <select class="form-select form-select-sm" name="pro_file_show" id="proFileShow" style="width: auto;">
+                                                        <option value="0" selected>🟢 เปิด (เผยแพร่สาธารณะ)</option>
+                                                        <option value="1">🔴 ปิด (ปกปิดเล่มรายงาน)</option>
+                                                        <option value="2">🟡 ร่าง (ฉบับร่าง)</option>
+                                                    </select>
                                                 </div>
                                                 <small class="text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i>อัปโหลดแล้วระบบจะปรับสถานะเป็น "ดำเนินการเสร็จสิ้น" ทันที</small>
                                             </div>
@@ -1383,8 +1389,32 @@
         });
 
 
-        // --- File Visibility Toggles ---
-        // Toggle Report
+        // --- File Visibility Toggles (0 = เปิด, 1 = ปิด, 2 = ร่าง) ---
+        document.querySelector('.select-report-status')?.addEventListener('change', function() {
+            const id = this.dataset.id;
+            const newStatus = this.value;
+            
+            fetch(`{{ url('backend/rdb_project') }}/${id}/toggle-report-status`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status: newStatus })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(!data.success) {
+                    alert('เกิดข้อผิดพลาดในการเปลี่ยนสถานะ');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+            });
+        });
+
+        // Toggle Report (legacy fallback)
         document.querySelector('.toggle-report-status')?.addEventListener('change', function() {
             const id = this.dataset.id;
             const checked = this.checked;
@@ -1401,9 +1431,9 @@
             .then(data => {
                 if(data.success) {
                     if (label) {
-                        label.innerHTML = data.status == 1 
-                            ? '<span class="text-success"><i class="bi bi-globe me-1"></i>สาธารณะ (Public)</span>'
-                            : '<span class="text-secondary"><i class="bi bi-lock-fill me-1"></i>ซ่อน (Private)</span>';
+                        label.innerHTML = data.status == 0 
+                            ? '<span class="text-success"><i class="bi bi-globe me-1"></i>เปิด (Public)</span>'
+                            : (data.status == 1 ? '<span class="text-danger"><i class="bi bi-lock-fill me-1"></i>ปิด (Concealed)</span>' : '<span class="text-warning"><i class="bi bi-pencil me-1"></i>ร่าง (Draft)</span>');
                     }
                 } else {
                     alert('เกิดข้อผิดพลาดในการเปลี่ยนสถานะ');

@@ -56,8 +56,8 @@
                                 </div>
                             </td>
                             <td>
-                                @if($item->pts_file)
-                                    <a href="{{ asset('storage/uploads/project_types_sub/' . $item->pts_file) }}" target="_blank" class="text-decoration-none">
+                                @if($item->pts_file || $item->pts_path)
+                                    <a href="{{ route('backend.rdbprojecttypesub.view_file', $item->pts_id) }}" target="_blank" class="text-decoration-none">
                                         <i class="bi bi-file-earmark-text"></i> ดาวน์โหลด
                                     </a>
                                 @else

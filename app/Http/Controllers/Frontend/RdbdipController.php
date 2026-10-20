@@ -10,6 +10,7 @@ use App\Models\RdbProject;
 use App\Models\RdbResearcher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 
 class RdbdipController extends Controller
 {
@@ -38,13 +39,11 @@ class RdbdipController extends Controller
                   ->orWhere('dip_number', 'like', "%{$searchTerm}%")
                   ->orWhere('dip_patent_number', 'like', "%{$searchTerm}%")
                   ->orWhere('dip_data2_name', 'like', "%{$searchTerm}%")
-                  ->orWhere('dip_name', 'like', "%{$searchTerm}%")
                   ->orWhere('dip_publication_no', 'like', "%{$searchTerm}%");
 
                 foreach ($searchWords as $word) {
                     if (empty($word)) continue;
-                    $q->orWhere('dip_data2_name', 'like', "%{$word}%")
-                      ->orWhere('dip_name', 'like', "%{$word}%");
+                    $q->orWhere('dip_data2_name', 'like', "%{$word}%");
                 }
 
                 $q->orWhereHas('project', function($query) use ($searchTerm) {
@@ -70,6 +69,54 @@ class RdbdipController extends Controller
         // DIP Type filter
         if ($request->filled('dipt_id')) {
             $query->where('dipt_id', $request->dipt_id);
+        }
+
+        // DIP ID / Title Autocomplete Search
+        if ($request->filled('dip_id') && $request->dip_id !== 'pre') {
+            $query->where('dip_id', $request->dip_id);
+        } elseif ($request->filled('dip_name')) {
+            $dipName = trim($request->dip_name);
+            $query->where('dip_data2_name', 'like', "%{$dipName}%");
+        }
+
+        // Title Multi-Keyword Search (กลุ่มคำคั่นด้วยช่องว่าง + เจอทั้งหมด / เจอบางคำ)
+        if ($request->filled('title_keywords')) {
+            $keywords = array_values(array_filter(preg_split('/\s+/', trim($request->title_keywords))));
+            $mode = $request->input('title_keywords_mode', 'all');
+
+            if (!empty($keywords)) {
+                if ($mode === 'all') {
+                    $query->where(function($q) use ($keywords) {
+                        foreach ($keywords as $kw) {
+                            $q->where('dip_data2_name', 'like', "%{$kw}%");
+                        }
+                    });
+                } else {
+                    $query->where(function($q) use ($keywords) {
+                        foreach ($keywords as $kw) {
+                            $q->orWhere('dip_data2_name', 'like', "%{$kw}%");
+                        }
+                    });
+                }
+            }
+        }
+
+        // Researcher / Inventor Search
+        if ($request->filled('researcher_id') && $request->researcher_id !== 'pre') {
+            $query->where('researcher_id', $request->researcher_id);
+        } elseif ($request->filled('researcher_name')) {
+            $cleanName = preg_replace('/^(นาย|นาง|นางสาว|ดร\.|ผศ\.|รศ\.|ศ\.)\s*/u', '', trim($request->researcher_name));
+            $searchWords = array_values(array_filter(preg_split('/\s+/', $cleanName)));
+            if (!empty($searchWords)) {
+                $query->whereHas('researcher', function($rq) use ($searchWords) {
+                    foreach ($searchWords as $word) {
+                        $rq->where(function($wq) use ($word) {
+                            $wq->where('researcher_fname', 'like', "%{$word}%")
+                               ->orWhere('researcher_lname', 'like', "%{$word}%");
+                        });
+                    }
+                });
+            }
         }
 
         // Department filter (via researcher or project)
@@ -261,5 +308,135 @@ class RdbdipController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Search Dips for Frontend TomSelect Autocomplete
+     */
+    public function searchDips(Request $request)
+    {
+        $term = trim($request->q);
+        if (empty($term) || mb_strlen($term) < 2) {
+            return response()->json([]);
+        }
+
+        $dips = RdbDip::with(['dipType', 'researcher.prefix', 'researcher.department'])
+            ->where(function($q) {
+                if (Schema::hasColumn('rdb_dip', 'data_show')) {
+                    $q->where('data_show', 1)->orWhereNull('data_show');
+                }
+            })
+            ->where(function($q) use ($term) {
+                $q->where('dip_data2_name', 'LIKE', "%{$term}%")
+                  ->orWhere('dip_request_number', 'LIKE', "%{$term}%")
+                  ->orWhere('dip_patent_number', 'LIKE', "%{$term}%")
+                  ->orWhere('dip_number', 'LIKE', "%{$term}%")
+                  ->orWhereHas('dipType', function($tq) use ($term) {
+                      $tq->where('dipt_name', 'LIKE', "%{$term}%");
+                  })
+                  ->orWhereHas('researcher', function($rq) use ($term) {
+                      $rq->where('researcher_fname', 'LIKE', "%{$term}%")
+                         ->orWhere('researcher_lname', 'LIKE', "%{$term}%")
+                         ->orWhereRaw("CONCAT(researcher_fname, ' ', researcher_lname) LIKE ?", ["%{$term}%"]);
+                  });
+            })
+            ->orderBy('dip_id', 'desc')
+            ->limit(20)
+            ->get();
+
+        $results = [];
+        foreach ($dips as $d) {
+            $yearPrefix = '';
+            if ($d->project && $d->project->year && $d->project->year->year_name) {
+                $yearPrefix = "[{$d->project->year->year_name}] ";
+            }
+            $type = $d->dipType ? $d->dipType->dipt_name : '';
+            $num = $d->dip_request_number ? "คำขอ: " . $d->dip_request_number : ($d->dip_patent_number ? "สิทธิบัตร: " . $d->dip_patent_number : '');
+            
+            $resName = '';
+            if ($d->researcher) {
+                $resName = trim($d->researcher->researcher_fname . ' ' . $d->researcher->researcher_lname);
+            }
+            $dept = $d->researcher && $d->researcher->department ? $d->researcher->department->department_nameTH : '';
+
+            $meta = array_filter([
+                $type ? "ประเภท: {$type}" : '', 
+                $num, 
+                $dept, 
+                $resName ? "ผู้ประดิษฐ์: {$resName}" : ''
+            ]);
+            $sub = !empty($meta) ? ' [' . implode(', ', $meta) . ']' : '';
+
+            $cleanName = strip_tags($d->dip_data2_name ?: 'ไม่มีชื่อผลงาน');
+            $results[] = [
+                'value' => $d->dip_id,
+                'text' => $yearPrefix . $cleanName . $sub,
+                'dip_name' => $cleanName,
+                'dipt_name' => $type,
+                'researcher' => $resName,
+            ];
+        }
+
+        return response()->json($results);
+    }
+
+    /**
+     * View / stream DIP files (main patent file and attachments)
+     */
+    public function viewFile(Request $request, $id)
+    {
+        $item = RdbDip::findOrFail($id);
+
+        if (Schema::hasColumn('rdb_dip', 'data_show')) {
+            if (isset($item->data_show) && (int) $item->data_show !== 1) {
+                abort(404);
+            }
+        }
+
+        $field = $request->query('field', 'dip_files');
+        $allowedFields = [
+            'dip_files',
+            'dip_data1_files',
+            'dip_data2_files_con',
+            'dip_data3_drawing_picture',
+            'dip_data_forms_request',
+            'dip_data3_filesass1',
+            'dip_data3_filesass2',
+            'dip_data3_filesass3',
+        ];
+
+        if (!in_array($field, $allowedFields)) {
+            abort(400, 'คำขอไฟล์ไม่ถูกต้อง');
+        }
+
+        $filename = $item->{$field};
+        if (empty($filename)) {
+            abort(404, 'ไม่มีไฟล์เอกสารนี้');
+        }
+
+        $filePath = $item->getDipFilePath($field);
+
+        if ($filePath && Storage::disk('public')->exists($filePath)) {
+            return Storage::disk('public')->response($filePath);
+        }
+
+        if ($filePath && file_exists(public_path('storage/' . $filePath))) {
+            return response()->file(public_path('storage/' . $filePath));
+        }
+
+        if ($filePath && file_exists(public_path($filePath))) {
+            return response()->file(public_path($filePath));
+        }
+
+        // Support legacy yii2 datadip
+        $legacyPath = 'datadip/' . $item->dip_id . '/' . basename($filename);
+        if (file_exists(public_path($legacyPath))) {
+            return response()->file(public_path($legacyPath));
+        }
+        if (file_exists(base_path('yii2_rdb-main/frontend/web/' . $legacyPath))) {
+            return response()->file(base_path('yii2_rdb-main/frontend/web/' . $legacyPath));
+        }
+
+        abort(404, 'ไม่พบไฟล์เอกสารบนเซิร์ฟเวอร์');
     }
 }

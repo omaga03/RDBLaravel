@@ -286,8 +286,8 @@
                     <h6 class="mb-0 fw-semibold text-body">ไฟล์เอกสาร (Files)</h6>
                 </div>
                 <div class="card-body p-3">
-                    @if($item->utz_files)
-                        <a href="{{ asset('storage/' . $item->utz_files) }}" 
+                    @if($item->utz_files || $item->uf_path)
+                        <a href="{{ route('frontend.rdbprojectutilize.view_file', $item->utz_id) }}" 
                            target="_blank" 
                            class="file-cta-card card border border-success-subtle text-decoration-none shadow-sm"
                            style="background: rgba(16, 185, 129, 0.04);">

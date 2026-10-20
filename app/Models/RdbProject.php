@@ -13,6 +13,10 @@ class RdbProject extends Model
 
     protected $table = 'rdb_project';
 
+    public const REPORT_SHOW_OPEN = 0;   // 0 = เปิด (Public)
+    public const REPORT_SHOW_CLOSED = 1; // 1 = ปิด (Concealed/Private)
+    public const REPORT_SHOW_DRAFT = 2;  // 2 = ร่าง (Draft)
+
     /**
      * ✅ กำหนด fillable เฉพาะฟิลด์ที่ยอมให้แก้ไข
      * ไม่รวม: pro_id, user_created, user_updated, created_at, updated_at
@@ -264,6 +268,34 @@ class RdbProject extends Model
         }
 
         return null;
+    }
+
+    /**
+     * Helpers for pro_file_show: 0 = เปิด, 1 = ปิด, 2 = ร่าง
+     */
+    public function isReportOpen(): bool
+    {
+        return (int) $this->pro_file_show === self::REPORT_SHOW_OPEN;
+    }
+
+    public function isReportClosed(): bool
+    {
+        return (int) $this->pro_file_show === self::REPORT_SHOW_CLOSED;
+    }
+
+    public function isReportDraft(): bool
+    {
+        return (int) $this->pro_file_show === self::REPORT_SHOW_DRAFT;
+    }
+
+    public function getReportStatusLabel(): string
+    {
+        return match ((int) $this->pro_file_show) {
+            self::REPORT_SHOW_OPEN => 'เปิด (Public)',
+            self::REPORT_SHOW_CLOSED => 'ปิด (Concealed)',
+            self::REPORT_SHOW_DRAFT => 'ร่าง (Draft)',
+            default => 'เปิด (Public)',
+        };
     }
 
     /**

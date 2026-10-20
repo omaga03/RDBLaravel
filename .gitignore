@@ -54,6 +54,7 @@ yii2_rdb-main/
 # Temporary Check Scripts
 check_*.php
 update_*.php
+database/*.sql
 
 # Assets/Uploads
 /public/uploads/*

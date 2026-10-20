@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Traits\HasDualFilePath;
 
 class RdbDip extends Model
@@ -93,8 +94,49 @@ class RdbDip extends Model
         'user_updated',
     ];
 
-    public function getDipFilePath(string $newField = 'dip_path', string $oldField = 'dip_files', string $oldDir = 'uploads/dips'): ?string
+    /**
+     * Get path ที่ถูกต้องสำหรับไฟล์ทรัพย์สินทางปัญญา (ทั้งไฟล์หลักและไฟล์แนบเพิ่มเติม)
+     */
+    public function getDipFilePath(?string $field = 'dip_files'): ?string
     {
-        return $this->resolveDualFilePath($newField, $oldField, $oldDir);
+        $targetField = $field ?: 'dip_files';
+
+        // 1. กรณีไฟล์หลัก
+        if ($targetField === 'dip_files') {
+            if (!empty($this->dip_path)) {
+                return $this->dip_path;
+            }
+
+            if (!empty($this->dip_files)) {
+                $filename = $this->dip_files;
+                if (Storage::disk('public')->exists('dips/' . $filename) || file_exists(public_path('storage/dips/' . $filename))) {
+                    return 'dips/' . $filename;
+                }
+                if (Storage::disk('public')->exists('uploads/dips/' . $filename) || file_exists(public_path('storage/uploads/dips/' . $filename)) || file_exists(public_path('uploads/dips/' . $filename))) {
+                    return 'uploads/dips/' . $filename;
+                }
+                if (file_exists(public_path('datadip/' . $this->dip_id . '/' . $filename)) || file_exists(base_path('yii2_rdb-main/frontend/web/datadip/' . $this->dip_id . '/' . $filename))) {
+                    return 'datadip/' . $this->dip_id . '/' . $filename;
+                }
+                return 'uploads/dips/' . $filename;
+            }
+        } else {
+            // 2. กรณีไฟล์แนบเพิ่มเติม (dip_data1_files, dip_data2_files_con, ฯลฯ)
+            if (!empty($this->{$targetField})) {
+                $filename = $this->{$targetField};
+                if (Storage::disk('public')->exists('dips/' . $filename) || file_exists(public_path('storage/dips/' . $filename))) {
+                    return 'dips/' . $filename;
+                }
+                if (Storage::disk('public')->exists('uploads/dips/' . $filename) || file_exists(public_path('storage/uploads/dips/' . $filename)) || file_exists(public_path('uploads/dips/' . $filename))) {
+                    return 'uploads/dips/' . $filename;
+                }
+                if (file_exists(public_path('datadip/' . $this->dip_id . '/' . $filename)) || file_exists(base_path('yii2_rdb-main/frontend/web/datadip/' . $this->dip_id . '/' . $filename))) {
+                    return 'datadip/' . $this->dip_id . '/' . $filename;
+                }
+                return 'uploads/dips/' . $filename;
+            }
+        }
+
+        return null;
     }
 }

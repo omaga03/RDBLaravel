@@ -59,7 +59,17 @@ class RdbResearcher extends Model
         }
 
         if (!empty($this->researcher_picture)) {
-            return 'uploads/researchers/' . $this->researcher_picture;
+            $pic = $this->researcher_picture;
+            if (Storage::disk('public')->exists('researchers/' . $pic) || file_exists(public_path('storage/researchers/' . $pic))) {
+                return 'researchers/' . $pic;
+            }
+            if (Storage::disk('public')->exists('uploads/researchers/' . $pic) || file_exists(public_path('storage/uploads/researchers/' . $pic))) {
+                return 'uploads/researchers/' . $pic;
+            }
+            if (file_exists(public_path('dataresearcher/' . $pic))) {
+                return 'dataresearcher/' . $pic;
+            }
+            return 'uploads/researchers/' . $pic;
         }
 
         return null;
@@ -68,7 +78,13 @@ class RdbResearcher extends Model
     public function getProfileImageUrlAttribute(): ?string
     {
         $path = $this->getProfileFilePath();
-        return $path ? asset('storage/' . $path) : null;
+        if (!$path) {
+            return null;
+        }
+        if (str_starts_with($path, 'dataresearcher/')) {
+            return asset($path);
+        }
+        return asset('storage/' . $path);
     }
 
     public function getFullNameAttribute(): string

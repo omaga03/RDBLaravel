@@ -112,6 +112,7 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     Route::resource('rdbprojectposition', RdbprojectpositionController::class);
     Route::resource('rdbprojecttype', RdbprojecttypeController::class);
     Route::resource('rdbprojecttypesgroup', RdbProjectTypesGroupController::class);
+    Route::get('rdbprojecttypesub/{id}/view-file', [RdbProjectTypeSubController::class, 'viewFile'])->name('rdbprojecttypesub.view_file');
     Route::resource('rdbprojecttypesub', RdbProjectTypeSubController::class);
     Route::resource('rdbprojectwork', RdbprojectworkController::class);
     Route::resource('rdbstrategic', RdbstrategicController::class);
@@ -234,7 +235,10 @@ Route::name('frontend.')->group(function () {
     Route::resource('rdbdepartmenttype', RdbdepartmenttypeController::class)->parameters(['rdbdepartmenttype' => 'id'])->only(['index', 'show']);
     Route::resource('rdbdepmajor', RdbdepmajorController::class)->parameters(['rdbdepmajor' => 'id'])->only(['index', 'show']);
     Route::get('rdbdip/export', [RdbdipController::class, 'export'])->name('rdbdip.export');
+    Route::get('rdbdip/{id}/view-file', [RdbdipController::class, 'viewFile'])->name('rdbdip.view_file');
     Route::resource('rdbdip', RdbdipController::class)->parameters(['rdbdip' => 'id'])->only(['index', 'show']);
+    Route::get('rdbdip/api/search-dips', [RdbdipController::class, 'searchDips'])->name('rdbdip.search_dips');
+    Route::get('rdbdip/api/search-researchers', [FrontendRdbprojectController::class, 'searchResearchers'])->name('rdbdip.search_researchers');
     Route::resource('rdbdiptype', RdbdiptypeController::class)->parameters(['rdbdiptype' => 'id'])->only(['index', 'show']);
     Route::resource('rdbgroupproject', FrontendRdbgroupprojectController::class)->parameters(['rdbgroupproject' => 'id'])->only(['index', 'show']);
     Route::resource('rdbnacc', RdbnaccController::class)->parameters(['rdbnacc' => 'id'])->only(['index', 'show']);
@@ -243,6 +247,7 @@ Route::name('frontend.')->group(function () {
     Route::get('rdbproject/api/types-by-year', [FrontendRdbprojectController::class, 'getTypesByYear'])->name('rdbproject.typesByYear');
     Route::get('rdbproject/api/subtypes-by-type', [FrontendRdbprojectController::class, 'getSubTypesByType'])->name('rdbproject.subTypesByType');
     Route::get('rdbproject/api/search-researchers', [FrontendRdbprojectController::class, 'searchResearchers'])->name('rdbproject.search_researchers');
+    Route::get('rdbproject/api/search-projects', [FrontendRdbprojectController::class, 'searchProjects'])->name('rdbproject.search_projects');
     Route::get('rdbproject/{id}/file/{fid}/download', [FrontendRdbprojectController::class, 'downloadFile'])->name('rdbproject.file.download');
     Route::get('rdbproject/{id}/view-abstract', [FrontendRdbprojectController::class, 'viewAbstract'])->name('rdbproject.view_abstract');
     Route::get('rdbproject/{id}/view-report', [FrontendRdbprojectController::class, 'viewReport'])->name('rdbproject.view_report');
@@ -258,11 +263,17 @@ Route::name('frontend.')->group(function () {
     Route::resource('rdbprojecttypesub', FrontendRdbprojecttypesubController::class)->parameters(['rdbprojecttypesub' => 'id'])->only(['index', 'show']);
     Route::resource('rdbprojectutilization', RdbprojectutilizationController::class)->parameters(['rdbprojectutilization' => 'id']);
     Route::resource('rdbprojectutilize', RdbprojectutilizeController::class)->parameters(['rdbprojectutilize' => 'id'])->only(['index', 'show']);
+    Route::get('rdbprojectutilize/{id}/view-file', [RdbprojectutilizeController::class, 'viewFile'])->name('rdbprojectutilize.view_file');
+    Route::get('rdbprojectutilize/api/search-utilizes', [RdbprojectutilizeController::class, 'searchUtilizes'])->name('rdbprojectutilize.search_utilizes');
+    Route::get('rdbprojectutilize/api/search-researchers', [FrontendRdbprojectController::class, 'searchResearchers'])->name('rdbprojectutilize.search_researchers');
 
     Route::resource('rdbprojectutilizetype', RdbprojectutilizetypeController::class)->parameters(['rdbprojectutilizetype' => 'id'])->only(['index', 'show']);
     Route::resource('rdbprojectwork', RdbprojectworkController::class)->parameters(['rdbprojectwork' => 'id'])->only(['index', 'show']);
     Route::get('rdbpublished/export', [RdbpublishedController::class, 'export'])->name('rdbpublished.export');
+    Route::get('rdbpublished/{id}/view-file', [RdbpublishedController::class, 'viewFile'])->name('rdbpublished.view_file');
     Route::resource('rdbpublished', RdbpublishedController::class)->parameters(['rdbpublished' => 'id'])->only(['index', 'show']);
+    Route::get('rdbpublished/api/search-publications', [RdbpublishedController::class, 'searchPublications'])->name('rdbpublished.search_publications');
+    Route::get('rdbpublished/api/search-researchers', [FrontendRdbprojectController::class, 'searchResearchers'])->name('rdbpublished.search_researchers');
     Route::resource('rdbpublishedbranch', RdbpublishedbranchController::class)->parameters(['rdbpublishedbranch' => 'id'])->only(['index', 'show']);
     Route::resource('rdbpublishedbranchper', RdbpublishedbranchperController::class)->parameters(['rdbpublishedbranchper' => 'id'])->only(['index', 'show']);
     Route::resource('rdbpublishedcheckyear', RdbpublishedcheckyearController::class)->parameters(['rdbpublishedcheckyear' => 'id'])->only(['index', 'show']);

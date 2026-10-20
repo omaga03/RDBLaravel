@@ -65,12 +65,7 @@
                         <tr>
                             <td class="text-center p-3">
                                 @php
-                                    $conImg = null;
-                                    if (!empty($item->file_path)) {
-                                        $conImg = asset('storage/' . $item->file_path);
-                                    } elseif (!empty($item->con_img)) {
-                                        $conImg = Storage::url($item->con_img);
-                                    }
+                                    $conImg = $item->image_url;
                                 @endphp
                                 <div class="ratio ratio-16x9 rounded overflow-hidden bg-body-secondary border mx-auto" style="max-width: 140px;">
                                     @if($conImg)

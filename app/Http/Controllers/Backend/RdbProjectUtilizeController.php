@@ -77,6 +77,53 @@ class RdbProjectUtilizeController extends Controller
         }
 
         if ($request->search_mode === 'advanced') {
+            if ($request->filled('utz_id') && $request->utz_id !== 'pre') {
+                $query->where('utz_id', $request->utz_id);
+            }
+            if ($request->filled('pro_id')) {
+                $query->where('pro_id', $request->pro_id);
+            }
+            if ($request->filled('researcher_id')) {
+                $resId = $request->researcher_id;
+                $query->whereHas('project.rdbProjectWorks', function($q) use ($resId) {
+                    $q->where('rdb_project_work.researcher_id', $resId);
+                });
+            }
+            if ($request->filled('title_keywords')) {
+                $keywords = array_values(array_filter(preg_split('/\s+/', trim($request->title_keywords))));
+                $mode = $request->input('title_keywords_mode', 'all');
+
+                if (!empty($keywords)) {
+                    if ($mode === 'all') {
+                        $query->where(function($q) use ($keywords) {
+                            foreach ($keywords as $kw) {
+                                $q->where(function($sub) use ($kw) {
+                                    $sub->where('utz_department_name', 'like', "%{$kw}%")
+                                        ->orWhere('utz_detail', 'like', "%{$kw}%")
+                                        ->orWhereHas('project', function($pq) use ($kw) {
+                                            $pq->where('pro_nameTH', 'like', "%{$kw}%")
+                                               ->orWhere('pro_nameEN', 'like', "%{$kw}%");
+                                        });
+                                });
+                            }
+                        });
+                    } else {
+                        $query->where(function($q) use ($keywords) {
+                            foreach ($keywords as $kw) {
+                                $q->orWhere(function($sub) use ($kw) {
+                                    $sub->where('utz_department_name', 'like', "%{$kw}%")
+                                        ->orWhere('utz_detail', 'like', "%{$kw}%")
+                                        ->orWhereHas('project', function($pq) use ($kw) {
+                                            $pq->where('pro_nameTH', 'like', "%{$kw}%")
+                                               ->orWhere('pro_nameEN', 'like', "%{$kw}%");
+                                        });
+                                });
+                            }
+                        });
+                    }
+                }
+            }
+
             if ($request->filled('utz_department_name')) {
                 $query->where('utz_department_name', 'like', '%' . $request->utz_department_name . '%');
             }
@@ -314,7 +361,7 @@ class RdbProjectUtilizeController extends Controller
             $filePath = $candidate;
         }
 
-        // 2. Fallback to specific $filename under uploads/utilize
+        // 2. Fallback to specific $filename under uploads/utilize or datautilize
         if (!$filePath && $filename) {
             $safeName = basename(trim($filename));
             if ($safeName) {
@@ -322,6 +369,16 @@ class RdbProjectUtilizeController extends Controller
                     $filePath = 'uploads/utilize/' . $safeName;
                 } elseif (file_exists(public_path('uploads/utilize/' . $safeName))) {
                     $filePath = 'uploads/utilize/' . $safeName;
+                } elseif (file_exists(public_path('datautilize/' . $item->utz_id . '/' . $safeName))) {
+                    $filePath = 'datautilize/' . $item->utz_id . '/' . $safeName;
+                } elseif (file_exists(base_path('yii2_rdb-main/frontend/web/datautilize/' . $item->utz_id . '/' . $safeName))) {
+                    $item->increment('utz_countfile');
+                    $fullPath = base_path('yii2_rdb-main/frontend/web/datautilize/' . $item->utz_id . '/' . $safeName);
+                    $mimeType = mime_content_type($fullPath) ?: 'application/pdf';
+                    return response()->file($fullPath, [
+                        'Content-Type' => $mimeType,
+                        'Content-Disposition' => 'inline; filename="' . $safeName . '"'
+                    ]);
                 }
             }
         }

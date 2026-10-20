@@ -79,12 +79,7 @@
 
                     <!-- Main News Image -->
                     @php
-                        $newsImg = null;
-                        if (!empty($item->news_path)) {
-                            $newsImg = asset('storage/' . $item->news_path);
-                        } elseif (!empty($item->news_img)) {
-                            $newsImg = Storage::url($item->news_img);
-                        }
+                        $newsImg = $item->image_url;
                     @endphp
                     @if($newsImg)
                         <div class="mb-4 rounded overflow-hidden shadow-sm border text-center bg-body-tertiary">
@@ -139,12 +134,7 @@
                     <div class="list-group list-group-flush">
                         @foreach($recentNews as $other)
                             @php
-                                $otherImg = null;
-                                if (!empty($other->news_path)) {
-                                    $otherImg = asset('storage/' . $other->news_path);
-                                } elseif (!empty($other->news_img)) {
-                                    $otherImg = Storage::url($other->news_img);
-                                }
+                                $otherImg = $other->image_url;
                             @endphp
                             <a href="{{ route('frontend.researchnews.show', $other->id) }}" class="list-group-item list-group-item-action bg-transparent py-3 px-3">
                                 <div class="d-flex gap-3">

@@ -18,8 +18,8 @@
             <hr>
         @endif
 
-        <!-- ✅ Report File - Read Only (แสดงเฉพาะ pro_file_show = 1) -->
-        @if($project->getReportFilePath() && $project->pro_file_show == 1)
+        <!-- ✅ Report File - Read Only (แสดงเฉพาะ pro_file_show = 0 เปิด) -->
+        @if($project->getReportFilePath() && (int)$project->pro_file_show === 0)
             <div class="mb-3">
                 <h6>📑 รายงานฉบับสมบูรณ์ (Full Report)</h6>
                 <a href="{{ route('frontend.rdb_project.view_report', $project->pro_id) }}" 
@@ -29,6 +29,18 @@
                 <small class="text-muted d-block mt-1">
                     ดูแล้ว: {{ $project->pro_count_full ?? 0 }} ครั้ง
                 </small>
+            </div>
+            <hr>
+        @elseif($project->getReportFilePath() && (int)$project->pro_file_show === 1)
+            <div class="mb-3">
+                <h6>📑 รายงานฉบับสมบูรณ์ (Full Report)</h6>
+                <span class="badge bg-danger text-white"><i class="fa fa-lock"></i> ปกปิดเล่มรายงาน (ไม่เผยแพร่)</span>
+            </div>
+            <hr>
+        @elseif($project->getReportFilePath() && (int)$project->pro_file_show === 2)
+            <div class="mb-3">
+                <h6>📑 รายงานฉบับสมบูรณ์ (Full Report)</h6>
+                <span class="badge bg-warning text-dark"><i class="fa fa-pencil"></i> ฉบับร่าง (ยังไม่เผยแพร่)</span>
             </div>
             <hr>
         @endif
@@ -70,7 +82,7 @@
 
         <!-- ✅ No files message -->
         @if(!$project->getAbstractFilePath() && 
-            (!$project->getReportFilePath() || $project->pro_file_show == 0) && 
+            (!$project->getReportFilePath() || (int)$project->pro_file_show !== 0) && 
             $publicFiles->count() == 0)
             <div class="alert alert-info">
                 <i class="fa fa-info-circle"></i> ไม่มีไฟล์ที่เปิดให้สาธารณะ

@@ -80,10 +80,46 @@
                 <input type="number" class="form-control" name="budget_max" value="{{ request('budget_max') }}" placeholder="สูงสุด" min="0">
             </div>
 
-            {{-- Row 3: ชื่อโครงการ --}}
+            {{-- Row 3: ชื่อโครงการ (Searchable TomSelect Autocomplete like Researcher) --}}
             <div class="col-md-12">
-                <label class="form-label">ชื่อโครงการวิจัย (ภาษาไทย-อังกฤษ)</label>
-                <input type="text" class="form-control" name="pro_nameTH" value="{{ request('pro_nameTH') }}" placeholder="ระบุชื่อโครงการ...">
+                <label class="form-label d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-folder2 text-primary me-1"></i> ชื่อโครงการวิจัย (ภาษาไทย-อังกฤษ)</span>
+                    <span class="badge bg-secondary-subtle text-body-secondary" style="font-size: 0.7rem;">พิมพ์เพื่อค้นหาชื่อโครงการ</span>
+                </label>
+                <select class="form-select" id="search_pro_id" name="pro_id"></select>
+                <input type="hidden" name="pro_nameTH" id="search_pro_nameTH" value="{{ request('pro_nameTH') }}">
+            </div>
+
+            {{-- Row 3.5: Multi-Keyword Title Search (กลุ่มคำคั่นด้วยช่องว่าง + เจอทั้งหมด / เจอบางคำ) --}}
+            <div class="col-md-12">
+                <div class="p-3 rounded-3 border bg-body-tertiary">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-1.5 gap-2">
+                        <label class="form-label mb-0 fw-semibold text-body" style="font-size: 0.88rem;">
+                            <i class="bi bi-fonts text-primary me-1"></i> ค้นหาชื่อเรื่องแบบกลุ่มคำ (คั่นด้วยช่องว่าง)
+                        </label>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="form-check form-check-inline mb-0">
+                                <input class="form-check-input" type="radio" name="title_keywords_mode" id="b_pro_mode_all" value="all" 
+                                    {{ request('title_keywords_mode', 'all') === 'all' ? 'checked' : '' }}>
+                                <label class="form-check-label small fw-medium" for="b_pro_mode_all">
+                                    <i class="bi bi-check-all text-success me-1"></i>เจอทั้งหมด (ตรงทุกคำ - AND)
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline mb-0">
+                                <input class="form-check-input" type="radio" name="title_keywords_mode" id="b_pro_mode_any" value="any" 
+                                    {{ request('title_keywords_mode') === 'any' ? 'checked' : '' }}>
+                                <label class="form-check-label small fw-medium" for="b_pro_mode_any">
+                                    <i class="bi bi-intersect text-primary me-1"></i>เจอบางคำ (ตรงคำใดคำหนึ่ง - OR)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="text" class="form-control" name="title_keywords" value="{{ request('title_keywords') }}" 
+                        placeholder="เช่น เกษตร ชุมชน พลังงาน (พิมพ์หลายคำคั่นด้วยช่องว่าง)...">
+                    <div class="form-text small text-body-secondary mt-1">
+                        <i class="bi bi-info-circle me-1"></i>ระบบจะค้นหาชื่อโครงการวิจัยที่มีกลุ่มคำดังกล่าวตามเงื่อนไขที่เลือก (เจอทั้งหมด หรือ เจอบางคำ)
+                    </div>
+                </div>
             </div>
 
             {{-- Row 4: นักวิจัย (TomSelect), หน่วยงาน --}}
@@ -468,6 +504,55 @@ document.addEventListener('DOMContentLoaded', function() {
         typeSelect.addEventListener('change', function() {
             loadProjectTypeSubs(this.value);
         });
+    }
+
+    // =========================================================================
+    // TOMSELECT FOR PROJECT TITLE SEARCH
+    // =========================================================================
+    const projectSelect = document.getElementById('search_pro_id');
+    const projectNameHidden = document.getElementById('search_pro_nameTH');
+
+    if (projectSelect && typeof TomSelect !== 'undefined') {
+        const tsProj = new TomSelect(projectSelect, {
+            create: false,
+            openOnFocus: true,
+            persist: false,
+            maxOptions: 20,
+            valueField: 'value',
+            labelField: 'text',
+            searchField: 'text',
+            placeholder: '-- พิมพ์เพื่อค้นหาชื่อโครงการวิจัย --',
+            loadThrottle: 300,
+            load: function(query, callback) {
+                if (!query.length || query.length < 2) return callback();
+                fetch('{{ route("backend.rdb_project.search") }}?q=' + encodeURIComponent(query))
+                    .then(response => response.json())
+                    .then(json => callback(json.results || json))
+                    .catch(() => callback());
+            },
+            onChange: function(value) {
+                const item = this.options[value];
+                if (item && projectNameHidden) {
+                    projectNameHidden.value = item.text.split(' [')[0];
+                } else if (projectNameHidden) {
+                    projectNameHidden.value = '';
+                }
+            },
+            render: {
+                option: function(data, escape) { return '<div>' + (data._highlight || escape(data.text)) + '</div>'; },
+                item: function(data, escape) { return '<div>' + escape(data.text) + '</div>'; },
+                no_results: function() { return '<div class="no-results p-2 text-muted">ไม่พบข้อมูลโครงการ (พิมพ์อย่างน้อย 2 ตัวอักษร)</div>'; }
+            }
+        });
+
+        const preProId = "{{ request('pro_id') }}";
+        const preProName = @json(request('pro_nameTH') ?: '');
+        if (preProId || preProName) {
+            const val = preProId || 'pre';
+            const label = preProName || ('โครงการ #' + preProId);
+            tsProj.addOption({ value: val, text: label });
+            tsProj.setValue(val);
+        }
     }
 
     // =========================================================================

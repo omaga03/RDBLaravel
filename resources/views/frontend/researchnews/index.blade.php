@@ -78,12 +78,7 @@
                         <tr>
                             <td class="text-center p-3">
                                 @php
-                                    $newsImg = null;
-                                    if (!empty($item->news_path)) {
-                                        $newsImg = asset('storage/' . $item->news_path);
-                                    } elseif (!empty($item->news_img)) {
-                                        $newsImg = Storage::url($item->news_img);
-                                    }
+                                    $newsImg = $item->image_url;
                                 @endphp
                                 <div class="ratio ratio-16x9 rounded overflow-hidden bg-body-secondary border mx-auto" style="max-width: 140px;">
                                     @if($newsImg)

@@ -79,13 +79,8 @@
                         </td>
                         <td class="text-center">
                             <a href="{{ route('frontend.rdbresearcher.show', $item->researcher_id) }}" class="d-inline-block text-decoration-none">
-                                @if($item->researcher_picture)
-                                    <img src="{{ asset('storage/uploads/researchers/' . $item->researcher_picture) }}"
-                                         alt="{{ $item->researcher_fname }}"
-                                         class="rounded-circle object-fit-cover shadow-sm"
-                                         style="width: 46px; height: 46px; border: 2px solid var(--bs-border-color);">
-                                @elseif($item->rf_path)
-                                    <img src="{{ asset('storage/' . $item->rf_path) }}"
+                                @if($item->profile_image_url)
+                                    <img src="{{ $item->profile_image_url }}"
                                          alt="{{ $item->researcher_fname }}"
                                          class="rounded-circle object-fit-cover shadow-sm"
                                          style="width: 46px; height: 46px; border: 2px solid var(--bs-border-color);">

@@ -101,6 +101,44 @@ class RdbPublishedController extends Controller
         // 2. Advanced Search Filters
         if ($request->filled('search_mode') && $request->search_mode == 'advanced') {
             
+            // Publication Autocomplete & Multi-Keyword Title Search
+            if ($request->filled('pub_id') && $request->pub_id !== 'pre') {
+                $query->where('id', $request->pub_id);
+            } elseif ($request->filled('pub_name')) {
+                $pubName = trim($request->pub_name);
+                $query->where(function($q) use ($pubName) {
+                    $q->where('pub_name', 'like', "%{$pubName}%")
+                      ->orWhere('pub_name_journal', 'like', "%{$pubName}%");
+                });
+            }
+
+            if ($request->filled('title_keywords')) {
+                $keywords = array_values(array_filter(preg_split('/\s+/', trim($request->title_keywords))));
+                $mode = $request->input('title_keywords_mode', 'all');
+
+                if (!empty($keywords)) {
+                    if ($mode === 'all') {
+                        $query->where(function($q) use ($keywords) {
+                            foreach ($keywords as $kw) {
+                                $q->where(function($sub) use ($kw) {
+                                    $sub->where('pub_name', 'like', "%{$kw}%")
+                                        ->orWhere('pub_name_journal', 'like', "%{$kw}%");
+                                });
+                            }
+                        });
+                    } else {
+                        $query->where(function($q) use ($keywords) {
+                            foreach ($keywords as $kw) {
+                                $q->orWhere(function($sub) use ($kw) {
+                                    $sub->where('pub_name', 'like', "%{$kw}%")
+                                        ->orWhere('pub_name_journal', 'like', "%{$kw}%");
+                                });
+                            }
+                        });
+                    }
+                }
+            }
+
             // Year Filter with Year Type
             if ($request->filled('year_id')) {
                 $yearCol = 'year_id'; // Default: Calendar
@@ -665,9 +703,27 @@ class RdbPublishedController extends Controller
             return Storage::disk('public')->response($filePath);
         }
 
+        if ($filePath && file_exists(public_path('storage/' . $filePath))) {
+            $item->increment('pub_download');
+            return response()->file(public_path('storage/' . $filePath));
+        }
+
         if ($filePath && file_exists(public_path($filePath))) {
             $item->increment('pub_download');
             return response()->file(public_path($filePath));
+        }
+
+        // Support legacy yii2 datapublished
+        if (!empty($item->pub_file)) {
+            $legacyPath = 'datapublished/' . $item->id . '/' . basename($item->pub_file);
+            if (file_exists(public_path($legacyPath))) {
+                $item->increment('pub_download');
+                return response()->file(public_path($legacyPath));
+            }
+            if (file_exists(base_path('yii2_rdb-main/frontend/web/' . $legacyPath))) {
+                $item->increment('pub_download');
+                return response()->file(base_path('yii2_rdb-main/frontend/web/' . $legacyPath));
+            }
         }
 
         abort(404, 'ไม่พบไฟล์');

@@ -78,12 +78,7 @@
 
                     <!-- Conference Banner/Image -->
                     @php
-                        $conImg = null;
-                        if (!empty($item->file_path)) {
-                            $conImg = asset('storage/' . $item->file_path);
-                        } elseif (!empty($item->con_img)) {
-                            $conImg = Storage::url($item->con_img);
-                        }
+                        $conImg = $item->image_url;
                     @endphp
                     @if($conImg)
                         <div class="mb-4 rounded overflow-hidden shadow-sm border text-center bg-body-tertiary">
@@ -165,12 +160,7 @@
                     <div class="list-group list-group-flush">
                         @foreach($recentConferences as $other)
                             @php
-                                $otherImg = null;
-                                if (!empty($other->file_path)) {
-                                    $otherImg = asset('storage/' . $other->file_path);
-                                } elseif (!empty($other->con_img)) {
-                                    $otherImg = Storage::url($other->con_img);
-                                }
+                                $otherImg = $other->image_url;
                             @endphp
                             <a href="{{ route('frontend.researchcoferenceinthai.show', $other->id) }}" class="list-group-item list-group-item-action bg-transparent py-3 px-3">
                                 <div class="d-flex gap-3">

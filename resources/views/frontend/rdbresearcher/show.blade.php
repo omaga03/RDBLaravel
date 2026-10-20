@@ -32,12 +32,7 @@
                     <!-- Profile Image -->
                     <div class="mb-3 position-relative d-inline-block">
                         @php
-                            $profileImg = null;
-                            if (!empty($item->rf_path)) {
-                                $profileImg = asset('storage/' . $item->rf_path);
-                            } elseif (!empty($item->researcher_picture)) {
-                                $profileImg = asset('storage/uploads/researchers/' . $item->researcher_picture);
-                            }
+                            $profileImg = $item->profile_image_url;
                         @endphp
                         @if($profileImg)
                             <img src="{{ $profileImg }}"
