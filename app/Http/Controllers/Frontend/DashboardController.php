@@ -17,6 +17,7 @@ use App\Models\RdbDipType;
 use App\Models\RdbPublishedType;
 use App\Models\RdbProjectStatus;
 use App\Models\RdbPrefix;
+use App\Models\RdbChangwat;
 
 class DashboardController extends Controller
 {
@@ -621,8 +622,28 @@ class DashboardController extends Controller
     }
 
     /**
+     * AJAX endpoint: Get distinct Amphoes for a given Changwat
+     */
+    public function getAmphoesByChangwat(Request $request)
+    {
+        $changwat = $request->input('changwat');
+        if (!$changwat) {
+            return response()->json([]);
+        }
+
+        $amphoes = RdbChangwat::where('changwat_t', $changwat)
+            ->whereNotNull('amphoe_t')
+            ->where('amphoe_t', '!=', '')
+            ->distinct()
+            ->orderBy('amphoe_t')
+            ->pluck('amphoe_t');
+
+        return response()->json($amphoes);
+    }
+
+    /**
      * 4. Geographic & Community Utilization Dashboard (GIS Map)
-     * Filters: year_id, department_id, utz_pillar, amphoe, qa_status
+     * Filters: year_id, department_id, utz_pillar, changwat[], amphoe[], qa_status
      */
     public function utilizations(Request $request)
     {
@@ -631,10 +652,70 @@ class DashboardController extends Controller
 
         $deptId = $request->filled('department_id') && $request->department_id !== 'all' ? (int)$request->department_id : null;
         $utzPillar = $request->filled('utz_pillar') && $request->utz_pillar !== 'all' ? $request->utz_pillar : null;
-        $amphoe = $request->filled('amphoe') && $request->amphoe !== 'all' ? $request->amphoe : null;
         $qaStatus = $request->filled('qa_status') && $request->qa_status !== 'all' ? $request->qa_status : null;
 
-        $activeFilterCount = count(array_filter([$selectedYearId, $deptId, $utzPillar, $amphoe, $qaStatus]));
+        // Multi-select Changwat (Province)
+        $selectedChangwats = [];
+        if ($request->filled('changwat')) {
+            $raw = $request->input('changwat');
+            if (is_array($raw)) {
+                $selectedChangwats = array_values(array_filter($raw, fn($v) => !empty($v) && $v !== 'all'));
+            } elseif (is_string($raw) && $raw !== 'all') {
+                $selectedChangwats = array_values(array_filter(explode(',', $raw), fn($v) => !empty(trim($v)) && trim($v) !== 'all'));
+            }
+        }
+
+        // Multi-select Amphoe (District)
+        $selectedAmphoes = [];
+        if ($request->filled('amphoe')) {
+            $rawAmp = $request->input('amphoe');
+            if (is_array($rawAmp)) {
+                $selectedAmphoes = array_values(array_filter($rawAmp, fn($v) => !empty($v) && $v !== 'all'));
+            } elseif (is_string($rawAmp) && $rawAmp !== 'all') {
+                $selectedAmphoes = array_values(array_filter(explode(',', $rawAmp), fn($v) => !empty(trim($v)) && trim($v) !== 'all'));
+            }
+        }
+
+        // Backward compatibility: If amphoe was provided directly without changwat, resolve its changwat
+        if (empty($selectedChangwats) && !empty($selectedAmphoes)) {
+            $foundChangwat = RdbChangwat::where('amphoe_t', $selectedAmphoes[0])->value('changwat_t');
+            if ($foundChangwat) {
+                $selectedChangwats = [$foundChangwat];
+            }
+        }
+
+        // Amphoe selection is strictly valid only when exactly 1 province is selected
+        if (count($selectedChangwats) !== 1) {
+            $selectedAmphoes = [];
+        }
+
+        // Available provinces (prioritize จ.เพชรบูรณ์ first, then alphabetical)
+        $allProvinces = RdbChangwat::whereNotNull('changwat_t')
+            ->where('changwat_t', '!=', '')
+            ->distinct()
+            ->orderByRaw("CASE WHEN changwat_t = 'จ.เพชรบูรณ์' THEN 0 ELSE 1 END")
+            ->orderBy('changwat_t')
+            ->pluck('changwat_t');
+
+        // Available amphoes if exactly 1 province is selected
+        $availableAmphoes = collect();
+        if (count($selectedChangwats) === 1) {
+            $availableAmphoes = RdbChangwat::where('changwat_t', $selectedChangwats[0])
+                ->whereNotNull('amphoe_t')
+                ->where('amphoe_t', '!=', '')
+                ->distinct()
+                ->orderBy('amphoe_t')
+                ->pluck('amphoe_t');
+        }
+
+        $activeFilterCount = count(array_filter([
+            $selectedYearId, 
+            $deptId, 
+            $utzPillar, 
+            !empty($selectedChangwats) ? count($selectedChangwats) : null,
+            !empty($selectedAmphoes) ? count($selectedAmphoes) : null,
+            $qaStatus
+        ]));
 
         $query = RdbProjectUtilize::query();
 
@@ -646,12 +727,42 @@ class DashboardController extends Controller
         if ($deptId) {
             $query->whereHas('project', fn($q) => $q->where('department_id', $deptId));
         }
+
+        // 5 Pillars Breakdown Filter (1: สาธารณะ, 2: นโยบาย, 3: พาณิชย์, 4: ชุมชน/พื้นที่, 5: อื่น ๆ)
         if ($utzPillar) {
-            $query->where('utz_group', 'like', "%{$utzPillar}%");
+            if ($utzPillar === '5') {
+                $query->where(function ($q) {
+                    if (DB::connection()->getDriverName() === 'sqlite') {
+                        $q->where('utz_group', 'like', '%5%')
+                          ->orWhere('utz_group', 'like', '%6%')
+                          ->orWhere('utz_group', 'like', '%7%')
+                          ->orWhere('utz_group', 'like', '%8%')
+                          ->orWhere('utz_group', 'like', '%9%')
+                          ->orWhere('utz_group', 'like', '%10%')
+                          ->orWhere('utz_group', 'like', '%11%');
+                    } else {
+                        $q->whereRaw("utz_group REGEXP '(^|,)([5-9]|1[0-9])(,|$)'");
+                    }
+                });
+            } else {
+                if (DB::connection()->getDriverName() === 'sqlite') {
+                    $query->whereRaw("',' || utz_group || ',' LIKE ?", ["%,{$utzPillar},%"]);
+                } else {
+                    $query->whereRaw("FIND_IN_SET(?, utz_group)", [$utzPillar]);
+                }
+            }
         }
-        if ($amphoe) {
-            $query->whereHas('changwat', fn($q) => $q->where('amphoe_t', $amphoe));
+
+        // Filter by Changwat & Amphoe
+        if (!empty($selectedChangwats)) {
+            $query->whereHas('changwat', function ($q) use ($selectedChangwats, $selectedAmphoes) {
+                $q->whereIn('changwat_t', $selectedChangwats);
+                if (!empty($selectedAmphoes)) {
+                    $q->whereIn('amphoe_t', $selectedAmphoes);
+                }
+            });
         }
+
         if ($qaStatus !== null) {
             if ($qaStatus === '1') {
                 $query->where('utz_group_qa', '1');
@@ -681,12 +792,26 @@ class DashboardController extends Controller
             ->orderByDesc('count')
             ->get();
 
-        // 4 Pillars Breakdown
-        $fourPillars = [
-            'public' => (clone $query)->where('utz_group', 'like', '%1%')->count(),
-            'policy' => (clone $query)->where('utz_group', 'like', '%2%')->count(),
-            'commercial' => (clone $query)->where('utz_group', 'like', '%3%')->count(),
-            'community' => (clone $query)->where('utz_group', 'like', '%4%')->count(),
+        // 5 Pillars Breakdown
+        $isSqlite = DB::connection()->getDriverName() === 'sqlite';
+        $fivePillars = [
+            'public' => (clone $query)->whereRaw($isSqlite ? "',' || utz_group || ',' LIKE '%,1,%'" : "FIND_IN_SET('1', utz_group)")->count(),
+            'policy' => (clone $query)->whereRaw($isSqlite ? "',' || utz_group || ',' LIKE '%,2,%'" : "FIND_IN_SET('2', utz_group)")->count(),
+            'commercial' => (clone $query)->whereRaw($isSqlite ? "',' || utz_group || ',' LIKE '%,3,%'" : "FIND_IN_SET('3', utz_group)")->count(),
+            'community' => (clone $query)->whereRaw($isSqlite ? "',' || utz_group || ',' LIKE '%,4,%'" : "FIND_IN_SET('4', utz_group)")->count(),
+            'other' => (clone $query)->where(function ($q) use ($isSqlite) {
+                if ($isSqlite) {
+                    $q->where('utz_group', 'like', '%5%')
+                      ->orWhere('utz_group', 'like', '%6%')
+                      ->orWhere('utz_group', 'like', '%7%')
+                      ->orWhere('utz_group', 'like', '%8%')
+                      ->orWhere('utz_group', 'like', '%9%')
+                      ->orWhere('utz_group', 'like', '%10%')
+                      ->orWhere('utz_group', 'like', '%11%');
+                } else {
+                    $q->whereRaw("utz_group REGEXP '(^|,)([5-9]|1[0-9])(,|$)'");
+                }
+            })->count(),
         ];
 
         // Top Partner Agencies
@@ -728,7 +853,11 @@ class DashboardController extends Controller
             'selectedYear' => $selectedYear,
             'deptId' => $deptId,
             'utzPillar' => $utzPillar,
-            'amphoe' => $amphoe,
+            'selectedChangwats' => $selectedChangwats,
+            'selectedAmphoes' => $selectedAmphoes,
+            'allProvinces' => $allProvinces,
+            'availableAmphoes' => $availableAmphoes,
+            'amphoe' => count($selectedAmphoes) === 1 ? $selectedAmphoes[0] : null,
             'qaStatus' => $qaStatus,
             'activeFilterCount' => $activeFilterCount,
             'totalUtilizations' => $totalUtilizations,
@@ -736,7 +865,8 @@ class DashboardController extends Controller
             'qaCount' => $qaCount,
             'partnerCount' => $partnerCount,
             'districtsRanking' => $districtsRanking,
-            'fourPillars' => $fourPillars,
+            'fivePillars' => $fivePillars,
+            'fourPillars' => $fivePillars,
             'topAgencies' => $topAgencies,
             'mapMarkers' => $mapMarkers,
             'utilizationsList' => $utilizationsList,

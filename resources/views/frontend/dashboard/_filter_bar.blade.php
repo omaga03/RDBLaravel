@@ -204,7 +204,7 @@
                     </div>
 
                     <!-- Filter 2: Faculty / Department -->
-                    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                         <label class="form-label text-body-secondary small fw-medium mb-1"><i class="bi bi-building text-primary me-1"></i> คณะ / หน่วยงาน</label>
                         <select name="department_id" class="form-select form-select-sm fw-medium">
                             <option value="all" {{ empty($deptId) ? 'selected' : '' }}>-- ทุกคณะ / หน่วยงาน --</option>
@@ -216,7 +216,7 @@
                         </select>
                     </div>
 
-                    <!-- Filter 3: 4 Pillars of Utilization -->
+                    <!-- Filter 3: 5 Pillars of Utilization -->
                     <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                         <label class="form-label text-body-secondary small fw-medium mb-1"><i class="bi bi-diagram-3 text-primary me-1"></i> มิติการใช้ประโยชน์</label>
                         <select name="utz_pillar" class="form-select form-select-sm fw-medium">
@@ -225,23 +225,58 @@
                             <option value="2" {{ (isset($utzPillar) && $utzPillar === '2') ? 'selected' : '' }}>2. เชิงนโยบาย</option>
                             <option value="3" {{ (isset($utzPillar) && $utzPillar === '3') ? 'selected' : '' }}>3. เชิงพาณิชย์</option>
                             <option value="4" {{ (isset($utzPillar) && $utzPillar === '4') ? 'selected' : '' }}>4. เชิงพื้นที่ / ชุมชน</option>
+                            <option value="5" {{ (isset($utzPillar) && $utzPillar === '5') ? 'selected' : '' }}>5. อื่น ๆ</option>
                         </select>
                     </div>
 
-                    <!-- Filter 4: District / Amphoe GIS -->
+                    <!-- Filter 4: Province (Changwat) - Multi-select -->
                     <div class="col-12 col-sm-6 col-md-4 col-lg-2">
-                        <label class="form-label text-body-secondary small fw-medium mb-1"><i class="bi bi-geo-alt-fill text-danger me-1"></i> อำเภอ (เพชรบูรณ์)</label>
-                        <select name="amphoe" class="form-select form-select-sm fw-medium">
-                            <option value="all" {{ empty($amphoe) ? 'selected' : '' }}>-- ทุกอำเภอ --</option>
-                            @foreach($amphoes as $amp)
-                                <option value="{{ $amp }}" {{ (isset($amphoe) && $amphoe === $amp) ? 'selected' : '' }}>
-                                    {{ $amp }}
+                        <label class="form-label text-body-secondary small fw-medium mb-1 d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-geo-alt-fill text-danger me-1"></i> จังหวัด</span>
+                            @if(!empty($selectedChangwats))
+                                <span class="badge bg-danger-subtle text-danger" style="font-size: 0.65rem;">เลือก {{ count($selectedChangwats) }} จว.</span>
+                            @endif
+                        </label>
+                        <select name="changwat[]" id="filter_changwat" class="form-select form-select-sm" multiple placeholder="เลือกจังหวัด (เลือกได้หลายจังหวัด)...">
+                            @foreach($allProvinces ?? [] as $prov)
+                                <option value="{{ $prov }}" {{ in_array($prov, $selectedChangwats ?? []) ? 'selected' : '' }}>
+                                    {{ $prov }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
 
-                    <!-- Filter 5: QA Accreditation -->
+                    <!-- Filter 5: Amphoe - Multi-select (Only enabled if 1 changwat is selected) -->
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                        <label class="form-label text-body-secondary small fw-medium mb-1 d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-pin-map-fill text-danger me-1"></i> อำเภอ</span>
+                            @if(count($selectedChangwats ?? []) === 1 && !empty($selectedAmphoes))
+                                <span class="badge bg-primary-subtle text-primary" style="font-size: 0.65rem;">เลือก {{ count($selectedAmphoes) }} อ.</span>
+                            @endif
+                        </label>
+                        @php
+                            $changwatCount = count($selectedChangwats ?? []);
+                            $amphoeDisabled = $changwatCount !== 1;
+                            if ($changwatCount === 1) {
+                                $amphoePlaceholder = 'เลือกอำเภอ (เลือกได้มากกว่า 1)...';
+                            } elseif ($changwatCount > 1) {
+                                $amphoePlaceholder = 'เลือกได้เมื่อระบุ 1 จังหวัดเท่านั้น';
+                            } else {
+                                $amphoePlaceholder = 'เลือก 1 จังหวัดก่อนเพื่อกรองอำเภอ';
+                            }
+                        @endphp
+                        <select name="amphoe[]" id="filter_amphoe" class="form-select form-select-sm" multiple {{ $amphoeDisabled ? 'disabled' : '' }} placeholder="{{ $amphoePlaceholder }}">
+                            @if($changwatCount === 1)
+                                @foreach($availableAmphoes ?? [] as $amp)
+                                    <option value="{{ $amp }}" {{ in_array($amp, $selectedAmphoes ?? []) ? 'selected' : '' }}>
+                                        {{ $amp }}
+                                    </option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+
+                    <!-- Filter 6: QA Accreditation -->
                     <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                         <label class="form-label text-body-secondary small fw-medium mb-1"><i class="bi bi-shield-check text-success me-1"></i> รับรองเกณฑ์ QA</label>
                         <select name="qa_status" class="form-select form-select-sm fw-medium">
@@ -401,8 +436,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const ptSelect = document.getElementById('filter_pt_id');
 
-    // Auto-submit on change for any select in the filter form
-    form.querySelectorAll('select').forEach(function(select) {
+    // Auto-submit on change for standard single selects in the filter form
+    form.querySelectorAll('select:not([multiple])').forEach(function(select) {
         select.addEventListener('change', function() {
             // If year was changed, reset pt_id to 'all' so it doesn't send mismatched type ID
             if (this.name === 'year_id' && ptSelect) {
@@ -412,6 +447,79 @@ document.addEventListener('DOMContentLoaded', function() {
             form.submit();
         });
     });
+
+    // Handle Utilizations Dashboard: Multi-select for Changwat & Cascading Amphoe
+    const changwatSelect = document.getElementById('filter_changwat');
+    const amphoeSelect = document.getElementById('filter_amphoe');
+
+    if (changwatSelect && typeof TomSelect !== 'undefined') {
+        let tsAmphoe = null;
+        if (amphoeSelect) {
+            tsAmphoe = new TomSelect(amphoeSelect, {
+                plugins: ['remove_button', 'clear_button'],
+                maxItems: null,
+                placeholder: amphoeSelect.getAttribute('placeholder') || 'เลือกอำเภอ (เลือกได้มากกว่า 1)...',
+                closeAfterSelect: false,
+                onDropdownClose: function() {
+                    debounceSubmit(600);
+                },
+                onItemRemove: function() {
+                    debounceSubmit(800);
+                }
+            });
+        }
+
+        let submitTimer = null;
+        function debounceSubmit(delay = 1000) {
+            clearTimeout(submitTimer);
+            submitTimer = setTimeout(() => {
+                if (tsAmphoe && tsAmphoe.isOpen) return;
+                if (tsChangwat && tsChangwat.isOpen) return;
+                form.submit();
+            }, delay);
+        }
+
+        const tsChangwat = new TomSelect(changwatSelect, {
+            plugins: ['remove_button', 'clear_button'],
+            maxItems: null,
+            placeholder: changwatSelect.getAttribute('placeholder') || 'เลือกจังหวัด (เลือกได้หลายจังหวัด)...',
+            closeAfterSelect: false,
+            onChange: function(values) {
+                if (!tsAmphoe) return;
+                const count = values.length;
+                if (count === 1) {
+                    const selectedProv = values[0];
+                    tsAmphoe.enable();
+                    fetch('{{ route("frontend.dashboard.amphoes") }}?changwat=' + encodeURIComponent(selectedProv))
+                        .then(r => r.json())
+                        .then(amphoes => {
+                            tsAmphoe.clear();
+                            tsAmphoe.clearOptions();
+                            amphoes.forEach(a => {
+                                tsAmphoe.addOption({ value: a, text: a });
+                            });
+                            tsAmphoe.settings.placeholder = 'เลือกอำเภอ (เลือกได้มากกว่า 1)...';
+                            tsAmphoe.input.placeholder = 'เลือกอำเภอ (เลือกได้มากกว่า 1)...';
+                            tsAmphoe.refreshOptions(false);
+                        })
+                        .catch(() => {});
+                } else {
+                    tsAmphoe.clear();
+                    tsAmphoe.clearOptions();
+                    tsAmphoe.disable();
+                    const msg = count > 1 ? `เลือกได้เมื่อระบุ 1 จังหวัดเท่านั้น (เลือก ${count} จังหวัด)` : 'เลือก 1 จังหวัดก่อนเพื่อกรองอำเภอ';
+                    tsAmphoe.settings.placeholder = msg;
+                    tsAmphoe.input.placeholder = msg;
+                }
+            },
+            onDropdownClose: function() {
+                debounceSubmit(600);
+            },
+            onItemRemove: function() {
+                debounceSubmit(800);
+            }
+        });
+    }
 
     // Handle collapse icon rotation
     const collapseEl = document.getElementById('intelligenceFiltersCollapse');
@@ -433,5 +541,25 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 .filter-collapse-icon.rotate-180 {
     transform: rotate(180deg);
+}
+.ts-wrapper.form-select-sm .ts-control {
+    min-height: 31px;
+    padding: 2px 8px;
+    font-size: 0.82rem;
+    border-radius: var(--bs-border-radius-sm, 0.25rem);
+}
+.ts-wrapper .ts-control .item {
+    background-color: rgba(220, 38, 38, 0.1);
+    color: #DC2626;
+    border: 1px solid rgba(220, 38, 38, 0.25);
+    border-radius: 4px;
+    font-size: 0.75rem;
+    padding: 0 5px;
+    margin: 1px 3px 1px 0;
+}
+.ts-wrapper.disabled .ts-control {
+    background-color: var(--bs-secondary-bg, #e9ecef);
+    opacity: 0.75;
+    cursor: not-allowed;
 }
 </style>

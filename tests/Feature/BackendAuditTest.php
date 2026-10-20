@@ -787,15 +787,30 @@ class BackendAuditTest extends TestCase
         $resPubs->assertSee('ผลงานตีพิมพ์');
         $resPubs->assertSee('quality_group');
 
-        // 4. Utilizations Dashboard with 4 pillars, amphoe, QA
+        // 4. Utilizations Dashboard with 5 pillars, multi-province, cascading amphoe, QA
         $resUtils = $this->get(route('frontend.dashboard.utilizations', [
-            'utz_pillar' => '4',
-            'amphoe' => 'อ.เมืองเพชรบูรณ์',
+            'utz_pillar' => '5',
             'qa_status' => '1',
+            'changwat' => ['จ.เพชรบูรณ์'],
+            'amphoe' => ['อ.เมืองเพชรบูรณ์', 'อ.หล่มสัก'],
         ]));
         $resUtils->assertStatus(200);
         $resUtils->assertSee('การใช้ประโยชน์');
         $resUtils->assertSee('utz_pillar');
+        $resUtils->assertSee('สัดส่วน 5 มิติการนำไปใช้ประโยชน์');
+        $resUtils->assertSee('อื่น ๆ');
+
+        // Test multi-province filter without amphoe
+        $resMultiProv = $this->get(route('frontend.dashboard.utilizations', [
+            'changwat' => ['จ.เพชรบูรณ์', 'จ.พิษณุโลก'],
+        ]));
+        $resMultiProv->assertStatus(200);
+
+        // Test AJAX endpoint for amphoes by province
+        $resAmphoes = $this->get(route('frontend.dashboard.amphoes', [
+            'changwat' => 'จ.เพชรบูรณ์',
+        ]));
+        $resAmphoes->assertStatus(200);
 
         // 5. Intellectual Property Dashboard with IP category & registration status
         $resIP = $this->get(route('frontend.dashboard.ip', [

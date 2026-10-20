@@ -151,14 +151,14 @@
         </div>
     </div>
 
-    <!-- Charts Row: 4 Pillars & Districts Ranking -->
+    <!-- Charts Row: 5 Pillars & Districts Ranking -->
     <div class="row g-4 mb-4">
-        <!-- 4 Pillars of Utilization -->
+        <!-- 5 Pillars of Utilization -->
         <div class="col-lg-5">
             <div class="card border shadow-sm h-100">
                 <div class="card-header bg-transparent py-3">
                     <h5 class="mb-0 fw-bold text-body">
-                        <i class="bi bi-pie-chart-fill text-danger me-2"></i> สัดส่วน 4 มิติการนำไปใช้ประโยชน์
+                        <i class="bi bi-pie-chart-fill text-danger me-2"></i> สัดส่วน 5 มิติการนำไปใช้ประโยชน์
                     </h5>
                 </div>
                 <div class="card-body p-3 p-md-4">
@@ -385,16 +385,28 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 2. 4 Pillars Doughnut Chart
-    const pillars = @json($fourPillars);
+    // 2. 5 Pillars Doughnut Chart
+    const pillars = @json($fivePillars ?? $fourPillars);
     const ctxPillars = document.getElementById('fourPillarsChart').getContext('2d');
     new Chart(ctxPillars, {
         type: 'doughnut',
         data: {
-            labels: ['เชิงสาธารณะ (Public)', 'เชิงนโยบาย (Policy)', 'เชิงพาณิชย์ (Commercial)', 'เชิงชุมชน/พื้นที่ (Community)'],
+            labels: [
+                'เชิงสาธารณะ (Public)', 
+                'เชิงนโยบาย (Policy)', 
+                'เชิงพาณิชย์ (Commercial)', 
+                'เชิงพื้นที่ / ชุมชน (Community)', 
+                'อื่น ๆ (Others)'
+            ],
             datasets: [{
-                data: [pillars.public, pillars.policy, pillars.commercial, pillars.community],
-                backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'],
+                data: [
+                    pillars.public || 0, 
+                    pillars.policy || 0, 
+                    pillars.commercial || 0, 
+                    pillars.community || 0, 
+                    pillars.other || 0
+                ],
+                backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'],
                 borderWidth: 2,
                 borderColor: isDark ? '#1E293B' : '#FFFFFF'
             }]
@@ -411,7 +423,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 3. Districts Ranking Bar Chart
     const distData = @json($districtsRanking).slice(0, 11);
-    const distLabels = distData.map(d => d.amphoe_t.replace('อ.', ''));
+    const hasMultipleProvs = @json(!empty($selectedChangwats) && count($selectedChangwats) > 1);
+    const distLabels = distData.map(d => {
+        let name = (d.amphoe_t || '-').replace('อ.', '');
+        if (hasMultipleProvs && d.changwat_t) {
+            name += ' (' + d.changwat_t.replace('จ.', '') + ')';
+        }
+        return name;
+    });
     const distCounts = distData.map(d => d.count);
 
     const ctxDist = document.getElementById('districtsBarChart').getContext('2d');

@@ -302,6 +302,7 @@ Route::prefix('dashboard')->group(function () {
     Route::get('/projects', [DashboardController::class, 'projects'])->name('frontend.dashboard.projects');
     Route::get('/publications', [DashboardController::class, 'publications'])->name('frontend.dashboard.publications');
     Route::get('/utilizations', [DashboardController::class, 'utilizations'])->name('frontend.dashboard.utilizations');
+    Route::get('/api/amphoes', [DashboardController::class, 'getAmphoesByChangwat'])->name('frontend.dashboard.amphoes');
     Route::get('/ip', [DashboardController::class, 'ip'])->name('frontend.dashboard.ip');
     Route::get('/researchers', [DashboardController::class, 'researchers'])->name('frontend.dashboard.researchers');
 });
