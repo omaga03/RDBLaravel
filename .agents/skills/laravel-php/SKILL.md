@@ -1,6 +1,6 @@
 ---
 name: laravel-php
-description: Best practices, coding conventions, architectural rules, Eloquent optimization (N+1 prevention), and Thin Controllers for Laravel 12 and PHP 8.
+description: Best practices, coding conventions, architectural rules, Eloquent optimization (N+1 prevention), Thin Controllers, and Senior Minimalist (YAGNI) mindset for Laravel 12 and PHP 8.
 ---
 
 # Laravel PHP Development Skill
@@ -16,7 +16,16 @@ description: Best practices, coding conventions, architectural rules, Eloquent o
 
 ---
 
-## 2. Eloquent Optimization & N+1 Prevention
+## 2. Senior Minimalist Mindset (YAGNI & Anti-Over-Engineering)
+ยึดหลัก **"The best code is the code you never wrote"** เพื่อป้องกันโค้ดบวมและความซับซ้อนเกินจำเป็น:
+1. **Reuse First**: ก่อนสร้าง UI, ฟังก์ชัน, หรือ Class ใหม่ ให้ตรวจสอบและนำของเดิมในระบบมาใช้ซ้ำก่อนเสมอ (เช่น `<x-card>`, `<x-search-bar>`, `<x-form-wrapper>`, Trait ที่มีอยู่)
+2. **Native Framework Capabilities**: ใช้ความสามารถ Built-in ของ PHP 8, Laravel 12 Core, และ Bootstrap 5.3 ให้เต็มที่ก่อนคิดสร้าง Custom Solution ซับซ้อน
+3. **No Unnecessary Dependencies**: **ห้ามสั่งติดตั้ง Composer package หรือ npm package ใหม่โดยไม่จำเป็น** หากสามารถแก้ปัญหาได้ด้วยเครื่องมือที่มีอยู่แล้ว
+4. **Simplicity with Quality**: เขียนโค้ดให้กระชับ เข้าใจง่าย ไม่เพิ่ม Abstraction เกินจริง โดยยังคงยึดมั่นในความปลอดภัยและการทดสอบ Automated Tests 100%
+
+---
+
+## 3. Eloquent Optimization & N+1 Prevention
 เพื่อป้องกันปัญหา Database Query บวม (N+1 Query Problem) ในระบบข้อมูลงานวิจัย:
 - **Eager Loading เสมอ**: เมื่อจะนำ Relation ไปแสดงผลใน Blade (เช่น ลูปแสดงชื่อนักวิจัย, ประเภทโครงการ, สาขาวิชา) ต้องใช้ `with()` หรือ `$model->load()` ทุกครั้ง
   ```php
@@ -33,7 +42,7 @@ description: Best practices, coding conventions, architectural rules, Eloquent o
 
 ---
 
-## 3. Research Metadata & Relationships Standard
+## 4. Research Metadata & Relationships Standard
 - **Many-to-Many Relationships**: ออกแบบและเรียกใช้งานความสัมพันธ์กลุ่มคน (เช่น งานวิจัย <-> ผู้ร่วมวิจัย) ผ่าน Pivot Table พร้อม Eager Loading ข้อมูลสัดส่วนการวิจัย
 - **Academic Identifiers**: การจัดการข้อมูลเชิงวิชาการ (DOI, ISBN/ISSN, Citation, Keywords) ให้เก็บในรูปแบบ Clean String ที่ถูก Sanitized ป้องกัน XSS
 - **Timestamp Handling**: โมเดลที่ตั้งค่า `$timestamps = true` ห้ามใส่ `created_at` และ `updated_at` ใน `$fillable` เด็ดขาด

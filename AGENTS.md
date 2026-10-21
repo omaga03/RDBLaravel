@@ -3,6 +3,10 @@
 ## 1. Core Architecture & Standards (laravel-php)
 - ใช้ PHP 8.x และ Laravel 12 Conventions เสมอ
 - ยึดหลัก PSR-12, Clean Architecture และ Thin Controllers (ย้าย Validation ไปที่ FormRequest เสมอ)
+- **Senior Minimalist Mindset (YAGNI & Anti-Over-Engineering)**: 
+  - ยึดหลัก "The best code is the code you never wrote"
+  - ใช้ซ้ำ (Reuse) Blade Components (`<x-card>`, `<x-search-bar>`), Classes, และ Helpers เดิมก่อนเสมอ
+  - ใช้ฟีเจอร์ Built-in ของ Laravel 12, PHP 8 และ Bootstrap 5.3 ห้ามติดตั้ง Composer/npm packages ใหม่โดยไม่จำเป็น
 - **Eloquent Optimization & N+1 Prevention**: บังคับใช้ Eager Loading (`with()`, `load()`) ทุกครั้งที่มีการดึง Relation ไปแสดงผลใน Blade ห้าม query ซ้ำซ้อนใน loop
 - ห้ามเขียน Complex Business Logic ไว้ใน Controller ให้ย้ายไปใส่ Service Class เสมอ
 - เขียน PHPUnit Test (Feature/Unit Test) ควบคู่ทุกครั้งที่มีการสร้างหรือแก้ไข Feature ใหม่
