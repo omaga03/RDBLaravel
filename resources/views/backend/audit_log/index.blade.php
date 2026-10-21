@@ -9,15 +9,15 @@
     </x-page-header>
 
     <!-- Filters Card -->
-    <div class="card shadow-sm border-0 rounded-3 mb-4">
+    <div class="card shadow-sm border rounded-3 mb-4">
         <div class="card-body p-3">
             <form method="GET" action="{{ route('backend.audit_log.index') }}" class="row g-2 align-items-end">
                 <div class="col-md-3 col-sm-6">
-                    <label class="form-label small text-muted mb-1">ค้นหา (ชื่อผู้ใช้, หมายเหตุ, ID)</label>
+                    <label class="form-label small text-body-secondary mb-1">ค้นหา (ชื่อผู้ใช้, หมายเหตุ, ID)</label>
                     <input type="text" name="search" class="form-control form-control-sm" placeholder="พิมพ์คำค้นหา..." value="{{ request('search') }}">
                 </div>
                 <div class="col-md-2 col-sm-6">
-                    <label class="form-label small text-muted mb-1">ประเภทกิจกรรม (Event)</label>
+                    <label class="form-label small text-body-secondary mb-1">ประเภทกิจกรรม (Event)</label>
                     <select name="event" class="form-select form-select-sm">
                         <option value="">-- ทั้งหมด --</option>
                         @foreach($events as $e)
@@ -26,7 +26,7 @@
                     </select>
                 </div>
                 <div class="col-md-2 col-sm-6">
-                    <label class="form-label small text-muted mb-1">โมดูลข้อมูล (Model)</label>
+                    <label class="form-label small text-body-secondary mb-1">โมดูลข้อมูล (Model)</label>
                     <select name="auditable_type" class="form-select form-select-sm">
                         <option value="">-- ทั้งหมด --</option>
                         @foreach($types as $t)
@@ -35,11 +35,11 @@
                     </select>
                 </div>
                 <div class="col-md-3 col-sm-6">
-                    <label class="form-label small text-muted mb-1">ช่วงวันที่</label>
+                    <label class="form-label small text-body-secondary mb-1">ช่วงวันที่</label>
                     <div class="input-group input-group-sm">
-                        <input type="date" name="date_start" class="form-control" value="{{ request('date_start') }}">
+                        <input type="text" name="date_start" id="audit_date_start" class="form-control datepicker" value="{{ request('date_start') }}" placeholder="วว/ดด/ปปปป" autocomplete="off">
                         <span class="input-group-text">-</span>
-                        <input type="date" name="date_end" class="form-control" value="{{ request('date_end') }}">
+                        <input type="text" name="date_end" id="audit_date_end" class="form-control datepicker" value="{{ request('date_end') }}" placeholder="วว/ดด/ปปปป" autocomplete="off">
                     </div>
                 </div>
                 <div class="col-md-2 col-sm-12 d-flex gap-1">
@@ -57,11 +57,11 @@
     </div>
 
     <!-- Table Card -->
-    <div class="card shadow-sm border-0 rounded-3">
+    <div class="card shadow-sm border rounded-3">
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0 text-sm">
-                    <thead class="table-light text-muted small">
+                    <thead class="bg-body-secondary text-body-secondary small">
                         <tr>
                             <th class="ps-3" style="width: 140px;">วันเวลา</th>
                             <th>ผู้ใช้งาน / สิทธิ์</th>
@@ -75,26 +75,26 @@
                     <tbody>
                         @forelse($logs as $log)
                             <tr>
-                                <td class="ps-3 text-muted small">
-                                    <div class="fw-semibold text-dark">{{ $log->created_at ? $log->created_at->format('d/m/Y') : '-' }}</div>
+                                <td class="ps-3 text-body-secondary small">
+                                    <div class="fw-semibold text-body">{{ $log->created_at ? $log->created_at->format('d/m/Y') : '-' }}</div>
                                     <small>{{ $log->created_at ? $log->created_at->format('H:i:s') : '' }} น.</small>
                                 </td>
                                 <td>
-                                    <div class="fw-bold text-dark">{{ $log->user_name }}</div>
-                                    <span class="badge bg-secondary-subtle text-secondary border small" style="font-size: 0.72rem;">
+                                    <div class="fw-bold text-body">{{ $log->user_name }}</div>
+                                    <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle small" style="font-size: 0.72rem;">
                                         {{ $log->user_role ?? 'User' }}
                                     </span>
                                 </td>
                                 <td>
                                     @php
                                         $badgeClass = match($log->event) {
-                                            'create' => 'bg-success-subtle text-success border border-success-subtle',
+                                            'create' => 'bg-success-subtle text-success-emphasis border border-success-subtle',
                                             'update' => 'bg-info-subtle text-info-emphasis border border-info-subtle',
-                                            'delete' => 'bg-danger-subtle text-danger border border-danger-subtle',
-                                            'approve' => 'bg-primary-subtle text-primary border border-primary-subtle',
+                                            'delete' => 'bg-danger-subtle text-danger-emphasis border border-danger-subtle',
+                                            'approve' => 'bg-primary-subtle text-primary-emphasis border border-primary-subtle',
                                             'reject' => 'bg-warning-subtle text-warning-emphasis border border-warning-subtle',
-                                            'impersonate' => 'bg-purple-subtle text-purple border',
-                                            default => 'bg-light text-dark border',
+                                            'impersonate' => 'bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle',
+                                            default => 'bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle',
                                         };
                                     @endphp
                                     <span class="badge {{ $badgeClass }} px-2 py-1">
@@ -103,19 +103,19 @@
                                 </td>
                                 <td>
                                     <span class="fw-semibold text-primary">{{ $log->auditable_type }}</span>
-                                    <span class="text-muted small">#{{ $log->auditable_id }}</span>
+                                    <span class="text-body-secondary small">#{{ $log->auditable_id }}</span>
                                 </td>
                                 <td>
                                     <div class="text-truncate" style="max-width: 320px;" title="{{ $log->diff_summary ?? $log->remarks }}">
                                         {{ $log->diff_summary ?? $log->remarks ?? '-' }}
                                     </div>
                                     @if($log->remarks && $log->remarks !== $log->diff_summary)
-                                        <small class="text-muted d-block text-truncate" style="max-width: 320px;">
+                                        <small class="text-body-secondary d-block text-truncate" style="max-width: 320px;">
                                             <em>{{ $log->remarks }}</em>
                                         </small>
                                     @endif
                                 </td>
-                                <td class="small text-muted">
+                                <td class="small text-body-secondary">
                                     <div>{{ $log->ip_address ?? '-' }}</div>
                                     @if($log->scope_info)
                                         <small class="text-primary-emphasis d-block">{{ $log->scope_info }}</small>
@@ -129,7 +129,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center py-5 text-muted">
+                                <td colspan="7" class="text-center py-5 text-body-secondary">
                                     <i class="bi bi-journal-x fs-1 d-block mb-2 text-secondary opacity-50"></i>
                                     ไม่พบประวัติการใช้งานตามเงื่อนไขที่กำหนด
                                 </td>
@@ -140,10 +140,31 @@
             </div>
         </div>
         @if($logs->hasPages())
-            <div class="card-footer bg-white border-0 py-3">
+            <div class="card-footer bg-body-tertiary border-0 py-3">
                 {{ $logs->links() }}
             </div>
         @endif
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof initThaiFlatpickr === 'function') {
+        const endPicker = initThaiFlatpickr('#audit_date_end');
+        initThaiFlatpickr('#audit_date_start', {
+            onChange: function(selectedDates, dateStr) {
+                if (endPicker) {
+                    endPicker.set('minDate', dateStr || null);
+                    const currentEnd = endPicker.selectedDates[0];
+                    if (currentEnd && selectedDates.length > 0 && currentEnd < selectedDates[0]) {
+                        endPicker.clear();
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+@endpush
 @endsection

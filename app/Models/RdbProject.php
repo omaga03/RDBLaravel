@@ -88,9 +88,33 @@ class RdbProject extends Model
         return $this->belongsTo(RdbGroupproject::class, 'pgroup_id', 'pgroup_id');
     }
 
+    public function parentProject()
+    {
+        return $this->belongsTo(RdbProject::class, 'pro_group', 'pro_id');
+    }
+
+    public function subProjects()
+    {
+        return $this->hasMany(RdbProject::class, 'pro_group', 'pro_id')
+            ->where('pro_id', '!=', \Illuminate\Support\Facades\DB::raw('COALESCE(pro_group, 0)'))
+            ->where('data_show', '1');
+    }
+
     public function type()
     {
         return $this->belongsTo(RdbProjectType::class, 'pt_id', 'pt_id');
+    }
+
+    public function masterType()
+    {
+        return $this->hasOneThrough(
+            RdbProjectTypeMaster::class,
+            RdbProjectType::class,
+            'pt_id',
+            'master_pt_id',
+            'pt_id',
+            'master_pt_id'
+        );
     }
 
     public function typeSub()

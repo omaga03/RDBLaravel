@@ -118,11 +118,11 @@
             {{-- Date Range --}}
             <div class="col-md-6">
                 <label class="form-label">ตั้งแต่วันที่</label>
-                <input type="date" class="form-control datepicker" id="s_date_start" name="date_start" value="{{ request('date_start') }}">
+                <input type="text" class="form-control datepicker" id="s_date_start" name="date_start" value="{{ request('date_start') }}" placeholder="วว/ดด/ปปปป" autocomplete="off">
             </div>
             <div class="col-md-6">
                 <label class="form-label">ถึงวันที่</label>
-                <input type="date" class="form-control datepicker" id="s_date_end" name="date_end" value="{{ request('date_end') }}">
+                <input type="text" class="form-control datepicker" id="s_date_end" name="date_end" value="{{ request('date_end') }}" placeholder="วว/ดด/ปปปป" autocomplete="off">
             </div>
         </div>
     </x-search-bar>
@@ -131,7 +131,7 @@
         <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center py-3">
             <h5 class="mb-0 fw-bold text-body">
                 <i class="bi bi-list-ul me-2 text-primary"></i>รายการข้อมูลการตีพิมพ์
-                <span class="badge bg-primary rounded-pill ms-2">{{ number_format($items->total()) }} รายการ</span>
+                <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle rounded-pill ms-2">{{ number_format($items->total()) }} รายการ</span>
             </h5>
         </div>
         <div class="card-body p-0">

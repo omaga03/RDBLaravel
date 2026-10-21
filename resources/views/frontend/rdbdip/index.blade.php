@@ -36,9 +36,9 @@
     <div class="alert alert-info d-flex align-items-center justify-content-between mb-4 shadow-sm" role="alert">
         <div>
             <i class="bi bi-info-circle-fill me-2 fs-5"></i>
-            กำลังแสดงรายการทรัพย์สินทางปัญญาของโครงการ: <strong>{!! $project->pro_nameTH !!}</strong>
+            กำลังแสดงรายการทรัพย์สินทางปัญญาของโครงการ: <strong>{{ strip_tags((string) $project->pro_nameTH) }}</strong>
         </div>
-        <a href="{{ route('frontend.rdbdip.index') }}" class="btn btn-sm btn-outline-primary bg-white">แสดงทั้งหมด</a>
+        <a href="{{ route('frontend.rdbdip.index') }}" class="btn btn-sm btn-outline-primary bg-body">แสดงทั้งหมด</a>
     </div>
     @endif
 
@@ -128,11 +128,11 @@
                 {{-- Row 5: Date Range --}}
                 <div class="col-md-6">
                     <label class="form-label">วันที่ยื่นคำขอ (เริ่มต้น)</label>
-                    <input type="date" class="form-control" id="date_start" name="date_start" value="{{ request('date_start') }}">
+                    <input type="text" class="form-control datepicker" id="date_start" name="date_start" value="{{ request('date_start') }}" placeholder="วว/ดด/ปปปป" autocomplete="off">
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">วันที่ยื่นคำขอ (สิ้นสุด)</label>
-                    <input type="date" class="form-control" id="date_end" name="date_end" value="{{ request('date_end') }}">
+                    <input type="text" class="form-control datepicker" id="date_end" name="date_end" value="{{ request('date_end') }}" placeholder="วว/ดด/ปปปป" autocomplete="off">
                 </div>
             </div>
         </x-search-bar>
@@ -162,7 +162,7 @@
                                 <div class="fw-bold mb-1">
                                     <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle me-1">#{{ $item->dip_id }}</span>
                                     <a href="{{ route('frontend.rdbdip.show', $item->dip_id) }}" class="text-decoration-none text-body hover-primary">
-                                        {!! $item->dip_data2_name ?: ($item->dip_name ?: 'ไม่มีชื่อผลงาน') !!}
+                                        {{ strip_tags((string) ($item->dip_data2_name ?: ($item->dip_name ?: 'ไม่มีชื่อผลงาน'))) }}
                                     </a>
                                 </div>
                                 <div class="small d-flex flex-wrap gap-1 align-items-center mt-1">
@@ -361,26 +361,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Date range validation
-    const dateStart = document.getElementById('date_start');
-    const dateEnd = document.getElementById('date_end');
-    
-    if (dateStart && dateEnd) {
-        dateStart.addEventListener('change', function() {
-            if (this.value) {
-                dateEnd.min = this.value;
-            } else {
-                dateEnd.removeAttribute('min');
+    // Flatpickr Thai Buddhist Date Pickers
+    if (typeof initThaiFlatpickr === 'function') {
+        const endPicker = initThaiFlatpickr('#date_end');
+        initThaiFlatpickr('#date_start', {
+            onChange: function(selectedDates, dateStr) {
+                if (endPicker) {
+                    endPicker.set('minDate', dateStr || null);
+                    const currentEnd = endPicker.selectedDates[0];
+                    if (currentEnd && selectedDates.length > 0 && currentEnd < selectedDates[0]) {
+                        endPicker.clear();
+                    }
+                }
             }
         });
-        
-        dateEnd.addEventListener('change', function() {
-            if (this.value) {
-                dateStart.max = this.value;
-            } else {
-                dateStart.removeAttribute('max');
-            }
-        });
+        const startVal = document.getElementById('date_start').value;
+        if (startVal && endPicker) {
+            endPicker.set('minDate', startVal);
+        }
     }
 });
 </script>

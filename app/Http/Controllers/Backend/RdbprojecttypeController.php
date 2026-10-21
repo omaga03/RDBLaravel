@@ -12,7 +12,7 @@ class RdbprojecttypeController extends Controller
     public function index()
     {
         $this->authorize('viewAny', RdbProjecttype::class);
-        $items = RdbProjecttype::with(['projectTypeGroup', 'year', 'creator', 'updater'])->orderBy('pt_id', 'desc')->paginate(10);
+        $items = RdbProjecttype::with(['projectTypeGroup', 'masterType', 'year', 'creator', 'updater'])->orderBy('pt_id', 'desc')->paginate(10);
         return view('backend.rdbprojecttype.index', compact('items'));
     }
 
@@ -21,10 +21,11 @@ class RdbprojecttypeController extends Controller
         $this->authorize('create', RdbProjecttype::class);
         $item = new RdbProjecttype();
         $groupList = \App\Models\RdbProjectTypesGroup::all();
+        $masterList = \App\Models\RdbProjectTypeMaster::orderBy('order_index')->get();
         $yearList = \App\Models\RdbYear::orderBy('year_name', 'desc')->get();
         $forList = RdbProjecttype::getPtforlist();
         $createList = RdbProjecttype::getCreatelist();
-        return view('backend.rdbprojecttype.create', compact('item', 'groupList', 'yearList', 'forList', 'createList'));
+        return view('backend.rdbprojecttype.create', compact('item', 'groupList', 'masterList', 'yearList', 'forList', 'createList'));
     }
 
     public function store(StoreRdbProjectTypeRequest $request)
@@ -43,7 +44,7 @@ class RdbprojecttypeController extends Controller
 
     public function show($id)
     {
-        $item = RdbProjecttype::with(['projectTypeGroup', 'year', 'creator', 'updater'])->findOrFail($id);
+        $item = RdbProjecttype::with(['projectTypeGroup', 'masterType', 'year', 'creator', 'updater'])->findOrFail($id);
         $this->authorize('view', $item);
         $forList = RdbProjecttype::getPtforlist();
         $createList = RdbProjecttype::getCreatelist();
@@ -52,13 +53,14 @@ class RdbprojecttypeController extends Controller
 
     public function edit($id)
     {
-        $item = RdbProjecttype::with(['projectTypeGroup', 'year', 'creator', 'updater'])->findOrFail($id);
+        $item = RdbProjecttype::with(['projectTypeGroup', 'masterType', 'year', 'creator', 'updater'])->findOrFail($id);
         $this->authorize('update', $item);
         $groupList = \App\Models\RdbProjectTypesGroup::all();
+        $masterList = \App\Models\RdbProjectTypeMaster::orderBy('order_index')->get();
         $yearList = \App\Models\RdbYear::orderBy('year_name', 'desc')->get();
         $forList = RdbProjecttype::getPtforlist();
         $createList = RdbProjecttype::getCreatelist();
-        return view('backend.rdbprojecttype.edit', compact('item', 'groupList', 'yearList', 'forList', 'createList'));
+        return view('backend.rdbprojecttype.edit', compact('item', 'groupList', 'masterList', 'yearList', 'forList', 'createList'));
     }
 
     public function update(UpdateRdbProjectTypeRequest $request, $id)

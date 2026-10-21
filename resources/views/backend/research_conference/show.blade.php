@@ -93,8 +93,8 @@
                         </button>
                     </div>
                     <div class="abstract-box p-3 p-md-4 border border-start border-4 border-primary rounded-3 bg-body-tertiary shadow-xs">
-                        <div id="con-backend-detail-text" class="abstract-content abstract-indent">
-                            {!! strip_tags($item->con_detail, '<p><br><b><strong><i><em><u><ul><ol><li><a><span>') !!}
+                        <div id="con-backend-detail-text" class="abstract-content">
+                            {!! $item->formatted_detail !!}
                         </div>
                     </div>
                 </div>

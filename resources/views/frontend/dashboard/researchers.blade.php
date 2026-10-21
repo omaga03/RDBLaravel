@@ -16,7 +16,7 @@
             <div class="card h-100 border-0 shadow-sm text-white" 
                  style="background: linear-gradient(135deg, #1E1B4B 0%, #4338CA 100%); border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
-                    <span class="badge bg-white bg-opacity-25 text-white border-0 mb-2">
+                    <span class="badge bg-light-subtle bg-opacity-25 text-white border-0 mb-2">
                         <i class="bi bi-people me-1"></i> นักวิจัยในระบบทั้งหมด
                     </span>
                     <h3 class="fw-bold mb-1 text-white text-nowrap">{{ number_format($totalResearchers) }} ท่าน</h3>
@@ -91,9 +91,9 @@
                                 <tr>
                                     <td class="text-center fw-bold">
                                         @if($idx === 0)
-                                            <span class="badge rounded-circle bg-warning text-dark px-2 py-1">1</span>
+                                            <span class="badge rounded-circle bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1">1</span>
                                         @elseif($idx === 1)
-                                            <span class="badge rounded-circle bg-secondary text-white px-2 py-1">2</span>
+                                            <span class="badge rounded-circle bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-2 py-1">2</span>
                                         @elseif($idx === 2)
                                             <span class="badge rounded-circle bg-danger-subtle text-danger px-2 py-1">3</span>
                                         @else
@@ -145,9 +145,9 @@
                                 <tr>
                                     <td class="text-center fw-bold">
                                         @if($idx === 0)
-                                            <span class="badge rounded-circle bg-warning text-dark px-2 py-1">1</span>
+                                            <span class="badge rounded-circle bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1">1</span>
                                         @elseif($idx === 1)
-                                            <span class="badge rounded-circle bg-secondary text-white px-2 py-1">2</span>
+                                            <span class="badge rounded-circle bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-2 py-1">2</span>
                                         @elseif($idx === 2)
                                             <span class="badge rounded-circle bg-danger-subtle text-danger px-2 py-1">3</span>
                                         @else
@@ -258,12 +258,12 @@
                                     </td>
                                     <td class="text-center">
                                         @if($res->scopus_authorId)
-                                            <span class="badge bg-warning text-dark" title="Scopus Author ID: {{ $res->scopus_authorId }}">
+                                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" title="Scopus Author ID: {{ $res->scopus_authorId }}">
                                                 Scopus
                                             </span>
                                         @endif
                                         @if($res->orcid)
-                                            <span class="badge bg-success" title="ORCID: {{ $res->orcid }}">
+                                            <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle" title="ORCID: {{ $res->orcid }}">
                                                 ORCID
                                             </span>
                                         @endif

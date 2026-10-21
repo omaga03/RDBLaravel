@@ -112,9 +112,9 @@
             <div class="card shadow-sm mb-4 border">
                 <div class="card-header text-white p-3 p-md-4 d-print-none" style="background: var(--rdb-gradient-primary);">
                     <span class="small text-white-50"><i class="bi bi-file-earmark-text me-1"></i> ชื่อบทความ / ผลงานตีพิมพ์</span>
-                    <h4 class="card-title mb-0 mt-1 fw-semibold text-white text-break" style="font-size: 1.15rem; line-height: 1.55;">{!! html_entity_decode($item->pub_name, ENT_QUOTES, 'UTF-8') !!}</h4>
+                    <h4 class="card-title mb-0 mt-1 fw-semibold text-white text-break" style="font-size: 1.15rem; line-height: 1.55;">{{ strip_tags(html_entity_decode((string) $item->pub_name, ENT_QUOTES, 'UTF-8')) }}</h4>
                     @if($item->pub_name_journal)
-                        <p class="text-white-50 small mb-0 mt-1 text-break"><i class="bi bi-journal-bookmark me-1"></i> {!! html_entity_decode($item->pub_name_journal, ENT_QUOTES, 'UTF-8') !!}</p>
+                        <p class="text-white-50 small mb-0 mt-1 text-break"><i class="bi bi-journal-bookmark me-1"></i> {{ strip_tags(html_entity_decode((string) $item->pub_name_journal, ENT_QUOTES, 'UTF-8')) }}</p>
                     @endif
                 </div>
                 <div class="card-body">
@@ -187,7 +187,7 @@
                                 <th>คำสำคัญ (Keywords):</th>
                                 <td>
                                     @foreach(explode(',', $item->pub_keyword) as $keyword)
-                                        <span class="badge bg-secondary me-1 mb-1">{{ trim($keyword) }}</span>
+                                        <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle me-1 mb-1">{{ trim($keyword) }}</span>
                                     @endforeach
                                 </td>
                             </tr>

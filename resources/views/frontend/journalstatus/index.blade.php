@@ -7,7 +7,8 @@
             Journalstatus List
         </div>
         <div class="card-body">
-            <table class="table table-bordered">
+            <div class="table-responsive">
+<table class="table table-bordered">
                 <thead><tr><th>ID</th><th>Actions</th></tr></thead>
                 <tbody>
                     @foreach($items as $item)
@@ -20,6 +21,7 @@
                     @endforeach
                 </tbody>
             </table>
+</div>
             {{ $items->links() }}
         </div>
     </div>

@@ -34,7 +34,7 @@
             <div class="card shadow-sm border mb-4">
                 <div class="card-header text-white p-3 p-md-4" style="background: var(--rdb-gradient-primary);">
                     <span class="small text-white-50"><i class="bi bi-file-earmark-text me-1"></i> ชื่อบทความ / ผลงานตีพิมพ์</span>
-                    <h4 class="card-title mb-0 mt-1 fw-semibold text-white text-break" style="font-size: 1.15rem; line-height: 1.55;">{!! $item->pub_name !!}</h4>
+                    <h4 class="card-title mb-0 mt-1 fw-semibold text-white text-break" style="font-size: 1.15rem; line-height: 1.55;">{{ strip_tags((string) $item->pub_name) }}</h4>
                 </div>
                 <div class="card-body">
                     <!-- Badges Row -->
@@ -99,7 +99,7 @@
                         </div>
                         <div class="flex-grow-1">
                             <h6 class="fw-bold text-body mb-1">แหล่งตีพิมพ์ / วารสาร (Journal / Conference Source)</h6>
-                            <p class="text-body-secondary mb-0 text-break">{!! $item->pub_name_journal !!}</p>
+                            <p class="text-body-secondary mb-0 text-break">{{ strip_tags((string) $item->pub_name_journal) }}</p>
                         </div>
                     </div>
                 </div>
@@ -131,7 +131,7 @@
                                 </button>
                             </div>
                             <div id="pub-abstract-th" class="abstract-content abstract-indent">
-                                {!! $abstracts[0] !!}
+                                {!! strip_tags((string) $abstracts[0], '<p><br><b><strong><i><em><u><ul><ol><li><span><sub><sup>') !!}
                             </div>
                         </div>
                         
@@ -148,7 +148,7 @@
                                 </button>
                             </div>
                             <div id="pub-abstract-en" class="abstract-content abstract-indent">
-                                {!! $abstracts[1] !!}
+                                {!! strip_tags((string) $abstracts[1], '<p><br><b><strong><i><em><u><ul><ol><li><span><sub><sup>') !!}
                             </div>
                         </div>
                     @else
@@ -164,7 +164,7 @@
                                 @endif
                             </div>
                             <div id="pub-abstract-single" class="abstract-content abstract-indent">
-                                {!! !empty(trim(strip_tags($item->pub_abstract ?? ''))) ? $item->pub_abstract : '<span class="text-body-secondary fst-italic">ไม่มีข้อมูลบทคัดย่อ</span>' !!}
+                                {!! !empty(trim(strip_tags($item->pub_abstract ?? ''))) ? strip_tags((string) $item->pub_abstract, '<p><br><b><strong><i><em><u><ul><ol><li><span><sub><sup>') : '<span class="text-body-secondary fst-italic">ไม่มีข้อมูลบทคัดย่อ</span>' !!}
                             </div>
                         </div>
                     @endif
@@ -175,7 +175,76 @@
 
         <!-- Sidebar / Right Column -->
         <div class="col-lg-4">
-            {{-- 1. Authors Card --}}
+            {{-- 1. Related Project Card (If exists, shown at the top) --}}
+            @if($item->project)
+            <div class="card shadow-sm border mb-4">
+                <div class="card-header bg-body-tertiary d-flex align-items-center py-2.5 px-3">
+                    <i class="bi bi-folder-fill text-success me-2 fs-5"></i>
+                    <h6 class="mb-0 fw-semibold text-success">โครงการวิจัยที่เกี่ยวข้อง</h6>
+                </div>
+                <div class="card-body">
+                    <h6 class="fw-semibold mb-2" style="font-size: 0.95rem; line-height: 1.5;">
+                        <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" class="text-decoration-none text-body hover-primary text-break">
+                            {{ strip_tags((string) $item->project->pro_nameTH) }}
+                        </a>
+                    </h6>
+
+                    @if($item->project->type || $item->project->typeSub)
+                    <div class="text-body-secondary small mb-1">
+                        {{ $item->project->type->pt_name ?? '' }}
+                        @if($item->project->type && $item->project->typeSub) • @endif
+                        {{ $item->project->typeSub->pts_name ?? '' }}
+                    </div>
+                    @endif
+
+                    @if($item->project->department)
+                    <div class="text-body-secondary small mb-2">
+                        <i class="bi bi-building me-1"></i>{{ $item->project->department->department_nameTH }}
+                    </div>
+                    @endif
+
+                    @php
+                        $allWorks = $item->project->rdbProjectWorks ? $item->project->rdbProjectWorks->filter(fn($w) => !empty($w->researcher)) : collect();
+                        $headWork = $allWorks->firstWhere('position_id', 2) 
+                                 ?? $allWorks->firstWhere('position_id', 1) 
+                                 ?? $allWorks->first();
+                        $headResearcher = $headWork?->researcher;
+                        $remainingWorks = $headResearcher ? $allWorks->reject(fn($w) => $w->researcher_id === $headResearcher->researcher_id)->unique('researcher_id') : collect();
+                        $remainingCount = $remainingWorks->count();
+                        $remainingNames = $remainingWorks->map(function($work) {
+                            $prefix = $work->researcher->prefix->prefix_nameTH ?? '';
+                            return e($prefix . $work->researcher->researcher_fname . ' ' . $work->researcher->researcher_lname);
+                        })->filter()->implode('<br>• ');
+                    @endphp
+                    @if($headResearcher)
+                    <hr class="my-2 border-secondary-subtle">
+                    <div class="small fw-semibold text-body mb-1" style="font-size: 0.78rem;">หัวหน้าโครงการ:</div>
+                    <div class="d-flex align-items-center flex-wrap">
+                        <i class="bi bi-person-circle text-primary me-2 fs-6"></i>
+                        <a href="{{ route('frontend.rdbresearcher.show', $headResearcher->researcher_id) }}" class="text-decoration-none text-body hover-primary fw-medium small">
+                            {{ $headResearcher->prefix->prefix_nameTH ?? '' }}{{ $headResearcher->researcher_fname }} {{ $headResearcher->researcher_lname }}
+                        </a>
+                        @if($remainingCount > 0)
+                            <span class="text-body-secondary small ms-1" 
+                                  data-bs-toggle="tooltip" 
+                                  data-bs-placement="top" 
+                                  data-bs-html="true"
+                                  title="<strong>นักวิจัยร่วม:</strong><br>• {!! strip_tags($remainingNames, '<br>') !!}"
+                                  style="cursor: pointer;">(+{{ $remainingCount }})</span>
+                        @endif
+                    </div>
+                    @endif
+
+                    <div class="mt-3">
+                        <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" class="btn btn-sm btn-outline-primary w-100">
+                            <i class="bi bi-box-arrow-up-right me-1"></i> ดูรายละเอียดโครงการ
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            {{-- 2. Authors Card --}}
             <div class="card shadow-sm border mb-4">
                 <div class="card-header bg-body-tertiary d-flex align-items-center py-2.5 px-3">
                     <i class="bi bi-people-fill text-primary me-2"></i>
@@ -377,7 +446,7 @@
                         <!-- APA 7 Pane -->
                         <div class="tab-pane fade show active" id="pane-pub-apa7" role="tabpanel" aria-labelledby="tab-pub-apa7" tabindex="0">
                             <div class="p-2.5 rounded bg-body-tertiary border text-body text-break mb-2" id="text-pub-apa7" style="font-size: 0.82rem; line-height: 1.65; user-select: all;">
-                                {!! $pubCitationApa !!}
+                                {!! strip_tags((string) $pubCitationApa, '<i><em><b><strong>') !!}
                             </div>
                             <button type="button" class="btn btn-sm btn-outline-primary w-100 py-1.5 d-flex align-items-center justify-content-center gap-1.5" style="font-size: 0.78rem;" onclick="copyCitation('text-pub-apa7', this)">
                                 <i class="bi bi-clipboard"></i> คัดลอก APA 7
@@ -387,7 +456,7 @@
                         <!-- IEEE Pane -->
                         <div class="tab-pane fade" id="pane-pub-ieee" role="tabpanel" aria-labelledby="tab-pub-ieee" tabindex="0">
                             <div class="p-2.5 rounded bg-body-tertiary border text-body text-break mb-2" id="text-pub-ieee" style="font-size: 0.82rem; line-height: 1.65; user-select: all;">
-                                {!! $pubCitationIeee !!}
+                                {!! strip_tags((string) $pubCitationIeee, '<i><em><b><strong>') !!}
                             </div>
                             <button type="button" class="btn btn-sm btn-outline-primary w-100 py-1.5 d-flex align-items-center justify-content-center gap-1.5" style="font-size: 0.78rem;" onclick="copyCitation('text-pub-ieee', this)">
                                 <i class="bi bi-clipboard"></i> คัดลอก IEEE
@@ -397,7 +466,7 @@
                         <!-- MLA 9 Pane -->
                         <div class="tab-pane fade" id="pane-pub-mla9" role="tabpanel" aria-labelledby="tab-pub-mla9" tabindex="0">
                             <div class="p-2.5 rounded bg-body-tertiary border text-body text-break mb-2" id="text-pub-mla9" style="font-size: 0.82rem; line-height: 1.65; user-select: all;">
-                                {!! $pubCitationMla !!}
+                                {!! strip_tags((string) $pubCitationMla, '<i><em><b><strong>') !!}
                             </div>
                             <button type="button" class="btn btn-sm btn-outline-primary w-100 py-1.5 d-flex align-items-center justify-content-center gap-1.5" style="font-size: 0.78rem;" onclick="copyCitation('text-pub-mla9', this)">
                                 <i class="bi bi-clipboard"></i> คัดลอก MLA 9
@@ -407,62 +476,6 @@
                 </div>
             </div>
 
-            <!-- Related Project Card (Styled like Image 3) -->
-            @if($item->project)
-            <div class="card shadow-sm border mb-4">
-                <div class="card-header bg-body-tertiary d-flex align-items-center py-2.5 px-3">
-                    <i class="bi bi-folder-fill text-success me-2 fs-5"></i>
-                    <h6 class="mb-0 fw-semibold text-success">โครงการวิจัยที่เกี่ยวข้อง</h6>
-                </div>
-                <div class="card-body">
-                    <h6 class="fw-semibold mb-2" style="font-size: 0.95rem; line-height: 1.5;">
-                        <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" class="text-decoration-none text-body hover-primary text-break">
-                            {!! $item->project->pro_nameTH !!}
-                        </a>
-                    </h6>
-                    @if($item->project->pro_nameEN)
-                        <p class="text-body-secondary small mb-2 text-break">{!! $item->project->pro_nameEN !!}</p>
-                    @endif
-
-                    @if($item->project->type || $item->project->typeSub)
-                    <div class="text-body-secondary small mb-1">
-                        {{ $item->project->type->pt_name ?? '' }}
-                        @if($item->project->type && $item->project->typeSub) • @endif
-                        {{ $item->project->typeSub->pts_name ?? '' }}
-                    </div>
-                    @endif
-
-                    @if($item->project->department)
-                    <div class="text-body-secondary small mb-2">
-                        <i class="bi bi-building me-1"></i>{{ $item->project->department->department_nameTH }}
-                    </div>
-                    @endif
-
-                    @php
-                        $headWork = $item->project->rdbProjectWorks->firstWhere('position_id', 2) 
-                                 ?? $item->project->rdbProjectWorks->firstWhere('position_id', 1) 
-                                 ?? $item->project->rdbProjectWorks->first();
-                        $headResearcher = $headWork?->researcher;
-                    @endphp
-                    @if($headResearcher)
-                    <hr class="my-2 border-secondary-subtle">
-                    <div class="small fw-semibold text-body mb-1">นักวิจัย:</div>
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-person-circle text-primary me-2 fs-6"></i>
-                        <a href="{{ route('frontend.rdbresearcher.show', $headResearcher->researcher_id) }}" class="text-decoration-none text-body hover-primary fw-medium small">
-                            {{ $headResearcher->prefix->prefix_nameTH ?? '' }}{{ $headResearcher->researcher_fname }} {{ $headResearcher->researcher_lname }}
-                        </a>
-                    </div>
-                    @endif
-
-                    <div class="mt-3">
-                        <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" class="btn btn-sm btn-outline-primary w-100">
-                            <i class="bi bi-box-arrow-up-right me-1"></i> ดูรายละเอียดโครงการ
-                        </a>
-                    </div>
-                </div>
-            </div>
-            @endif
 
             <!-- Keywords Card -->
             @if($item->pub_keyword)

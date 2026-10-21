@@ -27,31 +27,31 @@
         <li class="nav-item" role="presentation">
             <a class="nav-link {{ $activeTab === 'projects' ? 'active' : '' }}" href="{{ route('backend.workflow.queue', ['tab' => 'projects']) }}">
                 <i class="bi bi-folder me-1"></i> โครงการวิจัย
-                <span class="badge {{ $projects->total() > 0 ? 'bg-danger' : 'bg-secondary' }} ms-1">{{ $projects->total() }}</span>
+                <span class="badge {{ $projects->total() > 0 ? 'bg-danger-subtle text-danger-emphasis border border-danger-subtle' : 'bg-secondary' }} ms-1">{{ $projects->total() }}</span>
             </a>
         </li>
         <li class="nav-item" role="presentation">
             <a class="nav-link {{ $activeTab === 'publications' ? 'active' : '' }}" href="{{ route('backend.workflow.queue', ['tab' => 'publications']) }}">
                 <i class="bi bi-journal-text me-1"></i> ผลงานตีพิมพ์
-                <span class="badge {{ $publications->total() > 0 ? 'bg-danger' : 'bg-secondary' }} ms-1">{{ $publications->total() }}</span>
+                <span class="badge {{ $publications->total() > 0 ? 'bg-danger-subtle text-danger-emphasis border border-danger-subtle' : 'bg-secondary' }} ms-1">{{ $publications->total() }}</span>
             </a>
         </li>
         <li class="nav-item" role="presentation">
             <a class="nav-link {{ $activeTab === 'dips' ? 'active' : '' }}" href="{{ route('backend.workflow.queue', ['tab' => 'dips']) }}">
                 <i class="bi bi-award me-1"></i> ทรัพย์สินทางปัญญา
-                <span class="badge {{ $dips->total() > 0 ? 'bg-danger' : 'bg-secondary' }} ms-1">{{ $dips->total() }}</span>
+                <span class="badge {{ $dips->total() > 0 ? 'bg-danger-subtle text-danger-emphasis border border-danger-subtle' : 'bg-secondary' }} ms-1">{{ $dips->total() }}</span>
             </a>
         </li>
         <li class="nav-item" role="presentation">
             <a class="nav-link {{ $activeTab === 'utilizes' ? 'active' : '' }}" href="{{ route('backend.workflow.queue', ['tab' => 'utilizes']) }}">
                 <i class="bi bi-arrow-up-right-circle me-1"></i> การใช้ประโยชน์
-                <span class="badge {{ $utilizes->total() > 0 ? 'bg-danger' : 'bg-secondary' }} ms-1">{{ $utilizes->total() }}</span>
+                <span class="badge {{ $utilizes->total() > 0 ? 'bg-danger-subtle text-danger-emphasis border border-danger-subtle' : 'bg-secondary' }} ms-1">{{ $utilizes->total() }}</span>
             </a>
         </li>
         <li class="nav-item" role="presentation">
             <a class="nav-link {{ $activeTab === 'unlocks' ? 'active' : '' }}" href="{{ route('backend.workflow.queue', ['tab' => 'unlocks']) }}">
                 <i class="bi bi-unlock me-1"></i> คำขอเปิดสิทธิ์แก้ไข
-                <span class="badge {{ $totalUnlocks > 0 ? 'bg-warning text-dark' : 'bg-secondary' }} ms-1">{{ $totalUnlocks }}</span>
+                <span class="badge {{ $totalUnlocks > 0 ? 'bg-warning-subtle text-warning-emphasis border border-warning-subtle ' : 'bg-secondary' }} ms-1">{{ $totalUnlocks }}</span>
             </a>
         </li>
     </ul>

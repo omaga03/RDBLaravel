@@ -15,7 +15,8 @@
     <div class="row">
         <div class="col-lg-8">
             <x-card title="ข้อมูลหน่วยงาน" icon="bi-info-circle" color="blue">
-                <table class="table table-borderless table-sm mb-0">
+                <div class="table-responsive">
+<table class="table table-borderless table-sm mb-0">
                     <tr>
                         <th style="width: 30%;">รหัสหน่วยงาน:</th>
                         <td><code>{{ $item->department_code }}</code></td>
@@ -32,7 +33,7 @@
                         <th>ประเภท:</th>
                         <td>
                             @if($item->departmentType)
-                                <span class="badge bg-info text-dark">{{ $item->departmentType->tdepartment_nameTH }}</span>
+                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">{{ $item->departmentType->tdepartment_nameTH }}</span>
                             @else
                                 <span class="text-muted">-</span>
                             @endif
@@ -51,6 +52,7 @@
                         </td>
                     </tr>
                 </table>
+</div>
             </x-card>
         </div>
 

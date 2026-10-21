@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Backend\StoreUserRequest;
+use App\Http\Requests\Backend\UpdateUserRequest;
 use App\Models\User;
 use App\Models\AuthItem;
 use App\Models\AuthAssignment;
@@ -10,7 +12,6 @@ use App\Models\RdbResearcher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -55,18 +56,11 @@ class UserController extends Controller
         return view('backend.user.create', compact('roles', 'researchers'));
     }
 
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
         $this->authorize('create', User::class);
 
-        $validated = $request->validate([
-            'username' => ['required', 'string', 'max:255', 'unique:user,username'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:user,email'],
-            'password' => ['required', 'string', 'min:8'],
-            'role' => ['required', 'string', 'exists:auth_item,name'],
-            'researcher_id' => ['nullable', 'exists:rdb_researcher,researcher_id'],
-            'status' => ['required', 'integer'],
-        ]);
+        $validated = $request->validated();
 
         $user = new User();
         $user->username = $validated['username'];
@@ -112,26 +106,14 @@ class UserController extends Controller
         return view('backend.user.edit', compact('user', 'roles', 'researchers', 'userRole', 'canManageRoles'));
     }
 
-    public function update(Request $request, User $user)
+    public function update(UpdateUserRequest $request, User $user)
     {
         $this->authorize('update', $user);
 
         $currentUser = auth()->user();
         $canManageRoles = $currentUser && ($currentUser->hasRole('The Creator') || $currentUser->hasRole('Admin') || $currentUser->hasPermission('User Manager'));
 
-        $rules = [
-            'username' => ['required', 'string', 'max:255', Rule::unique('user')->ignore($user->id)],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('user')->ignore($user->id)],
-            'password' => ['nullable', 'string', 'min:8'],
-        ];
-
-        if ($canManageRoles) {
-            $rules['role'] = ['required', 'string', 'exists:auth_item,name'];
-            $rules['researcher_id'] = ['nullable', 'exists:rdb_researcher,researcher_id'];
-            $rules['status'] = ['required', 'integer'];
-        }
-
-        $validated = $request->validate($rules);
+        $validated = $request->validated();
 
         $user->username = $validated['username'];
         $user->email = $validated['email'];

@@ -34,13 +34,13 @@
         @elseif($project->getReportFilePath() && (int)$project->pro_file_show === 1)
             <div class="mb-3">
                 <h6>📑 รายงานฉบับสมบูรณ์ (Full Report)</h6>
-                <span class="badge bg-danger text-white"><i class="fa fa-lock"></i> ปกปิดเล่มรายงาน (ไม่เผยแพร่)</span>
+                <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle"><i class="fa fa-lock"></i> ปกปิดเล่มรายงาน (ไม่เผยแพร่)</span>
             </div>
             <hr>
         @elseif($project->getReportFilePath() && (int)$project->pro_file_show === 2)
             <div class="mb-3">
                 <h6>📑 รายงานฉบับสมบูรณ์ (Full Report)</h6>
-                <span class="badge bg-warning text-dark"><i class="fa fa-pencil"></i> ฉบับร่าง (ยังไม่เผยแพร่)</span>
+                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle"><i class="fa fa-pencil"></i> ฉบับร่าง (ยังไม่เผยแพร่)</span>
             </div>
             <hr>
         @endif

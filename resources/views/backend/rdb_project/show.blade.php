@@ -78,7 +78,7 @@
             <div class="card shadow-sm border mb-4 sticky-top" style="top: 20px;">
                 <div class="card-header text-white py-3" style="background: var(--rdb-gradient-primary);">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="badge bg-light text-primary fw-bold font-monospace fs-6">
+                        <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle fw-bold font-monospace fs-6">
                             {{ $project->pro_code ?? 'ID: ' . $project->pro_id }}
                         </span>
                         <div class="d-flex align-items-center gap-1">
@@ -87,7 +87,7 @@
                                     {{ $project->status->ps_name }}
                                 </span>
                             @else
-                                <span class="badge bg-secondary">ไม่ระบุสถานะ</span>
+                                <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">ไม่ระบุสถานะ</span>
                             @endif
                             @can('update', $project)
                             <button type="button" class="btn btn-sm btn-light py-0 px-2 text-dark shadow-sm" data-bs-toggle="modal" data-bs-target="#projectStatusModal" title="ปรับปรุงสถานะโครงการ">
@@ -182,16 +182,16 @@
                                         {{ $project->status->ps_name }}
                                     </span>
                                 @else
-                                    <span class="badge bg-secondary">ยังไม่ระบุ</span>
+                                    <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">ยังไม่ระบุ</span>
                                 @endif
                             </button>
                             <button type="button" class="btn btn-outline-success btn-sm d-flex justify-content-between align-items-center" data-bs-toggle="modal" data-bs-target="#researcherModal">
                                 <span><i class="bi bi-people-fill me-2"></i> จัดการคณะผู้วิจัย</span>
-                                <span class="badge bg-success">{{ $project->rdbProjectWorks->count() }} ท่าน</span>
+                                <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle">{{ $project->rdbProjectWorks->count() }} ท่าน</span>
                             </button>
                             <button type="button" class="btn btn-outline-primary btn-sm d-flex justify-content-between align-items-center" data-bs-toggle="modal" data-bs-target="#projectFilesModal">
                                 <span><i class="bi bi-file-earmark-arrow-up-fill me-2"></i> จัดการไฟล์โครงการ</span>
-                                <span class="badge bg-primary">{{ ($project->pro_abstract_file ? 1 : 0) + ($project->pro_file ? 1 : 0) + $project->files->count() }} ไฟล์</span>
+                                <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle">{{ ($project->pro_abstract_file ? 1 : 0) + ($project->pro_file ? 1 : 0) + $project->files->count() }} ไฟล์</span>
                             </button>
                         </div>
                         @endcan
@@ -264,7 +264,7 @@
                                                                 <i class="bi bi-flag-fill me-1"></i> {{ $project->status->ps_name }}
                                                             </span>
                                                         @else
-                                                            <span class="badge bg-secondary px-3 py-1">ยังไม่ระบุสถานะ</span>
+                                                            <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-3 py-1">ยังไม่ระบุสถานะ</span>
                                                         @endif
                                                         @can('update', $project)
                                                         <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" data-bs-toggle="modal" data-bs-target="#projectStatusModal">
@@ -283,7 +283,24 @@
                                                     @endif
                                                 </td>
                                                 <th style="width: 25%;" class="bg-body-tertiary">กลุ่มโครงการ:</th>
-                                                <td>{{ $project->group->group_name ?? '-' }}</td>
+                                                <td>
+                                                    <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-2 py-0.5 me-1">
+                                                        {{ $project->group->pgroup_nameTH ?? ($project->group->pgroup_nameEN ?? '-') }}
+                                                    </span>
+                                                    @if(($project->pgroup_id == 2 || ($project->pro_group && $project->pro_group != $project->pro_id)) && $project->parentProject)
+                                                        <div class="mt-1 small">
+                                                            <span class="text-body-secondary fw-semibold"><i class="bi bi-diagram-3-fill text-primary me-1"></i>ภายใต้แผนงานวิจัย:</span>
+                                                            <a href="{{ route('backend.rdb_project.show', $project->parentProject->pro_id) }}" class="text-decoration-none fw-medium text-primary hover-underline">
+                                                                {{ $project->parentProject->pro_nameTH }}
+                                                            </a>
+                                                        </div>
+                                                    @endif
+                                                    @if($project->pgroup_id == 1 && $project->subProjects && $project->subProjects->count() > 0)
+                                                        <div class="mt-1 small">
+                                                            <span class="text-body-secondary fw-semibold"><i class="bi bi-collection-fill text-success me-1"></i>โครงการย่อยภายใต้แผนงานนี้ ({{ $project->subProjects->count() }} โครงการ)</span>
+                                                        </div>
+                                                    @endif
+                                                </td>
                                             </tr>
                                             <tr>
                                                 <th class="bg-body-tertiary">ยุทธศาสตร์:</th>
@@ -437,7 +454,7 @@
                                                 <td colspan="2" class="text-end">รวมสัดส่วนทั้งหมด:</td>
                                                 <td class="text-center">
                                                     @php $totalRatio = $project->rdbProjectWorks->sum('ratio'); @endphp
-                                                    <span class="badge {{ $totalRatio == 100 ? 'bg-success' : 'bg-warning text-dark' }} fs-6">
+                                                    <span class="badge {{ $totalRatio == 100 ? 'bg-success-subtle text-success-emphasis border border-success-subtle' : 'bg-warning ' }} fs-6">
                                                         {{ $totalRatio }}%
                                                     </span>
                                                 </td>
@@ -496,11 +513,11 @@
                                                         @if($project->pro_file)
                                                             <span class="badge bg-success-subtle text-success border border-success-subtle">มีไฟล์</span>
                                                             @if((int)$project->pro_file_show === 0)
-                                                                <span class="badge bg-success text-white" title="เปิดเผยต่อสาธารณะ"><i class="bi bi-globe me-1"></i>เปิด (Public)</span>
+                                                                <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle" title="เปิดเผยต่อสาธารณะ"><i class="bi bi-globe me-1"></i>เปิด (Public)</span>
                                                             @elseif((int)$project->pro_file_show === 1)
-                                                                <span class="badge bg-danger text-white" title="ปกปิดเล่มรายงาน"><i class="bi bi-lock-fill me-1"></i>ปิด (Concealed)</span>
+                                                                <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle" title="ปกปิดเล่มรายงาน"><i class="bi bi-lock-fill me-1"></i>ปิด (Concealed)</span>
                                                             @else
-                                                                <span class="badge bg-warning text-dark" title="ฉบับร่าง"><i class="bi bi-pencil me-1"></i>ร่าง (Draft)</span>
+                                                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" title="ฉบับร่าง"><i class="bi bi-pencil me-1"></i>ร่าง (Draft)</span>
                                                             @endif
                                                         @else
                                                             <span class="badge bg-secondary-subtle text-secondary">ไม่มีไฟล์</span>
@@ -726,7 +743,7 @@
                                         <i class="bi bi-flag-fill me-1"></i> {{ $project->status->ps_name }}
                                     </span>
                                 @else
-                                    <span class="badge bg-secondary px-3 py-2 fs-6">ยังไม่ระบุสถานะ</span>
+                                    <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-3 py-2 fs-6">ยังไม่ระบุสถานะ</span>
                                 @endif
                             </div>
 
@@ -775,9 +792,9 @@
                                     <div class="card-header d-flex justify-content-between align-items-center">
                                         <span><i class="bi bi-file-earmark-text"></i> ไฟล์บทคัดย่อ (Abstract File)</span>
                                         @if($project->pro_abstract_file)
-                                            <span class="badge bg-success"><i class="bi bi-check-circle"></i> มีไฟล์แล้ว</span>
+                                            <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle"><i class="bi bi-check-circle"></i> มีไฟล์แล้ว</span>
                                         @else
-                                            <span class="badge bg-secondary">ยังไม่มีไฟล์</span>
+                                            <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">ยังไม่มีไฟล์</span>
                                         @endif
                                     </div>
                                     <div class="card-body">
@@ -819,9 +836,9 @@
                                     <div class="card-header d-flex justify-content-between align-items-center">
                                         <span><i class="bi bi-file-earmark-richtext"></i> ไฟล์รายงานฉบับสมบูรณ์ (Full Report)</span>
                                         @if($project->pro_file || $project->pro_file_path)
-                                            <span class="badge bg-success"><i class="bi bi-check-circle"></i> มีไฟล์แล้ว</span>
+                                            <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle"><i class="bi bi-check-circle"></i> มีไฟล์แล้ว</span>
                                         @else
-                                            <span class="badge bg-secondary">ยังไม่มีไฟล์</span>
+                                            <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">ยังไม่มีไฟล์</span>
                                         @endif
                                     </div>
                                     <div class="card-body">
@@ -832,7 +849,7 @@
                                                     <strong class="text-body">{{ $project->pro_file ?: basename($project->pro_file_path) }}</strong>
                                                 </div>
                                                 <div class="d-flex gap-2 align-items-center">
-                                                    <div class="d-flex align-items-center px-2 py-1 rounded border bg-white shadow-sm" title="ปรับการแสดงผลไฟล์นี้ (0 = เปิด, 1 = ปิด, 2 = ร่าง)">
+                                                    <div class="d-flex align-items-center px-2 py-1 rounded border bg-body shadow-sm" title="ปรับการแสดงผลไฟล์นี้ (0 = เปิด, 1 = ปิด, 2 = ร่าง)">
                                                         <label class="small fw-bold text-muted mb-0 me-1"><i class="bi bi-shield-check"></i></label>
                                                         <select class="form-select form-select-sm border-0 py-0 ps-1 pe-4 fw-bold select-report-status" id="selectReportStatus" data-id="{{ $project->pro_id }}" style="font-size: 0.82rem; cursor: pointer; width: auto;">
                                                             <option value="0" {{ (int)$project->pro_file_show === 0 ? 'selected' : '' }}>🟢 เปิด (Public)</option>
@@ -883,7 +900,7 @@
                                 <div class="card mt-3">
                                     <div class="card-header d-flex justify-content-between align-items-center">
                                         <span><i class="bi bi-paperclip"></i> ไฟล์เพิ่มเติม (Additional Files)</span>
-                                        <span class="badge bg-info">{{ $project->files->count() }} ไฟล์</span>
+                                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">{{ $project->files->count() }} ไฟล์</span>
                                     </div>
                                     <div class="card-body">
                                         <!-- Add/Edit File Form -->

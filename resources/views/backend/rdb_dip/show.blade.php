@@ -103,7 +103,7 @@
                             @if($item->dip_request_date)
                             <tr>
                                 <th style="width: 30%;">ปีที่ขอรับ:</th>
-                                <td><span class="badge bg-secondary">{{ $item->dip_request_date->year + 543 }}</span></td>
+                                <td><span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">{{ $item->dip_request_date->year + 543 }}</span></td>
                             </tr>
                             @endif
                             @if($item->dipType)
@@ -187,7 +187,7 @@
                             @if($item->dip_data2_agent)
                             <tr>
                                 <th>เลขที่สิทธิบัตร/อนุสิทธิบัตร (Legacy):</th>
-                                <td><span class="badge bg-success">{{ $item->dip_data2_agent }}</span></td>
+                                <td><span class="badge bg-success-subtle text-success-emphasis border border-success-subtle">{{ $item->dip_data2_agent }}</span></td>
                             </tr>
                             @endif
                             @if($item->dip_data2_status)

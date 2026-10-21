@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Backend\UpdateAccessControlSettingsRequest;
 use Illuminate\Http\Request;
 use App\Models\SystemSetting;
 
@@ -38,18 +39,8 @@ class AccessControlSettingsController extends Controller
     /**
      * Update access control & download policy settings.
      */
-    public function update(Request $request)
+    public function update(UpdateAccessControlSettingsRequest $request)
     {
-        $request->validate([
-            'download_policy_full_report' => 'required|in:public,members_only,admin_only',
-            'download_policy_abstract' => 'required|in:public,members_only',
-            'download_policy_attachments' => 'required|in:public,members_only,admin_only',
-            'download_require_login_message' => 'required|string|max:1000',
-            'google_allowed_domains' => 'nullable|string|max:255',
-            'google_client_id' => 'nullable|string|max:500',
-            'google_client_secret' => 'nullable|string|max:500',
-        ]);
-
         // 1. Login & Google Settings
         SystemSetting::set('google_login_enabled', $request->has('google_login_enabled') ? '1' : '0', 'auth', 'เปิด/ปิดการเข้าสู่ระบบด้วย Google');
         SystemSetting::set('google_client_id', trim($request->google_client_id ?? ''), 'auth', 'Google OAuth Client ID');

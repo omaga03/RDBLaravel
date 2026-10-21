@@ -14,7 +14,8 @@
     <div class="row">
         <div class="col-lg-6">
             <x-card title="ข้อมูลประเภท" icon="bi-info-circle" color="blue">
-                <table class="table table-borderless table-sm mb-0">
+                <div class="table-responsive">
+<table class="table table-borderless table-sm mb-0">
                     <tr>
                         <th style="width: 40%;">รหัสประเภท:</th>
                         <td><code>{{ $item->utz_type_id }}</code></td>
@@ -28,6 +29,7 @@
                         <td>{{ $item->utz_type_index ?? '-' }}</td>
                     </tr>
                 </table>
+</div>
             </x-card>
         </div>
 

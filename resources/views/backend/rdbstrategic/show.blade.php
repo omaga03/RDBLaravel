@@ -15,7 +15,8 @@
     <div class="row">
         <div class="col-lg-6">
             <x-card title="ข้อมูลยุทธศาสตร์" icon="bi-info-circle" color="primary">
-                <table class="table table-borderless table-sm mb-0">
+                <div class="table-responsive">
+<table class="table table-borderless table-sm mb-0">
                     <tr>
                         <th style="width: 40%;">รหัส:</th>
                         <td><code>{{ $item->strategic_id }}</code></td>
@@ -28,13 +29,14 @@
                         <th>ปีงบประมาณ:</th>
                         <td>
                             @if($item->year)
-                                <span class="badge bg-info">{{ $item->year->year_name }}</span>
+                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">{{ $item->year->year_name }}</span>
                             @else
                                 <span class="text-muted">-</span>
                             @endif
                         </td>
                     </tr>
                 </table>
+</div>
             </x-card>
         </div>
 

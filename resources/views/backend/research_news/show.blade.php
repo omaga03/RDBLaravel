@@ -38,7 +38,7 @@
                 <div class="card-header text-white p-3 p-md-4 d-print-none border-0" style="background: var(--rdb-gradient-primary);">
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
                         @if($item->news_type)
-                            <span class="badge bg-light text-dark fw-semibold">
+                            <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle fw-semibold">
                                 <i class="bi bi-tag-fill me-1"></i>{{ $item->news_type }}
                             </span>
                         @endif
@@ -86,8 +86,8 @@
                         </button>
                     </div>
                     <div class="abstract-box p-3 p-md-4 border border-start border-4 border-primary rounded-3 bg-body-tertiary shadow-xs">
-                        <div id="news-backend-detail-text" class="abstract-content abstract-indent">
-                            {!! strip_tags($item->news_detail, '<p><br><b><strong><i><em><u><ul><ol><li><a><span>') !!}
+                        <div id="news-backend-detail-text" class="abstract-content">
+                            {!! $item->formatted_detail !!}
                         </div>
                     </div>
                 </div>

@@ -15,7 +15,8 @@
     <div class="row">
         <div class="col-lg-8">
             <x-card title="ข้อมูลโครงการทุนย่อย" icon="bi-info-circle" color="primary">
-                <table class="table table-borderless table-sm mb-0">
+                <div class="table-responsive">
+<table class="table table-borderless table-sm mb-0">
                     <tr>
                         <th style="width: 30%;">รหัสอ้างอิง:</th>
                         <td><code>{{ $item->pts_id }}</code></td>
@@ -29,7 +30,7 @@
                         <td>
                             <span class="fw-bold">{{ $item->projectType->pt_name ?? '-' }}</span>
                             @if(isset($item->projectType->year->year_name))
-                                <span class="badge bg-info ms-2">
+                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle ms-2">
                                     <i class="bi bi-calendar-event me-1"></i> {{ $item->projectType->year->year_name }}
                                 </span>
                             @endif
@@ -48,6 +49,7 @@
                         </td>
                     </tr>
                 </table>
+</div>
             </x-card>
         </div>
 

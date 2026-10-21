@@ -16,7 +16,8 @@
         {{-- Main Info --}}
         <div class="col-lg-8">
             <x-card title="ข้อมูลประเภททุน" icon="bi-info-circle" color="primary">
-                <table class="table table-borderless table-sm mb-0">
+                <div class="table-responsive">
+<table class="table table-borderless table-sm mb-0">
                     <tr>
                         <th style="width: 30%;">รหัส (ID):</th>
                         <td><code>{{ $item->pt_id }}</code></td>
@@ -29,7 +30,7 @@
                         <th>ปีงบประมาณ:</th>
                         <td>
                             @if($item->year)
-                                <span class="badge bg-danger">{{ $item->year->year_name }}</span>
+                                <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle">{{ $item->year->year_name }}</span>
                             @else
                                 <span class="text-muted">-</span>
                             @endif
@@ -38,6 +39,18 @@
                     <tr>
                         <th>กลุ่มประเภทงบประมาณ:</th>
                         <td>{{ $item->projectTypeGroup->pttg_name ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th>หมวดประเภททุนมาตรฐาน:</th>
+                        <td>
+                            @if($item->masterType)
+                                <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle">
+                                    {{ $item->masterType->master_pt_name }}
+                                </span>
+                            @else
+                                <span class="text-muted">-</span>
+                            @endif
+                        </td>
                     </tr>
                     <tr>
                         <th>ทุนสนับสนุนสำหรับ:</th>
@@ -51,7 +64,7 @@
                         <th>คำนวณงบประมาณ:</th>
                         <td>
                             @if($item->pt_type == '1')
-                                <span class="badge bg-success"><i class="bi bi-check-circle"></i> คำนวณ</span>
+                                <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle"><i class="bi bi-check-circle"></i> คำนวณ</span>
                             @else
                                 <span class="text-muted">-</span>
                             @endif
@@ -61,7 +74,7 @@
                         <th>การนำไปใช้ประโยชน์ (QA):</th>
                         <td>
                             @if($item->pt_utz == '1')
-                                <span class="badge bg-success"><i class="bi bi-check-circle"></i> คำนวณ</span>
+                                <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle"><i class="bi bi-check-circle"></i> คำนวณ</span>
                             @else
                                 <span class="text-muted">-</span>
                             @endif
@@ -74,6 +87,7 @@
                     </tr>
                     @endif
                 </table>
+</div>
             </x-card>
         </div>
 

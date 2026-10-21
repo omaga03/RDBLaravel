@@ -81,14 +81,14 @@
             <div class="col-md-6 mb-3">
                 <label for="utz_files_upload" class="form-label fw-bold">ไฟล์แนบ</label>
                 @if($isEdit && $item->utz_files)
-                    <div class="mb-2 p-2 bg-light rounded border">
-                        <small class="text-muted d-block mb-1 fw-semibold"><i class="bi bi-paperclip"></i> ไฟล์ปัจจุบัน:</small>
+                    <div class="mb-2 p-2 bg-body-tertiary rounded border">
+                        <small class="text-body-secondary d-block mb-1 fw-semibold"><i class="bi bi-paperclip"></i> ไฟล์ปัจจุบัน:</small>
                         <div class="d-flex flex-wrap gap-2">
                             @foreach(explode(',', $item->utz_files) as $file)
                                 @if(trim($file))
                                     @php $trimmedFile = trim($file); @endphp
-                                    <div class="d-inline-flex align-items-center gap-2 bg-white px-2 py-1 rounded border shadow-sm">
-                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                                    <div class="d-inline-flex align-items-center gap-2 bg-body px-2 py-1 rounded border shadow-sm">
+                                        <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">
                                             <i class="bi bi-file-earmark-pdf text-danger me-1"></i> {{ $trimmedFile }}
                                         </span>
                                         <a href="{{ route('backend.rdbprojectutilize.download', ['id' => $item->utz_id, 'filename' => $trimmedFile]) }}" 
@@ -120,7 +120,7 @@
         <div class="row">
             <div class="col-md-4 mb-3">
                 <label for="utz_date" class="form-label">วันที่นำไปใช้ประโยชน์ <span class="text-danger">*</span></label>
-                <input type="date" class="form-control" id="utz_date" name="utz_date" value="{{ old('utz_date', $item->utz_date ?? date('Y-m-d')) }}" required>
+                <input type="text" class="form-control datepicker" id="utz_date" name="utz_date" value="{{ old('utz_date', $item->utz_date ?? date('Y-m-d')) }}" placeholder="วว/ดด/ปปปป" autocomplete="off" required>
             </div>
             <div class="col-md-4 mb-3">
                 <label for="utz_leading" class="form-label">ชื่อผู้นำไปใช้ประโยชน์</label>

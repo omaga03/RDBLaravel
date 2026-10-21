@@ -33,7 +33,7 @@
             <div class="card shadow-sm border mb-4">
                 <div class="card-header text-white p-3 p-md-4" style="background: var(--rdb-gradient-primary);">
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
-                        <span class="badge bg-light text-dark fw-semibold">
+                        <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle fw-semibold">
                             <i class="bi bi-megaphone me-1"></i>การประชุมวิชาการ
                         </span>
                         <span class="small text-white-50">
@@ -91,23 +91,8 @@
                         <h5 class="fw-bold text-primary mb-3">
                             <i class="bi bi-file-text me-2"></i>รายละเอียดการประชุม
                         </h5>
-                        @php
-                            $content = html_entity_decode($item->con_detail ?? '');
-                            $patterns = [
-                                '/<p>\s*[\.•\-]\s*<\/p>/iu',
-                                '/<p>\s*&nbsp;\s*<\/p>/iu',
-                                '/<br\s*\/?>\s*[\.•\-]\s*/iu',
-                                '/<div[^>]*>\s*[\.•\-]\s*<\/div>/iu',
-                            ];
-                            $content = preg_replace($patterns, '', $content);
-                            $content = preg_replace('/^\s*[\.•\-]\s*$/m', '', $content);
-                            $content = preg_replace('/^\s*[=_]{3,}\s*$/m', '', $content);
-                            $content = preg_replace('/(<br\s*\/?>\s*)+/iu', '<br>', $content);
-                            $content = preg_replace('/(\r?\n)+/', "\n", $content);
-                            $content = preg_replace('/<p>\s*<\/p>/iu', '', $content);
-                        @endphp
                         <div class="text-body text-break lh-lg fs-6">
-                            {!! $content !!}
+                            {!! $item->formatted_detail !!}
                         </div>
                     </div>
 

@@ -46,11 +46,11 @@
             </div>
             <div class="col-md-6">
                 <label class="form-label">วันที่ลงข่าว (เริ่มต้น)</label>
-                <input type="date" class="form-control" id="date_start" name="date_start" value="{{ request('date_start') }}">
+                <input type="text" class="form-control datepicker" id="date_start" name="date_start" value="{{ request('date_start') }}" placeholder="วว/ดด/ปปปป" autocomplete="off">
             </div>
             <div class="col-md-6">
                 <label class="form-label">วันที่ลงข่าว (สิ้นสุด)</label>
-                <input type="date" class="form-control" id="date_end" name="date_end" value="{{ request('date_end') }}">
+                <input type="text" class="form-control datepicker" id="date_end" name="date_end" value="{{ request('date_end') }}" placeholder="วว/ดด/ปปปป" autocomplete="off">
             </div>
         </div>
     </x-search-bar>
@@ -113,7 +113,7 @@
                                     </span>
                                 </div>
                                 <p class="mb-0 text-body-secondary small text-break" style="line-height: 1.5;">
-                                    {{ Str::limit(html_entity_decode(strip_tags($item->news_detail)), 180) }}
+                                    {{ $item->plain_summary }}
                                 </p>
                             </td>
                             <td class="text-center p-3">
@@ -145,4 +145,29 @@
         color: var(--bs-primary) !important;
     }
 </style>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof initThaiFlatpickr === 'function') {
+        const endPicker = initThaiFlatpickr('#date_end');
+        initThaiFlatpickr('#date_start', {
+            onChange: function(selectedDates, dateStr) {
+                if (endPicker) {
+                    endPicker.set('minDate', dateStr || null);
+                    const currentEnd = endPicker.selectedDates[0];
+                    if (currentEnd && selectedDates.length > 0 && currentEnd < selectedDates[0]) {
+                        endPicker.clear();
+                    }
+                }
+            }
+        });
+        const startVal = document.getElementById('date_start').value;
+        if (startVal && endPicker) {
+            endPicker.set('minDate', startVal);
+        }
+    }
+});
+</script>
+@endpush
 @endsection

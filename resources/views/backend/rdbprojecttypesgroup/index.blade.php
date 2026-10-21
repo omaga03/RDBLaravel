@@ -40,7 +40,7 @@
                             <td class="fw-bold">{{ $item->pttg_name }}</td>
                             <td>
                                 @if(isset($groupList[$item->pttg_group]))
-                                    <span class="badge bg-secondary">{{ $groupList[$item->pttg_group] }}</span>
+                                    <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">{{ $groupList[$item->pttg_group] }}</span>
                                 @else
                                     {{ $item->pttg_group ?? '-' }}
                                 @endif

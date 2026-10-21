@@ -13,6 +13,7 @@ use App\Models\RdbResearcher;
 use App\Models\RdbYear;
 use App\Models\RdbDepartment;
 use App\Models\RdbProjectType;
+use App\Models\RdbProjectTypeMaster;
 use App\Models\RdbDipType;
 use App\Models\RdbPublishedType;
 use App\Models\RdbProjectStatus;
@@ -47,6 +48,7 @@ class DashboardController extends Controller
 
         $statuses = RdbProjectStatus::all();
         $projectTypes = RdbProjectType::orderBy('pt_name')->get();
+        $masterProjectTypes = RdbProjectTypeMaster::orderBy('order_index')->get();
         $dipTypes = RdbDipType::all();
         $prefixes = RdbPrefix::orderBy('prefix_id')->get();
         $amphoes = [
@@ -59,6 +61,7 @@ class DashboardController extends Controller
             'departments' => $departments,
             'statuses' => $statuses,
             'projectTypes' => $projectTypes,
+            'masterProjectTypes' => $masterProjectTypes,
             'dipTypes' => $dipTypes,
             'prefixes' => $prefixes,
             'amphoes' => $amphoes,
@@ -76,19 +79,23 @@ class DashboardController extends Controller
 
         $deptId = $request->filled('department_id') && $request->department_id !== 'all' ? (int)$request->department_id : null;
         $psId = $request->filled('ps_id') && $request->ps_id !== 'all' ? (int)$request->ps_id : null;
+        $masterPtId = $request->filled('master_pt_id') && $request->master_pt_id !== 'all' ? (int)$request->master_pt_id : null;
         $ptId = $request->filled('pt_id') && $request->pt_id !== 'all' ? (int)$request->pt_id : null;
         $hasReport = $request->filled('has_report') && $request->has_report !== 'all' ? $request->has_report : null;
 
         // Project types are scoped to selected year
         if ($selectedYearId) {
-            $lookups['projectTypes'] = RdbProjectType::where('year_id', $selectedYearId)->orderBy('pt_name')->get();
+            $lookups['projectTypes'] = RdbProjectType::where('year_id', $selectedYearId)
+                ->when($masterPtId, fn($q) => $q->where('master_pt_id', $masterPtId))
+                ->orderBy('pt_name')
+                ->get();
         } else {
             $lookups['projectTypes'] = collect();
             $ptId = null;
         }
 
         // Active filter counter
-        $activeFilterCount = count(array_filter([$selectedYearId, $deptId, $psId, $ptId, $hasReport]));
+        $activeFilterCount = count(array_filter([$selectedYearId, $deptId, $psId, $masterPtId, $ptId, $hasReport]));
 
         // Core Queries
         $proQuery = RdbProject::query();
@@ -133,6 +140,10 @@ class DashboardController extends Controller
         }
 
         // 4. Project Type Filter
+        if ($masterPtId) {
+            $proQuery->whereHas('type', fn($q) => $q->where('master_pt_id', $masterPtId));
+            $utilQuery->whereHas('project.type', fn($q) => $q->where('master_pt_id', $masterPtId));
+        }
         if ($ptId) {
             $proQuery->where('pt_id', $ptId);
             $utilQuery->whereHas('project', fn($q) => $q->where('pt_id', $ptId));
@@ -165,10 +176,18 @@ class DashboardController extends Controller
         $totalDips = $dipQuery->count();
 
         // International publications (Scopus / WoS)
-        $internationalPubsCount = (clone $pubQuery)->whereHas('pubtype', function ($q) {
-            $q->where('pubtype_subgroup', 'like', '%Scopus%')
-              ->orWhere('pubtype_subgroup', 'like', '%Web of Science%')
-              ->orWhere('pubtype_subgroup', 'like', '%PubMed%');
+        $internationalPubsCount = (clone $pubQuery)->where(function ($q) {
+            $q->whereHas('pubtype', function ($sq) {
+                $sq->where('pubtype_subgroup', 'like', '%Scopus%')
+                  ->orWhere('pubtype_subgroup', 'like', '%Web of Science%')
+                  ->orWhere('pubtype_subgroup', 'like', '%PubMed%');
+            })->orWhere(function ($sq) {
+                $sq->where(fn($ssq) => $ssq->whereNull('pubtype_id')->orWhere('pubtype_id', ''))
+                   ->where(fn($ssq) => $ssq->where('pub_score', '>=', 1.0)
+                                           ->orWhere('pub_name_journal', 'like', '%Scopus%')
+                                           ->orWhere('pub_name_journal', 'like', '%Web of Science%')
+                                           ->orWhere('pub_name_journal', 'like', '%WoS%'));
+            });
         })->count();
 
         // Active Researchers (Distinct researchers participating in projects, respecting filters)
@@ -192,6 +211,10 @@ class DashboardController extends Controller
 
         if ($psId) {
             $resWorkQuery->where('rdb_project.ps_id', $psId);
+        }
+
+        if ($masterPtId) {
+            $resWorkQuery->whereHas('project.type', fn($q) => $q->where('master_pt_id', $masterPtId));
         }
 
         if ($ptId) {
@@ -230,13 +253,16 @@ class DashboardController extends Controller
             ->get()
             ->reverse()
             ->values()
-            ->map(function ($y) use ($deptId, $ptId) {
+            ->map(function ($y) use ($deptId, $masterPtId, $ptId) {
                 $pq = RdbProject::where('year_id', $y->year_id);
                 $pubq = RdbPublished::where(fn($q) => $q->where('year_id', $y->year_id)->orWhere('year_bud', $y->year_id));
 
                 if ($deptId) {
                     $pq->where('department_id', $deptId);
                     $pubq->where('department_id', $deptId);
+                }
+                if ($masterPtId) {
+                    $pq->whereHas('type', fn($q) => $q->where('master_pt_id', $masterPtId));
                 }
                 if ($ptId) {
                     $pq->where('pt_id', $ptId);
@@ -259,7 +285,7 @@ class DashboardController extends Controller
             ? $lookups['departments']->where('department_id', $deptId)
             : $lookups['departments'];
 
-        $facultyStats = $targetDepartments->map(function ($dept) use ($selectedYearId, $psId, $ptId) {
+        $facultyStats = $targetDepartments->map(function ($dept) use ($selectedYearId, $psId, $masterPtId, $ptId) {
             $pq = RdbProject::where('department_id', $dept->department_id);
             $pubq = RdbPublished::where('department_id', $dept->department_id);
             $uq = RdbProjectUtilize::whereHas('project', fn($q) => $q->where('department_id', $dept->department_id));
@@ -271,6 +297,9 @@ class DashboardController extends Controller
             }
             if ($psId) {
                 $pq->where('ps_id', $psId);
+            }
+            if ($masterPtId) {
+                $pq->whereHas('type', fn($q) => $q->where('master_pt_id', $masterPtId));
             }
             if ($ptId) {
                 $pq->where('pt_id', $ptId);
@@ -298,6 +327,7 @@ class DashboardController extends Controller
             'selectedYear' => $selectedYear,
             'deptId' => $deptId,
             'psId' => $psId,
+            'masterPtId' => $masterPtId,
             'ptId' => $ptId,
             'hasReport' => $hasReport,
             'activeFilterCount' => $activeFilterCount,
@@ -326,19 +356,23 @@ class DashboardController extends Controller
 
         $deptId = $request->filled('department_id') && $request->department_id !== 'all' ? (int)$request->department_id : null;
         $psId = $request->filled('ps_id') && $request->ps_id !== 'all' ? (int)$request->ps_id : null;
+        $masterPtId = $request->filled('master_pt_id') && $request->master_pt_id !== 'all' ? (int)$request->master_pt_id : null;
         $ptId = $request->filled('pt_id') && $request->pt_id !== 'all' ? (int)$request->pt_id : null;
         $budgetRange = $request->filled('budget_range') && $request->budget_range !== 'all' ? $request->budget_range : null;
         $hasReport = $request->filled('has_report') && $request->has_report !== 'all' ? $request->has_report : null;
 
         // Project types are scoped to selected year
         if ($selectedYearId) {
-            $lookups['projectTypes'] = RdbProjectType::where('year_id', $selectedYearId)->orderBy('pt_name')->get();
+            $lookups['projectTypes'] = RdbProjectType::where('year_id', $selectedYearId)
+                ->when($masterPtId, fn($q) => $q->where('master_pt_id', $masterPtId))
+                ->orderBy('pt_name')
+                ->get();
         } else {
             $lookups['projectTypes'] = collect();
             $ptId = null;
         }
 
-        $activeFilterCount = count(array_filter([$selectedYearId, $deptId, $psId, $ptId, $budgetRange, $hasReport]));
+        $activeFilterCount = count(array_filter([$selectedYearId, $deptId, $psId, $masterPtId, $ptId, $budgetRange, $hasReport]));
 
         $query = RdbProject::query();
 
@@ -350,6 +384,9 @@ class DashboardController extends Controller
         }
         if ($psId) {
             $query->where('ps_id', $psId);
+        }
+        if ($masterPtId) {
+            $query->whereHas('type', fn($q) => $q->where('master_pt_id', $masterPtId));
         }
         if ($ptId) {
             $query->where('pt_id', $ptId);
@@ -409,29 +446,36 @@ class DashboardController extends Controller
         })->count();
         $totalDownloads = (clone $query)->sum('pro_count_full');
 
-        // Funding types
+        // Funding types - Aggregated by Master Type
         $fundingTypes = DB::table('rdb_project')
-            ->leftJoin('rdb_project_type', 'rdb_project.pt_id', '=', 'rdb_project_type.pt_id')
+            ->leftJoin('rdb_project_types', 'rdb_project.pt_id', '=', 'rdb_project_types.pt_id')
+            ->leftJoin('rdb_project_types_master', 'rdb_project_types.master_pt_id', '=', 'rdb_project_types_master.master_pt_id')
             ->when($selectedYearId, fn($q) => $q->where('rdb_project.year_id', $selectedYearId))
             ->when($deptId, fn($q) => $q->where('rdb_project.department_id', $deptId))
             ->when($psId, fn($q) => $q->where('rdb_project.ps_id', $psId))
+            ->when($masterPtId, fn($q) => $q->where('rdb_project_types.master_pt_id', $masterPtId))
             ->when($ptId, fn($q) => $q->where('rdb_project.pt_id', $ptId))
+            ->where('rdb_project.data_show', '1')
             ->select(
-                DB::raw('COALESCE(rdb_project_type.pt_name, "ไม่ระบุ") as type_name'),
+                DB::raw('COALESCE(rdb_project_types_master.master_pt_name, "ทุนที่ไม่ระบุ") as type_name'),
                 DB::raw('count(*) as count'),
-                DB::raw('SUM(pro_budget) as budget')
+                DB::raw('SUM(COALESCE(rdb_project.pro_budget, 0)) as budget'),
+                DB::raw('COALESCE(rdb_project_types_master.color_code, "#64748B") as color')
             )
-            ->groupBy('rdb_project_type.pt_name')
+            ->groupBy('rdb_project_types_master.master_pt_id', 'rdb_project_types_master.master_pt_name', 'rdb_project_types_master.order_index', 'rdb_project_types_master.color_code')
+            ->orderBy('rdb_project_types_master.order_index')
             ->orderByDesc('budget')
             ->get();
 
         // Budget by Faculty
         $deptBudgets = DB::table('rdb_project')
             ->join('rdb_department', 'rdb_project.department_id', '=', 'rdb_department.department_id')
+            ->when($masterPtId, fn($q) => $q->join('rdb_project_types as dpt', 'rdb_project.pt_id', '=', 'dpt.pt_id')->where('dpt.master_pt_id', $masterPtId))
             ->when($selectedYearId, fn($q) => $q->where('rdb_project.year_id', $selectedYearId))
             ->when($deptId, fn($q) => $q->where('rdb_project.department_id', $deptId))
             ->when($psId, fn($q) => $q->where('rdb_project.ps_id', $psId))
             ->when($ptId, fn($q) => $q->where('rdb_project.pt_id', $ptId))
+            ->where('rdb_project.data_show', '1')
             ->select(
                 'rdb_department.department_nameTH',
                 DB::raw('count(*) as project_count'),
@@ -448,10 +492,13 @@ class DashboardController extends Controller
             ->get()
             ->reverse()
             ->values()
-            ->map(function ($y) use ($deptId, $psId, $ptId) {
-                $q = RdbProject::where('year_id', $y->year_id);
+            ->map(function ($y) use ($deptId, $psId, $masterPtId, $ptId) {
+                $q = RdbProject::where('year_id', $y->year_id)->where('data_show', '1');
                 if ($deptId) $q->where('department_id', $deptId);
                 if ($psId) $q->where('ps_id', $psId);
+                if ($masterPtId) {
+                    $q->whereHas('type', fn($sq) => $sq->where('master_pt_id', $masterPtId));
+                }
                 if ($ptId) $q->where('pt_id', $ptId);
 
                 $count = $q->count();
@@ -476,6 +523,7 @@ class DashboardController extends Controller
             'selectedYear' => $selectedYear,
             'deptId' => $deptId,
             'psId' => $psId,
+            'masterPtId' => $masterPtId,
             'ptId' => $ptId,
             'budgetRange' => $budgetRange,
             'hasReport' => $hasReport,
@@ -525,15 +573,45 @@ class DashboardController extends Controller
         }
         if ($qualityGroup) {
             if ($qualityGroup === 'scopus') {
-                $query->whereHas('pubtype', fn($q) => $q->where('pubtype_subgroup', 'like', '%Scopus%'));
+                $query->where(function($q) {
+                    $q->whereHas('pubtype', fn($sq) => $sq->where('pubtype_subgroup', 'like', '%Scopus%'))
+                      ->orWhere(function($sq) {
+                          $sq->where(fn($ssq) => $ssq->whereNull('rdb_published.pubtype_id')->orWhere('rdb_published.pubtype_id', ''))
+                             ->where(fn($ssq) => $ssq->where('rdb_published.pub_name_journal', 'like', '%Scopus%')->orWhere('rdb_published.pub_note', 'like', '%Scopus%')->orWhere(fn($x) => $x->where('rdb_published.pub_score', '>=', 1.0)->where('rdb_published.pub_name_journal', 'not like', '%Web of Science%')));
+                      });
+                });
             } elseif ($qualityGroup === 'wos') {
-                $query->whereHas('pubtype', fn($q) => $q->where('pubtype_subgroup', 'like', '%Web of Science%'));
+                $query->where(function($q) {
+                    $q->whereHas('pubtype', fn($sq) => $sq->where('pubtype_subgroup', 'like', '%Web of Science%'))
+                      ->orWhere(function($sq) {
+                          $sq->where(fn($ssq) => $ssq->whereNull('rdb_published.pubtype_id')->orWhere('rdb_published.pubtype_id', ''))
+                             ->where(fn($ssq) => $ssq->where('rdb_published.pub_name_journal', 'like', '%Web of Science%')->orWhere('rdb_published.pub_name_journal', 'like', '%WoS%')->orWhere('rdb_published.pub_note', 'like', '%Web of Science%'));
+                      });
+                });
             } elseif ($qualityGroup === 'tci1') {
-                $query->whereHas('pubtype', fn($q) => $q->where('pubtype_subgroup', 'like', '%TCI %1%'));
+                $query->where(function($q) {
+                    $q->whereHas('pubtype', fn($sq) => $sq->where('pubtype_subgroup', 'like', '%TCI %1%'))
+                      ->orWhere(function($sq) {
+                          $sq->where(fn($ssq) => $ssq->whereNull('rdb_published.pubtype_id')->orWhere('rdb_published.pubtype_id', ''))
+                             ->where(fn($ssq) => $ssq->where('rdb_published.pub_name_journal', 'like', '%TCI%1%')->orWhere('rdb_published.pub_note', 'like', '%TCI%1%')->orWhere('rdb_published.pub_score', '0.80'));
+                      });
+                });
             } elseif ($qualityGroup === 'tci2') {
-                $query->whereHas('pubtype', fn($q) => $q->where('pubtype_subgroup', 'like', '%TCI %2%'));
+                $query->where(function($q) {
+                    $q->whereHas('pubtype', fn($sq) => $sq->where('pubtype_subgroup', 'like', '%TCI %2%'))
+                      ->orWhere(function($sq) {
+                          $sq->where(fn($ssq) => $ssq->whereNull('rdb_published.pubtype_id')->orWhere('rdb_published.pubtype_id', ''))
+                             ->where(fn($ssq) => $ssq->where('rdb_published.pub_name_journal', 'like', '%TCI%2%')->orWhere('rdb_published.pub_note', 'like', '%TCI%2%')->orWhere('rdb_published.pub_score', '0.60'));
+                      });
+                });
             } elseif ($qualityGroup === 'conf') {
-                $query->whereHas('pubtype', fn($q) => $q->where('pubtype_group', 'like', '%ประชุม%'));
+                $query->where(function($q) {
+                    $q->whereHas('pubtype', fn($sq) => $sq->where('pubtype_group', 'like', '%ประชุม%'))
+                      ->orWhere(function($sq) {
+                          $sq->where(fn($ssq) => $ssq->whereNull('rdb_published.pubtype_id')->orWhere('rdb_published.pubtype_id', ''))
+                             ->where(fn($ssq) => $ssq->whereIn('rdb_published.pub_score', ['0.20', '0.25', '0.40'])->orWhere('rdb_published.pub_name_journal', 'like', '%ประชุม%'));
+                      });
+                });
             }
         }
         if ($hasProject !== null) {
@@ -553,23 +631,69 @@ class DashboardController extends Controller
 
         $totalPublished = (clone $query)->count();
 
-        // Quality Tiers Breakdown
+        // Quality Tiers Breakdown (with smart fallback to score & journal keywords for pre-2025 data)
+        $tierSql = "
+            CASE 
+                WHEN rdb_published_type.pubtype_subgroup IS NOT NULL AND rdb_published_type.pubtype_subgroup != '' THEN rdb_published_type.pubtype_subgroup
+                WHEN rdb_published.pub_score >= 1.0 OR rdb_published.pub_name_journal LIKE '%Scopus%' OR rdb_published.pub_name_journal LIKE '%Web of Science%' THEN 'วารสารวิชาการระดับนานาชาติ (Scopus / WoS)'
+                WHEN rdb_published.pub_score = 0.80 OR rdb_published.pub_name_journal LIKE '%TCI%1%' THEN 'วารสารวิชาการระดับชาติ TCI กลุ่มที่ 1'
+                WHEN rdb_published.pub_score = 0.60 OR rdb_published.pub_name_journal LIKE '%TCI%2%' THEN 'วารสารวิชาการระดับชาติ TCI กลุ่มที่ 2'
+                WHEN rdb_published.pub_score = 0.40 THEN 'การประชุมวิชาการระดับนานาชาติ'
+                WHEN rdb_published.pub_score = 0.20 OR rdb_published.pub_score = 0.25 OR rdb_published.pub_name_journal LIKE '%ประชุม%' THEN 'การประชุมวิชาการระดับชาติ'
+                ELSE 'วารสารวิชาการทั่วไป / อื่นๆ'
+            END
+        ";
+
         $qualityTiers = (clone $query)
             ->leftJoin('rdb_published_type', 'rdb_published.pubtype_id', '=', 'rdb_published_type.pubtype_id')
             ->select(
-                DB::raw('COALESCE(rdb_published_type.pubtype_subgroup, "วารสารวิชาการทั่วไป / อื่นๆ") as tier_name'),
+                DB::raw("{$tierSql} as tier_name"),
                 DB::raw('count(*) as count')
             )
-            ->groupBy('rdb_published_type.pubtype_subgroup')
+            ->groupBy(DB::raw("{$tierSql}"))
             ->orderByDesc('count')
             ->get();
 
-        // Count international (Scopus/WoS) vs TCI vs Conf
-        $scopusCount = (clone $query)->whereHas('pubtype', fn($q) => $q->where('pubtype_subgroup', 'like', '%Scopus%'))->count();
-        $wosCount = (clone $query)->whereHas('pubtype', fn($q) => $q->where('pubtype_subgroup', 'like', '%Web of Science%'))->count();
-        $tci1Count = (clone $query)->whereHas('pubtype', fn($q) => $q->where('pubtype_subgroup', 'like', '%TCI %1%'))->count();
-        $tci2Count = (clone $query)->whereHas('pubtype', fn($q) => $q->where('pubtype_subgroup', 'like', '%TCI %2%'))->count();
-        $confCount = (clone $query)->whereHas('pubtype', fn($q) => $q->where('pubtype_group', 'like', '%ประชุม%'))->count();
+        // Count international (Scopus/WoS) vs TCI vs Conf (with smart fallback)
+        $scopusCount = (clone $query)->where(function($q) {
+            $q->whereHas('pubtype', fn($sq) => $sq->where('pubtype_subgroup', 'like', '%Scopus%'))
+              ->orWhere(function($sq) {
+                  $sq->where(fn($ssq) => $ssq->whereNull('pubtype_id')->orWhere('pubtype_id', ''))
+                     ->where(fn($ssq) => $ssq->where('pub_name_journal', 'like', '%Scopus%')->orWhere('pub_note', 'like', '%Scopus%')->orWhere(fn($x) => $x->where('pub_score', '>=', 1.0)->where('pub_name_journal', 'not like', '%Web of Science%')));
+              });
+        })->count();
+
+        $wosCount = (clone $query)->where(function($q) {
+            $q->whereHas('pubtype', fn($sq) => $sq->where('pubtype_subgroup', 'like', '%Web of Science%'))
+              ->orWhere(function($sq) {
+                  $sq->where(fn($ssq) => $ssq->whereNull('pubtype_id')->orWhere('pubtype_id', ''))
+                     ->where(fn($ssq) => $ssq->where('pub_name_journal', 'like', '%Web of Science%')->orWhere('pub_name_journal', 'like', '%WoS%')->orWhere('pub_note', 'like', '%Web of Science%'));
+              });
+        })->count();
+
+        $tci1Count = (clone $query)->where(function($q) {
+            $q->whereHas('pubtype', fn($sq) => $sq->where('pubtype_subgroup', 'like', '%TCI %1%'))
+              ->orWhere(function($sq) {
+                  $sq->where(fn($ssq) => $ssq->whereNull('pubtype_id')->orWhere('pubtype_id', ''))
+                     ->where(fn($ssq) => $ssq->where('pub_name_journal', 'like', '%TCI%1%')->orWhere('pub_note', 'like', '%TCI%1%')->orWhere('pub_score', '0.80'));
+              });
+        })->count();
+
+        $tci2Count = (clone $query)->where(function($q) {
+            $q->whereHas('pubtype', fn($sq) => $sq->where('pubtype_subgroup', 'like', '%TCI %2%'))
+              ->orWhere(function($sq) {
+                  $sq->where(fn($ssq) => $ssq->whereNull('pubtype_id')->orWhere('pubtype_id', ''))
+                     ->where(fn($ssq) => $ssq->where('pub_name_journal', 'like', '%TCI%2%')->orWhere('pub_note', 'like', '%TCI%2%')->orWhere('pub_score', '0.60'));
+              });
+        })->count();
+
+        $confCount = (clone $query)->where(function($q) {
+            $q->whereHas('pubtype', fn($sq) => $sq->where('pubtype_group', 'like', '%ประชุม%'))
+              ->orWhere(function($sq) {
+                  $sq->where(fn($ssq) => $ssq->whereNull('pubtype_id')->orWhere('pubtype_id', ''))
+                     ->where(fn($ssq) => $ssq->whereIn('pub_score', ['0.20', '0.25', '0.40'])->orWhere('pub_name_journal', 'like', '%ประชุม%'));
+              });
+        })->count();
 
         // Publications by Faculty
         $byFaculty = (clone $query)

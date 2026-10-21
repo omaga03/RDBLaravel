@@ -679,6 +679,8 @@ class RdbprojectController extends Controller
             'strategic', 
             'researchers', 
             'group',
+            'parentProject',
+            'subProjects',
             'rdbProjectWorks' => function($q) {
                 $q->orderBy('position_id', 'asc');
             },

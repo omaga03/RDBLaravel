@@ -47,4 +47,14 @@ class ResearchConference extends Model
         }
         return null;
     }
+
+    public function getFormattedDetailAttribute(): string
+    {
+        return \App\Helpers\HtmlContentHelper::formatConference($this->con_detail);
+    }
+
+    public function getPlainSummaryAttribute(): string
+    {
+        return \App\Helpers\HtmlContentHelper::plainSummaryConference($this->con_detail, 180);
+    }
 }

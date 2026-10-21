@@ -12,34 +12,34 @@ class RdbChangwatPolicy
 
     public function before(User $user, $ability)
     {
-        if ($user->hasRole('The Creator')) {
+        if ($user->hasRole('The Creator') || $user->hasRole('Admin') || $user->hasPermission('MasterData.Manage') || $user->hasRole('Admin Utilize')) {
             return true;
         }
     }
 
     public function viewAny(?User $user): bool
     {
-        return false;
+        return $user && ($user->hasPermission('MasterData.Manage') || $user->hasRole(['Admin', 'Admin Utilize']));
     }
 
     public function view(?User $user, RdbChangwat $rdbChangwat): bool
     {
-        return false;
+        return $user && ($user->hasPermission('MasterData.Manage') || $user->hasRole(['Admin', 'Admin Utilize']));
     }
 
     public function create(?User $user): bool
     {
-        return false;
+        return $user && ($user->hasPermission('MasterData.Manage') || $user->hasRole(['Admin', 'Admin Utilize']));
     }
 
     public function update(?User $user, RdbChangwat $rdbChangwat): bool
     {
-        return false;
+        return $user && ($user->hasPermission('MasterData.Manage') || $user->hasRole(['Admin', 'Admin Utilize']));
     }
 
     public function delete(?User $user, RdbChangwat $rdbChangwat): bool
     {
-        return false;
+        return $user && ($user->hasPermission('MasterData.Manage') || $user->hasRole(['Admin', 'Admin Utilize']));
     }
 
     public function restore(?User $user, RdbChangwat $rdbChangwat): bool

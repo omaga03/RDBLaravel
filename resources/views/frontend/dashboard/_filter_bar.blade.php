@@ -9,7 +9,7 @@
             <i class="bi bi-sliders text-primary fs-5"></i>
             <span class="fw-bold text-body" style="font-size: 0.95rem;">ตัวกรองข้อมูลสารสนเทศ (Intelligence Filters)</span>
             @if(isset($activeFilterCount) && $activeFilterCount > 0)
-                <span class="badge bg-primary text-white rounded-pill px-2.5 py-1" style="font-size: 0.75rem;">
+                <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle rounded-pill px-2.5 py-1" style="font-size: 0.75rem;">
                     <i class="bi bi-funnel-fill me-1"></i> ใช้งาน {{ $activeFilterCount }} ตัวกรอง
                 </span>
             @else
@@ -77,22 +77,17 @@
                         </select>
                     </div>
 
-                    <!-- Filter 4: Project Type (Dependent on Year) -->
-                    <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                    <!-- Filter 4: Standard Master Funding Category -->
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                         <label class="form-label text-body-secondary small fw-medium mb-1">
-                            <i class="bi bi-tags text-primary me-1"></i> ประเภททุน
-                            @if(empty($selectedYearId))
-                                <span class="badge bg-warning-subtle text-warning-emphasis p-0 px-1" style="font-size: 0.65rem;">เลือกปีก่อน</span>
-                            @endif
+                            <i class="bi bi-tags text-primary me-1"></i> ประเภททุนวิจัย
                         </label>
-                        <select name="pt_id" id="filter_pt_id" class="form-select form-select-sm fw-medium" {{ empty($selectedYearId) ? 'disabled' : '' }}>
-                            @if(empty($selectedYearId))
-                                <option value="all">-- กรุณาเลือกปีงบประมาณก่อน --</option>
-                            @else
-                                <option value="all" {{ empty($ptId) ? 'selected' : '' }}>-- ทุกประเภททุน --</option>
-                                @foreach($projectTypes as $pt)
-                                    <option value="{{ $pt->pt_id }}" {{ (isset($ptId) && $ptId == $pt->pt_id) ? 'selected' : '' }}>
-                                        {{ $pt->pt_name }}
+                        <select name="master_pt_id" id="filter_master_pt_id" class="form-select form-select-sm fw-medium">
+                            <option value="all" {{ empty($masterPtId) ? 'selected' : '' }}>-- ทุกประเภททุน --</option>
+                            @if(isset($masterProjectTypes))
+                                @foreach($masterProjectTypes as $mpt)
+                                    <option value="{{ $mpt->master_pt_id }}" {{ (isset($masterPtId) && $masterPtId == $mpt->master_pt_id) ? 'selected' : '' }}>
+                                        {{ $mpt->master_pt_name }}
                                     </option>
                                 @endforeach
                             @endif

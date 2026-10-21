@@ -14,7 +14,8 @@
     <div class="row">
         <div class="col-lg-6">
             <x-card title="ข้อมูลประเภท" icon="bi-info-circle" color="blue">
-                <table class="table table-borderless table-sm mb-0">
+                <div class="table-responsive">
+<table class="table table-borderless table-sm mb-0">
                     <tr>
                         <th style="width: 40%;">รหัสประเภท:</th>
                         <td><code>{{ $item->pubtype_id }}</code></td>
@@ -35,13 +36,14 @@
                         <th>คะแนนมาตรฐาน:</th>
                         <td>
                             @if($item->pubtype_score)
-                                <span class="badge bg-success fs-6">{{ $item->pubtype_score }}</span>
+                                <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle fs-6">{{ $item->pubtype_score }}</span>
                             @else
                                 <span class="text-muted">-</span>
                             @endif
                         </td>
                     </tr>
                 </table>
+</div>
             </x-card>
         </div>
 

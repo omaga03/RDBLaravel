@@ -23,6 +23,8 @@ use App\Http\Requests\Backend\UpdateProjectRequest;
 use App\Http\Requests\Backend\StoreProjectResearcherRequest;
 use App\Http\Requests\Backend\UpdateProjectResearcherRequest;
 use App\Http\Requests\Backend\StoreProjectFileRequest;
+use App\Http\Requests\Backend\UpdateProjectFileRequest;
+use App\Http\Requests\Backend\UpdateProjectStatusRequest;
 use App\Http\Requests\Backend\UploadProjectAbstractRequest;
 use App\Http\Requests\Backend\UploadProjectReportRequest;
 
@@ -506,6 +508,8 @@ class RdbProjectController extends Controller
             'strategic', 
             'researchers', 
             'group',
+            'parentProject',
+            'subProjects',
             'rdbProjectWorks' => function($q) {
                 $q->orderBy('position_id', 'asc');
             },
@@ -626,18 +630,12 @@ class RdbProjectController extends Controller
     /**
      * Update project status (ps_id) directly
      */
-    public function updateStatus(Request $request, $id)
+    public function updateStatus(UpdateProjectStatusRequest $request, $id)
     {
         $project = RdbProject::findOrFail($id);
         $this->authorize('update', $project);
 
-        $validated = $request->validate([
-            'ps_id' => 'required|integer|exists:rdb_project_status,ps_id',
-        ], [
-            'ps_id.required' => 'กรุณาเลือกสถานะโครงการ',
-            'ps_id.integer' => 'รหัสสถานะโครงการต้องเป็นตัวเลข',
-            'ps_id.exists' => 'ไม่พบข้อมูลสถานะโครงการที่เลือก',
-        ]);
+        $validated = $request->validated();
 
         $project->ps_id = $validated['ps_id'];
         $project->user_updated = auth()->id();
@@ -1144,17 +1142,10 @@ class RdbProjectController extends Controller
     /**
      * Store additional project file
      */
-    public function storeFile(Request $request, $id)
+    public function storeFile(StoreProjectFileRequest $request, $id)
     {
         $project = RdbProject::findOrFail($id);
         $this->authorize('update', $project);
-
-        $request->validate([
-            'rf_filesname' => 'required|string|max:255',
-            'rf_files' => 'required|file|max:20480|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar,jpg,jpeg,png',
-            'rf_note' => 'nullable|string',
-            'rf_files_show' => 'nullable|boolean',
-        ]);
 
         try {
             $fileInfo = $this->fileUploadService->storeFile($request->file('rf_files'), 'project_files');
@@ -1182,19 +1173,12 @@ class RdbProjectController extends Controller
     /**
      * Update additional project file
      */
-    public function updateFile(Request $request, $id, $fileId)
+    public function updateFile(UpdateProjectFileRequest $request, $id, $fileId)
     {
         $project = RdbProject::findOrFail($id);
         $this->authorize('update', $project);
         
         $file = RdbProjectFiles::where('pro_id', $id)->where('id', $fileId)->firstOrFail();
-
-        $request->validate([
-            'rf_filesname' => 'required|string|max:255',
-            'rf_files' => 'nullable|file|max:20480|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar,jpg,jpeg,png',
-            'rf_note' => 'nullable|string',
-            'rf_files_show' => 'nullable|boolean',
-        ]);
 
         try {
             if ($request->hasFile('rf_files')) {

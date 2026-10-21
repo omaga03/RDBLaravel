@@ -23,10 +23,16 @@ class RdbProjectType extends Model
         'pt_type',
         'pt_utz',
         'pttg_id',
+        'master_pt_id',
         'pt_note',
         'user_created',
         'user_updated',
     ];
+
+    public function masterType()
+    {
+        return $this->belongsTo(RdbProjectTypeMaster::class, 'master_pt_id', 'master_pt_id');
+    }
 
     public function creator()
     {

@@ -16,7 +16,7 @@
             <div class="card h-100 border-0 shadow-sm text-white" 
                  style="background: linear-gradient(135deg, #7C2D12 0%, #F59E0B 100%); border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
-                    <span class="badge bg-white bg-opacity-25 text-white border-0 mb-2">
+                    <span class="badge bg-light-subtle bg-opacity-25 text-white border-0 mb-2">
                         <i class="bi bi-shield-check me-1"></i> ทรัพย์สินทางปัญญาทั้งหมด
                     </span>
                     <h3 class="fw-bold mb-1 text-white text-nowrap">{{ number_format($totalDips) }}</h3>
@@ -154,7 +154,7 @@
                                     <td>
                                         @if($dip->dip_patent_number ?? $dip->dip_number)
                                             <div class="fw-bold">
-                                                <span class="badge bg-success bg-opacity-10 text-success border border-success">
+                                                <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle border">
                                                     ทะเบียน: {{ $dip->dip_patent_number ?? $dip->dip_number }}
                                                 </span>
                                             </div>
@@ -167,11 +167,11 @@
                                     </td>
                                     <td>
                                         <a href="{{ route('frontend.rdbdip.show', $dip->dip_id) }}" target="_blank" class="fw-bold text-decoration-none text-body hover-primary">
-                                            {!! $dip->dip_data2_name ?: ($dip->dip_name ?: 'ไม่มีชื่อผลงาน') !!}
+                                            {{ strip_tags((string) ($dip->dip_data2_name ?: ($dip->dip_name ?: 'ไม่มีชื่อผลงาน'))) }}
                                         </a>
                                         @if($dip->project)
                                             <small class="text-body-secondary d-block mt-0.5">
-                                                <i class="bi bi-link-45deg text-primary"></i> โครงการ: {!! $dip->project->pro_nameTH !!}
+                                                <i class="bi bi-link-45deg text-primary"></i> โครงการ: {{ strip_tags((string) $dip->project->pro_nameTH) }}
                                             </small>
                                         @endif
                                     </td>

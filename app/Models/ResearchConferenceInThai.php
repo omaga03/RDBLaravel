@@ -7,7 +7,7 @@ use App\Models\Traits\HasDualFilePath;
 
 class ResearchConferenceInThai extends Model
 {
-	use HasDualFilePath;
+    use HasDualFilePath;
 
     protected $table = 'research_coferenceinthai';
 
@@ -34,8 +34,30 @@ class ResearchConferenceInThai extends Model
         'file_mime_type',
     ];
 
-	public function getConferenceFilePath(string $newField = 'file_path', string $oldField = 'file_name', string $oldDir = 'uploads/conferences'): ?string
-	{
-		return $this->resolveDualFilePath($newField, $oldField, $oldDir);
-	}
+    public function getConferenceFilePath(string $newField = 'file_path', string $oldField = 'file_name', string $oldDir = 'uploads/conferences'): ?string
+    {
+        return $this->resolveDualFilePath($newField, $oldField, $oldDir);
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        $path = $this->con_path ?: $this->file_path;
+        if (!empty($path)) {
+            return asset('storage/' . $path);
+        }
+        if (!empty($this->con_img)) {
+            return asset('storage/uploads/conference/' . $this->con_img);
+        }
+        return null;
+    }
+
+    public function getFormattedDetailAttribute(): string
+    {
+        return \App\Helpers\HtmlContentHelper::formatConference($this->con_detail);
+    }
+
+    public function getPlainSummaryAttribute(): string
+    {
+        return \App\Helpers\HtmlContentHelper::plainSummaryConference($this->con_detail, 180);
+    }
 }

@@ -15,7 +15,8 @@
     <div class="row">
         <div class="col-lg-6">
             <x-card title="ข้อมูลตำแหน่ง" icon="bi-info-circle" color="primary">
-                <table class="table table-borderless table-sm mb-0">
+                <div class="table-responsive">
+<table class="table table-borderless table-sm mb-0">
                     <tr>
                         <th style="width: 40%;">รหัส:</th>
                         <td><code>{{ $item->position_id }}</code></td>
@@ -29,6 +30,7 @@
                         <td>{{ $item->position_desc ?? '-' }}</td>
                     </tr>
                 </table>
+</div>
             </x-card>
         </div>
 

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Backend\RejectWorkflowItemRequest;
+use App\Http\Requests\Backend\RequestUnlockWorkflowItemRequest;
 use App\Models\AuditLog;
 use App\Models\RdbProject;
 use App\Models\RdbPublished;
@@ -167,18 +169,16 @@ class WorkflowController extends Controller
     /**
      * Reject an item with remarks (Pending Review -> Revision Required)
      */
-    public function reject(Request $request, string $type, $id)
+    public function reject(RejectWorkflowItemRequest $request, string $type, $id)
     {
-        $request->validate([
-            'remarks' => 'required|string|max:1000',
-        ]);
+        $validated = $request->validated();
 
         $item = $this->resolveModel($type, $id);
 
         $item->workflow_status = 'revision_required';
         $item->reviewed_by = auth()->id();
         $item->reviewed_at = now();
-        $item->rejection_remarks = trim($request->remarks);
+        $item->rejection_remarks = trim($validated['remarks']);
         $item->save();
 
         AuditLog::record(
@@ -210,17 +210,15 @@ class WorkflowController extends Controller
     /**
      * Request Unlock to Edit for a Published Item (Published -> Unlock Requested)
      */
-    public function requestUnlock(Request $request, string $type, $id)
+    public function requestUnlock(RequestUnlockWorkflowItemRequest $request, string $type, $id)
     {
-        $request->validate([
-            'reason' => 'required|string|max:1000',
-        ]);
+        $validated = $request->validated();
 
         $item = $this->resolveModel($type, $id);
         $this->authorize('requestUnlock', $item);
 
         $item->workflow_status = 'unlock_requested';
-        $item->unlock_reason = trim($request->reason);
+        $item->unlock_reason = trim($validated['reason']);
         $item->unlock_requested_at = now();
         $item->save();
 

@@ -118,6 +118,11 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     Route::resource('rdbstrategic', RdbstrategicController::class);
     
     // New Master Data Routes
+    Route::resource('rdbprojecttypesmaster', \App\Http\Controllers\Backend\RdbProjectTypeMasterController::class);
+    Route::resource('rdbprojectpersonnel', \App\Http\Controllers\Backend\RdbProjectPersonnelController::class);
+    Route::resource('rdbpublishedbranchper', \App\Http\Controllers\Backend\RdbPublishedBranchperController::class);
+    Route::resource('rdbpublishedpersonnel', \App\Http\Controllers\Backend\RdbPublishedPersonnelController::class);
+    Route::resource('rdbchangwat', \App\Http\Controllers\Backend\RdbChangwatController::class);
     Route::resource('rdbpublishedtype', \App\Http\Controllers\Backend\RdbPublishedTypeController::class);
     Route::resource('rdbdiptype', \App\Http\Controllers\Backend\RdbDipTypeController::class);
     Route::resource('rdbprojectutilizetype', \App\Http\Controllers\Backend\RdbProjectUtilizeTypeController::class);
@@ -261,7 +266,7 @@ Route::name('frontend.')->group(function () {
     Route::resource('rdbprojectstatus', RdbprojectstatusController::class)->parameters(['rdbprojectstatus' => 'id'])->only(['index', 'show']);
     Route::resource('rdbprojecttype', FrontendRdbprojecttypeController::class)->parameters(['rdbprojecttype' => 'id'])->only(['index', 'show']);
     Route::resource('rdbprojecttypesub', FrontendRdbprojecttypesubController::class)->parameters(['rdbprojecttypesub' => 'id'])->only(['index', 'show']);
-    Route::resource('rdbprojectutilization', RdbprojectutilizationController::class)->parameters(['rdbprojectutilization' => 'id']);
+    Route::resource('rdbprojectutilization', RdbprojectutilizationController::class)->parameters(['rdbprojectutilization' => 'id'])->only(['index', 'show']);
     Route::resource('rdbprojectutilize', RdbprojectutilizeController::class)->parameters(['rdbprojectutilize' => 'id'])->only(['index', 'show']);
     Route::get('rdbprojectutilize/{id}/view-file', [RdbprojectutilizeController::class, 'viewFile'])->name('rdbprojectutilize.view_file');
     Route::get('rdbprojectutilize/api/search-utilizes', [RdbprojectutilizeController::class, 'searchUtilizes'])->name('rdbprojectutilize.search_utilizes');

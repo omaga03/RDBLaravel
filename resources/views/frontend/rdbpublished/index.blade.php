@@ -37,7 +37,7 @@
         <div class="d-flex align-items-center">
             <i class="bi bi-info-circle-fill me-2 fs-5"></i>
             <div>
-                กำลังแสดงรายการเฉพาะโครงการ: <strong>{!! $project->pro_nameTH !!}</strong>
+                กำลังแสดงรายการเฉพาะโครงการ: <strong>{{ strip_tags((string) $project->pro_nameTH) }}</strong>
             </div>
         </div>
         <a href="{{ route('frontend.rdbpublished.index') }}" class="btn btn-sm btn-outline-info bg-body text-info text-decoration-none shadow-sm">
@@ -146,11 +146,11 @@
             {{-- Row 5: Date Range --}}
             <div class="col-md-6">
                 <label class="form-label">วันที่ตีพิมพ์ (เริ่มต้น)</label>
-                <input type="date" class="form-control" name="date_start" value="{{ request('date_start') }}">
+                <input type="text" class="form-control datepicker" id="pub_date_start" name="date_start" value="{{ request('date_start') }}" placeholder="วว/ดด/ปปปป" autocomplete="off">
             </div>
             <div class="col-md-6">
                 <label class="form-label">วันที่ตีพิมพ์ (สิ้นสุด)</label>
-                <input type="date" class="form-control" name="date_end" value="{{ request('date_end') }}">
+                <input type="text" class="form-control datepicker" id="pub_date_end" name="date_end" value="{{ request('date_end') }}" placeholder="วว/ดด/ปปปป" autocomplete="off">
             </div>
         </div>
     </x-search-bar>
@@ -179,7 +179,7 @@
                             <td>
                                 <div class="fw-bold mb-1">
                                     <a href="{{ route('frontend.rdbpublished.show', $item->id) }}" class="text-body fw-bold text-decoration-none hover-primary text-break">
-                                        {!! $item->pub_name !!}
+                                        {{ strip_tags((string) $item->pub_name) }}
                                     </a>
                                 </div>
                                 <div class="small d-flex flex-wrap gap-2 align-items-center mt-1">
@@ -189,7 +189,7 @@
                                         </span>
                                     @endif
                                     @if($item->year)
-                                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary">
+                                        <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle">
                                             ปี {{ $item->year->year_name }}
                                         </span>
                                     @endif
@@ -198,29 +198,40 @@
                             <td>
                                 @php
                                     $mainAuthor = null;
-                                    $otherCount = 0;
+                                    $remainingAuthors = collect();
                                     
                                     if ($item->authors && $item->authors->count() > 0) {
                                         $mainAuthor = $item->authors->first();
-                                        $otherCount = $item->authors->count() - 1;
+                                        $remainingAuthors = $item->authors->slice(1);
                                     } elseif ($item->researcher) {
                                         $mainAuthor = $item->researcher;
                                     }
+
+                                    $remainingCount = $remainingAuthors->count();
+                                    $remainingNames = $remainingAuthors->map(function($author) {
+                                        $prefix = $author->prefix->prefix_nameTH ?? '';
+                                        return e($prefix . $author->researcher_fname . ' ' . $author->researcher_lname);
+                                    })->filter()->implode('<br>• ');
                                 @endphp
 
                                 @if($mainAuthor)
-                                    <div class="fw-bold">
+                                    <div>
                                         <a href="{{ route('frontend.rdbresearcher.show', $mainAuthor->researcher_id) }}" 
-                                           class="text-decoration-none text-body fw-bold hover-primary">
-                                            <i class="bi bi-person-circle text-primary me-1"></i>{!! $mainAuthor->researcher_fname !!} {!! $mainAuthor->researcher_lname !!}
+                                           class="text-decoration-none text-body fw-semibold hover-primary">
+                                            <i class="bi bi-person-circle text-primary me-1"></i>{{ strip_tags((string) ($mainAuthor->prefix->prefix_nameTH ?? '')) }}{{ strip_tags((string) $mainAuthor->researcher_fname) }} {{ strip_tags((string) $mainAuthor->researcher_lname) }}
                                         </a>
-                                        @if($otherCount > 0)
-                                            <span class="text-body-secondary fw-normal">และ {{ $otherCount }} คน</span>
+                                        @if($remainingCount > 0)
+                                            <span class="text-body-secondary small ms-1" 
+                                                  data-bs-toggle="tooltip" 
+                                                  data-bs-placement="top" 
+                                                  data-bs-html="true"
+                                                  title="<strong>ผู้ประพันธ์ร่วม:</strong><br>• {!! strip_tags($remainingNames, '<br>') !!}"
+                                                  style="cursor: pointer;">(+{{ $remainingCount }})</span>
                                         @endif
                                     </div>
                                     @if($mainAuthor->department)
                                     <small class="text-body-secondary d-block mt-1">
-                                        <i class="bi bi-building me-1"></i>{!! $mainAuthor->department->department_nameTH !!}
+                                        <i class="bi bi-building me-1"></i>{{ strip_tags((string) $mainAuthor->department->department_nameTH) }}
                                     </small>
                                     @endif
                                 @else
@@ -367,6 +378,26 @@ document.addEventListener('DOMContentLoaded', function() {
             const val = preResearcherId || 'pre';
             tsRes.addOption({ value: val, text: preResearcherName || ('นักวิจัย #' + preResearcherId) });
             tsRes.setValue(val);
+        }
+    }
+
+    // Flatpickr Thai Buddhist Date Pickers
+    if (typeof initThaiFlatpickr === 'function') {
+        const endPicker = initThaiFlatpickr('#pub_date_end');
+        initThaiFlatpickr('#pub_date_start', {
+            onChange: function(selectedDates, dateStr) {
+                if (endPicker) {
+                    endPicker.set('minDate', dateStr || null);
+                    const currentEnd = endPicker.selectedDates[0];
+                    if (currentEnd && selectedDates.length > 0 && currentEnd < selectedDates[0]) {
+                        endPicker.clear();
+                    }
+                }
+            }
+        });
+        const startVal = document.getElementById('pub_date_start').value;
+        if (startVal && endPicker) {
+            endPicker.set('minDate', startVal);
         }
     }
 });

@@ -12,7 +12,8 @@
     <div class="row">
         <div class="col-lg-8">
             <x-card title="ข้อมูลงานวิจัย" icon="bi-info-circle" color="primary">
-                <table class="table table-borderless table-sm mb-0">
+                <div class="table-responsive">
+<table class="table table-borderless table-sm mb-0">
                     <tr>
                         <th style="width: 30%;">ID:</th>
                         <td><code>{{ $item->id ?? '-' }}</code></td>
@@ -51,6 +52,7 @@
                         <td><span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">{{ $item->ratio }}%</span></td>
                     </tr>
                 </table>
+</div>
             </x-card>
         </div>
     </div>

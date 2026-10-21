@@ -15,7 +15,8 @@
     <div class="row">
         <div class="col-lg-6">
             <x-card title="ข้อมูลปีงบประมาณ" icon="bi-info-circle" color="primary">
-                <table class="table table-borderless table-sm mb-0">
+                <div class="table-responsive">
+<table class="table table-borderless table-sm mb-0">
                     <tr>
                         <th style="width: 40%;">รหัส:</th>
                         <td><code>{{ $item->year_id }}</code></td>
@@ -25,6 +26,7 @@
                         <td class="fw-bold fs-3">{{ $item->year_name }}</td>
                     </tr>
                 </table>
+</div>
             </x-card>
         </div>
 

@@ -45,6 +45,22 @@ class ResearchNews extends Model
         if (!empty($this->news_img)) {
             return asset('storage/uploads/news/' . $this->news_img);
         }
+        if (!empty($this->news_detail)) {
+            $decoded = html_entity_decode((string) $this->news_detail, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            if (preg_match('/<img\b[^>]*?\bsrc\s*=\s*[\'"]+(https?:\/\/[^\'">\s]+)[\'"]/isu', $decoded, $m)) {
+                return trim($m[1]);
+            }
+        }
         return null;
+    }
+
+    public function getFormattedDetailAttribute(): string
+    {
+        return \App\Helpers\HtmlContentHelper::formatNews($this->news_detail, $this->image_url);
+    }
+
+    public function getPlainSummaryAttribute(): string
+    {
+        return \App\Helpers\HtmlContentHelper::plainSummaryNews($this->news_detail, 180);
     }
 }

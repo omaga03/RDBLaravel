@@ -37,5 +37,15 @@ class RdbGroupproject extends Model
         return $this->belongsTo(User::class, 'user_updated');
     }
 
+    public function getGroupNameAttribute()
+    {
+        return $this->pgroup_nameTH ?? $this->pgroup_nameEN;
+    }
+
+    public function getPgroupNameAttribute()
+    {
+        return $this->pgroup_nameTH ?? $this->pgroup_nameEN;
+    }
+
     const GROUP_PROJECT = 1;
 }

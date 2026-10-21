@@ -220,11 +220,11 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="row">
             <div class="col-md-4 mb-3">
                 <label for="pub_date" class="form-label">วันที่นำเสนอ/ตีพิมพ์ (เริ่มต้น) <span class="text-danger">*</span></label>
-                <input type="date" class="form-control datepicker" id="pub_date" name="pub_date" value="{{ old('pub_date', $item->pub_date ?? date('Y-m-d')) }}" required>
+                <input type="text" class="form-control datepicker" id="pub_date" name="pub_date" value="{{ old('pub_date', $item->pub_date ?? date('Y-m-d')) }}" placeholder="วว/ดด/ปปปป" autocomplete="off" required>
             </div>
             <div class="col-md-4 mb-3">
                 <label for="pub_date_end" class="form-label">วันที่นำเสนอ/ตีพิมพ์ (สิ้นสุด)</label>
-                <input type="date" class="form-control datepicker" id="pub_date_end" name="pub_date_end" value="{{ old('pub_date_end', $item->pub_date_end ?? '') }}">
+                <input type="text" class="form-control datepicker" id="pub_date_end" name="pub_date_end" value="{{ old('pub_date_end', $item->pub_date_end ?? '') }}" placeholder="วว/ดด/ปปปป" autocomplete="off">
             </div>
             <div class="col-md-4 mb-3">
                 <label for="pub_budget" class="form-label">งบประมาณ (Budget) <span class="text-danger">*</span></label>

@@ -196,7 +196,7 @@
                                         <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-2 py-0.5 me-1">#{{ $project->pro_id }}</span>
                                     @endif
                                     <a href="{{ route('frontend.rdbproject.show', $project->pro_id) }}" class="text-decoration-none text-body fw-bold hover-primary">
-                                        {!! $project->pro_nameTH !!}
+                                        {{ strip_tags((string) $project->pro_nameTH) }}
                                     </a>
                                 </div>
                                 <div class="d-flex flex-wrap gap-1 align-items-center mt-1">
@@ -213,7 +213,7 @@
                                         <span class="badge" style="background-color: {{ $project->status->ps_color ?? '#6c757d' }}; color: #fff; font-size: 0.75rem;">{{ $project->status->ps_name }}</span>
                                     @endif
                                     @if(request('search') && !empty($project->match_sources))
-                                        <span class="badge bg-warning text-dark" 
+                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" 
                                               data-bs-toggle="tooltip" 
                                               data-bs-placement="top" 
                                               data-bs-html="true"
@@ -231,7 +231,7 @@
                                         $remainingWorks = $project->rdbProjectWorks->slice(1);
                                         $remainingCount = $remainingWorks->count();
                                         $remainingNames = $remainingWorks->map(function($work) {
-                                            return $work->researcher ? $work->researcher->researcher_fname . ' ' . $work->researcher->researcher_lname : '';
+                                            return $work->researcher ? e($work->researcher->researcher_fname . ' ' . $work->researcher->researcher_lname) : '';
                                         })->filter()->implode('<br>• ');
                                     @endphp
                                     @if($firstLeader && $firstLeader->researcher)
@@ -241,11 +241,11 @@
                                             <i class="bi bi-person-circle text-primary me-1"></i>{{ $firstLeader->researcher->researcher_fname }} {{ $firstLeader->researcher->researcher_lname }}
                                         </a>
                                         @if($remainingCount > 0)
-                                            <span class="text-muted small" 
+                                            <span class="text-body-secondary small" 
                                                   data-bs-toggle="tooltip" 
                                                   data-bs-placement="top" 
                                                   data-bs-html="true"
-                                                  title="<strong>นักวิจัยร่วม:</strong><br>• {!! $remainingNames !!}"
+                                                  title="<strong>นักวิจัยร่วม:</strong><br>• {!! strip_tags($remainingNames, '<br>') !!}"
                                                   style="cursor: pointer;">(+{{ $remainingCount }})</span>
                                         @endif
                                     </div>

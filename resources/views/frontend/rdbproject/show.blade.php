@@ -46,9 +46,9 @@
             <div class="card shadow-sm border mb-4">
                 <div class="card-header text-white p-3 p-md-4" style="background: var(--rdb-gradient-primary);">
                     <span class="small text-white-50"><i class="bi bi-folder2-open me-1"></i> ข้อมูลโครงการวิจัย</span>
-                    <h4 class="card-title mb-0 mt-1 fw-semibold text-white text-break" style="font-size: 1.15rem; line-height: 1.55;">{!! $item->pro_nameTH !!}</h4>
+                    <h4 class="card-title mb-0 mt-1 fw-semibold text-white text-break" style="font-size: 1.15rem; line-height: 1.55;">{{ strip_tags((string) $item->pro_nameTH) }}</h4>
                     @if($item->pro_nameEN)
-                        <p class="text-white-50 small mb-0 mt-1 text-break">{!! $item->pro_nameEN !!}</p>
+                        <p class="text-white-50 small mb-0 mt-1 text-break">{{ strip_tags((string) $item->pro_nameEN) }}</p>
                     @endif
                 </div>
                 <div class="card-body">
@@ -106,10 +106,46 @@
                                     <td class="text-body">{{ $item->strategic->strategic_name ?? '-' }}</td>
                                 </tr>
                                 @endif
-                                @if($item->group)
+                                @if($item->group || $item->pro_group)
                                 <tr>
                                     <th class="text-body-secondary fw-semibold">กลุ่มโครงการ:</th>
-                                    <td class="text-body">{{ $item->group->pgroup_name ?? '-' }}</td>
+                                    <td class="text-body">
+                                        @if($item->group)
+                                            <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-2 py-0.5 me-1">
+                                                {{ $item->group->pgroup_nameTH ?? ($item->group->pgroup_nameEN ?? '-') }}
+                                            </span>
+                                        @endif
+
+                                        {{-- If this is a sub-project, show parent plan (แผนงาน) --}}
+                                        @if(($item->pgroup_id == 2 || ($item->pro_group && $item->pro_group != $item->pro_id)) && $item->parentProject)
+                                            <div class="mt-1.5 p-2 rounded bg-body-tertiary border small">
+                                                <div class="text-body-secondary fw-semibold mb-0.5">
+                                                    <i class="bi bi-diagram-3-fill text-primary me-1"></i>ภายใต้แผนงานวิจัย:
+                                                </div>
+                                                <a href="{{ route('frontend.rdbproject.show', $item->parentProject->pro_id) }}" class="text-decoration-none fw-medium text-primary hover-underline">
+                                                    {{ $item->parentProject->pro_nameTH }}
+                                                </a>
+                                            </div>
+                                        @endif
+
+                                        {{-- If this is a parent plan (แผนงานวิจัย), show list of sub-projects --}}
+                                        @if($item->pgroup_id == 1 && $item->subProjects && $item->subProjects->count() > 0)
+                                            <div class="mt-2 p-2 rounded bg-body-tertiary border small">
+                                                <div class="text-body-secondary fw-semibold mb-1">
+                                                    <i class="bi bi-collection-fill text-success me-1"></i>โครงการวิจัยย่อยภายใต้แผนงานนี้ ({{ $item->subProjects->count() }} โครงการ):
+                                                </div>
+                                                <ol class="mb-0 ps-3">
+                                                    @foreach($item->subProjects as $sub)
+                                                        <li class="mb-1">
+                                                            <a href="{{ route('frontend.rdbproject.show', $sub->pro_id) }}" class="text-decoration-none text-body hover-underline">
+                                                                {{ $sub->pro_nameTH }}
+                                                            </a>
+                                                        </li>
+                                                    @endforeach
+                                                </ol>
+                                            </div>
+                                        @endif
+                                    </td>
                                 </tr>
                                 @endif
                                 @if($item->pro_keyword)
@@ -168,7 +204,7 @@
                                 </button>
                             </div>
                             <div id="abstract-th-content" class="abstract-content abstract-indent">
-                                {!! $abstractParts[0] !!}
+                                {!! strip_tags((string) $abstractParts[0], '<p><br><b><strong><i><em><u><ul><ol><li><span><sub><sup>') !!}
                             </div>
                         </div>
 
@@ -185,7 +221,7 @@
                                 </button>
                             </div>
                             <div id="abstract-en-content" class="abstract-content abstract-indent">
-                                {!! $abstractParts[1] !!}
+                                {!! strip_tags((string) $abstractParts[1], '<p><br><b><strong><i><em><u><ul><ol><li><span><sub><sup>') !!}
                             </div>
                         </div>
                     @else
@@ -199,7 +235,7 @@
                                 </button>
                             </div>
                             <div id="abstract-single-content" class="abstract-content abstract-indent">
-                                {!! $item->pro_abstract !!}
+                                {!! strip_tags((string) $item->pro_abstract, '<p><br><b><strong><i><em><u><ul><ol><li><span><sub><sup>') !!}
                             </div>
                         </div>
                     @endif
@@ -334,7 +370,7 @@
                 </div>
                 <div class="card-body p-3">
                     {{-- Abstract File --}}
-                    @if($item->pro_abstract_file)
+                    @if(!empty($item->pro_abstract_file) || !empty($item->pro_abstract_file_path))
                         <a href="{{ route('frontend.rdbproject.view_abstract', $item->pro_id) }}" 
                            target="_blank" 
                            class="file-cta-card card border mb-3 text-decoration-none shadow-sm">
@@ -366,7 +402,7 @@
                     @endif
 
                     {{-- Full Report File (0 = เปิด, 1 = ปิด, 2 = ร่าง) --}}
-                    @if($item->pro_file || $item->pro_file_path)
+                    @if(!empty($item->pro_file) || !empty($item->pro_file_path))
                         @if((int) $item->pro_file_show === 0)
                             @php
                                 $reportPolicy = \App\Models\SystemSetting::get('download_policy_full_report', 'members_only');
@@ -529,7 +565,7 @@
                         <!-- APA 7 Pane -->
                         <div class="tab-pane fade show active" id="pane-apa7" role="tabpanel" aria-labelledby="tab-apa7" tabindex="0">
                             <div class="p-2.5 rounded bg-body-tertiary border text-body text-break mb-2" id="text-apa7" style="font-size: 0.82rem; line-height: 1.65; user-select: all;">
-                                {!! $citationApa !!}
+                                {!! strip_tags((string) $citationApa, '<i><em><b><strong>') !!}
                             </div>
                             <button type="button" class="btn btn-sm btn-outline-primary w-100 py-1.5 d-flex align-items-center justify-content-center gap-1.5" style="font-size: 0.78rem;" onclick="copyCitation('text-apa7', this)">
                                 <i class="bi bi-clipboard"></i> คัดลอก APA 7
@@ -539,7 +575,7 @@
                         <!-- IEEE Pane -->
                         <div class="tab-pane fade" id="pane-ieee" role="tabpanel" aria-labelledby="tab-ieee" tabindex="0">
                             <div class="p-2.5 rounded bg-body-tertiary border text-body text-break mb-2" id="text-ieee" style="font-size: 0.82rem; line-height: 1.65; user-select: all;">
-                                {!! $citationIeee !!}
+                                {!! strip_tags((string) $citationIeee, '<i><em><b><strong>') !!}
                             </div>
                             <button type="button" class="btn btn-sm btn-outline-primary w-100 py-1.5 d-flex align-items-center justify-content-center gap-1.5" style="font-size: 0.78rem;" onclick="copyCitation('text-ieee', this)">
                                 <i class="bi bi-clipboard"></i> คัดลอก IEEE
@@ -549,7 +585,7 @@
                         <!-- MLA 9 Pane -->
                         <div class="tab-pane fade" id="pane-mla9" role="tabpanel" aria-labelledby="tab-mla9" tabindex="0">
                             <div class="p-2.5 rounded bg-body-tertiary border text-body text-break mb-2" id="text-mla9" style="font-size: 0.82rem; line-height: 1.65; user-select: all;">
-                                {!! $citationMla !!}
+                                {!! strip_tags((string) $citationMla, '<i><em><b><strong>') !!}
                             </div>
                             <button type="button" class="btn btn-sm btn-outline-primary w-100 py-1.5 d-flex align-items-center justify-content-center gap-1.5" style="font-size: 0.78rem;" onclick="copyCitation('text-mla9', this)">
                                 <i class="bi bi-clipboard"></i> คัดลอก MLA 9

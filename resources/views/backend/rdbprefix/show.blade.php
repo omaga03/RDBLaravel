@@ -17,7 +17,8 @@
         {{-- Main Info --}}
         <div class="col-lg-6">
             <x-card title="ข้อมูลคำนำหน้า" icon="bi-info-circle" color="primary">
-                <table class="table table-borderless table-sm mb-0">
+                <div class="table-responsive">
+<table class="table table-borderless table-sm mb-0">
                     <tr>
                         <th style="width: 40%;">รหัส (ID):</th>
                         <td><code>{{ $item->prefix_id }}</code></td>
@@ -31,6 +32,7 @@
                         <td>{{ $item->prefix_abbreviationTH ?? '-' }}</td>
                     </tr>
                 </table>
+</div>
             </x-card>
         </div>
 

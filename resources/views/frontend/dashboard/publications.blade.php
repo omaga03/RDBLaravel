@@ -16,7 +16,7 @@
             <div class="card h-100 border-0 shadow-sm text-white" 
                  style="background: linear-gradient(135deg, #065F46 0%, #10B981 100%); border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
-                    <span class="badge bg-white bg-opacity-25 text-white border-0 mb-2">
+                    <span class="badge bg-light-subtle bg-opacity-25 text-white border-0 mb-2">
                         <i class="bi bi-journal-check me-1"></i> ผลงานตีพิมพ์รวม
                     </span>
                     <h3 class="fw-bold mb-1 text-white text-nowrap">{{ number_format($totalPublished) }}</h3>
@@ -171,11 +171,11 @@
                                 <tr>
                                     <td>
                                         <a href="{{ route('frontend.rdbpublished.show', $pub->id) }}" target="_blank" class="fw-bold text-decoration-none text-body hover-primary">
-                                            {!! $pub->pub_name !!}
+                                            {{ strip_tags((string) $pub->pub_name) }}
                                         </a>
                                         @if($pub->project)
                                             <small class="text-body-secondary d-block mt-0.5">
-                                                <i class="bi bi-link-45deg text-primary"></i> โครงการ: {!! $pub->project->pro_nameTH !!}
+                                                <i class="bi bi-link-45deg text-primary"></i> โครงการ: {{ strip_tags((string) $pub->project->pro_nameTH) }}
                                             </small>
                                         @endif
                                     </td>

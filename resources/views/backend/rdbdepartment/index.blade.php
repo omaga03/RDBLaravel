@@ -46,7 +46,7 @@
                             <td class="fw-bold">{{ $item->department_nameTH }}</td>
                             <td>
                                 @if($item->departmentType)
-                                    <span class="badge bg-info text-dark">{{ $item->departmentType->tdepartment_nameTH }}</span>
+                                    <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">{{ $item->departmentType->tdepartment_nameTH }}</span>
                                 @else
                                     <span class="text-muted">-</span>
                                 @endif

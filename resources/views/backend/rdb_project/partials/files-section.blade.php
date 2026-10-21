@@ -109,7 +109,8 @@
 
             <!-- File List -->
             @if($project->files->count() > 0)
-                <table class="table table-sm table-striped">
+                <div class="table-responsive">
+<table class="table table-sm table-striped">
                     <thead>
                         <tr>
                             <th>ชื่อไฟล์</th>
@@ -196,6 +197,7 @@
                         @endforeach
                     </tbody>
                 </table>
+</div>
             @else
                 <p class="text-muted">ไม่มีไฟล์เพิ่มเติม</p>
             @endif

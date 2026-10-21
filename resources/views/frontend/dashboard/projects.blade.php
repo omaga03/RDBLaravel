@@ -16,7 +16,7 @@
             <div class="card h-100 border-0 shadow-sm text-white" 
                  style="background: var(--rdb-gradient-primary); border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
-                    <span class="badge bg-white bg-opacity-25 text-white border-0 mb-2">
+                    <span class="badge bg-light-subtle bg-opacity-25 text-white border-0 mb-2">
                         <i class="bi bi-cash-stack me-1"></i> งบประมาณรวม
                     </span>
                     <h3 class="fw-bold mb-1 text-white text-nowrap">฿{{ number_format($totalBudget, 0) }}</h3>
@@ -175,14 +175,14 @@
                                     <td>
                                         <div class="fw-bold mb-1">
                                             @if($proj->pro_code)
-                                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary me-1">{{ $proj->pro_code }}</span>
+                                                <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle me-1">{{ $proj->pro_code }}</span>
                                             @endif
                                             <a href="{{ route('frontend.rdbproject.show', $proj->pro_id) }}" target="_blank" class="text-body fw-bold text-decoration-none hover-primary">
-                                                {!! $proj->pro_nameTH !!}
+                                                {{ strip_tags((string) $proj->pro_nameTH) }}
                                             </a>
                                         </div>
                                         @if($proj->pro_nameEN)
-                                            <small class="text-body-secondary d-block">{!! $proj->pro_nameEN !!}</small>
+                                            <small class="text-body-secondary d-block">{{ strip_tags((string) $proj->pro_nameEN) }}</small>
                                         @endif
                                     </td>
                                     <td>
@@ -236,7 +236,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const fundingData = @json($fundingTypes);
     const fundingLabels = fundingData.map(d => d.type_name);
     const fundingBudgets = fundingData.map(d => (d.budget / 1000000).toFixed(2));
-    const palette = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'];
+    const defaultPalette = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#06B6D4', '#EC4899', '#14B8A6', '#F97316', '#64748B'];
+    const fundingColors = fundingData.map((d, i) => d.color || defaultPalette[i % defaultPalette.length]);
 
     const ctxFund = document.getElementById('fundingDoughnutChart').getContext('2d');
     new Chart(ctxFund, {
@@ -245,7 +246,7 @@ document.addEventListener('DOMContentLoaded', function () {
             labels: fundingLabels,
             datasets: [{
                 data: fundingBudgets,
-                backgroundColor: palette,
+                backgroundColor: fundingColors,
                 borderWidth: 2,
                 borderColor: isDark ? '#1E293B' : '#FFFFFF'
             }]

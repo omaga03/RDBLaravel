@@ -35,6 +35,7 @@ class StoreRdbProjectTypeRequest extends FormRequest
             'pt_type' => 'nullable|string|max:1',
             'pt_utz' => 'nullable|string|max:1',
             'pttg_id' => 'nullable|exists:rdb_project_types_group,pttg_id',
+            'master_pt_id' => 'nullable|exists:rdb_project_types_master,master_pt_id',
             'pt_note' => 'nullable|string',
         ];
     }
@@ -46,6 +47,7 @@ class StoreRdbProjectTypeRequest extends FormRequest
             'year_id.required' => 'กรุณาเลือกปีงบประมาณ',
             'year_id.exists' => 'ไม่พบปีงบประมาณที่เลือก',
             'pttg_id.exists' => 'ไม่พบกลุ่มประเภททุนที่เลือก',
+            'master_pt_id.exists' => 'ไม่พบหมวดประเภททุนมาตรฐานที่เลือก',
         ];
     }
 }

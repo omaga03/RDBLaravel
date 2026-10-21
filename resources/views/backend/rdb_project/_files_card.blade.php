@@ -13,7 +13,7 @@
                         <i class="bi bi-file-earmark-pdf fs-4 me-2"></i> 
                         📄 บทคัดย่อ<br><small class="text-muted">Abstract File</small>
                     </span>
-                    <span class="badge bg-primary rounded-pill" title="จำนวนดาวน์โหลด">
+                    <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle rounded-pill" title="จำนวนดาวน์โหลด">
                         <i class="bi bi-eye"></i> {{ $project->pro_count_abs ?? 0 }}
                     </span>
                 </a>
@@ -29,7 +29,7 @@
                         <i class="bi bi-file-earmark-pdf fs-4 me-2"></i>
                         📚 รายงานฉบับสมบูรณ์<br><small class="text-muted">Full Report</small>
                     </span>
-                    <span class="badge bg-success rounded-pill" title="จำนวนดาวน์โหลด">
+                    <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle rounded-pill" title="จำนวนดาวน์โหลด">
                         <i class="bi bi-eye"></i> {{ $project->pro_count_full ?? 0 }}
                     </span>
                 </a>

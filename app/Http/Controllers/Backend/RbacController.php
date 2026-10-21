@@ -9,6 +9,7 @@ use App\Models\AuthItemChild;
 use App\Services\RbacService;
 use Illuminate\Http\Request;
 use App\Http\Requests\Backend\StoreRbacRoleRequest;
+use App\Http\Requests\Backend\SwitchRoleScopeRequest;
 use App\Http\Requests\Backend\UpdateRbacRoleRequest;
 
 class RbacController extends Controller
@@ -241,12 +242,8 @@ class RbacController extends Controller
     /**
      * Switch active role scope (Multi-Role Switcher).
      */
-    public function switchScope(Request $request)
+    public function switchScope(SwitchRoleScopeRequest $request)
     {
-        $request->validate([
-            'scope_id' => 'required|integer',
-        ]);
-
         $user = auth()->user();
         $scope = $user->roleScopes()->with('department')->findOrFail($request->scope_id);
 

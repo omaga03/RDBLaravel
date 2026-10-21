@@ -53,6 +53,11 @@
                                         </span>
                                     @endif
                                     {{ $item->pt_name }}
+                                    @if($item->masterType)
+                                        <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle ms-2" style="font-size: 0.72rem;">
+                                            {{ $item->masterType->master_pt_name }}
+                                        </span>
+                                    @endif
                                 </div>
                                 <div class="small text-muted mt-1">
                                     @if($item->projectTypeGroup)

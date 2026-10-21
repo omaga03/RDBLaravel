@@ -541,7 +541,7 @@
                                     @endif
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end shadow-lg py-0 border-0 rounded-3" style="width: 320px; max-height: 420px; overflow-y: auto;">
-                                    <div class="p-3 bg-light border-bottom d-flex align-items-center justify-content-between">
+                                    <div class="p-3 bg-body-tertiary border-bottom d-flex align-items-center justify-content-between">
                                         <h6 class="mb-0 fw-bold small"><i class="bi bi-bell-fill text-primary me-1"></i> การแจ้งเตือน</h6>
                                         @if($unreadNotifCount > 0)
                                             <form action="{{ route('notifications.read_all') }}" method="POST" class="m-0">
@@ -873,6 +873,14 @@
                             e.target.select();
                         }
                     }, 50);
+                }
+            });
+
+            // 4. Global Bootstrap Tooltips Initialization
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+                if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+                    bootstrap.Tooltip.getOrCreateInstance(tooltipTriggerEl);
                 }
             });
         });

@@ -34,7 +34,7 @@
                 <div class="card-header text-white p-3 p-md-4" style="background: var(--rdb-gradient-primary);">
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
                         @if($item->news_type)
-                            <span class="badge bg-light text-dark fw-semibold">
+                            <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle fw-semibold">
                                 <i class="bi bi-tag-fill me-1"></i>{{ $item->news_type }}
                             </span>
                         @endif
@@ -93,7 +93,7 @@
                             <i class="bi bi-file-text me-2"></i>รายละเอียดเนื้อหา
                         </h5>
                         <div class="text-body text-break lh-lg fs-6">
-                            {!! html_entity_decode($item->news_detail) !!}
+                            {!! $item->formatted_detail !!}
                         </div>
                     </div>
 

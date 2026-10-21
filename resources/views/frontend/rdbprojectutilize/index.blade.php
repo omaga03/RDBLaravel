@@ -33,9 +33,9 @@
     <div class="alert alert-info d-flex align-items-center justify-content-between mb-4 shadow-sm" role="alert">
         <div>
             <i class="bi bi-info-circle-fill me-2 fs-5"></i>
-            กำลังแสดงรายการการนำไปใช้ประโยชน์ของโครงการ: <strong>{!! $project->pro_nameTH !!}</strong>
+            กำลังแสดงรายการการนำไปใช้ประโยชน์ของโครงการ: <strong>{{ strip_tags((string) $project->pro_nameTH) }}</strong>
         </div>
-        <a href="{{ route('frontend.rdbprojectutilize.index') }}" class="btn btn-sm btn-outline-primary bg-white">แสดงทั้งหมด</a>
+        <a href="{{ route('frontend.rdbprojectutilize.index') }}" class="btn btn-sm btn-outline-primary bg-body">แสดงทั้งหมด</a>
     </div>
     @endif
 
@@ -125,11 +125,11 @@
             {{-- Row 5: Date Range --}}
             <div class="col-md-6">
                 <label class="form-label">วันที่นำไปใช้ประโยชน์ (เริ่มต้น)</label>
-                <input type="date" class="form-control" id="date_start" name="date_start" value="{{ request('date_start') }}">
+                <input type="text" class="form-control datepicker" id="date_start" name="date_start" value="{{ request('date_start') }}" placeholder="วว/ดด/ปปปป" autocomplete="off">
             </div>
             <div class="col-md-6">
                 <label class="form-label">วันที่นำไปใช้ประโยชน์ (สิ้นสุด)</label>
-                <input type="date" class="form-control" id="date_end" name="date_end" value="{{ request('date_end') }}">
+                <input type="text" class="form-control datepicker" id="date_end" name="date_end" value="{{ request('date_end') }}" placeholder="วว/ดด/ปปปป" autocomplete="off">
             </div>
         </div>
     </x-search-bar>
@@ -159,15 +159,15 @@
                                 <div class="fw-bold mb-1">
                                     <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle me-1">#{{ $item->utz_id }}</span>
                                     <a href="{{ route('frontend.rdbprojectutilize.show', $item->utz_id) }}" class="text-decoration-none text-body hover-primary">
-                                        <i class="bi bi-building text-primary me-1"></i>{!! $item->utz_department_name ?: 'ไม่ระบุหน่วยงาน' !!}
+                                        <i class="bi bi-building text-primary me-1"></i>{{ strip_tags((string) ($item->utz_department_name ?: 'ไม่ระบุหน่วยงาน')) }}
                                     </a>
                                 </div>
                                 
                                 @if($item->utz_leading)
-                                <div class="small text-muted mb-1">
-                                    <i class="bi bi-person-badge me-1"></i>ผู้แทน/ผู้ลงนาม: <strong>{!! $item->utz_leading !!}</strong>
+                                <div class="small text-body-secondary mb-1">
+                                    <i class="bi bi-person-badge me-1"></i>ผู้แทน/ผู้ลงนาม: <strong>{{ strip_tags((string) $item->utz_leading) }}</strong>
                                     @if($item->utz_leading_position)
-                                        <span class="text-secondary fw-normal">({!! $item->utz_leading_position !!})</span>
+                                        <span class="text-secondary fw-normal">({{ strip_tags((string) $item->utz_leading_position) }})</span>
                                     @endif
                                 </div>
                                 @endif
@@ -187,7 +187,7 @@
 
                                     @if($item->changwat)
                                         <span class="badge bg-body-secondary text-body-secondary border">
-                                            <i class="bi bi-geo-alt-fill me-1"></i>{!! $item->changwat->changwat_t ?? '' !!}
+                                            <i class="bi bi-geo-alt-fill me-1"></i>{{ strip_tags((string) ($item->changwat->changwat_t ?? '')) }}
                                         </span>
                                     @endif
 
@@ -211,7 +211,7 @@
                                             @if($item->project->pro_code)
                                                 <span class="text-primary me-1">[{{ $item->project->pro_code }}]</span>
                                             @endif
-                                            {!! $item->project->pro_nameTH !!}
+                                            {{ strip_tags((string) $item->project->pro_nameTH) }}
                                         </a>
                                     </div>
 
@@ -371,26 +371,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Date range validation
-    const dateStart = document.getElementById('date_start');
-    const dateEnd = document.getElementById('date_end');
-    
-    if (dateStart && dateEnd) {
-        dateStart.addEventListener('change', function() {
-            if (this.value) {
-                dateEnd.min = this.value;
-            } else {
-                dateEnd.removeAttribute('min');
+    // Flatpickr Thai Buddhist Date Pickers
+    if (typeof initThaiFlatpickr === 'function') {
+        const endPicker = initThaiFlatpickr('#date_end');
+        initThaiFlatpickr('#date_start', {
+            onChange: function(selectedDates, dateStr) {
+                if (endPicker) {
+                    endPicker.set('minDate', dateStr || null);
+                    const currentEnd = endPicker.selectedDates[0];
+                    if (currentEnd && selectedDates.length > 0 && currentEnd < selectedDates[0]) {
+                        endPicker.clear();
+                    }
+                }
             }
         });
-        
-        dateEnd.addEventListener('change', function() {
-            if (this.value) {
-                dateStart.max = this.value;
-            } else {
-                dateStart.removeAttribute('max');
-            }
-        });
+        const startVal = document.getElementById('date_start').value;
+        if (startVal && endPicker) {
+            endPicker.set('minDate', startVal);
+        }
     }
 });
 </script>

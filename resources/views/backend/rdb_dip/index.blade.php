@@ -52,11 +52,11 @@
             
             <div class="col-md-3">
                 <label class="form-label">วันที่ยื่นคำขอ (เริ่ม)</label>
-                <input type="date" class="form-control datepicker" name="start_date" value="{{ request('start_date') }}" placeholder="วว/ดด/ปปปป">
+                <input type="text" class="form-control datepicker" name="start_date" value="{{ request('start_date') }}" placeholder="วว/ดด/ปปปป" autocomplete="off">
             </div>
             <div class="col-md-3">
                 <label class="form-label">วันที่ยื่นคำขอ (สิ้นสุด)</label>
-                <input type="date" class="form-control datepicker" name="end_date" value="{{ request('end_date') }}" placeholder="วว/ดด/ปปปป">
+                <input type="text" class="form-control datepicker" name="end_date" value="{{ request('end_date') }}" placeholder="วว/ดด/ปปปป" autocomplete="off">
             </div>
 
             <div class="col-md-4">
@@ -86,7 +86,7 @@
         <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center py-3">
             <h5 class="mb-0 fw-bold text-body">
                 <i class="bi bi-list-ul me-2 text-primary"></i>รายการทรัพย์สินทางปัญญา
-                <span class="badge bg-primary rounded-pill ms-2">{{ number_format($items->total()) }} รายการ</span>
+                <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle rounded-pill ms-2">{{ number_format($items->total()) }} รายการ</span>
             </h5>
         </div>
         <div class="card-body p-0">

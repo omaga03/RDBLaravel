@@ -24,7 +24,8 @@
                 </div>
             </form>
 
-            <table class="table table-hover">
+            <div class="table-responsive">
+<table class="table table-hover">
                 <thead class="table-light">
                     <tr>
                         <th width="5%">#</th>
@@ -39,7 +40,7 @@
                     @forelse($items as $item)
                     <tr>
                         <td>{{ $item->department_id }}</td>
-                        <td><span class="badge bg-secondary">{{ $item->department_code }}</span></td>
+                        <td><span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">{{ $item->department_code }}</span></td>
                         <td>{{ $item->department_nameTH }}</td>
                         <td>{{ $item->department_nameEN }}</td>
                         <td>{{ $item->departmentType->tdepartment_nameTH ?? '-' }}</td>
@@ -68,6 +69,7 @@
                     @endforelse
                 </tbody>
             </table>
+</div>
             <div class="mt-3">
                 {{ $items->withQueryString()->links() }}
             </div>

@@ -17,7 +17,7 @@
                  style="background: var(--rdb-gradient-primary); border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5 position-relative" style="z-index: 1;">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="badge bg-white bg-opacity-25 text-white border-0">
+                        <span class="badge bg-light-subtle bg-opacity-25 text-white border-0">
                             <i class="bi bi-cash-stack me-1"></i> งบประมาณวิจัย
                         </span>
                         <i class="bi bi-graph-up text-white-50"></i>
@@ -38,7 +38,7 @@
             <div class="card h-100 border-0 shadow-sm text-white overflow-hidden position-relative" 
                  style="background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5 position-relative" style="z-index: 1;">
-                    <span class="badge bg-white bg-opacity-25 text-white border-0 mb-2">
+                    <span class="badge bg-light-subtle bg-opacity-25 text-white border-0 mb-2">
                         <i class="bi bi-folder2-open me-1"></i> โครงการวิจัย
                     </span>
                     <h2 class="fw-bold mb-1 text-white">{{ number_format($totalProjects) }}</h2>
@@ -54,12 +54,12 @@
                  style="background: linear-gradient(135deg, #065F46 0%, #10B981 100%); border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5 position-relative" style="z-index: 1;">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="badge bg-white bg-opacity-25 text-white border-0">
+                        <span class="badge bg-light-subtle bg-opacity-25 text-white border-0">
                             <i class="bi bi-journal-richtext me-1"></i> ผลงานตีพิมพ์
                         </span>
                     </div>
                     <h2 class="fw-bold mb-1 text-white">{{ number_format($totalPublished) }}</h2>
-                    <span class="badge bg-warning text-dark px-1.5 py-0.5 rounded-pill" style="font-size: 0.72rem;">
+                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-1.5 py-0.5 rounded-pill" style="font-size: 0.72rem;">
                         <i class="bi bi-globe me-0.5"></i> Scopus/WoS: {{ number_format($internationalPubsCount) }}
                     </span>
                 </div>
@@ -72,7 +72,7 @@
             <div class="card h-100 border-0 shadow-sm text-white overflow-hidden position-relative" 
                  style="background: linear-gradient(135deg, #991B1B 0%, #EF4444 100%); border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5 position-relative" style="z-index: 1;">
-                    <span class="badge bg-white bg-opacity-25 text-white border-0 mb-2">
+                    <span class="badge bg-light-subtle bg-opacity-25 text-white border-0 mb-2">
                         <i class="bi bi-geo-alt me-1"></i> การใช้ประโยชน์
                     </span>
                     <h2 class="fw-bold mb-1 text-white">{{ number_format($totalUtilizations) }}</h2>
@@ -87,7 +87,7 @@
             <div class="card h-100 border-0 shadow-sm text-white overflow-hidden position-relative" 
                  style="background: linear-gradient(135deg, #7C2D12 0%, #F59E0B 100%); border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5 position-relative" style="z-index: 1;">
-                    <span class="badge bg-white bg-opacity-25 text-white border-0 mb-2">
+                    <span class="badge bg-light-subtle bg-opacity-25 text-white border-0 mb-2">
                         <i class="bi bi-lightbulb me-1"></i> ทรัพย์สินทางปัญญา
                     </span>
                     <h2 class="fw-bold mb-1 text-white">{{ number_format($totalDips) }}</h2>
@@ -102,7 +102,7 @@
             <div class="card h-100 border-0 shadow-sm text-white overflow-hidden position-relative" 
                  style="background: linear-gradient(135deg, #4338CA 0%, #6366F1 100%); border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5 position-relative" style="z-index: 1;">
-                    <span class="badge bg-white bg-opacity-25 text-white border-0 mb-2">
+                    <span class="badge bg-light-subtle bg-opacity-25 text-white border-0 mb-2">
                         <i class="bi bi-people-fill me-1"></i> นักวิจัย
                     </span>
                     <h2 class="fw-bold mb-1 text-white">{{ number_format($totalResearchers) }}</h2>
@@ -224,10 +224,10 @@
                                     <td class="text-center fw-bold text-body-secondary">{{ $proj->year->year_name ?? '-' }}</td>
                                     <td>
                                         <a href="{{ route('frontend.rdbproject.show', $proj->pro_id) }}" target="_blank" class="fw-bold text-decoration-none text-body hover-primary">
-                                            {!! $proj->pro_nameTH !!}
+                                            {{ strip_tags((string) $proj->pro_nameTH) }}
                                         </a>
                                         @if($proj->pro_nameEN)
-                                            <small class="text-body-secondary d-block">{!! $proj->pro_nameEN !!}</small>
+                                            <small class="text-body-secondary d-block">{{ strip_tags((string) $proj->pro_nameEN) }}</small>
                                         @endif
                                     </td>
                                     <td>

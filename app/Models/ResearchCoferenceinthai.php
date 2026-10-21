@@ -24,4 +24,26 @@ class ResearchCoferenceinthai extends Model
         'created_at',
         'updated_at',
     ];
+
+    public function getImageUrlAttribute(): ?string
+    {
+        $path = $this->con_path ?: $this->file_path;
+        if (!empty($path)) {
+            return asset('storage/' . $path);
+        }
+        if (!empty($this->con_img)) {
+            return asset('storage/uploads/conference/' . $this->con_img);
+        }
+        return null;
+    }
+
+    public function getFormattedDetailAttribute(): string
+    {
+        return \App\Helpers\HtmlContentHelper::formatConference($this->con_detail);
+    }
+
+    public function getPlainSummaryAttribute(): string
+    {
+        return \App\Helpers\HtmlContentHelper::plainSummaryConference($this->con_detail, 180);
+    }
 }

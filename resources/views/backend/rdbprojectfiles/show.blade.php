@@ -34,15 +34,15 @@
                 </div>
                 <div class="row mb-3">
                     <label class="col-md-3 text-end text-muted fw-bold">ดาวน์โหลด:</label>
-                    <div class="col-md-9"><span class="badge bg-secondary rounded-pill">{{ $item->rf_download }} ครั้ง</span></div>
+                    <div class="col-md-9"><span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle rounded-pill">{{ $item->rf_download }} ครั้ง</span></div>
                 </div>
                 <div class="row mb-3">
                     <label class="col-md-3 text-end text-muted fw-bold">สถานะการแสดงผล:</label>
                     <div class="col-md-9">
                         @if($item->rf_files_show == 1)
-                            <span class="badge bg-success">แสดง</span>
+                            <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle">แสดง</span>
                         @else
-                            <span class="badge bg-secondary">ซ่อน</span>
+                            <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">ซ่อน</span>
                         @endif
                     </div>
                 </div>

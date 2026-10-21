@@ -183,7 +183,7 @@
         <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center py-3">
             <h5 class="mb-0 fw-bold text-body">
                 <i class="bi bi-list-ul me-2 text-primary"></i>รายการโครงการวิจัย
-                <span class="badge bg-primary rounded-pill ms-2">{{ number_format($projects->total()) }} รายการ</span>
+                <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle rounded-pill ms-2">{{ number_format($projects->total()) }} รายการ</span>
             </h5>
         </div>
         <div class="card-body p-0">

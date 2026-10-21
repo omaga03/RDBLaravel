@@ -17,7 +17,8 @@
         {{-- Main Info --}}
         <div class="col-lg-6">
             <x-card title="ข้อมูลสาขาวิชา" icon="bi-info-circle" color="primary">
-                <table class="table table-borderless table-sm mb-0">
+                <div class="table-responsive">
+<table class="table table-borderless table-sm mb-0">
                     <tr>
                         <th style="width: 40%;">รหัสสาขา:</th>
                         <td><code>{{ $item->maj_id ?? $item->maj_code }}</code></td>
@@ -34,13 +35,14 @@
                         <th>หน่วยงาน/คณะ:</th>
                         <td>
                             @if($item->department)
-                                <span class="badge bg-secondary">{{ $item->department->department_nameTH }}</span>
+                                <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">{{ $item->department->department_nameTH }}</span>
                             @else
                                 <span class="text-muted">-</span>
                             @endif
                         </td>
                     </tr>
                 </table>
+</div>
             </x-card>
         </div>
 

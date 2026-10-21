@@ -60,7 +60,7 @@
                     <!-- Department (wrapped to prevent overflow) -->
                     @if($item->department)
                         <div class="mb-2">
-                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary px-2.5 py-1.5 text-wrap text-break"
+                            <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle border px-2.5 py-1.5 text-wrap text-break"
                                   style="max-width: 100%; white-space: normal; line-height: 1.4;">
                                 <i class="bi bi-building me-1"></i>{{ $item->department->department_nameTH }}
                             </span>
@@ -86,7 +86,7 @@
                             @if($item->researcher_hindex)
                                 <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-body-tertiary border rounded">
                                     <span class="small text-body"><i class="bi bi-graph-up text-primary me-1"></i>H-Index</span>
-                                    <span class="badge bg-info text-dark fs-6">{{ $item->researcher_hindex }}</span>
+                                    <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle fs-6">{{ $item->researcher_hindex }}</span>
                                 </div>
                             @endif
                             @if($item->scopus_authorId)
@@ -129,32 +129,32 @@
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active fw-semibold text-nowrap px-3 py-2" id="projects-tab" data-bs-toggle="tab" data-bs-target="#projects" type="button" role="tab">
                                 <i class="bi bi-folder2-open me-1 text-primary"></i> โครงการวิจัย 
-                                <span class="badge bg-primary rounded-pill ms-1">{{ $item->rdbProjects->count() }}</span>
+                                <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle rounded-pill ms-1">{{ $item->rdbProjects->count() }}</span>
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link fw-semibold text-nowrap px-3 py-2" id="publications-tab" data-bs-toggle="tab" data-bs-target="#publications" type="button" role="tab">
                                 <i class="bi bi-journal-richtext me-1 text-success"></i> ผลงานตีพิมพ์ 
-                                <span class="badge bg-success rounded-pill ms-1">{{ $item->rdbPublisheds->count() }}</span>
+                                <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle rounded-pill ms-1">{{ $item->rdbPublisheds->count() }}</span>
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link fw-semibold text-nowrap px-3 py-2" id="utilizations-tab" data-bs-toggle="tab" data-bs-target="#utilizations" type="button" role="tab">
                                 <i class="bi bi-boxes me-1 text-info"></i> การนำไปใช้ 
-                                <span class="badge bg-info text-dark rounded-pill ms-1">{{ $utilizations->count() }}</span>
+                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle rounded-pill ms-1">{{ $utilizations->count() }}</span>
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link fw-semibold text-nowrap px-3 py-2" id="ip-tab" data-bs-toggle="tab" data-bs-target="#ip" type="button" role="tab">
                                 <i class="bi bi-shield-check me-1 text-warning"></i> ทรัพย์สินทางปัญญา 
-                                <span class="badge bg-warning text-dark rounded-pill ms-1">{{ $item->rdbDips->count() }}</span>
+                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill ms-1">{{ $item->rdbDips->count() }}</span>
                             </button>
                         </li>
                         @if($item->rdbResearcherEducations && $item->rdbResearcherEducations->count() > 0)
                         <li class="nav-item" role="presentation">
                             <button class="nav-link fw-semibold text-nowrap px-3 py-2" id="education-tab" data-bs-toggle="tab" data-bs-target="#education" type="button" role="tab">
                                 <i class="bi bi-mortarboard me-1 text-secondary"></i> ประวัติการศึกษา 
-                                <span class="badge bg-secondary rounded-pill ms-1">{{ $item->rdbResearcherEducations->count() }}</span>
+                                <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle rounded-pill ms-1">{{ $item->rdbResearcherEducations->count() }}</span>
                             </button>
                         </li>
                         @endif
@@ -186,15 +186,15 @@
                                                     <td>
                                                         <div class="fw-bold mb-1">
                                                             @if($project->pro_code)
-                                                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary me-1">{{ $project->pro_code }}</span>
+                                                                <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle me-1">{{ $project->pro_code }}</span>
                                                             @endif
                                                             <a href="{{ route('frontend.rdbproject.show', $project->pro_id) }}" target="_blank" class="text-body fw-bold text-decoration-none hover-primary text-break">
-                                                                {!! $project->pro_nameTH !!}
+                                                                {{ strip_tags((string) $project->pro_nameTH) }}
                                                             </a>
                                                         </div>
                                                         @if($project->pro_nameEN)
                                                             <small class="text-body-secondary d-block mb-1 text-break">
-                                                                {!! $project->pro_nameEN !!}
+                                                                {{ strip_tags((string) $project->pro_nameEN) }}
                                                             </small>
                                                         @endif
                                                         <div class="small text-body-secondary d-flex flex-wrap gap-2 align-items-center mt-1">
@@ -271,12 +271,12 @@
                                                     <td>
                                                         <div class="fw-bold mb-1">
                                                             <a href="{{ route('frontend.rdbpublished.show', $pub->id) }}" target="_blank" class="text-body fw-bold text-decoration-none hover-primary text-break">
-                                                                {!! $pub->pub_name !!}
+                                                                {{ strip_tags((string) $pub->pub_name) }}
                                                             </a>
                                                         </div>
                                                         @if($pub->pub_name_journal)
                                                             <small class="text-body-secondary d-block mb-1 text-break">
-                                                                <i class="bi bi-book me-1"></i>{!! $pub->pub_name_journal !!}
+                                                                <i class="bi bi-book me-1"></i>{{ strip_tags((string) $pub->pub_name_journal) }}
                                                             </small>
                                                         @endif
                                                         <div class="small d-flex flex-wrap gap-2 align-items-center mt-1">
@@ -289,7 +289,7 @@
                                                                 <span class="text-body-secondary">
                                                                     <i class="bi bi-link-45deg"></i> โครงการ: 
                                                                     <a href="{{ route('frontend.rdbproject.show', $pub->project->pro_id) }}" target="_blank" class="text-primary text-decoration-none hover-underline text-break">
-                                                                        {!! $pub->project->pro_nameTH !!}
+                                                                        {{ strip_tags((string) $pub->project->pro_nameTH) }}
                                                                     </a>
                                                                 </span>
                                                             @endif
@@ -361,7 +361,7 @@
                                                         @if($util->utz_department_name)
                                                             <div class="fw-bold mb-1">
                                                                 <a href="{{ route('frontend.rdbprojectutilize.show', $util->utz_id) }}" target="_blank" class="text-body fw-bold text-decoration-none hover-primary text-break">
-                                                                    <i class="bi bi-building me-1 text-primary"></i>{!! $util->utz_department_name !!}
+                                                                    <i class="bi bi-building me-1 text-primary"></i>{{ strip_tags((string) $util->utz_department_name) }}
                                                                 </a>
                                                             </div>
                                                         @endif
@@ -377,7 +377,7 @@
 
                                                         @if($util->utz_leading)
                                                             <small class="text-body-secondary d-block text-break">
-                                                                <i class="bi bi-person me-1"></i>ผู้ลงนาม: {!! $util->utz_leading !!}
+                                                                <i class="bi bi-person me-1"></i>ผู้ลงนาม: {{ strip_tags((string) $util->utz_leading) }}
                                                                 @if($util->utz_leading_position) ({{ $util->utz_leading_position }}) @endif
                                                             </small>
                                                         @endif
@@ -386,7 +386,7 @@
                                                         @if($util->project)
                                                             <div class="small">
                                                                 <a href="{{ route('frontend.rdbproject.show', $util->project->pro_id) }}" target="_blank" class="text-primary text-decoration-none hover-underline text-break">
-                                                                    <i class="bi bi-folder2 me-1"></i>{!! $util->project->pro_nameTH !!}
+                                                                    <i class="bi bi-folder2 me-1"></i>{{ strip_tags((string) $util->project->pro_nameTH) }}
                                                                 </a>
                                                             </div>
                                                         @else
@@ -431,7 +431,7 @@
                                                         @endif
                                                         @if($dip->dip_patent_number ?? $dip->dip_number)
                                                             <div class="mt-1">
-                                                                <span class="badge bg-success bg-opacity-10 text-success border border-success">
+                                                                <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle">
                                                                     ทะเบียน: {{ $dip->dip_patent_number ?? $dip->dip_number }}
                                                                 </span>
                                                             </div>
@@ -440,18 +440,18 @@
                                                     <td>
                                                         <div class="fw-bold mb-1">
                                                             <a href="{{ route('frontend.rdbdip.show', $dip->dip_id) }}" target="_blank" class="text-body fw-bold text-decoration-none hover-primary text-break">
-                                                                {!! $dip->dip_data2_name ?: ($dip->dip_name ?: 'ไม่มีชื่อผลงาน') !!}
+                                                                {{ strip_tags((string) ($dip->dip_data2_name ?: ($dip->dip_name ?: 'ไม่มีชื่อผลงาน'))) }}
                                                             </a>
                                                         </div>
                                                         <div class="small d-flex flex-wrap gap-2 align-items-center mt-1">
                                                             @if($dip->dipType)
-                                                                <span class="badge bg-info text-dark">{{ $dip->dipType->dipt_name }}</span>
+                                                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">{{ $dip->dipType->dipt_name }}</span>
                                                             @endif
                                                             @if($dip->project)
                                                                 <span class="text-body-secondary">
                                                                     <i class="bi bi-link-45deg"></i> โครงการ:
                                                                     <a href="{{ route('frontend.rdbproject.show', $dip->project->pro_id) }}" target="_blank" class="text-primary text-decoration-none hover-underline text-break">
-                                                                        {!! $dip->project->pro_nameTH !!}
+                                                                        {{ strip_tags((string) $dip->project->pro_nameTH) }}
                                                                     </a>
                                                                 </span>
                                                             @endif
@@ -510,7 +510,7 @@
                                                     {{ $edu->reedu_name ?: '-' }}
                                                 </td>
                                                 <td class="text-center small text-nowrap">
-                                                    <span class="badge bg-success bg-opacity-10 text-success border border-success">
+                                                    <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle border">
                                                         {{ $edu->reedu_status ?: 'จบการศึกษาแล้ว' }}
                                                     </span>
                                                 </td>

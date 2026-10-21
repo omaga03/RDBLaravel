@@ -45,7 +45,7 @@
                             <td>
                                 <div class="fw-bold">
                                     @if(isset($item->projectType->year->year_name))
-                                        <span class="badge bg-secondary me-1">
+                                        <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle me-1">
                                             <i class="bi bi-calendar-event me-1"></i> {{ $item->projectType->year->year_name }}
                                         </span>
                                     @endif

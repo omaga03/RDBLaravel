@@ -24,7 +24,8 @@
                 </div>
             </form>
 
-            <table class="table table-hover">
+            <div class="table-responsive">
+<table class="table table-hover">
                 <thead class="table-light">
                     <tr>
                         <th width="15%">#</th>
@@ -62,6 +63,7 @@
                     @endforelse
                 </tbody>
             </table>
+</div>
             <div class="mt-3">
                 {{ $items->withQueryString()->links() }}
             </div>

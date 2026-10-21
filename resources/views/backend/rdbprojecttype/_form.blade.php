@@ -22,10 +22,10 @@
         @enderror
     </div>
 
-    <div class="col-md-4">
-        <label for="pttg_id" class="form-label">กลุ่มประเภทงบประมาณ</label>
+    <div class="col-md-6">
+        <label for="pttg_id" class="form-label">กลุ่มประเภทงบประมาณหลัก</label>
         <select class="form-select @error('pttg_id') is-invalid @enderror" id="pttg_id" name="pttg_id">
-            <option value="">-- เลือกกลุ่ม --</option>
+            <option value="">-- เลือกกลุ่มหลัก --</option>
             @foreach($groupList as $group)
                 <option value="{{ $group->pttg_id }}" {{ old('pttg_id', $item->pttg_id ?? '') == $group->pttg_id ? 'selected' : '' }}>
                     {{ $group->pttg_name }}
@@ -33,6 +33,21 @@
             @endforeach
         </select>
         @error('pttg_id')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="col-md-6">
+        <label for="master_pt_id" class="form-label">หมวดประเภททุนมาตรฐาน (Master Category)</label>
+        <select class="form-select @error('master_pt_id') is-invalid @enderror" id="master_pt_id" name="master_pt_id">
+            <option value="">-- เลือกหมวดมาตรฐาน --</option>
+            @foreach($masterList as $master)
+                <option value="{{ $master->master_pt_id }}" {{ old('master_pt_id', $item->master_pt_id ?? '') == $master->master_pt_id ? 'selected' : '' }}>
+                    {{ $master->master_pt_name }}
+                </option>
+            @endforeach
+        </select>
+        @error('master_pt_id')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>

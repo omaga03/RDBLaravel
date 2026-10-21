@@ -123,11 +123,11 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label">ตั้งแต่วันที่</label>
-                            <input type="date" class="form-control datepicker" id="s_date_start" name="date_start" value="{{ request('date_start') }}">
+                            <input type="text" class="form-control datepicker" id="s_date_start" name="date_start" value="{{ request('date_start') }}" placeholder="วว/ดด/ปปปป" autocomplete="off">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">ถึงวันที่</label>
-                            <input type="date" class="form-control datepicker" id="s_date_end" name="date_end" value="{{ request('date_end') }}">
+                            <input type="text" class="form-control datepicker" id="s_date_end" name="date_end" value="{{ request('date_end') }}" placeholder="วว/ดด/ปปปป" autocomplete="off">
                         </div>
                     </div>
 

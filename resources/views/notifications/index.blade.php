@@ -29,13 +29,13 @@
         </div>
     @endif
 
-    <div class="card shadow-sm border-0 rounded-3">
+    <div class="card shadow-sm border rounded-3">
         <div class="card-header bg-transparent border-bottom py-3 d-flex justify-content-between align-items-center">
-            <span class="fw-semibold text-secondary">
+            <span class="fw-semibold text-body-secondary">
                 ประวัติการแจ้งเตือน ({{ $notifications->total() }} รายการ)
             </span>
             @if(auth()->user()->unreadNotifications->count() > 0)
-                <span class="badge bg-danger rounded-pill">
+                <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle rounded-pill">
                     ยังไม่ได้อ่าน {{ auth()->user()->unreadNotifications->count() }} รายการ
                 </span>
             @endif
@@ -66,7 +66,7 @@
                                 $colorClass = 'text-info';
                             }
                         @endphp
-                        <div class="list-group-item p-3 {{ $isUnread ? 'bg-light bg-opacity-75' : '' }} border-start-0 border-end-0">
+                        <div class="list-group-item p-3 {{ $isUnread ? 'bg-body-tertiary' : '' }} border-start-0 border-end-0">
                             <div class="d-flex align-items-start gap-3">
                                 <div class="fs-4 {{ $colorClass }} mt-1">
                                     <i class="bi {{ $icon }}"></i>
@@ -76,15 +76,15 @@
                                         <h6 class="mb-0 fw-bold {{ $isUnread ? 'text-primary' : 'text-body' }}">
                                             {{ $title }}
                                             @if($isUnread)
-                                                <span class="badge bg-danger ms-2 font-monospace" style="font-size: 0.65rem;">NEW</span>
+                                                <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle ms-2 font-monospace" style="font-size: 0.65rem;">NEW</span>
                                             @endif
                                         </h6>
-                                        <small class="text-muted ms-2 text-nowrap">
+                                        <small class="text-body-secondary ms-2 text-nowrap">
                                             <i class="bi bi-clock me-1"></i>{{ $item->created_at->diffForHumans() }}
                                             ({{ $item->created_at->format('d/m/Y H:i') }})
                                         </small>
                                     </div>
-                                    <p class="mb-2 text-secondary small">{{ $message }}</p>
+                                    <p class="mb-2 text-body-secondary small">{{ $message }}</p>
                                     <div class="d-flex align-items-center gap-2">
                                         @if($isUnread)
                                             <form action="{{ route('notifications.read', $item->id) }}" method="POST" class="d-inline">

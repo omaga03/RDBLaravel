@@ -12,7 +12,8 @@
     <div class="row">
         <div class="col-lg-6">
             <x-card title="ข้อมูลกลุ่มประเภทโครงการ" icon="bi-info-circle" color="primary">
-                <table class="table table-borderless table-sm mb-0">
+                <div class="table-responsive">
+<table class="table table-borderless table-sm mb-0">
                     <tr>
                         <th style="width: 40%;">รหัสอ้างอิง:</th>
                         <td><code>{{ $item->pttg_id }}</code></td>
@@ -25,7 +26,7 @@
                         <th>กลุ่มประเภทงบประมาณ:</th>
                         <td>
                             @if(isset($groupList[$item->pttg_group]))
-                                <span class="badge bg-primary">
+                                <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle">
                                     <i class="bi bi-tag-fill me-1"></i> {{ $groupList[$item->pttg_group] }}
                                 </span>
                             @else
@@ -34,6 +35,7 @@
                         </td>
                     </tr>
                 </table>
+</div>
             </x-card>
         </div>
 

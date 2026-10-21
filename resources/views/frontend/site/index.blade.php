@@ -97,7 +97,7 @@
                     <i class="bi bi-folder2-open stats-icon"></i>
                     <div class="position-relative" style="z-index: 1;">
                         <div class="d-flex align-items-center gap-2 mb-2">
-                            <span class="badge bg-white bg-opacity-25 text-white border-0">
+                            <span class="badge bg-light-subtle bg-opacity-25 text-white border-0">
                                 <i class="bi bi-calendar-check me-1"></i>ปี {{ $max_year->year_name }}
                             </span>
                         </div>
@@ -119,7 +119,7 @@
                     <i class="bi bi-cash-stack stats-icon"></i>
                     <div class="position-relative" style="z-index: 1;">
                         <div class="d-flex align-items-center gap-2 mb-2">
-                            <span class="badge bg-white bg-opacity-25 text-white border-0">
+                            <span class="badge bg-light-subtle bg-opacity-25 text-white border-0">
                                 <i class="bi bi-award me-1"></i>งบประมาณสนับสนุน
                             </span>
                         </div>
@@ -141,7 +141,7 @@
                     <i class="bi bi-people-fill stats-icon"></i>
                     <div class="position-relative" style="z-index: 1;">
                         <div class="d-flex align-items-center gap-2 mb-2">
-                            <span class="badge bg-white bg-opacity-25 text-white border-0">
+                            <span class="badge bg-light-subtle bg-opacity-25 text-white border-0">
                                 <i class="bi bi-person-badge me-1"></i>กำลังคนด้านวิจัย
                             </span>
                         </div>
@@ -251,8 +251,8 @@
                     <div class="card h-100 shadow-sm premium-card">
                         <a href="{{ route('frontend.researchnews.show', $news->id) }}" target="_blank" class="text-decoration-none text-body" title="{{ $news->news_name }}">
                             <div class="ratio ratio-4x3 card-img-wrapper">
-                                @if($news->news_img)
-                                    <img src="{{ Storage::url($news->news_img) }}" class="card-img-top object-fit-cover" alt="{{ $news->news_name }}">
+                                @if($news->image_url)
+                                    <img src="{{ $news->image_url }}" class="card-img-top object-fit-cover" alt="{{ $news->news_name }}">
                                 @else
                                     <div class="d-flex align-items-center justify-content-center bg-body-tertiary text-body-secondary h-100">
                                         <i class="bi bi-newspaper fs-1 opacity-25"></i>
@@ -289,8 +289,8 @@
                     <div class="card h-100 shadow-sm premium-card conf-card">
                         <a href="{{ route('frontend.researchcoferenceinthai.show', $conf->id) }}" target="_blank" class="text-decoration-none text-body" title="{{ $conf->con_name }}">
                             <div class="ratio ratio-4x3 card-img-wrapper">
-                                @if($conf->con_img)
-                                    <img src="{{ Storage::url($conf->con_img) }}" class="card-img-top object-fit-cover" alt="{{ $conf->con_name }}">
+                                @if($conf->image_url)
+                                    <img src="{{ $conf->image_url }}" class="card-img-top object-fit-cover" alt="{{ $conf->con_name }}">
                                 @else
                                     <div class="d-flex align-items-center justify-content-center bg-body-tertiary text-body-secondary h-100">
                                         <i class="bi bi-megaphone-fill fs-1 opacity-25"></i>

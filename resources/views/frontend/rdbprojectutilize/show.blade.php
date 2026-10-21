@@ -37,9 +37,6 @@
                     <h4 class="card-title mb-0 mt-1 fw-semibold text-white text-break" style="font-size: 1.15rem; line-height: 1.55;">
                         {{ $item->project->pro_nameTH ?? 'การนำงานวิจัยไปใช้ประโยชน์' }}
                     </h4>
-                    @if($item->project && $item->project->pro_nameEN)
-                        <p class="text-white-50 small mb-0 mt-1 text-break">{!! $item->project->pro_nameEN !!}</p>
-                    @endif
                 </div>
                 <div class="card-body">
                     <!-- Badges Row -->
@@ -80,7 +77,7 @@
                                     <th class="text-body-secondary fw-semibold">สถานที่ / ที่อยู่:</th>
                                     <td class="text-body">
                                         @if($item->utz_department_address)
-                                            <div>{!! $item->utz_department_address !!}</div>
+                                            <div>{{ strip_tags((string) $item->utz_department_address) }}</div>
                                         @endif
                                         @if($item->changwat)
                                             <div class="text-body-secondary small mt-0.5">
@@ -97,7 +94,7 @@
                                 <tr>
                                     <th class="text-body-secondary fw-semibold">ผู้แทน / ผู้ลงนาม:</th>
                                     <td class="text-body">
-                                        <span class="fw-semibold">{!! $item->utz_leading !!}</span>
+                                        <span class="fw-semibold">{{ strip_tags((string) $item->utz_leading) }}</span>
                                         @if($item->utz_leading_position)
                                             <span class="text-body-secondary ms-1">({{ $item->utz_leading_position }})</span>
                                         @endif
@@ -153,12 +150,12 @@
                                 </button>
                             </div>
                             <div id="utz-detail-text" class="abstract-content abstract-indent">
-                                {!! $item->utz_detail !!}
+                                {!! strip_tags((string) $item->utz_detail, '<p><br><b><strong><i><em><u><ul><ol><li><span><sub><sup>') !!}
                             </div>
                         </div>
                     @else
                         <div class="abstract-box p-4 border rounded-3 bg-body-tertiary text-center text-body-secondary">
-                            <i class="bi bi-file-earmark-text text-muted fs-3 d-block mb-2"></i>
+                            <i class="bi bi-file-earmark-text text-body-secondary fs-3 d-block mb-2"></i>
                             <span class="fst-italic">ไม่มีข้อมูลรายละเอียดการนำไปใช้ประโยชน์</span>
                         </div>
                     @endif
@@ -182,11 +179,8 @@
                         </span>
                     @endif
                     <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" class="text-decoration-none fw-bold text-body hover-primary d-block mb-1.5" style="font-size: 0.92rem; line-height: 1.5;">
-                        {!! $item->project->pro_nameTH !!}
+                        {{ strip_tags((string) $item->project->pro_nameTH) }}
                     </a>
-                    @if($item->project->pro_nameEN)
-                        <p class="text-body-secondary small mb-2 text-break" style="font-size: 0.8rem;">{!! $item->project->pro_nameEN !!}</p>
-                    @endif
 
                     @if($item->project->type || $item->project->typeSub)
                     <div class="text-body-secondary small mb-1" style="font-size: 0.78rem;">
@@ -202,34 +196,36 @@
                     </div>
                     @endif
 
-                    {{-- Project Researchers List --}}
-                    @if($item->project->rdbProjectWorks && $item->project->rdbProjectWorks->count() > 0)
-                        <hr class="my-2 border-secondary-subtle">
-                        <div class="small fw-semibold text-body mb-2" style="font-size: 0.78rem;">คณะผู้วิจัย:</div>
-                        <div class="list-group list-group-flush mb-2">
-                            @foreach($item->project->rdbProjectWorks as $work)
-                                @if($work->researcher)
-                                    <div class="list-group-item bg-transparent px-0 py-1.5 border-0">
-                                        <div class="d-flex align-items-start">
-                                            <i class="bi bi-person-circle text-primary me-2 fs-6 mt-0.5"></i>
-                                            <div class="flex-grow-1 min-w-0">
-                                                <div class="d-flex flex-wrap align-items-center gap-1.5">
-                                                    <a href="{{ route('frontend.rdbresearcher.show', $work->researcher->researcher_id) }}" class="text-decoration-none text-body hover-primary fw-medium small">
-                                                        {{ $work->researcher->prefix->prefix_nameTH ?? '' }}{{ $work->researcher->researcher_fname }} {{ $work->researcher->researcher_lname }}
-                                                    </a>
-                                                    @if($work->position)
-                                                        <span class="badge {{ $work->position_id == 2 ? 'bg-primary-subtle text-primary border border-primary-subtle' : 'bg-secondary-subtle text-secondary-emphasis' }}" 
-                                                              style="font-size: 0.68rem; font-weight: 500; padding: 0.14rem 0.4rem;">
-                                                            {{ $work->position->position_nameTH }}
-                                                        </span>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
-                            @endforeach
-                        </div>
+                    @php
+                        $allWorks = $item->project->rdbProjectWorks ? $item->project->rdbProjectWorks->filter(fn($w) => !empty($w->researcher)) : collect();
+                        $headWork = $allWorks->firstWhere('position_id', 2) 
+                                 ?? $allWorks->firstWhere('position_id', 1) 
+                                 ?? $allWorks->first();
+                        $headResearcher = $headWork?->researcher;
+                        $remainingWorks = $headResearcher ? $allWorks->reject(fn($w) => $w->researcher_id === $headResearcher->researcher_id)->unique('researcher_id') : collect();
+                        $remainingCount = $remainingWorks->count();
+                        $remainingNames = $remainingWorks->map(function($work) {
+                            $prefix = $work->researcher->prefix->prefix_nameTH ?? '';
+                            return e($prefix . $work->researcher->researcher_fname . ' ' . $work->researcher->researcher_lname);
+                        })->filter()->implode('<br>• ');
+                    @endphp
+                    @if($headResearcher)
+                    <hr class="my-2 border-secondary-subtle">
+                    <div class="small fw-semibold text-body mb-1" style="font-size: 0.78rem;">หัวหน้าโครงการ:</div>
+                    <div class="d-flex align-items-center flex-wrap">
+                        <i class="bi bi-person-circle text-primary me-2 fs-6"></i>
+                        <a href="{{ route('frontend.rdbresearcher.show', $headResearcher->researcher_id) }}" class="text-decoration-none text-body hover-primary fw-medium small">
+                            {{ $headResearcher->prefix->prefix_nameTH ?? '' }}{{ $headResearcher->researcher_fname }} {{ $headResearcher->researcher_lname }}
+                        </a>
+                        @if($remainingCount > 0)
+                            <span class="text-body-secondary small ms-1" 
+                                  data-bs-toggle="tooltip" 
+                                  data-bs-placement="top" 
+                                  data-bs-html="true"
+                                  title="<strong>นักวิจัยร่วม:</strong><br>• {!! strip_tags($remainingNames, '<br>') !!}"
+                                  style="cursor: pointer;">(+{{ $remainingCount }})</span>
+                        @endif
+                    </div>
                     @endif
 
                     <div class="mt-3">

@@ -69,7 +69,7 @@
                         {{ $item->researcher_fnameEN }} {{ $item->researcher_lnameEN }}
                     </p>
                     <div class="mb-3">
-                        <span class="badge bg-primary text-wrap lh-base" style="max-width: 100%;">
+                        <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle text-wrap lh-base" style="max-width: 100%;">
                             {{ $item->department->department_nameTH ?? '-' }}
                         </span>
                     </div>
@@ -134,22 +134,22 @@
                     <ul class="nav nav-tabs card-header-tabs" id="researcherTabs" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="projects-tab" data-bs-toggle="tab" data-bs-target="#projects" type="button" role="tab">
-                                <i class="bi bi-folder-fill"></i> โครงการวิจัย <span class="badge bg-primary ms-1">{{ $item->rdbProjects->count() }}</span>
+                                <i class="bi bi-folder-fill"></i> โครงการวิจัย <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle ms-1">{{ $item->rdbProjects->count() }}</span>
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="publications-tab" data-bs-toggle="tab" data-bs-target="#publications" type="button" role="tab">
-                                <i class="bi bi-journal-text"></i> ผลงานตีพิมพ์ <span class="badge bg-primary ms-1">{{ $item->rdbPublisheds->count() }}</span>
+                                <i class="bi bi-journal-text"></i> ผลงานตีพิมพ์ <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle ms-1">{{ $item->rdbPublisheds->count() }}</span>
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="utilizations-tab" data-bs-toggle="tab" data-bs-target="#utilizations" type="button" role="tab">
-                                <i class="bi bi-box-seam"></i> การนำไปใช้ <span class="badge bg-primary ms-1">{{ $utilizations->count() }}</span>
+                                <i class="bi bi-box-seam"></i> การนำไปใช้ <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle ms-1">{{ $utilizations->count() }}</span>
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="ip-tab" data-bs-toggle="tab" data-bs-target="#ip" type="button" role="tab">
-                                <i class="bi bi-shield-check"></i> ทรัพย์สินทางปัญญา <span class="badge bg-primary ms-1">{{ $item->rdbDips->count() }}</span>
+                                <i class="bi bi-shield-check"></i> ทรัพย์สินทางปัญญา <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle ms-1">{{ $item->rdbDips->count() }}</span>
                             </button>
                         </li>
                     </ul>

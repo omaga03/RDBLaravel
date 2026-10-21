@@ -55,7 +55,7 @@
             <div class="card h-100 border-0 shadow-sm text-white" 
                  style="background: linear-gradient(135deg, #991B1B 0%, #EF4444 100%); border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
-                    <span class="badge bg-white bg-opacity-25 text-white border-0 mb-2">
+                    <span class="badge bg-light-subtle bg-opacity-25 text-white border-0 mb-2">
                         <i class="bi bi-pin-map-fill me-1"></i> การนำไปใช้ประโยชน์รวม
                     </span>
                     <h3 class="fw-bold mb-1 text-white text-nowrap">{{ number_format($totalUtilizations) }}</h3>
@@ -222,11 +222,11 @@
                                     </td>
                                     <td>
                                         <a href="{{ route('frontend.rdbprojectutilize.show', $util->utz_id) }}" target="_blank" class="fw-bold text-decoration-none text-body hover-primary">
-                                            {!! $util->utz_department_name ?: 'หน่วยงานในพื้นที่' !!}
+                                            {{ strip_tags((string) ($util->utz_department_name ?: 'หน่วยงานในพื้นที่')) }}
                                         </a>
                                         @if($util->utz_leading)
                                             <small class="text-body-secondary d-block">
-                                                <i class="bi bi-person me-1"></i>ผู้ลงนาม: {!! $util->utz_leading !!}
+                                                <i class="bi bi-person me-1"></i>ผู้ลงนาม: {{ strip_tags((string) $util->utz_leading) }}
                                             </small>
                                         @endif
                                     </td>
@@ -245,7 +245,7 @@
                                     <td>
                                         @if($util->project)
                                             <a href="{{ route('frontend.rdbproject.show', $util->project->pro_id) }}" target="_blank" class="small text-primary text-decoration-none hover-underline">
-                                                <i class="bi bi-folder2 me-1"></i>{!! $util->project->pro_nameTH !!}
+                                                <i class="bi bi-folder2 me-1"></i>{{ strip_tags((string) $util->project->pro_nameTH) }}
                                             </a>
                                         @else
                                             <span class="text-body-secondary small">-</span>

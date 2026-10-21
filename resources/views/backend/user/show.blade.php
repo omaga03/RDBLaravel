@@ -15,7 +15,8 @@
     <div class="row g-4">
         <div class="col-lg-6">
             <x-card title="ข้อมูลบัญชีผู้ใช้งาน" icon="bi-person-circle" color="primary">
-                <table class="table table-borderless table-sm mb-0">
+                <div class="table-responsive">
+<table class="table table-borderless table-sm mb-0">
                     <tr>
                         <th style="width: 35%;">รหัสผู้ใช้ (User ID):</th>
                         <td><code>{{ $user->id }}</code></td>
@@ -55,6 +56,7 @@
                         </td>
                     </tr>
                 </table>
+</div>
             </x-card>
         </div>
 

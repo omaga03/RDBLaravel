@@ -56,7 +56,7 @@
                                 @endif
                             </td>
                             <td class="text-center">
-                                <span class="badge bg-secondary rounded-pill">{{ $item->rf_download }} ครั้ง</span>
+                                <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle rounded-pill">{{ $item->rf_download }} ครั้ง</span>
                             </td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
