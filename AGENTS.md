@@ -2,8 +2,9 @@
 
 ## 1. Core Architecture & Standards (laravel-php)
 - ใช้ PHP 8.x และ Laravel 12 Conventions เสมอ
-- ยึดหลัก PSR-12 และ Clean Architecture
-- ห้ามเขียน Business Logic ไว้ใน Controller ให้ย้ายไปใส่ Service Class เสมอ
+- ยึดหลัก PSR-12, Clean Architecture และ Thin Controllers (ย้าย Validation ไปที่ FormRequest เสมอ)
+- **Eloquent Optimization & N+1 Prevention**: บังคับใช้ Eager Loading (`with()`, `load()`) ทุกครั้งที่มีการดึง Relation ไปแสดงผลใน Blade ห้าม query ซ้ำซ้อนใน loop
+- ห้ามเขียน Complex Business Logic ไว้ใน Controller ให้ย้ายไปใส่ Service Class เสมอ
 - เขียน PHPUnit Test (Feature/Unit Test) ควบคู่ทุกครั้งที่มีการสร้างหรือแก้ไข Feature ใหม่
 - คำนึงถึงความปลอดภัย (Authorization Gates, File Upload UUID Renaming, Security Headers, Rate Limiting)
 - รายละเอียด: `.agents/skills/laravel-php/SKILL.md`
@@ -22,6 +23,8 @@
 
 ## 3. UI Forms, Plugins & Visualizations (ui-form-controls-and-plugins, ui-dashboard-visualization & ui-ux-pro-max)
 - **ฟอร์มและการค้นหา**: TomSelect AJAX, Autocomplete ค้นหากลุ่มคำ, Multiple Select ปลอดภัย
+- **Multi-Step Form (Wizard UI)**: การแบ่งฟอร์มงานวิจัยที่มีรายละเอียดมากด้วย Bootstrap Nav-Pills ลด Cognitive Load
+- **PDF Preview & File Upload UX**: แสดงตัวอย่าง PDF ใน Modal พร้อมป้ายสถานะไฟล์ก่อนดาวน์โหลด
 - **Dashboard & กราฟ**: ใช้ Stat Cards พร้อม Watermark Icons และโทนสีกราฟ Chart.js ที่อ่านง่ายทั้งสองโหมด
 - **ดีไซน์ระบบและชุดสีอัจฉริยะ**: พาเลทสี, การจัดช่องว่าง, การจับคู่ฟอนต์ภาษาไทยและอังกฤษ
 - รายละเอียด: `.agents/skills/ui-form-controls-and-plugins/SKILL.md`, `.agents/skills/ui-dashboard-visualization/SKILL.md` และ `.agents/skills/ui-ux-pro-max/SKILL.md`

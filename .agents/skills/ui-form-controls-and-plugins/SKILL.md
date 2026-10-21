@@ -1,11 +1,11 @@
 ---
 name: ui-form-controls-and-plugins
-description: Standards for form controls, TomSelect AJAX search, multi-select array handling with @json, CKEditor setup, and validation feedback.
+description: Standards for form controls, TomSelect AJAX search, multi-select array handling with @json, CKEditor setup, Multi-Step Wizard UI, and validation feedback.
 ---
 
 # Form Controls & Plugin Standards (laravel_rdb)
 
-Use this skill whenever building or updating forms that involve TomSelect, CKEditor, file upload inputs, or complex validation.
+Use this skill whenever building or updating forms that involve TomSelect, CKEditor, file upload inputs, Multi-Step Wizard UI, or complex validation.
 
 ## 1. Multi-Select TomSelect with Safe Array `old()`
 When using TomSelect with multiple selections (e.g. `name="utz_group[]"`), NEVER use `{{ old('fieldName') }}` because in PHP 8.4 passing an array to `htmlspecialchars` throws a `TypeError`.
@@ -79,7 +79,45 @@ For rich text fields:
 @endpush
 ```
 
-## 4. Standard Form Validation Feedback
+## 4. Multi-Step Form / Wizard UI Standard (Bootstrap 5.3)
+สำหรับฟอร์มกรอกข้อมูลงานวิจัยที่มีรายละเอียดมาก (เช่น โครงการวิจัย, ผลงานตีพิมพ์) ให้แบ่งขั้นตอนออกเป็น Steps ด้วย Bootstrap 5.3 Nav-Pills เพื่อลด Cognitive Load ของผู้ใช้งาน:
+```blade
+<div class="card bg-body-tertiary border mb-4">
+    <div class="card-body p-3">
+        <ul class="nav nav-pills nav-fill gap-2" id="researchFormSteps" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active rounded-pill fw-medium" id="step1-tab" data-bs-toggle="pill" data-bs-target="#step1" type="button" role="tab">
+                    <span class="badge bg-primary me-2">1</span> ข้อมูลทั่วไปและชื่อเรื่อง
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-pill fw-medium" id="step2-tab" data-bs-toggle="pill" data-bs-target="#step2" type="button" role="tab">
+                    <span class="badge bg-secondary me-2">2</span> นักวิจัยและงบประมาณ
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-pill fw-medium" id="step3-tab" data-bs-toggle="pill" data-bs-target="#step3" type="button" role="tab">
+                    <span class="badge bg-secondary me-2">3</span> บทคัดย่อและเอกสารแนบ
+                </button>
+            </li>
+        </ul>
+    </div>
+</div>
+```
+- ในปุ่มเปลี่ยน Step ด้านล่าง ให้มีปุ่ม `ย้อนกลับ` (Previous) และ `ถัดไป` (Next) เพื่อนำทาง พร้อมการตรวจสอบ Input เบื้องต้นก่อนข้าม Step
+
+## 5. File Upload & PDF Preview Modal Standard
+สำหรับการอัปโหลดเอกสารรายงานวิจัย/บทความ PDF:
+1. แสดงขอบเขตประเภทไฟล์ (`.pdf`, `.doc`, `.docx`) และขนาดสูงสุดอย่างชัดเจน
+2. มีปุ่มกดดูเอกสารผ่าน Inline Modal สำหรับไฟล์ที่อัปโหลดไว้แล้ว โดยไม่ต้องโหลดหน้าใหม่:
+```blade
+<!-- ปุ่มเปิด PDF Preview Modal -->
+<button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#pdfPreviewModal">
+    <i class="bi bi-eye me-1"></i> ดูตัวอย่าง PDF
+</button>
+```
+
+## 6. Standard Form Validation Feedback
 Every required or validated form group must display server-side validation errors:
 ```blade
 <div class="mb-3">
