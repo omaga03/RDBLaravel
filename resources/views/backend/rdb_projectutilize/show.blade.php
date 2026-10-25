@@ -264,10 +264,14 @@
                     <h5 class="mb-0"><i class="bi bi-folder-symlink me-2"></i>โครงการวิจัยต้นแบบ</h5>
                 </div>
                 <div class="card-body border-top">
-                    <h6 class="fw-bold text-success mb-2">{{ $item->project->pro_nameTH }}</h6>
+                    <h6 class="fw-bold mb-2">
+                        <a href="{{ route('backend.rdb_project.show', $item->pro_id) }}" target="_blank" rel="noopener noreferrer" class="text-success text-decoration-none hover-underline">
+                            {{ $item->project->pro_nameTH }}
+                        </a>
+                    </h6>
                     <div class="small mb-3">รหัสโครงการ: {{ $item->project->pro_code ?? '-' }}</div>
                     <div class="d-grid shadow-sm mt-2">
-                        <a href="{{ route('backend.rdb_project.show', $item->pro_id) }}" target="_blank" class="btn btn-sm btn-outline-success">
+                        <a href="{{ route('backend.rdb_project.show', $item->pro_id) }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-success">
                             <i class="bi bi-box-arrow-up-right me-1"></i> ดูรายละเอียดโครงการ
                         </a>
                     </div>

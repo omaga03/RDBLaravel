@@ -28,6 +28,12 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        $user = Auth::user();
+        if ($user && !$user->canAccessFullBackend()) {
+            return redirect()->route('site.index')
+                ->with('status', 'เข้าสู่ระบบสำเร็จ (บัญชีของท่านยังไม่ได้รับการอนุมัติสิทธิ์นักวิจัย กรุณายืนยันตัวตนและสังกัดคณะ)');
+        }
+
         return redirect()->intended(route('backend.site.index', absolute: false));
     }
 

@@ -18,6 +18,9 @@
             <span class="badge bg-body border text-body-secondary px-3 py-2">
                 <i class="bi bi-database me-1 text-primary"></i> ทั้งหมด {{ number_format($projects->total()) }} โครงการ
             </span>
+            <a href="{{ route('frontend.rdbproject.export', request()->query()) }}" class="btn btn-outline-success btn-sm d-inline-flex align-items-center" title="ส่งออก CSV ตามตัวกรองปัจจุบัน">
+                <i class="bi bi-filetype-csv me-1"></i> Export CSV
+            </a>
         </div>
     </div>
 
@@ -242,6 +245,7 @@
                                     @if($firstLeader && $firstLeader->researcher)
                                     <div>
                                         <a href="{{ route('frontend.rdbresearcher.show', $firstLeader->researcher->researcher_id) }}" 
+                                           target="_blank" rel="noopener noreferrer"
                                            class="text-decoration-none text-body fw-semibold hover-primary">
                                             <i class="bi bi-person-circle text-primary me-1"></i>{{ $firstLeader->researcher->researcher_fname }} {{ $firstLeader->researcher->researcher_lname }}
                                         </a>

@@ -404,6 +404,59 @@
                             <option value="0" {{ (isset($hasPublications) && $hasPublications === '0') ? 'selected' : '' }}>ยังไม่มีผลงานตีพิมพ์</option>
                         </select>
                     </div>
+                @elseif(request()->routeIs('frontend.dashboard.qa'))
+                    <input type="hidden" name="tab" value="{{ $activeTab ?? 'pub' }}">
+
+                    <!-- Filter 1: Year (ปีงบประมาณ / ปีการศึกษา) -->
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                        <label class="form-label text-body-secondary small fw-medium mb-1"><i class="bi bi-calendar3 text-primary me-1"></i> ปีงบประมาณ / ปีการศึกษา</label>
+                        <select name="year_id" class="form-select form-select-sm fw-medium">
+                            <option value="all" {{ empty($selectedYearId) ? 'selected' : '' }}>-- ทุกปีงบประมาณ / ปีการศึกษา --</option>
+                            @foreach($years as $y)
+                                <option value="{{ $y->year_id }}" {{ (isset($selectedYearId) && $selectedYearId == $y->year_id) ? 'selected' : '' }}>
+                                    ปี พ.ศ. {{ $y->year_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Filter 2: Calculation Scope (ขอบเขตการคำนวณ) -->
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                        <label class="form-label text-body-secondary small fw-medium mb-1"><i class="bi bi-diagram-3-fill text-info me-1"></i> ขอบเขตข้อมูล (Scope)</label>
+                        <select name="scope" class="form-select form-select-sm fw-semibold">
+                            <option value="faculty" {{ (!isset($scope) || $scope === 'faculty') ? 'selected' : '' }}>🎓 เฉพาะคณะวิชาการ (Faculties Only)</option>
+                            <option value="all" {{ (isset($scope) && $scope === 'all') ? 'selected' : '' }}>🏛️ ทั้งหมด (รวมสำนัก/สถาบัน/ส่วนกลาง)</option>
+                        </select>
+                    </div>
+
+                    <!-- Filter 3: Faculty / Department -->
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                        <label class="form-label text-body-secondary small fw-medium mb-1"><i class="bi bi-building text-primary me-1"></i> คณะ / หน่วยงาน</label>
+                        <select name="department_id" class="form-select form-select-sm fw-medium">
+                            <option value="all" {{ empty($deptId) ? 'selected' : '' }}>-- ทุกหน่วยงานในขอบเขต --</option>
+                            @php
+                                $facIds = [2, 3, 4, 5, 6, 13];
+                                $facList = $departments->whereIn('department_id', $facIds);
+                                $otherList = $departments->whereNotIn('department_id', $facIds);
+                            @endphp
+                            <optgroup label="คณะวิชาการ (6 คณะ)">
+                                @foreach($facList as $dept)
+                                    <option value="{{ $dept->department_id }}" {{ (isset($deptId) && $deptId == $dept->department_id) ? 'selected' : '' }}>
+                                        {{ $dept->department_nameTH }}
+                                    </option>
+                                @endforeach
+                            </optgroup>
+                            @if(isset($scope) && $scope === 'all')
+                            <optgroup label="หน่วยงานส่วนกลาง / สำนัก / สถาบัน">
+                                @foreach($otherList as $dept)
+                                    <option value="{{ $dept->department_id }}" {{ (isset($deptId) && $deptId == $dept->department_id) ? 'selected' : '' }}>
+                                        {{ $dept->department_nameTH }}
+                                    </option>
+                                @endforeach
+                            </optgroup>
+                            @endif
+                        </select>
+                    </div>
                 @endif
 
                 <!-- Submit & Reset Action Buttons -->

@@ -29,9 +29,9 @@ class SystemSetting extends Model
         'standard_login_enabled' => '1',
 
         // Document Download Policies (Multi-layer security)
-        'download_policy_full_report' => 'members_only', // 'public', 'members_only', 'admin_only'
-        'download_policy_abstract' => 'public',          // 'public', 'members_only'
-        'download_policy_attachments' => 'members_only',  // 'public', 'members_only', 'admin_only'
+        'download_policy_full_report' => 'public',        // 'public', 'members_only', 'admin_only'
+        'download_policy_abstract' => 'public',           // 'public', 'members_only'
+        'download_policy_attachments' => 'public',        // 'public', 'members_only', 'admin_only'
         'download_require_login_message' => 'กรุณาเข้าสู่ระบบก่อนเพื่อดาวน์โหลดเอกสารเล่มรายงานวิจัยฉบับสมบูรณ์ ตามนโยบายความมั่นคงปลอดภัยสารสนเทศของมหาวิทยาลัย',
         'download_logging_enabled' => '1',
     ];

@@ -19,6 +19,9 @@
             'รายละเอียดโครงการ' => ''
         ]"
     >
+        <a href="{{ route('backend.rdb_project.export_dspace', $project->pro_id) }}" class="btn btn-outline-info d-inline-flex justify-content-center align-items-center shadow-sm" style="height: 38px; font-size: 0.85rem;" title="ส่งออกข้อมูลเข้าคลังปัญญา DSpace (Simple Archive Format)">
+            <i class="bi bi-file-earmark-zip me-1.5"></i> ส่งออก DSpace
+        </a>
         @if($project->workflow_status === 'published' && auth()->user()->can('requestUnlock', $project))
             <button type="button" class="btn btn-warning d-inline-flex justify-content-center align-items-center" style="min-width: 105px; height: 38px; font-size: 0.85rem;" data-bs-toggle="modal" data-bs-target="#requestUnlockModal" data-id="{{ $project->pro_id }}" data-type="project" data-title="{{ $project->pro_nameTH }}">
                 <i class="bi bi-unlock me-1.5"></i> ขอแก้ไข
@@ -107,7 +110,29 @@
                         <!-- Budget Highlight -->
                         <div class="text-center p-3 mb-3 bg-body-secondary rounded border border-secondary-subtle">
                             <span class="text-body-secondary small fw-bold text-uppercase d-block mb-1">งบประมาณโครงการ</span>
-                            <h3 class="fw-bold mb-0 text-success">฿{{ number_format($project->pro_budget, 2) }}</h3>
+                            <h3 class="fw-bold mb-1 text-success">฿{{ number_format($project->pro_budget, 2) }}</h3>
+                            @php
+                                $ckbAnnuity = (int) ($project->budget->ckb_annuity ?? 1);
+                            @endphp
+                            <div class="d-flex justify-content-center align-items-center gap-1 mt-1">
+                                @if($ckbAnnuity === 0)
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                        <i class="bi bi-check-circle-fill me-1"></i>หลักฐานการเงิน: ครบถ้วน
+                                    </span>
+                                @else
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                        <i class="bi bi-exclamation-circle-fill me-1"></i>หลักฐานการเงิน: ไม่ครบถ้วน
+                                    </span>
+                                @endif
+                                @can('update', $project)
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1.5" data-bs-toggle="modal" data-bs-target="#projectBudgetModal" title="ปรับปรุงสถานะหลักฐานทางการเงิน">
+                                        <i class="bi bi-pencil-square" style="font-size: 0.75rem;"></i>
+                                    </button>
+                                @endcan
+                            </div>
+                            @if(!empty($project->budget?->ckb_note))
+                                <div class="small text-body-secondary mt-1"><i class="bi bi-chat-left-text me-1"></i>{{ $project->budget->ckb_note }}</div>
+                            @endif
                         </div>
 
                         <!-- Key Details List -->
@@ -290,14 +315,23 @@
                                                     @if(($project->pgroup_id == 2 || ($project->pro_group && $project->pro_group != $project->pro_id)) && $project->parentProject)
                                                         <div class="mt-1 small">
                                                             <span class="text-body-secondary fw-semibold"><i class="bi bi-diagram-3-fill text-primary me-1"></i>ภายใต้แผนงานวิจัย:</span>
-                                                            <a href="{{ route('backend.rdb_project.show', $project->parentProject->pro_id) }}" class="text-decoration-none fw-medium text-primary hover-underline">
+                                                            <a href="{{ route('backend.rdb_project.show', $project->parentProject->pro_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none fw-medium text-primary hover-underline">
                                                                 {{ $project->parentProject->pro_nameTH }}
                                                             </a>
                                                         </div>
                                                     @endif
                                                     @if($project->pgroup_id == 1 && $project->subProjects && $project->subProjects->count() > 0)
-                                                        <div class="mt-1 small">
-                                                            <span class="text-body-secondary fw-semibold"><i class="bi bi-collection-fill text-success me-1"></i>โครงการย่อยภายใต้แผนงานนี้ ({{ $project->subProjects->count() }} โครงการ)</span>
+                                                        <div class="mt-2 small">
+                                                            <span class="text-body-secondary fw-semibold d-block mb-1"><i class="bi bi-collection-fill text-success me-1"></i>โครงการย่อยภายใต้แผนงานนี้ ({{ $project->subProjects->count() }} โครงการ):</span>
+                                                            <ol class="mb-0 ps-3">
+                                                                @foreach($project->subProjects as $subP)
+                                                                    <li class="mb-1">
+                                                                        <a href="{{ route('backend.rdb_project.show', $subP->pro_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body hover-underline">
+                                                                            {{ $subP->pro_nameTH }}
+                                                                        </a>
+                                                                    </li>
+                                                                @endforeach
+                                                            </ol>
                                                         </div>
                                                     @endif
                                                 </td>
@@ -415,7 +449,7 @@
                                                             $isSelfRes = (int)auth()->user()->researcher_id === (int)$work->researcher->researcher_id;
                                                         @endphp
                                                         @if($canManageRes || $isSelfRes)
-                                                            <a href="{{ route('backend.rdb_researcher.show', $work->researcher->researcher_id) }}" class="text-decoration-none text-body fw-bold hover-primary">
+                                                            <a href="{{ route('backend.rdb_researcher.show', $work->researcher->researcher_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body fw-bold hover-primary">
                                                                 {{ $work->researcher->prefix->prefix_nameTH ?? '' }}{{ $work->researcher->researcher_fname }} {{ $work->researcher->researcher_lname }}
                                                                 @if($isSelfRes)
                                                                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1" style="font-size: 0.72rem;">(คุณ)</span>
@@ -762,7 +796,7 @@
 
                             <div class="alert alert-info py-2 px-3 small mb-0 d-flex align-items-center">
                                 <i class="bi bi-info-circle-fill fs-5 me-2 text-info"></i>
-                                <div>การปรับปรุงสถานะโครงการจะอัปเดตข้อมูลบนแดชบอร์ด รายงานวิจัย และหน้าแสดงผลทันที</div>
+                                <div>การปรับปรุงสถานะโครงการจะคำนวณวันสิ้นสุดโครงการอัตโนมัติ (กรณีขยายเวลา +3 เดือน / เสร็จสิ้น) และอัปเดตโครงการย่อยในชุดโครงการเดียวกัน</div>
                             </div>
                         </div>
                         <div class="modal-footer bg-body-tertiary">
@@ -771,6 +805,45 @@
                             </button>
                             <button type="submit" class="btn btn-primary px-4">
                                 <i class="bi bi-check-lg me-1"></i> บันทึกสถานะใหม่
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Budget Evidence Modal -->
+        <div class="modal fade" id="projectBudgetModal" tabindex="-1" aria-labelledby="projectBudgetModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content shadow border-0">
+                    <div class="modal-header text-white" style="background: var(--rdb-gradient-primary);">
+                        <h5 class="modal-title" id="projectBudgetModalLabel">
+                            <i class="bi bi-cash-coin me-2"></i> ปรับปรุงสถานะหลักฐานทางการเงิน
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="{{ route('backend.rdb_project.update_budget', $project->pro_id) }}" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        <div class="modal-body p-4">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">สถานะหลักฐานทางการเงิน <span class="text-danger">*</span></label>
+                                <select name="ckb_annuity" class="form-select" required>
+                                    <option value="0" {{ (int)($project->budget->ckb_annuity ?? 1) === 0 ? 'selected' : '' }}>🟢 ครบถ้วน (เบิกจ่ายครบแล้ว)</option>
+                                    <option value="1" {{ (int)($project->budget->ckb_annuity ?? 1) === 1 ? 'selected' : '' }}>🔴 ไม่ครบถ้วน (ยังไม่ได้เบิกจ่ายครบ)</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">หมายเหตุการเบิกจ่าย</label>
+                                <input type="text" name="ckb_note" class="form-control" maxlength="255" value="{{ $project->budget->ckb_note ?? '' }}" placeholder="ระบุหมายเหตุ (ถ้ามี)">
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-body-tertiary">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-lg me-1"></i> ยกเลิก
+                            </button>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-check-lg me-1"></i> บันทึกข้อมูล
                             </button>
                         </div>
                     </form>

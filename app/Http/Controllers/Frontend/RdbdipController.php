@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Storage;
 
 class RdbdipController extends Controller
 {
-    public function index(Request $request)
+    protected function buildFilteredQuery(Request $request)
     {
         $query = RdbDip::with([
             'dipType', 
@@ -25,9 +25,7 @@ class RdbdipController extends Controller
         ]);
 
         if (Schema::hasColumn('rdb_dip', 'data_show')) {
-            $query->where(function($q) {
-                $q->where('data_show', 1)->orWhereNull('data_show');
-            });
+            $query->where('data_show', 1);
         }
 
         if ($request->filled('search')) {
@@ -131,6 +129,22 @@ class RdbdipController extends Controller
             });
         }
 
+        if ($request->filled('date_start') && $request->filled('date_end')) {
+            if ($request->date_end >= $request->date_start) {
+                $query->whereDate('dip_request_date', '>=', $request->date_start)
+                      ->whereDate('dip_request_date', '<=', $request->date_end);
+            }
+        }
+
+        if ($request->filled('pro_id')) {
+            $query->where('pro_id', $request->pro_id);
+        }
+
+        return $query;
+    }
+
+    public function index(Request $request)
+    {
         // Date range validation
         $hasDateStart = $request->filled('date_start');
         $hasDateEnd = $request->filled('date_end');
@@ -147,14 +161,12 @@ class RdbdipController extends Controller
                     ->withInput()
                     ->with('error', 'วันที่สิ้นสุดต้องไม่น้อยกว่าวันที่เริ่มต้น');
             }
-            
-            $query->whereDate('dip_request_date', '>=', $request->date_start)
-                  ->whereDate('dip_request_date', '<=', $request->date_end);
         }
+
+        $query = $this->buildFilteredQuery($request);
 
         $project = null;
         if ($request->filled('pro_id')) {
-            $query->where('pro_id', $request->pro_id);
             $project = RdbProject::find($request->pro_id);
         }
 
@@ -219,37 +231,7 @@ class RdbdipController extends Controller
 
     public function export(Request $request)
     {
-        $query = RdbDip::with(['dipType', 'project', 'researcher']);
-
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('dip_request_number', 'like', "%{$search}%")
-                  ->orWhere('dip_number', 'like', "%{$search}%")
-                  ->orWhere('dip_patent_number', 'like', "%{$search}%")
-                  ->orWhere('dip_data2_name', 'like', "%{$search}%")
-                  ->orWhereHas('project', function($query) use ($search) {
-                      $query->where('pro_nameTH', 'like', "%{$search}%");
-                  })
-                  ->orWhereHas('researcher', function($query) use ($search) {
-                      $query->where('researcher_fname', 'like', "%{$search}%")
-                            ->orWhere('researcher_lname', 'like', "%{$search}%")
-                            ->orWhereRaw("CONCAT(researcher_fname, ' ', researcher_lname) LIKE ?", ["%{$search}%"]);
-                  });
-            });
-        }
-
-        // Date range validation (Same as index but skipping redirect for stream, just filter if valid)
-        if ($request->filled('date_start') && $request->filled('date_end')) {
-             if ($request->date_end >= $request->date_start) {
-                $query->whereDate('dip_request_date', '>=', $request->date_start)
-                      ->whereDate('dip_request_date', '<=', $request->date_end);
-             }
-        }
-
-        if ($request->filled('pro_id')) {
-            $query->where('pro_id', $request->pro_id);
-        }
+        $query = $this->buildFilteredQuery($request);
 
         // Sort by date DESC, then name ASC
         $query->orderBy('dip_request_date', 'desc')
@@ -259,16 +241,25 @@ class RdbdipController extends Controller
 
         $filename = "ip_data_" . date('Y-m-d_H-i-s') . ".csv";
         $headers = [
-            "Content-type" => "text/csv",
+            "Content-type" => "text/csv; charset=UTF-8",
             "Content-Disposition" => "attachment; filename=$filename",
             "Pragma" => "no-cache",
             "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
             "Expires" => "0"
         ];
 
-        $callback = function() use ($items) {
+        $sanitize = function ($val) {
+            if ($val === null) return '';
+            $str = trim(strip_tags((string) $val));
+            if ($str !== '' && in_array($str[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
+                return "'" . $str;
+            }
+            return $str;
+        };
+
+        $callback = function() use ($items, $sanitize) {
             $file = fopen('php://output', 'w');
-            fputs($file, $bom = (chr(0xEF) . chr(0xBB) . chr(0xBF)));
+            fputs($file, "\xEF\xBB\xBF");
             
             fputcsv($file, [
                 'ID', 
@@ -282,10 +273,8 @@ class RdbdipController extends Controller
             ]);
 
             foreach ($items as $item) {
-                // Determine name (logic from view)
                 $name = $item->dip_data2_name ?? '-';
                 
-                // Determine researcher name
                 $researcherName = '-';
                 if ($item->researcher) {
                     $researcherName = ($item->researcher->prefix->prefix_nameTH ?? '') . 
@@ -295,13 +284,13 @@ class RdbdipController extends Controller
 
                 fputcsv($file, [
                     $item->dip_id,
-                    $item->dip_request_number ?? '-',
+                    $sanitize($item->dip_request_number ?? '-'),
                     $item->dip_request_date ? \Carbon\Carbon::parse($item->dip_request_date)->format('d/m/Y') : '-',
-                    $item->dip_patent_number ?? '-', // Actually dip_patent_number or dip_number based on view logic? View uses both.
-                    $name,
-                    $item->dipType->dipt_name ?? '-',
-                    $item->project->pro_nameTH ?? '-',
-                    $researcherName
+                    $sanitize($item->dip_patent_number ?: ($item->dip_number ?? '-')),
+                    $sanitize($name),
+                    $sanitize($item->dipType->dipt_name ?? '-'),
+                    $sanitize($item->project->pro_nameTH ?? '-'),
+                    $sanitize($researcherName)
                 ]);
             }
             fclose($file);

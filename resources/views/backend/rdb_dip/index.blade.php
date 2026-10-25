@@ -19,6 +19,15 @@
             <span class="badge bg-body border text-body-secondary px-3 py-2 shadow-sm">
                 <i class="bi bi-database me-1 text-primary"></i> ทั้งหมด {{ number_format($items->total()) }} รายการ
             </span>
+            @if(request('trash'))
+                <a href="{{ route('backend.rdb_dip.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center shadow-sm" style="height: 38px;">
+                    <i class="bi bi-arrow-left me-1.5"></i> รายการปกติ
+                </a>
+            @else
+                <a href="{{ route('backend.rdb_dip.index', ['trash' => 1]) }}" class="btn btn-outline-danger d-inline-flex align-items-center shadow-sm" style="height: 38px;">
+                    <i class="bi bi-trash3 me-1.5"></i> ถังขยะ
+                </a>
+            @endif
             @can('create', \App\Models\RdbDip::class)
             <a href="{{ route('backend.rdb_dip.create') }}" class="btn btn-primary d-inline-flex align-items-center shadow-sm" style="height: 38px;">
                 <i class="bi bi-plus-circle me-1.5"></i> เพิ่มข้อมูลใหม่
@@ -154,7 +163,7 @@
                                             $isSelfDipRes = (int)auth()->user()->researcher_id === (int)$item->researcher->researcher_id;
                                         @endphp
                                         @if($canManageDipRes || $isSelfDipRes)
-                                            <a href="{{ route('backend.rdb_researcher.show', $item->researcher->researcher_id) }}" class="text-decoration-none text-body fw-bold hover-primary">
+                                            <a href="{{ route('backend.rdb_researcher.show', $item->researcher->researcher_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body fw-bold hover-primary">
                                                 {{ $item->researcher->researcher_fname }} {{ $item->researcher->researcher_lname }}
                                                 @if($isSelfDipRes)
                                                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1" style="font-size: 0.7rem;">(คุณ)</span>
@@ -169,7 +178,7 @@
                                 @endif
                                 @if($item->project)
                                 <div class="mt-1">
-                                    <a href="{{ route('backend.rdb_project.show', $item->project->pro_id) }}" class="text-decoration-none text-body-secondary small hover-primary" title="{{ $item->project->pro_nameTH }}">
+                                    <a href="{{ route('backend.rdb_project.show', $item->project->pro_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body-secondary small hover-primary" title="{{ $item->project->pro_nameTH }}">
                                         <i class="bi bi-link-45deg me-1"></i>{{ Str::limit($item->project->pro_nameTH, 60) }}
                                     </a>
                                 </div>
@@ -201,6 +210,14 @@
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-success" title="อนุมัติให้แก้ไข (ย้ายไปฉบับร่าง)"><i class="bi bi-unlock"></i> ปลดล็อก</button>
                                         </form>
+                                    @endif
+                                    @if((int)$item->data_show === 0)
+                                        @can('delete', $item)
+                                        <form action="{{ route('backend.rdb_dip.restore', $item->dip_id) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันกู้คืนข้อมูลทรัพย์สินทางปัญญานี้จากถังขยะ?');">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-success" title="กู้คืนข้อมูล"><i class="bi bi-arrow-counterclockwise"></i> กู้คืน</button>
+                                        </form>
+                                        @endcan
                                     @endif
                                 </div>
                             </td>

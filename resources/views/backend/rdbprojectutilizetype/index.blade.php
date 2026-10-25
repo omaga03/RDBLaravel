@@ -23,7 +23,7 @@
                         <tr>
                             <th style="width: 60px;">#</th>
                             <th>ชื่อประเภทการนำไปใช้ประโยชน์</th>
-                            <th class="text-center" style="width: 100px;">ลำดับ</th>
+                            <th class="text-center" style="width: 140px;">ลำดับการแสดงผล</th>
                             <th class="text-center" style="width: 100px;">จัดการ</th>
                         </tr>
                     </thead>
@@ -32,7 +32,13 @@
                         <tr>
                             <td>{{ $items->firstItem() + $index }}</td>
                             <td class="fw-bold">{{ $item->utz_typr_name }}</td>
-                            <td class="text-center">{{ $item->utz_type_index ?? '-' }}</td>
+                            <td class="text-center">
+                                @if(!is_null($item->utz_type_index))
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 font-monospace">{{ $item->utz_type_index }}</span>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
                                     <a href="{{ route('backend.rdbprojectutilizetype.show', $item->utz_type_id) }}" class="btn btn-outline-primary" title="ดูรายละเอียด">

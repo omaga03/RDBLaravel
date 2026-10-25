@@ -316,7 +316,13 @@ class DashboardController extends Controller
         })->values();
 
         // Recent / Top Projects
-        $recentProjects = (clone $proQuery)->with(['year', 'department', 'status'])
+        $recentProjects = (clone $proQuery)->with([
+            'year',
+            'department',
+            'status',
+            'type.masterType',
+            'rdbProjectWorks.researcher.prefix',
+        ])
             ->orderBy('pro_budget', 'desc')
             ->take(6)
             ->get();
@@ -512,10 +518,18 @@ class DashboardController extends Controller
             });
 
         // Top funded projects list
-        $topProjects = (clone $query)->with(['department', 'year', 'status'])
+        $topProjects = (clone $query)->with([
+            'department',
+            'year',
+            'status',
+            'type.masterType',
+            'rdbProjectWorks.researcher.prefix',
+        ])
             ->orderBy('pro_budget', 'desc')
             ->take(20)
             ->get();
+
+        $qaProjectTable = collect();
 
         return view('frontend.dashboard.projects', array_merge($lookups, [
             'years' => $years,
@@ -542,6 +556,7 @@ class DashboardController extends Controller
             'deptBudgets' => $deptBudgets,
             'yearlyBudgetTrend' => $yearlyBudgetTrend,
             'topProjects' => $topProjects,
+            'qaProjectTable' => $qaProjectTable,
         ]));
     }
 
@@ -722,6 +737,8 @@ class DashboardController extends Controller
             ->take(20)
             ->get();
 
+        $qaPubTable = collect();
+
         return view('frontend.dashboard.publications', array_merge($lookups, [
             'years' => $years,
             'selectedYearId' => $selectedYearId,
@@ -742,6 +759,7 @@ class DashboardController extends Controller
             'topJournals' => $topJournals,
             'linkedProjectCount' => $linkedProjectCount,
             'publicationsList' => $publicationsList,
+            'qaPubTable' => $qaPubTable,
         ]));
     }
 
@@ -1243,6 +1261,58 @@ class DashboardController extends Controller
             ->take(20)
             ->get();
 
+        // New Researcher Report (reportfirstproject: นักวิจัยรุ่นใหม่ที่เริ่มทำโครงการวิจัยเป็นครั้งแรกในปีงบประมาณ)
+        $firstProjectSub = DB::table('rdb_project_work')
+            ->join('rdb_project', 'rdb_project_work.pro_id', '=', 'rdb_project.pro_id')
+            ->where('rdb_project.data_show', 1)
+            ->where(fn($q) => $q->whereNull('rdb_project.ps_id')->orWhere('rdb_project.ps_id', '<>', RdbProjectStatus::REFUNDED))
+            ->whereIn('rdb_project_work.position_id', [1, 2])
+            ->select(
+                'rdb_project_work.researcher_id',
+                DB::raw('MIN(rdb_project.year_id) as first_year_id'),
+                DB::raw('MIN(rdb_project.pro_id) as first_pro_id')
+            )
+            ->groupBy('rdb_project_work.researcher_id');
+
+        $newResearchersQuery = DB::query()->fromSub($firstProjectSub, 'fp')
+            ->join('rdb_researcher', 'fp.researcher_id', '=', 'rdb_researcher.researcher_id')
+            ->leftJoin('rdb_prefix', 'rdb_researcher.prefix_id', '=', 'rdb_prefix.prefix_id')
+            ->leftJoin('rdb_department', 'rdb_researcher.department_id', '=', 'rdb_department.department_id')
+            ->join('rdb_year', 'fp.first_year_id', '=', 'rdb_year.year_id')
+            ->join('rdb_project', 'fp.first_pro_id', '=', 'rdb_project.pro_id');
+
+        if ($selectedYearId) {
+            $newResearchersQuery->where('fp.first_year_id', $selectedYearId);
+        }
+        if ($deptId) {
+            $newResearchersQuery->where('rdb_researcher.department_id', $deptId);
+        }
+
+        $firstProjectByFaculty = (clone $newResearchersQuery)
+            ->select(
+                DB::raw('COALESCE(rdb_department.department_nameTH, "ไม่ระบุหน่วยงาน") as department_nameTH'),
+                DB::raw('COUNT(*) as new_researcher_count')
+            )
+            ->groupBy('rdb_department.department_nameTH')
+            ->orderByDesc('new_researcher_count')
+            ->get();
+
+        $firstProjectList = (clone $newResearchersQuery)
+            ->select(
+                'rdb_researcher.researcher_id',
+                'rdb_prefix.prefix_nameTH',
+                'rdb_researcher.researcher_fname',
+                'rdb_researcher.researcher_lname',
+                'rdb_department.department_nameTH',
+                'rdb_year.year_name',
+                'rdb_project.pro_id',
+                'rdb_project.pro_nameTH',
+                'rdb_project.pro_budget'
+            )
+            ->orderByDesc('rdb_year.year_name')
+            ->limit(15)
+            ->get();
+
         return view('frontend.dashboard.researchers', array_merge($lookups, [
             'years' => $years,
             'selectedYearId' => $selectedYearId,
@@ -1261,6 +1331,566 @@ class DashboardController extends Controller
             'topByPubs' => $topByPubs,
             'academicTitles' => $academicTitles,
             'researchersList' => $researchersList,
+            'firstProjectByFaculty' => $firstProjectByFaculty,
+            'firstProjectList' => $firstProjectList,
+        ]));
+    }
+
+    /**
+     * 7. Quality Assurance (QA) & Accreditations Dashboard
+     * Consolidated QA metrics across Projects, Publications (0.20-1.00), Utilizations, and New Researchers
+     */
+    public function qa(Request $request)
+    {
+        [$years, $selectedYearId, $selectedYear] = $this->getYearContext($request);
+        $lookups = $this->getCommonLookups();
+
+        // Academic Faculties of PCRU (คณะวิชาการ 6 คณะ)
+        $facultyIds = [2, 3, 4, 5, 6, 13];
+
+        // Calculation Scope: 'faculty' (เฉพาะคณะวิชาการ - Default) vs 'all' (ทั้งหมด รวมสำนัก/สถาบัน/ส่วนกลาง)
+        $scope = $request->input('scope', 'faculty');
+        if (!in_array($scope, ['faculty', 'all'])) {
+            $scope = 'faculty';
+        }
+
+        $deptId = $request->filled('department_id') && $request->department_id !== 'all' ? (int)$request->department_id : null;
+        $activeTab = $request->input('tab', 'pub');
+
+        $activeFilterCount = count(array_filter([$selectedYearId, $deptId]));
+        if ($scope === 'all') {
+            $activeFilterCount++;
+        }
+
+        // Departments filtered by calculation scope
+        $qaDepartments = $lookups['departments'];
+        if ($scope === 'faculty') {
+            $qaDepartments = $qaDepartments->whereIn('department_id', $facultyIds);
+        }
+        if ($deptId) {
+            $qaDepartments = $qaDepartments->where('department_id', $deptId);
+        }
+
+        $targetYearForQa = $selectedYearId ?: RdbYear::whereHas('projects')->max('year_id');
+        $targetPubYearId = $selectedYearId ?: RdbPublished::max('year_id');
+        $branches = DB::table('rdb_published_branch')->whereIn('branch_id', [1, 2, 3])->get();
+
+        // 1. QA Project Table by Department (สัดส่วนโครงการวิจัยและงบประมาณต่อบุคลากร)
+        $qaProjectTable = $qaDepartments->map(function ($dept) use ($selectedYearId, $targetYearForQa) {
+            $pq = RdbProject::where('department_id', $dept->department_id)
+                ->where('data_show', '1')
+                ->where(fn($q) => $q->whereNull('ps_id')->orWhere('ps_id', '<>', RdbProjectStatus::REFUNDED));
+            if ($selectedYearId) {
+                $pq->where('year_id', $selectedYearId);
+            }
+
+            $projCount = $pq->count();
+            $projBudget = (float) $pq->sum('pro_budget');
+            $perNum = (int) DB::table('rdb_project_personnel')
+                ->where('department_id', $dept->department_id)
+                ->when($targetYearForQa, fn($q) => $q->where('year_id', $targetYearForQa))
+                ->sum('pp_num');
+
+            return [
+                'department_id' => $dept->department_id,
+                'department_nameTH' => $dept->department_nameTH,
+                'per_num' => $perNum,
+                'project_count' => $projCount,
+                'total_budget' => $projBudget,
+                'avg_budget_per_person' => $perNum > 0 ? round($projBudget / $perNum, 2) : 0,
+                'project_ratio_pct' => $perNum > 0 ? round(($projCount / $perNum) * 100, 2) : 0,
+            ];
+        })->values();
+
+        // 1.1 QA Project Faculty & Branch Detailed Table (แยก คณะ - กลุ่มสาขา: วิทย์ฯ / มนุษย์ฯ / วิทย์สุขภาพ)
+        $projPersonnelQuery = DB::table('rdb_project_personnel as p')
+            ->join('rdb_department as d', 'p.department_id', '=', 'd.department_id')
+            ->join('rdb_published_branch as b', 'p.depcat_id', '=', 'b.branch_id')
+            ->when($targetYearForQa, fn($q) => $q->where('p.year_id', $targetYearForQa));
+
+        if ($scope === 'faculty') {
+            $projPersonnelQuery->whereIn('p.department_id', $facultyIds);
+        }
+        if ($deptId) {
+            $projPersonnelQuery->where('p.department_id', $deptId);
+        }
+
+        $qaProjectFacultyBranchTable = $projPersonnelQuery
+            ->select(
+                'd.department_id',
+                'd.department_nameTH',
+                'b.branch_id',
+                'b.branch_name',
+                'p.pp_num',
+                'p.pp_standard'
+            )
+            ->orderBy('d.department_id')
+            ->orderBy('b.branch_id')
+            ->get()
+            ->map(function ($r) use ($selectedYearId) {
+                $pq = DB::table('rdb_project')
+                    ->where('department_id', $r->department_id)
+                    ->where('depcat_id', $r->branch_id)
+                    ->where('data_show', '1')
+                    ->where(fn($q) => $q->whereNull('ps_id')->orWhere('ps_id', '<>', RdbProjectStatus::REFUNDED));
+
+                if ($selectedYearId) {
+                    $pq->where('year_id', $selectedYearId);
+                }
+
+                $projCount = $pq->count();
+                $projBudget = (float) $pq->sum('pro_budget');
+                $perNum = (float) $r->pp_num;
+                $standardBudget = (float) ($r->pp_standard ?: ($r->branch_id == 1 ? 60000 : ($r->branch_id == 3 ? 50000 : 25000)));
+                $avgBudgetPerPerson = $perNum > 0 ? round($projBudget / $perNum, 2) : 0;
+
+                $qaScore5 = $standardBudget > 0 ? round(($avgBudgetPerPerson / $standardBudget) * 5, 2) : 0;
+                if ($qaScore5 > 5.00) {
+                    $qaScore5 = 5.00;
+                }
+
+                return [
+                    'department_id' => $r->department_id,
+                    'department_nameTH' => $r->department_nameTH,
+                    'branch_id' => $r->branch_id,
+                    'branch_name' => $r->branch_name,
+                    'per_num' => $perNum,
+                    'proj_count' => $projCount,
+                    'proj_budget' => $projBudget,
+                    'avg_budget_per_person' => $avgBudgetPerPerson,
+                    'standard_budget' => $standardBudget,
+                    'qa_score_5' => $qaScore5,
+                ];
+            });
+
+        // 1.2 QA Project Faculty Grouped with Faculty Overall Score (จัดเรียงเป็นกรุ๊ปคณะ และคำนวณคะแนนภาพรวมระดับคณะ เต็ม 5.00)
+        $qaProjectFacultyGroups = $qaProjectFacultyBranchTable->groupBy('department_id')->map(function ($items) {
+            $dept = $items->first();
+            $totalPer = (float) $items->sum('per_num');
+            $totalProjects = (int) $items->sum('proj_count');
+            $totalBudget = (float) $items->sum('proj_budget');
+            $avgBudgetPerPerson = $totalPer > 0 ? round($totalBudget / $totalPer, 2) : 0;
+
+            // Faculty QA Score / 5 is the arithmetic average of all branch scores
+            // (e.g. if a faculty has 3 branches with scores 5.00, 0.00, 4.08, the overall score is (5 + 0 + 4.08) / 3 = 3.03)
+            $facultyQaScore5 = $items->count() > 0 ? round($items->avg('qa_score_5'), 2) : 0;
+            if ($facultyQaScore5 > 5.00) {
+                $facultyQaScore5 = 5.00;
+            }
+
+            return [
+                'department_id' => $dept['department_id'],
+                'department_nameTH' => $dept['department_nameTH'],
+                'branches' => $items,
+                'total_personnel' => $totalPer,
+                'total_projects' => $totalProjects,
+                'total_budget' => $totalBudget,
+                'avg_budget_per_person' => $avgBudgetPerPerson,
+                'faculty_qa_score_5' => $facultyQaScore5,
+            ];
+        })->values();
+
+        // 1.3 QA Project Budget by Academic Field / Branch (วิทย์ฯ 60,000, มนุษย์ฯ 25,000, วิทย์สุขภาพ 50,000)
+        $qaProjectBranchTable = $branches->map(function ($b) use ($selectedYearId, $targetYearForQa, $scope, $facultyIds, $deptId) {
+            $pp = DB::table('rdb_project_personnel')
+                ->where('depcat_id', $b->branch_id)
+                ->when($targetYearForQa, fn($q) => $q->where('year_id', $targetYearForQa));
+
+            if ($scope === 'faculty') {
+                $pp->whereIn('department_id', $facultyIds);
+            }
+            if ($deptId) {
+                $pp->where('department_id', $deptId);
+            }
+
+            $perNum = (float) (clone $pp)->sum('pp_num');
+            $standardBudget = (float) (clone $pp)->avg('pp_standard') ?: ($b->branch_id == 1 ? 60000 : ($b->branch_id == 3 ? 50000 : 25000));
+
+            $deptIds = (clone $pp)->pluck('department_id')->unique();
+
+            $pq = DB::table('rdb_project')
+                ->whereIn('department_id', $deptIds)
+                ->where('depcat_id', $b->branch_id)
+                ->where('data_show', '1')
+                ->where(fn($q) => $q->whereNull('ps_id')->orWhere('ps_id', '<>', RdbProjectStatus::REFUNDED));
+
+            if ($selectedYearId) {
+                $pq->where('year_id', $selectedYearId);
+            }
+
+            $projCount = $pq->count();
+            $projBudget = (float) $pq->sum('pro_budget');
+            $avgBudgetPerPerson = $perNum > 0 ? round($projBudget / $perNum, 2) : 0;
+
+            // OHEC/CHE Formula: (avgBudgetPerPerson / standardBudget) * 5
+            $qaScore5 = $standardBudget > 0 ? round(($avgBudgetPerPerson / $standardBudget) * 5, 2) : 0;
+            if ($qaScore5 > 5.00) {
+                $qaScore5 = 5.00;
+            }
+
+            return [
+                'branch_id' => $b->branch_id,
+                'branch_name' => $b->branch_name,
+                'per_num' => $perNum,
+                'proj_count' => $projCount,
+                'proj_budget' => $projBudget,
+                'avg_budget_per_person' => $avgBudgetPerPerson,
+                'standard_budget' => $standardBudget,
+                'qa_score_5' => $qaScore5,
+            ];
+        });
+        
+        // Overall institutional QA project score: average across faculties
+        $avgProjectQaScore5 = $qaProjectFacultyGroups->where('total_personnel', '>', 0)->count() > 0 
+            ? round($qaProjectFacultyGroups->where('total_personnel', '>', 0)->avg('faculty_qa_score_5'), 2) 
+            : 0;
+
+        // 2. QA Publications Table by Department (คะแนนถ่วงน้ำหนัก 0.20 - 1.00)
+        $qaPubTable = $qaDepartments->map(function ($dept) use ($selectedYearId, $targetPubYearId) {
+            $basePub = RdbPublished::where('department_id', $dept->department_id)->where('data_show', 1);
+            if ($selectedYearId) {
+                $basePub->where(fn($q) => $q->where('year_id', $selectedYearId)->orWhere('year_bud', $selectedYearId));
+            }
+
+            $c020 = (clone $basePub)->whereIn('pub_score', ['0.20', '0.25'])->count();
+            $c040 = (clone $basePub)->where('pub_score', '0.40')->count();
+            $c060 = (clone $basePub)->where('pub_score', '0.60')->count();
+            $c080 = (clone $basePub)->where('pub_score', '0.80')->count();
+            $c100 = (clone $basePub)->where('pub_score', '1.00')->count();
+
+            $totalItems = $c020 + $c040 + $c060 + $c080 + $c100;
+            $weightedScore = round(($c020 * 0.20) + ($c040 * 0.40) + ($c060 * 0.60) + ($c080 * 0.80) + ($c100 * 1.00), 2);
+
+            $perNum = (int) DB::table('rdb_published_personnel')
+                ->where('department_id', $dept->department_id)
+                ->when($targetPubYearId, fn($q) => $q->where('year_id', $targetPubYearId))
+                ->sum('personnel_num');
+
+            return [
+                'department_id' => $dept->department_id,
+                'department_nameTH' => $dept->department_nameTH,
+                'per_num' => $perNum,
+                'count_020' => $c020,
+                'count_040' => $c040,
+                'count_060' => $c060,
+                'count_080' => $c080,
+                'count_100' => $c100,
+                'total_items' => $totalItems,
+                'weighted_score' => $weightedScore,
+                'score_pct' => $perNum > 0 ? round(($weightedScore / $perNum) * 100, 2) : 0,
+            ];
+        })->values();
+
+        // 2.1 QA Publications Faculty & Branch Detailed Table (แยก คณะ - กลุ่มสาขา: วิทย์ฯ / มนุษย์ฯ / วิทย์สุขภาพ)
+        $pubPersonnelQuery = DB::table('rdb_published_personnel as p')
+            ->join('rdb_department as d', 'p.department_id', '=', 'd.department_id')
+            ->join('rdb_published_branch as b', 'p.depcat_id', '=', 'b.branch_id')
+            ->leftJoin('rdb_published_branchper as bp', function($join) use ($targetPubYearId) {
+                $join->on('p.depcat_id', '=', 'bp.branch_id')
+                     ->when($targetPubYearId, fn($q) => $q->where('bp.year_id', $targetPubYearId));
+            })
+            ->when($targetPubYearId, fn($q) => $q->where('p.year_id', $targetPubYearId));
+
+        if ($scope === 'faculty') {
+            $pubPersonnelQuery->whereIn('p.department_id', $facultyIds);
+        }
+        if ($deptId) {
+            $pubPersonnelQuery->where('p.department_id', $deptId);
+        }
+
+        $qaPubFacultyBranchTable = $pubPersonnelQuery
+            ->select(
+                'd.department_id',
+                'd.department_nameTH',
+                'b.branch_id',
+                'b.branch_name',
+                'p.personnel_num',
+                'bp.branchper_percent'
+            )
+            ->orderBy('d.department_id')
+            ->orderBy('b.branch_id')
+            ->get()
+            ->map(function ($r) use ($selectedYearId) {
+                $pubs = DB::table('rdb_published')
+                    ->where('department_id', $r->department_id)
+                    ->where('branch_id', $r->branch_id)
+                    ->where('data_show', 1);
+
+                if ($selectedYearId) {
+                    $pubs->where(fn($q) => $q->where('year_id', $selectedYearId)->orWhere('year_bud', $selectedYearId));
+                }
+
+                $c020 = (clone $pubs)->whereIn('pub_score', ['0.20', '0.25'])->count();
+                $c040 = (clone $pubs)->where('pub_score', '0.40')->count();
+                $c060 = (clone $pubs)->where('pub_score', '0.60')->count();
+                $c080 = (clone $pubs)->where('pub_score', '0.80')->count();
+                $c100 = (clone $pubs)->where('pub_score', '1.00')->count();
+
+                $totalPubs = $c020 + $c040 + $c060 + $c080 + $c100;
+                $weightedScore = round(($c020 * 0.20) + ($c040 * 0.40) + ($c060 * 0.60) + ($c080 * 0.80) + ($c100 * 1.00), 2);
+                $perNum = (float) $r->personnel_num;
+                $scorePct = $perNum > 0 ? round(($weightedScore / $perNum) * 100, 2) : 0;
+                $benchPercent = (float) ($r->branchper_percent ?: ($r->branch_id == 1 ? 30 : ($r->branch_id == 3 ? 30 : 20)));
+
+                $qaScore5 = $benchPercent > 0 ? round(($scorePct * 5) / $benchPercent, 2) : 0;
+                if ($qaScore5 > 5.00) {
+                    $qaScore5 = 5.00;
+                }
+
+                return [
+                    'department_id' => $r->department_id,
+                    'department_nameTH' => $r->department_nameTH,
+                    'branch_id' => $r->branch_id,
+                    'branch_name' => $r->branch_name,
+                    'per_num' => $perNum,
+                    'total_pubs' => $totalPubs,
+                    'count_020' => $c020,
+                    'count_040' => $c040,
+                    'count_060' => $c060,
+                    'count_080' => $c080,
+                    'count_100' => $c100,
+                    'weighted_score' => $weightedScore,
+                    'score_pct' => $scorePct,
+                    'bench_percent' => $benchPercent,
+                    'qa_score_5' => $qaScore5,
+                ];
+            });
+
+        // 2.2 QA Publications Faculty Grouped with Faculty Overall Score (จัดเรียงเป็นกรุ๊ปคณะ และคำนวณคะแนนภาพรวมระดับคณะ เต็ม 5.00)
+        $qaPubFacultyGroups = $qaPubFacultyBranchTable->groupBy('department_id')->map(function ($items) {
+            $dept = $items->first();
+            $totalPer = (float) $items->sum('per_num');
+            $totalPubs = (int) $items->sum('total_pubs');
+            $totalWeighted = (float) $items->sum('weighted_score');
+            $scorePct = $totalPer > 0 ? round(($totalWeighted / $totalPer) * 100, 2) : 0;
+
+            // Faculty QA Score / 5 is the arithmetic average of all branch scores
+            // (e.g. if a faculty has 3 branches with scores 5.00, 0.00, 4.08, the overall score is (5 + 0 + 4.08) / 3 = 3.03)
+            $facultyQaScore5 = $items->count() > 0 ? round($items->avg('qa_score_5'), 2) : 0;
+            if ($facultyQaScore5 > 5.00) {
+                $facultyQaScore5 = 5.00;
+            }
+
+            return [
+                'department_id' => $dept['department_id'],
+                'department_nameTH' => $dept['department_nameTH'],
+                'branches' => $items,
+                'total_personnel' => $totalPer,
+                'total_pubs' => $totalPubs,
+                'total_weighted_score' => $totalWeighted,
+                'score_pct' => $scorePct,
+                'faculty_qa_score_5' => $facultyQaScore5,
+            ];
+        })->values();
+
+        // 2.3 QA Publications by Academic Field / Branch (วิทยาศาสตร์ฯ 30%, มนุษยศาสตร์ฯ 20%, วิทย์สุขภาพ 30%)
+        $qaPubBranchTable = $branches->map(function ($b) use ($selectedYearId, $targetPubYearId, $scope, $facultyIds, $deptId) {
+            $pp = DB::table('rdb_published_personnel')
+                ->where('depcat_id', $b->branch_id)
+                ->when($targetPubYearId, fn($q) => $q->where('year_id', $targetPubYearId));
+
+            if ($scope === 'faculty') {
+                $pp->whereIn('department_id', $facultyIds);
+            }
+            if ($deptId) {
+                $pp->where('department_id', $deptId);
+            }
+
+            $perNum = (float) (clone $pp)->sum('personnel_num');
+
+            $benchPercent = (float) DB::table('rdb_published_branchper')
+                ->where('branch_id', $b->branch_id)
+                ->when($targetPubYearId, fn($q) => $q->where('year_id', $targetPubYearId))
+                ->value('branchper_percent') ?: ($b->branch_id == 1 ? 30 : ($b->branch_id == 3 ? 30 : 20));
+
+            $deptIds = (clone $pp)->pluck('department_id')->unique();
+
+            $pubs = DB::table('rdb_published')
+                ->whereIn('department_id', $deptIds)
+                ->where('branch_id', $b->branch_id)
+                ->where('data_show', 1);
+
+            if ($selectedYearId) {
+                $pubs->where(fn($q) => $q->where('year_id', $selectedYearId)->orWhere('year_bud', $selectedYearId));
+            }
+
+            $c020 = (clone $pubs)->whereIn('pub_score', ['0.20', '0.25'])->count();
+            $c040 = (clone $pubs)->where('pub_score', '0.40')->count();
+            $c060 = (clone $pubs)->where('pub_score', '0.60')->count();
+            $c080 = (clone $pubs)->where('pub_score', '0.80')->count();
+            $c100 = (clone $pubs)->where('pub_score', '1.00')->count();
+
+            $totalPubs = $c020 + $c040 + $c060 + $c080 + $c100;
+            $weightedScore = round(($c020 * 0.20) + ($c040 * 0.40) + ($c060 * 0.60) + ($c080 * 0.80) + ($c100 * 1.00), 2);
+            $scorePct = $perNum > 0 ? round(($weightedScore / $perNum) * 100, 2) : 0;
+
+            // OHEC/CHE Formula: ( (weightedScore / perNum * 100) * 5 ) / benchPercent
+            $qaScore5 = $benchPercent > 0 ? round(($scorePct * 5) / $benchPercent, 2) : 0;
+            if ($qaScore5 > 5.00) {
+                $qaScore5 = 5.00;
+            }
+
+            return [
+                'branch_id' => $b->branch_id,
+                'branch_name' => $b->branch_name,
+                'per_num' => $perNum,
+                'count_020' => $c020,
+                'count_040' => $c040,
+                'count_060' => $c060,
+                'count_080' => $c080,
+                'count_100' => $c100,
+                'total_pubs' => $totalPubs,
+                'weighted_score' => $weightedScore,
+                'score_pct' => $scorePct,
+                'bench_percent' => $benchPercent,
+                'qa_score_5' => $qaScore5,
+            ];
+        });
+        
+        // Overall institutional QA publication score: average across faculties
+        $avgPubQaScore5 = $qaPubFacultyGroups->where('total_personnel', '>', 0)->count() > 0 
+            ? round($qaPubFacultyGroups->where('total_personnel', '>', 0)->avg('faculty_qa_score_5'), 2) 
+            : 0;
+
+        // 3. QA Utilizations Table (ผลงานที่ผ่านการรับรอง QA)
+        $qaUtilTable = $qaDepartments->map(function ($dept) use ($selectedYearId) {
+            $baseUtil = DB::table('rdb_project_utilize')
+                ->join('rdb_project', 'rdb_project_utilize.pro_id', '=', 'rdb_project.pro_id')
+                ->where('rdb_project_utilize.data_show', '1')
+                ->where('rdb_project.data_show', '1')
+                ->where('rdb_project.department_id', $dept->department_id);
+
+            if ($selectedYearId) {
+                $baseUtil->where(function ($q) use ($selectedYearId) {
+                    $q->where('rdb_project_utilize.utz_year_id', $selectedYearId)
+                      ->orWhere('rdb_project_utilize.utz_year_bud', $selectedYearId)
+                      ->orWhere('rdb_project_utilize.utz_year_edu', $selectedYearId)
+                      ->orWhere('rdb_project.year_id', $selectedYearId);
+                });
+            }
+
+            $totalUtil = (clone $baseUtil)->count();
+            $qaCertified = (clone $baseUtil)->where('rdb_project_utilize.utz_group_qa', '1')->count();
+
+            return [
+                'department_id' => $dept->department_id,
+                'department_nameTH' => $dept->department_nameTH,
+                'total_util' => $totalUtil,
+                'qa_certified' => $qaCertified,
+                'qa_pct' => $totalUtil > 0 ? round(($qaCertified / $totalUtil) * 100, 1) : 0,
+            ];
+        })->values();
+
+        // 4. First-time Grantee Researchers (reportfirstproject)
+        // STRICT QA RULE: Only count researchers with an existing assigned faculty/department
+        $firstProjectSub = DB::table('rdb_project_work')
+            ->join('rdb_project', 'rdb_project_work.pro_id', '=', 'rdb_project.pro_id')
+            ->where('rdb_project.data_show', '1')
+            ->where(fn($q) => $q->whereNull('rdb_project.ps_id')->orWhere('rdb_project.ps_id', '<>', RdbProjectStatus::REFUNDED))
+            ->select(
+                'rdb_project_work.researcher_id',
+                DB::raw('MIN(rdb_project.year_id) as first_year_id'),
+                DB::raw('MIN(rdb_project.pro_id) as first_pro_id')
+            )
+            ->groupBy('rdb_project_work.researcher_id');
+
+        $newResearchersQuery = DB::query()->fromSub($firstProjectSub, 'fp')
+            ->join('rdb_researcher', 'fp.researcher_id', '=', 'rdb_researcher.researcher_id')
+            ->leftJoin('rdb_prefix', 'rdb_researcher.prefix_id', '=', 'rdb_prefix.prefix_id')
+            ->join('rdb_department', 'rdb_researcher.department_id', '=', 'rdb_department.department_id')
+            ->join('rdb_year', 'fp.first_year_id', '=', 'rdb_year.year_id')
+            ->join('rdb_project', 'fp.first_pro_id', '=', 'rdb_project.pro_id')
+            ->whereNotNull('rdb_researcher.department_id')
+            ->where('rdb_researcher.department_id', '>', 0);
+
+        if ($scope === 'faculty') {
+            $newResearchersQuery->whereIn('rdb_researcher.department_id', $facultyIds);
+        }
+        if ($selectedYearId) {
+            $newResearchersQuery->where('fp.first_year_id', $selectedYearId);
+        }
+        if ($deptId) {
+            $newResearchersQuery->where('rdb_researcher.department_id', $deptId);
+        }
+
+        $firstProjectByFaculty = (clone $newResearchersQuery)
+            ->select(
+                'rdb_department.department_id',
+                'rdb_department.department_nameTH',
+                DB::raw('COUNT(*) as new_researcher_count')
+            )
+            ->groupBy('rdb_department.department_id', 'rdb_department.department_nameTH')
+            ->orderByDesc('new_researcher_count')
+            ->get();
+
+        $firstProjectList = (clone $newResearchersQuery)
+            ->select(
+                'rdb_researcher.researcher_id',
+                'rdb_prefix.prefix_nameTH',
+                'rdb_researcher.researcher_fname',
+                'rdb_researcher.researcher_lname',
+                'rdb_department.department_nameTH',
+                'rdb_year.year_name',
+                'rdb_project.pro_id',
+                'rdb_project.pro_nameTH',
+                'rdb_project.pro_budget'
+            )
+            ->orderByDesc('rdb_year.year_name')
+            ->limit(30)
+            ->get();
+
+        $firstProjectByYear = (clone $newResearchersQuery)
+            ->select(
+                'rdb_year.year_name',
+                DB::raw('COUNT(*) as count')
+            )
+            ->groupBy('rdb_year.year_name')
+            ->orderBy('rdb_year.year_name')
+            ->get();
+
+        // 5. Consolidated KPI Summary Metrics
+        $totalWeightedPubScore = $qaPubTable->sum('weighted_score');
+        $totalPubItems = $qaPubTable->sum('total_items');
+        $totalProjects = $qaProjectTable->sum('project_count');
+        $totalBudget = $qaProjectTable->sum('total_budget');
+        $totalPersonnel = $qaProjectTable->sum('per_num');
+        $avgBudgetPerPersonnel = $totalPersonnel > 0 ? round($totalBudget / $totalPersonnel, 2) : 0;
+        $totalUtilCertified = $qaUtilTable->sum('qa_certified');
+        $totalUtil = $qaUtilTable->sum('total_util');
+        $totalFirstResearchers = $firstProjectByFaculty->sum('new_researcher_count');
+
+        return view('frontend.dashboard.qa', array_merge($lookups, [
+            'years' => $years,
+            'selectedYearId' => $selectedYearId,
+            'selectedYear' => $selectedYear,
+            'deptId' => $deptId,
+            'scope' => $scope,
+            'qaDepartments' => $qaDepartments,
+            'activeTab' => $activeTab,
+            'activeFilterCount' => $activeFilterCount,
+            'qaProjectTable' => $qaProjectTable,
+            'qaProjectBranchTable' => $qaProjectBranchTable,
+            'qaProjectFacultyBranchTable' => $qaProjectFacultyBranchTable,
+            'qaProjectFacultyGroups' => $qaProjectFacultyGroups,
+            'avgProjectQaScore5' => $avgProjectQaScore5,
+            'qaPubTable' => $qaPubTable,
+            'qaPubBranchTable' => $qaPubBranchTable,
+            'qaPubFacultyBranchTable' => $qaPubFacultyBranchTable,
+            'qaPubFacultyGroups' => $qaPubFacultyGroups,
+            'avgPubQaScore5' => $avgPubQaScore5,
+            'qaUtilTable' => $qaUtilTable,
+            'firstProjectByFaculty' => $firstProjectByFaculty,
+            'firstProjectByYear' => $firstProjectByYear,
+            'firstProjectList' => $firstProjectList,
+            'totalWeightedPubScore' => $totalWeightedPubScore,
+            'totalPubItems' => $totalPubItems,
+            'totalProjects' => $totalProjects,
+            'totalBudget' => $totalBudget,
+            'totalPersonnel' => $totalPersonnel,
+            'avgBudgetPerPersonnel' => $avgBudgetPerPersonnel,
+            'totalUtilCertified' => $totalUtilCertified,
+            'totalUtil' => $totalUtil,
+            'totalFirstResearchers' => $totalFirstResearchers,
         ]));
     }
 }

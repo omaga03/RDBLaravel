@@ -145,7 +145,7 @@
                                         $isSelfDipRes = (int)auth()->user()->researcher_id === (int)$item->researcher_id;
                                     @endphp
                                     @if($canManageDipRes || $isSelfDipRes)
-                                        <a href="{{ route('backend.rdb_researcher.show', $item->researcher_id) }}" class="fw-bold text-decoration-none">
+                                        <a href="{{ route('backend.rdb_researcher.show', $item->researcher_id) }}" target="_blank" rel="noopener noreferrer" class="fw-bold text-decoration-none">
                                             {{ $item->researcher->researcher_fname }} {{ $item->researcher->researcher_lname }}
                                             @if($isSelfDipRes)
                                                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1" style="font-size: 0.72rem;">(คุณ)</span>
@@ -166,7 +166,7 @@
                             <tr>
                                 <th>โครงการวิจัยที่เกี่ยวข้อง:</th>
                                 <td>
-                                    <a href="{{ route('backend.rdb_project.show', $item->project->pro_id) }}" class="fw-bold text-decoration-none text-body hover-primary">
+                                    <a href="{{ route('backend.rdb_project.show', $item->project->pro_id) }}" target="_blank" rel="noopener noreferrer" class="fw-bold text-decoration-none text-body hover-primary">
                                         <i class="bi bi-folder-symlink me-1 text-primary"></i> {{ $item->project->pro_nameTH }}
                                     </a>
                                 </td>
@@ -314,6 +314,18 @@
 
         <!-- Right Column -->
         <div class="col-lg-4">
+            @php
+                $dipFileFields = [
+                    'dip_files' => 'เอกสารสิทธิบัตรหลัก (ไฟล์หลัก)',
+                    'dip_data1_files' => 'ไฟล์ข้อมูลชุดที่ 1 (Date Start)',
+                    'dip_data2_files_con' => 'ไฟล์สัญญาโอนสิทธิ / สรุปผล',
+                    'dip_data3_filesass1' => 'ไฟล์เอกสารข้อถือสิทธิ 1',
+                    'dip_data3_filesass2' => 'ไฟล์เอกสารข้อถือสิทธิ 2',
+                    'dip_data3_filesass3' => 'ไฟล์เอกสารข้อถือสิทธิ 3',
+                    'dip_data3_drawing_picture' => 'ไฟล์แบบแสดง / รูปเขียน (Drawing)',
+                    'dip_data_forms_request' => 'ไฟล์แบบฟอร์มคำขอ',
+                ];
+            @endphp
             <!-- File Attachment -->
             <div class="card shadow-sm mb-4 d-print-none border">
                 <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center py-3 border-0">
@@ -324,24 +336,50 @@
                     </button>
                     @endif
                 </div>
-                <div class="card-body text-center p-4 border-top">
-                    <div class="mb-3">
-                        <i class="bi bi-file-earmark-pdf text-danger" style="font-size: 3rem;"></i>
+                <div class="card-body p-3 border-top">
+                    <div class="text-center mb-3">
+                        <i class="bi bi-file-earmark-pdf text-danger" style="font-size: 2.5rem;"></i>
+                        <div class="text-muted small py-1">
+                            <i class="bi bi-file-earmark-check"></i> เอกสารทรัพย์สินทางปัญญาหลัก
+                        </div>
+                        <div class="d-grid gap-2 mt-2">
+                            @if($item->dip_files || $item->dip_path)
+                                <a href="{{ route('backend.rdb_dip.view_file', $item->dip_id) }}" target="_blank" class="btn btn-primary btn-sm d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-eye me-2"></i> เปิดดูไฟล์หลัก
+                                </a>
+                            @else
+                                <button class="btn btn-outline-secondary btn-sm" disabled>
+                                    <i class="bi bi-file-earmark-x me-1"></i> ยังไม่มีไฟล์หลัก
+                                </button>
+                            @endif
+                        </div>
                     </div>
-                    <div class="text-muted py-2">
-                        <i class="bi bi-file-earmark-check"></i> เอกสารทรัพย์สินทางปัญญาหลัก
-                    </div>
-                    <div class="d-grid gap-2 mt-3">
-                        @if($item->dip_files || $item->dip_path)
-                            <a href="{{ route('backend.rdb_dip.view_file', $item->dip_id) }}" target="_blank" class="btn btn-primary d-flex align-items-center justify-content-center">
-                                <i class="bi bi-eye me-2"></i> เปิดดูไฟล์
-                            </a>
-                        @else
-                            <button class="btn btn-outline-secondary" disabled>
-                                <i class="bi bi-file-earmark-x me-1"></i> ยังไม่มีไฟล์แนบ
-                            </button>
-                        @endif
-                    </div>
+
+                    @php
+                        $hasSubFiles = false;
+                        foreach ($dipFileFields as $fKey => $fLabel) {
+                            if ($fKey !== 'dip_files' && !empty($item->{$fKey})) {
+                                $hasSubFiles = true;
+                                break;
+                            }
+                        }
+                    @endphp
+
+                    @if($hasSubFiles)
+                        <div class="border-top pt-2 mt-2">
+                            <div class="small fw-bold text-body-secondary mb-2"><i class="bi bi-files me-1"></i> เอกสารแนบเพิ่มเติม</div>
+                            <div class="list-group list-group-flush small">
+                                @foreach($dipFileFields as $fKey => $fLabel)
+                                    @if($fKey !== 'dip_files' && !empty($item->{$fKey}))
+                                        <a href="{{ route('backend.rdb_dip.view_file', [$item->dip_id, 'field' => $fKey]) }}" target="_blank" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-2 py-1.5">
+                                            <span class="text-truncate"><i class="bi bi-file-earmark-arrow-down text-primary me-1.5"></i>{{ $fLabel }}</span>
+                                            <i class="bi bi-box-arrow-up-right text-muted"></i>
+                                        </a>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
 
@@ -355,7 +393,11 @@
                     <table class="table table-sm table-borderless mb-0">
                         <tr>
                             <td colspan="2">
-                                <h6 class="fw-bold text-primary mb-1">{{ $item->project->pro_nameTH }}</h6>
+                                <h6 class="fw-bold mb-1">
+                                    <a href="{{ route('backend.rdb_project.show', $item->pro_id) }}" target="_blank" rel="noopener noreferrer" class="text-primary text-decoration-none hover-underline">
+                                        {{ $item->project->pro_nameTH }}
+                                    </a>
+                                </h6>
                                 <div class="small text-muted mb-3">รหัส: {{ $item->project->pro_code ?? '-' }}</div>
                             </td>
                         </tr>
@@ -394,46 +436,75 @@
 
 <!-- Modal Manage File (Relocated to root of section for proper DOM stacking context) -->
 <div class="modal fade" id="fileModal" tabindex="-1" aria-labelledby="fileModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content border-primary">
             <div class="modal-header text-white" style="background: var(--rdb-gradient-primary);">
-                <h5 class="modal-title" id="fileModalLabel"><i class="bi bi-folder-fill me-2"></i>จัดการไฟล์แนบหลัก</h5>
+                <h5 class="modal-title" id="fileModalLabel"><i class="bi bi-folder-fill me-2"></i>จัดการไฟล์แนบทรัพย์สินทางปัญญา (ครบทั้ง 8 หมวดเอกสาร)</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <!-- Current File Status -->
-                <div class="mb-4 text-center p-3 rounded border" style="background-color: rgba(255, 255, 255, 0.03);">
-                    <h6 class="fw-bold mb-3 border-bottom pb-2 text-primary">สถานะไฟล์ปัจจุบัน</h6>
-                    @if($item->dip_files)
-                        <div class="d-flex justify-content-between align-items-center px-2">
-                            <div class="text-truncate" style="max-width: 200px;">
-                                <i class="bi bi-file-earmark-pdf text-danger fs-5"></i>
-                                <small class="text-muted fw-bold">{{ $item->dip_files }}</small>
-                            </div>
-                            <form action="{{ route('backend.rdb_dip.delete_file', $item->dip_id) }}" method="POST" onsubmit="return confirm('ยืนยันการลบไฟล์นี้?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-outline-danger">
-                                    <i class="bi bi-trash me-1"></i> ลบไฟล์
-                                </button>
-                            </form>
+                <div class="mb-4 p-3 rounded border" style="background-color: rgba(255, 255, 255, 0.03);">
+                    <h6 class="fw-bold mb-3 border-bottom pb-2 text-primary"><i class="bi bi-files me-1"></i>รายการไฟล์แนบปัจจุบัน</h6>
+                    @php
+                        $anyFileUploaded = false;
+                        foreach ($dipFileFields as $fKey => $fLabel) {
+                            if (!empty($item->{$fKey})) {
+                                $anyFileUploaded = true;
+                                break;
+                            }
+                        }
+                    @endphp
+                    @if($anyFileUploaded)
+                        <div class="list-group list-group-flush">
+                            @foreach($dipFileFields as $fKey => $fLabel)
+                                @if(!empty($item->{$fKey}))
+                                    <div class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-2 py-2">
+                                        <div class="text-truncate me-2">
+                                            <i class="bi bi-file-earmark-pdf text-danger me-1.5"></i>
+                                            <span class="fw-semibold small">{{ $fLabel }}:</span>
+                                            <a href="{{ route('backend.rdb_dip.view_file', [$item->dip_id, 'field' => $fKey]) }}" target="_blank" class="small text-decoration-none ms-1">
+                                                {{ $item->{$fKey} }} <i class="bi bi-box-arrow-up-right"></i>
+                                            </a>
+                                        </div>
+                                        <form action="{{ route('backend.rdb_dip.delete_file', $item->dip_id) }}" method="POST" onsubmit="return confirm('ยืนยันการลบไฟล์ {{ $fLabel }} ?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <input type="hidden" name="field" value="{{ $fKey }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger py-0.5 px-2">
+                                                <i class="bi bi-trash me-1"></i> ลบไฟล์
+                                            </button>
+                                        </form>
+                                    </div>
+                                @endif
+                            @endforeach
                         </div>
                     @else
-                        <div class="text-muted small italic">ยังไม่มีการอัปโหลดไฟล์ไฟล์ PDF</div>
+                        <div class="text-muted small text-center py-2">ยังไม่มีการอัปโหลดไฟล์เอกสารแนบ</div>
                     @endif
                 </div>
 
                 <!-- Upload Form -->
                 <form action="{{ route('backend.rdb_dip.upload_file', $item->dip_id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
-                    <div class="mb-3">
-                        <label for="dip_files" class="form-label fw-bold">เลือกไฟล์ใหม่ <span class="text-muted fw-normal">(เฉพาะ PDF เท่านั้น)</span></label>
-                        <input type="file" name="dip_files" id="dip_files" class="form-control border-primary bg-transparent text-reset" accept=".pdf" required>
-                        <div class="form-text mt-2 small text-muted"><i class="bi bi-info-circle me-1"></i> ขนาดไฟล์ที่อนุญาตไม่เกิน 20MB</div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-5">
+                            <label for="dip_file_field" class="form-label fw-bold">ประเภทเอกสารที่ต้องการอัปโหลด</label>
+                            <select name="field" id="dip_file_field" class="form-select border-primary">
+                                @foreach($dipFileFields as $fKey => $fLabel)
+                                    <option value="{{ $fKey }}">{{ $fLabel }} {{ !empty($item->{$fKey}) ? '(มีไฟล์แล้ว - อัปโหลดทับ)' : '' }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-7">
+                            <label for="dip_files" class="form-label fw-bold">เลือกไฟล์เอกสาร <span class="text-muted fw-normal">(PDF, Word, รูปภาพ, ZIP)</span></label>
+                            <input type="file" name="dip_files" id="dip_files" class="form-control border-primary bg-transparent text-reset" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.zip" required>
+                        </div>
                     </div>
+                    <div class="form-text mb-3 small text-muted"><i class="bi bi-info-circle me-1"></i> ขนาดไฟล์ที่อนุญาตไม่เกิน 50MB</div>
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-primary shadow-sm">
-                            <i class="bi bi-upload me-1"></i> {{ $item->dip_files ? 'อัปโหลดเปลี่ยนไฟล์ใหม่' : 'เริ่มอัปโหลดไฟล์' }}
+                            <i class="bi bi-upload me-1"></i> อัปโหลดบันทึกไฟล์เอกสาร
                         </button>
                     </div>
                 </form>

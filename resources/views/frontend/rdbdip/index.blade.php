@@ -201,7 +201,7 @@
                                 @if($item->researcher)
                                     <div>
                                         <i class="bi bi-person-circle text-primary me-1"></i>
-                                        <a href="{{ route('frontend.rdbresearcher.show', $item->researcher->researcher_id) }}" class="text-decoration-none text-body fw-bold">
+                                        <a href="{{ route('frontend.rdbresearcher.show', $item->researcher->researcher_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body fw-bold">
                                             {{ $item->researcher->prefix->prefix_nameTH ?? '' }}{{ $item->researcher->researcher_fname }} {{ $item->researcher->researcher_lname }}
                                         </a>
                                     </div>
@@ -218,6 +218,7 @@
                                     <div class="small mt-1 text-truncate" style="max-width: 350px;">
                                         <i class="bi bi-folder2 text-success me-1"></i>
                                         <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" 
+                                           target="_blank" rel="noopener noreferrer"
                                            class="text-decoration-none text-muted" 
                                            title="{{ $item->project->pro_nameTH }}">
                                             {{ $item->project->pro_nameTH }}

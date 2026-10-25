@@ -694,6 +694,9 @@ class BackendAuditTest extends TestCase
         $updateResponse->assertRedirect(route('backend.settings.access_control'));
         $this->assertEquals('members_only', \App\Models\SystemSetting::get('download_policy_full_report'));
         $this->assertEquals('test-client-id.apps.googleusercontent.com', \App\Models\SystemSetting::get('google_client_id'));
+
+        \App\Models\SystemSetting::set('download_policy_full_report', 'public');
+        \App\Models\SystemSetting::set('download_policy_attachments', 'public');
     }
 
     public function test_login_page_renders_google_sso_and_collapsible_form()
@@ -754,6 +757,8 @@ class BackendAuditTest extends TestCase
             $showResponse->assertStatus(200);
             $showResponse->assertSee('ต้องเข้าสู่ระบบ');
         }
+
+        \App\Models\SystemSetting::set('download_policy_full_report', 'public');
     }
 
     public function test_pro_file_show_three_states_logic()

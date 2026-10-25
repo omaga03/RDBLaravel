@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+@include('layouts.partials.scholar-meta', ['type' => 'utilize', 'item' => $item])
 <div class="container-fluid py-4">
 
     <!-- Breadcrumb & Navigation -->
@@ -41,9 +42,19 @@
                 <div class="card-body">
                     <!-- Badges Row -->
                     <div class="d-flex flex-wrap gap-2 mb-3">
-                        @if($item->utilizeType)
+                        @if($item->utz_group)
+                            @php
+                                $headerGroupIds = array_filter(array_map('trim', explode(',', $item->utz_group)));
+                                $headerUtilTypes = \App\Models\RdbProjectUtilizeType::whereIn('utz_type_id', $headerGroupIds)->orderBy('utz_type_index')->get();
+                            @endphp
+                            @foreach($headerUtilTypes as $uType)
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1">
+                                    <i class="bi bi-tag-fill me-1"></i> {{ $uType->utz_typr_name }}
+                                </span>
+                            @endforeach
+                        @elseif($item->utilizeType && $item->utilizeType->utz_typr_name)
                             <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1">
-                                <i class="bi bi-tag-fill me-1"></i> {{ $item->utilizeType->ut_name }}
+                                <i class="bi bi-tag-fill me-1"></i> {{ $item->utilizeType->utz_typr_name }}
                             </span>
                         @endif
                         @if($item->utz_date)
@@ -178,7 +189,7 @@
                             {{ $item->project->pro_code }}
                         </span>
                     @endif
-                    <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" class="text-decoration-none fw-bold text-body hover-primary d-block mb-1.5" style="font-size: 0.92rem; line-height: 1.5;">
+                    <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none fw-bold text-body hover-primary d-block mb-1.5" style="font-size: 0.92rem; line-height: 1.5;">
                         {{ strip_tags((string) $item->project->pro_nameTH) }}
                     </a>
 
@@ -214,7 +225,7 @@
                     <div class="small fw-semibold text-body mb-1" style="font-size: 0.78rem;">หัวหน้าโครงการ:</div>
                     <div class="d-flex align-items-center flex-wrap">
                         <i class="bi bi-person-circle text-primary me-2 fs-6"></i>
-                        <a href="{{ route('frontend.rdbresearcher.show', $headResearcher->researcher_id) }}" class="text-decoration-none text-body hover-primary fw-medium small">
+                        <a href="{{ route('frontend.rdbresearcher.show', $headResearcher->researcher_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body hover-primary fw-medium small">
                             {{ $headResearcher->prefix->prefix_nameTH ?? '' }}{{ $headResearcher->researcher_fname }} {{ $headResearcher->researcher_lname }}
                         </a>
                         @if($remainingCount > 0)
@@ -229,7 +240,7 @@
                     @endif
 
                     <div class="mt-3">
-                        <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" class="btn btn-sm btn-outline-primary w-100">
+                        <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary w-100">
                             <i class="bi bi-box-arrow-up-right me-1"></i> ดูรายละเอียดโครงการ
                         </a>
                     </div>

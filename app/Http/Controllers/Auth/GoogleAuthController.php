@@ -184,6 +184,7 @@ class GoogleAuthController extends Controller
                     'email' => $email,
                     'name' => $name,
                     'researcher_id' => $researcher ? $researcher->researcher_id : null,
+                    'onboarding_status' => $researcher ? 'approved' : 'none',
                     'password' => Str::random(32),
                     'status' => 10, // Active
                     'confirmed_at' => time(),
@@ -191,10 +192,10 @@ class GoogleAuthController extends Controller
                     'updated_at' => time(),
                 ]);
 
-                // Assign default role
-                if (class_exists(AuthAssignment::class)) {
+                // Assign Researcher role if matching researcher was found
+                if ($researcher && class_exists(AuthAssignment::class)) {
                     AuthAssignment::create([
-                        'item_name' => $researcher ? 'Researcher' : 'User',
+                        'item_name' => 'Researcher',
                         'user_id' => (string)$user->id,
                         'created_at' => time(),
                     ]);
@@ -212,6 +213,24 @@ class GoogleAuthController extends Controller
                 ]);
             }
 
+            // If existing user doesn't have researcher linked yet, attempt to link if email now exists in database
+            if (!$user->researcher_id) {
+                $matched = RdbResearcher::where('researcher_email', $user->email)->first();
+                if ($matched) {
+                    $user->researcher_id = $matched->researcher_id;
+                    $user->onboarding_status = 'approved';
+                    $user->save();
+
+                    if (class_exists(AuthAssignment::class) && !AuthAssignment::where('user_id', (string)$user->id)->where('item_name', 'Researcher')->exists()) {
+                        AuthAssignment::create([
+                            'item_name' => 'Researcher',
+                            'user_id' => (string)$user->id,
+                            'created_at' => time(),
+                        ]);
+                    }
+                }
+            }
+
             // 6. Check user active status
             if ($user->status != 10) {
                 return redirect()->route('login')->with('error', 'บัญชีผู้ใช้นี้ถูกระงับการใช้งาน กรุณาติดต่อผู้ดูแลระบบ');
@@ -220,6 +239,11 @@ class GoogleAuthController extends Controller
             // 7. Login User
             Auth::login($user, true);
             $request->session()->regenerate();
+
+            if (!$user->canAccessFullBackend()) {
+                return redirect()->route('site.index')
+                    ->with('status', "เข้าสู่ระบบสำเร็จ ยินดีต้อนรับคุณ {$user->username} ({$email}) เนื่องจากยังไม่มีข้อมูลนักวิจัยในระบบ โปรดทำการยืนยันตัวตนเพื่อขอเปิดใช้งานระบบหลังบ้าน");
+            }
 
             return redirect()->intended(route('backend.site.index'))
                 ->with('status', "เข้าสู่ระบบสำเร็จ ยินดีต้อนรับคุณ {$user->username} ({$email})");

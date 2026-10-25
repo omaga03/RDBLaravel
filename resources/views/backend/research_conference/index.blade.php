@@ -19,7 +19,22 @@
             <span class="badge bg-body border text-body-secondary px-3 py-2 shadow-sm">
                 <i class="bi bi-database me-1 text-primary"></i> ทั้งหมด {{ number_format($items->total()) }} รายการ
             </span>
+            @if(request('trash'))
+                <a href="{{ route('backend.research_conference.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center shadow-sm" style="height: 38px;">
+                    <i class="bi bi-arrow-left me-1.5"></i> รายการปกติ
+                </a>
+            @else
+                <a href="{{ route('backend.research_conference.index', ['trash' => 1]) }}" class="btn btn-outline-danger d-inline-flex align-items-center shadow-sm" style="height: 38px;">
+                    <i class="bi bi-trash3 me-1.5"></i> ถังขยะ
+                </a>
+            @endif
             @can('create', \App\Models\ResearchConference::class)
+            <form action="{{ route('backend.research_conference.sync_facebook') }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันการดึงข่าวงานประชุมวิชาการล่าสุดจาก Facebook หรือไม่?');">
+                @csrf
+                <button type="submit" class="btn btn-outline-primary d-inline-flex align-items-center shadow-sm" style="height: 38px;" title="ดึงข้อมูลข่าวงานประชุมวิชาการจากเพจ Facebook">
+                    <i class="bi bi-facebook me-1.5 text-primary"></i> ดึงข่าว Facebook
+                </button>
+            </form>
             <a href="{{ route('backend.research_conference.create') }}" class="btn btn-primary d-inline-flex align-items-center shadow-sm" style="height: 38px;">
                 <i class="bi bi-plus-circle me-1.5"></i> เพิ่มการประชุมใหม่
             </a>
@@ -28,11 +43,30 @@
     </div>
 
     <!-- Search Bar -->
-    <x-search-bar :searchRoute="route('backend.research_conference.index')">
+    <x-search-bar :searchRoute="route('backend.research_conference.index')" simplePlaceholder="พิมพ์ชื่องานประชุม, สถานที่จัดงาน, หรือคำสำคัญ...">
         <div class="row g-3">
-             <div class="col-md-12">
-                <label class="form-label">คำค้นหา (Keyword)</label>
-                <input type="text" class="form-control" name="q" value="{{ request('q') }}" placeholder="พิมพ์ชื่องานประชุม, สถานที่จัดงาน...">
+            <div class="col-md-6">
+                <label class="form-label fw-medium">ชื่องานประชุมวิชาการ</label>
+                <input type="text" class="form-control" name="con_name" value="{{ request('con_name', request('q')) }}" placeholder="ค้นหาตามชื่องานประชุม...">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-medium">สถานที่จัดงาน (Venue)</label>
+                <input type="text" class="form-control" name="con_venue" value="{{ request('con_venue') }}" placeholder="เช่น มหาวิทยาลัย, โรงแรม, จังหวัด, Hybrid...">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-medium">ประเภทวันที่ค้นหา</label>
+                <select class="form-select" name="date_type">
+                    <option value="created_at" {{ request('date_type', 'created_at') === 'created_at' ? 'selected' : '' }}>วันที่ลงข่าว / บันทึกข้อมูล</option>
+                    <option value="event_date" {{ request('date_type') === 'event_date' ? 'selected' : '' }}>วันที่จัดงานประชุมวิชาการ</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-medium">วันที่เริ่มต้น</label>
+                <input type="text" class="form-control datepicker" name="date_start" value="{{ request('date_start') }}" placeholder="วว/ดด/ปปปป" autocomplete="off">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-medium">วันที่สิ้นสุด</label>
+                <input type="text" class="form-control datepicker" name="date_end" value="{{ request('date_end') }}" placeholder="วว/ดด/ปปปป" autocomplete="off">
             </div>
         </div>
     </x-search-bar>
@@ -100,6 +134,14 @@
                                         <i class="bi bi-pencil"></i>
                                     </a>
                                     @endcan
+                                    @if((int)$item->data_show === 0)
+                                        @can('delete', $item)
+                                        <form action="{{ route('backend.research_conference.restore', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันกู้คืนข่าวงานประชุมนี้จากถังขยะ?');">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-success" title="กู้คืนข้อมูล"><i class="bi bi-arrow-counterclockwise"></i> กู้คืน</button>
+                                        </form>
+                                        @endcan
+                                    @endif
                                 </div>
                             </td>
                         </tr>

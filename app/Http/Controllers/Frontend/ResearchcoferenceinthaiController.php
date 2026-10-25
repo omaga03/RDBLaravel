@@ -60,4 +60,38 @@ class ResearchcoferenceinthaiController extends Controller
 
         return view('frontend.researchcoferenceinthai.show', compact('item', 'recentConferences'));
     }
+
+    /**
+     * RSS 2.0 Feed for Research Conferences
+     */
+    public function rss(Request $request)
+    {
+        $limit = min(50, max(1, (int) $request->input('n', 20)));
+
+        $items = ResearchConferenceInThai::where(function($q) {
+                $q->where('data_show', 1)->orWhereNull('data_show');
+            })
+            ->orderBy('con_even_date', 'desc')
+            ->orderBy('id', 'desc')
+            ->take($limit)
+            ->get();
+
+        $siteTitle = 'ศูนย์ข่าววิจัย สถาบันวิจัยและพัฒนา มหาวิทยาลัยราชภัฏเพชรบูรณ์';
+        $siteDescription = 'ข่าวการประชุมวิชาการ สถาบันวิจัยและพัฒนา มหาวิทยาลัยราชภัฏเพชรบูรณ์';
+        $siteLink = url('/');
+        
+        $firstDate = $items->first()?->con_even_date;
+        $lastBuildDate = now()->toRssString();
+        if ($firstDate) {
+            try {
+                $lastBuildDate = \Carbon\Carbon::parse($firstDate)->toRssString();
+            } catch (\Throwable $e) {}
+        }
+
+        $xml = view('frontend.feeds.conference_rss', compact('items', 'siteTitle', 'siteDescription', 'siteLink', 'lastBuildDate'))->render();
+
+        return response($xml, 200, [
+            'Content-Type' => 'application/rss+xml; charset=utf-8'
+        ]);
+    }
 }

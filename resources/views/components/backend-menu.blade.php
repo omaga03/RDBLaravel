@@ -31,6 +31,14 @@
             box-shadow: var(--rdb-shadow-md);
             padding: 0.5rem;
             z-index: 1040 !important;
+            min-width: 14rem;
+        }
+        .backend-subnav .dropdown-header {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: var(--bs-secondary-color);
+            padding: 0.35rem 0.85rem 0.2rem;
         }
         .backend-subnav .dropdown-item {
             border-radius: var(--rdb-radius-sm);
@@ -42,9 +50,21 @@
             background-color: var(--rdb-primary-subtle);
             color: var(--rdb-primary);
         }
+        .backend-subnav .dropdown-item.active,
+        .backend-subnav .dropdown-item:active {
+            background-color: rgba(37, 99, 235, 0.12) !important;
+            color: var(--rdb-secondary, #1D4ED8) !important;
+            font-weight: 600 !important;
+        }
         [data-bs-theme="dark"] .backend-subnav .dropdown-item:hover {
             background-color: rgba(37, 99, 235, 0.2);
             color: #60A5FA;
+        }
+        [data-bs-theme="dark"] .backend-subnav .dropdown-item.active,
+        [data-bs-theme="dark"] .backend-subnav .dropdown-item:active {
+            background-color: rgba(37, 99, 235, 0.25) !important;
+            color: #93C5FD !important;
+            font-weight: 600 !important;
         }
     </style>
     <div class="container-fluid px-4">
@@ -55,20 +75,44 @@
         <div class="collapse navbar-collapse" id="backendMenuContent">
             @php
                 $currentUser = auth()->user();
-                $isSuperAdmin = $currentUser && ($currentUser->hasRole('The Creator') || $currentUser->hasRole('Admin'));
+                $isSuperAdmin = $currentUser && ($currentUser->hasRole('The Creator') || $currentUser->hasRole('Admin') || $currentUser->hasRole('Admin Research'));
+                $canDspaceProject = $isSuperAdmin || ($currentUser && ($currentUser->hasRole(['Admin Project', 'Admin Library']) || $currentUser->hasPermission('DSpace.Export')));
+                $canDspacePublished = $isSuperAdmin || ($currentUser && ($currentUser->hasRole(['Admin Published', 'Admin Library']) || $currentUser->hasPermission('DSpace.Export')));
+                $canManageResearchers = $isSuperAdmin || ($currentUser && ($currentUser->hasRole(['Admin Researcher', 'Admin Position']) || ($currentUser->hasPermission('RdbResearcher.View') && !$currentUser->hasRole('Researcher') && !$currentUser->researcher_id && !$currentUser->hasRole('Faculty Coordinator'))));
             @endphp
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <!-- 0. แดชบอร์ด (Dashboard) -->
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('backend.site.index') ? 'active fw-bold' : '' }}" href="{{ route('backend.site.index') }}">
-                            <i class="bi bi-speedometer2 text-primary me-1.5"></i> แดชบอร์ด
-                        </a>
-                    </li>
 
+            @if($currentUser && !$currentUser->canAccessFullBackend())
+                <div class="py-2 d-flex align-items-center justify-content-between w-100 flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-warning text-dark px-2.5 py-1.5 rounded-pill">
+                            <i class="bi bi-shield-exclamation me-1"></i> ยืนยันตัวตนนักวิจัย
+                        </span>
+                        <span class="text-body-secondary small">
+                            กรุณาเลือกสังกัด/คณะ และกรอกข้อมูลส่วนตัวเพื่อขอรับการอนุมัติสิทธิ์นักวิจัยจากผู้ดูแลระบบ
+                        </span>
+                    </div>
+                    <div>
+                        @if($currentUser->onboarding_status === 'pending')
+                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-3 py-1.5">
+                                <i class="bi bi-hourglass-split me-1"></i> อยู่ระหว่างรอ Admin ปลดล็อก
+                            </span>
+                        @elseif($currentUser->onboarding_status === 'rejected')
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1.5">
+                                <i class="bi bi-x-circle me-1"></i> คำขอไม่ผ่านการอนุมัติ (กรุณาแก้ไข)
+                            </span>
+                        @else
+                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-3 py-1.5">
+                                <i class="bi bi-pencil-square me-1"></i> ยังไม่ได้ส่งข้อมูลยืนยันตัวตน
+                            </span>
+                        @endif
+                    </div>
+                </div>
+            @else
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <!-- 0.1 คิวตรวจรับผลงาน (Review Queue) -->
                     @if($isSuperAdmin || ($currentUser && ($currentUser->hasRole(['Admin Project', 'Admin Published', 'Admin Dip', 'Admin Utilize', 'Faculty Coordinator', 'Sub Admin']) || $currentUser->hasPermission(['Project', 'Published', 'Dip', 'Utilize']))))
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->is('backend/workflow*') ? 'active fw-bold' : '' }}" href="{{ route('backend.workflow.queue') }}">
+                        <a class="nav-link {{ request()->is('backend/workflow*') || request()->routeIs('backend.workflow.*') ? 'active fw-bold' : '' }}" href="{{ route('backend.workflow.queue') }}">
                             <i class="bi bi-inbox-fill text-warning me-1.5"></i> คิวตรวจรับผลงาน
                         </a>
                     </li>
@@ -77,17 +121,19 @@
                     <!-- 1. โครงการ -->
                     @if($isSuperAdmin || ($currentUser && ($currentUser->hasRole(['Admin Project', 'Researcher', 'Faculty Coordinator']) || $currentUser->researcher_id || $currentUser->hasPermission(['RdbProject.View', 'Project', 'MasterData.Manage']))))
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle {{ request()->is('backend/rdb_project*') || request()->is('backend/rdbgroupproject*') || request()->is('backend/rdbprojecttypesgroup*') || request()->is('backend/rdbprojecttypesmaster*') || request()->is('backend/rdbprojecttype*') || request()->is('backend/rdbprojecttypesub*') || request()->is('backend/rdbprojectposition*') || request()->is('backend/rdbprojectpersonnel*') || request()->is('backend/rdbstrategic*') || request()->is('backend/rdbyear*') || request()->is('backend/rdbbranch*') ? 'active fw-bold' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle {{ request()->is('backend/rdb_project*') || request()->is('backend/rdbgroupproject*') || request()->is('backend/rdbprojecttypesgroup*') || request()->is('backend/rdbprojecttypesmaster*') || request()->is('backend/rdbprojecttype*') || request()->is('backend/rdbprojecttypesub*') || request()->is('backend/rdbprojectposition*') || request()->is('backend/rdbprojectpersonnel*') || request()->is('backend/rdbyear*') || request()->is('backend/rdbbranch*') ? 'active fw-bold' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-folder2-open text-primary me-1.5"></i> โครงการ
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdb_project.index') }}"><i class="bi bi-list-ul me-2 text-primary"></i>รายการโครงการทั้งหมด</a></li>
                             <li><a class="dropdown-item d-flex align-items-center text-warning" href="{{ route('backend.rdb_project.index', ['workflow_status' => 'unapproved']) }}"><i class="bi bi-clock-history me-2 text-warning"></i>ฉบับร่าง / รออนุมัติ</a></li>
+                            @if($isSuperAdmin)
+                            <li><a class="dropdown-item d-flex align-items-center text-danger" href="{{ route('backend.rdb_project.index', ['trashed' => 'only']) }}"><i class="bi bi-trash3 me-2 text-danger"></i>ถังขยะและกู้คืนข้อมูล</a></li>
+                            @endif
                             @if($isSuperAdmin || ($currentUser && $currentUser->hasPermission('MasterData.Manage')))
                             <li><hr class="dropdown-divider"></li>
                             <li><div class="dropdown-header text-uppercase small fw-bold d-flex align-items-center"><i class="bi bi-gear-wide-connected me-1.5 text-secondary"></i> ข้อมูลพื้นฐาน</div></li>
                             <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdbyear.index') }}"><i class="bi bi-calendar3 me-2 text-primary"></i>ปีงบประมาณ</a></li>
-                            <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdbstrategic.index') }}"><i class="bi bi-bullseye me-2 text-danger"></i>ยุทธศาสตร์</a></li>
                             <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdbbranch.index') }}"><i class="bi bi-diagram-3 me-2 text-info"></i>สาขาการวิจัย</a></li>
                             <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdbgroupproject.index') }}"><i class="bi bi-collection me-2 text-success"></i>กลุ่มโครงการ / แผนงาน</a></li>
                             <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdbprojecttypesgroup.index') }}"><i class="bi bi-tags me-2 text-secondary"></i>กลุ่มประเภททุน</a></li>
@@ -97,6 +143,12 @@
                             <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdbprojectposition.index') }}"><i class="bi bi-person-badge me-2 text-success"></i>ตำแหน่งในโครงการ</a></li>
                             <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdbprojectpersonnel.index') }}"><i class="bi bi-people me-2 text-info"></i>จำนวนคนในคณะ รายปี</a></li>
                             @endif
+                            <li><hr class="dropdown-divider"></li>
+                            <li><div class="dropdown-header text-uppercase small fw-bold d-flex align-items-center"><i class="bi bi-download me-1.5 text-secondary"></i> การส่งออกข้อมูล</div></li>
+                            @if($canDspaceProject)
+                            <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdb_project.dspace_index') }}"><i class="bi bi-box-arrow-up-right me-2 text-info"></i>ส่งออก DSpace (คลังปัญญา)</a></li>
+                            @endif
+                            <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdb_project.export') }}"><i class="bi bi-file-earmark-spreadsheet me-2 text-success"></i>ส่งออกข้อมูลโครงการ (CSV)</a></li>
                         </ul>
                     </li>
                     @endif
@@ -110,6 +162,9 @@
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdb_published.index') }}"><i class="bi bi-file-earmark-text me-2 text-info"></i>รายการตีพิมพ์ทั้งหมด</a></li>
                             <li><a class="dropdown-item d-flex align-items-center text-warning" href="{{ route('backend.rdb_published.index', ['workflow_status' => 'unapproved']) }}"><i class="bi bi-clock-history me-2 text-warning"></i>ฉบับร่าง / รออนุมัติ</a></li>
+                            @if($isSuperAdmin)
+                            <li><a class="dropdown-item d-flex align-items-center text-danger" href="{{ route('backend.rdb_published.index', ['trashed' => 'only']) }}"><i class="bi bi-trash3 me-2 text-danger"></i>ถังขยะและกู้คืนข้อมูล</a></li>
+                            @endif
                             @if($isSuperAdmin || ($currentUser && $currentUser->hasPermission('MasterData.Manage')))
                             <li><hr class="dropdown-divider"></li>
                             <li><div class="dropdown-header text-uppercase small fw-bold d-flex align-items-center"><i class="bi bi-gear-wide-connected me-1.5 text-secondary"></i> ข้อมูลพื้นฐาน</div></li>
@@ -118,6 +173,12 @@
                             <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdbpublishedbranchper.index') }}"><i class="bi bi-pie-chart me-2 text-success"></i>สัดส่วนสาขาการวิจัย รายปี</a></li>
                             <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdbpublishedpersonnel.index') }}"><i class="bi bi-people me-2 text-secondary"></i>จำนวนคนในคณะ รายปี</a></li>
                             @endif
+                            <li><hr class="dropdown-divider"></li>
+                            <li><div class="dropdown-header text-uppercase small fw-bold d-flex align-items-center"><i class="bi bi-download me-1.5 text-secondary"></i> การส่งออกข้อมูล</div></li>
+                            @if($canDspacePublished)
+                            <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdb_published.dspace_index') }}"><i class="bi bi-box-arrow-up-right me-2 text-info"></i>ส่งออก DSpace (คลังปัญญา)</a></li>
+                            @endif
+                            <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdb_published.export') }}"><i class="bi bi-file-earmark-spreadsheet me-2 text-success"></i>ส่งออกข้อมูลตีพิมพ์ (CSV)</a></li>
                         </ul>
                     </li>
                     @endif
@@ -131,12 +192,18 @@
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdbprojectutilize.index') }}"><i class="bi bi-graph-up-arrow me-2 text-danger"></i>รายการการใช้ฯ ทั้งหมด</a></li>
                             <li><a class="dropdown-item d-flex align-items-center text-warning" href="{{ route('backend.rdbprojectutilize.index', ['workflow_status' => 'unapproved']) }}"><i class="bi bi-clock-history me-2 text-warning"></i>ฉบับร่าง / รออนุมัติ</a></li>
+                            @if($isSuperAdmin)
+                            <li><a class="dropdown-item d-flex align-items-center text-danger" href="{{ route('backend.rdbprojectutilize.index', ['trashed' => 'only']) }}"><i class="bi bi-trash3 me-2 text-danger"></i>ถังขยะและกู้คืนข้อมูล</a></li>
+                            @endif
                             @if($isSuperAdmin || ($currentUser && $currentUser->hasPermission('MasterData.Manage')))
                             <li><hr class="dropdown-divider"></li>
                             <li><div class="dropdown-header text-uppercase small fw-bold d-flex align-items-center"><i class="bi bi-gear-wide-connected me-1.5 text-secondary"></i> ข้อมูลพื้นฐาน</div></li>
                             <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdbprojectutilizetype.index') }}"><i class="bi bi-tag-fill me-2 text-danger"></i>ประเภทการนำไปใช้ฯ</a></li>
                             <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdbchangwat.index') }}"><i class="bi bi-geo-alt-fill me-2 text-danger"></i>พื้นที่และพิกัด (ต. อ. จ.)</a></li>
                             @endif
+                            <li><hr class="dropdown-divider"></li>
+                            <li><div class="dropdown-header text-uppercase small fw-bold d-flex align-items-center"><i class="bi bi-download me-1.5 text-secondary"></i> การส่งออกข้อมูล</div></li>
+                            <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdbprojectutilize.export') }}"><i class="bi bi-file-earmark-spreadsheet me-2 text-success"></i>ส่งออกข้อมูลการใช้ประโยชน์ (CSV)</a></li>
                         </ul>
                     </li>
                     @endif
@@ -150,28 +217,37 @@
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdb_dip.index') }}"><i class="bi bi-award me-2 text-warning"></i>รายการทรัพย์สินฯ ทั้งหมด</a></li>
                             <li><a class="dropdown-item d-flex align-items-center text-warning" href="{{ route('backend.rdb_dip.index', ['workflow_status' => 'unapproved']) }}"><i class="bi bi-clock-history me-2 text-warning"></i>ฉบับร่าง / รออนุมัติ</a></li>
+                            @if($isSuperAdmin)
+                            <li><a class="dropdown-item d-flex align-items-center text-danger" href="{{ route('backend.rdb_dip.index', ['trashed' => 'only']) }}"><i class="bi bi-trash3 me-2 text-danger"></i>ถังขยะและกู้คืนข้อมูล</a></li>
+                            @endif
                             @if($isSuperAdmin || ($currentUser && $currentUser->hasPermission('MasterData.Manage')))
                             <li><hr class="dropdown-divider"></li>
                             <li><div class="dropdown-header text-uppercase small fw-bold d-flex align-items-center"><i class="bi bi-gear-wide-connected me-1.5 text-secondary"></i> ข้อมูลพื้นฐาน</div></li>
                             <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdbdiptype.index') }}"><i class="bi bi-patch-check-fill me-2 text-warning"></i>ประเภททรัพย์สินฯ</a></li>
                             @endif
+                            <li><hr class="dropdown-divider"></li>
+                            <li><div class="dropdown-header text-uppercase small fw-bold d-flex align-items-center"><i class="bi bi-download me-1.5 text-secondary"></i> การส่งออกข้อมูล</div></li>
+                            <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdb_dip.export') }}"><i class="bi bi-file-earmark-spreadsheet me-2 text-success"></i>ส่งออกข้อมูลทรัพย์สินทางปัญญา (CSV)</a></li>
                         </ul>
                     </li>
                     @endif
 
                     <!-- 5. นักวิจัย -->
-                    @if($isSuperAdmin || ($currentUser && ($currentUser->hasPermission('RdbResearcher.View') || $currentUser->hasRole(['Researcher', 'Admin Researcher']))))
+                    @if($canManageResearchers)
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle {{ request()->is('backend/rdb_researcher*') || request()->is('backend/rdbprefix*') ? 'active fw-bold' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-people text-success me-1.5"></i> นักวิจัย
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdb_researcher.index') }}"><i class="bi bi-person-lines-fill me-2 text-success"></i> รายการนักวิจัย</a></li>
+                            <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdb_researcher.index') }}"><i class="bi bi-person-lines-fill me-2 text-success"></i> รายการนักวิจัยทั้งหมด</a></li>
                             @if($isSuperAdmin || ($currentUser && $currentUser->hasPermission('MasterData.Manage')))
                             <li><hr class="dropdown-divider"></li>
                             <li><div class="dropdown-header text-uppercase small fw-bold d-flex align-items-center"><i class="bi bi-gear-wide-connected me-1.5 text-secondary"></i> ข้อมูลพื้นฐาน</div></li>
                             <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdbprefix.index') }}"><i class="bi bi-card-text me-2 text-info"></i>คำนำหน้าชื่อ</a></li>
                             @endif
+                            <li><hr class="dropdown-divider"></li>
+                            <li><div class="dropdown-header text-uppercase small fw-bold d-flex align-items-center"><i class="bi bi-download me-1.5 text-secondary"></i> การส่งออกข้อมูล</div></li>
+                            <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdb_researcher.export') }}"><i class="bi bi-file-earmark-spreadsheet me-2 text-success"></i>ส่งออกข้อมูลนักวิจัย (CSV)</a></li>
                         </ul>
                     </li>
                     @endif
@@ -209,25 +285,31 @@
                     <!-- 8. ผู้ดูแลระบบ -->
                     @if($isSuperAdmin || ($currentUser && $currentUser->hasPermission(['User Manager', 'Rbac.Management', 'RBAC Manager'])))
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle {{ request()->is('backend/user*') || request()->is('backend/rbac*') || request()->is('backend/settings*') ? 'active fw-bold' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle {{ request()->is('backend/user*') || request()->is('backend/rbac*') || request()->is('backend/settings*') || request()->is('backend/audit-logs*') ? 'active fw-bold' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-shield-lock text-danger me-1.5"></i> ผู้ดูแลระบบ
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
+                            @if($isSuperAdmin || ($currentUser && $currentUser->hasPermission(['User Manager', 'Rbac.Management', 'RBAC Manager'])))
+                            <li><div class="dropdown-header text-uppercase d-flex align-items-center"><i class="bi bi-person-gear me-1.5 text-primary"></i> การบริหารจัดการผู้ใช้</div></li>
                             @if($isSuperAdmin || ($currentUser && $currentUser->hasPermission('User Manager')))
-                            <li><a class="dropdown-item d-flex align-items-center {{ request()->is('backend/user*') ? 'active' : '' }}" href="{{ route('backend.user.index') }}"><i class="bi bi-person-gear me-2 text-primary"></i> จัดการผู้ใช้งาน (Users)</a></li>
+                            <li><a class="dropdown-item d-flex align-items-center {{ request()->is('backend/user*') || request()->routeIs('backend.user.*') ? 'active fw-bold' : '' }}" href="{{ route('backend.user.index') }}"><i class="bi bi-people-fill me-2 text-primary"></i> จัดการผู้ใช้งาน (Users)</a></li>
                             @endif
                             @if($isSuperAdmin || ($currentUser && $currentUser->hasPermission(['Rbac.Management', 'RBAC Manager'])))
-                            <li><a class="dropdown-item d-flex align-items-center {{ request()->is('backend/rbac*') ? 'active' : '' }}" href="{{ route('backend.rbac.index') }}"><i class="bi bi-shield-check me-2 text-success"></i> จัดการบทบาทและสิทธิ์ (RBAC)</a></li>
+                            <li><a class="dropdown-item d-flex align-items-center {{ request()->is('backend/rbac*') || request()->routeIs('backend.rbac.*') ? 'active fw-bold' : '' }}" href="{{ route('backend.rbac.index') }}"><i class="bi bi-shield-check me-2 text-success"></i> จัดการบทบาทและสิทธิ์ (RBAC)</a></li>
                             @endif
+                            @endif
+
                             @if($isSuperAdmin)
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item d-flex align-items-center {{ request()->is('backend/settings/access-control*') ? 'active' : '' }}" href="{{ route('backend.settings.access_control') }}"><i class="bi bi-shield-lock-fill me-2 text-warning"></i> ควบคุมล็อกอิน & นโยบายดาวน์โหลด</a></li>
-                            <li><a class="dropdown-item d-flex align-items-center {{ request()->is('backend/audit-logs*') ? 'active' : '' }}" href="{{ route('backend.audit_log.index') }}"><i class="bi bi-clock-history me-2 text-info"></i> ประวัติการใช้งานระบบ (Audit Trail)</a></li>
+                            <li><hr class="dropdown-divider my-1"></li>
+                            <li><div class="dropdown-header text-uppercase d-flex align-items-center"><i class="bi bi-shield-lock-fill me-1.5 text-warning"></i> ความปลอดภัยและระบบ</div></li>
+                            <li><a class="dropdown-item d-flex align-items-center {{ request()->is('backend/settings/access-control*') || request()->routeIs('backend.settings.access_control') ? 'active fw-bold' : '' }}" href="{{ route('backend.settings.access_control') }}"><i class="bi bi-shield-lock-fill me-2 text-warning"></i> ควบคุมล็อกอิน & นโยบายดาวน์โหลด</a></li>
+                            <li><a class="dropdown-item d-flex align-items-center {{ request()->is('backend/audit-logs*') || request()->routeIs('backend.audit_log.*') ? 'active fw-bold' : '' }}" href="{{ route('backend.audit_log.index') }}"><i class="bi bi-clock-history me-2 text-info"></i> ประวัติการใช้งานระบบ (Audit Trail)</a></li>
                             @endif
                         </ul>
                     </li>
                     @endif
             </ul>
+            @endif
         </div>
     </div>
 </nav>

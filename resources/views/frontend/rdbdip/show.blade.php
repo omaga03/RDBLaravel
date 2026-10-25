@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+@include('layouts.partials.scholar-meta', ['type' => 'dip', 'item' => $item])
 <div class="container-fluid py-4">
 
     <!-- Breadcrumb & Navigation -->
@@ -201,7 +202,7 @@
                             {{ $item->project->pro_code }}
                         </span>
                     @endif
-                    <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" class="text-decoration-none fw-bold text-body hover-primary d-block mb-1.5" style="font-size: 0.92rem; line-height: 1.5;">
+                    <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none fw-bold text-body hover-primary d-block mb-1.5" style="font-size: 0.92rem; line-height: 1.5;">
                         {{ strip_tags((string) $item->project->pro_nameTH) }}
                     </a>
 
@@ -237,7 +238,7 @@
                     <div class="small fw-semibold text-body mb-1" style="font-size: 0.78rem;">หัวหน้าโครงการ:</div>
                     <div class="d-flex align-items-center flex-wrap">
                         <i class="bi bi-person-circle text-primary me-2 fs-6"></i>
-                        <a href="{{ route('frontend.rdbresearcher.show', $headResearcher->researcher_id) }}" class="text-decoration-none text-body hover-primary fw-medium small">
+                        <a href="{{ route('frontend.rdbresearcher.show', $headResearcher->researcher_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body hover-primary fw-medium small">
                             {{ $headResearcher->prefix->prefix_nameTH ?? '' }}{{ $headResearcher->researcher_fname }} {{ $headResearcher->researcher_lname }}
                         </a>
                         @if($remainingCount > 0)
@@ -252,7 +253,7 @@
                     @endif
 
                     <div class="mt-3">
-                        <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" class="btn btn-sm btn-outline-primary w-100">
+                        <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary w-100">
                             <i class="bi bi-box-arrow-up-right me-1"></i> ดูรายละเอียดโครงการ
                         </a>
                     </div>
@@ -279,7 +280,7 @@
                                     </div>
                                     <div class="flex-grow-1 min-w-0">
                                         <div class="d-flex flex-wrap align-items-center gap-1.5 mb-0.5">
-                                            <a href="{{ route('frontend.rdbresearcher.show', $item->researcher->researcher_id) }}" class="text-decoration-none fw-bold text-body hover-primary">
+                                            <a href="{{ route('frontend.rdbresearcher.show', $item->researcher->researcher_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none fw-bold text-body hover-primary">
                                                 {{ $item->researcher->prefix->prefix_nameTH ?? '' }}{{ $item->researcher->researcher_fname }} {{ $item->researcher->researcher_lname }}
                                             </a>
                                             <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.7rem; font-weight: 500; padding: 0.16rem 0.45rem;">
@@ -309,13 +310,22 @@
             @php
                 $additionalFiles = [];
                 if($item->dip_data1_files) {
-                    $additionalFiles[] = ['field' => 'dip_data1_files', 'name' => 'ไฟล์ข้อมูล 1 (Date Start)', 'sub' => 'Filing Document', 'icon' => 'bi-file-earmark-text'];
+                    $additionalFiles[] = ['field' => 'dip_data1_files', 'name' => 'ไฟล์ข้อมูลชุดที่ 1 (Date Start)', 'sub' => 'Filing Document', 'icon' => 'bi-file-earmark-text'];
                 }
                 if($item->dip_data2_files_con) {
-                    $additionalFiles[] = ['field' => 'dip_data2_files_con', 'name' => 'ไฟล์ข้อมูล 2 (Conclusion)', 'sub' => 'Invention Summary', 'icon' => 'bi-file-earmark-text'];
+                    $additionalFiles[] = ['field' => 'dip_data2_files_con', 'name' => 'ไฟล์สัญญาโอนสิทธิ / สรุปผล', 'sub' => 'Invention Summary / Assignment', 'icon' => 'bi-file-earmark-text'];
+                }
+                if($item->dip_data3_filesass1) {
+                    $additionalFiles[] = ['field' => 'dip_data3_filesass1', 'name' => 'ไฟล์เอกสารข้อถือสิทธิ 1', 'sub' => 'Claim Attachment 1', 'icon' => 'bi-file-earmark-check'];
+                }
+                if($item->dip_data3_filesass2) {
+                    $additionalFiles[] = ['field' => 'dip_data3_filesass2', 'name' => 'ไฟล์เอกสารข้อถือสิทธิ 2', 'sub' => 'Claim Attachment 2', 'icon' => 'bi-file-earmark-check'];
+                }
+                if($item->dip_data3_filesass3) {
+                    $additionalFiles[] = ['field' => 'dip_data3_filesass3', 'name' => 'ไฟล์เอกสารข้อถือสิทธิ 3', 'sub' => 'Claim Attachment 3', 'icon' => 'bi-file-earmark-check'];
                 }
                 if($item->dip_data3_drawing_picture) {
-                    $additionalFiles[] = ['field' => 'dip_data3_drawing_picture', 'name' => 'ไฟล์แบบแสดง (Drawing)', 'sub' => 'Technical Drawing', 'icon' => 'bi-file-earmark-image'];
+                    $additionalFiles[] = ['field' => 'dip_data3_drawing_picture', 'name' => 'ไฟล์แบบแสดง / รูปเขียน (Drawing)', 'sub' => 'Technical Drawing', 'icon' => 'bi-file-earmark-image'];
                 }
                 if($item->dip_data_forms_request) {
                     $additionalFiles[] = ['field' => 'dip_data_forms_request', 'name' => 'ไฟล์แบบฟอร์มคำขอ', 'sub' => 'Application Form', 'icon' => 'bi-file-earmark-text'];

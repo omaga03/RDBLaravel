@@ -1,13 +1,14 @@
 @props(['searchRoute', 'exportRoute' => null, 'collapsed' => true, 'simplePlaceholder' => 'พิมพ์คำค้นหา...'])
 @php
     $action = $searchRoute ?? '#';
+    $hasAdvancedParams = !empty(request()->except(['page', 'search', 'trash', '_token']));
 @endphp
 
 <div class="card search-box mb-4 shadow-sm">
     <div class="card-header search-header d-flex justify-content-between align-items-center"  
          data-bs-toggle="collapse" 
          data-bs-target="#searchCollapse" 
-         aria-expanded="{{ $collapsed ? 'false' : 'true' }}" 
+         aria-expanded="{{ ($collapsed && !$hasAdvancedParams && !request()->filled('search')) ? 'false' : 'true' }}" 
          aria-controls="searchCollapse">
         
         <h5 class="mb-0 fw-semibold d-flex align-items-center">
@@ -23,7 +24,7 @@
                     <i class="bi bi-file-earmark-spreadsheet me-1"></i> ส่งออก Excel
                 </a>
             @endif
-            @if(request()->except(['page']))
+            @if(request()->except(['page', 'trash']))
                 <a href="{{ $action }}" class="btn btn-sm btn-warning shadow-sm" title="ล้างค่าการค้นหา" onclick="event.stopPropagation();">
                     <i class="bi bi-arrow-counterclockwise"></i> ล้างตัวกรอง
                 </a>
@@ -34,19 +35,22 @@
         </div>
     </div>
     
-    <div class="collapse {{ $collapsed ? '' : 'show' }}" id="searchCollapse">
+    <div class="collapse {{ ($collapsed && !$hasAdvancedParams && !request()->filled('search')) ? '' : 'show' }}" id="searchCollapse">
         <div class="card-body p-4">
             <form action="{{ $action }}" method="GET">
+                @if(request()->filled('trash'))
+                    <input type="hidden" name="trash" value="{{ request('trash') }}">
+                @endif
                 
                 {{-- Tabs for switching modes --}}
                 <ul class="nav nav-tabs mb-3 border-bottom" id="searchTabs" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active px-3 py-2 border-0 fw-semibold d-flex align-items-center" id="simple-tab" data-bs-toggle="tab" data-bs-target="#simple-search" type="button" role="tab" aria-controls="simple-search" aria-selected="true">
+                        <button class="nav-link {{ $hasAdvancedParams ? '' : 'active' }} px-3 py-2 border-0 fw-semibold d-flex align-items-center" id="simple-tab" data-bs-toggle="tab" data-bs-target="#simple-search" type="button" role="tab" aria-controls="simple-search" aria-selected="{{ $hasAdvancedParams ? 'false' : 'true' }}">
                             <i class="bi bi-search me-2"></i> ค้นหาทั่วไป
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link px-3 py-2 border-0 fw-semibold d-flex align-items-center" id="advanced-tab" data-bs-toggle="tab" data-bs-target="#advanced-search" type="button" role="tab" aria-controls="advanced-search" aria-selected="false">
+                        <button class="nav-link {{ $hasAdvancedParams ? 'active' : '' }} px-3 py-2 border-0 fw-semibold d-flex align-items-center" id="advanced-tab" data-bs-toggle="tab" data-bs-target="#advanced-search" type="button" role="tab" aria-controls="advanced-search" aria-selected="{{ $hasAdvancedParams ? 'true' : 'false' }}">
                             <i class="bi bi-sliders me-2"></i> ค้นหาละเอียด
                         </button>
                     </li>
@@ -76,7 +80,7 @@
                 
                 <div class="tab-content" id="searchTabContent">
                     {{-- Simple Search --}}
-                    <div class="tab-pane fade show active" id="simple-search" role="tabpanel" aria-labelledby="simple-tab">
+                    <div class="tab-pane fade {{ $hasAdvancedParams ? '' : 'show active' }}" id="simple-search" role="tabpanel" aria-labelledby="simple-tab">
                         <div class="input-group">
                             <input type="text" name="search" class="form-control" placeholder="{{ $simplePlaceholder }}" value="{{ request('search') }}">
                             @if(request()->filled('search'))
@@ -89,7 +93,7 @@
                     </div>
                     
                     {{-- Advanced Search --}}
-                    <div class="tab-pane fade" id="advanced-search" role="tabpanel" aria-labelledby="advanced-tab">
+                    <div class="tab-pane fade {{ $hasAdvancedParams ? 'show active' : '' }}" id="advanced-search" role="tabpanel" aria-labelledby="advanced-tab">
                         {{ $slot }}
                         
                         <div class="row mt-3">

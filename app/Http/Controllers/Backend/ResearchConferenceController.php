@@ -21,14 +21,78 @@ class ResearchConferenceController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', ResearchConference::class);
-        $query = ResearchConference::query()->where('data_show', 1);
+        $query = ResearchConference::query()->where('data_show', $request->boolean('trash') ? 0 : 1);
 
-        $search = $request->input('search', $request->input('q', $request->input('con_name')));
+        $search = $request->input('search', $request->input('q'));
         if ($search !== null && $search !== '') {
             $query->where(function ($q) use ($search) {
                 $q->where('con_name', 'like', "%{$search}%")
-                  ->orWhere('con_detail', 'like', "%{$search}%");
+                  ->orWhere('con_detail', 'like', "%{$search}%")
+                  ->orWhere('con_venue', 'like', "%{$search}%");
             });
+        }
+
+        if ($request->filled('con_name')) {
+            $query->where('con_name', 'like', '%' . $request->input('con_name') . '%');
+        }
+
+        if ($request->filled('con_venue')) {
+            $query->where('con_venue', 'like', '%' . $request->input('con_venue') . '%');
+        }
+
+        // Advanced date range filtering
+        $parseDate = function ($dateStr) {
+            if (empty($dateStr)) {
+                return null;
+            }
+            $dateStr = trim($dateStr);
+            // Matches d/m/Y or d-m-Y
+            if (preg_match('/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/', $dateStr, $m)) {
+                $y = (int)$m[3] > 2400 ? (int)$m[3] - 543 : (int)$m[3];
+                return sprintf('%04d-%02d-%02d', $y, (int)$m[2], (int)$m[1]);
+            }
+            // Matches Y-m-d or Y/m/d
+            if (preg_match('/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/', $dateStr, $m)) {
+                $y = (int)$m[1] > 2400 ? (int)$m[1] - 543 : (int)$m[1];
+                return sprintf('%04d-%02d-%02d', $y, (int)$m[2], (int)$m[3]);
+            }
+            return null;
+        };
+
+        $startDate = $parseDate($request->input('date_start'));
+        $endDate = $parseDate($request->input('date_end'));
+        $dateType = $request->input('date_type', 'created_at');
+
+        if ($startDate && $endDate && $endDate < $startDate) {
+            [$startDate, $endDate] = [$endDate, $startDate];
+        }
+
+        if ($startDate || $endDate) {
+            if ($dateType === 'event_date') {
+                $query->where(function ($eq) use ($startDate, $endDate) {
+                    $startYearBE = $startDate ? ((int)date('Y', strtotime($startDate)) + 543) : null;
+                    $endYearBE = $endDate ? ((int)date('Y', strtotime($endDate)) + 543) : null;
+
+                    if ($startYearBE && $endYearBE) {
+                        for ($y = $startYearBE; $y <= $endYearBE; $y++) {
+                            $eq->orWhere('con_even_date', 'like', "%{$y}%");
+                        }
+                    } elseif ($startYearBE) {
+                        $eq->where('con_even_date', 'like', "%{$startYearBE}%");
+                    } elseif ($endYearBE) {
+                        $eq->where('con_even_date', 'like', "%{$endYearBE}%");
+                    }
+                });
+            } else {
+                if ($startDate && $endDate) {
+                    $query->whereDate('created_at', '>=', $startDate)
+                          ->whereDate('created_at', '<=', $endDate);
+                } elseif ($startDate) {
+                    $query->whereDate('created_at', '>=', $startDate);
+                } elseif ($endDate) {
+                    $query->whereDate('created_at', '<=', $endDate);
+                }
+            }
         }
 
         $items = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
@@ -138,6 +202,31 @@ class ResearchConferenceController extends Controller
         $item->data_show = 0;
         $item->save();
         return redirect()->route('backend.research_conference.index')->with('success', 'ลบข้อมูลเรียบร้อยแล้ว');
+    }
+
+    public function restore($id)
+    {
+        $item = ResearchConference::withoutGlobalScope('active')->findOrFail($id);
+        $this->authorize('delete', $item);
+        $item->data_show = 1;
+        $item->save();
+        return redirect()->back()->with('success', 'กู้คืนข่าวงานประชุมเรียบร้อยแล้ว');
+    }
+
+    public function syncFacebook(Request $request, \App\Services\FacebookConferenceSyncService $syncService)
+    {
+        $this->authorize('create', ResearchConference::class);
+
+        $limit = min(20, max(1, (int) $request->input('limit', 8)));
+        $stats = $syncService->sync($limit);
+
+        if ($stats['synced'] > 0) {
+            return redirect()->route('backend.research_conference.index')
+                ->with('success', "ดึงข้อมูลงานประชุมวิชาการจาก Facebook สำเร็จ ({$stats['synced']} รายการ, ซ้ำ {$stats['skipped']} รายการ)");
+        }
+
+        return redirect()->route('backend.research_conference.index')
+            ->with($stats['skipped'] > 0 ? 'info' : 'warning', $stats['message'] ?: 'ไม่พบรายการใหม่จาก Facebook');
     }
 
     public function viewConferenceImage($id)

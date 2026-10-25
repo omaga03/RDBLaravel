@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http->Requests\Frontend;
+namespace App\Http\Requests\Frontend;
 
-use Illuminate->Foundation->Http->FormRequest;
-use Illuminate->Validation->Rule;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreRdbDepartmentTypeRequest extends FormRequest
 {
@@ -18,7 +18,7 @@ class StoreRdbDepartmentTypeRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate->Contracts\Validation\ValidationRule|array|string>
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
      */
     public function rules(): array
     {

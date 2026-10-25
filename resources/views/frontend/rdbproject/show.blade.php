@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+@include('layouts.partials.scholar-meta', ['type' => 'project', 'item' => $item])
 <div class="container-fluid py-4">
     @php
         if (!function_exists('getFrontendUserName')) {
@@ -122,7 +123,7 @@
                                                 <div class="text-body-secondary fw-semibold mb-0.5">
                                                     <i class="bi bi-diagram-3-fill text-primary me-1"></i>ภายใต้แผนงานวิจัย:
                                                 </div>
-                                                <a href="{{ route('frontend.rdbproject.show', $item->parentProject->pro_id) }}" class="text-decoration-none fw-medium text-primary hover-underline">
+                                                <a href="{{ route('frontend.rdbproject.show', $item->parentProject->pro_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none fw-medium text-primary hover-underline">
                                                     {{ $item->parentProject->pro_nameTH }}
                                                 </a>
                                             </div>
@@ -137,7 +138,7 @@
                                                 <ol class="mb-0 ps-3">
                                                     @foreach($item->subProjects as $sub)
                                                         <li class="mb-1">
-                                                            <a href="{{ route('frontend.rdbproject.show', $sub->pro_id) }}" class="text-decoration-none text-body hover-underline">
+                                                            <a href="{{ route('frontend.rdbproject.show', $sub->pro_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body hover-underline">
                                                                 {{ $sub->pro_nameTH }}
                                                             </a>
                                                         </li>
@@ -243,12 +244,27 @@
             </div>
             @endif
 
+            {{-- Note / หมายเหตุ --}}
+            @if($item->pro_note)
+            <div class="card shadow-sm border mb-4">
+                <div class="card-header bg-body-tertiary d-flex align-items-center">
+                    <i class="bi bi-sticky text-warning me-2 fs-5"></i>
+                    <h5 class="mb-0 fw-bold text-body">หมายเหตุ</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-body text-break lh-lg">
+                        {!! nl2br(e($item->pro_note)) !!}
+                    </div>
+                </div>
+            </div>
+            @endif
+
             {{-- Related Outputs Row --}}
             @if($item->utilizations->count() > 0 || $item->publisheds->count() > 0 || $item->dips->count() > 0)
             <div class="row g-3 mb-4">
                 @if($item->utilizations->count() > 0)
                 <div class="col-md-4">
-                    <a href="{{ route('frontend.rdbprojectutilize.index', ['pro_id' => $item->pro_id]) }}" class="text-decoration-none">
+                    <a href="{{ route('frontend.rdbprojectutilize.index', ['pro_id' => $item->pro_id]) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
                         <div class="card h-100 border shadow-sm hover-shadow transition-all">
                             <div class="card-body text-center p-3">
                                 <i class="bi bi-graph-up-arrow fs-1 text-success mb-2 d-block"></i>
@@ -264,7 +280,7 @@
                 
                 @if($item->publisheds->count() > 0)
                 <div class="col-md-4">
-                    <a href="{{ route('frontend.rdbpublished.index', ['pro_id' => $item->pro_id]) }}" class="text-decoration-none">
+                    <a href="{{ route('frontend.rdbpublished.index', ['pro_id' => $item->pro_id]) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
                         <div class="card h-100 border shadow-sm hover-shadow transition-all">
                             <div class="card-body text-center p-3">
                                 <i class="bi bi-journal-text fs-1 text-info mb-2 d-block"></i>
@@ -280,7 +296,7 @@
 
                 @if($item->dips->count() > 0)
                 <div class="col-md-4">
-                    <a href="{{ route('frontend.rdbdip.index', ['pro_id' => $item->pro_id]) }}" class="text-decoration-none">
+                    <a href="{{ route('frontend.rdbdip.index', ['pro_id' => $item->pro_id]) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
                         <div class="card h-100 border shadow-sm hover-shadow transition-all">
                             <div class="card-body text-center p-3">
                                 <i class="bi bi-award fs-1 text-warning mb-2 d-block"></i>
@@ -329,6 +345,7 @@
                                             @if($work->researcher)
                                                 <div class="d-flex flex-wrap align-items-center gap-1.5 mb-0.5">
                                                     <a href="{{ route('frontend.rdbresearcher.show', $work->researcher->researcher_id) }}" 
+                                                       target="_blank" rel="noopener noreferrer"
                                                        class="text-decoration-none fw-bold text-body hover-primary">
                                                         {{ $work->researcher->prefix->prefix_nameTH ?? '' }}{{ $work->researcher->researcher_fname }} {{ $work->researcher->researcher_lname }}
                                                     </a>

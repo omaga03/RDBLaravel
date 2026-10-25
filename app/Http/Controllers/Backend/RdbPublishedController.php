@@ -30,9 +30,13 @@ class RdbPublishedController extends Controller
     {
         $query = RdbPublished::with(['year', 'pubtype', 'researcher.prefix', 'authors.prefix', 'project', 'department', 'createdBy', 'updatedBy']);
 
+        if ($request->boolean('trash')) {
+            $query->withoutGlobalScope('active')->where('data_show', 0);
+        }
+
         // Apply RBAC Scoping:
         $currentUser = auth()->user();
-        if ($currentUser && !$currentUser->hasRole('The Creator') && !$currentUser->hasRole('Admin') && !$currentUser->hasRole('Admin Published')) {
+        if ($currentUser && !$currentUser->hasRole('The Creator') && !$currentUser->hasRole('Admin') && !$currentUser->hasRole('Admin Published') && !$currentUser->hasRole('Admin Research')) {
             if ($currentUser->hasRole('Published')) {
                 $publishedAdminIds = \App\Models\User::whereHas('roles', function ($q) {
                     $q->where('item_name', 'Published');
@@ -43,7 +47,7 @@ class RdbPublishedController extends Controller
                 if ($deptId) {
                     $query->where('department_id', $deptId);
                 }
-            } elseif ($currentUser->hasRole('Researcher') || $currentUser->researcher_id) {
+            } else {
                 $researcherId = $currentUser->researcher_id;
                 $query->where(function($q) use ($researcherId, $currentUser) {
                     $q->where('user_created', $currentUser->id);
@@ -835,6 +839,18 @@ class RdbPublishedController extends Controller
         return redirect()->route('backend.rdb_published.index')->with('success', 'ลบข้อมูลเรียบร้อยแล้ว (Soft Delete)');
     }
 
+    public function restore($id)
+    {
+        $item = RdbPublished::withoutGlobalScope('active')->findOrFail($id);
+        $this->authorize('delete', $item);
+
+        $item->data_show = 1;
+        $item->user_updated = auth()->id();
+        $item->save();
+
+        return redirect()->back()->with('success', 'กู้คืนข้อมูลการตีพิมพ์เรียบร้อยแล้ว');
+    }
+
     private function updateDepartmentFromMainOffice(RdbPublished $item)
     {
         $mainOfficeAuthor = $item->authors()->wherePivot('pubw_main', 1)->first();
@@ -845,5 +861,70 @@ class RdbPublishedController extends Controller
             $item->branch_id = $mainOfficeAuthor->depcat_id;
             $item->save();
         }
+    }
+
+    /**
+     * Export publication to DSpace SAF ZIP package
+     */
+    public function exportDspace($id, \App\Services\DSpaceExportService $dspaceService)
+    {
+        $user = auth()->user();
+        $isSuperAdmin = $user && ($user->hasRole('The Creator') || $user->hasRole('Admin') || $user->hasRole('Admin Research'));
+        $canDspace = $isSuperAdmin || ($user && ($user->hasRole(['Admin Published', 'Admin Library']) || $user->hasPermission('DSpace.Export')));
+        if (!$canDspace) {
+            abort(403, 'ไม่มีสิทธิ์ส่งออกแพ็กเกจ DSpace');
+        }
+
+        $published = RdbPublished::findOrFail($id);
+        $this->authorize('view', $published);
+
+        try {
+            $zipPath = $dspaceService->exportPublished($published);
+            if (!$zipPath || !file_exists($zipPath)) {
+                return redirect()->back()->with('error', 'ไม่สามารถสร้างแพ็กเกจ DSpace สำหรับผลงานนี้ได้');
+            }
+
+            return response()->download($zipPath, basename($zipPath))->deleteFileAfterSend(true);
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', 'เกิดข้อผิดพลาดในการส่งออก DSpace: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * DSpace Export Index Page for Publications
+     */
+    public function dspaceIndex(Request $request)
+    {
+        $user = auth()->user();
+        $isSuperAdmin = $user && ($user->hasRole('The Creator') || $user->hasRole('Admin') || $user->hasRole('Admin Research'));
+        $canDspace = $isSuperAdmin || ($user && ($user->hasRole(['Admin Published', 'Admin Library']) || $user->hasPermission('DSpace.Export')));
+        if (!$canDspace) {
+            abort(403, 'ไม่มีสิทธิ์เข้าถึงการส่งออก DSpace (เฉพาะผู้ดูแลระบบและเจ้าหน้าที่คลังปัญญา)');
+        }
+
+        $this->authorize('viewAny', RdbPublished::class);
+
+        $query = RdbPublished::with(['year', 'pubtype', 'department', 'authors.prefix'])
+            ->where('data_show', 1);
+
+        if ($request->filled('q')) {
+            $q = trim($request->q);
+            $query->where(function($sub) use ($q) {
+                $sub->where('pub_name', 'like', "%{$q}%")
+                    ->orWhere('pub_name_journal', 'like', "%{$q}%");
+            });
+        }
+        if ($request->filled('year_id')) {
+            $query->where('year_id', $request->year_id);
+        }
+        if ($request->filled('department_id')) {
+            $query->where('department_id', $request->department_id);
+        }
+
+        $items = $query->orderBy('pub_date', 'desc')->orderBy('id', 'desc')->paginate(20)->withQueryString();
+        $years = \App\Models\RdbYear::orderBy('year_name', 'desc')->get();
+        $departments = \App\Models\RdbDepartment::orderBy('department_nameTH')->get();
+
+        return view('backend.rdb_published.dspace', compact('items', 'years', 'departments'));
     }
 }

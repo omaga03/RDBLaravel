@@ -66,9 +66,10 @@ class RdbprojectutilizeController extends Controller
             });
         }
 
-        // Filter by Utilize Type
+        // Filter by Utilize Type (supports comma-separated utz_group)
         if ($request->filled('utz_group')) {
-            $query->where('utz_group', $request->utz_group);
+            $group = trim($request->utz_group);
+            $query->whereRaw("FIND_IN_SET(?, REPLACE(utz_group, ' ', ''))", [$group]);
         }
 
         // Title / Utilize Autocomplete Search
@@ -255,6 +256,114 @@ class RdbprojectutilizeController extends Controller
         }
 
         return view('frontend.rdbprojectutilize.show', compact('item'));
+    }
+
+    /**
+     * Export filtered utilization records as CSV (Frontend)
+     */
+    public function export(Request $request)
+    {
+        $query = RdbProjectUtilize::with([
+            'project', 'project.department', 'project.year',
+            'project.rdbProjectWorks' => function($q) { $q->orderBy('position_id', 'asc'); },
+            'project.rdbProjectWorks.researcher.prefix',
+            'changwat', 'utilizeType'
+        ]);
+
+        if (Schema::hasColumn('rdb_project_utilize', 'data_show')) {
+            $query->where(function($q) {
+                $q->where('data_show', 1)->orWhereNull('data_show');
+            });
+        }
+
+        // Apply same filters as index
+        if ($request->filled('search')) {
+            $searchTerm = trim($request->search);
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('utz_detail', 'like', "%{$searchTerm}%")
+                  ->orWhere('utz_leading', 'like', "%{$searchTerm}%")
+                  ->orWhere('utz_department_name', 'like', "%{$searchTerm}%")
+                  ->orWhereHas('project', function($pq) use ($searchTerm) {
+                      $pq->where('pro_nameTH', 'like', "%{$searchTerm}%")
+                         ->orWhere('pro_nameEN', 'like', "%{$searchTerm}%");
+                  });
+            });
+        }
+        if ($request->filled('utz_group')) {
+            $group = trim($request->utz_group);
+            $query->whereRaw("FIND_IN_SET(?, REPLACE(utz_group, ' ', ''))", [$group]);
+        }
+        if ($request->filled('department_id')) {
+            $deptId = $request->department_id;
+            $query->whereHas('project', function($pq) use ($deptId) {
+                $pq->where('department_id', $deptId);
+            });
+        }
+        if ($request->filled('chw_id')) {
+            $query->where('chw_id', $request->chw_id);
+        }
+        if ($request->filled('date_start') && $request->filled('date_end')) {
+            $query->whereDate('utz_date', '>=', $request->date_start)
+                  ->whereDate('utz_date', '<=', $request->date_end);
+        }
+
+        $items = $query->orderBy('utz_date', 'desc')->orderBy('utz_id', 'desc')->get();
+
+        $filename = "rdb_utilizations_" . date('Y-m-d_H-i-s') . ".csv";
+        $headers = [
+            "Content-type" => "text/csv; charset=UTF-8",
+            "Content-Disposition" => "attachment; filename=$filename",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        ];
+
+        $sanitize = function ($val) {
+            if ($val === null) return '';
+            $str = trim(strip_tags((string) $val));
+            if ($str !== '' && in_array($str[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
+                return "'" . $str;
+            }
+            return $str;
+        };
+
+        $callback = function() use ($items, $sanitize) {
+            $file = fopen('php://output', 'w');
+            fputs($file, "\xEF\xBB\xBF");
+
+            fputcsv($file, ['ID', 'โครงการวิจัย', 'ปีงบประมาณ', 'หน่วยงาน/องค์กรที่ใช้ประโยชน์', 'ประเภทการใช้ประโยชน์', 'รายละเอียด', 'ผู้แทน/ผู้ลงนาม', 'วันที่', 'จังหวัด', 'อำเภอ', 'ตำบล', 'คณะผู้วิจัย']);
+
+            foreach ($items as $item) {
+                $researchers = [];
+                if ($item->project && $item->project->rdbProjectWorks) {
+                    foreach ($item->project->rdbProjectWorks as $work) {
+                        if ($work->researcher) {
+                            $r = $work->researcher;
+                            $prefix = $r->prefix->prefix_nameTH ?? '';
+                            $researchers[] = trim("{$prefix}{$r->researcher_fname} {$r->researcher_lname}");
+                        }
+                    }
+                }
+
+                fputcsv($file, [
+                    $item->utz_id,
+                    $sanitize($item->project->pro_nameTH ?? '-'),
+                    $sanitize($item->project->year->year_name ?? '-'),
+                    $sanitize($item->utz_department_name ?? '-'),
+                    $sanitize($item->utilizeType->utz_typr_name ?? '-'),
+                    $sanitize($item->utz_detail ?? '-'),
+                    $sanitize($item->utz_leading ?? '-'),
+                    $sanitize($item->utz_date ?? '-'),
+                    $sanitize($item->changwat->changwat_t ?? '-'),
+                    $sanitize($item->changwat->amphoe_t ?? '-'),
+                    $sanitize($item->changwat->tambon_t ?? '-'),
+                    $sanitize(!empty($researchers) ? implode(', ', $researchers) : '-'),
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     /**

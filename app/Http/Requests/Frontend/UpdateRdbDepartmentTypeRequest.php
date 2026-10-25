@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http->Requests\Frontend;
+namespace App\Http\Requests\Frontend;
 
-use Illuminate->Foundation->Http->FormRequest;
-use Illuminate->Validation->Rule;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateRdbDepartmentTypeRequest extends FormRequest
 {

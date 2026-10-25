@@ -60,6 +60,8 @@ class ResearchConference extends Model
             if (app()->runningUnitTests() || !$this->exists) {
                 return asset('storage/uploads/conference/' . $img);
             }
+            // Fallback to upstream PCRU CDN if locally missing
+            return 'https://research.pcru.ac.th/rdb/datacoferenceinthai/' . $img;
         }
         return null;
     }

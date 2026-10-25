@@ -19,13 +19,15 @@ class UserController extends Controller
     {
         $this->authorize('viewAny', User::class);
 
-        $query = User::has('roles')->with(['roles', 'researcher.department', 'researcher.prefix']);
+        $query = User::with(['roles', 'researcher.department', 'researcher.prefix', 'onboardingDepartment', 'onboardingPrefix']);
 
         if ($request->filled('search')) {
             $search = trim($request->search);
             $query->where(function ($q) use ($search) {
                 $q->where('username', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('onboarding_fname', 'like', "%{$search}%")
+                  ->orWhere('onboarding_lname', 'like', "%{$search}%")
                   ->orWhereHas('researcher', function ($rq) use ($search) {
                       $rq->where('researcher_fname', 'like', "%{$search}%")
                          ->orWhere('researcher_lname', 'like', "%{$search}%");
@@ -35,15 +37,32 @@ class UserController extends Controller
 
         if ($request->filled('role')) {
             $role = $request->role;
-            $query->whereHas('roles', function ($q) use ($role) {
-                $q->where('item_name', $role);
-            });
+            if ($role === 'admin_all' || $role === 'admin_group') {
+                $query->whereHas('roles', function ($q) {
+                    $q->where('item_name', 'like', 'Admin%')
+                      ->orWhere('item_name', 'The Creator');
+                });
+            } else {
+                $query->whereHas('roles', function ($q) use ($role) {
+                    $q->where('item_name', $role);
+                });
+            }
         }
 
-        $users = $query->orderBy('id', 'desc')->paginate(15);
-        $roles = AuthItem::where('type', 1)->orderBy('name')->get();
+        if ($request->filled('onboarding_status')) {
+            $query->where('onboarding_status', $request->onboarding_status);
+        }
 
-        return view('backend.user.index', compact('users', 'roles'));
+        $users = $query->orderBy('id', 'desc')->paginate(15)->withQueryString();
+        $roles = AuthItem::where('type', 1)->orderBy('name')->get();
+        $pendingCount = User::where('onboarding_status', 'pending')->count();
+        $adminCount = User::whereHas('roles', function ($q) {
+            $q->where('item_name', 'like', 'Admin%')
+              ->orWhere('item_name', 'The Creator');
+        })->count();
+        $researchers = RdbResearcher::with(['prefix', 'department'])->orderBy('researcher_fname')->get();
+
+        return view('backend.user.index', compact('users', 'roles', 'pendingCount', 'adminCount', 'researchers'));
     }
 
     public function create()
@@ -124,6 +143,9 @@ class UserController extends Controller
         if ($canManageRoles) {
             $user->status = $validated['status'];
             $user->researcher_id = $validated['researcher_id'] ?? null;
+            if (isset($validated['onboarding_status'])) {
+                $user->onboarding_status = $validated['onboarding_status'];
+            }
         }
 
         $user->user_updated = auth()->id();
@@ -236,5 +258,96 @@ class UserController extends Controller
         }
 
         return redirect()->route('backend.user.index');
+    }
+
+    /**
+     * Admin verifies and unlocks user onboarding request.
+     */
+    public function approveOnboarding(Request $request, User $user)
+    {
+        $this->authorize('update', $user);
+
+        $currentUser = auth()->user();
+        if (!$currentUser || (!$currentUser->hasRole('The Creator') && !$currentUser->hasRole('Admin') && !$currentUser->hasPermission('User Manager'))) {
+            abort(403, 'เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถอนุมัติและปลดล็อกสิทธิ์ได้');
+        }
+
+        $mode = $request->input('mode', 'create_new');
+
+        if ($mode === 'link_existing' && $request->filled('existing_researcher_id')) {
+            $researcher = RdbResearcher::findOrFail($request->existing_researcher_id);
+            if ($user->onboarding_department_id && !$researcher->department_id) {
+                $researcher->department_id = $user->onboarding_department_id;
+                $researcher->save();
+            }
+        } else {
+            // Create a new researcher record
+            $researcher = new RdbResearcher();
+            $researcher->prefix_id = $user->onboarding_prefix_id ?? 1;
+            $researcher->researcher_fname = $user->onboarding_fname ?: $user->username;
+            $researcher->researcher_lname = $user->onboarding_lname ?: '-';
+            $researcher->researcher_fnameEN = $user->onboarding_fname_en;
+            $researcher->researcher_lnameEN = $user->onboarding_lname_en;
+            $researcher->department_id = $user->onboarding_department_id;
+            $researcher->researcher_email = $user->email;
+            $researcher->researcher_tel = $user->onboarding_tel;
+            $researcher->researcher_mobile = $user->onboarding_tel;
+            $researcher->user_created = auth()->id();
+            $researcher->created_at = now();
+            $researcher->updated_at = now();
+            $researcher->save();
+        }
+
+        // Link researcher to user & mark approved
+        $user->researcher_id = $researcher->researcher_id;
+        $user->onboarding_status = 'approved';
+        $user->onboarding_approved_at = now();
+        $user->onboarding_approved_by = auth()->id();
+        $user->onboarding_reject_reason = null;
+        $user->save();
+
+        // Assign Researcher role in auth_assignment if not exists
+        if (class_exists(AuthAssignment::class)) {
+            AuthAssignment::where('user_id', (string)$user->id)->where('item_name', 'User')->delete();
+
+            if (!AuthAssignment::where('user_id', (string)$user->id)->where('item_name', 'Researcher')->exists()) {
+                AuthAssignment::create([
+                    'item_name' => 'Researcher',
+                    'user_id' => (string)$user->id,
+                    'created_at' => time(),
+                ]);
+            }
+        }
+
+        return redirect()->back()
+            ->with('success', "อนุมัติและปลดล็อกสิทธิ์นักวิจัยสำหรับผู้ใช้ {$user->username} เรียบร้อยแล้ว");
+    }
+
+    /**
+     * Admin rejects onboarding request with a reason.
+     */
+    public function rejectOnboarding(Request $request, User $user)
+    {
+        $this->authorize('update', $user);
+
+        $currentUser = auth()->user();
+        if (!$currentUser || (!$currentUser->hasRole('The Creator') && !$currentUser->hasRole('Admin') && !$currentUser->hasPermission('User Manager'))) {
+            abort(403, 'เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถปฏิเสธคำขอได้');
+        }
+
+        $request->validate([
+            'reason' => 'required|string|max:500',
+        ], [
+            'reason.required' => 'กรุณาระบุเหตุผลการปฏิเสธคำขอ',
+        ]);
+
+        $user->onboarding_status = 'rejected';
+        $user->onboarding_reject_reason = trim($request->reason);
+        $user->onboarding_approved_at = null;
+        $user->onboarding_approved_by = auth()->id();
+        $user->save();
+
+        return redirect()->back()
+            ->with('warning', "ปฏิเสธคำขอยืนยันตัวตนของผู้ใช้ {$user->username} แล้ว (ผู้ใช้สามารถแก้ไขและส่งคำขอใหม่ได้)");
     }
 }

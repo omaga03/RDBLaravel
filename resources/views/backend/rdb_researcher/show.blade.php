@@ -244,14 +244,6 @@
                                                                 {{ strip_tags($pub->pub_name) }}
                                                             </a>
                                                         </div>
-                                                        @if($pub->project)
-                                                            <small class="text-muted d-block mt-1">
-                                                                <i class="bi bi-link-45deg"></i> โครงการ: 
-                                                                <a href="{{ route('backend.rdb_project.show', $pub->project->pro_id) }}" target="_blank" class="text-decoration-none text-muted">
-                                                                    {{ strip_tags($pub->project->pro_nameTH) }}
-                                                                </a>
-                                                            </small>
-                                                        @endif
                                                     </td>
                                                     <td>
                                                         @if($pub->pub_date)

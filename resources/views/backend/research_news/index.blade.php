@@ -19,7 +19,22 @@
             <span class="badge bg-body border text-body-secondary px-3 py-2 shadow-sm">
                 <i class="bi bi-database me-1 text-primary"></i> ทั้งหมด {{ number_format($items->total()) }} รายการ
             </span>
+            @if(request('trash'))
+                <a href="{{ route('backend.research_news.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center shadow-sm" style="height: 38px;">
+                    <i class="bi bi-arrow-left me-1.5"></i> รายการปกติ
+                </a>
+            @else
+                <a href="{{ route('backend.research_news.index', ['trash' => 1]) }}" class="btn btn-outline-danger d-inline-flex align-items-center shadow-sm" style="height: 38px;">
+                    <i class="bi bi-trash3 me-1.5"></i> ถังขยะ
+                </a>
+            @endif
             @can('create', \App\Models\ResearchNews::class)
+            <form action="{{ route('backend.research_news.sync_nriis') }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันการดึงข่าวทุนวิจัยล่าสุดจากระบบ NRIIS หรือไม่?');">
+                @csrf
+                <button type="submit" class="btn btn-outline-info d-inline-flex align-items-center shadow-sm" style="height: 38px;" title="ดึงข้อมูลข่าวทุนวิจัยจาก NRIIS API">
+                    <i class="bi bi-cloud-arrow-down me-1.5"></i> ดึงข่าว NRIIS
+                </button>
+            </form>
             <a href="{{ route('backend.research_news.create') }}" class="btn btn-primary d-inline-flex align-items-center shadow-sm" style="height: 38px;">
                 <i class="bi bi-plus-circle me-1.5"></i> เพิ่มข่าวใหม่
             </a>
@@ -98,6 +113,14 @@
                                         <i class="bi bi-pencil"></i>
                                     </a>
                                     @endcan
+                                    @if((int)$item->data_show === 0)
+                                        @can('delete', $item)
+                                        <form action="{{ route('backend.research_news.restore', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันกู้คืนข่าวนี้จากถังขยะ?');">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-success" title="กู้คืนข้อมูล"><i class="bi bi-arrow-counterclockwise"></i> กู้คืน</button>
+                                        </form>
+                                        @endcan
+                                    @endif
                                 </div>
                             </td>
                         </tr>

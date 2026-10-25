@@ -19,6 +19,15 @@
             <span class="badge bg-body border text-body-secondary px-3 py-2 shadow-sm">
                 <i class="bi bi-database me-1 text-primary"></i> ทั้งหมด {{ number_format($projects->total()) }} โครงการ
             </span>
+            @if(request('trash'))
+                <a href="{{ route('backend.rdb_project.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center shadow-sm" style="height: 38px;">
+                    <i class="bi bi-arrow-left me-1.5"></i> รายการปกติ
+                </a>
+            @else
+                <a href="{{ route('backend.rdb_project.index', ['trash' => 1]) }}" class="btn btn-outline-danger d-inline-flex align-items-center shadow-sm" style="height: 38px;">
+                    <i class="bi bi-trash3 me-1.5"></i> ถังขยะ
+                </a>
+            @endif
             @can('create', \App\Models\RdbProject::class)
             <a href="{{ route('backend.rdb_project.create') }}" class="btn btn-primary d-inline-flex align-items-center shadow-sm" style="height: 38px;">
                 <i class="bi bi-plus-circle me-1.5"></i> เพิ่มโครงการใหม่
@@ -272,7 +281,7 @@
                                             $isSelfLeader = (int)auth()->user()->researcher_id === (int)$firstLeader->researcher->researcher_id;
                                         @endphp
                                         @if($canManageLeader || $isSelfLeader)
-                                            <a href="{{ route('backend.rdb_researcher.show', $firstLeader->researcher->researcher_id) }}" class="text-decoration-none text-body fw-bold hover-primary">
+                                            <a href="{{ route('backend.rdb_researcher.show', $firstLeader->researcher->researcher_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body fw-bold hover-primary">
                                                 {{ $firstLeader->researcher->researcher_fname }} {{ $firstLeader->researcher->researcher_lname }}
                                                 @if($isSelfLeader)
                                                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1" style="font-size: 0.7rem;">(คุณ)</span>
@@ -329,6 +338,14 @@
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-success" title="อนุมัติให้แก้ไข (ย้ายไปฉบับร่าง)"><i class="bi bi-unlock"></i> ปลดล็อก</button>
                                         </form>
+                                    @endif
+                                    @if((int)$project->data_show === 0)
+                                        @can('delete', $project)
+                                        <form action="{{ route('backend.rdb_project.restore', $project->pro_id) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันกู้คืนโครงการวิจัยนี้จากถังขยะ?');">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-success" title="กู้คืนข้อมูล"><i class="bi bi-arrow-counterclockwise"></i> กู้คืน</button>
+                                        </form>
+                                        @endcan
                                     @endif
                                 </div>
                             </td>

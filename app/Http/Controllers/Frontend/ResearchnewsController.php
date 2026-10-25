@@ -60,4 +60,38 @@ class ResearchnewsController extends Controller
         $recentNews = ResearchNews::where('id', '!=', $item->id)->orderBy('news_date', 'desc')->orderBy('id', 'desc')->take(4)->get();
         return view('frontend.researchnews.show', compact('item', 'recentNews'));
     }
+
+    /**
+     * RSS 2.0 Feed for Research News
+     */
+    public function rss(Request $request)
+    {
+        $limit = min(50, max(1, (int) $request->input('n', 20)));
+
+        $items = ResearchNews::where(function($q) {
+                $q->where('data_show', 1)->orWhereNull('data_show');
+            })
+            ->orderBy('news_date', 'desc')
+            ->orderBy('id', 'desc')
+            ->take($limit)
+            ->get();
+
+        $siteTitle = 'ศูนย์ข่าววิจัย สถาบันวิจัยและพัฒนา มหาวิทยาลัยราชภัฏเพชรบูรณ์';
+        $siteDescription = 'ข่าวประกาศและกิจกรรมด้านการวิจัย สถาบันวิจัยและพัฒนา มหาวิทยาลัยราชภัฏเพชรบูรณ์';
+        $siteLink = url('/');
+        
+        $firstDate = $items->first()?->news_date;
+        $lastBuildDate = now()->toRssString();
+        if ($firstDate) {
+            try {
+                $lastBuildDate = \Carbon\Carbon::parse($firstDate)->toRssString();
+            } catch (\Throwable $e) {}
+        }
+
+        $xml = view('frontend.feeds.news_rss', compact('items', 'siteTitle', 'siteDescription', 'siteLink', 'lastBuildDate'))->render();
+
+        return response($xml, 200, [
+            'Content-Type' => 'application/rss+xml; charset=utf-8'
+        ]);
+    }
 }

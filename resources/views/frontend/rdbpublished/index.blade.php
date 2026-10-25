@@ -217,6 +217,7 @@
                                 @if($mainAuthor)
                                     <div>
                                         <a href="{{ route('frontend.rdbresearcher.show', $mainAuthor->researcher_id) }}" 
+                                           target="_blank" rel="noopener noreferrer"
                                            class="text-decoration-none text-body fw-semibold hover-primary">
                                             <i class="bi bi-person-circle text-primary me-1"></i>{{ strip_tags((string) ($mainAuthor->prefix->prefix_nameTH ?? '')) }}{{ strip_tags((string) $mainAuthor->researcher_fname) }} {{ strip_tags((string) $mainAuthor->researcher_lname) }}
                                         </a>

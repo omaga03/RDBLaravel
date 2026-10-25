@@ -192,11 +192,6 @@
                                                                 {{ strip_tags((string) $project->pro_nameTH) }}
                                                             </a>
                                                         </div>
-                                                        @if($project->pro_nameEN)
-                                                            <small class="text-body-secondary d-block mb-1 text-break">
-                                                                {{ strip_tags((string) $project->pro_nameEN) }}
-                                                            </small>
-                                                        @endif
                                                         <div class="small text-body-secondary d-flex flex-wrap gap-2 align-items-center mt-1">
                                                             @if($project->type)
                                                                 <span class="badge bg-body-secondary text-body border"><i class="bi bi-tag me-1"></i>{{ $project->type->pt_name }}</span>
@@ -283,14 +278,6 @@
                                                             @if($pub->pubtype)
                                                                 <span class="badge bg-body-secondary text-body border">
                                                                     {{ $pub->pubtype->pubtype_name ?? $pub->pubtype->pubtype_subgroup ?? '-' }}
-                                                                </span>
-                                                            @endif
-                                                            @if($pub->project)
-                                                                <span class="text-body-secondary">
-                                                                    <i class="bi bi-link-45deg"></i> โครงการ: 
-                                                                    <a href="{{ route('frontend.rdbproject.show', $pub->project->pro_id) }}" target="_blank" class="text-primary text-decoration-none hover-underline text-break">
-                                                                        {{ strip_tags((string) $pub->project->pro_nameTH) }}
-                                                                    </a>
                                                                 </span>
                                                             @endif
                                                         </div>

@@ -16,9 +16,10 @@ use Illuminate\Support\Facades\DB;
 
 class RdbpublishedController extends Controller
 {
-    public function index(Request $request)
+    protected function buildFilteredQuery(Request $request)
     {
-        $query = RdbPublished::with(['year', 'researcher', 'researcher.prefix', 'department', 'pubtype', 'project', 'authors', 'authors.prefix']);
+        $query = RdbPublished::with(['year', 'researcher', 'researcher.prefix', 'department', 'pubtype', 'project', 'authors', 'authors.prefix'])
+            ->where('data_show', 1);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -26,6 +27,7 @@ class RdbpublishedController extends Controller
                 $q->where('pub_name', 'like', "%{$search}%")
                   ->orWhere('pub_name_journal', 'like', "%{$search}%")
                   ->orWhere('pub_keyword', 'like', "%{$search}%")
+                  ->orWhere('pub_note', 'like', "%{$search}%")
                   ->orWhereHas('researcher', function($query) use ($search) {
                       $query->where('researcher_fname', 'like', "%{$search}%")
                             ->orWhere('researcher_lname', 'like', "%{$search}%")
@@ -128,41 +130,58 @@ class RdbpublishedController extends Controller
             });
         }
 
-        // Date range validation
-        $hasDateStart = $request->filled('date_start');
-        $hasDateEnd = $request->filled('date_end');
-        
-        if ($hasDateStart || $hasDateEnd) {
-            // Both dates must be provided
-            if (!$hasDateStart || !$hasDateEnd) {
-                return redirect()->back()
-                    ->withInput()
-                    ->with('error', 'กรุณาระบุทั้งวันที่เริ่มและวันที่สิ้นสุด');
-            }
-            
-            // End date must be >= start date
-            if ($request->date_end < $request->date_start) {
-                return redirect()->back()
-                    ->withInput()
-                    ->with('error', 'วันที่สิ้นสุดต้องไม่น้อยกว่าวันที่เริ่มต้น');
-            }
-            
+        if ($request->filled('date_start') && $request->filled('date_end')) {
             $query->whereDate('pub_date', '>=', $request->date_start)
                   ->whereDate('pub_date', '<=', $request->date_end);
         }
 
-        $project = null;
         if ($request->filled('pro_id')) {
             $query->where('pro_id', $request->pro_id);
-            $project = RdbProject::find($request->pro_id);
         }
 
         if ($request->filled('pubtype_id')) {
             $query->where('pubtype_id', $request->pubtype_id);
         }
 
+        if ($request->filled('branch_id')) {
+            $query->where('branch_id', $request->branch_id);
+        }
+
+        if ($request->filled('pub_score')) {
+            $query->where('pub_score', $request->pub_score);
+        }
+
         if ($request->filled('year_id')) {
             $query->where('year_id', $request->year_id);
+        }
+
+        return $query;
+    }
+
+    public function index(Request $request)
+    {
+        // Date range validation
+        $hasDateStart = $request->filled('date_start');
+        $hasDateEnd = $request->filled('date_end');
+        
+        if ($hasDateStart || $hasDateEnd) {
+            if (!$hasDateStart || !$hasDateEnd) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'กรุณาระบุทั้งวันที่เริ่มและวันที่สิ้นสุด');
+            }
+            if ($request->date_end < $request->date_start) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'วันที่สิ้นสุดต้องไม่น้อยกว่าวันที่เริ่มต้น');
+            }
+        }
+
+        $query = $this->buildFilteredQuery($request);
+
+        $project = null;
+        if ($request->filled('pro_id')) {
+            $project = RdbProject::find($request->pro_id);
         }
         
         // Sort by date DESC, then name ASC
@@ -323,46 +342,60 @@ class RdbpublishedController extends Controller
 
     public function export(Request $request)
     {
-        $query = RdbPublished::with(['year', 'researcher', 'department', 'pubtype']);
-
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('pub_name', 'like', "%{$search}%")
-                  ->orWhere('pub_name_journal', 'like', "%{$search}%");
-            });
-        }
-        if ($request->filled('year_id')) {
-            $query->where('year_id', $request->year_id);
-        }
-
-        $items = $query->orderBy('id', 'desc')->get();
+        $query = $this->buildFilteredQuery($request);
+        $items = $query->orderBy('pub_date', 'desc')->orderBy('id', 'desc')->get();
 
         $filename = "published_works_" . date('Y-m-d_H-i-s') . ".csv";
         $headers = [
-            "Content-type" => "text/csv",
+            "Content-type" => "text/csv; charset=UTF-8",
             "Content-Disposition" => "attachment; filename=$filename",
             "Pragma" => "no-cache",
             "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
             "Expires" => "0"
         ];
 
-        $callback = function() use ($items) {
+        $sanitize = function ($val) {
+            if ($val === null) return '';
+            $str = trim(strip_tags((string) $val));
+            if ($str !== '' && in_array($str[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
+                return "'" . $str;
+            }
+            return $str;
+        };
+
+        $callback = function() use ($items, $sanitize) {
             $file = fopen('php://output', 'w');
-            fputs($file, $bom = (chr(0xEF) . chr(0xBB) . chr(0xBF)));
+            fputs($file, "\xEF\xBB\xBF");
             
-            fputcsv($file, ['ID', 'ชื่อผลงาน', 'วารสาร', 'ปีงบประมาณ', 'ประเภท', 'นักวิจัย', 'หน่วยงาน', 'งบประมาณ']);
+            fputcsv($file, ['ID', 'ชื่อผลงาน', 'วารสาร/แหล่งเผยแพร่', 'ปี พ.ศ.', 'ประเภทการตีพิมพ์', 'คณะผู้แต่ง', 'หน่วยงาน', 'วันที่ตีพิมพ์', 'งบประมาณ']);
 
             foreach ($items as $item) {
+                $authorList = [];
+                if ($item->authors && $item->authors->isNotEmpty()) {
+                    foreach ($item->authors as $author) {
+                        $prefix = $author->prefix->prefix_nameTH ?? '';
+                        $authorList[] = trim($prefix . $author->researcher_fname . ' ' . $author->researcher_lname);
+                    }
+                } elseif ($item->researcher) {
+                    $prefix = $item->researcher->prefix->prefix_nameTH ?? '';
+                    $authorList[] = trim($prefix . $item->researcher->researcher_fname . ' ' . $item->researcher->researcher_lname);
+                }
+
+                $pubTypeStr = '-';
+                if ($item->pubtype) {
+                    $pubTypeStr = trim(($item->pubtype->pubtype_group ?? '') . ($item->pubtype->pubtype_subgroup ? ' - ' . $item->pubtype->pubtype_subgroup : ''));
+                }
+
                 fputcsv($file, [
                     $item->id,
-                    $item->pub_name,
-                    $item->pub_name_journal,
-                    $item->year->year_name ?? '-',
-                    $item->pubtype->pubtype_name ?? '-',
-                    ($item->researcher->researcher_nameTH ?? '') . ' ' . ($item->researcher->researcher_surnameTH ?? ''),
-                    $item->department->department_nameTH ?? '-',
-                    $item->pub_budget
+                    $sanitize($item->pub_name),
+                    $sanitize($item->pub_name_journal),
+                    $sanitize($item->year->year_name ?? '-'),
+                    $sanitize($pubTypeStr ?: '-'),
+                    $sanitize(!empty($authorList) ? implode(', ', $authorList) : '-'),
+                    $sanitize($item->department->department_nameTH ?? '-'),
+                    $sanitize($item->pub_date ?? '-'),
+                    $item->pub_budget ?? 0
                 ]);
             }
             fclose($file);

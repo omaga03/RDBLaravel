@@ -161,28 +161,22 @@
                         <thead class="table-light">
                             <tr>
                                 <th>ชื่อผลงานตีพิมพ์</th>
-                                <th style="width: 200px;">วารสาร / แหล่งตีพิมพ์</th>
                                 <th style="width: 170px;" class="text-center">มาตรฐานวารสาร</th>
                                 <th style="width: 130px;" class="text-center">วันที่ตีพิมพ์</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($publicationsList as $pub)
+                            @forelse($publicationsList as $pub)
                                 <tr>
                                     <td>
-                                        <a href="{{ route('frontend.rdbpublished.show', $pub->id) }}" target="_blank" class="fw-bold text-decoration-none text-body hover-primary">
+                                        <a href="{{ route('frontend.rdbpublished.show', $pub->id) }}" target="_blank" class="fw-bold text-decoration-none text-body hover-primary d-block">
                                             {{ strip_tags((string) $pub->pub_name) }}
                                         </a>
-                                        @if($pub->project)
-                                            <small class="text-body-secondary d-block mt-0.5">
-                                                <i class="bi bi-link-45deg text-primary"></i> โครงการ: {{ strip_tags((string) $pub->project->pro_nameTH) }}
+                                        @if($pub->pub_name_journal)
+                                            <small class="text-body-secondary d-block mt-1">
+                                                <i class="bi bi-journal-text text-success me-1"></i>{{ strip_tags((string) $pub->pub_name_journal) }}
                                             </small>
                                         @endif
-                                    </td>
-                                    <td>
-                                        <small class="text-body text-break d-block">
-                                            {{ $pub->pub_name_journal ?: '-' }}
-                                        </small>
                                     </td>
                                     <td class="text-center">
                                         @if($pub->pubtype)
@@ -212,13 +206,21 @@
                                         @endif
                                     </td>
                                 </tr>
-                            @endforeach
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="text-center py-4 text-body-secondary">
+                                        <i class="bi bi-inbox fs-3 d-block mb-2"></i> ไม่พบข้อมูลผลงานตีพิมพ์ตามเงื่อนไขที่เลือก
+                                    </td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
+
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

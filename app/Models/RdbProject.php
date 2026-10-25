@@ -193,6 +193,11 @@ class RdbProject extends Model
         return $this->hasMany(RdbDip::class, 'pro_id', 'pro_id');
     }
 
+    public function budget()
+    {
+        return $this->hasOne(RdbProjectBudget::class, 'pro_id', 'pro_id');
+    }
+
     // Legacy Chart Logic Ported
     public static function getReportProjectChartSplit($dep, $ptid)
     {

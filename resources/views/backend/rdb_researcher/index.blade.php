@@ -95,7 +95,7 @@
                                     </div>
                                     <div>
                                         <div class="fw-bold fs-6 mb-1">
-                                            <a href="{{ route('backend.rdb_researcher.show', $researcher->getKey()) }}" class="text-decoration-none text-body fw-bold hover-primary">
+                                            <a href="{{ route('backend.rdb_researcher.show', $researcher->getKey()) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body fw-bold hover-primary">
                                                 {{ $researcher->prefix->prefix_nameTH ?? '' }} {{ $researcher->researcher_fname }} {{ $researcher->researcher_lname }}
                                             </a>
                                         </div>
@@ -146,7 +146,7 @@
                             </td>
                             <td class="text-center py-3 text-nowrap">
                                 <div class="btn-group btn-group-sm" role="group">
-                                    <a href="{{ route('backend.rdb_researcher.show', $researcher->getKey()) }}" class="btn btn-outline-primary" title="ดูรายละเอียด">
+                                    <a href="{{ route('backend.rdb_researcher.show', $researcher->getKey()) }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary" title="ดูรายละเอียด">
                                         <i class="bi bi-eye"></i>
                                     </a>
                                     @can('update', $researcher)

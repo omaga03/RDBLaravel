@@ -65,7 +65,6 @@ class UpdateDipRequest extends FormRequest
             'dip_data1_datestart' => 'nullable|date',
             'dip_data1_files' => 'nullable|file|max:51200',
             'dip_data2_patent' => 'nullable|string|max:255',
-            'dip_data2_name' => 'nullable|string', // Already required above
             'dip_data2_agent' => 'nullable|string|max:255',
             'dip_data2_status' => 'nullable|string|max:255',
             'dip_data2_dateend' => 'nullable|date',

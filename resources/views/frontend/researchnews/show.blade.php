@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+@include('layouts.partials.scholar-meta', ['type' => 'news', 'item' => $item])
 <div class="container-fluid py-4">
 
     <!-- Breadcrumb & Navigation -->

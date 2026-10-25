@@ -10,6 +10,7 @@ use App\Models\RdbResearcherStatus;
 use App\Models\RdbDepMajor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class RdbresearcherController extends Controller
 {
@@ -78,22 +79,29 @@ class RdbresearcherController extends Controller
             $query->orderBy('reedu_year', 'desc')->orderBy('reedu_id', 'desc');
         }]);
         
-        // Load projects with proper sorting and relationships
+        // Load projects with proper sorting and relationships (exclude refunded projects ps_id = 6 and hidden items)
         $item->load(['rdbProjects' => function($query) {
             $query->with(['year', 'type', 'typeSub', 'status'])
-                  ->orderBy('year_id', 'desc')
-                  ->orderBy('pro_budget', 'desc')
-                  ->orderBy('pro_id', 'desc');
+                  ->where('rdb_project.data_show', 1)
+                  ->where('rdb_project.ps_id', '<>', \App\Models\RdbProjectStatus::REFUNDED)
+                  ->orderBy('rdb_project.year_id', 'desc')
+                  ->orderBy('rdb_project_work.position_id', 'asc')
+                  ->orderBy('rdb_project.pro_budget', 'desc')
+                  ->orderBy('rdb_project.pro_id', 'desc');
         }]);
         
-        // Load publications
+        // Load publications (only visible)
         $item->load(['rdbPublisheds' => function($query) use ($id) {
             $query->with([
                 'project',
                 'pubtype'
             ])
-            ->orderBy('pub_date', 'desc')
-            ->orderBy('id', 'desc');
+            ->where('rdb_published.data_show', 1)
+            ->orderByRaw('YEAR(rdb_published.pub_date) desc')
+            ->orderByDesc('rdb_published_work.pubw_main')
+            ->orderByRaw('FIELD(COALESCE(rdb_published_work.pubta_id, 99), 1, 4, 2, 3, 5, 99)')
+            ->orderBy('rdb_published.pub_date', 'desc')
+            ->orderBy('rdb_published.id', 'desc');
         }]);
         
         // Load author types for publications manually
@@ -107,18 +115,22 @@ class RdbresearcherController extends Controller
             }
         }
         
-        // Load utilizations through projects
-        $utilizations = \App\Models\RdbProjectUtilize::whereHas('project.rdbProjectWorks', function($q) use ($id) {
-            $q->where('researcher_id', $id);
-        })->with(['project', 'changwat'])
-          ->orderBy('utz_date', 'desc')
-          ->get();
+        // Load utilizations through projects (only visible)
+        $utilizations = \App\Models\RdbProjectUtilize::where('data_show', 1)
+            ->whereHas('project.rdbProjectWorks', function($q) use ($id) {
+                $q->where('researcher_id', $id);
+            })->with(['project', 'changwat'])
+            ->orderBy('utz_date', 'desc')
+            ->get();
         
-        // Load intellectual properties
+        // Load intellectual properties (only visible)
         $item->load(['rdbDips' => function($query) {
             $query->with(['project', 'dipType'])
-                  ->orderBy('dip_request_date', 'desc')
-                  ->orderBy('dip_id', 'desc');
+                  ->where('rdb_dip.data_show', 1)
+                  ->orderByRaw('YEAR(rdb_dip.dip_request_date) desc')
+                  ->orderBy('rdb_dip.dipt_id', 'asc')
+                  ->orderBy('rdb_dip.dip_request_date', 'desc')
+                  ->orderBy('rdb_dip.dip_id', 'desc');
         }]);
         
         // Load Project Positions lookup
@@ -184,6 +196,167 @@ class RdbresearcherController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * PMIS API: Get research projects by PMIS teacher code and fiscal year
+     */
+    public function datagetresearchbypmis(Request $request)
+    {
+        $query = DB::table('rdb_project as p')
+            ->select([
+                'res.researcher_id',
+                'res.tea_code',
+                'res.researcher_fname',
+                'res.researcher_lname',
+                'd.department_nameTH',
+                'pos.position_id',
+                'pos.position_nameTH',
+                'pw.ratio',
+                'p.pro_id',
+                'p_count.total_researchers',
+                'y.year_name',
+                'p.pro_nameTH',
+                'pt.pt_name',
+                'pts.pts_name',
+                'ps.ps_id',
+                'ps.ps_name',
+                'p.pro_budget',
+                'p.pro_finish',
+            ])
+            ->join(DB::raw('(SELECT pw_sub.pro_id, COUNT(pw_sub.researcher_id) AS total_researchers FROM rdb_project_work pw_sub GROUP BY pw_sub.pro_id) AS p_count'), 'p.pro_id', '=', 'p_count.pro_id')
+            ->join('rdb_project_work as pw', 'p.pro_id', '=', 'pw.pro_id')
+            ->join('rdb_researcher as res', 'pw.researcher_id', '=', 'res.researcher_id')
+            ->join('rdb_project_position as pos', 'pw.position_id', '=', 'pos.position_id')
+            ->leftJoin('rdb_year as y', 'p.year_id', '=', 'y.year_id')
+            ->leftJoin('rdb_department as d', 'res.department_id', '=', 'd.department_id')
+            ->leftJoin('rdb_project_types as pt', 'p.pt_id', '=', 'pt.pt_id')
+            ->leftJoin('rdb_project_types_sub as pts', 'p.pts_id', '=', 'pts.pts_id')
+            ->leftJoin('rdb_project_status as ps', 'p.ps_id', '=', 'ps.ps_id')
+            ->where('p.data_show', 1)
+            ->whereNotIn('p.ps_id', [6, 8]);
+
+        if ($request->filled('pmis')) {
+            $query->where('res.tea_code', trim($request->query('pmis')));
+        }
+
+        if ($request->filled('year')) {
+            $query->where('y.year_name', trim($request->query('year')));
+        }
+
+        $rows = $query->orderBy('y.year_name', 'desc')
+                      ->orderBy('p.pro_nameTH', 'asc')
+                      ->get();
+
+        $result = [];
+        foreach ($rows as $row) {
+            $resId = $row->researcher_id;
+            if (!isset($result[$resId])) {
+                $result[$resId] = [
+                    'id' => $row->researcher_id,
+                    'teacher_code' => $row->tea_code,
+                    'first_name' => $row->researcher_fname,
+                    'last_name' => $row->researcher_lname,
+                    'faculty' => $row->department_nameTH,
+                    'research_list' => [],
+                ];
+            }
+
+            $result[$resId]['research_list'][] = [
+                'project_id' => $row->pro_id,
+                'project_title' => $row->pro_nameTH,
+                'role_id' => $row->position_id,
+                'role_name' => $row->position_nameTH,
+                'contribution_pct' => $row->ratio,
+                'team_size' => $row->total_researchers,
+                'fiscal_year' => $row->year_name,
+                'category' => $row->pt_name,
+                'sub_category' => $row->pts_name,
+                'status_id' => $row->ps_id,
+                'status_name' => $row->ps_name,
+                'budget_amount' => (float) $row->pro_budget,
+                'project_finish' => $row->pro_finish,
+            ];
+        }
+
+        return response()->json(array_values($result));
+    }
+
+    /**
+     * PMIS API: Get publications by PMIS teacher code and publication year
+     */
+    public function datagetpublicationbypmis(Request $request)
+    {
+        $query = DB::table('rdb_researcher as res')
+            ->select([
+                'res.researcher_id',
+                'res.tea_code',
+                'res.researcher_fname',
+                'res.researcher_lname',
+                'rd.department_nameTH as res_dept',
+                'pub.id as publication_id',
+                'pub.pub_name as publication_title',
+                'y.year_name as pub_year',
+                DB::raw("CONCAT(COALESCE(pt.pubtype_subgroup, ''), ' (', COALESCE(pt.pubtype_group, ''), ' - ', COALESCE(pt.pubtype_grouptype, ''), ')') AS pub_category"),
+                'pub.pub_name_journal as journal_name',
+                'pub.pub_score',
+                'rpp.pubta_id',
+                'rpp.pubta_nameTH as role_name',
+                'rpw.pubw_main',
+                'rpw.pubw_bud',
+                'p_count.total_authors',
+            ])
+            ->join('rdb_published_work as rpw', 'res.researcher_id', '=', 'rpw.researcher_id')
+            ->join('rdb_published as pub', 'rpw.published_id', '=', 'pub.id')
+            ->leftJoin('rdb_published_type_author as rpp', 'rpw.pubta_id', '=', 'rpp.pubta_id')
+            ->leftJoin('rdb_department as rd', 'res.department_id', '=', 'rd.department_id')
+            ->leftJoin('rdb_year as y', 'pub.year_id', '=', 'y.year_id')
+            ->leftJoin('rdb_published_type as pt', 'pub.pubtype_id', '=', 'pt.pubtype_id')
+            ->join(DB::raw('(SELECT pw_sub.published_id, COUNT(pw_sub.researcher_id) AS total_authors FROM rdb_published_work pw_sub GROUP BY pw_sub.published_id) AS p_count'), 'pub.id', '=', 'p_count.published_id')
+            ->where('pub.data_show', 1);
+
+        if ($request->filled('pmis')) {
+            $query->where('res.tea_code', trim($request->query('pmis')));
+        }
+
+        if ($request->filled('year')) {
+            $query->where('y.year_name', trim($request->query('year')));
+        }
+
+        $rows = $query->orderBy('y.year_name', 'desc')
+                      ->orderBy('pub.pub_name', 'asc')
+                      ->get();
+
+        $result = [];
+        foreach ($rows as $row) {
+            $resId = $row->researcher_id;
+            if (!isset($result[$resId])) {
+                $result[$resId] = [
+                    'id' => $row->researcher_id,
+                    'teacher_code' => $row->tea_code,
+                    'first_name' => $row->researcher_fname,
+                    'last_name' => $row->researcher_lname,
+                    'faculty' => $row->res_dept,
+                    'publication_list' => [],
+                ];
+            }
+
+            $result[$resId]['publication_list'][] = [
+                'pub_id' => $row->publication_id,
+                'pub_title' => $row->publication_title,
+                'pub_year' => $row->pub_year,
+                'pub_category' => $row->pub_category,
+                'journal_name' => $row->journal_name,
+                'role_id' => $row->pubta_id,
+                'role_name' => $row->role_name,
+                'is_main_affiliation' => $row->pubw_main,
+                'is_budget_requester' => $row->pubw_bud,
+                'team_size' => $row->total_authors,
+                'quality_score' => (float) $row->pub_score,
+            ];
+        }
+
+        return response()->json(array_values($result));
     }
 }
 

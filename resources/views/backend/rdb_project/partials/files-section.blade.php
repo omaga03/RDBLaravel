@@ -135,8 +135,9 @@
                                 <td>{{ $file->rf_download ?? 0 }}</td>
                                 <td>
                                     <a href="{{ route('backend.rdb_project.file.download', [$project->pro_id, $file->id]) }}" 
-                                       class="btn btn-info btn-sm" title="ดาวน์โหลด">
-                                        <i class="fa fa-download"></i>
+                                       target="_blank" rel="noopener noreferrer"
+                                       class="btn btn-info btn-sm" title="เปิดดูไฟล์">
+                                        <i class="fa fa-eye"></i>
                                     </a>
                                     <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" 
                                             data-target="#editFileModal{{ $file->id }}" title="แก้ไข">

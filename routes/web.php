@@ -75,10 +75,21 @@ use App\Http\Controllers\Frontend\SiteController as FrontendSiteController;
 use App\Http\Controllers\Frontend\DashboardController;
 
 Route::get('/', [FrontendSiteController::class, 'index'])->name('home');
+Route::get('/site/index', [FrontendSiteController::class, 'index'])->name('site.index');
+Route::view('/privacy-policy', 'pages.privacy')->name('privacy');
+Route::view('/cookie-policy', 'pages.cookies')->name('cookies');
 
 
 // Backend Routes (Protected)
-Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function () {
+Route::prefix('backend')->name('backend.')->middleware(['auth', \App\Http\Middleware\EnsureResearcherVerified::class])->group(function () {
+    // Identity Verification & Department Onboarding
+    Route::get('/onboarding', [\App\Http\Controllers\Backend\OnboardingController::class, 'index'])->name('onboarding.index');
+    Route::post('/onboarding', [\App\Http\Controllers\Backend\OnboardingController::class, 'store'])->name('onboarding.store');
+
+    // Admin Verification & Unlock Actions
+    Route::post('/user/{user}/approve-onboarding', [\App\Http\Controllers\Backend\UserController::class, 'approveOnboarding'])->name('user.approve_onboarding');
+    Route::post('/user/{user}/reject-onboarding', [\App\Http\Controllers\Backend\UserController::class, 'rejectOnboarding'])->name('user.reject_onboarding');
+
     Route::get('/', [SiteController::class, 'index'])->name('site.index');
 
     // AJAX Researcher Search (must be BEFORE resource route)
@@ -89,12 +100,15 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     // Export Routes (Must be BEFORE resource routes, rate-limited to protect server resources)
     Route::middleware('throttle:30,1')->group(function () {
         Route::get('/rdb_project/export', [RdbProjectController::class, 'export'])->name('rdb_project.export');
+        Route::get('/rdb_project/{id}/dspace', [RdbProjectController::class, 'exportDspace'])->name('rdb_project.export_dspace');
         Route::get('/rdb_researcher/export', [RdbResearcherController::class, 'export'])->name('rdb_researcher.export');
         Route::get('/rdb_published/export', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'export'])->name('rdb_published.export');
+        Route::get('/rdb_published/{id}/dspace', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'exportDspace'])->name('rdb_published.export_dspace');
         Route::get('/rdb_dip/export', [\App\Http\Controllers\Backend\RdbDipController::class, 'export'])->name('rdb_dip.export');
         Route::get('/rdbprojectutilize/export', [\App\Http\Controllers\Backend\RdbProjectUtilizeController::class, 'export'])->name('rdbprojectutilize.export');
     });
 
+    Route::get('/rdb_project/dspace', [RdbProjectController::class, 'dspaceIndex'])->name('rdb_project.dspace_index');
     Route::resource('rdb_project', RdbProjectController::class);
     Route::resource('rdb_researcher', RdbResearcherController::class);
     Route::post('/rdb_researcher/{id}/update-codeid', [RdbResearcherController::class, 'updateCodeId'])->name('rdb_researcher.update_codeid');
@@ -124,16 +138,19 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     Route::resource('rdbpublishedpersonnel', \App\Http\Controllers\Backend\RdbPublishedPersonnelController::class);
     Route::resource('rdbchangwat', \App\Http\Controllers\Backend\RdbChangwatController::class);
     Route::resource('rdbpublishedtype', \App\Http\Controllers\Backend\RdbPublishedTypeController::class);
+    Route::resource('rdbpublishedcheckyear', \App\Http\Controllers\Backend\RdbPublishedCheckyearController::class);
+    Route::resource('rdbpublishedtypeauthor', \App\Http\Controllers\Backend\RdbPublishedTypeAuthorController::class);
+    Route::resource('rdbpublishedpersonneldep', \App\Http\Controllers\Backend\RdbPublishedPersonnelDepController::class);
     Route::resource('rdbdiptype', \App\Http\Controllers\Backend\RdbDipTypeController::class);
     Route::resource('rdbprojectutilizetype', \App\Http\Controllers\Backend\RdbProjectUtilizeTypeController::class);
 
     Route::get('/rbac/{rbac}/permissions', [RbacController::class, 'permissions'])->name('rbac.permissions');
     Route::put('/rbac/{rbac}/permissions', [RbacController::class, 'updatePermissions'])->name('rbac.update_permissions');
     Route::post('/rbac/{rbac}/impersonate', [RbacController::class, 'impersonate'])->name('rbac.impersonate');
-    Route::post('/rbac/stop-impersonate', [RbacController::class, 'stopImpersonate'])->name('rbac.stop_impersonate');
+    Route::match(['get', 'post'], '/rbac/stop-impersonate', [RbacController::class, 'stopImpersonate'])->name('rbac.stop_impersonate');
     Route::post('/rbac/switch-scope', [\App\Http\Controllers\Backend\RbacController::class, 'switchScope'])->name('rbac.switch_scope');
     Route::post('/user/{user}/impersonate', [\App\Http\Controllers\Backend\UserController::class, 'impersonate'])->name('user.impersonate');
-    Route::post('/user/stop-impersonate', [\App\Http\Controllers\Backend\UserController::class, 'stopImpersonate'])->name('user.stop_impersonate');
+    Route::match(['get', 'post'], '/user/stop-impersonate', [\App\Http\Controllers\Backend\UserController::class, 'stopImpersonate'])->name('user.stop_impersonate');
     Route::resource('rbac', RbacController::class);
     Route::resource('user', UserController::class);
 
@@ -168,6 +185,8 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     Route::post('/rdb_published/{id}/delete-file', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'deleteFile'])->name('rdb_published.delete_file');
     Route::get('/rdb_published/{id}/view-file', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'viewFile'])->name('rdb_published.view_file');
 
+    Route::post('/rdb_published/{id}/restore', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'restore'])->name('rdb_published.restore');
+    Route::get('/rdb_published/dspace', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'dspaceIndex'])->name('rdb_published.dspace_index');
     Route::resource('rdb_published', \App\Http\Controllers\Backend\RdbPublishedController::class);
     
     // DIP File Management
@@ -175,6 +194,7 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     Route::get('/rdb_dip/{id}/view-file', [\App\Http\Controllers\Backend\RdbDipController::class, 'viewFile'])->name('rdb_dip.view_file');
     Route::delete('/rdb_dip/{id}/delete-file', [\App\Http\Controllers\Backend\RdbDipController::class, 'deleteFile'])->name('rdb_dip.delete_file');
     Route::get('/rdb_dip/search/years', [\App\Http\Controllers\Backend\RdbDipController::class, 'searchYears'])->name('rdb_dip.search_years');
+    Route::post('/rdb_dip/{id}/restore', [\App\Http\Controllers\Backend\RdbDipController::class, 'restore'])->name('rdb_dip.restore');
     
     Route::resource('rdb_dip', \App\Http\Controllers\Backend\RdbDipController::class);
     
@@ -187,15 +207,22 @@ Route::prefix('backend')->name('backend.')->middleware(['auth'])->group(function
     Route::get('/rdbprojectutilize/search/utilize-types', [\App\Http\Controllers\Backend\RdbProjectUtilizeController::class, 'searchUtilizeTypes'])->name('rdbprojectutilize.search_utilize_types');
     Route::get('/rdbprojectutilize/search/projects', [\App\Http\Controllers\Backend\RdbProjectUtilizeController::class, 'searchProjects'])->name('rdbprojectutilize.search_projects');
     Route::get('/rdbprojectutilize/download/{id}/{filename}', [\App\Http\Controllers\Backend\RdbProjectUtilizeController::class, 'downloadFile'])->name('rdbprojectutilize.download');
+    Route::post('/rdbprojectutilize/{id}/restore', [\App\Http\Controllers\Backend\RdbProjectUtilizeController::class, 'restore'])->name('rdbprojectutilize.restore');
     
     Route::resource('rdbprojectutilize', \App\Http\Controllers\Backend\RdbProjectUtilizeController::class);
+    Route::post('/research_news/sync-nriis', [\App\Http\Controllers\Backend\ResearchNewsController::class, 'syncNriis'])->name('research_news.sync_nriis');
+    Route::post('/research_news/{id}/restore', [\App\Http\Controllers\Backend\ResearchNewsController::class, 'restore'])->name('research_news.restore');
     Route::resource('research_news', \App\Http\Controllers\Backend\ResearchNewsController::class);
     Route::get('/research_news/{id}/view-image', [\App\Http\Controllers\Backend\ResearchNewsController::class, 'viewNewsImage'])->name('research_news.view_image');
+    Route::post('/research_conference/sync-facebook', [\App\Http\Controllers\Backend\ResearchConferenceController::class, 'syncFacebook'])->name('research_conference.sync_facebook');
+    Route::post('/research_conference/{id}/restore', [\App\Http\Controllers\Backend\ResearchConferenceController::class, 'restore'])->name('research_conference.restore');
     Route::resource('research_conference', \App\Http\Controllers\Backend\ResearchConferenceController::class);
     Route::get('/research_conference/{id}/view-image', [\App\Http\Controllers\Backend\ResearchConferenceController::class, 'viewConferenceImage'])->name('research_conference.view_image');
 
-    // Project Status Management
+    // Project Status & Budget Management
+    Route::post('/rdb_project/{id}/restore', [RdbProjectController::class, 'restore'])->name('rdb_project.restore');
     Route::patch('/rdb_project/{id}/status', [RdbProjectController::class, 'updateStatus'])->name('rdb_project.update_status');
+    Route::patch('/rdb_project/{id}/budget', [RdbProjectController::class, 'updateBudget'])->name('rdb_project.update_budget');
 
     // Project Researcher Management
     Route::post('/rdb_project/{id}/researcher', [RdbProjectController::class, 'storeResearcher'])->name('rdb_project.researcher.store');
@@ -248,6 +275,7 @@ Route::name('frontend.')->group(function () {
     Route::resource('rdbgroupproject', FrontendRdbgroupprojectController::class)->parameters(['rdbgroupproject' => 'id'])->only(['index', 'show']);
     Route::resource('rdbnacc', RdbnaccController::class)->parameters(['rdbnacc' => 'id'])->only(['index', 'show']);
     Route::resource('rdbprefix', FrontendRdbprefixController::class)->parameters(['rdbprefix' => 'id'])->only(['index', 'show']);
+    Route::get('rdbproject/export', [FrontendRdbprojectController::class, 'export'])->name('rdbproject.export');
     Route::resource('rdbproject', FrontendRdbprojectController::class)->parameters(['rdbproject' => 'id'])->only(['index', 'show']);
     Route::get('rdbproject/api/types-by-year', [FrontendRdbprojectController::class, 'getTypesByYear'])->name('rdbproject.typesByYear');
     Route::get('rdbproject/api/subtypes-by-type', [FrontendRdbprojectController::class, 'getSubTypesByType'])->name('rdbproject.subTypesByType');
@@ -267,6 +295,7 @@ Route::name('frontend.')->group(function () {
     Route::resource('rdbprojecttype', FrontendRdbprojecttypeController::class)->parameters(['rdbprojecttype' => 'id'])->only(['index', 'show']);
     Route::resource('rdbprojecttypesub', FrontendRdbprojecttypesubController::class)->parameters(['rdbprojecttypesub' => 'id'])->only(['index', 'show']);
     Route::resource('rdbprojectutilization', RdbprojectutilizationController::class)->parameters(['rdbprojectutilization' => 'id'])->only(['index', 'show']);
+    Route::get('rdbprojectutilize/export', [RdbprojectutilizeController::class, 'export'])->name('rdbprojectutilize.export');
     Route::resource('rdbprojectutilize', RdbprojectutilizeController::class)->parameters(['rdbprojectutilize' => 'id'])->only(['index', 'show']);
     Route::get('rdbprojectutilize/{id}/view-file', [RdbprojectutilizeController::class, 'viewFile'])->name('rdbprojectutilize.view_file');
     Route::get('rdbprojectutilize/api/search-utilizes', [RdbprojectutilizeController::class, 'searchUtilizes'])->name('rdbprojectutilize.search_utilizes');
@@ -290,6 +319,12 @@ Route::name('frontend.')->group(function () {
     Route::resource('rdbpublishedtype', RdbpublishedtypeController::class)->parameters(['rdbpublishedtype' => 'id'])->only(['index', 'show']);
     Route::resource('rdbpublishedtypeauthor', RdbpublishedtypeauthorController::class)->parameters(['rdbpublishedtypeauthor' => 'id'])->only(['index', 'show']);
     Route::resource('rdbpublishedwork', RdbpublishedworkController::class)->parameters(['rdbpublishedwork' => 'id'])->only(['index', 'show']);
+    // PMIS API Endpoints (JSON)
+    Route::get('rdbresearcher/datagetresearchbypmis', [FrontendRdbresearcherController::class, 'datagetresearchbypmis'])->name('rdbresearcher.datagetresearchbypmis');
+    Route::get('rdbresearcher/datagetpublicationbypmis', [FrontendRdbresearcherController::class, 'datagetpublicationbypmis'])->name('rdbresearcher.datagetpublicationbypmis');
+    Route::get('api/pmis/research', [FrontendRdbresearcherController::class, 'datagetresearchbypmis'])->name('api.pmis.research');
+    Route::get('api/pmis/publication', [FrontendRdbresearcherController::class, 'datagetpublicationbypmis'])->name('api.pmis.publication');
+
     Route::get('rdbresearcher/export', [FrontendRdbresearcherController::class, 'export'])->name('rdbresearcher.export');
     Route::resource('rdbresearcher', FrontendRdbresearcherController::class)->parameters(['rdbresearcher' => 'id'])->only(['index', 'show']);
     Route::resource('rdbresearchereducation', RdbresearchereducationController::class)->parameters(['rdbresearchereducation' => 'id'])->only(['index', 'show']);
@@ -298,8 +333,18 @@ Route::name('frontend.')->group(function () {
     Route::resource('rdbtraining', RdbtrainingController::class)->parameters(['rdbtraining' => 'id'])->only(['index', 'show']);
     Route::resource('rdbtrainingregister', RdbtrainingregisterController::class)->parameters(['rdbtrainingregister' => 'id'])->only(['index', 'show']);
     Route::resource('rdbyear', FrontendRdbyearController::class)->parameters(['rdbyear' => 'id'])->only(['index', 'show']);
+
+    // RSS 2.0 Feeds
+    Route::get('researchcoferenceinthai/rss', [ResearchcoferenceinthaiController::class, 'rss'])->name('researchcoferenceinthai.rss');
+    Route::get('researchcoferenceinthai/jsonrssnewscoferenceinthai', [ResearchcoferenceinthaiController::class, 'rss'])->name('researchcoferenceinthai.rss_legacy');
     Route::resource('researchcoferenceinthai', ResearchcoferenceinthaiController::class)->parameters(['researchcoferenceinthai' => 'id'])->only(['index', 'show']);
+
+    Route::get('researchnews/rss', [ResearchnewsController::class, 'rss'])->name('researchnews.rss');
+    Route::get('researchnews/jsonrssnewsresearch', [ResearchnewsController::class, 'rss'])->name('researchnews.rss_legacy');
     Route::resource('researchnews', ResearchnewsController::class)->parameters(['researchnews' => 'id'])->only(['index', 'show']);
+
+    Route::get('rss/news', [ResearchnewsController::class, 'rss'])->name('rss.news');
+    Route::get('rss/conferences', [ResearchcoferenceinthaiController::class, 'rss'])->name('rss.conferences');
     Route::get('/site', [FrontendSiteController::class, 'index'])->name('site.index');
 });
 
@@ -324,6 +369,7 @@ Route::prefix('dashboard')->group(function () {
     Route::get('/api/amphoes', [DashboardController::class, 'getAmphoesByChangwat'])->name('frontend.dashboard.amphoes');
     Route::get('/ip', [DashboardController::class, 'ip'])->name('frontend.dashboard.ip');
     Route::get('/researchers', [DashboardController::class, 'researchers'])->name('frontend.dashboard.researchers');
+    Route::get('/qa', [DashboardController::class, 'qa'])->name('frontend.dashboard.qa');
 });
 
 // Authenticated Routes

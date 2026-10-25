@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+@include('layouts.partials.scholar-meta', ['type' => 'published', 'item' => $item])
 <div class="container-fluid py-4">
 
     <!-- Breadcrumb & Navigation -->
@@ -184,7 +185,7 @@
                 </div>
                 <div class="card-body">
                     <h6 class="fw-semibold mb-2" style="font-size: 0.95rem; line-height: 1.5;">
-                        <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" class="text-decoration-none text-body hover-primary text-break">
+                        <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body hover-primary text-break">
                             {{ strip_tags((string) $item->project->pro_nameTH) }}
                         </a>
                     </h6>
@@ -221,7 +222,7 @@
                     <div class="small fw-semibold text-body mb-1" style="font-size: 0.78rem;">หัวหน้าโครงการ:</div>
                     <div class="d-flex align-items-center flex-wrap">
                         <i class="bi bi-person-circle text-primary me-2 fs-6"></i>
-                        <a href="{{ route('frontend.rdbresearcher.show', $headResearcher->researcher_id) }}" class="text-decoration-none text-body hover-primary fw-medium small">
+                        <a href="{{ route('frontend.rdbresearcher.show', $headResearcher->researcher_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body hover-primary fw-medium small">
                             {{ $headResearcher->prefix->prefix_nameTH ?? '' }}{{ $headResearcher->researcher_fname }} {{ $headResearcher->researcher_lname }}
                         </a>
                         @if($remainingCount > 0)
@@ -236,7 +237,7 @@
                     @endif
 
                     <div class="mt-3">
-                        <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" class="btn btn-sm btn-outline-primary w-100">
+                        <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary w-100">
                             <i class="bi bi-box-arrow-up-right me-1"></i> ดูรายละเอียดโครงการ
                         </a>
                     </div>
@@ -266,7 +267,7 @@
                                         </div>
                                         <div class="flex-grow-1 min-w-0">
                                             <div class="d-flex flex-wrap align-items-center gap-1.5 mb-0.5">
-                                                <a href="{{ route('frontend.rdbresearcher.show', $author->researcher_id) }}" class="text-decoration-none fw-bold text-body hover-primary">
+                                                <a href="{{ route('frontend.rdbresearcher.show', $author->researcher_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none fw-bold text-body hover-primary">
                                                     {{ $author->prefix->prefix_nameTH ?? '' }}{{ $author->researcher_fname }} {{ $author->researcher_lname }}
                                                 </a>
                                                 @if(isset($author->authorType))
@@ -298,7 +299,7 @@
                                     </div>
                                     <div class="flex-grow-1 min-w-0">
                                         <div class="d-flex flex-wrap align-items-center gap-1.5 mb-0.5">
-                                            <a href="{{ route('frontend.rdbresearcher.show', $item->researcher->researcher_id) }}" class="text-decoration-none fw-bold text-body hover-primary">
+                                            <a href="{{ route('frontend.rdbresearcher.show', $item->researcher->researcher_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none fw-bold text-body hover-primary">
                                                 {{ $item->researcher->prefix->prefix_nameTH ?? '' }}{{ $item->researcher->researcher_fname }} {{ $item->researcher->researcher_lname }}
                                             </a>
                                         </div>
@@ -493,6 +494,21 @@
                                 </span>
                             @endif
                         @endforeach
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            {{-- Note / หมายเหตุ --}}
+            @if($item->pub_note)
+            <div class="card shadow-sm border mb-4">
+                <div class="card-header bg-body-tertiary d-flex align-items-center">
+                    <i class="bi bi-sticky text-warning me-2 fs-5"></i>
+                    <h5 class="mb-0 fw-bold text-body">หมายเหตุ</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-body text-break lh-lg">
+                        {!! nl2br(e($item->pub_note)) !!}
                     </div>
                 </div>
             </div>

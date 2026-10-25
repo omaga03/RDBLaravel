@@ -257,9 +257,10 @@ class RdbResearcherController extends Controller
         
         $researcher->load(['rdbProjects' => function($query) {
             $query->with(['year', 'type', 'typeSub', 'status'])
-                  ->orderBy('year_id', 'desc')
-                  ->orderBy('pro_budget', 'desc')
-                  ->orderBy('pro_id', 'desc');
+                  ->orderBy('rdb_project.year_id', 'desc')
+                  ->orderBy('rdb_project_work.position_id', 'asc')
+                  ->orderBy('rdb_project.pro_budget', 'desc')
+                  ->orderBy('rdb_project.pro_id', 'desc');
         }]);
         
         $researcher->load(['rdbPublisheds' => function($query) use ($id) {
@@ -267,8 +268,11 @@ class RdbResearcherController extends Controller
                 'project',
                 'pubtype'
             ])
-            ->orderBy('pub_date', 'desc')
-            ->orderBy('id', 'desc');
+            ->orderByRaw('YEAR(rdb_published.pub_date) desc')
+            ->orderByDesc('rdb_published_work.pubw_main')
+            ->orderByRaw('FIELD(COALESCE(rdb_published_work.pubta_id, 99), 1, 4, 2, 3, 5, 99)')
+            ->orderBy('rdb_published.pub_date', 'desc')
+            ->orderBy('rdb_published.id', 'desc');
         }]);
         
         $authorTypeIds = $researcher->rdbPublisheds->pluck('pivot.pubta_id')->filter()->unique();
@@ -289,8 +293,10 @@ class RdbResearcherController extends Controller
         
         $researcher->load(['rdbDips' => function($query) {
             $query->with(['project', 'dipType'])
-                  ->orderBy('dip_request_date', 'desc')
-                  ->orderBy('dip_id', 'desc');
+                  ->orderByRaw('YEAR(rdb_dip.dip_request_date) desc')
+                  ->orderBy('rdb_dip.dipt_id', 'asc')
+                  ->orderBy('rdb_dip.dip_request_date', 'desc')
+                  ->orderBy('rdb_dip.dip_id', 'desc');
         }]);
         
         $projectPositions = \App\Models\RdbProjectPosition::all()->keyBy('position_id');

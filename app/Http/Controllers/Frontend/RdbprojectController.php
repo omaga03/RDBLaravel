@@ -619,10 +619,18 @@ class RdbprojectController extends Controller
         
         if ($filePath && Storage::disk('public')->exists($filePath)) {
             $fileRecord->increment('rf_download');
-            return Storage::disk('public')->download($filePath);
+            $mime = Storage::disk('public')->mimeType($filePath) ?: ($fileRecord->prf_mime_type ?: 'application/pdf');
+            return response(Storage::disk('public')->get($filePath), 200, [
+                'Content-Type' => $mime,
+                'Content-Disposition' => 'inline; filename="' . basename($filePath) . '"'
+            ]);
         } elseif ($filePath && file_exists(public_path($filePath))) {
             $fileRecord->increment('rf_download');
-            return response()->download(public_path($filePath));
+            $mime = mime_content_type(public_path($filePath)) ?: ($fileRecord->prf_mime_type ?: 'application/pdf');
+            return response()->file(public_path($filePath), [
+                'Content-Type' => $mime,
+                'Content-Disposition' => 'inline; filename="' . basename($filePath) . '"'
+            ]);
         }
 
         abort(404, 'ไฟล์ไม่พบ');
@@ -707,11 +715,26 @@ class RdbprojectController extends Controller
 
         $filePath = $project->getReportFilePath();
         
-        if ($filePath && Storage::disk('public')->exists($filePath)) {
+        $logDownload = function () use ($project) {
             $project->increment('pro_count_full');
+            try {
+                \App\Models\RdbProjectDownload::create([
+                    'pro_id' => $project->pro_id,
+                    'researcher_id' => auth()->user()?->researcher_id ?? null,
+                    'uti_id' => 1,
+                    'pjdo_date' => now()->format('Y-m-d H:i:s'),
+                    'pjdo_ip' => substr((string) request()->ip(), 0, 15),
+                ]);
+            } catch (\Throwable $e) {
+                // Ignore if optional FK/table constraint differs
+            }
+        };
+
+        if ($filePath && Storage::disk('public')->exists($filePath)) {
+            $logDownload();
             return Storage::disk('public')->response($filePath);
         } elseif ($filePath && file_exists(public_path($filePath))) {
-            $project->increment('pro_count_full');
+            $logDownload();
             return response()->file(public_path($filePath));
         }
 
@@ -719,15 +742,117 @@ class RdbprojectController extends Controller
         if (!empty($project->pro_file)) {
             $legacyRelative = 'datafiles/' . $project->pro_id . '/' . $project->pro_file;
             if (Storage::disk('public')->exists($legacyRelative)) {
-                $project->increment('pro_count_full');
+                $logDownload();
                 return Storage::disk('public')->response($legacyRelative);
             } elseif (file_exists(public_path($legacyRelative))) {
-                $project->increment('pro_count_full');
+                $logDownload();
                 return response()->file(public_path($legacyRelative));
             }
         }
 
         abort(404, 'ไม่พบไฟล์รายงานบนเซิร์ฟเวอร์');
+    }
+
+    /**
+     * Export filtered projects as CSV (Frontend)
+     */
+    public function export(Request $request)
+    {
+        $query = RdbProject::with([
+            'year', 'type', 'typeSub', 'status', 'department',
+            'rdbProjectWorks' => function($q) { $q->orderBy('position_id', 'asc'); },
+            'rdbProjectWorks.researcher.prefix',
+            'rdbProjectWorks.position'
+        ]);
+
+        // Apply same filters as index
+        if ($request->filled('search')) {
+            $searchTerm = trim($request->search);
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('pro_nameTH', 'like', "%{$searchTerm}%")
+                  ->orWhere('pro_nameEN', 'like', "%{$searchTerm}%")
+                  ->orWhere('pro_code', 'like', "%{$searchTerm}%")
+                  ->orWhere('pro_keyword', 'like', "%{$searchTerm}%");
+            });
+        }
+        if ($request->filled('year_id')) { $query->where('year_id', $request->year_id); }
+        if ($request->filled('pt_id'))   { $query->where('pt_id', $request->pt_id); }
+        if ($request->filled('pts_id'))  { $query->where('pts_id', $request->pts_id); }
+        if ($request->filled('department_id')) { $query->where('department_id', $request->department_id); }
+        if ($request->filled('ps_id'))   { $query->where('ps_id', $request->ps_id); }
+        if ($request->filled('pgroup_id')) { $query->where('pgroup_id', $request->pgroup_id); }
+        if ($request->filled('budget_min')) { $query->where('pro_budget', '>=', $request->budget_min); }
+        if ($request->filled('budget_max')) { $query->where('pro_budget', '<=', $request->budget_max); }
+
+        if ($request->filled('date_start') && $request->filled('date_end')) {
+            $query->whereDate('pro_date_start', '>=', $request->date_start)
+                  ->whereDate('pro_date_end', '<=', $request->date_end);
+        }
+
+        if ($request->filled('researcher_id') && $request->researcher_id !== 'pre') {
+            $query->whereHas('researchers', function($rq) use ($request) {
+                $rq->where('rdb_researcher.researcher_id', $request->researcher_id);
+            });
+        }
+
+        $items = $query->orderBy('pro_date_start', 'desc')->orderBy('pro_id', 'desc')->get();
+
+        $filename = "rdb_projects_" . date('Y-m-d_H-i-s') . ".csv";
+        $headers = [
+            "Content-type" => "text/csv; charset=UTF-8",
+            "Content-Disposition" => "attachment; filename=$filename",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        ];
+
+        $sanitize = function ($val) {
+            if ($val === null) return '';
+            $str = trim(strip_tags((string) $val));
+            if ($str !== '' && in_array($str[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
+                return "'" . $str;
+            }
+            return $str;
+        };
+
+        $callback = function() use ($items, $sanitize) {
+            $file = fopen('php://output', 'w');
+            fputs($file, "\xEF\xBB\xBF");
+
+            fputcsv($file, ['ID', 'รหัสโครงการ', 'ชื่อโครงการ (TH)', 'ชื่อโครงการ (EN)', 'ปีงบประมาณ', 'ประเภททุน', 'ประเภทย่อย', 'หน่วยงาน', 'สถานะ', 'งบประมาณ', 'วันเริ่มต้น', 'วันสิ้นสุด', 'คณะผู้วิจัย', 'หมายเหตุ']);
+
+            foreach ($items as $item) {
+                $researchers = [];
+                foreach ($item->rdbProjectWorks as $work) {
+                    if ($work->researcher) {
+                        $r = $work->researcher;
+                        $prefix = $r->prefix->prefix_nameTH ?? '';
+                        $posName = $work->position->position_nameTH ?? 'ผู้ร่วมวิจัย';
+                        $researchers[] = trim("{$prefix}{$r->researcher_fname} {$r->researcher_lname}") . " ({$posName})";
+                    }
+                }
+
+                fputcsv($file, [
+                    $item->pro_id,
+                    $sanitize($item->pro_code),
+                    $sanitize($item->pro_nameTH),
+                    $sanitize($item->pro_nameEN),
+                    $sanitize($item->year->year_name ?? '-'),
+                    $sanitize($item->type->pt_name ?? '-'),
+                    $sanitize($item->typeSub->pts_name ?? '-'),
+                    $sanitize($item->department->department_nameTH ?? '-'),
+                    $sanitize($item->status->ps_name ?? '-'),
+                    $item->pro_budget ?? 0,
+                    $sanitize($item->pro_date_start ?? '-'),
+                    $sanitize($item->pro_date_end ?? '-'),
+                    $sanitize(!empty($researchers) ? implode(', ', $researchers) : '-'),
+                    $sanitize($item->pro_note ?? ''),
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     public function show($id)
@@ -756,6 +881,9 @@ class RdbprojectController extends Controller
             'createdBy.researcher',
             'updatedBy.researcher'
         ])->findOrFail($id);
+
+        $item->increment('pro_count_page');
+
         return view('frontend.rdbproject.show', compact('item'));
     }
 }

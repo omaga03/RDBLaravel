@@ -22,7 +22,8 @@ class UploadDipFileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'dip_files' => 'required|file|mimes:pdf|max:51200', // 50MB
+            'field' => 'nullable|string|in:dip_files,dip_data1_files,dip_data2_files_con,dip_data3_drawing_picture,dip_data_forms_request,dip_data3_filesass1,dip_data3_filesass2,dip_data3_filesass3',
+            'dip_files' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png,zip|max:51200', // 50MB
         ];
     }
 

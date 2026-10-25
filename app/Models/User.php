@@ -22,6 +22,19 @@ class User extends Authenticatable
         'username',
         'email',
         'status',
+        'onboarding_status',
+        'onboarding_department_id',
+        'onboarding_prefix_id',
+        'onboarding_fname',
+        'onboarding_lname',
+        'onboarding_fname_en',
+        'onboarding_lname_en',
+        'onboarding_tel',
+        'onboarding_position',
+        'onboarding_submitted_at',
+        'onboarding_approved_at',
+        'onboarding_approved_by',
+        'onboarding_reject_reason',
         'password_hash',
         'auth_key',
         'password_reset_token',
@@ -148,6 +161,14 @@ class User extends Authenticatable
      */
     protected $allRoles = null;
 
+    public function refresh()
+    {
+        $this->allRoles = null;
+        $this->unsetRelation('roles');
+        $this->unsetRelation('researcher');
+        return parent::refresh();
+    }
+
     /**
      * Get all roles assigned to the user, including inherited roles.
      * Caches the result for the duration of the request.
@@ -222,6 +243,55 @@ class User extends Authenticatable
     public function researcher()
     {
         return $this->belongsTo(RdbResearcher::class, 'researcher_id', 'researcher_id');
+    }
+
+    public function onboardingDepartment()
+    {
+        return $this->belongsTo(RdbDepartment::class, 'onboarding_department_id', 'department_id');
+    }
+
+    public function onboardingPrefix()
+    {
+        return $this->belongsTo(RdbPrefix::class, 'onboarding_prefix_id', 'prefix_id');
+    }
+
+    public function onboardingApprover()
+    {
+        return $this->belongsTo(User::class, 'onboarding_approved_by', 'id');
+    }
+
+    /**
+     * Check if user is a fully verified researcher or an admin.
+     */
+    public function isVerifiedResearcher(): bool
+    {
+        // Admins, Domain Managers, and Coordinators are always considered verified
+        if ($this->hasRole(['The Creator', 'Admin', 'Admin Research', 'Admin Project', 'Admin Published', 'Admin Utilize', 'Admin Researcher', 'Faculty Coordinator', 'Admin Library', 'Admin Position', 'Admin Dep'])
+            || $this->hasPermission(['User Manager', 'news', 'Event', 'MasterData.Manage', 'Department', 'Budget', 'Rbac.Management', 'RBAC Manager'])) {
+            return true;
+        }
+
+        if (in_array($this->onboarding_status, ['none', 'pending', 'rejected'])) {
+            return false;
+        }
+
+        return !empty($this->researcher_id);
+    }
+
+    /**
+     * Determine if user has access to full backend modules (projects, publications, etc.).
+     */
+    public function canAccessFullBackend(): bool
+    {
+        return $this->isVerifiedResearcher();
+    }
+
+    /**
+     * Check if user is in pending onboarding / awaiting admin verification.
+     */
+    public function isPendingOnboarding(): bool
+    {
+        return !$this->isVerifiedResearcher();
     }
 
     public function getNameAttribute()

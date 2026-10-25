@@ -110,6 +110,36 @@
                     </div>
                 @endif
             </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold">สถานะการยืนยันตัวตน (Onboarding Status)</label>
+                @if($canManageRoles)
+                    <select name="onboarding_status" id="onboarding_status" class="form-select @error('onboarding_status') is-invalid @enderror">
+                        <option value="approved" {{ old('onboarding_status', $user->onboarding_status) == 'approved' ? 'selected' : '' }}>อนุมัติและปลดล็อกแล้ว (Approved)</option>
+                        <option value="pending" {{ old('onboarding_status', $user->onboarding_status) == 'pending' ? 'selected' : '' }}>รอยืนยันและปลดล็อก (Pending)</option>
+                        <option value="rejected" {{ old('onboarding_status', $user->onboarding_status) == 'rejected' ? 'selected' : '' }}>ไม่อนุมัติ (Rejected)</option>
+                        <option value="none" {{ old('onboarding_status', $user->onboarding_status) == 'none' ? 'selected' : '' }}>ยังไม่ส่งข้อมูลยืนยันตัวตน (None)</option>
+                    </select>
+                    @error('onboarding_status')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                @else
+                    <div class="form-control bg-body-tertiary d-flex align-items-center justify-content-between">
+                        <span>
+                            @if($user->onboarding_status == 'approved')
+                                <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-check-circle me-1"></i>อนุมัติแล้ว</span>
+                            @elseif($user->onboarding_status == 'pending')
+                                <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i>รอยืนยัน/ปลดล็อก</span>
+                            @elseif($user->onboarding_status == 'rejected')
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle"><i class="bi bi-x-circle me-1"></i>ไม่อนุมัติ</span>
+                            @else
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">ยังไม่ส่งข้อมูล</span>
+                            @endif
+                        </span>
+                        <small class="text-body-secondary"><i class="bi bi-lock-fill me-1"></i>เฉพาะผู้ดูแลระบบ</small>
+                    </div>
+                @endif
+            </div>
         </div>
     </x-form-wrapper>
 </div>

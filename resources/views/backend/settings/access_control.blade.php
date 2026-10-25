@@ -175,18 +175,18 @@
                             </label>
                             <div class="border rounded-3 p-3 bg-body-tertiary">
                                 <div class="form-check mb-2.5">
-                                    <input class="form-check-input" type="radio" name="download_policy_full_report" id="report_members_only" value="members_only" {{ ($settings['download_policy_full_report'] ?? 'members_only') === 'members_only' ? 'checked' : '' }}>
-                                    <label class="form-check-label fw-semibold text-body" for="report_members_only">
-                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle me-1.5">แนะนำ</span>
-                                        ต้องเป็นสมาชิก / เข้าสู่ระบบก่อนเท่านั้น (Members Only)
-                                        <div class="text-body-secondary fw-normal small mt-0.5">บุคคลทั่วไปไม่สามารถดาวน์โหลดได้โดยตรง ต้องล็อกอินก่อน (ป้องกันการดึงข้อมูลและคุ้มครองลิขสิทธิ์)</div>
+                                    <input class="form-check-input" type="radio" name="download_policy_full_report" id="report_public" value="public" {{ ($settings['download_policy_full_report'] ?? 'public') === 'public' ? 'checked' : '' }}>
+                                    <label class="form-check-label fw-semibold text-body" for="report_public">
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle me-1.5">แนะนำ (ค่าพื้นฐาน)</span>
+                                        เปิดให้บุคคลทั่วไปดาวน์โหลดได้ทันที (Public)
+                                        <div class="text-body-secondary fw-normal small mt-0.5">เปิดเสรีตามสถานะเปิดเผยของแต่ละโครงการโดยไม่ต้องล็อกอิน</div>
                                     </label>
                                 </div>
                                 <div class="form-check mb-2.5">
-                                    <input class="form-check-input" type="radio" name="download_policy_full_report" id="report_public" value="public" {{ ($settings['download_policy_full_report'] ?? '') === 'public' ? 'checked' : '' }}>
-                                    <label class="form-check-label text-body" for="report_public">
-                                        เปิดให้บุคคลทั่วไปดาวน์โหลดได้ทันที (Public)
-                                        <div class="text-body-secondary small mt-0.5">เปิดเสรีตามสถานะเปิดเผยของแต่ละโครงการโดยไม่ต้องล็อกอิน</div>
+                                    <input class="form-check-input" type="radio" name="download_policy_full_report" id="report_members_only" value="members_only" {{ ($settings['download_policy_full_report'] ?? '') === 'members_only' ? 'checked' : '' }}>
+                                    <label class="form-check-label text-body" for="report_members_only">
+                                        ต้องเป็นสมาชิก / เข้าสู่ระบบก่อนเท่านั้น (Members Only)
+                                        <div class="text-body-secondary small mt-0.5">บุคคลทั่วไปไม่สามารถดาวน์โหลดได้โดยตรง ต้องล็อกอินก่อน (ป้องกันการดึงข้อมูลและคุ้มครองลิขสิทธิ์)</div>
                                     </label>
                                 </div>
                                 <div class="form-check">
@@ -209,7 +209,7 @@
                                 <div class="form-check mb-2">
                                     <input class="form-check-input" type="radio" name="download_policy_abstract" id="abstract_public" value="public" {{ ($settings['download_policy_abstract'] ?? 'public') === 'public' ? 'checked' : '' }}>
                                     <label class="form-check-label fw-semibold text-body" for="abstract_public">
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle me-1.5">แนะนำ</span>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle me-1.5">แนะนำ (ค่าพื้นฐาน)</span>
                                         เปิดให้อ่านได้แบบสาธารณะ (Public Access)
                                         <div class="text-body-secondary fw-normal small mt-0.5">บุคคลทั่วไปสามารถเปิดอ่านบทคัดย่อเพื่อการสืบค้นและอ้างอิงทางวิชาการได้ทันที</div>
                                     </label>
@@ -231,16 +231,17 @@
                             </label>
                             <div class="border rounded-3 p-3 bg-body-tertiary">
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="radio" name="download_policy_attachments" id="attach_members_only" value="members_only" {{ ($settings['download_policy_attachments'] ?? 'members_only') === 'members_only' ? 'checked' : '' }}>
-                                    <label class="form-check-label fw-semibold text-body" for="attach_members_only">
-                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle me-1.5">แนะนำ</span>
-                                        ต้องเป็นสมาชิก / เข้าสู่ระบบก่อน (Members Only)
+                                    <input class="form-check-input" type="radio" name="download_policy_attachments" id="attach_public" value="public" {{ ($settings['download_policy_attachments'] ?? 'public') === 'public' ? 'checked' : '' }}>
+                                    <label class="form-check-label fw-semibold text-body" for="attach_public">
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle me-1.5">แนะนำ (ค่าพื้นฐาน)</span>
+                                        เปิดให้ดาวน์โหลดได้แบบสาธารณะ (Public)
+                                        <div class="text-body-secondary fw-normal small mt-0.5">เปิดให้บุคคลทั่วไปและบุคคลภายนอกสามารถดาวน์โหลดเอกสารแนบได้ทันที</div>
                                     </label>
                                 </div>
                                 <div class="form-check mb-2">
-                                    <input class="form-check-input" type="radio" name="download_policy_attachments" id="attach_public" value="public" {{ ($settings['download_policy_attachments'] ?? '') === 'public' ? 'checked' : '' }}>
-                                    <label class="form-check-label text-body" for="attach_public">
-                                        เปิดให้ดาวน์โหลดได้แบบสาธารณะ (Public)
+                                    <input class="form-check-input" type="radio" name="download_policy_attachments" id="attach_members_only" value="members_only" {{ ($settings['download_policy_attachments'] ?? '') === 'members_only' ? 'checked' : '' }}>
+                                    <label class="form-check-label text-body" for="attach_members_only">
+                                        ต้องเป็นสมาชิก / เข้าสู่ระบบก่อน (Members Only)
                                     </label>
                                 </div>
                                 <div class="form-check">

@@ -381,7 +381,7 @@
                                                 @endphp
 
                                                 @if($firstResearcher && $firstResearcher->researcher)
-                                                    <a href="{{ route('frontend.rdbresearcher.show', $firstResearcher->researcher->researcher_id) }}" class="text-body text-decoration-none fw-semibold" target="_blank">
+                                                    <a href="{{ route('frontend.rdbresearcher.show', $firstResearcher->researcher->researcher_id) }}" class="text-body text-decoration-none fw-semibold" target="_blank" rel="noopener noreferrer">
                                                         <i class="bi bi-person-fill text-primary me-1"></i>{{ $firstResearcher->researcher->researcher_fname }} {{ $firstResearcher->researcher->researcher_lname }}
                                                     </a>
                                                     @if($countOthers > 0)
@@ -413,7 +413,7 @@
                                         <tr>
                                             <td>
                                                 <div class="mb-1">
-                                                    <a href="{{ route('frontend.rdbpublished.show', $pub->id) }}" class="text-body text-decoration-none fw-bold hover-primary" target="_blank">
+                                                    <a href="{{ route('frontend.rdbpublished.show', $pub->id) }}" class="text-body text-decoration-none fw-bold hover-primary" target="_blank" rel="noopener noreferrer">
                                                         <i class="bi bi-file-earmark-text text-info me-1"></i> {{ $pub->pub_name }}
                                                     </a>
                                                 </div>
@@ -432,7 +432,7 @@
                                                     $mainAuthor = $pub->authors->sortBy('pivot.pubw_main')->first();
                                                 @endphp
                                                 @if($mainAuthor)
-                                                    <a href="{{ route('frontend.rdbresearcher.show', $mainAuthor->researcher_id) }}" class="text-body text-decoration-none fw-semibold" target="_blank">
+                                                    <a href="{{ route('frontend.rdbresearcher.show', $mainAuthor->researcher_id) }}" class="text-body text-decoration-none fw-semibold" target="_blank" rel="noopener noreferrer">
                                                         <i class="bi bi-pen me-1 text-primary"></i>{{ $mainAuthor->researcher_fname }} {{ $mainAuthor->researcher_lname }}
                                                     </a>
                                                 @else
@@ -461,7 +461,7 @@
                                         <tr>
                                             <td>
                                                 <div class="mb-1">
-                                                    <a href="{{ route('frontend.rdbdip.show', $ip->dip_id) }}" class="text-body text-decoration-none fw-bold hover-primary" target="_blank">
+                                                    <a href="{{ route('frontend.rdbdip.show', $ip->dip_id) }}" class="text-body text-decoration-none fw-bold hover-primary" target="_blank" rel="noopener noreferrer">
                                                         <i class="bi bi-lightbulb text-warning me-1"></i> {{ $ip->dip_name ?: ($ip->dip_data2_name ?? '-') }}
                                                     </a>
                                                 </div>
@@ -476,7 +476,7 @@
                                             </td>
                                             <td>
                                                 @if($ip->researcher)
-                                                    <a href="{{ route('frontend.rdbresearcher.show', $ip->researcher->researcher_id) }}" class="text-body text-decoration-none fw-semibold" target="_blank">
+                                                    <a href="{{ route('frontend.rdbresearcher.show', $ip->researcher->researcher_id) }}" class="text-body text-decoration-none fw-semibold" target="_blank" rel="noopener noreferrer">
                                                         <i class="bi bi-person-fill text-warning me-1"></i>{{ $ip->researcher->researcher_fname }} {{ $ip->researcher->researcher_lname }}
                                                     </a>
                                                 @else

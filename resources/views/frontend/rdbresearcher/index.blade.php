@@ -84,7 +84,7 @@
                             {{ ($items->currentPage() - 1) * $items->perPage() + $index + 1 }}
                         </td>
                         <td class="text-center">
-                            <a href="{{ route('frontend.rdbresearcher.show', $item->researcher_id) }}" class="d-inline-block text-decoration-none">
+                            <a href="{{ route('frontend.rdbresearcher.show', $item->researcher_id) }}" target="_blank" rel="noopener noreferrer" class="d-inline-block text-decoration-none">
                                 @if($item->profile_image_url)
                                     <img src="{{ $item->profile_image_url }}"
                                          alt="{{ $item->researcher_fname }}"
@@ -101,6 +101,7 @@
                         <td>
                             <div>
                                 <a href="{{ route('frontend.rdbresearcher.show', $item->researcher_id) }}"
+                                   target="_blank" rel="noopener noreferrer"
                                    class="fw-semibold text-body text-decoration-none hover-primary text-break">
                                     {{ $item->prefix->prefix_nameTH ?? '' }}{{ $item->researcher_fname }} {{ $item->researcher_lname }}
                                 </a>
@@ -135,6 +136,7 @@
                         </td>
                         <td class="text-center text-nowrap">
                             <a href="{{ route('frontend.rdbresearcher.show', $item->researcher_id) }}"
+                               target="_blank" rel="noopener noreferrer"
                                class="btn btn-outline-primary btn-sm">
                                 <i class="bi bi-eye"></i> ดูข้อมูล
                             </a>

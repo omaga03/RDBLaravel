@@ -18,6 +18,9 @@
             <span class="badge bg-body border text-body-secondary px-3 py-2">
                 <i class="bi bi-database me-1 text-primary"></i> ทั้งหมด {{ number_format($items->total()) }} รายการ
             </span>
+            <a href="{{ route('frontend.rdbprojectutilize.export', request()->query()) }}" class="btn btn-outline-success btn-sm d-inline-flex align-items-center" title="ส่งออก CSV ตามตัวกรองปัจจุบัน">
+                <i class="bi bi-filetype-csv me-1"></i> Export CSV
+            </a>
         </div>
     </div>
 
@@ -225,6 +228,7 @@
                                     <div class="fw-bold mb-1">
                                         <i class="bi bi-journal-text text-success me-1"></i>
                                         <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" 
+                                           target="_blank" rel="noopener noreferrer"
                                            class="text-decoration-none text-body hover-primary">
                                             @if($item->project->pro_code)
                                                 <span class="text-primary me-1">[{{ $item->project->pro_code }}]</span>
@@ -239,7 +243,7 @@
                                         @endphp
                                         @if($head && $head->researcher)
                                             <div class="small">
-                                                <a href="{{ route('frontend.rdbresearcher.show', $head->researcher->researcher_id) }}" class="text-decoration-none text-body hover-primary">
+                                                <a href="{{ route('frontend.rdbresearcher.show', $head->researcher->researcher_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body hover-primary">
                                                     <i class="bi bi-person-circle text-primary me-1"></i>{{ $head->researcher->prefix->prefix_nameTH ?? '' }}{{ $head->researcher->researcher_fname }} {{ $head->researcher->researcher_lname }}
                                                 </a>
                                             </div>

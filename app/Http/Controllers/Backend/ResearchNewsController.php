@@ -22,7 +22,7 @@ class ResearchNewsController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', ResearchNews::class);
-        $query = ResearchNews::query()->where('data_show', 1);
+        $query = ResearchNews::query()->where('data_show', $request->boolean('trash') ? 0 : 1);
 
         $search = $request->input('search', $request->input('q', $request->input('news_name')));
         if ($search !== null && $search !== '') {
@@ -120,6 +120,26 @@ class ResearchNewsController extends Controller
         $item->data_show = 0;
         $item->save();
         return redirect()->route('backend.research_news.index')->with('success', 'ลบข้อมูลเรียบร้อยแล้ว');
+    }
+
+    public function restore($id)
+    {
+        $item = ResearchNews::withoutGlobalScope('active')->findOrFail($id);
+        $this->authorize('delete', $item);
+        $item->data_show = 1;
+        $item->save();
+        return redirect()->back()->with('success', 'กู้คืนข่าวเรียบร้อยแล้ว');
+    }
+
+    public function syncNriis(Request $request, \App\Services\NriisSyncService $syncService)
+    {
+        $this->authorize('create', ResearchNews::class);
+
+        $limit = min(50, max(5, (int) $request->input('limit', 20)));
+        $stats = $syncService->sync($limit);
+
+        return redirect()->route('backend.research_news.index')
+            ->with('success', "ดึงข้อมูลข่าวทุนวิจัยจาก NRIIS เรียบร้อยแล้ว (เพิ่มใหม่ {$stats['synced']} รายการ, ซ้ำ/ข้าม {$stats['skipped']} รายการ)");
     }
 
     public function viewNewsImage($id)

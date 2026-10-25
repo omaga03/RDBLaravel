@@ -19,7 +19,18 @@ class RdbResearcherPolicy
 
     public function viewAny(?User $user): bool
     {
-        return $user && ($user->hasPermission('RdbResearcher.View') || $user->hasRole('Admin') || $user->hasRole('Researcher'));
+        if (!$user) return false;
+
+        if ($user->hasRole(['The Creator', 'Admin', 'Admin Research', 'Admin Researcher'])) {
+            return true;
+        }
+
+        // Regular researchers or faculty coordinators cannot view/manage the full backend researcher directory
+        if ($user->hasRole(['Researcher', 'Faculty Coordinator']) || $user->researcher_id) {
+            return false;
+        }
+
+        return $user->hasPermission('RdbResearcher.View');
     }
 
     public function view(?User $user, RdbResearcher $rdbResearcher): bool

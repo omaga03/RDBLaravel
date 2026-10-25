@@ -48,12 +48,134 @@ class RdbProjectController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', RdbProject::class);
+
+        // Budget range validation
+        $hasBudgetMin = $request->filled('budget_min');
+        $hasBudgetMax = $request->filled('budget_max');
+
+        if ($hasBudgetMin && $hasBudgetMax) {
+            if ($request->budget_max < $request->budget_min) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'งบประมาณสูงสุดต้องไม่น้อยกว่างบประมาณเริ่มต้น');
+            }
+        }
+
+        // Date range validation
+        $hasDateStart = $request->filled('date_start');
+        $hasDateEnd = $request->filled('date_end');
+
+        if ($hasDateStart || $hasDateEnd) {
+            if (!$hasDateStart || !$hasDateEnd) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'กรุณาระบุทั้งวันที่เริ่มและวันที่สิ้นสุด');
+            }
+
+            if ($request->date_end < $request->date_start) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'วันที่สิ้นสุดต้องไม่น้อยกว่าวันที่เริ่มต้น');
+            }
+        }
+
+        $query = $this->getFilteredQuery($request);
+
+        $projects = $query->orderBy('pro_id', 'desc')->paginate(10);
+        
+        $searchTerm = $request->filled('search') ? trim($request->search) : null;
+        if ($searchTerm) {
+            $searchWords = preg_split('/\s+/', $searchTerm);
+            
+            foreach ($projects as $project) {
+                $matchSources = [];
+                
+                if (stripos($project->pro_nameTH ?? '', $searchTerm) !== false) {
+                    $matchSources[] = 'ชื่อโครงการ (ไทย)';
+                }
+                if (stripos($project->pro_nameEN ?? '', $searchTerm) !== false) {
+                    $matchSources[] = 'ชื่อโครงการ (อังกฤษ)';
+                }
+                if (stripos($project->pro_code ?? '', $searchTerm) !== false) {
+                    $matchSources[] = 'รหัสโครงการ';
+                }
+                if (stripos($project->pro_keyword ?? '', $searchTerm) !== false) {
+                    $matchSources[] = 'คำสำคัญ';
+                }
+                if (stripos($project->pro_abstract ?? '', $searchTerm) !== false) {
+                    $matchSources[] = 'บทคัดย่อ';
+                }
+                
+                if ($project->type && stripos($project->type->pt_name ?? '', $searchTerm) !== false) {
+                    $matchSources[] = 'ประเภททุน';
+                }
+                
+                if ($project->typeSub && stripos($project->typeSub->pts_name ?? '', $searchTerm) !== false) {
+                    $matchSources[] = 'ประเภททุนย่อย';
+                }
+                
+                if ($project->year && stripos($project->year->year_name ?? '', $searchTerm) !== false) {
+                    $matchSources[] = 'ปีงบประมาณ';
+                }
+                
+                if ($project->department && (
+                    stripos($project->department->department_nameTH ?? '', $searchTerm) !== false ||
+                    stripos($project->department->department_nameEN ?? '', $searchTerm) !== false
+                )) {
+                    $matchSources[] = 'หน่วยงาน/คณะ';
+                }
+                
+                $matchedResearchers = [];
+                foreach ($project->researchers as $researcher) {
+                    $fullName = ($researcher->prefix->prefix_nameTH ?? '') . $researcher->researcher_fname . ' ' . $researcher->researcher_lname;
+                    $fullNameEN = $researcher->researcher_fnameEN . ' ' . $researcher->researcher_lnameEN;
+                    
+                    foreach ($searchWords as $word) {
+                        if (stripos($fullName, $word) !== false || stripos($fullNameEN, $word) !== false) {
+                            $matchedResearchers[] = $fullName;
+                            break;
+                        }
+                    }
+                }
+                
+                if (!empty($matchedResearchers)) {
+                    $matchSources[] = 'นักวิจัย: ' . implode(', ', array_unique($matchedResearchers));
+                }
+                
+                $project->match_sources = $matchSources;
+            }
+        }
+        
+        $years = RdbYear::orderBy('year_id', 'desc')->get();
+        $departments = RdbDepartment::orderBy('department_nameTH')->get();
+        $types = RdbProjectType::all();
+        $typeSubs = \App\Models\RdbProjectTypeSub::all();
+        $groups = RdbGroupproject::all();
+        $statuses = RdbProjectStatus::all();
+
+        return view('backend.rdb_project.index', compact(
+            'projects',
+            'years',
+            'departments',
+            'types',
+            'typeSubs',
+            'groups',
+            'statuses'
+        ));
+    }
+
+    /**
+     * Get filtered query for both index and export with RBAC scoping applied.
+     */
+    protected function getFilteredQuery(Request $request)
+    {
         $query = RdbProject::with([
             'year', 
             'type', 
             'typeSub',
             'status', 
             'department', 
+            'researchers.prefix',
             'rdbProjectWorks' => function($q) {
                 $q->orderBy('position_id', 'asc');
             },
@@ -63,13 +185,17 @@ class RdbProjectController extends Controller
             'updatedBy'
         ]);
 
+        if ($request->boolean('trash')) {
+            $query->withoutGlobalScope('active')->where('data_show', 0);
+        }
+
         // Apply RBAC Scoping:
-        // 1. Super Admin ('The Creator') and 'Admin Project' can view all projects across the university.
+        // 1. Super Admin ('The Creator', 'Admin Project', 'Admin Research') can view/export all projects.
         // 2. Legacy 'Admin' manages own group data.
         // 3. 'Faculty Coordinator' manages projects in their department.
-        // 4. 'Researcher' views projects they authored/created or projects in their faculty.
+        // 4. 'Researcher' or standard USER can ONLY view/export projects they authored/created.
         $currentUser = auth()->user();
-        if ($currentUser && !$currentUser->hasRole('The Creator') && !$currentUser->hasRole('Admin Project')) {
+        if ($currentUser && !$currentUser->hasRole('The Creator') && !$currentUser->hasRole('Admin Project') && !$currentUser->hasRole('Admin Research')) {
             if ($currentUser->hasRole('Admin')) {
                 $adminIds = \App\Models\User::whereHas('roles', function ($q) {
                     $q->where('item_name', 'Admin');
@@ -80,7 +206,7 @@ class RdbProjectController extends Controller
                 if ($deptId) {
                     $query->where('department_id', $deptId);
                 }
-            } elseif ($currentUser->hasRole('Researcher') || $currentUser->researcher_id) {
+            } else {
                 $researcherId = $currentUser->researcher_id;
                 $query->where(function($q) use ($researcherId, $currentUser) {
                     $q->where('user_created', $currentUser->id);
@@ -153,7 +279,7 @@ class RdbProjectController extends Controller
             });
         }
 
-        // Title Multi-Keyword Search (กลุ่มคำคั่นด้วยช่องว่าง + ตัวเลือก เจอทั้งหมด/เจอบางคำ)
+        // Title Multi-Keyword Search
         if ($request->filled('title_keywords')) {
             $keywords = array_values(array_filter(preg_split('/\s+/', trim($request->title_keywords))));
             $mode = $request->input('title_keywords_mode', 'all');
@@ -180,8 +306,9 @@ class RdbProjectController extends Controller
                 }
             }
         }
-        if ($request->filled('year_id')) {
-            $query->where('year_id', $request->year_id);
+        if ($request->filled('year_id') || $request->filled('pro_year')) {
+            $yId = $request->year_id ?? $request->pro_year;
+            $query->where('year_id', $yId);
         }
         if ($request->filled('department_id')) {
             $query->where('department_id', $request->department_id);
@@ -195,28 +322,17 @@ class RdbProjectController extends Controller
         if ($request->filled('pgroup_id')) {
             $query->where('pgroup_id', $request->pgroup_id);
         }
-        if ($request->filled('ps_id')) {
-            $query->where('ps_id', $request->ps_id);
+        if ($request->filled('ps_id') || $request->filled('pro_status')) {
+            $statusId = $request->ps_id ?? $request->pro_status;
+            $query->where('ps_id', $statusId);
         }
         if ($request->filled('pro_code')) {
             $query->where('pro_code', 'like', '%' . $request->pro_code . '%');
         }
-        // Budget range validation
-        $hasBudgetMin = $request->filled('budget_min');
-        $hasBudgetMax = $request->filled('budget_max');
-
-        if ($hasBudgetMin && $hasBudgetMax) {
-            if ($request->budget_max < $request->budget_min) {
-                return redirect()->back()
-                    ->withInput()
-                    ->with('error', 'งบประมาณสูงสุดต้องไม่น้อยกว่างบประมาณเริ่มต้น');
-            }
-        }
-
-        if ($hasBudgetMin) {
+        if ($request->filled('budget_min')) {
             $query->where('pro_budget', '>=', $request->budget_min);
         }
-        if ($hasBudgetMax) {
+        if ($request->filled('budget_max')) {
             $query->where('pro_budget', '<=', $request->budget_max);
         }
         if ($request->filled('researcher_id') && $request->researcher_id !== 'pre') {
@@ -254,23 +370,7 @@ class RdbProjectController extends Controller
                 }
             });
         }
-        // Date range validation
-        $hasDateStart = $request->filled('date_start');
-        $hasDateEnd = $request->filled('date_end');
-
-        if ($hasDateStart || $hasDateEnd) {
-            if (!$hasDateStart || !$hasDateEnd) {
-                return redirect()->back()
-                    ->withInput()
-                    ->with('error', 'กรุณาระบุทั้งวันที่เริ่มและวันที่สิ้นสุด');
-            }
-
-            if ($request->date_end < $request->date_start) {
-                return redirect()->back()
-                    ->withInput()
-                    ->with('error', 'วันที่สิ้นสุดต้องไม่น้อยกว่าวันที่เริ่มต้น');
-            }
-
+        if ($request->filled('date_start') && $request->filled('date_end') && $request->date_end >= $request->date_start) {
             $query->whereDate('pro_date_start', '>=', $request->date_start)
                   ->whereDate('pro_date_end', '<=', $request->date_end);
         }
@@ -284,89 +384,7 @@ class RdbProjectController extends Controller
             });
         }
 
-        $projects = $query->orderBy('pro_id', 'desc')->paginate(10);
-        
-        $searchTerm = $request->filled('search') ? trim($request->search) : null;
-        if ($searchTerm) {
-            $searchWords = preg_split('/\s+/', $searchTerm);
-            
-            foreach ($projects as $project) {
-                $matchSources = [];
-                
-                if (stripos($project->pro_nameTH ?? '', $searchTerm) !== false) {
-                    $matchSources[] = 'ชื่อโครงการ (ไทย)';
-                }
-                if (stripos($project->pro_nameEN ?? '', $searchTerm) !== false) {
-                    $matchSources[] = 'ชื่อโครงการ (อังกฤษ)';
-                }
-                if (stripos($project->pro_code ?? '', $searchTerm) !== false) {
-                    $matchSources[] = 'รหัสโครงการ';
-                }
-                if (stripos($project->pro_keyword ?? '', $searchTerm) !== false) {
-                    $matchSources[] = 'คำสำคัญ';
-                }
-                if (stripos($project->pro_abstract ?? '', $searchTerm) !== false) {
-                    $matchSources[] = 'บทคัดย่อ';
-                }
-                
-                if ($project->type && stripos($project->type->pt_name ?? '', $searchTerm) !== false) {
-                    $matchSources[] = 'ประเภททุน';
-                }
-                
-                if ($project->typeSub && stripos($project->typeSub->pts_name ?? '', $searchTerm) !== false) {
-                    $matchSources[] = 'ประเภททุนย่อย';
-                }
-                
-                if ($project->year && stripos($project->year->year_name ?? '', $searchTerm) !== false) {
-                    $matchSources[] = 'ปีงบประมาณ';
-                }
-                
-                if ($project->department) {
-                    if (stripos($project->department->department_nameTH ?? '', $searchTerm) !== false ||
-                        stripos($project->department->department_nameEN ?? '', $searchTerm) !== false) {
-                        $matchSources[] = 'หน่วยงาน';
-                    }
-                }
-                
-                $matchedResearchers = [];
-                foreach ($project->rdbProjectWorks as $work) {
-                    $researcher = $work->researcher;
-                    if (!$researcher) continue;
-                    $matched = true;
-                    foreach ($searchWords as $word) {
-                        if (empty($word)) continue;
-                        if (stripos($researcher->researcher_fname ?? '', $word) === false &&
-                            stripos($researcher->researcher_lname ?? '', $word) === false &&
-                            stripos($researcher->researcher_fnameEN ?? '', $word) === false &&
-                            stripos($researcher->researcher_lnameEN ?? '', $word) === false) {
-                            $matched = false;
-                            break;
-                        }
-                    }
-                    if ($matched) {
-                        $posName = $work->position->position_nameTH ?? 'นักวิจัย';
-                        $fullName = trim(($researcher->prefix->prefix_nameTH ?? '') . $researcher->researcher_fname . ' ' . $researcher->researcher_lname);
-                        $matchedResearchers[] = "นักวิจัย ({$posName}): {$fullName}";
-                    }
-                }
-                if (!empty($matchedResearchers)) {
-                    foreach ($matchedResearchers as $mr) {
-                        $matchSources[] = $mr;
-                    }
-                }
-                
-                $project->match_sources = $matchSources;
-            }
-        }
-        
-        $years = RdbYear::orderBy('year_id', 'desc')->get();
-        $departments = RdbDepartment::orderBy('department_nameTH')->get();
-        $types = RdbProjectType::all();
-        $typeSubs = \App\Models\RdbProjectTypeSub::all();
-        $groups = RdbGroupproject::all();
-        $statuses = RdbProjectStatus::all();
-
-        return view('backend.rdb_project.index', compact('projects', 'years', 'departments', 'types', 'typeSubs', 'groups', 'statuses'));
+        return $query;
     }
 
     /**
@@ -376,32 +394,7 @@ class RdbProjectController extends Controller
     {
         $this->authorize('viewAny', RdbProject::class);
 
-        $query = RdbProject::with(['year', 'type', 'typeSub', 'status', 'department', 'researchers', 'group']);
-
-        if ($request->filled('search')) {
-            $words = preg_split('/[\s\/,]+/', trim($request->search));
-            $query->where(function ($q) use ($words) {
-                foreach ($words as $word) {
-                    if (empty($word)) continue;
-                    $q->orWhere('pro_nameTH', 'like', "%{$word}%")
-                      ->orWhere('pro_nameEN', 'like', "%{$word}%")
-                      ->orWhere('pro_code', 'like', "%{$word}%")
-                      ->orWhere('pro_keyword', 'like', "%{$word}%");
-                }
-            });
-        }
-        if ($request->filled('pro_year')) {
-            $query->where('pro_year', $request->pro_year);
-        }
-        if ($request->filled('pt_id')) {
-            $query->where('pt_id', $request->pt_id);
-        }
-        if ($request->filled('pro_status')) {
-            $query->where('pro_status', $request->pro_status);
-        }
-        if ($request->filled('department_id')) {
-            $query->where('department_id', $request->department_id);
-        }
+        $query = $this->getFilteredQuery($request);
 
         $filename = 'projects_' . date('Y-m-d_His') . '.csv';
         $headers = $this->csvHeaders($filename);
@@ -501,6 +494,23 @@ class RdbProjectController extends Controller
             // Create project
             $project = RdbProject::create($validated);
 
+            // Set pro_group = pro_id for parent project (pgroup_id == 1)
+            if ((int) ($project->pgroup_id ?? 0) === 1) {
+                $project->pro_group = $project->pro_id;
+                $project->save();
+            }
+
+            // Create initial RdbProjectBudget record (ckb_annuity = 1: ยังไม่ครบถ้วน)
+            \App\Models\RdbProjectBudget::firstOrCreate(
+                ['pro_id' => $project->pro_id],
+                [
+                    'ckb_annuity' => 1,
+                    'created_at' => now()->toDateTimeString(),
+                    'user_created' => auth()->id(),
+                    'user_updated' => auth()->id(),
+                ]
+            );
+
             // If researcher data is provided, create project_work record
             if ($researcherId && $positionId && $ratio !== null) {
                 $work = new RdbProjectWork();
@@ -544,6 +554,7 @@ class RdbProjectController extends Controller
             'dips',
             'utilizations',
             'files',
+            'budget',
             'createdBy',
             'updatedBy'
         ])->findOrFail($id);
@@ -669,6 +680,15 @@ class RdbProjectController extends Controller
                 }
             }
             
+            // Handle pro_group based on pgroup_id (matching Yii2 actionUpdate)
+            if (isset($validated['pgroup_id'])) {
+                if ((int) $validated['pgroup_id'] === 1) {
+                    $validated['pro_group'] = $project->pro_id;
+                } elseif ((int) $validated['pgroup_id'] !== 2) {
+                    $validated['pro_group'] = null;
+                }
+            }
+
             $project->update($validated);
 
             return redirect()->back()->with('success', 'แก้ไขโครงการเรียบร้อยแล้ว');
@@ -678,7 +698,7 @@ class RdbProjectController extends Controller
     }
 
     /**
-     * Update project status (ps_id) directly
+     * Update project status (ps_id) directly with Yii2 date & group cascade rules
      */
     public function updateStatus(UpdateProjectStatusRequest $request, $id)
     {
@@ -686,10 +706,26 @@ class RdbProjectController extends Controller
         $this->authorize('update', $project);
 
         $validated = $request->validated();
+        $oldPsId = (int) $project->ps_id;
+        $newPsId = (int) $validated['ps_id'];
 
-        $project->ps_id = $validated['ps_id'];
+        $this->applyStatusChangesToProject($project, $oldPsId, $newPsId);
         $project->user_updated = auth()->id();
         $project->save();
+
+        // Cascade status to sibling/child projects in the same pro_group (if pgroup_id <= 2)
+        if ((int) ($project->pgroup_id ?? 0) <= 2 && !empty($project->pro_group)) {
+            $groupProjects = RdbProject::where('pro_group', $project->pro_group)
+                ->where('pro_id', '!=', $project->pro_id)
+                ->get();
+
+            foreach ($groupProjects as $subProject) {
+                $subOldPsId = (int) $subProject->ps_id;
+                $this->applyStatusChangesToProject($subProject, $subOldPsId, $newPsId);
+                $subProject->user_updated = auth()->id();
+                $subProject->save();
+            }
+        }
 
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
@@ -700,6 +736,87 @@ class RdbProjectController extends Controller
         }
 
         return redirect()->back()->with('success', 'ปรับปรุงสถานะโครงการเรียบร้อยแล้ว');
+    }
+
+    /**
+     * Apply Yii2 status transition date rules (actionCreatestatus / findProgroupStatus)
+     */
+    protected function applyStatusChangesToProject(RdbProject $project, int $oldPsId, int $newPsId): void
+    {
+        switch ($newPsId) {
+            case 1: // กำลังดำเนินการ
+                if (!empty($project->pro_date_end)) {
+                    if ($oldPsId === 3) {
+                        $project->pro_date_end = date('Y-m-d', strtotime($project->pro_date_end . ' -3 month'));
+                    } elseif ($oldPsId === 4) {
+                        $project->pro_date_end = date('Y-m-d', strtotime($project->pro_date_end . ' -6 month'));
+                    }
+                }
+                break;
+            case 2: // ดำเนินการเสร็จสิ้น
+                if (empty($project->pro_finish) || $project->pro_finish === '0000-00-00') {
+                    $project->pro_finish = date('Y-m-d');
+                }
+                break;
+            case 3: // ขยายเวลาครั้งที่ 1 (+3 เดือน)
+                if ($oldPsId !== 3 && !empty($project->pro_date_end)) {
+                    $project->pro_date_end = date('Y-m-d', strtotime($project->pro_date_end . ' +3 month'));
+                }
+                break;
+            case 4: // ขยายเวลาครั้งที่ 2 (+3 เดือน)
+                if ($oldPsId !== 4 && !empty($project->pro_date_end)) {
+                    $project->pro_date_end = date('Y-m-d', strtotime($project->pro_date_end . ' +3 month'));
+                }
+                break;
+        }
+
+        $project->ps_id = $newPsId;
+    }
+
+    /**
+     * Update project budget evidence status (RdbProjectBudget)
+     */
+    public function updateBudget(Request $request, $id)
+    {
+        $project = RdbProject::findOrFail($id);
+        $this->authorize('update', $project);
+
+        $validated = $request->validate([
+            'ckb_annuity' => 'required|in:0,1',
+            'ckb_note' => 'nullable|string|max:255',
+        ]);
+
+        $budget = \App\Models\RdbProjectBudget::firstOrNew(['pro_id' => $project->pro_id]);
+        if (!$budget->exists) {
+            $budget->created_at = now()->toDateTimeString();
+            $budget->user_created = auth()->id();
+        }
+        $budget->ckb_annuity = (int) $validated['ckb_annuity'];
+        $budget->ckb_note = $validated['ckb_note'] ?? null;
+        $budget->updated_at = now()->toDateTimeString();
+        $budget->user_updated = auth()->id();
+        $budget->save();
+
+        // Cascade ckb_annuity to sibling/child projects in the same pro_group (matching Yii2 RdbprojectbudgetController)
+        if (!empty($project->pro_group)) {
+            $groupProjectIds = RdbProject::where('pro_group', $project->pro_group)
+                ->where('pro_id', '!=', $project->pro_id)
+                ->pluck('pro_id');
+
+            foreach ($groupProjectIds as $subProId) {
+                $subBudget = \App\Models\RdbProjectBudget::firstOrNew(['pro_id' => $subProId]);
+                if (!$subBudget->exists) {
+                    $subBudget->created_at = now()->toDateTimeString();
+                    $subBudget->user_created = auth()->id();
+                }
+                $subBudget->ckb_annuity = (int) $validated['ckb_annuity'];
+                $subBudget->updated_at = now()->toDateTimeString();
+                $subBudget->user_updated = auth()->id();
+                $subBudget->save();
+            }
+        }
+
+        return redirect()->back()->with('success', 'ปรับปรุงสถานะหลักฐานทางการเงินเรียบร้อยแล้ว');
     }
 
     /**
@@ -715,6 +832,21 @@ class RdbProjectController extends Controller
         $project->save();
 
         return redirect()->route('backend.rdb_project.index')->with('success', 'ลบโครงการเรียบร้อยแล้ว (ซ่อนการแสดงผล)');
+    }
+
+    /**
+     * Restore a soft-deleted project from trash (data_show = 1).
+     */
+    public function restore($id)
+    {
+        $project = RdbProject::withoutGlobalScope('active')->findOrFail($id);
+        $this->authorize('delete', $project);
+
+        $project->data_show = 1;
+        $project->user_updated = auth()->id();
+        $project->save();
+
+        return redirect()->back()->with('success', 'กู้คืนโครงการวิจัยเรียบร้อยแล้ว');
     }
 
     public function storeResearcher(StoreProjectResearcherRequest $request, $id)
@@ -1435,5 +1567,71 @@ class RdbProjectController extends Controller
             },
             'message' => 'ปรับปรุงสถานะการแสดงผลรายงานฉบับสมบูรณ์เรียบร้อยแล้ว'
         ]);
+    }
+
+    /**
+     * Export project to DSpace SAF ZIP package
+     */
+    public function exportDspace($id, \App\Services\DSpaceExportService $dspaceService)
+    {
+        $user = auth()->user();
+        $isSuperAdmin = $user && ($user->hasRole('The Creator') || $user->hasRole('Admin') || $user->hasRole('Admin Research'));
+        $canDspace = $isSuperAdmin || ($user && ($user->hasRole(['Admin Project', 'Admin Library']) || $user->hasPermission('DSpace.Export')));
+        if (!$canDspace) {
+            abort(403, 'ไม่มีสิทธิ์ส่งออกแพ็กเกจ DSpace');
+        }
+
+        $project = RdbProject::findOrFail($id);
+        $this->authorize('view', $project);
+
+        try {
+            $zipPath = $dspaceService->exportProject($project);
+            if (!$zipPath || !file_exists($zipPath)) {
+                return redirect()->back()->with('error', 'ไม่สามารถสร้างแพ็กเกจ DSpace สำหรับโครงการนี้ได้');
+            }
+
+            return response()->download($zipPath, basename($zipPath))->deleteFileAfterSend(true);
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', 'เกิดข้อผิดพลาดในการส่งออก DSpace: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * DSpace Export Index Page for Projects
+     */
+    public function dspaceIndex(Request $request)
+    {
+        $user = auth()->user();
+        $isSuperAdmin = $user && ($user->hasRole('The Creator') || $user->hasRole('Admin') || $user->hasRole('Admin Research'));
+        $canDspace = $isSuperAdmin || ($user && ($user->hasRole(['Admin Project', 'Admin Library']) || $user->hasPermission('DSpace.Export')));
+        if (!$canDspace) {
+            abort(403, 'ไม่มีสิทธิ์เข้าถึงการส่งออก DSpace (เฉพาะผู้ดูแลระบบและเจ้าหน้าที่คลังปัญญา)');
+        }
+
+        $this->authorize('viewAny', RdbProject::class);
+
+        $query = RdbProject::with(['year', 'type', 'department', 'rdbProjectWorks.researcher.prefix'])
+            ->where('data_show', 1);
+
+        if ($request->filled('q')) {
+            $q = trim($request->q);
+            $query->where(function($sub) use ($q) {
+                $sub->where('pro_nameTH', 'like', "%{$q}%")
+                    ->orWhere('pro_nameEN', 'like', "%{$q}%")
+                    ->orWhere('pro_code', 'like', "%{$q}%");
+            });
+        }
+        if ($request->filled('year_id')) {
+            $query->where('year_id', $request->year_id);
+        }
+        if ($request->filled('department_id')) {
+            $query->where('department_id', $request->department_id);
+        }
+
+        $items = $query->orderBy('pro_date_start', 'desc')->orderBy('pro_id', 'desc')->paginate(20)->withQueryString();
+        $years = \App\Models\RdbYear::orderBy('year_name', 'desc')->get();
+        $departments = \App\Models\RdbDepartment::orderBy('department_nameTH')->get();
+
+        return view('backend.rdb_project.dspace', compact('items', 'years', 'departments'));
     }
 }

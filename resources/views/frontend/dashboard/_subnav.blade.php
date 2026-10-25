@@ -94,6 +94,15 @@
                     <span>ศักยภาพนักวิจัย & คณะ</span>
                 </a>
             </li>
+
+            <!-- 7. Quality Assurance (QA & Accreditations) -->
+            <li class="nav-item">
+                <a class="nav-link py-2 px-3 text-nowrap d-flex align-items-center justify-content-center gap-2 {{ request()->routeIs('frontend.dashboard.qa') ? 'active shadow-sm fw-semibold' : 'text-body-secondary' }}" 
+                   href="{{ route('frontend.dashboard.qa', $navParams) }}">
+                    <i class="bi bi-shield-check text-success"></i>
+                    <span>ประกันคุณภาพ (QA)</span>
+                </a>
+            </li>
         </ul>
     </div>
 

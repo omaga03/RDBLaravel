@@ -31,9 +31,13 @@ class RdbDipController extends Controller
     {
         $query = RdbDip::with(['dipType', 'researcher.prefix', 'project']);
 
+        if ($request->boolean('trash')) {
+            $query->withoutGlobalScope('active')->where('data_show', 0);
+        }
+
         // Apply RBAC Scoping:
         $currentUser = auth()->user();
-        if ($currentUser && !$currentUser->hasRole('The Creator') && !$currentUser->hasRole('Admin') && !$currentUser->hasRole('Admin Dip')) {
+        if ($currentUser && !$currentUser->hasRole('The Creator') && !$currentUser->hasRole('Admin') && !$currentUser->hasRole('Admin Dip') && !$currentUser->hasRole('Admin Research')) {
             if ($currentUser->hasRole('Faculty Coordinator')) {
                 $deptId = $currentUser->getActiveRoleScope()?->department_id ?? $currentUser->researcher?->department_id;
                 if ($deptId) {
@@ -41,7 +45,7 @@ class RdbDipController extends Controller
                         $q->where('department_id', $deptId);
                     });
                 }
-            } elseif ($currentUser->hasRole('Researcher') || $currentUser->researcher_id) {
+            } else {
                 $researcherId = $currentUser->researcher_id;
                 $query->where(function($q) use ($researcherId, $currentUser) {
                     $q->where('user_created', $currentUser->id);
@@ -295,9 +299,20 @@ class RdbDipController extends Controller
             $data['dip_files'] = $fileInfo['safe_name'];
         }
 
-        if ($request->hasFile('dip_data1_files')) {
-            $fileInfo = $this->fileUploadService->storeFile($request->file('dip_data1_files'), 'dips');
-            $data['dip_data1_files'] = $fileInfo['safe_name'];
+        $extraFileFields = [
+            'dip_data1_files',
+            'dip_data2_files_con',
+            'dip_data3_drawing_picture',
+            'dip_data_forms_request',
+            'dip_data3_filesass1',
+            'dip_data3_filesass2',
+            'dip_data3_filesass3',
+        ];
+        foreach ($extraFileFields as $field) {
+            if ($request->hasFile($field)) {
+                $fileInfo = $this->fileUploadService->storeFile($request->file($field), 'dips');
+                $data[$field] = $fileInfo['safe_name'];
+            }
         }
         
         $item = RdbDip::create($data);
@@ -341,6 +356,26 @@ class RdbDipController extends Controller
             $data['dip_mime_type'] = $fileInfo['mime_type'];
             $data['dip_files'] = $fileInfo['safe_name'];
         }
+
+        $extraFileFields = [
+            'dip_data1_files',
+            'dip_data2_files_con',
+            'dip_data3_drawing_picture',
+            'dip_data_forms_request',
+            'dip_data3_filesass1',
+            'dip_data3_filesass2',
+            'dip_data3_filesass3',
+        ];
+        foreach ($extraFileFields as $field) {
+            if ($request->hasFile($field)) {
+                $existingPath = $item->getDipFilePath($field);
+                if ($existingPath && Storage::disk('public')->exists($existingPath)) {
+                    Storage::disk('public')->delete($existingPath);
+                }
+                $fileInfo = $this->fileUploadService->storeFile($request->file($field), 'dips');
+                $data[$field] = $fileInfo['safe_name'];
+            }
+        }
         
         $item->update($data);
 
@@ -359,47 +394,112 @@ class RdbDipController extends Controller
         return redirect()->route('backend.rdb_dip.index')->with('success', 'ลบข้อมูลเรียบร้อยแล้ว (ซ่อนการแสดงผล)');
     }
 
+    public function restore($id)
+    {
+        $item = RdbDip::withoutGlobalScope('active')->findOrFail($id);
+        $this->authorize('delete', $item);
+
+        $item->data_show = 1;
+        $item->user_updated = auth()->id();
+        $item->save();
+
+        return redirect()->back()->with('success', 'กู้คืนข้อมูลทรัพย์สินทางปัญญาเรียบร้อยแล้ว');
+    }
+
     public function uploadFile(UploadDipFileRequest $request, $id)
     {
         $item = RdbDip::findOrFail($id);
         $this->authorize('update', $item);
         $validated = $request->validated();
 
-        if ($item->dip_path && Storage::disk('public')->exists($item->dip_path)) {
-            Storage::disk('public')->delete($item->dip_path);
+        $field = $validated['field'] ?? 'dip_files';
+        $allowedFields = [
+            'dip_files',
+            'dip_data1_files',
+            'dip_data2_files_con',
+            'dip_data3_drawing_picture',
+            'dip_data_forms_request',
+            'dip_data3_filesass1',
+            'dip_data3_filesass2',
+            'dip_data3_filesass3',
+        ];
+        if (!in_array($field, $allowedFields, true)) {
+            $field = 'dip_files';
         }
 
-        $fileInfo = $this->fileUploadService->storeFile($validated['dip_files'], 'dips');
-        
-        $item->update([
-            'dip_safe_name' => $fileInfo['safe_name'],
-            'dip_path'      => $fileInfo['path'],
-            'dip_size'      => $fileInfo['size'],
-            'dip_mime_type' => $fileInfo['mime_type'],
-            'dip_files'     => $fileInfo['safe_name'],
-            'user_updated'  => auth()->id(),
-        ]);
+        if ($field === 'dip_files') {
+            if ($item->dip_path && Storage::disk('public')->exists($item->dip_path)) {
+                Storage::disk('public')->delete($item->dip_path);
+            }
+
+            $fileInfo = $this->fileUploadService->storeFile($validated['dip_files'], 'dips');
+            
+            $item->update([
+                'dip_safe_name' => $fileInfo['safe_name'],
+                'dip_path'      => $fileInfo['path'],
+                'dip_size'      => $fileInfo['size'],
+                'dip_mime_type' => $fileInfo['mime_type'],
+                'dip_files'     => $fileInfo['safe_name'],
+                'user_updated'  => auth()->id(),
+            ]);
+        } else {
+            $existingPath = $item->getDipFilePath($field);
+            if ($existingPath && Storage::disk('public')->exists($existingPath)) {
+                Storage::disk('public')->delete($existingPath);
+            }
+            $fileInfo = $this->fileUploadService->storeFile($validated['dip_files'], 'dips');
+            $item->update([
+                $field => $fileInfo['safe_name'],
+                'user_updated' => auth()->id(),
+            ]);
+        }
 
         return redirect()->back()->with('success', 'อัปโหลดไฟล์เรียบร้อยแล้ว');
     }
 
-    public function deleteFile($id)
+    public function deleteFile(Request $request, $id)
     {
         $item = RdbDip::findOrFail($id);
         $this->authorize('update', $item);
 
-        if ($item->dip_path && Storage::disk('public')->exists($item->dip_path)) {
-            Storage::disk('public')->delete($item->dip_path);
+        $field = $request->input('field', 'dip_files');
+        $allowedFields = [
+            'dip_files',
+            'dip_data1_files',
+            'dip_data2_files_con',
+            'dip_data3_drawing_picture',
+            'dip_data_forms_request',
+            'dip_data3_filesass1',
+            'dip_data3_filesass2',
+            'dip_data3_filesass3',
+        ];
+        if (!in_array($field, $allowedFields, true)) {
+            $field = 'dip_files';
         }
-        
-        $item->update([
-            'dip_files' => null,
-            'dip_safe_name' => null,
-            'dip_path' => null,
-            'dip_size' => null,
-            'dip_mime_type' => null,
-            'user_updated' => auth()->id(),
-        ]);
+
+        if ($field === 'dip_files') {
+            if ($item->dip_path && Storage::disk('public')->exists($item->dip_path)) {
+                Storage::disk('public')->delete($item->dip_path);
+            }
+            
+            $item->update([
+                'dip_files' => null,
+                'dip_safe_name' => null,
+                'dip_path' => null,
+                'dip_size' => null,
+                'dip_mime_type' => null,
+                'user_updated' => auth()->id(),
+            ]);
+        } else {
+            $existingPath = $item->getDipFilePath($field);
+            if ($existingPath && Storage::disk('public')->exists($existingPath)) {
+                Storage::disk('public')->delete($existingPath);
+            }
+            $item->update([
+                $field => null,
+                'user_updated' => auth()->id(),
+            ]);
+        }
 
         return redirect()->back()->with('success', 'ลบไฟล์เรียบร้อยแล้ว');
     }

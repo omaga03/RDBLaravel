@@ -23,7 +23,9 @@ class RdbProjectUtilizeTypeController extends Controller
             $query->where('utz_typr_name', 'like', "%{$search}%");
         }
 
-        $items = $query->orderBy('utz_type_id', 'desc')->paginate(10)->withQueryString();
+        $items = $query->orderByRaw('CASE WHEN utz_type_index IS NULL THEN 1 ELSE 0 END, utz_type_index ASC, utz_type_id ASC')
+            ->paginate(20)
+            ->withQueryString();
         return view('backend.rdbprojectutilizetype.index', compact('items'));
     }
 

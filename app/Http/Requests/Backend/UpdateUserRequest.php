@@ -29,6 +29,7 @@ class UpdateUserRequest extends FormRequest
             $rules['role'] = ['required', 'string', 'exists:auth_item,name'];
             $rules['researcher_id'] = ['nullable', 'exists:rdb_researcher,researcher_id'];
             $rules['status'] = ['required', 'integer'];
+            $rules['onboarding_status'] = ['nullable', 'string', 'in:none,pending,approved,rejected'];
         }
 
         return $rules;

@@ -32,9 +32,13 @@ class RdbProjectUtilizeController extends Controller
     {
         $query = RdbProjectUtilize::with(['project.rdbProjectWorks.researcher', 'changwat', 'utilizeType', 'createdBy', 'updatedBy']);
 
+        if ($request->boolean('trash')) {
+            $query->withoutGlobalScope('active')->where('data_show', 0);
+        }
+
         // Apply RBAC Scoping:
         $currentUser = auth()->user();
-        if ($currentUser && !$currentUser->hasRole('The Creator') && !$currentUser->hasRole('Admin') && !$currentUser->hasRole('Admin Utilize')) {
+        if ($currentUser && !$currentUser->hasRole('The Creator') && !$currentUser->hasRole('Admin') && !$currentUser->hasRole('Admin Utilize') && !$currentUser->hasRole('Admin Research')) {
             if ($currentUser->hasRole('Faculty Coordinator')) {
                 $deptId = $currentUser->getActiveRoleScope()?->department_id ?? $currentUser->researcher?->department_id;
                 if ($deptId) {
@@ -42,7 +46,7 @@ class RdbProjectUtilizeController extends Controller
                         $q->where('department_id', $deptId);
                     });
                 }
-            } elseif ($currentUser->hasRole('Researcher') || $currentUser->researcher_id) {
+            } else {
                 $researcherId = $currentUser->researcher_id;
                 $query->where(function($q) use ($researcherId, $currentUser) {
                     $q->where('user_created', $currentUser->id);
@@ -378,6 +382,18 @@ class RdbProjectUtilizeController extends Controller
         $item->save();
 
         return redirect()->route('backend.rdbprojectutilize.index')->with('success', 'ลบข้อมูลเรียบร้อยแล้ว (ซ่อนการแสดงผล)');
+    }
+
+    public function restore($id)
+    {
+        $item = RdbProjectUtilize::withoutGlobalScope('active')->findOrFail($id);
+        $this->authorize('delete', $item);
+
+        $item->data_show = 1;
+        $item->user_updated = auth()->id();
+        $item->save();
+
+        return redirect()->back()->with('success', 'กู้คืนข้อมูลการนำไปใช้ประโยชน์เรียบร้อยแล้ว');
     }
 
     public function downloadFile($id, $filename)

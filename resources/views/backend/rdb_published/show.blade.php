@@ -52,6 +52,9 @@
             'รายละเอียดผลงาน' => ''
         ]"
     >
+        <a href="{{ route('backend.rdb_published.export_dspace', $item->id) }}" class="btn btn-outline-info d-inline-flex justify-content-center align-items-center shadow-sm" style="height: 38px; font-size: 0.85rem;" title="ส่งออกข้อมูลเข้าคลังปัญญา DSpace (Simple Archive Format)">
+            <i class="bi bi-file-earmark-zip me-1.5"></i> ส่งออก DSpace
+        </a>
         @if($item->workflow_status === 'published' && auth()->user()->can('requestUnlock', $item))
             <button type="button" class="btn btn-warning d-inline-flex justify-content-center align-items-center" style="min-width: 105px; height: 38px; font-size: 0.85rem;" data-bs-toggle="modal" data-bs-target="#requestUnlockModal" data-id="{{ $item->id }}" data-type="published" data-title="{{ $item->pub_name }}">
                 <i class="bi bi-unlock me-1.5"></i> ขอแก้ไข
@@ -369,7 +372,7 @@
                                             $isSelfAuthor = (int)auth()->user()->researcher_id === (int)$author->researcher_id;
                                         @endphp
                                         @if($canManageAuthor || $isSelfAuthor)
-                                            <a href="{{ route('backend.rdb_researcher.show', $author->researcher_id) }}" class="fw-bold text-body hover-primary text-decoration-none d-inline-block">
+                                            <a href="{{ route('backend.rdb_researcher.show', $author->researcher_id) }}" target="_blank" rel="noopener noreferrer" class="fw-bold text-body hover-primary text-decoration-none d-inline-block">
                                                  {{ $author->researcher_fname }} {{ $author->researcher_lname }}
                                                  @if($isSelfAuthor)
                                                      <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1" style="font-size: 0.7rem;">(คุณ)</span>

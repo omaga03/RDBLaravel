@@ -87,7 +87,7 @@
                         </div>
                     </div>
                     <div class="mt-3">
-                        <a href="{{ route('backend.rdb_researcher.show', $user->researcher->researcher_id) }}" class="btn btn-sm btn-outline-info">
+                        <a href="{{ route('backend.rdb_researcher.show', $user->researcher->researcher_id) }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-info">
                             <i class="bi bi-box-arrow-up-right me-1"></i> ดูประวัตินักวิจัยฉบับเต็ม
                         </a>
                     </div>

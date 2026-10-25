@@ -428,20 +428,36 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--bs-border-color) !important;
-            z-index: 1030 !important;
+            z-index: 1050 !important;
         }
         .rdb-navbar .dropdown-menu {
-            z-index: 1040 !important;
+            z-index: 1055 !important;
             border-color: var(--rdb-card-border);
             box-shadow: var(--rdb-shadow-md);
+        }
+        .rdb-navbar .nav-link.active {
+            color: var(--rdb-secondary, #1D4ED8) !important;
+            font-weight: 600 !important;
+        }
+        .rdb-navbar .dropdown-item.active,
+        .rdb-navbar .dropdown-item:active {
+            background-color: rgba(37, 99, 235, 0.12) !important;
+            color: var(--rdb-secondary, #1D4ED8) !important;
+            font-weight: 600 !important;
+        }
+        [data-bs-theme="dark"] .rdb-navbar .dropdown-item.active,
+        [data-bs-theme="dark"] .rdb-navbar .dropdown-item:active {
+            background-color: rgba(37, 99, 235, 0.25) !important;
+            color: #93C5FD !important;
+            font-weight: 600 !important;
         }
 
         /* Modal & Backdrop Layering: Ensure Modals always sit above sticky navbars */
         .modal {
-            z-index: 1065 !important;
+            z-index: 1075 !important;
         }
         .modal-backdrop {
-            z-index: 1060 !important;
+            z-index: 1070 !important;
         }
         .navbar-brand {
             font-weight: 700;
@@ -451,14 +467,33 @@
             gap: 0.5rem;
         }
         .navbar-brand .brand-badge {
-            background: var(--rdb-primary);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #FFFFFF;
-            font-size: 0.7rem;
-            padding: 0.18rem 0.5rem;
-            border-radius: 5px;
-            font-weight: 600;
+            background: linear-gradient(135deg, #183152 0%, #1d4ed8 100%);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #FFFFFF !important;
+            font-size: 1.05rem;
+            padding: 0.32rem 0.85rem;
+            border-radius: 8px;
+            font-weight: 700;
             letter-spacing: 0.04em;
+            box-shadow: 0 2px 6px rgba(24, 49, 82, 0.25);
+            display: inline-flex;
+            align-items: center;
+            line-height: 1.25;
+            transition: all 0.2s ease-in-out;
+        }
+        .navbar-brand:hover .brand-badge {
+            background: linear-gradient(135deg, #10223a 0%, #1e40af 100%);
+            box-shadow: 0 4px 12px rgba(24, 49, 82, 0.35);
+            transform: translateY(-1px);
+        }
+        [data-bs-theme="dark"] .navbar-brand .brand-badge {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+            border-color: rgba(96, 165, 250, 0.3);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+        }
+        [data-bs-theme="dark"] .navbar-brand:hover .brand-badge {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.5);
         }
 
         /* Theme Toggle Button */
@@ -520,11 +555,17 @@
     </style>
     <!-- IMask CDN -->
     <script src="https://unpkg.com/imask"></script>
+    <!-- MathJax: render equations in abstracts -->
+    <script>window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }, options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] } };</script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    {{-- Page-specific meta tags (Google Scholar / Dublin Core / OpenGraph) --}}
+    @stack('meta')
+    @stack('styles')
 </head>
 <body>
     <div id="app">
         @if(session()->has('impersonator_id'))
-            <div class="alert alert-warning border-0 rounded-0 mb-0 py-2 px-4 d-flex justify-content-between align-items-center shadow-sm" style="position: sticky; top: 0; z-index: 1035; background: #fff3cd; color: #664d03;">
+            <div class="alert alert-warning border-0 rounded-0 mb-0 py-2 px-4 d-flex justify-content-between align-items-center shadow-sm" style="position: sticky; top: 0; z-index: 1060; background: #fff3cd; color: #664d03;">
                 <div class="d-flex align-items-center flex-wrap gap-2">
                     <span class="badge {{ session()->has('impersonated_user_id') ? 'bg-danger text-white' : 'bg-warning text-dark' }} border fw-bold">
                         <i class="bi bi-person-fill-gear me-1"></i> {{ session()->has('impersonated_user_id') ? 'โหมดสวมสิทธิ์ผู้ใช้งาน (Login As)' : 'โหมดทดสอบบทบาท (Testing Role)' }}
@@ -544,11 +585,10 @@
                 </form>
             </div>
         @endif
-        <nav class="navbar navbar-expand-md shadow-sm rdb-navbar sticky-top" style="z-index: 1030;">
+        <nav class="navbar navbar-expand-md shadow-sm rdb-navbar sticky-top" style="z-index: 1050;">
             <div class="{{ request()->is('backend*') ? 'container-fluid px-4' : 'container' }}">
                 <a class="navbar-brand" href="{{ url('/') }}">
-                    <img src="https://research.pcru.ac.th/rdb/images/pcru.png" alt="PCRU Logo" style="height: 32px;" class="me-2">
-                    <span class="d-none d-sm-inline">{{ config('app.name', 'ระบบฐานข้อมูลงานวิจัย') }}</span>
+                    <img src="https://research.pcru.ac.th/rdb/images/pcru.png" alt="PCRU Logo" style="height: 36px;" class="me-2">
                     <span class="brand-badge ms-1">PCRU RDB</span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
@@ -562,11 +602,19 @@
                     <ul class="navbar-nav me-auto">
                         @auth
                             @if(request()->is('backend*'))
-                                <li class="nav-item">
-                                    <a class="nav-link {{ request()->routeIs('backend.site.index') ? 'active fw-bold' : '' }}" href="{{ route('backend.site.index') }}">
-                                        <i class="bi bi-speedometer2 text-primary me-1"></i> แดชบอร์ด
-                                    </a>
-                                </li>
+                                @if(Auth::user()->canAccessFullBackend())
+                                    <li class="nav-item">
+                                        <a class="nav-link {{ request()->routeIs('backend.site.index') || request()->is('backend') ? 'active fw-bold' : '' }}" href="{{ route('backend.site.index') }}">
+                                            <i class="bi bi-speedometer2 text-primary me-1"></i> แดชบอร์ด
+                                        </a>
+                                    </li>
+                                @else
+                                    <li class="nav-item">
+                                        <a class="nav-link {{ request()->routeIs('backend.onboarding.*') ? 'active fw-bold text-warning' : '' }}" href="{{ route('backend.onboarding.index') }}">
+                                            <i class="bi bi-person-check-fill text-warning me-1"></i> ยืนยันตัวตนนักวิจัย
+                                        </a>
+                                    </li>
+                                @endif
                                 <li class="nav-item">
                                     <a class="nav-link text-body-secondary" href="{{ route('home') }}" target="_blank" title="เปิดหน้าเว็บไซต์ส่วนสาธารณะ (เปิดแท็บใหม่)">
                                         <i class="bi bi-box-arrow-up-right text-info me-1"></i> ดูหน้าบ้าน
@@ -695,19 +743,25 @@
                                             <i class="bi bi-box-arrow-up-right me-2 text-info"></i> ไปหน้าบ้าน (Public Portal)
                                         </a>
                                     @else
-                                        <a class="dropdown-item d-flex align-items-center" href="{{ route('backend.site.index') }}">
-                                            <i class="bi bi-speedometer2 me-2 text-primary"></i> จัดการข้อมูลหลังบ้าน
-                                        </a>
+                                        @if(Auth::user()->canAccessFullBackend())
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ route('backend.site.index') }}">
+                                                <i class="bi bi-speedometer2 me-2 text-primary"></i> จัดการข้อมูลหลังบ้าน
+                                            </a>
+                                        @else
+                                            <a class="dropdown-item d-flex align-items-center {{ request()->routeIs('backend.onboarding.*') ? 'active' : '' }}" href="{{ route('backend.onboarding.index') }}">
+                                                <i class="bi bi-person-check-fill me-2 text-warning"></i> ยืนยันตัวตน / ขอสิทธิ์หลังบ้าน
+                                            </a>
+                                        @endif
                                     @endif
                                     @if(Auth::user()->hasRole('The Creator') || Auth::user()->hasRole('Admin') || Auth::user()->hasPermission('User Manager'))
-                                        <a class="dropdown-item d-flex align-items-center" href="{{ route('backend.user.index') }}">
+                                        <a class="dropdown-item d-flex align-items-center {{ request()->routeIs('backend.user.index') ? 'active' : '' }}" href="{{ route('backend.user.index') }}">
                                             <i class="bi bi-person-gear me-2 text-primary"></i> จัดการผู้ใช้งาน (Users)
                                         </a>
                                     @endif
-                                    <a class="dropdown-item d-flex align-items-center" href="{{ route('backend.user.show', Auth::id()) }}">
+                                    <a class="dropdown-item d-flex align-items-center {{ request()->routeIs('backend.user.show') && request()->route('id') == Auth::id() ? 'active' : '' }}" href="{{ route('backend.user.show', Auth::id()) }}">
                                         <i class="bi bi-person-circle me-2 text-primary"></i> บัญชีของฉัน
                                     </a>
-                                    <a class="dropdown-item d-flex align-items-center" href="{{ route('backend.user.edit', Auth::id()) }}">
+                                    <a class="dropdown-item d-flex align-items-center {{ request()->routeIs('backend.user.edit') && request()->route('id') == Auth::id() ? 'active' : '' }}" href="{{ route('backend.user.edit', Auth::id()) }}">
                                         <i class="bi bi-key me-2 text-warning"></i> เปลี่ยนรหัสผ่าน
                                     </a>
                                     <div class="dropdown-divider"></div>
@@ -750,6 +804,20 @@
                 @yield('content')
             </div>
         </main>
+
+        @unless(request()->is('backend*'))
+        <footer class="border-top mt-4 py-4 bg-body-tertiary">
+            <div class="container text-center small text-body-secondary">
+                <div class="fw-semibold text-body mb-1">สถาบันวิจัยและพัฒนา มหาวิทยาลัยราชภัฏเพชรบูรณ์</div>
+                <div>83 หมู่ 11 ต.สะเดียง อ.เมือง จ.เพชรบูรณ์ 67000 · research.pcru.ac.th</div>
+                <div class="mt-2">
+                    <a href="{{ route('privacy') }}" class="text-decoration-none me-3">นโยบายความเป็นส่วนตัว</a>
+                    <a href="{{ route('cookies') }}" class="text-decoration-none">นโยบายคุกกี้</a>
+                </div>
+                <div class="mt-2">&copy; {{ date('Y') }} PCRU Research &amp; Development Institute</div>
+            </div>
+        </footer>
+        @endunless
         
         <!-- Bottom Nav (Mobile only) -->
         @include('layouts.partials.bottom_nav')

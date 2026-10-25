@@ -204,14 +204,13 @@
                         <thead class="table-light">
                             <tr>
                                 <th style="width: 140px;" class="text-center text-nowrap">วันที่นำไปใช้</th>
-                                <th>หน่วยงาน / องค์กรผู้รับประโยชน์</th>
-                                <th style="width: 220px;">พื้นที่ดำเนินการ</th>
+                                <th>หน่วยงาน / องค์กรผู้รับประโยชน์ และ พื้นที่ดำเนินการ</th>
                                 <th>โครงการวิจัยที่เกี่ยวข้อง</th>
                                 <th style="width: 120px;" class="text-center">รับรอง QA</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($utilizationsList as $util)
+                            @forelse($utilizationsList as $util)
                                 <tr>
                                     <td class="text-center small text-body-secondary text-nowrap">
                                         @if($util->utz_date)
@@ -221,25 +220,29 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <a href="{{ route('frontend.rdbprojectutilize.show', $util->utz_id) }}" target="_blank" class="fw-bold text-decoration-none text-body hover-primary">
+                                        <a href="{{ route('frontend.rdbprojectutilize.show', $util->utz_id) }}" target="_blank" class="fw-bold text-decoration-none text-body hover-primary d-block mb-1">
                                             {{ strip_tags((string) ($util->utz_department_name ?: 'หน่วยงานในพื้นที่')) }}
                                         </a>
                                         @if($util->utz_leading)
-                                            <small class="text-body-secondary d-block">
+                                            <div class="small text-body-secondary mb-1">
                                                 <i class="bi bi-person me-1"></i>ผู้ลงนาม: {{ strip_tags((string) $util->utz_leading) }}
-                                            </small>
+                                            </div>
                                         @endif
-                                    </td>
-                                    <td>
                                         @if($util->changwat)
-                                            <small class="text-body text-break d-block">
-                                                <i class="bi bi-geo-alt text-danger me-1"></i>
-                                                @if($util->changwat->tambon_t) ต.{{ $util->changwat->tambon_t }} @endif
-                                                @if($util->changwat->amphoe_t) {{ $util->changwat->amphoe_t }} @endif
-                                                @if($util->changwat->changwat_t) {{ $util->changwat->changwat_t }} @endif
-                                            </small>
-                                        @else
-                                            <span class="text-body-secondary small">-</span>
+                                            @php
+                                                $t = $util->changwat->tambon_t;
+                                                $tStr = $t ? ((str_starts_with($t, 'ต.') || str_starts_with($t, 'แขวง')) ? $t : 'ต.' . $t) : '';
+                                                $a = $util->changwat->amphoe_t;
+                                                $aStr = $a ? ((str_starts_with($a, 'อ.') || str_starts_with($a, 'เขต')) ? $a : 'อ.' . $a) : '';
+                                                $c = $util->changwat->changwat_t;
+                                                $cStr = $c ? ((str_starts_with($c, 'จ.') || str_contains($c, 'กรุงเทพ')) ? $c : 'จ.' . $c) : '';
+                                                $locStr = trim("$tStr $aStr $cStr");
+                                            @endphp
+                                            @if($locStr)
+                                                <div class="small text-body-secondary text-break">
+                                                    <i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ $locStr }}
+                                                </div>
+                                            @endif
                                         @endif
                                     </td>
                                     <td>
@@ -263,7 +266,13 @@
                                         @endif
                                     </td>
                                 </tr>
-                            @endforeach
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-body-secondary">
+                                        <i class="bi bi-inbox fs-3 d-block mb-2"></i> ไม่พบข้อมูลการนำไปใช้ประโยชน์
+                                    </td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>

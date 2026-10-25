@@ -81,9 +81,8 @@
                         <thead class="table-light">
                             <tr>
                                 <th style="width: 50px;" class="text-center">#</th>
-                                <th>ชื่อ - สกุล นักวิจัย</th>
-                                <th>คณะ / หน่วยงาน</th>
-                                <th style="width: 90px;" class="text-center">โครงการ</th>
+                                <th>ชื่อ - สกุล นักวิจัย / สังกัดคณะ</th>
+                                <th style="width: 95px;" class="text-center">โครงการ</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -101,14 +100,16 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <a href="{{ route('frontend.rdbresearcher.show', $r->researcher_id) }}" target="_blank" class="fw-bold text-decoration-none text-body hover-primary">
-                                            {{ $r->prefix_nameTH ?? '' }}{{ $r->researcher_fname }} {{ $r->researcher_lname }}
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <small class="text-body-secondary text-truncate d-block" style="max-width: 200px;" title="{{ $r->department_nameTH }}">
-                                            {{ str_replace('คณะ', '', $r->department_nameTH) }}
-                                        </small>
+                                        <div>
+                                            <a href="{{ route('frontend.rdbresearcher.show', $r->researcher_id) }}" target="_blank" rel="noopener noreferrer" class="fw-bold text-decoration-none text-body hover-primary">
+                                                <i class="bi bi-person-fill text-primary me-1"></i>{{ $r->prefix_nameTH ?? '' }}{{ $r->researcher_fname }} {{ $r->researcher_lname }}
+                                            </a>
+                                        </div>
+                                        @if(!empty($r->department_nameTH))
+                                            <small class="text-body-secondary d-flex align-items-center gap-1 mt-0.5 text-truncate" title="{{ $r->department_nameTH }}">
+                                                <i class="bi bi-buildings text-secondary"></i>{{ $r->department_nameTH }}
+                                            </small>
+                                        @endif
                                     </td>
                                     <td class="text-center fw-bold text-primary">
                                         {{ number_format($r->project_count) }}
@@ -135,9 +136,8 @@
                         <thead class="table-light">
                             <tr>
                                 <th style="width: 50px;" class="text-center">#</th>
-                                <th>ชื่อ - สกุล นักวิจัย</th>
-                                <th>คณะ / หน่วยงาน</th>
-                                <th style="width: 90px;" class="text-center">ผลงาน</th>
+                                <th>ชื่อ - สกุล นักวิจัย / สังกัดคณะ</th>
+                                <th style="width: 95px;" class="text-center">ผลงาน</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -155,14 +155,16 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <a href="{{ route('frontend.rdbresearcher.show', $r->researcher_id) }}" target="_blank" class="fw-bold text-decoration-none text-body hover-primary">
-                                            {{ $r->prefix_nameTH ?? '' }}{{ $r->researcher_fname }} {{ $r->researcher_lname }}
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <small class="text-body-secondary text-truncate d-block" style="max-width: 200px;" title="{{ $r->department_nameTH }}">
-                                            {{ str_replace('คณะ', '', $r->department_nameTH) }}
-                                        </small>
+                                        <div>
+                                            <a href="{{ route('frontend.rdbresearcher.show', $r->researcher_id) }}" target="_blank" rel="noopener noreferrer" class="fw-bold text-decoration-none text-body hover-primary">
+                                                <i class="bi bi-person-fill text-success me-1"></i>{{ $r->prefix_nameTH ?? '' }}{{ $r->researcher_fname }} {{ $r->researcher_lname }}
+                                            </a>
+                                        </div>
+                                        @if(!empty($r->department_nameTH))
+                                            <small class="text-body-secondary d-flex align-items-center gap-1 mt-0.5 text-truncate" title="{{ $r->department_nameTH }}">
+                                                <i class="bi bi-buildings text-secondary"></i>{{ $r->department_nameTH }}
+                                            </small>
+                                        @endif
                                     </td>
                                     <td class="text-center fw-bold text-success">
                                         {{ number_format($r->pub_count) }}
@@ -227,8 +229,7 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>ชื่อ - สกุล นักวิจัย</th>
-                                <th>คณะ / หน่วยงาน</th>
+                                <th>ชื่อ - สกุล นักวิจัย / สังกัดคณะ</th>
                                 <th style="width: 130px;" class="text-center">โครงการวิจัย</th>
                                 <th style="width: 130px;" class="text-center">งานตีพิมพ์</th>
                                 <th style="width: 140px;" class="text-center">โปรไฟล์สากล</th>
@@ -238,17 +239,19 @@
                             @foreach($researchersList as $res)
                                 <tr>
                                     <td>
-                                        <a href="{{ route('frontend.rdbresearcher.show', $res->researcher_id) }}" target="_blank" class="fw-bold text-decoration-none text-body hover-primary">
-                                            {{ $res->prefix->prefix_nameTH ?? '' }}{{ $res->researcher_fname }} {{ $res->researcher_lname }}
-                                        </a>
-                                        @if($res->researcher_fnameEN || $res->researcher_lnameEN)
-                                            <small class="text-body-secondary d-block">{{ $res->researcher_fnameEN }} {{ $res->researcher_lnameEN }}</small>
+                                        <div>
+                                            <a href="{{ route('frontend.rdbresearcher.show', $res->researcher_id) }}" target="_blank" rel="noopener noreferrer" class="fw-bold text-decoration-none text-body hover-primary">
+                                                <i class="bi bi-person-fill text-primary me-1"></i>{{ $res->prefix->prefix_nameTH ?? '' }}{{ $res->researcher_fname }} {{ $res->researcher_lname }}
+                                            </a>
+                                            @if($res->researcher_fnameEN || $res->researcher_lnameEN)
+                                                <small class="text-body-secondary ms-1">({{ trim(($res->researcher_fnameEN ?? '') . ' ' . ($res->researcher_lnameEN ?? '')) }})</small>
+                                            @endif
+                                        </div>
+                                        @if($res->department)
+                                            <small class="text-body-secondary d-flex align-items-center gap-1 mt-0.5" title="{{ $res->department->department_nameTH }}">
+                                                <i class="bi bi-buildings text-secondary"></i>{{ $res->department->department_nameTH }}
+                                            </small>
                                         @endif
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-body-secondary text-body border">
-                                            {{ $res->department->department_nameTH ?? '-' }}
-                                        </span>
                                     </td>
                                     <td class="text-center fw-bold text-primary">
                                         {{ number_format($res->rdb_projects_count) }}
@@ -273,6 +276,52 @@
                                     </td>
                                 </tr>
                             @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- รายงานนักวิจัยรุ่นใหม่ (First Project) --}}
+    <div class="row g-4 mb-4">
+        <div class="col-lg-5">
+            <div class="card border shadow-sm h-100">
+                <div class="card-header bg-transparent py-3">
+                    <h5 class="mb-0 fw-bold text-body"><i class="bi bi-person-plus-fill text-success me-2"></i> นักวิจัยรุ่นใหม่ (เริ่มทำโครงการครั้งแรก){{ !empty($selectedYear) ? ' ปี '.$selectedYear->year_name : '' }}</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle mb-0">
+                        <thead class="table-light"><tr><th>คณะ / หน่วยงาน</th><th class="text-end">จำนวน (ท่าน)</th></tr></thead>
+                        <tbody>
+                            @forelse($firstProjectByFaculty as $r)
+                                <tr><td>{{ $r->department_nameTH }}</td><td class="text-end fw-bold">{{ number_format($r->new_researcher_count) }}</td></tr>
+                            @empty
+                                <tr><td colspan="2" class="text-center text-body-secondary py-3">ไม่พบข้อมูล</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="card border shadow-sm h-100">
+                <div class="card-header bg-transparent py-3">
+                    <h5 class="mb-0 fw-bold text-body"><i class="bi bi-list-check text-primary me-2"></i> รายชื่อนักวิจัยรุ่นใหม่ล่าสุด</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle mb-0">
+                        <thead class="table-light"><tr><th>นักวิจัย</th><th>โครงการแรก</th><th class="text-center">ปีงบฯ</th></tr></thead>
+                        <tbody>
+                            @forelse($firstProjectList as $r)
+                                <tr>
+                                    <td><a href="{{ route('frontend.rdbresearcher.show', $r->researcher_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none fw-bold text-body hover-primary">{{ $r->prefix_nameTH }}{{ $r->researcher_fname }} {{ $r->researcher_lname }}</a><small class="d-block text-body-secondary">{{ $r->department_nameTH }}</small></td>
+                                    <td><a href="{{ route('frontend.rdbproject.show', $r->pro_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body hover-primary">{{ \Illuminate\Support\Str::limit(strip_tags((string) $r->pro_nameTH), 70) }}</a></td>
+                                    <td class="text-center">{{ $r->year_name }}</td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="3" class="text-center text-body-secondary py-3">ไม่พบข้อมูล</td></tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>

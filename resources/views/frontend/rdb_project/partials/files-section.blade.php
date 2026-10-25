@@ -59,6 +59,7 @@
                 <div class="list-group">
                     @foreach($publicFiles as $file)
                         <a href="{{ route('frontend.rdb_project.download_file', [$project->pro_id, $file->id]) }}" 
+                           target="_blank" rel="noopener noreferrer"
                            class="list-group-item list-group-item-action">
                             <div class="d-flex w-100 justify-content-between">
                                 <h6 class="mb-1">
