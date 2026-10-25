@@ -30,10 +30,16 @@
 
         <div class="row g-3">
             {{-- Name Search --}}
-            <div class="col-md-8">
+            <div class="col-md-4">
                 <label class="form-label">ชื่อ-นามสกุล (ไทย/อังกฤษ)</label>
                 <input type="text" class="form-control" name="search" value="{{ request('search') }}"
                     placeholder="ระบุชื่อ หรือนามสกุล (ไทยหรืออังกฤษ)...">
+            </div>
+            {{-- Other Keywords / Note Search --}}
+            <div class="col-md-4">
+                <label class="form-label">คำค้นอื่น ๆ (เช่น หมายเหตุ, อีเมล)</label>
+                <input type="text" class="form-control" name="note" value="{{ request('note') }}"
+                    placeholder="ระบุคำค้นในหมายเหตุ, ความเชี่ยวชาญ, หรืออีเมล...">
             </div>
             {{-- Department --}}
             <div class="col-md-4">
@@ -41,7 +47,7 @@
                 <select class="form-select" name="department">
                     <option value="">-- ทั้งหมด --</option>
                     @foreach($departments as $dep)
-                        <option value="{{ $dep->department_id }}" {{ request('department') == $dep->department_id ? 'selected' : '' }}>
+                        <option value="{{ $dep->department_id }}" {{ (request('department') == $dep->department_id || request('department_id') == $dep->department_id) ? 'selected' : '' }}>
                             {{ $dep->department_nameTH }}
                         </option>
                     @endforeach
@@ -50,16 +56,16 @@
         </div>
     </x-search-bar>
 
-    <!-- Results Table -->
-    <div class="card shadow-sm border-0">
+    <!-- Results Table Card -->
+    <div class="card shadow-sm border mb-4">
         <div class="card-header bg-body-tertiary border-bottom py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 fw-semibold text-body">
+            <h6 class="mb-0 fw-semibold text-body">
                 <i class="bi bi-list-ul me-2 text-primary"></i>รายชื่อนักวิจัย
-                <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle rounded-pill ms-2">{{ number_format($items->total()) }} รายการ</span>
-            </h5>
+            </h6>
         </div>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
                         <th style="width: 60px;" class="text-center text-nowrap">#</th>
@@ -144,6 +150,7 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
         </div>
     </div>
 

@@ -176,8 +176,13 @@
     </x-search-bar>
 
     <!-- Results Table Card -->
-    <div class="card shadow-sm">
-        <div class="card-body">
+    <div class="card shadow-sm border mb-4">
+        <div class="card-header bg-body-tertiary border-bottom py-3 d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 fw-semibold text-body">
+                <i class="bi bi-list-ul me-2 text-primary"></i>รายการโครงการวิจัย
+            </h6>
+        </div>
+        <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-top mb-0">
                     <thead class="table-light">
@@ -276,12 +281,12 @@
                     </tbody>
                 </table>
             </div>
-
-            <!-- Pagination -->
-            <div class="mt-4 d-flex justify-content-center">
-                {{ $projects->withQueryString()->links('pagination::bootstrap-5') }}
-            </div>
         </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-center mt-4">
+        {{ $projects->withQueryString()->links('pagination::bootstrap-5') }}
     </div>
 @endsection
 

@@ -9,10 +9,20 @@ use App\Http\Requests\Backend\{StoreRdbDepartmentTypeRequest, UpdateRdbDepartmen
 
 class RdbdepartmenttypeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', RdbDepartmentType::class);
-        $items = RdbDepartmentType::with(['creator', 'updater'])->orderBy('tdepartment_id')->paginate(20);
+        $query = RdbDepartmentType::with(['creator', 'updater']);
+
+        $search = $request->input('search', $request->input('q'));
+        if ($search !== null && $search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('tdepartment_nameTH', 'like', "%{$search}%")
+                  ->orWhere('tdepartment_nameEN', 'like', "%{$search}%");
+            });
+        }
+
+        $items = $query->orderBy('tdepartment_id')->paginate(20)->withQueryString();
         return view('backend.rdbdepartmenttype.index', compact('items'));
     }
 
@@ -56,7 +66,7 @@ class RdbdepartmenttypeController extends Controller
         $item = RdbDepartmentType::findOrFail($id);
         $this->authorize('update', $item);
         
-        $data = $request.validated();
+        $data = $request->validated();
         
         $item->fill($data);
         $item->user_updated = auth()->id();

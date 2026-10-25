@@ -41,3 +41,27 @@ Bootstrap automatically adjusts `.table-light` in dark mode to an appropriate el
 - When adding new primary menu items, ensure they are registered in both sidebar and bottom navigation partials.
 - Active link check:
   `{{ request()->routeIs('backend.module.*') ? 'active fw-bold' : '' }}`
+
+## 4. Aesthetic Anchors, Token Locking & Anti-AI-Slop Craftsmanship (Ilm-Alan Frontend Design Protocol)
+To ensure the application feels genuinely crafted by a senior human designer for an academic institution—and never resembles generic "AI-slop"—strictly follow these aesthetic discipline rules:
+
+### 4.1 Aesthetic Anchor: Scholarly Editorial & Swiss Modernism
+- **Visual Direction**: Inspire confidence through crisp editorial precision (inspired by Stripe Docs, Nature Portfolio, and Linear). Prioritize high-contrast typography, structured hairline borders (`1px solid`), and calm, deliberate surfaces over flashy decoration.
+- **No Generic AI Gradients or Neon Glows**:
+  - ❌ **FORBIDDEN**: Purple-to-pink/cyan neon gradients (`#8b5cf6` to `#ec4899`), glowing box-shadows (`0 0 20px rgba(...)`), or heavy glassmorphism everywhere.
+  - ✅ **REQUIRED**: Solid, grounded academic surfaces (`--bs-card-bg`) paired with subtle top/left accent borders or refined Deep Navy (`#0F2744` -> `#1E3A5F`) and Citation Gold (`#D97706`) accents.
+
+### 4.2 Token Locking & Atmospheric Polarity (Light vs. Dark Mode)
+- **Light Mode (Daylight Editorial Slate)**:
+  - Warm/clean paper-slate canvas (`#F8FAFC`), crisp white elevated surfaces (`#FFFFFF`), and subtle structural hairline borders (`#E2E8F0` / `rgba(15, 23, 42, 0.08)`).
+  - Table headers and filter headers should use clean, structured surfaces or deep scholarly navy with crisp `1px` borders—never muddy or overly saturated blocks.
+- **Dark Mode (Carbon-Navy Night Reading)**:
+  - Deep carbon-navy canvas (`#090F1E` / `#0B1329`) with layered surface elevation (`#111C35` for cards, `#162444` for inputs/dropdowns) and subtle specular top-edge borders (`#1E2E4E` / `rgba(255, 255, 255, 0.07)`).
+  - Never use pure `#000000` backgrounds or glaring `#FFFFFF` text for long paragraphs; use `#F1F5F9` for primary headings and `#CBD5E1` / `#94A3B8` for comfortable long-form reading.
+
+### 4.3 Tabular Numerals & Micro-Interactions
+- **Tabular Numerals (`font-variant-numeric: tabular-nums`)**:
+  - Always apply `.tabular-nums` or `font-variant-numeric: tabular-nums` to budgets (`pro_budget`), years (`2569`), project codes, citation counts, percentages, and date columns so digits align vertically with Swiss grid precision.
+- **Tactile Micro-Interactions**:
+  - Avoid exaggerated card bouncing (`translateY(-5px)`). Use subtle, responsive transitions (`150ms cubic-bezier(0.22, 1, 0.36, 1)`), crisp focus rings (`0 0 0 3px rgba(37, 99, 235, 0.16)`), and clear active states.
+  - Never hardcode `.text-dark` inside components (such as navbar dropdowns or notification lists) where dark mode is active; always use `.text-body` or `.text-body-emphasis`.

@@ -23,11 +23,15 @@ class ResearchConferenceController extends Controller
         $this->authorize('viewAny', ResearchConference::class);
         $query = ResearchConference::query()->where('data_show', 1);
 
-        if ($request->filled('con_name')) {
-            $query->where('con_name', 'like', '%' . $request->con_name . '%');
+        $search = $request->input('search', $request->input('q', $request->input('con_name')));
+        if ($search !== null && $search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('con_name', 'like', "%{$search}%")
+                  ->orWhere('con_detail', 'like', "%{$search}%");
+            });
         }
 
-        $items = $query->orderBy('created_at', 'desc')->paginate(20);
+        $items = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
 
         return view('backend.research_conference.index', compact('items'));
     }

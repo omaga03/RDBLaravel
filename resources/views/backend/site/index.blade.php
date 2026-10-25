@@ -358,6 +358,13 @@
                         </div>
                     </a>
                     @if($userRoleType === 'admin')
+                        <a href="{{ route('backend.user.index') }}" class="list-group-item list-group-item-action bg-transparent d-flex align-items-center py-3">
+                            <i class="bi bi-person-gear text-primary fs-5 me-3"></i>
+                            <div>
+                                <div class="fw-bold text-body">จัดการผู้ใช้งาน (Users)</div>
+                                <small class="text-body-secondary">จัดการบัญชีผู้ใช้งาน สิทธิ์การเข้าถึง และรีเซ็ตรหัสผ่าน</small>
+                            </div>
+                        </a>
                         <a href="{{ route('backend.rdb_researcher.create') }}" class="list-group-item list-group-item-action bg-transparent d-flex align-items-center py-3">
                             <i class="bi bi-person-plus-fill text-success fs-5 me-3"></i>
                             <div>

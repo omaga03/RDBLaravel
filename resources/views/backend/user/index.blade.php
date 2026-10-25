@@ -2,10 +2,17 @@
 
 @section('content')
 <div class="container-fluid py-4">
+    <!-- Page Header & Breadcrumb -->
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ route('backend.site.index') }}" class="text-decoration-none"><i class="bi bi-speedometer2 me-1"></i>แดชบอร์ด</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">จัดการผู้ใช้งาน</li>
+                </ol>
+            </nav>
             <h2 class="mb-1 fw-bold text-body">
-                <i class="bi bi-people-gear me-2 text-primary"></i>จัดการผู้ใช้งาน (User Management)
+                <i class="bi bi-person-gear me-2 text-primary"></i>จัดการผู้ใช้งาน <span class="text-body-secondary small fw-normal">(User Management)</span>
             </h2>
             <p class="text-body-secondary mb-0">จัดการบัญชีผู้ใช้งาน สิทธิ์การเข้าถึง และการเชื่อมโยงกับข้อมูลนักวิจัย</p>
         </div>
@@ -20,7 +27,7 @@
     <x-search-bar :searchRoute="route('backend.user.index')" :collapsed="request()->hasAny(['search', 'role']) ? false : true">
         <div class="row g-3">
             <div class="col-md-6">
-                <label class="form-label fw-bold">บทบาท (Role)</label>
+                <label class="form-label fw-bold"><i class="bi bi-shield-check me-1 text-primary"></i>บทบาท (Role)</label>
                 <select name="role" class="form-select">
                     <option value="">-- ทุกบทบาท --</option>
                     @foreach($roles as $r)
@@ -36,22 +43,22 @@
     <div class="card shadow-sm border">
         <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center py-3">
             <h6 class="mb-0 fw-bold text-body">
-                <i class="bi bi-people me-2"></i>รายชื่อผู้ใช้งานที่มีบทบาทในระบบ
+                <i class="bi bi-people me-2 text-primary"></i>รายชื่อผู้ใช้งานที่มีบทบาทในระบบ
             </h6>
             <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
-                ทั้งหมด {{ number_format($users->total()) }} บัญชี
+                <i class="bi bi-database me-1"></i> ทั้งหมด {{ number_format($users->total()) }} บัญชี
             </span>
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead>
                     <tr>
-                        <th style="width: 80px;">ID</th>
-                        <th style="width: 25%;">ชื่อผู้ใช้ / อีเมล</th>
-                        <th style="width: 20%;">บทบาท (Role)</th>
-                        <th>นักวิจัยที่เชื่อมโยง</th>
-                        <th style="width: 120px;" class="text-center">สถานะ</th>
-                        <th style="width: 140px;" class="text-center">จัดการ</th>
+                        <th style="width: 80px;"><i class="bi bi-hash me-1 text-secondary"></i>ID</th>
+                        <th style="width: 25%;"><i class="bi bi-person me-1 text-primary"></i>ชื่อผู้ใช้ / อีเมล</th>
+                        <th style="width: 20%;"><i class="bi bi-shield-check me-1 text-success"></i>บทบาท (Role)</th>
+                        <th><i class="bi bi-person-workspace me-1 text-info"></i>นักวิจัยที่เชื่อมโยง</th>
+                        <th style="width: 120px;" class="text-center"><i class="bi bi-toggle2-on me-1 text-warning"></i>สถานะ</th>
+                        <th style="width: 140px;" class="text-center"><i class="bi bi-gear me-1 text-secondary"></i>จัดการ</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -24,11 +24,15 @@ class ResearchNewsController extends Controller
         $this->authorize('viewAny', ResearchNews::class);
         $query = ResearchNews::query()->where('data_show', 1);
 
-        if ($request->filled('news_name')) {
-            $query->where('news_name', 'like', '%' . $request->news_name . '%');
+        $search = $request->input('search', $request->input('q', $request->input('news_name')));
+        if ($search !== null && $search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('news_name', 'like', "%{$search}%")
+                  ->orWhere('news_detail', 'like', "%{$search}%");
+            });
         }
 
-        $items = $query->orderBy('created_at', 'desc')->paginate(20);
+        $items = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
 
         return view('backend.research_news.index', compact('items'));
     }

@@ -66,9 +66,9 @@ class RdbPublishedController extends Controller
             }
         }
 
-        // 1. Simple Search (Keyword 'q')
-        if ($request->filled('q')) {
-            $q = $request->q;
+        // 1. Simple Search (Keyword 'search' or 'q')
+        if ($request->filled('search') || $request->filled('q')) {
+            $q = trim($request->search ?? $request->q);
             $query->where(function($sub) use ($q) {
                 $sub->where('pub_name', 'like', "%{$q}%")
                     ->orWhere('pub_name_journal', 'like', "%{$q}%")
@@ -99,117 +99,126 @@ class RdbPublishedController extends Controller
         }
 
         // 2. Advanced Search Filters
-        if ($request->filled('search_mode') && $request->search_mode == 'advanced') {
-            
-            // Publication Autocomplete & Multi-Keyword Title Search
-            if ($request->filled('pub_id') && $request->pub_id !== 'pre') {
-                $query->where('id', $request->pub_id);
-            } elseif ($request->filled('pub_name')) {
-                $pubName = trim($request->pub_name);
-                $query->where(function($q) use ($pubName) {
-                    $q->where('pub_name', 'like', "%{$pubName}%")
-                      ->orWhere('pub_name_journal', 'like', "%{$pubName}%");
-                });
-            }
+        if ($request->filled('pub_id') && $request->pub_id !== 'pre') {
+            $query->where('id', $request->pub_id);
+        } elseif ($request->filled('pub_name')) {
+            $pubName = trim($request->pub_name);
+            $query->where(function($q) use ($pubName) {
+                $q->where('pub_name', 'like', "%{$pubName}%")
+                  ->orWhere('pub_name_journal', 'like', "%{$pubName}%");
+            });
+        }
 
-            if ($request->filled('title_keywords')) {
-                $keywords = array_values(array_filter(preg_split('/\s+/', trim($request->title_keywords))));
-                $mode = $request->input('title_keywords_mode', 'all');
+        if ($request->filled('title_keywords')) {
+            $keywords = array_values(array_filter(preg_split('/\s+/', trim($request->title_keywords))));
+            $mode = $request->input('title_keywords_mode', 'all');
 
-                if (!empty($keywords)) {
-                    if ($mode === 'all') {
-                        $query->where(function($q) use ($keywords) {
-                            foreach ($keywords as $kw) {
-                                $q->where(function($sub) use ($kw) {
-                                    $sub->where('pub_name', 'like', "%{$kw}%")
-                                        ->orWhere('pub_name_journal', 'like', "%{$kw}%");
-                                });
-                            }
-                        });
-                    } else {
-                        $query->where(function($q) use ($keywords) {
-                            foreach ($keywords as $kw) {
-                                $q->orWhere(function($sub) use ($kw) {
-                                    $sub->where('pub_name', 'like', "%{$kw}%")
-                                        ->orWhere('pub_name_journal', 'like', "%{$kw}%");
-                                });
-                            }
-                        });
-                    }
+            if (!empty($keywords)) {
+                if ($mode === 'all') {
+                    $query->where(function($q) use ($keywords) {
+                        foreach ($keywords as $kw) {
+                            $q->where(function($sub) use ($kw) {
+                                $sub->where('pub_name', 'like', "%{$kw}%")
+                                    ->orWhere('pub_name_journal', 'like', "%{$kw}%");
+                            });
+                        }
+                    });
+                } else {
+                    $query->where(function($q) use ($keywords) {
+                        foreach ($keywords as $kw) {
+                            $q->orWhere(function($sub) use ($kw) {
+                                $sub->where('pub_name', 'like', "%{$kw}%")
+                                    ->orWhere('pub_name_journal', 'like', "%{$kw}%");
+                            });
+                        }
+                    });
                 }
             }
+        }
 
-            // Year Filter with Year Type
-            if ($request->filled('year_id')) {
-                $yearCol = 'year_id'; // Default: Calendar
-                if ($request->year_type == 'budget') $yearCol = 'year_bud';
-                if ($request->year_type == 'education') $yearCol = 'year_edu';
-                $query->where($yearCol, $request->year_id);
-            }
+        // Year Filter with Year Type
+        if ($request->filled('year_id')) {
+            $yearCol = 'year_id'; // Default: Calendar
+            if ($request->year_type == 'budget') $yearCol = 'year_bud';
+            if ($request->year_type == 'education') $yearCol = 'year_edu';
+            $query->where($yearCol, $request->year_id);
+        }
 
-            // Publication Type Hierarchy
-            if ($request->filled('pubtype_id')) {
-                $query->where('pubtype_id', $request->pubtype_id);
-            } elseif ($request->filled('pubtype_grouptype')) {
-                $ids = \App\Models\RdbPublishedType::where('pubtype_grouptype', $request->pubtype_grouptype)
-                        ->pluck('pubtype_id');
-                $query->whereIn('pubtype_id', $ids);
-            } elseif ($request->filled('pubtype_group')) {
-                $ids = \App\Models\RdbPublishedType::where('pubtype_group', $request->pubtype_group)
-                        ->pluck('pubtype_id');
-                $query->whereIn('pubtype_id', $ids);
-            }
+        // Publication Type Hierarchy
+        if ($request->filled('pubtype_id')) {
+            $query->where('pubtype_id', $request->pubtype_id);
+        } elseif ($request->filled('pubtype_grouptype')) {
+            $ids = \App\Models\RdbPublishedType::where('pubtype_grouptype', $request->pubtype_grouptype)
+                    ->pluck('pubtype_id');
+            $query->whereIn('pubtype_id', $ids);
+        } elseif ($request->filled('pubtype_group')) {
+            $ids = \App\Models\RdbPublishedType::where('pubtype_group', $request->pubtype_group)
+                    ->pluck('pubtype_id');
+            $query->whereIn('pubtype_id', $ids);
+        }
 
-            // Researcher & Project
-            if ($request->filled('researcher_id')) {
-                $query->where(function($q) use ($request) {
-                    $q->where('researcher_id', $request->researcher_id)
-                      ->orWhereHas('authors', function($a) use ($request) {
-                          $a->where('rdb_researcher.researcher_id', $request->researcher_id);
-                      });
+        // Researcher & Project
+        if ($request->filled('researcher_id') && $request->researcher_id !== 'pre') {
+            $query->where(function($q) use ($request) {
+                $q->where('researcher_id', $request->researcher_id)
+                  ->orWhereHas('authors', function($a) use ($request) {
+                      $a->where('rdb_researcher.researcher_id', $request->researcher_id);
+                  });
+            });
+        } elseif ($request->filled('researcher_name')) {
+            $cleanName = preg_replace('/^(นาย|นาง|นางสาว|ดร\.|ผศ\.|รศ\.|ศ\.)\s*/u', '', trim($request->researcher_name));
+            $searchWords = array_values(array_filter(preg_split('/\s+/', $cleanName)));
+            if (!empty($searchWords)) {
+                $query->where(function($q) use ($searchWords) {
+                    $q->whereHas('researcher', function($rq) use ($searchWords) {
+                        foreach ($searchWords as $word) {
+                            $rq->where(function($wq) use ($word) {
+                                $wq->where('researcher_fname', 'like', "%{$word}%")
+                                   ->orWhere('researcher_lname', 'like', "%{$word}%");
+                            });
+                        }
+                    })->orWhereHas('authors', function($aq) use ($searchWords) {
+                        foreach ($searchWords as $word) {
+                            $aq->where(function($wq) use ($word) {
+                                $wq->where('researcher_fname', 'like', "%{$word}%")
+                                   ->orWhere('researcher_lname', 'like', "%{$word}%");
+                            });
+                        }
+                    });
                 });
             }
-            if ($request->filled('pro_id')) {
-                $query->where('pro_id', $request->pro_id);
-            }
+        }
+        if ($request->filled('pro_id')) {
+            $query->where('pro_id', $request->pro_id);
+        }
 
-            // Department & Branch
-            if ($request->filled('department_id')) {
-                $query->where('department_id', $request->department_id);
-            }
-            if ($request->filled('branch_id')) {
-                $query->where('branch_id', $request->branch_id);
-            }
+        // Department & Branch
+        if ($request->filled('department_id')) {
+            $query->where('department_id', $request->department_id);
+        }
+        if ($request->filled('branch_id')) {
+            $query->where('branch_id', $request->branch_id);
+        }
 
-            // Score
-            if ($request->filled('pub_score')) {
-                $query->where('pub_score', $request->pub_score);
-            }
+        // Score
+        if ($request->filled('pub_score')) {
+            $query->where('pub_score', $request->pub_score);
+        }
 
-            // Budget Range
-            if ($request->filled('budget_min')) {
-                $query->where('pub_budget', '>=', $request->budget_min);
-            }
-            if ($request->filled('budget_max')) {
-                $query->where('pub_budget', '<=', $request->budget_max);
-            }
+        // Budget Range
+        if ($request->filled('budget_min')) {
+            $query->where('pub_budget', '>=', $request->budget_min);
+        }
+        if ($request->filled('budget_max')) {
+            $query->where('pub_budget', '<=', $request->budget_max);
+        }
 
-            // Date Range
-            if ($request->filled('date_start')) {
-                $query->whereDate('pub_date', '>=', $request->date_start);
-                
-                if (!$request->filled('date_end')) {
-                    $query->whereDate('pub_date', '<=', $request->date_start);
-                }
-            }
-            if ($request->filled('date_end')) {
-                $query->whereDate('pub_date', '<=', $request->date_end);
-            }
-
-        } else {
-            if ($request->filled('year_id') && !$request->filled('q')) {
-                $query->where('year_id', $request->year_id);
-            }
+        // Date Range
+        if ($request->filled('date_start')) {
+            $query->whereDate('pub_date', '>=', $request->date_start);
+        }
+        if ($request->filled('date_end')) {
+            $query->whereDate('pub_date', '<=', $request->date_end);
         }
 
         return $query;
@@ -218,6 +227,18 @@ class RdbPublishedController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', RdbPublished::class);
+
+        $hasDateStart = $request->filled('date_start');
+        $hasDateEnd = $request->filled('date_end');
+        if ($hasDateStart || $hasDateEnd) {
+            if (!$hasDateStart || !$hasDateEnd) {
+                return redirect()->back()->withInput()->with('error', 'กรุณาระบุทั้งวันที่เริ่มและวันที่สิ้นสุด');
+            }
+            if ($request->date_end < $request->date_start) {
+                return redirect()->back()->withInput()->with('error', 'วันที่สิ้นสุดต้องไม่น้อยกว่าวันที่เริ่มต้น');
+            }
+        }
+
         $query = $this->getFilteredQuery($request);
 
         $items = $query->orderBy('pub_date', 'desc')->paginate(20);
@@ -479,23 +500,48 @@ class RdbPublishedController extends Controller
     public function searchResearcher(Request $request)
     {
         $this->authorize('viewAny', RdbPublished::class);
-        $q = $request->get('q', '');
+        $rawQuery = trim($request->get('q', ''));
         
-        $query = \App\Models\RdbResearcher::with(['prefix', 'department']);
-        
-        if ($q) {
-            $query->where(function($sub) use ($q) {
-                $sub->where('researcher_fname', 'like', "%{$q}%")
-                    ->orWhere('researcher_lname', 'like', "%{$q}%");
-            });
+        if (mb_strlen($rawQuery) < 2) {
+            return response()->json(['results' => []]);
         }
+
+        $cleanTerm = preg_replace('/^(นาย|นาง|นางสาว|ดร\.|ผศ\.|รศ\.|ศ\.)\s*/u', '', $rawQuery);
+        $words = array_values(array_filter(preg_split('/\s+/', $cleanTerm)));
+
+        $query = \App\Models\RdbResearcher::with(['prefix', 'department'])
+            ->where(function($sub) use ($cleanTerm, $words) {
+                $sub->where('researcher_fname', 'like', "%{$cleanTerm}%")
+                    ->orWhere('researcher_lname', 'like', "%{$cleanTerm}%")
+                    ->orWhere('researcher_fnameEN', 'like', "%{$cleanTerm}%")
+                    ->orWhere('researcher_lnameEN', 'like', "%{$cleanTerm}%")
+                    ->orWhereRaw("CONCAT(researcher_fname, ' ', researcher_lname) LIKE ?", ["%{$cleanTerm}%"]);
+
+                if (count($words) > 1) {
+                    $sub->orWhere(function($wSub) use ($words) {
+                        foreach ($words as $w) {
+                            $wSub->where(function($wq) use ($w) {
+                                $wq->where('researcher_fname', 'like', "%{$w}%")
+                                   ->orWhere('researcher_lname', 'like', "%{$w}%")
+                                   ->orWhere('researcher_fnameEN', 'like', "%{$w}%")
+                                   ->orWhere('researcher_lnameEN', 'like', "%{$w}%");
+                            });
+                        }
+                    });
+                }
+            });
         
         $results = $query->limit(30)->get()->map(function($item) {
             $prefix = $item->prefix ? $item->prefix->prefix_nameTH : '';
-            $dept = $item->department ? $item->department->department_nameTH : '';
+            $dept = $item->department ? $item->department->department_nameTH : '-';
             return [
-                'id' => $item->researcher_id, 
-                'text' => "{$prefix}{$item->researcher_fname} {$item->researcher_lname} [{$dept}]"
+                'id' => $item->researcher_id,
+                'value' => $item->researcher_id,
+                'text' => "{$prefix}{$item->researcher_fname} {$item->researcher_lname} [{$dept}]",
+                'prefix' => $prefix,
+                'fname' => $item->researcher_fname,
+                'lname' => $item->researcher_lname,
+                'department' => $dept,
             ];
         });
         
@@ -505,32 +551,81 @@ class RdbPublishedController extends Controller
     public function searchProject(Request $request)
     {
         $this->authorize('viewAny', RdbPublished::class);
-        $q = $request->get('q', '');
+        $q = trim($request->get('q', ''));
         
-        $query = \App\Models\RdbProject::with(['year', 'researchers' => function($q) {
-            $q->orderBy('rdb_project_work.position_id', 'asc')
-              ->with('prefix');
-        }]);
-        
-        if ($q) {
-            $query->where(function($sub) use ($q) {
-                $sub->where('pro_nameTH', 'like', "%{$q}%")
-                    ->orWhere('pro_nameEN', 'like', "%{$q}%");
-            });
+        if (mb_strlen($q) < 2) {
+            return response()->json(['results' => []]);
         }
-        
-        $results = $query->orderBy('year_id', 'desc')->limit(10)->get()->map(function($item) {
-             $year = $item->year ? $item->year->year_name : '-';
-             
-             $head = $item->researchers->first();
-             $headName = '-';
-             if ($head) {
-                 $headName = "{$head->researcher_fname} {$head->researcher_lname}";
-             }
 
-             return [
-                'id' => $item->pro_id, 
-                'text' => "{$year} • {$item->pro_nameTH} • {$headName}"
+        $cleanName = preg_replace('/^(นาย|นาง|นางสาว|ดร\.|ผศ\.|รศ\.|ศ\.)\s*/u', '', $q);
+        $words = array_values(array_filter(preg_split('/\s+/', $cleanName)));
+
+        $query = \App\Models\RdbProject::with([
+            'year',
+            'department',
+            'rdbProjectWorks' => function($wq) {
+                $wq->orderBy('position_id', 'asc');
+            },
+            'rdbProjectWorks.researcher.prefix',
+            'rdbProjectWorks.position'
+        ])->where(function($sub) use ($q, $cleanName, $words) {
+            $sub->where('pro_nameTH', 'like', "%{$q}%")
+                ->orWhere('pro_nameEN', 'like', "%{$q}%")
+                ->orWhere('pro_code', 'like', "%{$q}%")
+                ->orWhereHas('rdbProjectWorks.researcher', function($rq) use ($cleanName, $words) {
+                    $rq->where('researcher_fname', 'like', "%{$cleanName}%")
+                       ->orWhere('researcher_lname', 'like', "%{$cleanName}%")
+                       ->orWhere('researcher_fnameEN', 'like', "%{$cleanName}%")
+                       ->orWhere('researcher_lnameEN', 'like', "%{$cleanName}%")
+                       ->orWhereRaw("CONCAT(researcher_fname, ' ', researcher_lname) LIKE ?", ["%{$cleanName}%"]);
+
+                    if (count($words) > 1) {
+                        $rq->orWhere(function($wSub) use ($words) {
+                            foreach ($words as $w) {
+                                $wSub->where(function($wq) use ($w) {
+                                    $wq->where('researcher_fname', 'like', "%{$w}%")
+                                       ->orWhere('researcher_lname', 'like', "%{$w}%");
+                                });
+                            }
+                        });
+                    }
+                });
+        });
+        
+        $results = $query->orderBy('year_id', 'desc')->limit(20)->get()->map(function($item) {
+            $year = $item->year ? $item->year->year_name : '-';
+            $deptName = $item->department ? $item->department->department_nameTH : '';
+
+            $researchersList = $item->rdbProjectWorks->map(function($work) {
+                $r = $work->researcher;
+                if (!$r) return null;
+                $prefix = $r->prefix->prefix_nameTH ?? '';
+                return [
+                    'researcher_id' => $r->researcher_id,
+                    'full_name' => trim("{$prefix}{$r->researcher_fname} {$r->researcher_lname}"),
+                    'position_id' => $work->position_id,
+                    'position_name' => $work->position->position_nameTH ?? 'ผู้ร่วมวิจัย',
+                    'ratio' => $work->ratio,
+                ];
+            })->filter()->values();
+
+            $allResearchersText = $researchersList->pluck('full_name')->implode(', ');
+            $headName = $researchersList->first()['full_name'] ?? '-';
+            $cleanNameTH = strip_tags($item->pro_nameTH ?? '');
+            $cleanNameEN = strip_tags($item->pro_nameEN ?? '');
+
+            return [
+                'id' => $item->pro_id,
+                'value' => $item->pro_id,
+                'text' => "[{$year}] {$cleanNameTH} • ผู้วิจัย: " . ($allResearchersText ?: $headName),
+                'pro_nameTH' => $cleanNameTH,
+                'pro_nameEN' => $cleanNameEN,
+                'pro_code' => $item->pro_code ?? '',
+                'year_name' => $year,
+                'department_name' => $deptName,
+                'head_researcher' => $headName,
+                'all_researchers_text' => $allResearchersText ?: '-',
+                'researchers' => $researchersList->toArray(),
             ];
         });
         

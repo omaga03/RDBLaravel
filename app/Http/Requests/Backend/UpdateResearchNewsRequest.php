@@ -14,6 +14,15 @@ class UpdateResearchNewsRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        foreach (['news_date', 'news_event_start', 'news_event_end'] as $field) {
+            if ($this->has($field) && $this->input($field) !== null && $this->input($field) !== '') {
+                $this->merge([$field => \App\Helpers\ThaiDateHelper::toIsoDate($this->input($field))]);
+            }
+        }
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -28,7 +37,7 @@ class UpdateResearchNewsRequest extends FormRequest
             'news_type' => 'nullable|string|max:255',
             'news_date' => 'nullable|date',
             'news_event_start' => 'nullable|date',
-            'news_event_end' => 'nullable|date',
+            'news_event_end' => 'nullable|date|after_or_equal:news_event_start',
             'news_event_guarantee' => 'nullable|string|max:255',
             'news_detail' => 'nullable|string',
             'news_reference' => 'nullable|string',

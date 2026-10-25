@@ -18,12 +18,12 @@ class RdbDipTypeController extends Controller
         $query = RdbDipType::with(['creator', 'updater']);
 
         // Search logic
-        if ($request->filled('q')) {
-            $search = $request->q;
+        $search = $request->input('search', $request->input('q'));
+        if ($search !== null && $search !== '') {
             $query->where('dipt_name', 'like', "%{$search}%");
         }
 
-        $items = $query->orderBy('dipt_id', 'desc')->paginate(10);
+        $items = $query->orderBy('dipt_id', 'desc')->paginate(10)->withQueryString();
         return view('backend.rdbdiptype.index', compact('items'));
     }
 

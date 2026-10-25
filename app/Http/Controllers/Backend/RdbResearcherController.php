@@ -45,22 +45,46 @@ class RdbResearcherController extends Controller
         $this->authorize('viewAny', RdbResearcher::class);
         $query = RdbResearcher::with(['prefix', 'department', 'departmentCategory', 'creator', 'updater', 'user']);
 
-        if ($request->filled('q')) {
-            $q = $request->q;
-            $query->where(function($w) use ($q) {
-                $w->where('researcher_fname', 'like', "%{$q}%")
-                  ->orWhere('researcher_lname', 'like', "%{$q}%")
-                  ->orWhere('researcher_email', 'like', "%{$q}%")
-                  ->orWhere('researcher_note', 'like', "%{$q}%");
+        if ($request->filled('search') || $request->filled('q')) {
+            $rawQ = trim($request->search ?? $request->q);
+            $cleanQ = preg_replace('/^(นาย|นาง|นางสาว|ดร\.|ผศ\.|รศ\.|ศ\.)\s*/u', '', $rawQ);
+            $words = array_values(array_filter(preg_split('/\s+/', $cleanQ)));
+
+            $query->where(function($w) use ($rawQ, $cleanQ, $words) {
+                $w->where('rdb_researcher.researcher_fname', 'like', "%{$cleanQ}%")
+                  ->orWhere('rdb_researcher.researcher_lname', 'like', "%{$cleanQ}%")
+                  ->orWhere('rdb_researcher.researcher_fnameEN', 'like', "%{$cleanQ}%")
+                  ->orWhere('rdb_researcher.researcher_lnameEN', 'like', "%{$cleanQ}%")
+                  ->orWhere('rdb_researcher.researcher_email', 'like', "%{$rawQ}%")
+                  ->orWhere('rdb_researcher.researcher_note', 'like', "%{$rawQ}%")
+                  ->orWhereRaw("CONCAT(rdb_researcher.researcher_fname, ' ', rdb_researcher.researcher_lname) LIKE ?", ["%{$cleanQ}%"]);
+
+                if (count($words) > 1) {
+                    $w->orWhere(function($sub) use ($words) {
+                        foreach ($words as $word) {
+                            $sub->where(function($wq) use ($word) {
+                                $wq->where('rdb_researcher.researcher_fname', 'like', "%{$word}%")
+                                   ->orWhere('rdb_researcher.researcher_lname', 'like', "%{$word}%")
+                                   ->orWhere('rdb_researcher.researcher_fnameEN', 'like', "%{$word}%")
+                                   ->orWhere('rdb_researcher.researcher_lnameEN', 'like', "%{$word}%");
+                            });
+                        }
+                    });
+                }
             });
         }
         
-        if ($request->filled('department_id')) {
-            $query->where('department_id', $request->department_id);
+        if ($request->filled('department_id') || $request->filled('department')) {
+            $query->where('rdb_researcher.department_id', $request->department_id ?? $request->department);
         }
 
         if ($request->filled('depcat_id')) {
-            $query->where('depcat_id', $request->depcat_id);
+            $query->where('rdb_researcher.depcat_id', $request->depcat_id);
+        }
+
+        if ($request->filled('note') || $request->filled('researcher_note')) {
+            $note = trim($request->note ?? $request->researcher_note);
+            $query->where('rdb_researcher.researcher_note', 'like', "%{$note}%");
         }
 
         $researchers = $query->leftJoin('rdb_department', 'rdb_researcher.department_id', '=', 'rdb_department.department_id')
@@ -98,6 +122,10 @@ class RdbResearcherController extends Controller
         }
         if ($request->filled('department_id')) {
             $query->where('department_id', $request->department_id);
+        }
+        if ($request->filled('note') || $request->filled('researcher_note')) {
+            $note = trim($request->note ?? $request->researcher_note);
+            $query->where('researcher_note', 'like', "%{$note}%");
         }
 
         $filename = 'researchers_' . date('Y-m-d_His') . '.csv';

@@ -80,27 +80,29 @@ class RdbProjectUtilize extends Model
      */
     public function getUtilizeFilePath(?string $filename = null): ?string
     {
-        if (!empty($this->uf_path)) {
-            return $this->uf_path;
-        }
-
-        $file = $filename ?: $this->utz_files;
-        if (!empty($file)) {
-            $safeName = basename(trim($file));
-            if ($safeName) {
-                if (Storage::disk('public')->exists('utilize/' . $safeName) || file_exists(public_path('storage/utilize/' . $safeName))) {
-                    return 'utilize/' . $safeName;
+        if (!empty($filename) && $filename !== $this->utz_files) {
+            $safeName = basename(trim($filename));
+            $candidates = [
+                'uploads/datautilize/' . $this->utz_id . '/' . $safeName,
+                'uploads/datautilize/' . $safeName,
+                'utilize/' . $safeName,
+                'uploads/utilize/' . $safeName,
+                'datautilize/' . $this->utz_id . '/' . $safeName,
+            ];
+            foreach ($candidates as $cand) {
+                if (Storage::disk('public')->exists($cand) || file_exists(public_path('storage/' . $cand)) || file_exists(public_path($cand))) {
+                    return $cand;
                 }
-                if (Storage::disk('public')->exists('uploads/utilize/' . $safeName) || file_exists(public_path('storage/uploads/utilize/' . $safeName)) || file_exists(public_path('uploads/utilize/' . $safeName))) {
-                    return 'uploads/utilize/' . $safeName;
-                }
-                if (file_exists(public_path('datautilize/' . $this->utz_id . '/' . $safeName)) || file_exists(base_path('yii2_rdb-main/frontend/web/datautilize/' . $this->utz_id . '/' . $safeName))) {
-                    return 'datautilize/' . $this->utz_id . '/' . $safeName;
-                }
-                return 'uploads/utilize/' . $safeName;
             }
+            return 'uploads/utilize/' . $safeName;
         }
 
-        return null;
+        return $this->resolveDualFilePath('uf_path', 'utz_files', [
+            'uploads/datautilize/{utz_id}',
+            'uploads/datautilize',
+            'utilize',
+            'uploads/utilize',
+            'datautilize/{utz_id}',
+        ]) ?? (!empty($this->utz_files) ? 'uploads/utilize/' . basename(trim($this->utz_files)) : null);
     }
 }

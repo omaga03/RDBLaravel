@@ -46,13 +46,12 @@
     <x-search-bar :searchRoute="route('frontend.rdbdip.index')" 
         simplePlaceholder="ค้นหาจาก: เลขที่คำขอ, เลขที่ทะเบียน/สิทธิบัตร, ชื่อผลงาน, ผู้ประดิษฐ์, โครงการวิจัย...">
         
-        <div class="row g-3">
-            @if(request('pro_id'))
-                <input type="hidden" name="pro_id" value="{{ request('pro_id') }}">
-            @endif
+        @if(request('pro_id'))
+            <input type="hidden" name="pro_id" value="{{ request('pro_id') }}">
+        @endif
 
-            <div class="row g-3">
-                {{-- Row 1: DIP Title Autocomplete Search --}}
+        <div class="row g-3">
+            {{-- Row 1: DIP Title Autocomplete Search --}}
                 <div class="col-md-12">
                     <label class="form-label d-flex justify-content-between align-items-center">
                         <span><i class="bi bi-award text-primary me-1"></i> ชื่อผลงาน / ทรัพย์สินทางปัญญา</span>
@@ -137,13 +136,12 @@
             </div>
         </x-search-bar>
 
-    <!-- Results Table -->
-    <div class="card shadow-sm border-0">
+    <!-- Results Table Card -->
+    <div class="card shadow-sm border mb-4">
         <div class="card-header bg-body-tertiary border-bottom py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 fw-semibold text-body">
+            <h6 class="mb-0 fw-semibold text-body">
                 <i class="bi bi-list-ul me-2 text-primary"></i>รายการทรัพย์สินทางปัญญา
-                <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle rounded-pill ms-2">{{ number_format($items->total()) }} รายการ</span>
-            </h5>
+            </h6>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -244,18 +242,12 @@
                     </tbody>
                 </table>
             </div>
-
-            <!-- Pagination -->
-            <div class="p-3 border-top d-flex justify-content-center">
-                {{ $items->withQueryString()->links('pagination::bootstrap-5') }}
-            </div>
         </div>
     </div>
 
-    <div class="mt-4">
-        <a href="{{ route('frontend.rdbproject.index') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i> ไปหน้ารายการโครงการวิจัย
-        </a>
+    <!-- Pagination -->
+    <div class="d-flex justify-content-center mt-4">
+        {{ $items->withQueryString()->links('pagination::bootstrap-5') }}
     </div>
 @endsection
 

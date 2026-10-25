@@ -56,26 +56,12 @@ class RdbProjectTypeSub extends Model
      */
     public function getTypeSubFilePath(): ?string
     {
-        if (!empty($this->pts_path)) {
-            return $this->pts_path;
-        }
-
-        if (!empty($this->pts_safe_name)) {
-            if (Storage::disk('public')->exists('project_types_sub/' . $this->pts_safe_name) || file_exists(public_path('storage/project_types_sub/' . $this->pts_safe_name))) {
-                return 'project_types_sub/' . $this->pts_safe_name;
-            }
-            if (Storage::disk('public')->exists('uploads/project_types_sub/' . $this->pts_safe_name) || file_exists(public_path('storage/uploads/project_types_sub/' . $this->pts_safe_name))) {
-                return 'uploads/project_types_sub/' . $this->pts_safe_name;
-            }
-        }
-
-        if (!empty($this->pts_file)) {
-            if (Storage::disk('public')->exists('uploads/project_types_sub/' . $this->pts_file) || file_exists(public_path('storage/uploads/project_types_sub/' . $this->pts_file)) || file_exists(public_path('uploads/project_types_sub/' . $this->pts_file))) {
-                return 'uploads/project_types_sub/' . $this->pts_file;
-            }
-            return 'uploads/project_types_sub/' . $this->pts_file;
-        }
-
-        return null;
+        $file = $this->pts_safe_name ?: $this->pts_file;
+        return $this->resolveDualFilePath('pts_path', !empty($this->pts_safe_name) ? 'pts_safe_name' : 'pts_file', [
+            'uploads/datapts',
+            'uploads/project_types_sub',
+            'project_types_sub',
+            'datapts',
+        ]) ?? (!empty($file) ? 'uploads/project_types_sub/' . basename(trim($file)) : null);
     }
 }

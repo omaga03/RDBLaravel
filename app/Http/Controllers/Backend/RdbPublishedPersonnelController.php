@@ -24,7 +24,19 @@ class RdbPublishedPersonnelController extends Controller
             $query->where('department_id', $request->department_id);
         }
 
-        $items = $query->orderBy('year_id', 'desc')->orderBy('department_id')->paginate(15);
+        $search = $request->input('search', $request->input('q'));
+        if ($search !== null && $search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('year', function ($yq) use ($search) {
+                    $yq->where('year_name', 'like', "%{$search}%");
+                })->orWhereHas('department', function ($dq) use ($search) {
+                    $dq->where('department_nameTH', 'like', "%{$search}%")
+                       ->orWhere('department_nameEN', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        $items = $query->orderBy('year_id', 'desc')->orderBy('department_id')->paginate(15)->withQueryString();
         $years = RdbYear::orderBy('year_name', 'desc')->get();
         $departments = RdbDepartment::orderBy('department_nameTH')->get();
 

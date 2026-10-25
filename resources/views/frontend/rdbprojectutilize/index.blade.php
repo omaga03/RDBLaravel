@@ -43,10 +43,9 @@
     <x-search-bar :searchRoute="route('frontend.rdbprojectutilize.index')" 
         simplePlaceholder="ค้นหาจาก: ชื่อหน่วยงาน, รายละเอียด, ผู้แทน/ผู้ลงนาม, ชื่อโครงการวิจัย, นักวิจัย...">
         
-        <div class="row g-3">
-            @if(request('pro_id'))
-                <input type="hidden" name="pro_id" value="{{ request('pro_id') }}">
-            @endif
+        @if(request('pro_id'))
+            <input type="hidden" name="pro_id" value="{{ request('pro_id') }}">
+        @endif
 
         <div class="row g-3">
             {{-- Row 1: Utilize / Project Title Autocomplete Search --}}
@@ -122,7 +121,27 @@
                 </select>
             </div>
 
-            {{-- Row 5: Date Range --}}
+            {{-- Row 5: Location (ต. อ. จ.) --}}
+            <div class="col-md-4">
+                <label class="form-label"><i class="bi bi-geo-alt text-danger me-1"></i>จังหวัด</label>
+                <select class="form-select" id="s_changwat" name="changwat">
+                    <option value="">-- คลิกเพื่อเลือก --</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">อำเภอ</label>
+                <select class="form-select" id="s_amphoe" name="amphoe" {{ !request('changwat') ? 'disabled' : '' }}>
+                    <option value="">-- ทั้งหมด --</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">ตำบล</label>
+                <select class="form-select" id="s_tambon" name="tambon" {{ !request('amphoe') ? 'disabled' : '' }}>
+                    <option value="">-- ทั้งหมด --</option>
+                </select>
+            </div>
+
+            {{-- Row 6: Date Range --}}
             <div class="col-md-6">
                 <label class="form-label">วันที่นำไปใช้ประโยชน์ (เริ่มต้น)</label>
                 <input type="text" class="form-control datepicker" id="date_start" name="date_start" value="{{ request('date_start') }}" placeholder="วว/ดด/ปปปป" autocomplete="off">
@@ -134,13 +153,12 @@
         </div>
     </x-search-bar>
 
-    <!-- Results Table -->
-    <div class="card shadow-sm border-0">
+    <!-- Results Table Card -->
+    <div class="card shadow-sm border mb-4">
         <div class="card-header bg-body-tertiary border-bottom py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 fw-semibold text-body">
+            <h6 class="mb-0 fw-semibold text-body">
                 <i class="bi bi-list-ul me-2 text-primary"></i>รายการการนำผลงานวิจัยไปใช้ประโยชน์
-                <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle rounded-pill ms-2">{{ number_format($items->total()) }} รายการ</span>
-            </h5>
+            </h6>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -254,18 +272,12 @@
                     </tbody>
                 </table>
             </div>
-
-            <!-- Pagination -->
-            <div class="p-3 border-top d-flex justify-content-center">
-                {{ $items->withQueryString()->links('pagination::bootstrap-5') }}
-            </div>
         </div>
     </div>
 
-    <div class="mt-4">
-        <a href="{{ route('frontend.rdbproject.index') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i> ไปหน้ารายการโครงการวิจัย
-        </a>
+    <!-- Pagination -->
+    <div class="d-flex justify-content-center mt-4">
+        {{ $items->withQueryString()->links('pagination::bootstrap-5') }}
     </div>
 @endsection
 
@@ -388,6 +400,104 @@ document.addEventListener('DOMContentLoaded', function() {
         const startVal = document.getElementById('date_start').value;
         if (startVal && endPicker) {
             endPicker.set('minDate', startVal);
+        }
+    }
+
+    // Location Cascading Dropdowns (ต. อ. จ.)
+    const sChangwat = document.getElementById('s_changwat');
+    const sAmphoe = document.getElementById('s_amphoe');
+    const sTambon = document.getElementById('s_tambon');
+
+    const oldChangwat = @json(request('changwat') ?: '');
+    const oldAmphoe = @json(request('amphoe') ?: '');
+    const oldTambon = @json(request('tambon') ?: '');
+    let provincesLoaded = false;
+
+    async function fetchProvinces(selectedVal = '') {
+        if (provincesLoaded || !sChangwat) return;
+        sChangwat.innerHTML = '<option value="">กำลังโหลด...</option>';
+        try {
+            const response = await fetch(`{{ route('frontend.rdbprojectutilize.search_provinces') }}`);
+            const data = await response.json();
+            sChangwat.innerHTML = '<option value="">-- ทั้งหมด --</option>';
+            data.forEach(p => {
+                const option = new Option(p.text, p.value, false, p.value === selectedVal);
+                sChangwat.add(option);
+            });
+            provincesLoaded = true;
+        } catch (e) {
+            sChangwat.innerHTML = '<option value="">-- ทั้งหมด --</option>';
+        }
+    }
+
+    if (sChangwat) {
+        sChangwat.addEventListener('focus', () => fetchProvinces(oldChangwat));
+        sChangwat.addEventListener('click', () => fetchProvinces(oldChangwat));
+    }
+
+    async function fetchAmphoes(changwat, selectedVal = '') {
+        if (!sAmphoe) return;
+        sAmphoe.innerHTML = '<option value="">กำลังโหลด...</option>';
+        sAmphoe.disabled = true;
+        if (!changwat) {
+            sAmphoe.innerHTML = '<option value="">-- ทั้งหมด --</option>';
+            return;
+        }
+        try {
+            const response = await fetch(`{{ route('frontend.rdbprojectutilize.search_amphoes') }}?changwat=${encodeURIComponent(changwat)}`);
+            const data = await response.json();
+            sAmphoe.innerHTML = '<option value="">-- ทั้งหมด --</option>';
+            data.forEach(a => {
+                const option = new Option(a.text, a.value, false, a.value === selectedVal);
+                sAmphoe.add(option);
+            });
+            sAmphoe.disabled = false;
+        } catch (e) {
+            sAmphoe.innerHTML = '<option value="">-- ทั้งหมด --</option>';
+        }
+    }
+
+    async function fetchTambons(changwat, amphoe, selectedVal = '') {
+        if (!sTambon) return;
+        sTambon.innerHTML = '<option value="">กำลังโหลด...</option>';
+        sTambon.disabled = true;
+        if (!changwat || !amphoe) {
+            sTambon.innerHTML = '<option value="">-- ทั้งหมด --</option>';
+            return;
+        }
+        try {
+            const response = await fetch(`{{ route('frontend.rdbprojectutilize.search_tambons') }}?changwat=${encodeURIComponent(changwat)}&amphoe=${encodeURIComponent(amphoe)}`);
+            const data = await response.json();
+            sTambon.innerHTML = '<option value="">-- ทั้งหมด --</option>';
+            data.forEach(t => {
+                const option = new Option(t.text, t.value, false, t.value === selectedVal);
+                sTambon.add(option);
+            });
+            sTambon.disabled = false;
+        } catch (e) {
+            sTambon.innerHTML = '<option value="">-- ทั้งหมด --</option>';
+        }
+    }
+
+    if (sChangwat && sAmphoe && sTambon) {
+        sChangwat.addEventListener('change', function() {
+            fetchAmphoes(this.value);
+            sTambon.innerHTML = '<option value="">-- ทั้งหมด --</option>';
+            sTambon.disabled = true;
+        });
+
+        sAmphoe.addEventListener('change', function() {
+            fetchTambons(sChangwat.value, this.value);
+        });
+
+        if (oldChangwat) {
+            fetchProvinces(oldChangwat).then(() => {
+                fetchAmphoes(oldChangwat, oldAmphoe).then(() => {
+                    if (oldAmphoe) {
+                        fetchTambons(oldChangwat, oldAmphoe, oldTambon);
+                    }
+                });
+            });
         }
     }
 });

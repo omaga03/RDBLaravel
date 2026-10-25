@@ -23,40 +23,44 @@
 
     <style>
         /* ==========================================================================
-           UI/UX Pro Max: Academic Scholarly & Swiss Modernism 2.0 Design System
+           Academic Scholarly & Swiss Modernism 2.0 Design System
+           Aesthetic Anchors: Stripe Docs & Linear (Editorial Precision, Tactile Depth)
            ========================================================================== */
         :root {
-            /* Scholarly Color Palette */
-            --rdb-primary: #1E3A5F;
-            --rdb-primary-hover: #152B47;
-            --rdb-primary-subtle: #EBF3FA;
-            --rdb-secondary: #2563EB;
-            --rdb-secondary-hover: #1D4ED8;
-            --rdb-accent: #D97706; /* Citation Gold / Warm Amber */
-            --rdb-accent-hover: #B45309;
-            --rdb-success: #059669;
-            --rdb-danger: #DC2626;
-            --rdb-warning: #D97706;
-            --rdb-info: #0284C7;
+            /* Scholarly Color Palette - Token Locked */
+            --rdb-primary: #1B365D;
+            --rdb-primary-hover: #122645;
+            --rdb-primary-subtle: #EDF4FC;
+            --rdb-secondary: #1D4ED8;
+            --rdb-secondary-hover: #1E40AF;
+            --rdb-accent: #C87D16; /* Archival Citation Gold */
+            --rdb-accent-hover: #A8640B;
+            --rdb-success: #047857;
+            --rdb-danger: #B91C1C;
+            --rdb-warning: #C87D16;
+            --rdb-info: #0369A1;
 
-            /* Radius & Shadows */
-            --rdb-radius-sm: 8px;
-            --rdb-radius-md: 14px;
-            --rdb-radius-lg: 18px;
-            --rdb-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
-            --rdb-shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.06);
-            --rdb-shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.06);
+            /* Refined Radius & Tactile Hairline Shadows */
+            --rdb-radius-sm: 6px;
+            --rdb-radius-md: 10px;
+            --rdb-radius-lg: 14px;
+            --rdb-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.045), 0 0 0 1px rgba(15, 23, 42, 0.02);
+            --rdb-shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+            --rdb-shadow-lg: 0 12px 24px -4px rgba(15, 23, 42, 0.09), 0 4px 8px -4px rgba(15, 23, 42, 0.05);
 
-            /* Gradients */
-            --rdb-gradient-primary: linear-gradient(135deg, #0F2744 0%, #1E3A5F 55%, #2563EB 100%);
-            --rdb-gradient-navy: linear-gradient(135deg, #0A192F 0%, #1E3A5F 100%);
-            --rdb-gradient-gold: linear-gradient(135deg, #D97706 0%, #F59E0B 100%);
-            --rdb-gradient-emerald: linear-gradient(135deg, #059669 0%, #10B981 100%);
+            /* Grounded Academic Surfaces (No generic neon/multi-stop slop) */
+            --rdb-gradient-primary: linear-gradient(180deg, #1E3A5F 0%, #152C4A 100%);
+            --rdb-gradient-navy: linear-gradient(180deg, #162B49 0%, #0F1E36 100%);
+            --rdb-gradient-gold: linear-gradient(180deg, #D97706 0%, #B45309 100%);
+            --rdb-gradient-emerald: linear-gradient(180deg, #059669 0%, #047857 100%);
         }
 
         /* Base Typography Calibration for Thai & English Academic UI */
         html {
-            font-size: 15px; /* Proportional scaling for Thai fonts to prevent oversized appearance */
+            font-size: 15px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
         }
         @media (min-width: 1400px) {
             html {
@@ -67,9 +71,19 @@
         body {
             font-family: 'Plus Jakarta Sans', 'Prompt', 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             font-size: 0.94rem;
-            line-height: 1.55;
-            letter-spacing: -0.005em;
-            transition: background-color 0.25s ease, color 0.25s ease;
+            line-height: 1.58;
+            letter-spacing: -0.004em;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        /* Tabular Numerals for Academic Data, Budgets, Years, & Counts */
+        .tabular-nums,
+        .table td,
+        .table th,
+        .badge,
+        .pagination .page-link,
+        input[type="number"] {
+            font-variant-numeric: tabular-nums;
         }
 
         /* Harmonious Scholarly Heading Hierarchy */
@@ -77,14 +91,14 @@
             font-size: 1.5rem !important;
             font-weight: 700;
             line-height: 1.35;
-            letter-spacing: -0.015em;
+            letter-spacing: -0.018em;
         }
 
         h2, .h2 {
             font-size: 1.3rem !important;
             font-weight: 700;
             line-height: 1.35;
-            letter-spacing: -0.01em;
+            letter-spacing: -0.014em;
         }
 
         h3, .h3, .page-title {
@@ -114,13 +128,13 @@
 
         /* Card Headers & Title Scaling */
         .card-title {
-            font-size: 1.1rem !important;
+            font-size: 1.08rem !important;
             font-weight: 600;
             line-height: 1.5;
         }
 
         .card-header h4, .card-header .h4 {
-            font-size: 1.12rem !important;
+            font-size: 1.1rem !important;
             font-weight: 600;
             line-height: 1.5;
         }
@@ -139,11 +153,11 @@
 
         /* Clean Metadata Badges */
         .badge {
-            font-size: 0.76rem !important;
+            font-size: 0.75rem !important;
             font-weight: 500;
             letter-spacing: 0.01em;
-            padding: 0.32rem 0.6rem;
-            border-radius: 6px;
+            padding: 0.3rem 0.58rem;
+            border-radius: 5px;
         }
 
         /* Breadcrumbs */
@@ -155,32 +169,44 @@
             font-size: 0.75rem;
         }
 
-        /* Light Theme (Clean Academic Slate) */
+        /* Light Theme (Daylight Editorial Paper & Crisp Slate) */
         [data-bs-theme="light"] {
-            --bs-body-bg: #F8FAFC;
-            --bs-body-color: #0F172A;
-            --bs-secondary-color: #475569;
-            --bs-tertiary-bg: #F1F5F9;
-            --bs-border-color: #E2E8F0;
+            --bs-body-bg: #F6F8FA;
+            --bs-body-color: #111827;
+            --bs-secondary-color: #4B5563;
+            --bs-tertiary-bg: #EEF2F6;
+            --bs-border-color: #DDE3EA;
             --bs-card-bg: #FFFFFF;
-            --rdb-nav-bg: rgba(255, 255, 255, 0.95);
-            --rdb-card-border: #E2E8F0;
-            --rdb-table-stripe: #F8FAFC;
-            --rdb-table-hover: #F1F5F9;
+            --rdb-nav-bg: rgba(255, 255, 255, 0.94);
+            --rdb-card-border: #DDE3EA;
+            --rdb-card-inner-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            --rdb-table-head-bg: #183152;
+            --rdb-table-head-border: #10223A;
+            --rdb-table-stripe: #F9FAFB;
+            --rdb-table-hover: #F0F4F9;
+            --rdb-search-header-bg: #183152;
+            --rdb-search-header-accent: #C87D16;
         }
 
-        /* Dark Theme (Deep Navy Slate) */
+        /* Dark Theme (Carbon-Navy Night Reading & Specular Borders) */
         [data-bs-theme="dark"] {
-            --bs-body-bg: #0B1329;
-            --bs-body-color: #F8FAFC;
-            --bs-secondary-color: #94A3B8;
-            --bs-tertiary-bg: #131F3A;
-            --bs-border-color: #1E293B;
-            --bs-card-bg: #111D38;
-            --rdb-nav-bg: rgba(17, 29, 56, 0.95);
-            --rdb-card-border: #1E2E4E;
-            --rdb-table-stripe: rgba(19, 31, 58, 0.4);
-            --rdb-table-hover: rgba(30, 46, 78, 0.5);
+            --bs-body-bg: #0A101D;
+            --bs-body-color: #E5E7EB;
+            --bs-secondary-color: #9CA3AF;
+            --bs-tertiary-bg: #111A2E;
+            --bs-border-color: #1F2D47;
+            --bs-card-bg: #10192C;
+            --rdb-nav-bg: rgba(16, 25, 44, 0.92);
+            --rdb-card-border: #223252;
+            --rdb-card-inner-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+            --rdb-table-head-bg: #162642;
+            --rdb-table-head-border: #263B63;
+            --rdb-table-stripe: rgba(17, 26, 46, 0.45);
+            --rdb-table-hover: rgba(34, 50, 82, 0.45);
+            --rdb-search-header-bg: #15243E;
+            --rdb-search-header-accent: #D97706;
+            --rdb-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
+            --rdb-shadow-md: 0 6px 16px -3px rgba(0, 0, 0, 0.45);
         }
 
         /* Dark Mode Scrollbar */
@@ -189,61 +215,63 @@
             height: 10px;
         }
         [data-bs-theme="dark"] ::-webkit-scrollbar-track {
-            background: #0B1329; 
+            background: #0A101D; 
         }
         [data-bs-theme="dark"] ::-webkit-scrollbar-thumb {
-            background-color: #26385C;
-            border-radius: 8px;
-            border: 2px solid #0B1329;
+            background-color: #243556;
+            border-radius: 6px;
+            border: 2px solid #0A101D;
         }
         [data-bs-theme="dark"] ::-webkit-scrollbar-thumb:hover {
-            background-color: #38507D;
+            background-color: #354C78;
         }
 
-        /* Global Card Refinement */
+        /* Global Card Refinement - Editorial Hairline + Subtle Specular Top Edge */
         .card {
             border-radius: var(--rdb-radius-md) !important;
             border: 1px solid var(--rdb-card-border) !important;
-            box-shadow: var(--rdb-shadow-sm);
+            box-shadow: var(--rdb-shadow-sm), var(--rdb-card-inner-highlight);
             background-color: var(--bs-card-bg);
-            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
         }
         .card:hover {
-            box-shadow: var(--rdb-shadow-md);
+            box-shadow: var(--rdb-shadow-md), var(--rdb-card-inner-highlight);
         }
         .card-header {
             border-bottom: 1px solid var(--rdb-card-border);
             border-top-left-radius: calc(var(--rdb-radius-md) - 1px) !important;
             border-top-right-radius: calc(var(--rdb-radius-md) - 1px) !important;
+            padding: 0.75rem 1.15rem;
         }
 
-        /* Global Table Styling - Scholarly Navy Gradient */
+        /* Global Table Styling - Editorial Precision */
         .table thead th,
         .table-light,
         .table .thead-light th {
-            background: var(--rdb-gradient-primary) !important;
-            color: #FFFFFF !important;
-            border-color: #0F2744 !important;
+            background: var(--rdb-table-head-bg) !important;
+            color: #F8FAFC !important;
+            border-bottom: 2px solid var(--rdb-search-header-accent) !important;
+            border-top: none !important;
             font-weight: 600;
-            letter-spacing: 0.02em;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.25);
-            padding: 0.85rem 1rem;
+            font-size: 0.86rem;
+            letter-spacing: 0.015em;
+            padding: 0.8rem 1rem;
             vertical-align: middle;
         }
         .table thead th:first-child {
-            border-top-left-radius: 10px;
+            border-top-left-radius: 8px;
         }
         .table thead th:last-child {
-            border-top-right-radius: 10px;
+            border-top-right-radius: 8px;
         }
         .table tbody tr {
-            transition: background-color 0.15s ease;
+            transition: background-color 0.12s ease;
         }
         .table tbody tr:hover {
             background-color: var(--rdb-table-hover) !important;
         }
         .table tbody td {
-            padding: 0.85rem 1rem;
+            padding: 0.82rem 1rem;
             vertical-align: middle;
             border-color: var(--bs-border-color);
         }
@@ -252,9 +280,9 @@
         .search-box .card-header,
         .card.search-box > .card-header,
         .card-header.search-header {
-            background: var(--rdb-gradient-primary) !important;
-            color: #FFFFFF !important;
-            border-color: #0F2744 !important;
+            background: var(--rdb-search-header-bg) !important;
+            color: #F8FAFC !important;
+            border-bottom: 2px solid var(--rdb-search-header-accent) !important;
             cursor: pointer;
             border-top-left-radius: calc(var(--rdb-radius-md) - 1px) !important;
             border-top-right-radius: calc(var(--rdb-radius-md) - 1px) !important;
@@ -263,19 +291,21 @@
         .search-box .card-header h6,
         .card-header.search-header h5,
         .card-header.search-header h6 {
-            color: #FFFFFF !important;
+            color: #F8FAFC !important;
+            letter-spacing: 0.005em;
         }
         .search-box .btn-toggle-search,
         .btn-toggle-search {
-            background: rgba(255,255,255,0.18) !important;
-            border: 1px solid rgba(255,255,255,0.3) !important;
+            background: rgba(255, 255, 255, 0.12) !important;
+            border: 1px solid rgba(255, 255, 255, 0.22) !important;
             color: #FFFFFF !important;
             border-radius: var(--rdb-radius-sm);
-            transition: all 0.2s ease;
+            transition: background-color 0.15s ease, border-color 0.15s ease;
         }
         .search-box .btn-toggle-search:hover,
         .btn-toggle-search:hover {
-            background: rgba(255,255,255,0.28) !important;
+            background: rgba(255, 255, 255, 0.22) !important;
+            border-color: rgba(255, 255, 255, 0.35) !important;
         }
         .btn-toggle-search[aria-expanded="true"] .bi-chevron-down {
             transform: rotate(180deg);
@@ -286,18 +316,16 @@
             transition: transform 0.2s ease;
         }
 
-        /* Buttons Styling */
+        /* Buttons Styling - Restraint over bouncy transforms */
         .btn {
             border-radius: var(--rdb-radius-sm);
             font-weight: 500;
-            padding: 0.45rem 1rem;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 0.42rem 0.95rem;
+            transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
         }
-        .btn:hover {
-            transform: translateY(-1px);
-        }
-        .btn:active {
-            transform: translateY(0);
+        .btn-sm {
+            padding: 0.28rem 0.68rem;
+            font-size: 0.82rem;
         }
         .btn-primary {
             background-color: var(--rdb-primary);
@@ -308,6 +336,15 @@
             background-color: var(--rdb-primary-hover);
             border-color: var(--rdb-primary-hover);
             color: #FFFFFF;
+        }
+        [data-bs-theme="dark"] .btn-primary {
+            background-color: #2563EB;
+            border-color: #3B82F6;
+        }
+        [data-bs-theme="dark"] .btn-primary:hover,
+        [data-bs-theme="dark"] .btn-primary:focus {
+            background-color: #1D4ED8;
+            border-color: #60A5FA;
         }
         .btn-success {
             background-color: var(--rdb-success);
@@ -328,27 +365,35 @@
         .form-control, .form-select {
             border-radius: var(--rdb-radius-sm);
             border: 1px solid var(--bs-border-color);
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
         .form-control:focus, .form-select:focus {
             border-color: var(--rdb-secondary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+            box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15);
         }
         [data-bs-theme="dark"] .form-control,
         [data-bs-theme="dark"] .form-select {
-            background-color: #14223F;
-            border-color: #27385E;
-            color: #F8FAFC;
+            background-color: #0D1526;
+            border-color: #243556;
+            color: #E5E7EB;
+        }
+        [data-bs-theme="dark"] .form-control:focus,
+        [data-bs-theme="dark"] .form-select:focus {
+            background-color: #0F192D;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
         }
 
         /* TomSelect Highlighting & Dark Mode */
         .ts-dropdown .highlight {
-            background: transparent !important;
-            color: #D97706 !important;
-            font-weight: bold !important;
-            padding: 0 !important;
+            background: rgba(200, 125, 22, 0.12) !important;
+            color: #B45309 !important;
+            font-weight: 600 !important;
+            padding: 0 2px !important;
+            border-radius: 3px;
         }
         [data-bs-theme="dark"] .ts-dropdown .highlight {
+            background: rgba(251, 191, 36, 0.15) !important;
             color: #FBBF24 !important;
             text-shadow: none !important;
         }
@@ -359,33 +404,36 @@
         }
         [data-bs-theme="dark"] .ts-wrapper .ts-control,
         [data-bs-theme="dark"] .ts-wrapper .ts-control input {
-            color: #F8FAFC !important;
-            background-color: #14223F !important;
-            border-color: #27385E !important;
+            color: #E5E7EB !important;
+            background-color: #0D1526 !important;
+            border-color: #243556 !important;
         }
         [data-bs-theme="dark"] .ts-dropdown {
-            background-color: #14223F !important;
-            color: #F8FAFC !important;
-            border-color: #27385E !important;
+            background-color: #10192C !important;
+            color: #E5E7EB !important;
+            border-color: #243556 !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
         }
         [data-bs-theme="dark"] .ts-dropdown .option {
-            color: #F8FAFC !important;
+            color: #E5E7EB !important;
         }
         [data-bs-theme="dark"] .ts-dropdown .active {
-            background-color: #2563EB !important;
+            background-color: #1E3A5F !important;
             color: #FFFFFF !important;
         }
 
         /* Navbar Styling */
         .rdb-navbar {
             background-color: var(--rdb-nav-bg) !important;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--bs-border-color) !important;
             z-index: 1030 !important;
         }
         .rdb-navbar .dropdown-menu {
             z-index: 1040 !important;
+            border-color: var(--rdb-card-border);
+            box-shadow: var(--rdb-shadow-md);
         }
 
         /* Modal & Backdrop Layering: Ensure Modals always sit above sticky navbars */
@@ -403,22 +451,39 @@
             gap: 0.5rem;
         }
         .navbar-brand .brand-badge {
-            background: var(--rdb-gradient-primary);
+            background: var(--rdb-primary);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             color: #FFFFFF;
-            font-size: 0.72rem;
-            padding: 0.2rem 0.55rem;
-            border-radius: 6px;
-            font-weight: 700;
+            font-size: 0.7rem;
+            padding: 0.18rem 0.5rem;
+            border-radius: 5px;
+            font-weight: 600;
             letter-spacing: 0.04em;
+        }
+
+        /* Theme Toggle Button */
+        #theme-toggle {
+            width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            border: 1px solid var(--bs-border-color);
+            color: var(--bs-body-color);
+            transition: background-color 0.15s ease, border-color 0.15s ease;
+        }
+        #theme-toggle:hover {
+            background-color: var(--bs-tertiary-bg);
         }
 
         /* Abstract & Long-Text Typography & Box Styling */
         .abstract-box {
-            border-radius: 12px;
+            border-radius: 10px;
             transition: box-shadow 0.2s ease, border-color 0.2s ease;
         }
         .abstract-box:hover {
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+            box-shadow: var(--rdb-shadow-sm);
         }
         .abstract-content {
             font-size: 0.96rem;
@@ -440,10 +505,10 @@
             margin-bottom: 0;
         }
         [data-bs-theme="dark"] .abstract-content {
-            color: #d1d5db; /* Softer, comfortable reading tone in dark mode */
+            color: #D1D5DB;
         }
         [data-bs-theme="light"] .abstract-content {
-            color: #334155; /* Slate-700 for optimal contrast without eye strain */
+            color: #334155;
         }
         .copy-abstract-btn {
             transition: all 0.15s ease;
@@ -498,7 +563,14 @@
                         @auth
                             @if(request()->is('backend*'))
                                 <li class="nav-item">
-                                    <a class="nav-link {{ request()->routeIs('backend.site.index') ? 'active fw-bold' : '' }}" href="{{ route('backend.site.index') }}"><i class="bi bi-speedometer2"></i> แดชบอร์ด</a>
+                                    <a class="nav-link {{ request()->routeIs('backend.site.index') ? 'active fw-bold' : '' }}" href="{{ route('backend.site.index') }}">
+                                        <i class="bi bi-speedometer2 text-primary me-1"></i> แดชบอร์ด
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-body-secondary" href="{{ route('home') }}" target="_blank" title="เปิดหน้าเว็บไซต์ส่วนสาธารณะ (เปิดแท็บใหม่)">
+                                        <i class="bi bi-box-arrow-up-right text-info me-1"></i> ดูหน้าบ้าน
+                                    </a>
                                 </li>
                             @endif
                         @endauth
@@ -555,7 +627,7 @@
                                             <form action="{{ route('notifications.read', $n->id) }}" method="POST" class="m-0">
                                                 @csrf
                                                 <button type="submit" class="list-group-item list-group-item-action py-2.5 px-3 border-bottom text-start {{ $n->read_at ? 'text-muted' : 'bg-primary-subtle' }}">
-                                                    <div class="fw-semibold text-dark">{{ $n->data['title'] ?? 'การแจ้งเตือน' }}</div>
+                                                    <div class="fw-semibold text-body">{{ $n->data['title'] ?? 'การแจ้งเตือน' }}</div>
                                                     <div class="small text-secondary text-truncate" style="max-width: 280px;">{{ $n->data['message'] ?? '' }}</div>
                                                     <div class="text-muted" style="font-size: 0.7rem;">{{ $n->created_at ? $n->created_at->diffForHumans() : '' }}</div>
                                                 </button>
@@ -579,19 +651,23 @@
 
                                 <div class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="navbarDropdown" style="min-width: 260px;">
                                     <div class="dropdown-header small text-body-secondary fw-bold">
-                                        <div class="text-dark">{{ (Auth::user()->researcher && !empty(Auth::user()->researcher->full_name)) ? Auth::user()->researcher->full_name : Auth::user()->username }}</div>
+                                        <div class="text-body d-flex align-items-center">
+                                            <i class="bi bi-person-fill text-primary me-1.5"></i>
+                                            <span>{{ (Auth::user()->researcher && !empty(Auth::user()->researcher->full_name)) ? Auth::user()->researcher->full_name : Auth::user()->username }}</span>
+                                        </div>
                                         @php
                                             $activeScope = Auth::user()->getActiveRoleScope();
                                         @endphp
-                                        <div class="text-primary small mt-0.5">
-                                            {{ $activeScope ? $activeScope->label : (Auth::user()->roles->first()->item_name ?? 'User') }}
+                                        <div class="text-primary small mt-1 d-flex align-items-center">
+                                            <i class="bi bi-shield-check text-success me-1"></i>
+                                            <span>{{ $activeScope ? $activeScope->label : (Auth::user()->roles->first()->item_name ?? 'User') }}</span>
                                         </div>
                                     </div>
 
                                     @if(Auth::user()->roleScopes && Auth::user()->roleScopes->count() > 1)
                                         <div class="dropdown-divider"></div>
                                         <div class="dropdown-header small text-body-secondary fw-bold text-uppercase py-1" style="font-size: 0.72rem;">
-                                            <i class="bi bi-arrow-repeat me-1"></i> สลับบทบาทการทำงาน (Multi-Role)
+                                            <i class="bi bi-arrow-repeat me-1 text-primary"></i> สลับบทบาทการทำงาน (Multi-Role)
                                         </div>
                                         @foreach(Auth::user()->roleScopes as $scope)
                                             @php
@@ -601,7 +677,10 @@
                                                 @csrf
                                                 <input type="hidden" name="scope_id" value="{{ $scope->id }}">
                                                 <button type="submit" class="dropdown-item d-flex align-items-center justify-content-between py-1.5 {{ $isActive ? 'active bg-primary text-white' : '' }}">
-                                                    <span class="text-truncate me-2 small">{{ $scope->label }}</span>
+                                                    <span class="text-truncate me-2 small d-flex align-items-center">
+                                                        <i class="bi bi-person-badge me-1.5 {{ $isActive ? 'text-white' : 'text-secondary' }}"></i>
+                                                        {{ $scope->label }}
+                                                    </span>
                                                     @if($isActive)
                                                         <i class="bi bi-check2"></i>
                                                     @endif
@@ -611,17 +690,31 @@
                                     @endif
 
                                     <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" href="{{ route('backend.user.show', Auth::id()) }}">
-                                        <i class="bi bi-person-circle me-2"></i> บัญชีของฉัน
+                                    @if(request()->is('backend*'))
+                                        <a class="dropdown-item d-flex align-items-center" href="{{ route('home') }}" target="_blank">
+                                            <i class="bi bi-box-arrow-up-right me-2 text-info"></i> ไปหน้าบ้าน (Public Portal)
+                                        </a>
+                                    @else
+                                        <a class="dropdown-item d-flex align-items-center" href="{{ route('backend.site.index') }}">
+                                            <i class="bi bi-speedometer2 me-2 text-primary"></i> จัดการข้อมูลหลังบ้าน
+                                        </a>
+                                    @endif
+                                    @if(Auth::user()->hasRole('The Creator') || Auth::user()->hasRole('Admin') || Auth::user()->hasPermission('User Manager'))
+                                        <a class="dropdown-item d-flex align-items-center" href="{{ route('backend.user.index') }}">
+                                            <i class="bi bi-person-gear me-2 text-primary"></i> จัดการผู้ใช้งาน (Users)
+                                        </a>
+                                    @endif
+                                    <a class="dropdown-item d-flex align-items-center" href="{{ route('backend.user.show', Auth::id()) }}">
+                                        <i class="bi bi-person-circle me-2 text-primary"></i> บัญชีของฉัน
                                     </a>
-                                    <a class="dropdown-item" href="{{ route('backend.user.edit', Auth::id()) }}">
-                                        <i class="bi bi-key me-2"></i> เปลี่ยนรหัสผ่าน
+                                    <a class="dropdown-item d-flex align-items-center" href="{{ route('backend.user.edit', Auth::id()) }}">
+                                        <i class="bi bi-key me-2 text-warning"></i> เปลี่ยนรหัสผ่าน
                                     </a>
                                     <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item text-danger" href="{{ route('logout') }}"
+                                    <a class="dropdown-item text-danger d-flex align-items-center" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">
-                                        <i class="bi bi-box-arrow-right me-2"></i> {{ __('Logout') }}
+                                        <i class="bi bi-box-arrow-right me-2 text-danger"></i> {{ __('Logout') }}
                                     </a>
 
                                     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">

@@ -144,7 +144,7 @@ class RdbpublishedController extends Controller
             if ($request->date_end < $request->date_start) {
                 return redirect()->back()
                     ->withInput()
-                    ->with('error', 'วันที่สิ้นสุดต้องมากกว่าหรือเท่ากับวันที่เริ่ม');
+                    ->with('error', 'วันที่สิ้นสุดต้องไม่น้อยกว่าวันที่เริ่มต้น');
             }
             
             $query->whereDate('pub_date', '>=', $request->date_start)

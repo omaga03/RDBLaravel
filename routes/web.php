@@ -271,6 +271,9 @@ Route::name('frontend.')->group(function () {
     Route::get('rdbprojectutilize/{id}/view-file', [RdbprojectutilizeController::class, 'viewFile'])->name('rdbprojectutilize.view_file');
     Route::get('rdbprojectutilize/api/search-utilizes', [RdbprojectutilizeController::class, 'searchUtilizes'])->name('rdbprojectutilize.search_utilizes');
     Route::get('rdbprojectutilize/api/search-researchers', [FrontendRdbprojectController::class, 'searchResearchers'])->name('rdbprojectutilize.search_researchers');
+    Route::get('rdbprojectutilize/api/search-provinces', [RdbprojectutilizeController::class, 'searchProvinces'])->name('rdbprojectutilize.search_provinces');
+    Route::get('rdbprojectutilize/api/search-amphoes', [RdbprojectutilizeController::class, 'searchAmphoes'])->name('rdbprojectutilize.search_amphoes');
+    Route::get('rdbprojectutilize/api/search-tambons', [RdbprojectutilizeController::class, 'searchTambons'])->name('rdbprojectutilize.search_tambons');
 
     Route::resource('rdbprojectutilizetype', RdbprojectutilizetypeController::class)->parameters(['rdbprojectutilizetype' => 'id'])->only(['index', 'show']);
     Route::resource('rdbprojectwork', RdbprojectworkController::class)->parameters(['rdbprojectwork' => 'id'])->only(['index', 'show']);

@@ -14,6 +14,30 @@ class StoreDipRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $dateFields = [
+            'dip_startdate',
+            'dip_enddate',
+            'dip_request_date',
+            'dip_request_dateget',
+            'dip_publication_date',
+            'dip_data1_datestart',
+            'dip_data2_dateend',
+        ];
+
+        $merged = [];
+        foreach ($dateFields as $field) {
+            if ($this->has($field) && $this->input($field) !== null && $this->input($field) !== '') {
+                $merged[$field] = \App\Helpers\ThaiDateHelper::toIsoDate($this->input($field));
+            }
+        }
+
+        if (!empty($merged)) {
+            $this->merge($merged);
+        }
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -30,7 +54,7 @@ class StoreDipRequest extends FormRequest
             'dip_type' => 'nullable|integer',
             'dip_files' => 'nullable|file|mimes:pdf|max:51200', // Allow optional file upload
             'dip_startdate' => 'nullable|date',
-            'dip_enddate' => 'nullable|date',
+            'dip_enddate' => 'nullable|date|after_or_equal:dip_startdate',
             'pro_id' => 'nullable|exists:rdb_project,pro_id',
             'dip_request_date' => 'nullable|date',
             'dip_request_dateget' => 'nullable|date',

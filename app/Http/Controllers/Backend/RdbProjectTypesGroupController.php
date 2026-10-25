@@ -10,10 +10,17 @@ use App\Http\Requests\Backend\{StoreRdbProjectTypesGroupRequest, UpdateRdbProjec
 
 class RdbProjectTypesGroupController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', RdbProjectTypesGroup::class);
-        $items = RdbProjectTypesGroup::with(['createdBy', 'updatedBy'])->orderBy('pttg_id', 'desc')->paginate(10);
+        $query = RdbProjectTypesGroup::with(['createdBy', 'updatedBy']);
+
+        $search = $request->input('search', $request->input('q'));
+        if ($search !== null && $search !== '') {
+            $query->where('pttg_name', 'like', "%{$search}%");
+        }
+
+        $items = $query->orderBy('pttg_id', 'desc')->paginate(10)->withQueryString();
         $groupList = RdbProjectTypesGroup::getGroupList();
         return view('backend.rdbprojecttypesgroup.index', compact('items', 'groupList'));
     }

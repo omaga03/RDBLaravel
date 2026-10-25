@@ -1187,8 +1187,9 @@
                     fetch('{{ route("backend.rdb_project.search_researchers") }}?q=' + encodeURIComponent(query))
                         .then(response => response.json())
                         .then(json => {
+                            const items = json.results || json;
                             // Filter out existing researchers
-                            const filtered = json.filter(item => !existingResearcherIds.includes(parseInt(item.value)));
+                            const filtered = items.filter(item => !existingResearcherIds.includes(parseInt(item.value)));
                             callback(filtered);
                         })
                         .catch(() => callback());

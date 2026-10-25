@@ -1,13 +1,13 @@
 ---
 name: security-and-hardening
-description: Security guidelines, authorization checks, file upload hardening, CSV sanitization, and IDOR prevention for the Research Database system.
+description: Security guidelines, authorization checks, file upload hardening, CSV sanitization, IDOR prevention, and multi-phase adversarial security auditing (cloudflare/security-audit-skill) for the Research Database system.
 ---
 
-# Security & Hardening Guidelines (laravel_rdb)
+# Security, Hardening & Audit Guidelines (laravel_rdb)
 
-Use these security procedures whenever creating or updating controllers, file uploads, data exports, or permission management.
+Use these security procedures whenever creating, updating, or auditing controllers, file uploads, data exports, raw queries, or permission management.
 
-## 1. Controller Authorization Standards
+## 1. Controller Authorization & Role Scope Standards
 Every backend action MUST enforce authorization through Laravel Policies:
 ```php
 // In Controller Methods
@@ -19,6 +19,7 @@ $this->authorize('delete', $item);                 // For destroy()
 ```
 - Never rely solely on route middleware; always verify object-level permission in the controller.
 - Check `$admin->hasPermission('Permission.Name')` via `App\Services\RbacService` when handling custom permissions.
+- **Role-Based Data Scoping**: Ensure `Faculty Coordinator` only accesses records within their assigned `department_id` (`getActiveRoleScope()`), and `Researcher` only modifies records they authored/created or where `workflow_status` is unlocked.
 
 ## 2. File Upload Security Standards
 - Always process uploaded files through `App\Services\FileUploadService`:
@@ -70,3 +71,23 @@ Route::middleware('throttle:30,1')->group(function () {
     Route::get('/rdb_project/export', ...);
 });
 ```
+
+---
+
+## 6. Structured Security Audit Protocol (Inspired by `cloudflare/security-audit-skill`)
+เมื่อทำการตรวจสอบความปลอดภัยของระบบ (Security Audit) ห้ามรายงานช่องโหว่จากการเดาหรือดูเพียงบรรทัดเดียว ให้ปฏิบัติตามกระบวนการ 3 ขั้นตอนเพื่อขจัด False Positives:
+
+1. **Reconnaissance (สำรวจขอบเขตและจุดรับข้อมูล)**:
+   - ระบุจุดรับ Input ทั้งหมด: Query Parameters (`request('search')`, `request('sort')`), `FormRequest`, File Uploads, และ AJAX Search Endpoints
+   - ระบุขอบเขตสิทธิ์ (Trust Boundaries): หน้าบ้านสาธารณะ (`data_show = 1`) vs หลังบ้านตามบทบาท (`The Creator`, `Admin Project`, `Faculty Coordinator`, `Researcher`)
+2. **Coverage-Led Hunting (รายการตรวจสอบจุดเสี่ยงสำคัญของ Laravel)**:
+   - **SQL Injection ใน Raw Queries**: ตรวจสอบ `whereRaw()`, `selectRaw()`, `orderByRaw()`, `DB::select()` ทุกจุด ต้องส่งตัวแปรผ่าน Parameter Binding (`?` หรือ Named Bindings) เท่านั้น ห้ามเชื่อม String ตรงๆ เด็ดขาด:
+     ```php
+     // ถูกต้อง:
+     $q->whereRaw("CONCAT(researcher_fname, ' ', researcher_lname) LIKE ?", ["%{$term}%"]);
+     ```
+   - **Stored/Reflected XSS ใน Blade `{!! ... !!}`**: ทุกจุดที่ใช้ `{!! ... !!}` แสดงผล HTML จากฐานข้อมูล (เช่น `pro_abstract`, `pro_detail`, `news_detail`) ต้องผ่านการทำความสะอาดด้วย `App\Helpers\HtmlContentHelper::clean()` หรือตัวกรอง HTML ที่ปลอดภัยเสมอ
+   - **Mass Assignment & Workflow State Tampering**: ตรวจสอบการใช้ `$request->validated()` หรือ `$request->only(...)` ป้องกันไม่ให้ผู้ใช้ทั่วไปส่งค่าแก้ไขฟิลด์ควบคุมระบบ เช่น `workflow_status`, `is_locked`, `user_created`, หรือข้าม `department_id` ของตนเอง
+3. **Adversarial Candidate Validation (พิสูจน์ย้อนแย้งก่อนสรุปผล)**:
+   - ทุกช่องโหว่ที่สงสัย (Candidate Finding) ต้องไล่ตรวจสอบตลอดเส้นทาง `Route Middleware` -> `FormRequest` -> `Controller` -> `Policy` -> `Model/Blade` ว่ามีกลไกป้องกันอยู่แล้วหรือไม่
+   - รายงานเฉพาะช่องโหว่ที่ยืนยันแล้วว่าสามารถเข้าถึงและเกิดผลกระทบได้จริง (Confirmed Exploitable) พร้อมระบุไฟล์และเลขบรรทัดที่ชัดเจน

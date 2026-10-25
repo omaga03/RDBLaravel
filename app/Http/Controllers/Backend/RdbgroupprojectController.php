@@ -9,10 +9,20 @@ use App\Http\Requests\Backend\{StoreRdbGroupprojectRequest, UpdateRdbGroupprojec
 
 class RdbgroupprojectController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', RdbGroupproject::class);
-        $items = RdbGroupproject::with(['creator', 'updater'])->paginate(10);
+        $query = RdbGroupproject::with(['creator', 'updater']);
+
+        $search = $request->input('search', $request->input('q'));
+        if ($search !== null && $search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('pgroup_nameTH', 'like', "%{$search}%")
+                  ->orWhere('pgroup_nameEN', 'like', "%{$search}%");
+            });
+        }
+
+        $items = $query->paginate(10)->withQueryString();
         return view('backend.rdbgroupproject.index', compact('items'));
     }
 

@@ -51,12 +51,14 @@ class RdbProjectController extends Controller
         $query = RdbProject::with([
             'year', 
             'type', 
+            'typeSub',
             'status', 
             'department', 
             'rdbProjectWorks' => function($q) {
                 $q->orderBy('position_id', 'asc');
             },
-            'rdbProjectWorks.researcher',
+            'rdbProjectWorks.researcher.prefix',
+            'rdbProjectWorks.position',
             'createdBy',
             'updatedBy'
         ]);
@@ -252,11 +254,25 @@ class RdbProjectController extends Controller
                 }
             });
         }
-        if ($request->filled('date_start')) {
-            $query->where('pro_date_start', '>=', $request->date_start);
-        }
-        if ($request->filled('date_end')) {
-            $query->where('pro_date_end', '<=', $request->date_end);
+        // Date range validation
+        $hasDateStart = $request->filled('date_start');
+        $hasDateEnd = $request->filled('date_end');
+
+        if ($hasDateStart || $hasDateEnd) {
+            if (!$hasDateStart || !$hasDateEnd) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'กรุณาระบุทั้งวันที่เริ่มและวันที่สิ้นสุด');
+            }
+
+            if ($request->date_end < $request->date_start) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'วันที่สิ้นสุดต้องไม่น้อยกว่าวันที่เริ่มต้น');
+            }
+
+            $query->whereDate('pro_date_start', '>=', $request->date_start)
+                  ->whereDate('pro_date_end', '<=', $request->date_end);
         }
         if ($request->filled('pro_note')) {
             $words = preg_split('/[\s\/,]+/', trim($request->pro_note));
@@ -313,21 +329,30 @@ class RdbProjectController extends Controller
                 }
                 
                 $matchedResearchers = [];
-                foreach ($project->researchers as $researcher) {
+                foreach ($project->rdbProjectWorks as $work) {
+                    $researcher = $work->researcher;
+                    if (!$researcher) continue;
                     $matched = true;
                     foreach ($searchWords as $word) {
+                        if (empty($word)) continue;
                         if (stripos($researcher->researcher_fname ?? '', $word) === false &&
-                            stripos($researcher->researcher_lname ?? '', $word) === false) {
+                            stripos($researcher->researcher_lname ?? '', $word) === false &&
+                            stripos($researcher->researcher_fnameEN ?? '', $word) === false &&
+                            stripos($researcher->researcher_lnameEN ?? '', $word) === false) {
                             $matched = false;
                             break;
                         }
                     }
                     if ($matched) {
-                        $matchedResearchers[] = ($researcher->researcher_fname ?? '') . ' ' . ($researcher->researcher_lname ?? '');
+                        $posName = $work->position->position_nameTH ?? 'นักวิจัย';
+                        $fullName = trim(($researcher->prefix->prefix_nameTH ?? '') . $researcher->researcher_fname . ' ' . $researcher->researcher_lname);
+                        $matchedResearchers[] = "นักวิจัย ({$posName}): {$fullName}";
                     }
                 }
                 if (!empty($matchedResearchers)) {
-                    $matchSources[] = 'นักวิจัย: ' . implode(', ', $matchedResearchers);
+                    foreach ($matchedResearchers as $mr) {
+                        $matchSources[] = $mr;
+                    }
                 }
                 
                 $project->match_sources = $matchSources;
@@ -543,32 +568,57 @@ class RdbProjectController extends Controller
      */
     public function searchResearchers(Request $request)
     {
-        $this->authorize('viewAny', RdbResearcher::class); // Assuming general researcher view permission
-        $query = $request->get('q', '');
+        $this->authorize('viewAny', RdbResearcher::class);
+        $rawQuery = trim($request->get('q', ''));
         
-        if (strlen($query) < 2) {
-            return response()->json([]);
+        if (mb_strlen($rawQuery) < 2) {
+            return response()->json(['results' => []]);
         }
+
+        $cleanTerm = preg_replace('/^(นาย|นาง|นางสาว|ดร\.|ผศ\.|รศ\.|ศ\.)\s*/u', '', $rawQuery);
+        $words = array_values(array_filter(preg_split('/\s+/', $cleanTerm)));
 
         $researchers = RdbResearcher::with(['prefix', 'department'])
             ->whereNotNull('researcher_fname')
             ->where('researcher_fname', '!=', '')
-            ->where(function($q) use ($query) {
-                $q->where('researcher_fname', 'like', "%{$query}%")
-                  ->orWhere('researcher_lname', 'like', "%{$query}%");
+            ->where(function($q) use ($cleanTerm, $words) {
+                $q->where('researcher_fname', 'like', "%{$cleanTerm}%")
+                  ->orWhere('researcher_lname', 'like', "%{$cleanTerm}%")
+                  ->orWhere('researcher_fnameEN', 'like', "%{$cleanTerm}%")
+                  ->orWhere('researcher_lnameEN', 'like', "%{$cleanTerm}%")
+                  ->orWhereRaw("CONCAT(researcher_fname, ' ', researcher_lname) LIKE ?", ["%{$cleanTerm}%"]);
+
+                if (count($words) > 1) {
+                    $q->orWhere(function($sub) use ($words) {
+                        foreach ($words as $w) {
+                            $sub->where(function($wq) use ($w) {
+                                $wq->where('researcher_fname', 'like', "%{$w}%")
+                                   ->orWhere('researcher_lname', 'like', "%{$w}%")
+                                   ->orWhere('researcher_fnameEN', 'like', "%{$w}%")
+                                   ->orWhere('researcher_lnameEN', 'like', "%{$w}%");
+                            });
+                        }
+                    });
+                }
             })
-            ->limit(10)
+            ->limit(20)
             ->get()
             ->map(function($r) {
+                $prefix = $r->prefix->prefix_nameTH ?? '';
                 $deptName = $r->department->department_nameTH ?? $r->department->department_nameEN ?? $r->researcher_note ?? '-';
-                $fullName = ($r->prefix->prefix_nameTH ?? '') . $r->researcher_fname . ' ' . $r->researcher_lname . ' [' . $deptName . ']';
+                $fullName = "{$prefix}{$r->researcher_fname} {$r->researcher_lname} [{$deptName}]";
                 return [
+                    'id' => $r->researcher_id,
                     'value' => $r->researcher_id,
-                    'text' => $fullName
+                    'text' => $fullName,
+                    'prefix' => $prefix,
+                    'fname' => $r->researcher_fname,
+                    'lname' => $r->researcher_lname,
+                    'department' => $deptName,
                 ];
             });
 
-        return response()->json($researchers);
+        return response()->json(['results' => $researchers]);
     }
 
     /**
@@ -967,43 +1017,99 @@ class RdbProjectController extends Controller
      */
     public function search(Request $request)
     {
-        $this->authorize('viewAny', RdbProject::class); // Authorize searching projects
-        $q = $request->get('q', '');
+        $this->authorize('viewAny', RdbProject::class);
+        $q = trim($request->get('q', ''));
         
-        if (strlen($q) < 2) {
-            return response()->json([]);
+        if (mb_strlen($q) < 2) {
+            return response()->json(['results' => []]);
         }
 
-        $projects = RdbProject::with(['year', 'department', 'type', 'typeSub', 'rdbProjectWorks' => function($q) {
-                $q->orderBy('position_id', 'asc');
-            }, 'rdbProjectWorks.researcher', 'utilizations'])
+        $cleanName = preg_replace('/^(นาย|นาง|นางสาว|ดร\.|ผศ\.|รศ\.|ศ\.)\s*/u', '', $q);
+        $words = array_values(array_filter(preg_split('/\s+/', $cleanName)));
+
+        $projects = RdbProject::with([
+                'year',
+                'department',
+                'type',
+                'typeSub',
+                'rdbProjectWorks' => function($wq) {
+                    $wq->orderBy('position_id', 'asc');
+                },
+                'rdbProjectWorks.researcher.prefix',
+                'rdbProjectWorks.researcher.department',
+                'rdbProjectWorks.position',
+                'utilizations'
+            ])
             ->withCount('utilizations')
-            ->where(function($sub) use ($q) {
+            ->where(function($sub) use ($q, $cleanName, $words) {
                 $sub->where('pro_nameTH', 'like', "%{$q}%")
                     ->orWhere('pro_nameEN', 'like', "%{$q}%")
                     ->orWhere('pro_code', 'like', "%{$q}%")
                     ->orWhereHas('type', fn($t) => $t->where('pt_name', 'like', "%{$q}%"))
                     ->orWhereHas('typeSub', fn($ts) => $ts->where('pts_name', 'like', "%{$q}%"))
-                    ->orWhereHas('researchers', function($rq) use ($q) {
-                        $rq->where('researcher_fname', 'like', "%{$q}%")
-                           ->orWhere('researcher_lname', 'like', "%{$q}%")
-                           ->orWhereRaw("CONCAT(researcher_fname, ' ', researcher_lname) LIKE ?", ["%{$q}%"]);
+                    ->orWhereHas('rdbProjectWorks.researcher', function($rq) use ($cleanName, $words) {
+                        $rq->where('researcher_fname', 'like', "%{$cleanName}%")
+                           ->orWhere('researcher_lname', 'like', "%{$cleanName}%")
+                           ->orWhere('researcher_fnameEN', 'like', "%{$cleanName}%")
+                           ->orWhere('researcher_lnameEN', 'like', "%{$cleanName}%")
+                           ->orWhereRaw("CONCAT(researcher_fname, ' ', researcher_lname) LIKE ?", ["%{$cleanName}%"]);
+
+                        if (count($words) > 1) {
+                            $rq->orWhere(function($wSub) use ($words) {
+                                foreach ($words as $w) {
+                                    $wSub->where(function($wq) use ($w) {
+                                        $wq->where('researcher_fname', 'like', "%{$w}%")
+                                           ->orWhere('researcher_lname', 'like', "%{$w}%");
+                                    });
+                                }
+                            });
+                        }
                     });
             })
             ->orderBy('pro_id', 'desc')
             ->limit(20)
             ->get()
-            ->map(fn($p) => [
-                'id' => $p->pro_id,
-                'value' => $p->pro_id,
-                'text' => $this->formatProjectText($p),
-                'utilization_rows' => $p->utilizations->map(function($u, $index) {
-                     $date = $u->utz_date ? \App\Helpers\ThaiDateHelper::format($u->utz_date, false, true) : '-';
-                     $dept = $u->utz_department_name ?? '-';
-                     $lead = $u->utz_leading ?? '-';
-                     return ($index + 1) . ". {$date} • {$dept} • {$lead}";
-                })->values()->toArray()
-            ]);
+            ->map(function($p) {
+                $researchersList = $p->rdbProjectWorks->map(function($work) {
+                    $r = $work->researcher;
+                    if (!$r) return null;
+                    $prefix = $r->prefix->prefix_nameTH ?? '';
+                    return [
+                        'researcher_id' => $r->researcher_id,
+                        'full_name' => trim("{$prefix}{$r->researcher_fname} {$r->researcher_lname}"),
+                        'position_id' => $work->position_id,
+                        'position_name' => $work->position->position_nameTH ?? 'ผู้ร่วมวิจัย',
+                        'ratio' => $work->ratio,
+                    ];
+                })->filter()->values();
+
+                $allResearchersText = $researchersList->pluck('full_name')->implode(', ');
+                $headResearcher = $researchersList->first()['full_name'] ?? '-';
+                $cleanNameTH = strip_tags($p->pro_nameTH ?? '');
+                $cleanNameEN = strip_tags($p->pro_nameEN ?? '');
+                $yearName = $p->year->year_name ?? '-';
+                $deptName = $p->department->department_nameTH ?? '';
+
+                return [
+                    'id' => $p->pro_id,
+                    'value' => $p->pro_id,
+                    'text' => $this->formatProjectText($p),
+                    'pro_nameTH' => $cleanNameTH,
+                    'pro_nameEN' => $cleanNameEN,
+                    'pro_code' => $p->pro_code ?? '',
+                    'year_name' => $yearName,
+                    'department_name' => $deptName,
+                    'head_researcher' => $headResearcher,
+                    'all_researchers_text' => $allResearchersText ?: '-',
+                    'researchers' => $researchersList->toArray(),
+                    'utilization_rows' => $p->utilizations->map(function($u, $index) {
+                         $date = $u->utz_date ? \App\Helpers\ThaiDateHelper::format($u->utz_date, false, true) : '-';
+                         $dept = $u->utz_department_name ?? '-';
+                         $lead = $u->utz_leading ?? '-';
+                         return ($index + 1) . ". {$date} • {$dept} • {$lead}";
+                    })->values()->toArray()
+                ];
+            });
 
         return response()->json(['results' => $projects]);
     }
@@ -1017,18 +1123,23 @@ class RdbProjectController extends Controller
             $typeName .= ($typeName ? ' (' . $project->typeSub->pts_name . ')' : $project->typeSub->pts_name);
         }
         
-        $researcherName = '-';
-        $departmentName = '';
+        $researcherNames = [];
+        $departmentName = $project->department->department_nameTH ?? '';
         if ($project->rdbProjectWorks->isNotEmpty()) {
-            $mainWork = $project->rdbProjectWorks->first();
-            if ($mainWork && $mainWork->researcher) {
-                $researcherName = $mainWork->researcher->researcher_fname . ' ' . $mainWork->researcher->researcher_lname;
-                $departmentName = $mainWork->researcher->department->department_nameTH ?? '';
+            foreach ($project->rdbProjectWorks as $work) {
+                if ($work->researcher) {
+                    $prefix = $work->researcher->prefix->prefix_nameTH ?? '';
+                    $researcherNames[] = trim("{$prefix}{$work->researcher->researcher_fname} {$work->researcher->researcher_lname}");
+                    if (!$departmentName && $work->researcher->department) {
+                        $departmentName = $work->researcher->department->department_nameTH ?? '';
+                    }
+                }
             }
         }
+        $researchersStr = !empty($researcherNames) ? implode(', ', $researcherNames) : '-';
         
         $typeMeta = $typeName ? " [ทุน: {$typeName}]" : '';
-        return "[{$year}]{$typeMeta} {$name} โดย : {$researcherName} " . ($departmentName ? "({$departmentName})" : "");
+        return "[{$year}]{$typeMeta} {$name} โดย : {$researchersStr}" . ($departmentName ? " ({$departmentName})" : "");
     }
 
     /**

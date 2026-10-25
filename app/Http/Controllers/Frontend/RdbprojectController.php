@@ -30,7 +30,8 @@ class RdbprojectController extends Controller
             'rdbProjectWorks' => function($q) {
                 $q->orderBy('position_id', 'asc');
             },
-            'rdbProjectWorks.researcher'
+            'rdbProjectWorks.researcher.prefix',
+            'rdbProjectWorks.position'
         ]);
 
         if ($request->filled('search')) {
@@ -322,22 +323,30 @@ class RdbprojectController extends Controller
                 
                 // Check researchers
                 $matchedResearchers = [];
-                foreach ($project->researchers as $researcher) {
+                foreach ($project->rdbProjectWorks as $work) {
+                    $researcher = $work->researcher;
+                    if (!$researcher) continue;
                     $matched = true;
                     foreach ($searchWords as $word) {
                         if (empty($word)) continue;
                         if (stripos($researcher->researcher_fname ?? '', $word) === false &&
-                            stripos($researcher->researcher_lname ?? '', $word) === false) {
+                            stripos($researcher->researcher_lname ?? '', $word) === false &&
+                            stripos($researcher->researcher_fnameEN ?? '', $word) === false &&
+                            stripos($researcher->researcher_lnameEN ?? '', $word) === false) {
                             $matched = false;
                             break;
                         }
                     }
                     if ($matched) {
-                        $matchedResearchers[] = ($researcher->researcher_fname ?? '') . ' ' . ($researcher->researcher_lname ?? '');
+                        $posName = $work->position->position_nameTH ?? 'นักวิจัย';
+                        $fullName = trim(($researcher->prefix->prefix_nameTH ?? '') . $researcher->researcher_fname . ' ' . $researcher->researcher_lname);
+                        $matchedResearchers[] = "นักวิจัย ({$posName}): {$fullName}";
                     }
                 }
                 if (!empty($matchedResearchers)) {
-                    $matchSources[] = 'นักวิจัย: ' . implode(', ', $matchedResearchers);
+                    foreach ($matchedResearchers as $mr) {
+                        $matchSources[] = $mr;
+                    }
                 }
                 
                 $project->match_sources = $matchSources;
@@ -398,18 +407,35 @@ class RdbprojectController extends Controller
      */
     public function searchResearchers(Request $request)
     {
-        $term = trim($request->q);
+        $rawTerm = trim($request->q ?? '');
 
-        if (empty($term)) {
-            return response()->json([]);
+        if (empty($rawTerm) || mb_strlen($rawTerm) < 2) {
+            return response()->json(['results' => []]);
         }
 
-        $researchers = \App\Models\RdbResearcher::with('prefix')
-            ->where(function($q) use ($term) {
-                $q->where('researcher_fname', 'LIKE', "%{$term}%")
-                  ->orWhere('researcher_lname', 'LIKE', "%{$term}%")
-                  ->orWhere('researcher_fnameEN', 'LIKE', "%{$term}%")
-                  ->orWhere('researcher_lnameEN', 'LIKE', "%{$term}%");
+        $cleanTerm = preg_replace('/^(นาย|นาง|นางสาว|ดร\.|ผศ\.|รศ\.|ศ\.)\s*/u', '', $rawTerm);
+        $words = array_values(array_filter(preg_split('/\s+/', $cleanTerm)));
+
+        $researchers = \App\Models\RdbResearcher::with(['prefix', 'department'])
+            ->where(function($q) use ($cleanTerm, $words) {
+                $q->where('researcher_fname', 'LIKE', "%{$cleanTerm}%")
+                  ->orWhere('researcher_lname', 'LIKE', "%{$cleanTerm}%")
+                  ->orWhere('researcher_fnameEN', 'LIKE', "%{$cleanTerm}%")
+                  ->orWhere('researcher_lnameEN', 'LIKE', "%{$cleanTerm}%")
+                  ->orWhereRaw("CONCAT(researcher_fname, ' ', researcher_lname) LIKE ?", ["%{$cleanTerm}%"]);
+
+                if (count($words) > 1) {
+                    $q->orWhere(function($sub) use ($words) {
+                        foreach ($words as $w) {
+                            $sub->where(function($wq) use ($w) {
+                                $wq->where('researcher_fname', 'LIKE', "%{$w}%")
+                                   ->orWhere('researcher_lname', 'LIKE', "%{$w}%")
+                                   ->orWhere('researcher_fnameEN', 'LIKE', "%{$w}%")
+                                   ->orWhere('researcher_lnameEN', 'LIKE', "%{$w}%");
+                            });
+                        }
+                    });
+                }
             })
             ->limit(20)
             ->get();
@@ -418,14 +444,17 @@ class RdbprojectController extends Controller
         foreach ($researchers as $r) {
             $prefix = $r->prefix ? $r->prefix->prefix_nameTH : '';
             $nameTH = $prefix . $r->researcher_fname . ' ' . $r->researcher_lname;
-            
             $dept = $r->department ? $r->department->department_nameTH : '-';
-            
             $text = "{$nameTH} [{$dept}]";
 
             $results[] = [
+                'id' => $r->researcher_id,
                 'value' => $r->researcher_id,
-                'text' => $text
+                'text' => $text,
+                'prefix' => $prefix,
+                'fname' => $r->researcher_fname,
+                'lname' => $r->researcher_lname,
+                'department' => $dept,
             ];
         }
 
@@ -437,10 +466,13 @@ class RdbprojectController extends Controller
      */
     public function searchProjects(Request $request)
     {
-        $term = trim($request->q);
+        $term = trim($request->q ?? '');
         if (empty($term) || mb_strlen($term) < 2) {
-            return response()->json([]);
+            return response()->json(['results' => []]);
         }
+
+        $cleanName = preg_replace('/^(นาย|นาง|นางสาว|ดร\.|ผศ\.|รศ\.|ศ\.)\s*/u', '', $term);
+        $words = array_values(array_filter(preg_split('/\s+/', $cleanName)));
 
         $projects = RdbProject::with([
                 'year', 
@@ -450,9 +482,10 @@ class RdbprojectController extends Controller
                 'rdbProjectWorks' => function($wq) {
                     $wq->orderBy('position_id', 'asc');
                 },
-                'rdbProjectWorks.researcher.prefix'
+                'rdbProjectWorks.researcher.prefix',
+                'rdbProjectWorks.position'
             ])
-            ->where(function($q) use ($term) {
+            ->where(function($q) use ($term, $cleanName, $words) {
                 $q->where('pro_nameTH', 'LIKE', "%{$term}%")
                   ->orWhere('pro_nameEN', 'LIKE', "%{$term}%")
                   ->orWhere('pro_code', 'LIKE', "%{$term}%")
@@ -462,12 +495,23 @@ class RdbprojectController extends Controller
                   ->orWhereHas('typeSub', function($tsq) use ($term) {
                       $tsq->where('pts_name', 'LIKE', "%{$term}%");
                   })
-                  ->orWhereHas('researchers', function($rq) use ($term) {
-                      $rq->where('researcher_fname', 'LIKE', "%{$term}%")
-                         ->orWhere('researcher_lname', 'LIKE', "%{$term}%")
-                         ->orWhere('researcher_fnameEN', 'LIKE', "%{$term}%")
-                         ->orWhere('researcher_lnameEN', 'LIKE', "%{$term}%")
-                         ->orWhereRaw("CONCAT(researcher_fname, ' ', researcher_lname) LIKE ?", ["%{$term}%"]);
+                  ->orWhereHas('rdbProjectWorks.researcher', function($rq) use ($cleanName, $words) {
+                      $rq->where('researcher_fname', 'LIKE', "%{$cleanName}%")
+                         ->orWhere('researcher_lname', 'LIKE', "%{$cleanName}%")
+                         ->orWhere('researcher_fnameEN', 'LIKE', "%{$cleanName}%")
+                         ->orWhere('researcher_lnameEN', 'LIKE', "%{$cleanName}%")
+                         ->orWhereRaw("CONCAT(researcher_fname, ' ', researcher_lname) LIKE ?", ["%{$cleanName}%"]);
+
+                      if (count($words) > 1) {
+                          $rq->orWhere(function($wSub) use ($words) {
+                              foreach ($words as $w) {
+                                  $wSub->where(function($wq) use ($w) {
+                                      $wq->where('researcher_fname', 'LIKE', "%{$w}%")
+                                         ->orWhere('researcher_lname', 'LIKE', "%{$w}%");
+                                  });
+                              }
+                          });
+                      }
                   });
             })
             ->orderBy('pro_id', 'desc')
@@ -476,45 +520,63 @@ class RdbprojectController extends Controller
 
         $results = [];
         foreach ($projects as $p) {
+            $yearName = ($p->year && $p->year->year_name) ? $p->year->year_name : '-';
             $yearPrefix = ($p->year && $p->year->year_name) ? "[{$p->year->year_name}] " : '';
             $typeName = $p->type ? $p->type->pt_name : '';
             if ($p->typeSub && $p->typeSub->pts_name) {
                 $typeName .= ($typeName ? ' (' . $p->typeSub->pts_name . ')' : $p->typeSub->pts_name);
             }
-            $dept = $p->department ? ($p->department->department_nameTH ?? $p->department->department_name) : '';
+            $dept = $p->department ? ($p->department->department_nameTH ?? $p->department->department_name ?? '') : '';
 
+            $researchersList = [];
             $researcherNames = [];
             if ($p->rdbProjectWorks && $p->rdbProjectWorks->isNotEmpty()) {
                 foreach ($p->rdbProjectWorks as $pw) {
                     if ($pw->researcher) {
-                        $researcherNames[] = trim($pw->researcher->researcher_fname . ' ' . $pw->researcher->researcher_lname);
+                        $r = $pw->researcher;
+                        $prefix = $r->prefix ? $r->prefix->prefix_nameTH : '';
+                        $fullName = trim("{$prefix}{$r->researcher_fname} {$r->researcher_lname}");
+                        $researcherNames[] = $fullName;
+                        $researchersList[] = [
+                            'researcher_id' => $r->researcher_id,
+                            'full_name' => $fullName,
+                            'position_id' => $pw->position_id,
+                            'position_name' => $pw->position->position_nameTH ?? 'ผู้ร่วมวิจัย',
+                            'ratio' => $pw->ratio,
+                        ];
                     }
                 }
-            } elseif ($p->researchers && $p->researchers->isNotEmpty()) {
-                foreach ($p->researchers as $r) {
-                    $researcherNames[] = trim($r->researcher_fname . ' ' . $r->researcher_lname);
-                }
             }
-            $resText = !empty($researcherNames) ? implode(', ', array_slice($researcherNames, 0, 2)) . (count($researcherNames) > 2 ? '...' : '') : '';
+            $allResearchersText = !empty($researcherNames) ? implode(', ', $researcherNames) : '';
+            $headResearcher = $researcherNames[0] ?? '-';
 
             $meta = array_filter([
                 $typeName ? "ทุน: {$typeName}" : '', 
                 $dept, 
-                $resText ? "ผู้วิจัย: {$resText}" : ''
+                $allResearchersText ? "ผู้วิจัย: {$allResearchersText}" : ''
             ]);
             $sub = !empty($meta) ? ' [' . implode(', ', $meta) . ']' : '';
 
-            $cleanName = strip_tags($p->pro_nameTH);
+            $cleanNameTH = strip_tags($p->pro_nameTH ?? '');
+            $cleanNameEN = strip_tags($p->pro_nameEN ?? '');
             $results[] = [
+                'id' => $p->pro_id,
                 'value' => $p->pro_id,
-                'text' => $yearPrefix . $cleanName . $sub,
-                'pro_nameTH' => $cleanName,
+                'text' => $yearPrefix . $cleanNameTH . $sub,
+                'pro_nameTH' => $cleanNameTH,
+                'pro_nameEN' => $cleanNameEN,
+                'pro_code' => $p->pro_code ?? '',
+                'year_name' => $yearName,
+                'department_name' => $dept,
+                'head_researcher' => $headResearcher,
+                'all_researchers_text' => $allResearchersText ?: '-',
+                'researchers' => $researchersList,
                 'pt_name' => $typeName,
-                'researcher_name' => $resText,
+                'researcher_name' => $allResearchersText,
             ];
         }
 
-        return response()->json($results);
+        return response()->json(['results' => $results]);
     }
 
     /**

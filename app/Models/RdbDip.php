@@ -103,34 +103,29 @@ class RdbDip extends Model
 
         // 1. กรณีไฟล์หลัก
         if ($targetField === 'dip_files') {
-            if (!empty($this->dip_path)) {
-                return $this->dip_path;
-            }
-
-            if (!empty($this->dip_files)) {
-                $filename = $this->dip_files;
-                if (Storage::disk('public')->exists('dips/' . $filename) || file_exists(public_path('storage/dips/' . $filename))) {
-                    return 'dips/' . $filename;
-                }
-                if (Storage::disk('public')->exists('uploads/dips/' . $filename) || file_exists(public_path('storage/uploads/dips/' . $filename)) || file_exists(public_path('uploads/dips/' . $filename))) {
-                    return 'uploads/dips/' . $filename;
-                }
-                if (file_exists(public_path('datadip/' . $this->dip_id . '/' . $filename)) || file_exists(base_path('yii2_rdb-main/frontend/web/datadip/' . $this->dip_id . '/' . $filename))) {
-                    return 'datadip/' . $this->dip_id . '/' . $filename;
-                }
-                return 'uploads/dips/' . $filename;
-            }
+            return $this->resolveDualFilePath('dip_path', 'dip_files', [
+                'uploads/dips/{dip_id}',
+                'uploads/dips',
+                'dips/{dip_id}',
+                'dips',
+                'datadip/{dip_id}',
+            ]) ?? (!empty($this->dip_files) ? 'uploads/dips/' . basename(trim($this->dip_files)) : null);
         } else {
             // 2. กรณีไฟล์แนบเพิ่มเติม (dip_data1_files, dip_data2_files_con, ฯลฯ)
             if (!empty($this->{$targetField})) {
-                $filename = $this->{$targetField};
-                if (Storage::disk('public')->exists('dips/' . $filename) || file_exists(public_path('storage/dips/' . $filename))) {
-                    return 'dips/' . $filename;
+                $filename = basename(trim($this->{$targetField}));
+                $candidates = [
+                    'uploads/dips/' . $this->dip_id . '/' . $filename,
+                    'uploads/dips/' . $filename,
+                    'dips/' . $filename,
+                    'datadip/' . $this->dip_id . '/' . $filename,
+                ];
+                foreach ($candidates as $cand) {
+                    if (Storage::disk('public')->exists($cand) || file_exists(public_path('storage/' . $cand)) || file_exists(public_path($cand))) {
+                        return $cand;
+                    }
                 }
-                if (Storage::disk('public')->exists('uploads/dips/' . $filename) || file_exists(public_path('storage/uploads/dips/' . $filename)) || file_exists(public_path('uploads/dips/' . $filename))) {
-                    return 'uploads/dips/' . $filename;
-                }
-                if (file_exists(public_path('datadip/' . $this->dip_id . '/' . $filename)) || file_exists(base_path('yii2_rdb-main/frontend/web/datadip/' . $this->dip_id . '/' . $filename))) {
+                if (file_exists(base_path('yii2_rdb-main/frontend/web/datadip/' . $this->dip_id . '/' . $filename))) {
                     return 'datadip/' . $this->dip_id . '/' . $filename;
                 }
                 return 'uploads/dips/' . $filename;

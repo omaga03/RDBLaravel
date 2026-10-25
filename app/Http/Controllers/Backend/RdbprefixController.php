@@ -9,10 +9,20 @@ use App\Http\Requests\Backend\{StoreRdbPrefixRequest, UpdateRdbPrefixRequest};
 
 class RdbprefixController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', RdbPrefix::class);
-        $items = RdbPrefix::with(['creator', 'updater'])->paginate(10);
+        $query = RdbPrefix::with(['creator', 'updater']);
+
+        $search = $request->input('search', $request->input('q'));
+        if ($search !== null && $search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('prefix_nameTH', 'like', "%{$search}%")
+                  ->orWhere('prefix_nameEN', 'like', "%{$search}%");
+            });
+        }
+
+        $items = $query->paginate(10)->withQueryString();
         return view('backend.rdbprefix.index', compact('items'));
     }
 

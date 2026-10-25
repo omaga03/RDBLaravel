@@ -120,12 +120,15 @@ document.addEventListener('DOMContentLoaded', function() {
     if (researcherSelect && typeof TomSelect !== 'undefined') {
         new TomSelect(researcherSelect, {
             create: false,
+            valueField: 'value',
+            labelField: 'text',
+            searchField: 'text',
             placeholder: '-- พิมพ์เพื่อค้นหานักวิจัย --',
             load: function(query, callback) {
                 if (!query.length || query.length < 2) return callback();
                 fetch('{{ route("backend.rdb_project.search_researchers") }}?q=' + encodeURIComponent(query))
                     .then(response => response.json())
-                    .then(json => callback(json))
+                    .then(json => callback(json.results || json))
                     .catch(() => callback());
             },
             render: {
@@ -144,12 +147,15 @@ document.addEventListener('DOMContentLoaded', function() {
     if (projectSelect && typeof TomSelect !== 'undefined') {
         new TomSelect(projectSelect, {
             create: false,
+            valueField: 'value',
+            labelField: 'text',
+            searchField: 'text',
             placeholder: '-- พิมพ์เพื่อค้นหาโครงการ --',
             load: function(query, callback) {
                 if (!query.length || query.length < 2) return callback();
                 fetch('{{ route("backend.rdb_project.search") }}?q=' + encodeURIComponent(query))
                     .then(response => response.json())
-                    .then(json => callback(json))
+                    .then(json => callback(json.results || json))
                     .catch(() => callback());
             },
             render: {

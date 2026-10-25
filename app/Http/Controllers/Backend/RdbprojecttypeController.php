@@ -9,10 +9,17 @@ use App\Http\Requests\Backend\{StoreRdbProjectTypeRequest, UpdateRdbProjectTypeR
 
 class RdbprojecttypeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', RdbProjecttype::class);
-        $items = RdbProjecttype::with(['projectTypeGroup', 'masterType', 'year', 'creator', 'updater'])->orderBy('pt_id', 'desc')->paginate(10);
+        $query = RdbProjecttype::with(['projectTypeGroup', 'masterType', 'year', 'creator', 'updater']);
+
+        $search = $request->input('search', $request->input('q'));
+        if ($search !== null && $search !== '') {
+            $query->where('pt_name', 'like', "%{$search}%");
+        }
+
+        $items = $query->orderBy('pt_id', 'desc')->paginate(10)->withQueryString();
         return view('backend.rdbprojecttype.index', compact('items'));
     }
 

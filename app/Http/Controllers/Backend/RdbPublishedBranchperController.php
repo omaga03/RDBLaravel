@@ -23,7 +23,18 @@ class RdbPublishedBranchperController extends Controller
             $query->where('branch_id', $request->branch_id);
         }
 
-        $items = $query->orderBy('year_id', 'desc')->orderBy('branch_id')->paginate(15);
+        $search = $request->input('search', $request->input('q'));
+        if ($search !== null && $search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('year', function ($yq) use ($search) {
+                    $yq->where('year_name', 'like', "%{$search}%");
+                })->orWhereHas('branch', function ($bq) use ($search) {
+                    $bq->where('branch_name', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        $items = $query->orderBy('year_id', 'desc')->orderBy('branch_id')->paginate(15)->withQueryString();
         $years = RdbYear::orderBy('year_name', 'desc')->get();
         $branches = RdbPublishedBranch::orderBy('branch_name')->get();
 

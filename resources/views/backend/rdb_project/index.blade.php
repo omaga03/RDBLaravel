@@ -577,7 +577,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 fetch('{{ route("backend.rdb_project.search_researchers") }}?q=' + encodeURIComponent(query))
                     .then(response => response.json())
-                    .then(json => callback(json))
+                    .then(json => callback(json.results || json))
                     .catch(() => callback());
             },
             onChange: function(value) {

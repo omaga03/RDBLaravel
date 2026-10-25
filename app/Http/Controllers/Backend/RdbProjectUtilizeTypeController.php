@@ -18,12 +18,12 @@ class RdbProjectUtilizeTypeController extends Controller
         $query = RdbProjectUtilizeType::with(['creator', 'updater']);
 
         // Search logic
-        if ($request->filled('q')) {
-            $search = $request->q;
+        $search = $request->input('search', $request->input('q'));
+        if ($search !== null && $search !== '') {
             $query->where('utz_typr_name', 'like', "%{$search}%");
         }
 
-        $items = $query->orderBy('utz_type_id', 'desc')->paginate(10);
+        $items = $query->orderBy('utz_type_id', 'desc')->paginate(10)->withQueryString();
         return view('backend.rdbprojectutilizetype.index', compact('items'));
     }
 

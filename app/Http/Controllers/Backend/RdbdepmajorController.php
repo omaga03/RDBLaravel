@@ -10,14 +10,26 @@ use App\Http\Requests\Backend\{StoreRdbDepMajorRequest, UpdateRdbDepMajorRequest
 
 class RdbdepmajorController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', RdbDepmajor::class);
-        $items = RdbDepmajor::with('department')
+        $query = RdbDepmajor::with('department')
             ->join('rdb_department', 'rdb_dep_major.department_id', '=', 'rdb_department.department_id')
-            ->orderBy('rdb_department.department_nameTH', 'asc')
-            ->select('rdb_dep_major.*')
-            ->paginate(20);
+            ->select('rdb_dep_major.*');
+
+        $search = $request->input('search', $request->input('q'));
+        if ($search !== null && $search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('rdb_dep_major.maj_nameTH', 'like', "%{$search}%")
+                  ->orWhere('rdb_dep_major.maj_nameEN', 'like', "%{$search}%")
+                  ->orWhere('rdb_dep_major.maj_id', 'like', "%{$search}%")
+                  ->orWhere('rdb_department.department_nameTH', 'like', "%{$search}%");
+            });
+        }
+
+        $items = $query->orderBy('rdb_department.department_nameTH', 'asc')
+            ->paginate(20)
+            ->withQueryString();
         return view('backend.rdbdepmajor.index', compact('items'));
     }
 

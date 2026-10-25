@@ -20,10 +20,17 @@ class RdbProjectTypeSubController extends Controller
         $this->fileUploadService = $fileUploadService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', RdbProjectTypeSub::class);
-        $items = RdbProjectTypeSub::with(['projectType', 'createdBy', 'updatedBy'])->orderBy('pts_id', 'desc')->paginate(10);
+        $query = RdbProjectTypeSub::with(['projectType', 'createdBy', 'updatedBy']);
+
+        $search = $request->input('search', $request->input('q'));
+        if ($search !== null && $search !== '') {
+            $query->where('pts_name', 'like', "%{$search}%");
+        }
+
+        $items = $query->orderBy('pts_id', 'desc')->paginate(10)->withQueryString();
         return view('backend.rdbprojecttypesub.index', compact('items'));
     }
 

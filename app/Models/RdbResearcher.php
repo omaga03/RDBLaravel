@@ -55,25 +55,12 @@ class RdbResearcher extends Model
      */
     public function getProfileFilePath(): ?string
     {
-        if (!empty($this->rf_path)) {
-            return $this->rf_path;
-        }
-
-        if (!empty($this->researcher_picture)) {
-            $pic = $this->researcher_picture;
-            if (Storage::disk('public')->exists('researchers/' . $pic) || file_exists(public_path('storage/researchers/' . $pic))) {
-                return 'researchers/' . $pic;
-            }
-            if (Storage::disk('public')->exists('uploads/researchers/' . $pic) || file_exists(public_path('storage/uploads/researchers/' . $pic))) {
-                return 'uploads/researchers/' . $pic;
-            }
-            if (file_exists(public_path('dataresearcher/' . $pic))) {
-                return 'dataresearcher/' . $pic;
-            }
-            return 'uploads/researchers/' . $pic;
-        }
-
-        return null;
+        return $this->resolveDualFilePath('rf_path', 'researcher_picture', [
+            'uploads/dataresearcher',
+            'uploads/researchers',
+            'researchers',
+            'dataresearcher',
+        ]) ?? (!empty($this->researcher_picture) ? 'uploads/researchers/' . basename(trim($this->researcher_picture)) : null);
     }
 
     public function getProfileImageUrlAttribute(): ?string

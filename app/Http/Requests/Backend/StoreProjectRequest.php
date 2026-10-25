@@ -54,10 +54,10 @@ class StoreProjectRequest extends FormRequest
 
         // 4. Convert Thai Dates to Y-m-d
         if ($this->has('pro_date_start')) {
-            $this->merge(['pro_date_start' => $this->parseThaiDate($this->pro_date_start)]);
+            $this->merge(['pro_date_start' => \App\Helpers\ThaiDateHelper::toIsoDate($this->pro_date_start)]);
         }
         if ($this->has('pro_date_end')) {
-            $this->merge(['pro_date_end' => $this->parseThaiDate($this->pro_date_end)]);
+            $this->merge(['pro_date_end' => \App\Helpers\ThaiDateHelper::toIsoDate($this->pro_date_end)]);
         }
 
         // 5. Handle Abstract Concatenation
@@ -122,7 +122,7 @@ class StoreProjectRequest extends FormRequest
             'pro_detail' => 'nullable|string',
             'pro_budget' => 'nullable|numeric|min:0',
             'pro_date_start' => 'required|date',
-            'pro_date_end' => 'required|date|after:pro_date_start',
+            'pro_date_end' => 'required|date|after_or_equal:pro_date_start',
             'pt_id' => 'required|integer|exists:rdb_project_types,pt_id',
             'pts_id' => 'nullable|integer|exists:rdb_project_types_sub,pts_id',
             'ps_id' => 'nullable|integer|exists:rdb_project_status,ps_id',
@@ -151,7 +151,7 @@ class StoreProjectRequest extends FormRequest
             'pro_nameTH.required' => 'ชื่อโครงการ (ไทย) จำเป็นต้องกรอก',
             'pro_date_start.required' => 'วันเริ่มต้น จำเป็นต้องกรอก',
             'pro_date_end.required' => 'วันสิ้นสุด จำเป็นต้องกรอก',
-            'pro_date_end.after' => 'วันสิ้นสุดต้องหลังจากวันเริ่มต้น',
+            'pro_date_end.after_or_equal' => 'วันที่สิ้นสุดต้องไม่น้อยกว่าวันที่เริ่มต้น',
         ];
     }
 }

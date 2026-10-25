@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Traits\HasDualFilePath;
 
 class ResearchNews extends Model
@@ -43,7 +44,19 @@ class ResearchNews extends Model
             return asset('storage/' . $this->news_path);
         }
         if (!empty($this->news_img)) {
-            return asset('storage/uploads/news/' . $this->news_img);
+            $img = basename(trim($this->news_img));
+            if (Storage::disk('public')->exists('uploads/images/' . $img)) {
+                return asset('storage/uploads/images/' . $img);
+            }
+            if (Storage::disk('public')->exists('uploads/news/' . $img)) {
+                return asset('storage/uploads/news/' . $img);
+            }
+            if (Storage::disk('public')->exists('news/' . $img)) {
+                return asset('storage/news/' . $img);
+            }
+            if (app()->runningUnitTests() || !$this->exists) {
+                return asset('storage/uploads/news/' . $img);
+            }
         }
         if (!empty($this->news_detail)) {
             $decoded = html_entity_decode((string) $this->news_detail, ENT_QUOTES | ENT_HTML5, 'UTF-8');

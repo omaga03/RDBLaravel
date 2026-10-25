@@ -18,8 +18,8 @@ class RdbPublishedTypeController extends Controller
         $query = RdbPublishedType::query();
 
         // Search logic
-        if ($request->filled('q')) {
-            $search = $request->q;
+        $search = $request->input('search', $request->input('q'));
+        if ($search !== null && $search !== '') {
             $query->where(function($q) use ($search) {
                 $q->where('pubtype_group', 'like', "%{$search}%")
                   ->orWhere('pubtype_grouptype', 'like', "%{$search}%")
@@ -27,7 +27,7 @@ class RdbPublishedTypeController extends Controller
             });
         }
 
-        $items = $query->orderBy('pubtype_id', 'desc')->paginate(10);
+        $items = $query->orderBy('pubtype_id', 'desc')->paginate(10)->withQueryString();
         return view('backend.rdbpublishedtype.index', compact('items'));
     }
 

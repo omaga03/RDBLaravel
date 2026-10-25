@@ -64,100 +64,120 @@ class RdbProjectUtilizeController extends Controller
             }
         }
         
-        if ($request->filled('q')) {
-            $q = $request->q;
+        if ($request->filled('search') || $request->filled('q')) {
+            $q = trim($request->search ?? $request->q);
             $query->where(function($qry) use ($q) {
                 $qry->where('utz_department_name', 'like', "%{$q}%")
                     ->orWhere('utz_leading', 'like', "%{$q}%")
+                    ->orWhere('utz_detail', 'like', "%{$q}%")
                     ->orWhereHas('project', function($p) use ($q) {
                         $p->where('pro_nameTH', 'like', "%{$q}%")
+                          ->orWhere('pro_nameEN', 'like', "%{$q}%")
                           ->orWhere('pro_code', 'like', "%{$q}%");
+                    })
+                    ->orWhereHas('project.rdbProjectWorks.researcher', function($rq) use ($q) {
+                        $rq->where('researcher_fname', 'like', "%{$q}%")
+                           ->orWhere('researcher_lname', 'like', "%{$q}%");
                     });
             });
         }
 
-        if ($request->search_mode === 'advanced') {
-            if ($request->filled('utz_id') && $request->utz_id !== 'pre') {
-                $query->where('utz_id', $request->utz_id);
-            }
-            if ($request->filled('pro_id')) {
-                $query->where('pro_id', $request->pro_id);
-            }
-            if ($request->filled('researcher_id')) {
-                $resId = $request->researcher_id;
-                $query->whereHas('project.rdbProjectWorks', function($q) use ($resId) {
-                    $q->where('rdb_project_work.researcher_id', $resId);
-                });
-            }
-            if ($request->filled('title_keywords')) {
-                $keywords = array_values(array_filter(preg_split('/\s+/', trim($request->title_keywords))));
-                $mode = $request->input('title_keywords_mode', 'all');
-
-                if (!empty($keywords)) {
-                    if ($mode === 'all') {
-                        $query->where(function($q) use ($keywords) {
-                            foreach ($keywords as $kw) {
-                                $q->where(function($sub) use ($kw) {
-                                    $sub->where('utz_department_name', 'like', "%{$kw}%")
-                                        ->orWhere('utz_detail', 'like', "%{$kw}%")
-                                        ->orWhereHas('project', function($pq) use ($kw) {
-                                            $pq->where('pro_nameTH', 'like', "%{$kw}%")
-                                               ->orWhere('pro_nameEN', 'like', "%{$kw}%");
-                                        });
-                                });
-                            }
-                        });
-                    } else {
-                        $query->where(function($q) use ($keywords) {
-                            foreach ($keywords as $kw) {
-                                $q->orWhere(function($sub) use ($kw) {
-                                    $sub->where('utz_department_name', 'like', "%{$kw}%")
-                                        ->orWhere('utz_detail', 'like', "%{$kw}%")
-                                        ->orWhereHas('project', function($pq) use ($kw) {
-                                            $pq->where('pro_nameTH', 'like', "%{$kw}%")
-                                               ->orWhere('pro_nameEN', 'like', "%{$kw}%");
-                                        });
-                                });
-                            }
+        if ($request->filled('utz_id') && $request->utz_id !== 'pre') {
+            $query->where('utz_id', $request->utz_id);
+        }
+        if ($request->filled('pro_id')) {
+            $query->where('pro_id', $request->pro_id);
+        }
+        if ($request->filled('researcher_id') && $request->researcher_id !== 'pre') {
+            $resId = $request->researcher_id;
+            $query->whereHas('project.rdbProjectWorks', function($q) use ($resId) {
+                $q->where('rdb_project_work.researcher_id', $resId);
+            });
+        } elseif ($request->filled('researcher_name')) {
+            $cleanName = preg_replace('/^(นาย|นาง|นางสาว|ดร\.|ผศ\.|รศ\.|ศ\.)\s*/u', '', trim($request->researcher_name));
+            $searchWords = array_values(array_filter(preg_split('/\s+/', $cleanName)));
+            if (!empty($searchWords)) {
+                $query->whereHas('project.rdbProjectWorks.researcher', function($rq) use ($searchWords) {
+                    foreach ($searchWords as $word) {
+                        $rq->where(function($wq) use ($word) {
+                            $wq->where('researcher_fname', 'like', "%{$word}%")
+                               ->orWhere('researcher_lname', 'like', "%{$word}%");
                         });
                     }
+                });
+            }
+        }
+        if ($request->filled('title_keywords')) {
+            $keywords = array_values(array_filter(preg_split('/\s+/', trim($request->title_keywords))));
+            $mode = $request->input('title_keywords_mode', 'all');
+
+            if (!empty($keywords)) {
+                if ($mode === 'all') {
+                    $query->where(function($q) use ($keywords) {
+                        foreach ($keywords as $kw) {
+                            $q->where(function($sub) use ($kw) {
+                                $sub->where('utz_department_name', 'like', "%{$kw}%")
+                                    ->orWhere('utz_detail', 'like', "%{$kw}%")
+                                    ->orWhereHas('project', function($pq) use ($kw) {
+                                        $pq->where('pro_nameTH', 'like', "%{$kw}%")
+                                           ->orWhere('pro_nameEN', 'like', "%{$kw}%");
+                                    });
+                            });
+                        }
+                    });
+                } else {
+                    $query->where(function($q) use ($keywords) {
+                        foreach ($keywords as $kw) {
+                            $q->orWhere(function($sub) use ($kw) {
+                                $sub->where('utz_department_name', 'like', "%{$kw}%")
+                                    ->orWhere('utz_detail', 'like', "%{$kw}%")
+                                    ->orWhereHas('project', function($pq) use ($kw) {
+                                        $pq->where('pro_nameTH', 'like', "%{$kw}%")
+                                           ->orWhere('pro_nameEN', 'like', "%{$kw}%");
+                                    });
+                            });
+                        }
+                    });
                 }
             }
+        }
 
-            if ($request->filled('utz_department_name')) {
-                $query->where('utz_department_name', 'like', '%' . $request->utz_department_name . '%');
-            }
-            if ($request->filled('utz_leading')) {
-                $query->where('utz_leading', 'like', '%' . $request->utz_leading . '%');
-            }
-            
-            if ($request->filled('utz_group')) {
-                $group = $request->utz_group;
-                $query->where(function($q) use ($group) {
-                    $q->whereRaw("FIND_IN_SET(?, utz_group)", [$group]);
-                });
-            }
+        if ($request->filled('utz_department_name')) {
+            $query->where('utz_department_name', 'like', '%' . $request->utz_department_name . '%');
+        }
+        if ($request->filled('utz_leading')) {
+            $query->where('utz_leading', 'like', '%' . $request->utz_leading . '%');
+        }
+        
+        if ($request->filled('utz_group')) {
+            $group = $request->utz_group;
+            $query->where(function($q) use ($group) {
+                $q->whereRaw("FIND_IN_SET(?, utz_group)", [$group]);
+            });
+        }
 
-            if ($request->filled('chw_id')) {
-                $query->where('chw_id', $request->chw_id);
-            } elseif ($request->filled('changwat')) {
-                $query->whereHas('changwat', function($q) use ($request) {
-                    $q->where('changwat_t', 'like', '%' . $request->changwat . '%');
-                    if ($request->filled('amphoe')) {
-                        $q->where('amphoe_t', 'like', '%' . $request->amphoe . '%');
-                    }
-                });
-            }
+        if ($request->filled('chw_id')) {
+            $query->where('chw_id', $request->chw_id);
+        } elseif ($request->filled('changwat')) {
+            $query->whereHas('changwat', function($q) use ($request) {
+                $q->where('changwat_t', 'like', '%' . $request->changwat . '%');
+                if ($request->filled('amphoe')) {
+                    $q->where('amphoe_t', 'like', '%' . $request->amphoe . '%');
+                }
+                if ($request->filled('tambon')) {
+                    $q->where('tambon_t', 'like', '%' . $request->tambon . '%');
+                }
+            });
+        }
 
-            if ($request->filled('year_id')) {
-                $query->where('utz_year_id', $request->year_id);
-            }
-            if ($request->filled('date_start')) {
-                $query->whereDate('utz_date', '>=', $request->date_start);
-            }
-            if ($request->filled('date_end')) {
-                $query->whereDate('utz_date', '<=', $request->date_end);
-            }
+        if ($request->filled('year_id')) {
+            $query->where('utz_year_id', $request->year_id);
+        }
+        if ($request->filled('date_start')) {
+            $query->whereDate('utz_date', '>=', $request->date_start);
+        }
+        if ($request->filled('date_end')) {
+            $query->whereDate('utz_date', '<=', $request->date_end);
         }
 
         return $query;
@@ -166,6 +186,18 @@ class RdbProjectUtilizeController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', RdbProjectUtilize::class);
+
+        $hasDateStart = $request->filled('date_start');
+        $hasDateEnd = $request->filled('date_end');
+        if ($hasDateStart || $hasDateEnd) {
+            if (!$hasDateStart || !$hasDateEnd) {
+                return redirect()->back()->withInput()->with('error', 'กรุณาระบุทั้งวันที่เริ่มและวันที่สิ้นสุด');
+            }
+            if ($request->date_end < $request->date_start) {
+                return redirect()->back()->withInput()->with('error', 'วันที่สิ้นสุดต้องไม่น้อยกว่าวันที่เริ่มต้น');
+            }
+        }
+
         $query = $this->getFilteredQuery($request);
 
         $items = $query->orderBy('utz_date', 'desc')->paginate(20);
@@ -546,27 +578,87 @@ class RdbProjectUtilizeController extends Controller
     public function searchProjects(Request $request)
     {
         $this->authorize('viewAny', RdbProjectUtilize::class);
-        $q = $request->get('q', '');
+        $q = trim($request->get('q', ''));
         
-        if (strlen($q) < 2) {
-            return response()->json([]);
+        if (mb_strlen($q) < 2) {
+            return response()->json(['results' => []]);
         }
 
-        $projects = RdbProject::with(['year', 'department', 'rdbProjectWorks' => function($q) {
-                $q->orderBy('position_id', 'asc');
-            }, 'rdbProjectWorks.researcher'])
-            ->where('pro_nameTH', 'like', "%{$q}%")
-            ->orWhere('pro_nameEN', 'like', "%{$q}%")
-            ->orWhere('pro_code', 'like', "%{$q}%")
-            ->orderBy('created_at', 'desc')
+        $cleanName = preg_replace('/^(นาย|นาง|นางสาว|ดร\.|ผศ\.|รศ\.|ศ\.)\s*/u', '', $q);
+        $words = array_values(array_filter(preg_split('/\s+/', $cleanName)));
+
+        $projects = RdbProject::with([
+                'year',
+                'department',
+                'rdbProjectWorks' => function($wq) {
+                    $wq->orderBy('position_id', 'asc');
+                },
+                'rdbProjectWorks.researcher.prefix',
+                'rdbProjectWorks.position'
+            ])
+            ->where(function($sub) use ($q, $cleanName, $words) {
+                $sub->where('pro_nameTH', 'like', "%{$q}%")
+                    ->orWhere('pro_nameEN', 'like', "%{$q}%")
+                    ->orWhere('pro_code', 'like', "%{$q}%")
+                    ->orWhereHas('rdbProjectWorks.researcher', function($rq) use ($cleanName, $words) {
+                        $rq->where('researcher_fname', 'like', "%{$cleanName}%")
+                           ->orWhere('researcher_lname', 'like', "%{$cleanName}%")
+                           ->orWhere('researcher_fnameEN', 'like', "%{$cleanName}%")
+                           ->orWhere('researcher_lnameEN', 'like', "%{$cleanName}%")
+                           ->orWhereRaw("CONCAT(researcher_fname, ' ', researcher_lname) LIKE ?", ["%{$cleanName}%"]);
+
+                        if (count($words) > 1) {
+                            $rq->orWhere(function($wSub) use ($words) {
+                                foreach ($words as $w) {
+                                    $wSub->where(function($wq) use ($w) {
+                                        $wq->where('researcher_fname', 'like', "%{$w}%")
+                                           ->orWhere('researcher_lname', 'like', "%{$w}%");
+                                    });
+                                }
+                            });
+                        }
+                    });
+            })
+            ->orderBy('pro_id', 'desc')
             ->limit(20)
             ->get()
-            ->map(fn($p) => [
-                'value' => $p->pro_id,
-                'text' => $this->formatProjectText($p)
-            ]);
+            ->map(function($p) {
+                $researchersList = $p->rdbProjectWorks->map(function($work) {
+                    $r = $work->researcher;
+                    if (!$r) return null;
+                    $prefix = $r->prefix->prefix_nameTH ?? '';
+                    return [
+                        'researcher_id' => $r->researcher_id,
+                        'full_name' => trim("{$prefix}{$r->researcher_fname} {$r->researcher_lname}"),
+                        'position_id' => $work->position_id,
+                        'position_name' => $work->position->position_nameTH ?? 'ผู้ร่วมวิจัย',
+                        'ratio' => $work->ratio,
+                    ];
+                })->filter()->values();
 
-        return response()->json($projects);
+                $allResearchersText = $researchersList->pluck('full_name')->implode(', ');
+                $headResearcher = $researchersList->first()['full_name'] ?? '-';
+                $cleanNameTH = strip_tags($p->pro_nameTH ?? '');
+                $cleanNameEN = strip_tags($p->pro_nameEN ?? '');
+                $yearName = $p->year->year_name ?? '-';
+                $deptName = $p->department->department_nameTH ?? '';
+
+                return [
+                    'id' => $p->pro_id,
+                    'value' => $p->pro_id,
+                    'text' => $this->formatProjectText($p),
+                    'pro_nameTH' => $cleanNameTH,
+                    'pro_nameEN' => $cleanNameEN,
+                    'pro_code' => $p->pro_code ?? '',
+                    'year_name' => $yearName,
+                    'department_name' => $deptName,
+                    'head_researcher' => $headResearcher,
+                    'all_researchers_text' => $allResearchersText ?: '-',
+                    'researchers' => $researchersList->toArray(),
+                ];
+            });
+
+        return response()->json(['results' => $projects]);
     }
 
     private function formatProjectText($project)
@@ -574,13 +666,16 @@ class RdbProjectUtilizeController extends Controller
         $year = $project->year->year_name ?? '-';
         $name = strip_tags($project->pro_nameTH);
         
-        $researcherName = '-';
+        $researcherNames = [];
         if ($project->rdbProjectWorks->isNotEmpty()) {
-            $mainWork = $project->rdbProjectWorks->first();
-            if ($mainWork && $mainWork->researcher) {
-                $researcherName = $mainWork->researcher->researcher_fname . ' ' . $mainWork->researcher->researcher_lname;
+            foreach ($project->rdbProjectWorks as $work) {
+                if ($work->researcher) {
+                    $prefix = $work->researcher->prefix->prefix_nameTH ?? '';
+                    $researcherNames[] = trim("{$prefix}{$work->researcher->researcher_fname} {$work->researcher->researcher_lname}");
+                }
             }
         }
+        $researcherName = !empty($researcherNames) ? implode(', ', $researcherNames) : '-';
         
         return "{$year} • {$name} • {$researcherName}";
     }

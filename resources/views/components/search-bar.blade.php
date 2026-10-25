@@ -4,14 +4,15 @@
 @endphp
 
 <div class="card search-box mb-4 shadow-sm">
-    <div class="card-header d-flex justify-content-between align-items-center"  
+    <div class="card-header search-header d-flex justify-content-between align-items-center"  
          data-bs-toggle="collapse" 
          data-bs-target="#searchCollapse" 
          aria-expanded="{{ $collapsed ? 'false' : 'true' }}" 
-         aria-controls="searchCollapse"
-         style="cursor: pointer; background: var(--rdb-gradient-primary); color: #fff;">
+         aria-controls="searchCollapse">
         
-        <h5 class="mb-0 fw-bold"><i class="bi bi-search me-2"></i> ค้นหาข้อมูล (Search)</h5>
+        <h5 class="mb-0 fw-semibold d-flex align-items-center">
+            <i class="bi bi-search me-2 opacity-75"></i> ค้นหาข้อมูล (Search)
+        </h5>
         
         <div class="d-flex align-items-center gap-2">
             @if($exportRoute)
@@ -27,8 +28,8 @@
                     <i class="bi bi-arrow-counterclockwise"></i> ล้างตัวกรอง
                 </a>
             @endif
-            <button type="button" class="btn btn-sm btn-light border-0 shadow-sm" style="width: 32px; height: 32px; padding: 0;">
-                <i class="bi bi-chevron-{{ $collapsed ? 'down' : 'up' }}"></i>
+            <button type="button" class="btn btn-sm btn-toggle-search d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px; padding: 0;" aria-label="Toggle search panel">
+                <i class="bi bi-chevron-down"></i>
             </button>
         </div>
     </div>
@@ -38,14 +39,14 @@
             <form action="{{ $action }}" method="GET">
                 
                 {{-- Tabs for switching modes --}}
-                <ul class="nav nav-tabs mb-4 border-bottom-0" id="searchTabs" role="tablist">
+                <ul class="nav nav-tabs mb-3 border-bottom" id="searchTabs" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active px-4 py-2 border-0 fw-bold d-flex align-items-center" id="simple-tab" data-bs-toggle="tab" data-bs-target="#simple-search" type="button" role="tab" aria-controls="simple-search" aria-selected="true" style="transition: all 0.25s ease;">
+                        <button class="nav-link active px-3 py-2 border-0 fw-semibold d-flex align-items-center" id="simple-tab" data-bs-toggle="tab" data-bs-target="#simple-search" type="button" role="tab" aria-controls="simple-search" aria-selected="true">
                             <i class="bi bi-search me-2"></i> ค้นหาทั่วไป
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link px-4 py-2 border-0 fw-bold d-flex align-items-center" id="advanced-tab" data-bs-toggle="tab" data-bs-target="#advanced-search" type="button" role="tab" aria-controls="advanced-search" aria-selected="false" style="transition: all 0.25s ease;">
+                        <button class="nav-link px-3 py-2 border-0 fw-semibold d-flex align-items-center" id="advanced-tab" data-bs-toggle="tab" data-bs-target="#advanced-search" type="button" role="tab" aria-controls="advanced-search" aria-selected="false">
                             <i class="bi bi-sliders me-2"></i> ค้นหาละเอียด
                         </button>
                     </li>
@@ -56,6 +57,8 @@
                         border-radius: 0;
                         border-bottom: 2px solid transparent !important;
                         color: var(--bs-secondary-color) !important;
+                        margin-bottom: -1px;
+                        transition: color 0.15s ease, border-color 0.15s ease;
                     }
                     #searchTabs .nav-link.active {
                         border-bottom: 2px solid var(--rdb-secondary) !important;
@@ -63,15 +66,11 @@
                         color: var(--rdb-secondary) !important;
                     }
                     #searchTabs .nav-link:hover {
-                        border-bottom: 2px solid var(--rdb-primary) !important;
-                        color: var(--rdb-primary) !important;
+                        color: var(--bs-body-color) !important;
                     }
                     [data-bs-theme="dark"] #searchTabs .nav-link.active {
                         border-bottom: 2px solid #60A5FA !important;
                         color: #60A5FA !important;
-                    }
-                    [data-bs-theme="dark"] #searchTabs .nav-link:not(.active) {
-                        color: var(--bs-secondary-color) !important;
                     }
                 </style>
                 

@@ -40,12 +40,19 @@ class AuditLogController extends Controller
             });
         }
 
-        if ($request->filled('date_start')) {
-            $query->whereDate('created_at', '>=', $request->date_start);
-        }
+        $hasDateStart = $request->filled('date_start');
+        $hasDateEnd = $request->filled('date_end');
 
-        if ($request->filled('date_end')) {
-            $query->whereDate('created_at', '<=', $request->date_end);
+        if ($hasDateStart || $hasDateEnd) {
+            if (!$hasDateStart || !$hasDateEnd) {
+                return redirect()->back()->withInput()->with('error', 'กรุณาระบุทั้งวันที่เริ่มและวันที่สิ้นสุด');
+            }
+            if ($request->date_end < $request->date_start) {
+                return redirect()->back()->withInput()->with('error', 'วันที่สิ้นสุดต้องไม่น้อยกว่าวันที่เริ่มต้น');
+            }
+
+            $query->whereDate('created_at', '>=', $request->date_start)
+                  ->whereDate('created_at', '<=', $request->date_end);
         }
 
         $logs = $query->orderBy('id', 'desc')->paginate(20)->withQueryString();

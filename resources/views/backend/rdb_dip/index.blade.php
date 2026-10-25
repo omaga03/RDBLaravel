@@ -52,11 +52,11 @@
             
             <div class="col-md-3">
                 <label class="form-label">วันที่ยื่นคำขอ (เริ่ม)</label>
-                <input type="text" class="form-control datepicker" name="start_date" value="{{ request('start_date') }}" placeholder="วว/ดด/ปปปป" autocomplete="off">
+                <input type="text" class="form-control datepicker" name="date_start" value="{{ request('date_start') }}" placeholder="วว/ดด/ปปปป" autocomplete="off">
             </div>
             <div class="col-md-3">
                 <label class="form-label">วันที่ยื่นคำขอ (สิ้นสุด)</label>
-                <input type="text" class="form-control datepicker" name="end_date" value="{{ request('end_date') }}" placeholder="วว/ดด/ปปปป" autocomplete="off">
+                <input type="text" class="form-control datepicker" name="date_end" value="{{ request('date_end') }}" placeholder="วว/ดด/ปปปป" autocomplete="off">
             </div>
 
             <div class="col-md-4">
@@ -294,7 +294,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!query.length || query.length < 2) return callback();
             fetch('{{ route("backend.rdb_project.search_researchers") }}?q=' + encodeURIComponent(query))
                 .then(response => response.json())
-                .then(json => callback(json))
+                .then(json => callback(json.results || json))
                 .catch(() => callback());
         },
         render: {
@@ -317,7 +317,7 @@ document.addEventListener('DOMContentLoaded', function() {
         load: function(query, callback) {
             fetch('{{ route("backend.rdb_dip.search_years") }}')
                 .then(response => response.json())
-                .then(json => callback(json))
+                .then(json => callback(json.results || json))
                 .catch(() => callback());
         },
         render: {
@@ -332,18 +332,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Datepickers
     if (typeof initThaiFlatpickr === 'function') {
-        const startDatePicker = initThaiFlatpickr("input[name='start_date']", {
+        const startDatePicker = initThaiFlatpickr("input[name='date_start']", {
             onChange: function(selectedDates, dateStr, instance) {
-                const endDateInput = document.querySelector("input[name='end_date']");
+                const endDateInput = document.querySelector("input[name='date_end']");
                 if (endDateInput && endDateInput._flatpickr) {
                     endDateInput._flatpickr.set('minDate', dateStr);
                 }
             }
         });
 
-        const endDatePicker = initThaiFlatpickr("input[name='end_date']", {
+        const endDatePicker = initThaiFlatpickr("input[name='date_end']", {
             onReady: function(selectedDates, dateStr, instance) {
-                const startDateInput = document.querySelector("input[name='start_date']");
+                const startDateInput = document.querySelector("input[name='date_start']");
                 if (startDateInput && startDateInput._flatpickr && startDateInput._flatpickr.selectedDates.length > 0) {
                      instance.set('minDate', startDateInput._flatpickr.selectedDates[0]);
                 }

@@ -9,10 +9,20 @@ use App\Http\Requests\Backend\{StoreRdbStrategicRequest, UpdateRdbStrategicReque
 
 class RdbstrategicController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', RdbStrategic::class);
-        $items = RdbStrategic::with(['year', 'creator', 'updater'])->paginate(10);
+        $query = RdbStrategic::with(['year', 'creator', 'updater']);
+
+        $search = $request->input('search', $request->input('q'));
+        if ($search !== null && $search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('strategic_nameTH', 'like', "%{$search}%")
+                  ->orWhere('strategic_nameEN', 'like', "%{$search}%");
+            });
+        }
+
+        $items = $query->paginate(10)->withQueryString();
         return view('backend.rdbstrategic.index', compact('items'));
     }
 

@@ -14,6 +14,15 @@ class UpdateProjectUtilizeRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('utz_date') && $this->utz_date !== null && $this->utz_date !== '') {
+            $this->merge([
+                'utz_date' => \App\Helpers\ThaiDateHelper::toIsoDate($this->utz_date),
+            ]);
+        }
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *

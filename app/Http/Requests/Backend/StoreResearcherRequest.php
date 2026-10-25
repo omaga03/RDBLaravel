@@ -14,6 +14,15 @@ class StoreResearcherRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('researcher_birthdate') && $this->researcher_birthdate !== null && $this->researcher_birthdate !== '') {
+            $this->merge([
+                'researcher_birthdate' => \App\Helpers\ThaiDateHelper::toIsoDate($this->researcher_birthdate),
+            ]);
+        }
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *

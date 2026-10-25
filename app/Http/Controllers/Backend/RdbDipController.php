@@ -61,6 +61,39 @@ class RdbDipController extends Controller
             }
         }
 
+        // Simple Search
+        if ($request->filled('search') || $request->filled('q')) {
+            $searchTerm = trim($request->search ?? $request->q);
+            $searchWords = array_values(array_filter(preg_split('/[\s\/,]+/', $searchTerm)));
+
+            $query->where(function($q) use ($searchTerm, $searchWords) {
+                $q->where('dip_request_number', 'like', "%{$searchTerm}%")
+                  ->orWhere('dip_number', 'like', "%{$searchTerm}%")
+                  ->orWhere('dip_patent_number', 'like', "%{$searchTerm}%")
+                  ->orWhere('dip_data2_name', 'like', "%{$searchTerm}%")
+                  ->orWhere('dip_publication_no', 'like', "%{$searchTerm}%");
+
+                foreach ($searchWords as $word) {
+                    $q->orWhere('dip_data2_name', 'like', "%{$word}%");
+                }
+
+                $q->orWhereHas('project', function($pq) use ($searchTerm) {
+                    $pq->where('pro_nameTH', 'like', "%{$searchTerm}%")
+                       ->orWhere('pro_nameEN', 'like', "%{$searchTerm}%")
+                       ->orWhere('pro_code', 'like', "%{$searchTerm}%");
+                });
+
+                $q->orWhereHas('researcher', function($rq) use ($searchWords) {
+                    foreach ($searchWords as $word) {
+                        $rq->where(function($wq) use ($word) {
+                            $wq->where('researcher_fname', 'like', "%{$word}%")
+                               ->orWhere('researcher_lname', 'like', "%{$word}%");
+                        });
+                    }
+                });
+            });
+        }
+
         // Filter: Dip ID / Autocomplete
         if ($request->filled('dip_id') && $request->dip_id !== 'pre') {
             $query->where('dip_id', $request->dip_id);
@@ -105,12 +138,14 @@ class RdbDipController extends Controller
             $query->where('researcher_id', $request->researcher_id);
         }
 
-        // Filter: Date Range (dip_request_date)
-        if ($request->filled('start_date')) {
-            $query->whereDate('dip_request_date', '>=', $request->start_date);
+        // Filter: Date Range (dip_request_date) - support both date_start/date_end and legacy start_date/end_date
+        $dateStart = $request->input('date_start') ?: $request->input('start_date');
+        $dateEnd = $request->input('date_end') ?: $request->input('end_date');
+        if (!empty($dateStart)) {
+            $query->whereDate('dip_request_date', '>=', $dateStart);
         }
-        if ($request->filled('end_date')) {
-            $query->whereDate('dip_request_date', '<=', $request->end_date);
+        if (!empty($dateEnd)) {
+            $query->whereDate('dip_request_date', '<=', $dateEnd);
         }
 
         // Filter: Year (via linked project or dip_request_date)
@@ -132,6 +167,21 @@ class RdbDipController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', RdbDip::class);
+
+        $dateStart = $request->input('date_start') ?: $request->input('start_date');
+        $dateEnd = $request->input('date_end') ?: $request->input('end_date');
+        $hasDateStart = !empty($dateStart);
+        $hasDateEnd = !empty($dateEnd);
+
+        if ($hasDateStart || $hasDateEnd) {
+            if (!$hasDateStart || !$hasDateEnd) {
+                return redirect()->back()->withInput()->with('error', 'กรุณาระบุทั้งวันที่เริ่มและวันที่สิ้นสุด');
+            }
+            if ($dateEnd < $dateStart) {
+                return redirect()->back()->withInput()->with('error', 'วันที่สิ้นสุดต้องไม่น้อยกว่าวันที่เริ่มต้น');
+            }
+        }
+
         $query = $this->getFilteredQuery($request);
 
         $items = $query->orderBy('dip_request_date', 'desc')->paginate(20);

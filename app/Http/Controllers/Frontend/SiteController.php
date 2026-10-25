@@ -11,7 +11,7 @@ use App\Models\RdbDepartment;
 use App\Models\RdbProjectStatus;
 use Illuminate\Support\Facades\DB;
 
-use App\Models\ResearchCoferenceinthai;
+use App\Models\ResearchConference;
 use App\Models\ResearchNews;
 
 class SiteController extends Controller
@@ -193,11 +193,39 @@ class SiteController extends Controller
                                     ->limit(5)
                                     ->get();
 
-        // 9. Latest Conference
-        $latestConference = ResearchCoferenceinthai::orderBy('id', 'desc')->limit(5)->get();
+        // 9. Latest Conference (Prioritize items with images, 6 items to fill 6-col grid)
+        $latestConference = ResearchConference::where('data_show', 1)
+            ->where(function($q) {
+                $q->whereNotNull('con_path')->where('con_path', '!=', '');
+            })
+            ->orderBy('id', 'desc')
+            ->limit(6)
+            ->get();
+        if ($latestConference->count() < 6) {
+            $fallbackConfs = ResearchConference::where('data_show', 1)
+                ->whereNotIn('id', $latestConference->pluck('id'))
+                ->orderBy('id', 'desc')
+                ->limit(6 - $latestConference->count())
+                ->get();
+            $latestConference = $latestConference->concat($fallbackConfs);
+        }
 
-        // 10. Latest News
-        $latestNews = ResearchNews::orderBy('id', 'desc')->limit(5)->get();
+        // 10. Latest News (Prioritize items with images, 6 items to fill 6-col grid)
+        $latestNews = ResearchNews::where('data_show', 1)
+            ->where(function($q) {
+                $q->whereNotNull('news_path')->where('news_path', '!=', '');
+            })
+            ->orderBy('id', 'desc')
+            ->limit(6)
+            ->get();
+        if ($latestNews->count() < 6) {
+            $fallbackNews = ResearchNews::where('data_show', 1)
+                ->whereNotIn('id', $latestNews->pluck('id'))
+                ->orderBy('id', 'desc')
+                ->limit(6 - $latestNews->count())
+                ->get();
+            $latestNews = $latestNews->concat($fallbackNews);
+        }
 
         return view('frontend.site.index', compact(
             'max_year', 

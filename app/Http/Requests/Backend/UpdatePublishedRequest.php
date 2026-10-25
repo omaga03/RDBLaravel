@@ -14,6 +14,15 @@ class UpdatePublishedRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('pub_date') && $this->pub_date !== null && $this->pub_date !== '') {
+            $this->merge([
+                'pub_date' => \App\Helpers\ThaiDateHelper::toIsoDate($this->pub_date),
+            ]);
+        }
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *

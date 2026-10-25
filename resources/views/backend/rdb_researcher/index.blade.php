@@ -30,11 +30,15 @@
     {{-- Central Template Search --}}
     <x-search-bar :searchRoute="route('backend.rdb_researcher.index')" :exportRoute="route('backend.rdb_researcher.export')" :collapsed="true">
         <div class="row g-3">
-            <div class="col-md-4">
-                <label class="form-label">คำค้นหา (Keywords)</label>
-                <input type="text" name="q" class="form-control" value="{{ request('q') }}" placeholder="ชื่อ, อีเมล, หมายเหตุ...">
+            <div class="col-md-3">
+                <label class="form-label">คำค้นหาหลัก (Keywords)</label>
+                <input type="text" name="q" class="form-control" value="{{ request('q') }}" placeholder="ชื่อ, อีเมล...">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
+                <label class="form-label">คำค้นอื่น ๆ / หมายเหตุ</label>
+                <input type="text" name="note" class="form-control" value="{{ request('note') }}" placeholder="ระบุคำค้นในหมายเหตุ...">
+            </div>
+            <div class="col-md-3">
                 <label class="form-label">หน่วยงาน (Department)</label>
                 <x-tom-select 
                     name="department_id" 
@@ -43,7 +47,7 @@
                     placeholder="-- ทั้งหมด --"
                 />
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="form-label">สาขาทางวิชาการ</label>
                 <x-tom-select 
                     name="depcat_id" 

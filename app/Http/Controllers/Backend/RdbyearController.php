@@ -9,10 +9,17 @@ use App\Http\Requests\Backend\{StoreRdbyearRequest, UpdateRdbyearRequest};
 
 class RdbyearController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', RdbYear::class);
-        $items = RdbYear::with(['creator', 'updater'])->orderBy('year_name', 'desc')->paginate(10);
+        $query = RdbYear::with(['creator', 'updater']);
+
+        $search = $request->input('search', $request->input('q'));
+        if ($search !== null && $search !== '') {
+            $query->where('year_name', 'like', "%{$search}%");
+        }
+
+        $items = $query->orderBy('year_name', 'desc')->paginate(10)->withQueryString();
         return view('backend.rdbyear.index', compact('items'));
     }
 

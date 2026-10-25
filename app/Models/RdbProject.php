@@ -196,8 +196,11 @@ class RdbProject extends Model
     // Legacy Chart Logic Ported
     public static function getReportProjectChartSplit($dep, $ptid)
     {
-        $impdep = implode(',', $dep);
-        $impptid = implode(',', $ptid);
+        $safeDep = array_map('intval', (array) $dep);
+        $safePtid = array_map('intval', (array) $ptid);
+        $impdep = !empty($safeDep) ? implode(',', $safeDep) : '0';
+        $impptid = !empty($safePtid) ? implode(',', $safePtid) : '0';
+        $cancelledStatus = (int) RdbProjectStatus::STATUS_CANCELLED;
 
         // Replaced view_year with rdb_year
         $sql = "SELECT
@@ -213,9 +216,9 @@ class RdbProject extends Model
             WHERE
             cpro.year_id = rdb_year.year_id
             AND cpro.data_show = 1
-            AND cpro.ps_id <> " . RdbProjectStatus::STATUS_CANCELLED . "  
+            AND cpro.ps_id <> {$cancelledStatus}  
             AND cpro.department_id = rdb_department.department_id
-            AND cpro.pt_id IN ($impptid)
+            AND cpro.pt_id IN ({$impptid})
             ) AS cpro,
             (
             ifnull(
@@ -227,9 +230,9 @@ class RdbProject extends Model
             WHERE
             d.year_id = rdb_year.year_id
             AND d.data_show = 1
-            AND d.ps_id <> " . RdbProjectStatus::STATUS_CANCELLED . " 
+            AND d.ps_id <> {$cancelledStatus} 
             AND d.department_id = rdb_department.department_id
-            AND d.pt_id IN ($impptid)
+            AND d.pt_id IN ({$impptid})
             ),
             0
             )
@@ -238,7 +241,7 @@ class RdbProject extends Model
             rdb_year,
             rdb_department
             WHERE
-            rdb_department.department_id IN ($impdep)
+            rdb_department.department_id IN ({$impdep})
             ORDER BY
             rdb_department.department_nameTH ASC,
             rdb_year.year_name ASC";
@@ -265,17 +268,14 @@ class RdbProject extends Model
      */
     public function getAbstractFilePath(): ?string
     {
-        // ลองใช้ path ใหม่ก่อน
-        if (!empty($this->pro_abstract_file_path)) {
-            return $this->pro_abstract_file_path;
-        }
-
-        // Fallback ใช้ path เก่า
-        if (!empty($this->pro_abstract_file)) {
-            return 'uploads/projects/' . $this->pro_abstract_file;
-        }
-
-        return null;
+        return $this->resolveDualFilePath('pro_abstract_file_path', 'pro_abstract_file', [
+            'uploads/project_files/{pro_id}',
+            'uploads/projects',
+            'abstracts',
+            'projects',
+            'datafiles/{pro_id}',
+            'uploads',
+        ]) ?? (!empty($this->pro_abstract_file) ? 'uploads/projects/' . $this->pro_abstract_file : null);
     }
 
     /**
@@ -283,15 +283,13 @@ class RdbProject extends Model
      */
     public function getReportFilePath(): ?string
     {
-        if (!empty($this->pro_file_path)) {
-            return $this->pro_file_path;
-        }
-
-        if (!empty($this->pro_file)) {
-            return 'uploads/projects/' . $this->pro_file;
-        }
-
-        return null;
+        return $this->resolveDualFilePath('pro_file_path', 'pro_file', [
+            'uploads/project_files/{pro_id}',
+            'uploads/projects',
+            'projects',
+            'datafiles/{pro_id}',
+            'uploads',
+        ]) ?? (!empty($this->pro_file) ? 'uploads/projects/' . $this->pro_file : null);
     }
 
     /**

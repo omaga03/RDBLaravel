@@ -157,6 +157,21 @@ class RdbprojectutilizeController extends Controller
             });
         }
 
+        // Location Filters (ต. อ. จ.)
+        if ($request->filled('chw_id')) {
+            $query->where('chw_id', $request->chw_id);
+        } elseif ($request->filled('changwat')) {
+            $query->whereHas('changwat', function($q) use ($request) {
+                $q->where('changwat_t', 'like', '%' . $request->changwat . '%');
+                if ($request->filled('amphoe')) {
+                    $q->where('amphoe_t', 'like', '%' . $request->amphoe . '%');
+                }
+                if ($request->filled('tambon')) {
+                    $q->where('tambon_t', 'like', '%' . $request->tambon . '%');
+                }
+            });
+        }
+
         // Date range validation
         $hasDateStart = $request->filled('date_start');
         $hasDateEnd = $request->filled('date_end');
@@ -374,5 +389,60 @@ class RdbprojectutilizeController extends Controller
         }
 
         abort(404, 'ไม่พบไฟล์เอกสารบนเซิร์ฟเวอร์');
+    }
+
+    public function searchProvinces()
+    {
+        $provinces = RdbChangwat::select('changwat_t')
+            ->distinct()
+            ->whereNotNull('changwat_t')
+            ->where('changwat_t', '!=', '')
+            ->orderByRaw("CASE WHEN changwat_t = 'จ.เพชรบูรณ์' THEN 0 WHEN changwat_t = 'จ.พิจิตร' THEN 1 ELSE 2 END")
+            ->orderBy('changwat_t')
+            ->pluck('changwat_t')
+            ->map(fn($p) => ['value' => $p, 'text' => preg_replace('/^จ\./', '', $p)]);
+
+        return response()->json($provinces);
+    }
+
+    public function searchAmphoes(Request $request)
+    {
+        $changwat = $request->get('changwat');
+        if (!$changwat) {
+            return response()->json([]);
+        }
+
+        $amphoes = RdbChangwat::select('amphoe_t')
+            ->distinct()
+            ->where('changwat_t', $changwat)
+            ->whereNotNull('amphoe_t')
+            ->where('amphoe_t', '!=', '')
+            ->orderBy('amphoe_t')
+            ->pluck('amphoe_t')
+            ->map(fn($a) => ['value' => $a, 'text' => preg_replace('/^อ\./', '', $a)]);
+
+        return response()->json($amphoes);
+    }
+
+    public function searchTambons(Request $request)
+    {
+        $changwat = $request->get('changwat');
+        $amphoe = $request->get('amphoe');
+        
+        if (!$changwat || !$amphoe) {
+            return response()->json([]);
+        }
+
+        $tambons = RdbChangwat::where('changwat_t', $changwat)
+            ->where('amphoe_t', $amphoe)
+            ->whereNotNull('tambon_t')
+            ->where('tambon_t', '!=', '')
+            ->orderBy('tambon_t')
+            ->select('tambon_t')
+            ->distinct()
+            ->pluck('tambon_t')
+            ->map(fn($t) => ['value' => $t, 'text' => preg_replace('/^ต\./', '', $t)]);
+
+        return response()->json($tambons);
     }
 }

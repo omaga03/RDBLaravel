@@ -9,10 +9,20 @@ use App\Http\Requests\Backend\{StoreRdbProjectPositionRequest, UpdateRdbProjectP
 
 class RdbprojectpositionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', RdbProjectposition::class);
-        $items = RdbProjectposition::with(['creator', 'updater'])->paginate(10);
+        $query = RdbProjectposition::with(['creator', 'updater']);
+
+        $search = $request->input('search', $request->input('q'));
+        if ($search !== null && $search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('position_nameTH', 'like', "%{$search}%")
+                  ->orWhere('position_nameEN', 'like', "%{$search}%");
+            });
+        }
+
+        $items = $query->paginate(10)->withQueryString();
         return view('backend.rdbprojectposition.index', compact('items'));
     }
 
