@@ -665,7 +665,7 @@ class DashboardController extends Controller
                 DB::raw("{$tierSql} as tier_name"),
                 DB::raw('count(*) as count')
             )
-            ->groupBy(DB::raw("{$tierSql}"))
+            ->groupBy('tier_name')
             ->orderByDesc('count')
             ->get();
 

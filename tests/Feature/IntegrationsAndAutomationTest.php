@@ -20,7 +20,8 @@ class IntegrationsAndAutomationTest extends TestCase
         config([
             'database.default' => 'mysql',
             'database.connections.mysql.host' => '127.0.0.1',
-            'database.connections.mysql.database' => 'rdbv2',
+            'database.connections.mysql.database' => 'rdbpcru',
+            'database.connections.mysql.password' => '',
         ]);
         \Illuminate\Support\Facades\DB::purge('mysql');
     }

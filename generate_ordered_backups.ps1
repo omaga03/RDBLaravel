@@ -1,6 +1,6 @@
 param(
     [string]$dateStr = (Get-Date -Format "yyyy_MM_dd"),
-    [string]$dbName = "rdbv2",
+    [string]$dbName = "rdbpcru",
     [string]$backupDir = "backups"
 )
 

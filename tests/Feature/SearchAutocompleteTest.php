@@ -11,7 +11,8 @@ class SearchAutocompleteTest extends TestCase
         parent::setUp();
         config([
             'database.default' => 'mysql',
-            'database.connections.mysql.database' => 'rdbv2',
+            'database.connections.mysql.database' => 'rdbpcru',
+            'database.connections.mysql.password' => '',
         ]);
         \Illuminate\Support\Facades\DB::purge('mysql');
     }
@@ -25,17 +26,19 @@ class SearchAutocompleteTest extends TestCase
         // 2. Search by researcher name
         $responseRes = $this->getJson(route('frontend.rdbproject.search_projects', ['q' => 'การันต์']));
         $responseRes->assertStatus(200);
-        $this->assertNotEmpty($responseRes->json());
-        $firstItemText = $responseRes->json()[0]['text'];
+        $resData = $responseRes->json()['results'] ?? $responseRes->json();
+        $this->assertNotEmpty($resData);
+        $firstItemText = $resData[0]['text'];
         $this->assertStringContainsString('การันต์', $firstItemText);
         $this->assertMatchesRegularExpression('/^\[\d{4}\]/', $firstItemText);
 
         // 3. Search by grant/type name
         $responseType = $this->getJson(route('frontend.rdbproject.search_projects', ['q' => 'งบประมาณ']));
         $responseType->assertStatus(200);
-        $this->assertNotEmpty($responseType->json());
-        $this->assertStringContainsString('ทุน:', $responseType->json()[0]['text']);
-        $this->assertMatchesRegularExpression('/^\[\d{4}\]/', $responseType->json()[0]['text']);
+        $typeData = $responseType->json()['results'] ?? $responseType->json();
+        $this->assertNotEmpty($typeData);
+        $this->assertStringContainsString('ทุน:', $typeData[0]['text']);
+        $this->assertMatchesRegularExpression('/^\[\d{4}\]/', $typeData[0]['text']);
 
         // Test title keywords with AND mode
         $indexResponse = $this->get(route('frontend.rdbproject.index', [

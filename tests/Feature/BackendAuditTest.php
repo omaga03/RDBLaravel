@@ -14,7 +14,8 @@ class BackendAuditTest extends TestCase
         parent::setUp();
         config([
             'database.default' => 'mysql',
-            'database.connections.mysql.database' => 'rdbv2',
+            'database.connections.mysql.database' => 'rdbpcru',
+            'database.connections.mysql.password' => '',
         ]);
         \Illuminate\Support\Facades\DB::purge('mysql');
     }
