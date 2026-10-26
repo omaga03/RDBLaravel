@@ -66,9 +66,12 @@ $baseTables = Get-Content "base_tables.txt"
 $objectListStr = $sortedObjects -join " "
 Write-Host "   Total sorted objects: $($sortedObjects.Count) (Base tables: $($baseTables.Count))" -ForegroundColor Green
 
+$dumpVer = cmd /c "mysqldump --version 2>&1"
+$gtidFlag = if ($dumpVer -match "MariaDB") { "" } else { "--set-gtid-purged=OFF" }
+
 Write-Host "`n3. Generating Clean Structure Backup ($structBackupFile)..." -ForegroundColor Yellow
 # Dump structure in topological order with utf8mb4
-cmd /c "mysqldump -u root --default-character-set=utf8mb4 --routines --triggers --set-gtid-purged=OFF --no-data $dbName $objectListStr > ""$structBackupFile"""
+cmd /c "mysqldump -u root --default-character-set=utf8mb4 --routines --triggers $gtidFlag --no-data $dbName $objectListStr > ""$structBackupFile"""
 # Clean DEFINER clauses for universal portability
 python "$cleanDefinersScript" "$structBackupFile"
 Write-Host "   Structure backup generated and definers cleaned." -ForegroundColor Green
@@ -77,7 +80,7 @@ Write-Host "`n4. Generating Monolithic Full Backup ($fullBackupFile)..." -Foregr
 # Prepend SET FOREIGN_KEY_CHECKS=0
 "SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;`r`nSET NAMES utf8mb4;`r`n" | Out-File -Encoding UTF8 "$fullBackupFile"
 # Dump all objects with data
-cmd /c "mysqldump -u root --default-character-set=utf8mb4 --single-transaction --quick --hex-blob --routines --triggers --set-gtid-purged=OFF $dbName $objectListStr >> ""$fullBackupFile"""
+cmd /c "mysqldump -u root --default-character-set=utf8mb4 --single-transaction --quick --hex-blob --routines --triggers $gtidFlag $dbName $objectListStr >> ""$fullBackupFile"""
 # Append SET FOREIGN_KEY_CHECKS=1
 "`r`nSET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;`r`n" | Out-File -Append -Encoding UTF8 "$fullBackupFile"
 # Clean DEFINER clauses

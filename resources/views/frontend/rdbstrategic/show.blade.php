@@ -25,7 +25,6 @@
 </div>
             <div class="mt-3">
                 <a href="{{ route('frontend.rdbstrategic.index') }}" class="btn btn-secondary">กลับ</a>
-                <a href="{{ route('frontend.rdbstrategic.edit', $item->strategic_id) }}" class="btn btn-warning">แก้ไข</a>
             </div>
         </div>
     </div>

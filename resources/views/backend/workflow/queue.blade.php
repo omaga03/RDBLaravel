@@ -261,7 +261,7 @@
                                         {{ $utz->submitted_at ? \Carbon\Carbon::parse($utz->submitted_at)->format('d/m/Y H:i') : '-' }}
                                     </td>
                                     <td>
-                                        <a href="{{ route('backend.rdb_projectutilize.show', $utz->utz_id) }}" class="fw-bold text-body text-decoration-none hover-primary">
+                                        <a href="{{ route('backend.rdbprojectutilize.show', $utz->utz_id) }}" class="fw-bold text-body text-decoration-none hover-primary">
                                             {{ $utz->project?->pro_nameTH ?? 'การใช้ประโยชน์ #' . $utz->utz_id }}
                                         </a>
                                     </td>
@@ -269,7 +269,7 @@
                                     <td>{{ $utz->utz_department_name ?? '-' }}</td>
                                     <td class="text-end pe-3">
                                         <div class="d-inline-flex gap-1.5">
-                                            <a href="{{ route('backend.rdb_projectutilize.show', $utz->utz_id) }}" class="btn btn-sm btn-outline-secondary" title="ดูรายละเอียด">
+                                            <a href="{{ route('backend.rdbprojectutilize.show', $utz->utz_id) }}" class="btn btn-sm btn-outline-secondary" title="ดูรายละเอียด">
                                                 <i class="bi bi-eye"></i>
                                             </a>
                                             <form action="{{ route('backend.workflow.approve', ['type' => 'utilize', 'id' => $utz->utz_id]) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันการอนุมัติการนำไปใช้ประโยชน์นี้?');">

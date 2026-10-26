@@ -4,9 +4,6 @@
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2><i class="bi bi-diagram-3"></i> ชนิดหน่วยงาน (Department Types)</h2>
-        <a href="{{ route('frontend.rdbdepartmenttype.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> เพิ่มชนิด
-        </a>
     </div>
 
     @if(session('success'))
@@ -45,16 +42,6 @@
                                 <a href="{{ route('frontend.rdbdepartmenttype.show', $item->tdepartment_id) }}" class="btn btn-info" title="ดู">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                <a href="{{ route('frontend.rdbdepartmenttype.edit', $item->tdepartment_id) }}" class="btn btn-warning" title="แก้ไข">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <form action="{{ route('frontend.rdbdepartmenttype.destroy', $item->tdepartment_id) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันการลบ?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm" title="ลบ">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
                             </div>
                         </td>
                     </tr>

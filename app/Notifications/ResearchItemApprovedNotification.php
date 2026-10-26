@@ -29,11 +29,17 @@ class ResearchItemApprovedNotification extends Notification
             default => 'ผลงานวิชาการ',
         };
 
+        // Map workflow type → public route (utilize module is named "rdbprojectutilize")
+        $routeName = match ($this->type) {
+            'utilize' => 'frontend.rdbprojectutilize.show',
+            default => 'frontend.rdb' . $this->type . '.show',
+        };
+
         return [
             'type' => 'approved',
             'title' => '🎉 ผลงานของท่านได้รับการอนุมัติแล้ว',
             'message' => "รายการ '{$titleName}' ได้รับการตรวจสอบและเผยแพร่สู่สาธารณะเรียบร้อยแล้ว",
-            'url' => route('frontend.rdb' . $this->type . '.show', $this->item->getKey()),
+            'url' => \Illuminate\Support\Facades\Route::has($routeName) ? route($routeName, $this->item->getKey()) : null,
             'item_id' => $this->item->getKey(),
             'model_type' => $this->type,
         ];

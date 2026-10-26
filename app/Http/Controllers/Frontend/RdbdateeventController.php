@@ -11,9 +11,7 @@ class RdbdateeventController extends Controller
 {
     public function index(Request $request)
     {
-        $query = RdbDateevent::with('event
-
-Type');
+        $query = RdbDateevent::with('eventType');
 
         if ($request->filled('search')) {
             $search = $request->search;

@@ -30,11 +30,17 @@ class ResearchItemRejectedNotification extends Notification
             default => 'ผลงานวิชาการ',
         };
 
+        // Map workflow type → backend edit route (utilize module is named "rdbprojectutilize")
+        $routeName = match ($this->type) {
+            'utilize' => 'backend.rdbprojectutilize.edit',
+            default => 'backend.rdb_' . $this->type . '.edit',
+        };
+
         return [
             'type' => 'rejected',
             'title' => '⚠️ ผลงานถูกส่งกลับแก้ไข (Revision Required)',
             'message' => "รายการ '{$titleName}' ถูกส่งกลับแก้ไข เหตุผล: {$this->remarks}",
-            'url' => route('backend.rdb_' . $this->type . '.edit', $this->item->getKey()),
+            'url' => \Illuminate\Support\Facades\Route::has($routeName) ? route($routeName, $this->item->getKey()) : null,
             'item_id' => $this->item->getKey(),
             'model_type' => $this->type,
             'remarks' => $this->remarks,

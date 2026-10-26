@@ -4,9 +4,6 @@
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2><i class="bi bi-list-stars"></i> แผนยุทธศาสตร์ (Strategic Plans)</h2>
-        <a href="{{ route('frontend.rdbstrategic.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> เพิ่มแผนฯ
-        </a>
     </div>
 
     <div class="card shadow-sm mb-4">
@@ -49,16 +46,6 @@
                                 <a href="{{ route('frontend.rdbstrategic.show', $item->strategic_id) }}" class="btn btn-info" title="ดู">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                <a href="{{ route('frontend.rdbstrategic.edit', $item->strategic_id) }}" class="btn btn-warning" title="แก้ไข">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <form action="{{ route('frontend.rdbstrategic.destroy', $item->strategic_id) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันการลบ?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger" title="ลบ">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
                             </div>
                         </td>
                     </tr>

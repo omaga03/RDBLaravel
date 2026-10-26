@@ -25,7 +25,6 @@
 </div>
             <div class="mt-3">
                 <a href="{{ route('frontend.rdbprefix.index') }}" class="btn btn-secondary">กลับ</a>
-                <a href="{{ route('frontend.rdbprefix.edit', $item->prefix_id) }}" class="btn btn-warning">แก้ไข</a>
             </div>
         </div>
     </div>

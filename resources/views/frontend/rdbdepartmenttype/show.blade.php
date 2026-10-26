@@ -25,7 +25,6 @@
 </div>
             <div class="mt-3">
                 <a href="{{ route('frontend.rdbdepartmenttype.index') }}" class="btn btn-secondary">กลับ</a>
-                <a href="{{ route('frontend.rdbdepartmenttype.edit', $item->tdepartment_id) }}" class="btn btn-warning">แก้ไข</a>
             </div>
         </div>
     </div>

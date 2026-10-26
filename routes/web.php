@@ -249,9 +249,8 @@ Route::prefix('backend')->name('backend.')->middleware(['auth', \App\Http\Middle
     Route::get('/rdb_project/search/project-type', [RdbProjectController::class, 'searchProjectType'])->name('rdb_project.search_project_type');
     Route::get('/rdb_project/search/project-type-sub', [RdbProjectController::class, 'searchProjectTypeSub'])->name('rdb_project.search_project_type_sub');
     Route::get('/rdb_project/search/pro-group', [RdbProjectController::class, 'searchProGroup'])->name('rdb_project.search_pro_group');
-    Route::get('/rdb_project/search/researcher', [RdbProjectController::class, 'searchResearcher'])->name('rdb_project.search_researcher');
-    Route::get('/rdb_project/search/depcou', [RdbProjectController::class, 'searchDepcou'])->name('rdb_project.search_depcou');
-    Route::get('/rdb_project/search/major', [RdbProjectController::class, 'searchMajor'])->name('rdb_project.search_major');
+    Route::get('/rdb_project/search/researcher', [RdbProjectController::class, 'searchResearchers'])->name('rdb_project.search_researcher');
+    // Removed dead routes rdb_project.search_depcou / rdb_project.search_major (controller methods never existed → HTTP 500)
 
 });
 

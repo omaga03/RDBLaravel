@@ -487,8 +487,8 @@ class RdbProjectUtilizeController extends Controller
     public function searchLocation(Request $request)
     {
         $this->authorize('viewAny', RdbProjectUtilize::class);
-        $q = $request->get('q');
-        if (strlen($q) < 2) {
+        $q = (string) $request->get('q', '');
+        if (mb_strlen($q) < 2) {
             return response()->json([]);
         }
 
