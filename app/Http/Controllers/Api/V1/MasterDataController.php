@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\RdbDepartment;
+use App\Models\RdbDipType;
 use App\Models\RdbProjectType;
+use App\Models\RdbProjectUtilizeType;
 use App\Models\RdbYear;
 use Illuminate\Http\JsonResponse;
 
@@ -74,6 +76,41 @@ class MasterDataController extends Controller
                             'name' => (string) $st->pts_name,
                         ];
                     }),
+                ];
+            }),
+        ]);
+    }
+
+    /**
+     * Get list of research utilization types.
+     */
+    public function utilizeTypes(): JsonResponse
+    {
+        $types = RdbProjectUtilizeType::orderBy('utz_type_index')->get();
+
+        return response()->json([
+            'data' => $types->map(function ($t) {
+                return [
+                    'id' => (string) $t->utz_type_id,
+                    'name' => (string) $t->utz_typr_name,
+                    'index' => (int) $t->utz_type_index,
+                ];
+            }),
+        ]);
+    }
+
+    /**
+     * Get list of intellectual property types (DIP Types).
+     */
+    public function dipTypes(): JsonResponse
+    {
+        $types = RdbDipType::orderBy('dipt_id')->get();
+
+        return response()->json([
+            'data' => $types->map(function ($t) {
+                return [
+                    'id' => (string) $t->dipt_id,
+                    'name' => (string) $t->dipt_name,
                 ];
             }),
         ]);

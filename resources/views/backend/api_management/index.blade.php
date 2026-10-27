@@ -633,7 +633,17 @@ curl -X GET "http://laravel_rdb.test/api/v1/projects?dep=2&year=2567" \
      -H "Accept: application/json" \
      -H "Authorization: Bearer YOUR_BEARER_TOKEN"
 
-# 3. เพิกถอน Token ของตนเองเมื่อเลิกใช้งาน (Self Token Deletion)
+# 3. เรียกดูข้อมูลงานนำไปใช้ประโยชน์ (Research Utilizations)
+curl -X GET "http://laravel_rdb.test/api/v1/utilizations?dep=2" \
+     -H "Accept: application/json" \
+     -H "Authorization: Bearer YOUR_BEARER_TOKEN"
+
+# 4. เรียกดูข้อมูลงานทรัพย์สินทางปัญญา (Intellectual Properties / DIP)
+curl -X GET "http://laravel_rdb.test/api/v1/intellectual-properties?dipt_id=2" \
+     -H "Accept: application/json" \
+     -H "Authorization: Bearer YOUR_BEARER_TOKEN"
+
+# 5. เพิกถอน Token ของตนเองเมื่อเลิกใช้งาน (Self Token Deletion)
 curl -X POST "http://laravel_rdb.test/api/v1/auth/logout" \
      -H "Accept: application/json" \
      -H "Authorization: Bearer YOUR_BEARER_TOKEN"</code></pre>
@@ -811,6 +821,22 @@ else:
                                         <input class="form-check-input ability-item" type="checkbox" name="abilities[]" value="publication:read" id="abPubRead" checked>
                                         <label class="form-check-label small" for="abPubRead">
                                             <code>publication:read</code> ดึงข้อมูลผลงานตีพิมพ์ (GET)
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input ability-item" type="checkbox" name="abilities[]" value="utilize:read" id="abUtzRead" checked>
+                                        <label class="form-check-label small" for="abUtzRead">
+                                            <code>utilize:read</code> ดึงข้อมูลการนำไปใช้ประโยชน์ (GET)
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input ability-item" type="checkbox" name="abilities[]" value="ip:read" id="abIpRead" checked>
+                                        <label class="form-check-label small" for="abIpRead">
+                                            <code>ip:read</code> ดึงข้อมูลทรัพย์สินทางปัญญา (GET)
                                         </label>
                                     </div>
                                 </div>

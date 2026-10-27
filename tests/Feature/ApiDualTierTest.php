@@ -119,6 +119,14 @@ class ApiDualTierTest extends TestCase
         $this->getJson('/api/v1/master/project-types')
             ->assertStatus(200)
             ->assertJsonStructure(['data' => [['id', 'name', 'sub_types']]]);
+
+        $this->getJson('/api/v1/master/utilize-types')
+            ->assertStatus(200)
+            ->assertJsonStructure(['data' => [['id', 'name', 'index']]]);
+
+        $this->getJson('/api/v1/master/dip-types')
+            ->assertStatus(200)
+            ->assertJsonStructure(['data' => [['id', 'name']]]);
     }
 
     public function test_v1_projects_index_and_show(): void
@@ -214,6 +222,99 @@ class ApiDualTierTest extends TestCase
                 'projects',
                 'publications'
             ]);
+    }
+
+    public function test_v1_utilizations_endpoints(): void
+    {
+        // 1. Unauthenticated request must return 401 Unauthorized
+        $this->getJson('/api/v1/utilizations')->assertStatus(401);
+
+        // 2. Authenticated with Sanctum Bearer Token
+        $admin = User::find(129);
+        Sanctum::actingAs($admin, ['*']);
+
+        $response = $this->getJson('/api/v1/utilizations?dep=2');
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'project_id',
+                        'project',
+                        'fiscal_year',
+                        'utilize_date',
+                        'target_organization',
+                        'target_address',
+                        'location',
+                        'utilize_types',
+                        'detail',
+                        'budget',
+                        'workflow_status',
+                    ]
+                ],
+                'links',
+                'meta'
+            ]);
+
+        // 3. Test alias endpoint /api/v1/project-utilizations
+        $this->getJson('/api/v1/project-utilizations')
+            ->assertStatus(200);
+
+        // 4. Test Single Item Show
+        $firstId = $response->json('data.0.id');
+        if ($firstId) {
+            $this->getJson("/api/v1/utilizations/{$firstId}")
+                ->assertStatus(200)
+                ->assertJsonPath('data.id', (string) $firstId);
+
+            $this->getJson("/api/v1/project-utilizations/{$firstId}")
+                ->assertStatus(200)
+                ->assertJsonPath('data.id', (string) $firstId);
+        }
+    }
+
+    public function test_v1_intellectual_properties_endpoints(): void
+    {
+        // 1. Unauthenticated request must return 401 Unauthorized
+        $this->getJson('/api/v1/intellectual-properties')->assertStatus(401);
+
+        // 2. Authenticated with Sanctum Bearer Token
+        $admin = User::find(129);
+        Sanctum::actingAs($admin, ['*']);
+
+        $response = $this->getJson('/api/v1/intellectual-properties');
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'ip_title',
+                        'ip_type' => ['id', 'name'],
+                        'registration_number',
+                        'status',
+                        'conclusion',
+                        'workflow_status',
+                    ]
+                ],
+                'links',
+                'meta'
+            ]);
+
+        // 3. Test alias endpoint /api/v1/dips
+        $this->getJson('/api/v1/dips')
+            ->assertStatus(200);
+
+        // 4. Test Single Item Show
+        $firstId = $response->json('data.0.id');
+        if ($firstId) {
+            $this->getJson("/api/v1/intellectual-properties/{$firstId}")
+                ->assertStatus(200)
+                ->assertJsonPath('data.id', (string) $firstId);
+
+            $this->getJson("/api/v1/dips/{$firstId}")
+                ->assertStatus(200)
+                ->assertJsonPath('data.id', (string) $firstId);
+        }
     }
 
     public function test_v1_auth_me_and_read_only_enforcement(): void

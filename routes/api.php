@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\DipController;
 use App\Http\Controllers\Api\V1\MasterDataController;
 use App\Http\Controllers\Api\V1\ProjectController;
+use App\Http\Controllers\Api\V1\ProjectUtilizeController;
 use App\Http\Controllers\Api\V1\PublicationController;
 use App\Http\Controllers\Api\V1\ResearcherController;
 use App\Http\Controllers\Frontend\RdbresearcherController;
@@ -54,6 +56,8 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
         Route::get('master/departments', [MasterDataController::class, 'departments'])->name('api.v1.master.departments');
         Route::get('master/years', [MasterDataController::class, 'years'])->name('api.v1.master.years');
         Route::get('master/project-types', [MasterDataController::class, 'projectTypes'])->name('api.v1.master.projectTypes');
+        Route::get('master/utilize-types', [MasterDataController::class, 'utilizeTypes'])->name('api.v1.master.utilizeTypes');
+        Route::get('master/dip-types', [MasterDataController::class, 'dipTypes'])->name('api.v1.master.dipTypes');
 
         // Resources (Read)
         Route::get('projects', [ProjectController::class, 'index'])->name('api.v1.projects.index');
@@ -61,6 +65,18 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
 
         Route::get('publications', [PublicationController::class, 'index'])->name('api.v1.publications.index');
         Route::get('publications/{id}', [PublicationController::class, 'show'])->name('api.v1.publications.show');
+
+        // Research Utilization (งานนำไปใช้ประโยชน์)
+        Route::get('utilizations', [ProjectUtilizeController::class, 'index'])->name('api.v1.utilizations.index');
+        Route::get('utilizations/{id}', [ProjectUtilizeController::class, 'show'])->name('api.v1.utilizations.show');
+        Route::get('project-utilizations', [ProjectUtilizeController::class, 'index'])->name('api.v1.project_utilizations.index');
+        Route::get('project-utilizations/{id}', [ProjectUtilizeController::class, 'show'])->name('api.v1.project_utilizations.show');
+
+        // Intellectual Property (งานทรัพย์สินทางปัญญา - DIP)
+        Route::get('intellectual-properties', [DipController::class, 'index'])->name('api.v1.intellectual_properties.index');
+        Route::get('intellectual-properties/{id}', [DipController::class, 'show'])->name('api.v1.intellectual_properties.show');
+        Route::get('dips', [DipController::class, 'index'])->name('api.v1.dips.index');
+        Route::get('dips/{id}', [DipController::class, 'show'])->name('api.v1.dips.show');
 
         Route::get('researchers/{id}', [ResearcherController::class, 'show'])->name('api.v1.researchers.show');
         Route::get('researchers/{pmis}/portfolio', [ResearcherController::class, 'portfolio'])->name('api.v1.researchers.portfolio');
