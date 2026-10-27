@@ -524,12 +524,15 @@
                         <div class="card-body p-4">
                             <form id="liveTesterForm" class="no-loading" onsubmit="event.preventDefault(); executeTestCall();">
                                 <div class="mb-3">
-                                    <label class="form-label small fw-bold">HTTP Method &amp; Endpoint Path:</label>
+                                    <label class="form-label small fw-bold d-flex justify-content-between align-items-center">
+                                        <span>HTTP Method &amp; Endpoint Path:</span>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle small">
+                                            <i class="bi bi-shield-check me-1"></i>Read-Only (GET เท่านั้น)
+                                        </span>
+                                    </label>
                                     <div class="input-group">
-                                        <select id="testerMethod" class="form-select font-monospace fw-bold" style="max-width: 110px;">
-                                            <option value="GET">GET</option>
-                                            <option value="POST">POST</option>
-                                        </select>
+                                        <span class="input-group-text font-monospace fw-bold bg-success text-white px-3">GET</span>
+                                        <input type="hidden" id="testerMethod" value="GET">
                                         <input type="text" id="testerPath" class="form-control font-monospace" placeholder="/rdbproject/jsonprojectall?dep=2" value="/rdbproject/jsonprojectall?dep=2" required>
                                     </div>
                                 </div>
@@ -781,15 +784,7 @@ else:
                                     <div class="form-check">
                                         <input class="form-check-input ability-item" type="checkbox" name="abilities[]" value="project:read" id="abProjRead" checked>
                                         <label class="form-check-label small" for="abProjRead">
-                                            <code>project:read</code> ดูข้อมูลโครงการวิจัย
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-check">
-                                        <input class="form-check-input ability-item" type="checkbox" name="abilities[]" value="project:write" id="abProjWrite" checked>
-                                        <label class="form-check-label small" for="abProjWrite">
-                                            <code>project:write</code> สร้างและแก้ไขโครงการวิจัย
+                                            <code>project:read</code> ดึงข้อมูลโครงการวิจัย (GET)
                                         </label>
                                     </div>
                                 </div>
@@ -797,28 +792,13 @@ else:
                                     <div class="form-check">
                                         <input class="form-check-input ability-item" type="checkbox" name="abilities[]" value="publication:read" id="abPubRead" checked>
                                         <label class="form-check-label small" for="abPubRead">
-                                            <code>publication:read</code> ดูข้อมูลผลงานตีพิมพ์
+                                            <code>publication:read</code> ดึงข้อมูลผลงานตีพิมพ์ (GET)
                                         </label>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-check">
-                                        <input class="form-check-input ability-item" type="checkbox" name="abilities[]" value="publication:write" id="abPubWrite">
-                                        <label class="form-check-label small" for="abPubWrite">
-                                            <code>publication:write</code> สร้างและแก้ไขผลงานตีพิมพ์
-                                        </label>
-                                    </div>
-                                </div>
-                                @if($isSuperAdmin)
-                                <div class="col-md-6">
-                                    <div class="form-check">
-                                        <input class="form-check-input ability-item" type="checkbox" name="abilities[]" value="rdb:admin" id="abRdbAdmin">
-                                        <label class="form-check-label small text-danger" for="abRdbAdmin">
-                                            <code>rdb:admin</code> สิทธิ์ผู้ดูแลระบบ API (ลบโครงการวิจัย)
-                                        </label>
-                                    </div>
-                                </div>
-                                @endif
+                            </div>
+                            <div class="mt-2.5 p-2 bg-success-subtle border border-success-subtle rounded small text-success">
+                                <i class="bi bi-shield-check me-1"></i> <strong>นโยบายความปลอดภัยระบบ:</strong> บริการ API เปิดให้เรียกดูข้อมูลวิจัย (GET) เท่านั้น เพื่อความปลอดภัยของข้อมูลวิจัยและป้องกันการดัดแปลงข้อมูล
                             </div>
                         </div>
                     </div>

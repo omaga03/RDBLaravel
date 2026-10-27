@@ -10,7 +10,7 @@ class EnsureSuperAdminForNonSafeApiMethods
 {
     /**
      * Handle an incoming request.
-     * Enforces read-only (GET/HEAD) access for all API users except Super Admin (The Creator / ID 129).
+     * Enforces strictly read-only (GET/HEAD) access across all data endpoints in the API system.
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
@@ -26,17 +26,11 @@ class EnsureSuperAdminForNonSafeApiMethods
             return $next($request);
         }
 
-        $user = $request->user();
-
-        // 3. Any mutating actions (POST, PUT, PATCH, DELETE) require Super Admin status
-        if (!$user || !$user->isSuperAdmin()) {
-            return response()->json([
-                'message' => 'เฉพาะผู้ดูแลระบบระดับสูงสุด (The Creator) เท่านั้นที่มีสิทธิ์ส่งคำขอเพิ่มหรือแก้ไขข้อมูลผ่าน API (ผู้ใช้อื่นได้รับสิทธิ์เฉพาะคำขอแบบ GET เท่านั้น)',
-                'error' => 'MethodNotAllowedForRole',
-                'allowed_methods' => ['GET'],
-            ], 403);
-        }
-
-        return $next($request);
+        // 3. Mutating actions (POST, PUT, PATCH, DELETE) are strictly disallowed across the entire API system
+        return response()->json([
+            'message' => 'ระบบบริการ API ของสถาบันวิจัยฯ ให้บริการสำหรับเรียกดูข้อมูล (GET) เท่านั้น ไม่อนุญาตให้ส่งคำขอประเภท POST, PUT หรือ DELETE',
+            'error' => 'MethodNotAllowed',
+            'allowed_methods' => ['GET'],
+        ], 405);
     }
 }

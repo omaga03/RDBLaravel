@@ -194,12 +194,12 @@ class ApiManagementController extends Controller
     {
         $request->validate([
             'path' => ['required', 'string'],
-            'method' => ['required', 'in:GET,POST,PUT,DELETE'],
+            'method' => ['nullable', 'string'],
             'bearer_token' => ['nullable', 'string'],
         ]);
 
         $path = '/' . ltrim($request->input('path'), '/');
-        $method = strtoupper($request->input('method'));
+        $method = 'GET';
         $bearerToken = trim((string) $request->input('bearer_token'));
 
         $startTime = microtime(true);
@@ -426,24 +426,6 @@ class ApiManagementController extends Controller
                             ['name' => 'id', 'type' => 'integer', 'desc' => 'รหัสโครงการวิจัย เช่น 2597'],
                         ],
                         'sample_url' => '/api/v1/projects/2597',
-                    ],
-                    [
-                        'id' => 'v1-projects-store',
-                        'method' => 'POST',
-                        'path' => '/api/v1/projects',
-                        'alt_paths' => [],
-                        'auth' => 'Bearer Token Required (Admin สูงสุดเท่านั้น - The Creator)',
-                        'auth_type' => 'bearer',
-                        'title' => 'Create Project with Research Team',
-                        'desc' => 'สร้างโครงการวิจัยใหม่ บันทึกทีมนักวิจัยใน transaction เดียว พร้อมตรวจสอบผลรวมสัดส่วนต้องไม่เกิน 100%',
-                        'params' => [
-                            ['name' => 'title_th', 'type' => 'string', 'desc' => 'ชื่อโครงการ (ไทย) [จำเป็น]'],
-                            ['name' => 'fiscal_year', 'type' => 'integer', 'desc' => 'ปีงบประมาณ พ.ศ. [จำเป็น]'],
-                            ['name' => 'budget_amount', 'type' => 'numeric', 'desc' => 'งบประมาณ [จำเป็น]'],
-                            ['name' => 'department_id', 'type' => 'integer', 'desc' => 'รหัสคณะ [จำเป็น]'],
-                            ['name' => 'research_team', 'type' => 'array', 'desc' => 'อาร์เรย์ทีมนักวิจัย [{researcher_id, contribution_percentage, position_id}]'],
-                        ],
-                        'sample_url' => '/api/v1/projects',
                     ],
                     [
                         'id' => 'v1-publications-index',

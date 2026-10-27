@@ -216,71 +216,33 @@ class ApiDualTierTest extends TestCase
             ]);
     }
 
-    public function test_v1_auth_me_and_crud_workflow(): void
+    public function test_v1_auth_me_and_read_only_enforcement(): void
     {
         $admin = User::find(129) ?? User::factory()->create();
         Sanctum::actingAs($admin, ['*']);
 
-        // 1. Auth Me
+        // 1. Auth Me (GET is permitted)
         $this->getJson('/api/v1/auth/me')
             ->assertStatus(200)
             ->assertJsonPath('user.id', (string) $admin->id);
 
-        // 2. FormRequest validation: Team contribution > 100% must return 422
-        $invalidPayload = [
-            'title_th' => 'โครงการทดสอบสัดส่วนเกิน 100%',
+        // 2. Mutating requests (POST, PUT, DELETE) on data endpoints are disallowed (405 Method Not Allowed)
+        $this->postJson('/api/v1/projects', [
+            'title_th' => 'โครงการทดสอบบล็อก POST',
             'fiscal_year' => 2568,
-            'budget_amount' => 50000,
-            'department_id' => 2,
-            'research_team' => [
-                ['researcher_id' => 4, 'contribution_percentage' => 70],
-                ['researcher_id' => 5, 'contribution_percentage' => 45], // Sum = 115%
-            ]
-        ];
-
-        $this->postJson('/api/v1/projects', $invalidPayload)
-            ->assertStatus(422)
-            ->assertJsonValidationErrors(['research_team']);
-
-        // 3. Valid creation: Team contribution <= 100%
-        $validPayload = [
-            'title_th' => 'โครงการทดสอบระบบ RESTful API v1 อัตโนมัติ (Feature Test)',
-            'title_en' => 'Automated Test RESTful Project v1 Feature Test',
-            'fiscal_year' => 2568,
-            'budget_amount' => 120000.00,
-            'department_id' => 2,
-            'abstract' => 'บทคัดย่อทดสอบระบบ API Integration',
-            'keywords' => 'API, Sanctum, Test',
-            'start_date' => '2025-10-01',
-            'end_date' => '2026-09-30',
-            'research_team' => [
-                ['researcher_id' => 4, 'contribution_percentage' => 60, 'position_id' => 1],
-                ['researcher_id' => 5, 'contribution_percentage' => 40, 'position_id' => 2],
-            ]
-        ];
-
-        $createResponse = $this->postJson('/api/v1/projects', $validPayload);
-        $createResponse->assertStatus(201)
-            ->assertJsonPath('data.title_th', $validPayload['title_th']);
-
-        $createdId = $createResponse->json('data.id');
-        $this->assertNotNull($createdId);
-
-        // 4. Update project
-        $this->putJson("/api/v1/projects/{$createdId}", [
-            'title_th' => 'โครงการทดสอบระบบ RESTful API v1 (แก้ไขโดย Feature Test)',
-            'budget_amount' => 180000.00,
         ])
-        ->assertStatus(200)
-        ->assertJsonPath('data.budget_amount', '180000.00');
+        ->assertStatus(405);
 
-        // 5. Delete project (soft delete)
-        $this->deleteJson("/api/v1/projects/{$createdId}")
-            ->assertStatus(200)
-            ->assertJsonPath('message', 'ลบโครงการวิจัยสำเร็จ');
+        $this->putJson('/api/v1/projects/1', [
+            'title_th' => 'โครงการทดสอบบล็อก PUT',
+        ])
+        ->assertStatus(405);
+
+        $this->deleteJson('/api/v1/projects/1')
+            ->assertStatus(405);
     }
 
-    public function test_non_superadmin_is_restricted_to_get_methods_only(): void
+    public function test_researchers_and_users_restricted_to_get_methods_only(): void
     {
         $regularUser = User::where('id', '!=', 129)->first();
         $this->assertNotNull($regularUser);
@@ -288,7 +250,7 @@ class ApiDualTierTest extends TestCase
 
         Sanctum::actingAs($regularUser, ['*']);
 
-        // 1. GET requests are allowed for regular users with Bearer Token
+        // 1. GET requests are allowed for users with Bearer Token
         $this->getJson('/api/v1/projects')
             ->assertStatus(200);
 
@@ -298,26 +260,19 @@ class ApiDualTierTest extends TestCase
         $this->getJson('/api/v1/auth/me')
             ->assertStatus(200);
 
-        // 2. POST mutating requests are BLOCKED with 403 Forbidden
+        // 2. Mutating requests (POST, PUT, DELETE) are disallowed with 405 Method Not Allowed
         $this->postJson('/api/v1/projects', [
-            'title_th' => 'โครงการทดสอบโดยผู้ใช้ที่ไม่ใช่ Super Admin',
+            'title_th' => 'โครงการทดสอบโดยผู้ใช้ทั่วไป',
             'fiscal_year' => 2568,
-            'budget_amount' => 50000,
-            'department_id' => 2,
         ])
-        ->assertStatus(403)
-        ->assertJsonPath('error', 'MethodNotAllowedForRole');
+        ->assertStatus(405);
 
-        // 3. PUT mutating requests are BLOCKED with 403 Forbidden
         $this->putJson('/api/v1/projects/1', [
-            'title_th' => 'แก้ไขโครงการโดยผู้ใช้ที่ไม่ใช่ Super Admin',
+            'title_th' => 'แก้ไขโครงการโดยผู้ใช้ทั่วไป',
         ])
-        ->assertStatus(403)
-        ->assertJsonPath('error', 'MethodNotAllowedForRole');
+        ->assertStatus(405);
 
-        // 4. DELETE mutating requests are BLOCKED with 403 Forbidden
         $this->deleteJson('/api/v1/projects/1')
-            ->assertStatus(403)
-            ->assertJsonPath('error', 'MethodNotAllowedForRole');
+        ->assertStatus(405);
     }
 }

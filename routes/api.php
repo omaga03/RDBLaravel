@@ -68,10 +68,5 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
         // Authenticated Actions & User Profile
         Route::get('auth/me', [AuthController::class, 'me'])->name('api.v1.auth.me');
         Route::post('auth/logout', [AuthController::class, 'logout'])->name('api.v1.auth.logout');
-
-        // Project CRUD mutations (Write / Admin)
-        Route::post('projects', [ProjectController::class, 'store'])->name('api.v1.projects.store');
-        Route::put('projects/{id}', [ProjectController::class, 'update'])->name('api.v1.projects.update');
-        Route::delete('projects/{id}', [ProjectController::class, 'destroy'])->name('api.v1.projects.destroy');
     });
 });
