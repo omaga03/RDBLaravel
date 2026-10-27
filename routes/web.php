@@ -68,6 +68,7 @@ use App\Http\Controllers\Frontend\RdbresearcherstatusController;
 use App\Http\Controllers\Frontend\RdbstrategicController as FrontendRdbstrategicController;
 use App\Http\Controllers\Frontend\RdbtrainingController;
 use App\Http\Controllers\Frontend\RdbtrainingregisterController;
+use App\Http\Controllers\Api\LegacyApiController;
 use App\Http\Controllers\Frontend\RdbyearController as FrontendRdbyearController;
 use App\Http\Controllers\Frontend\ResearchcoferenceinthaiController;
 use App\Http\Controllers\Frontend\ResearchnewsController;
@@ -274,6 +275,26 @@ Route::name('frontend.')->group(function () {
     Route::resource('rdbgroupproject', FrontendRdbgroupprojectController::class)->parameters(['rdbgroupproject' => 'id'])->only(['index', 'show']);
     Route::resource('rdbnacc', RdbnaccController::class)->parameters(['rdbnacc' => 'id'])->only(['index', 'show']);
     Route::resource('rdbprefix', FrontendRdbprefixController::class)->parameters(['rdbprefix' => 'id'])->only(['index', 'show']);
+
+    // PCRU Research Database - Legacy & Integration JSON APIs (Must precede resource wildcard routes)
+    Route::middleware('throttle:60,1')->group(function () {
+        // Project Master Data & Filter Feeds
+        Route::get('rdb/project/jsonprojectall', [LegacyApiController::class, 'jsonprojectall'])->name('api.rdb.project.jsonprojectall');
+        Route::get('rdbproject/jsonprojectall', [LegacyApiController::class, 'jsonprojectall'])->name('rdbproject.jsonprojectall');
+
+        // Publication Master Data & Filter Feeds
+        Route::get('rdb/published/jsonpublisheddataall', [LegacyApiController::class, 'jsonpublisheddataall'])->name('api.rdb.published.jsonpublisheddataall');
+        Route::get('rdbpublished/jsonpublisheddataall', [LegacyApiController::class, 'jsonpublisheddataall'])->name('rdbpublished.jsonpublisheddataall');
+
+        // PMIS & Researcher Portfolio APIs
+        Route::get('rdb/researcher/datagetresearchbypmis', [FrontendRdbresearcherController::class, 'datagetresearchbypmis'])->name('api.rdb.researcher.datagetresearchbypmis');
+        Route::get('rdbresearcher/datagetresearchbypmis', [FrontendRdbresearcherController::class, 'datagetresearchbypmis'])->name('rdbresearcher.datagetresearchbypmis');
+        Route::get('rdb/researcher/datagetpublicationbypmis', [FrontendRdbresearcherController::class, 'datagetpublicationbypmis'])->name('api.rdb.researcher.datagetpublicationbypmis');
+        Route::get('rdbresearcher/datagetpublicationbypmis', [FrontendRdbresearcherController::class, 'datagetpublicationbypmis'])->name('rdbresearcher.datagetpublicationbypmis');
+        Route::get('api/pmis/research', [FrontendRdbresearcherController::class, 'datagetresearchbypmis'])->name('api.pmis.research');
+        Route::get('api/pmis/publication', [FrontendRdbresearcherController::class, 'datagetpublicationbypmis'])->name('api.pmis.publication');
+    });
+
     Route::get('rdbproject/export', [FrontendRdbprojectController::class, 'export'])->name('rdbproject.export');
     Route::resource('rdbproject', FrontendRdbprojectController::class)->parameters(['rdbproject' => 'id'])->only(['index', 'show']);
     Route::get('rdbproject/api/types-by-year', [FrontendRdbprojectController::class, 'getTypesByYear'])->name('rdbproject.typesByYear');
@@ -318,11 +339,6 @@ Route::name('frontend.')->group(function () {
     Route::resource('rdbpublishedtype', RdbpublishedtypeController::class)->parameters(['rdbpublishedtype' => 'id'])->only(['index', 'show']);
     Route::resource('rdbpublishedtypeauthor', RdbpublishedtypeauthorController::class)->parameters(['rdbpublishedtypeauthor' => 'id'])->only(['index', 'show']);
     Route::resource('rdbpublishedwork', RdbpublishedworkController::class)->parameters(['rdbpublishedwork' => 'id'])->only(['index', 'show']);
-    // PMIS API Endpoints (JSON)
-    Route::get('rdbresearcher/datagetresearchbypmis', [FrontendRdbresearcherController::class, 'datagetresearchbypmis'])->name('rdbresearcher.datagetresearchbypmis');
-    Route::get('rdbresearcher/datagetpublicationbypmis', [FrontendRdbresearcherController::class, 'datagetpublicationbypmis'])->name('rdbresearcher.datagetpublicationbypmis');
-    Route::get('api/pmis/research', [FrontendRdbresearcherController::class, 'datagetresearchbypmis'])->name('api.pmis.research');
-    Route::get('api/pmis/publication', [FrontendRdbresearcherController::class, 'datagetpublicationbypmis'])->name('api.pmis.publication');
 
     Route::get('rdbresearcher/export', [FrontendRdbresearcherController::class, 'export'])->name('rdbresearcher.export');
     Route::resource('rdbresearcher', FrontendRdbresearcherController::class)->parameters(['rdbresearcher' => 'id'])->only(['index', 'show']);

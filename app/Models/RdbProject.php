@@ -158,6 +158,11 @@ class RdbProject extends Model
                     ->orderBy('rdb_researcher.researcher_fname', 'asc');
     }
 
+    public function works()
+    {
+        return $this->rdbProjectWorks();
+    }
+
     public function files()
     {
         return $this->hasMany(RdbProjectFiles::class, 'pro_id', 'pro_id');

@@ -85,6 +85,14 @@ class RdbPublished extends Model
         return $this->belongsTo(RdbPublishedBranch::class, 'branch_id', 'branch_id');
     }
 
+    public function publishedWorks()
+    {
+        return $this->hasMany(RdbPublishedWork::class, 'published_id', 'id')
+                    ->orderBy('pubw_bud', 'desc')
+                    ->orderBy('pubw_main', 'desc')
+                    ->orderBy('pubta_id', 'asc');
+    }
+
     public function authors()
     {
         return $this->belongsToMany(RdbResearcher::class, 'rdb_published_work', 'published_id', 'researcher_id')
