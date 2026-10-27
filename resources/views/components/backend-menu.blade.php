@@ -310,12 +310,14 @@
                     </li>
                     @endif
 
-                    <!-- 9. บริการ API -->
+                    <!-- 9. บริการ API (แสดงสำหรับ Super Admin หรือสมาชิกที่ได้สร้าง Bearer Token แล้ว) -->
+                    @if($isSuperAdmin || ($currentUser && $currentUser->tokens()->exists()))
                     <li class="nav-item">
-                        <a class="nav-link {{ request()->is('backend/api-management*') || request()->routeIs('backend.api_management.*') ? 'active fw-bold text-primary' : '' }}" href="{{ route('backend.api_management.index') }}" title="ศูนย์บริหารจัดการบริการ API และ Bearer Token">
+                        <a class="nav-link {{ request()->is('backend/api-management*') || request()->routeIs('backend.api_management.*') ? 'active fw-bold text-primary' : '' }}" href="{{ route('backend.api_management.index') }}" title="ศูนย์บริการ API และคู่มือการเชื่อมต่อ">
                             <i class="bi bi-braces-asterisk text-primary me-1"></i> บริการ API
                         </a>
                     </li>
+                    @endif
             </ul>
             @endif
         </div>

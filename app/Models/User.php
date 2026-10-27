@@ -280,6 +280,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Determine if user is Super Admin (The Creator / ID 129).
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->id === 129 || $this->hasRole('The Creator');
+    }
+
+    /**
      * Determine if user has access to full backend modules (projects, publications, etc.).
      */
     public function canAccessFullBackend(): bool

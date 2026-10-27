@@ -97,10 +97,17 @@ class ApiDualTierTest extends TestCase
     }
 
     /**
-     * Tier 2: Modern RESTful API v1 Endpoints
+     * Tier 2: Modern RESTful API v1 Endpoints (All Require Sanctum Bearer Token)
      */
     public function test_v1_master_data(): void
     {
+        // 1. Unauthenticated request must return 401 Unauthorized
+        $this->getJson('/api/v1/master/departments')->assertStatus(401);
+
+        // 2. Authenticated with Sanctum Bearer Token returns 200 OK
+        $admin = User::find(129);
+        Sanctum::actingAs($admin, ['*']);
+
         $this->getJson('/api/v1/master/departments')
             ->assertStatus(200)
             ->assertJsonStructure(['data' => [['id', 'name_th', 'code']]]);
@@ -116,6 +123,13 @@ class ApiDualTierTest extends TestCase
 
     public function test_v1_projects_index_and_show(): void
     {
+        // 1. Unauthenticated request must return 401 Unauthorized
+        $this->getJson('/api/v1/projects')->assertStatus(401);
+
+        // 2. Authenticated with Sanctum Bearer Token
+        $admin = User::find(129);
+        Sanctum::actingAs($admin, ['*']);
+
         $response = $this->getJson('/api/v1/projects?dep=2&year=2567');
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -148,6 +162,13 @@ class ApiDualTierTest extends TestCase
 
     public function test_v1_publications_index_and_show(): void
     {
+        // 1. Unauthenticated request must return 401 Unauthorized
+        $this->getJson('/api/v1/publications')->assertStatus(401);
+
+        // 2. Authenticated with Sanctum Bearer Token
+        $admin = User::find(129);
+        Sanctum::actingAs($admin, ['*']);
+
         $response = $this->getJson('/api/v1/publications?dep=6&year=2568');
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -177,6 +198,13 @@ class ApiDualTierTest extends TestCase
 
     public function test_v1_researcher_portfolio(): void
     {
+        // 1. Unauthenticated request must return 401 Unauthorized
+        $this->getJson('/api/v1/researchers/656219/portfolio')->assertStatus(401);
+
+        // 2. Authenticated with Sanctum Bearer Token
+        $admin = User::find(129);
+        Sanctum::actingAs($admin, ['*']);
+
         $this->getJson('/api/v1/researchers/656219/portfolio')
             ->assertStatus(200)
             ->assertJsonStructure([

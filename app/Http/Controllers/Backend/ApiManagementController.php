@@ -18,18 +18,18 @@ class ApiManagementController extends Controller
     public function index(Request $request): View
     {
         $currentUser = auth()->user();
-        $isAdmin = $currentUser && (
-            $currentUser->hasRole('The Creator') ||
-            $currentUser->hasRole('Admin') ||
-            $currentUser->hasRole('Admin Research') ||
-            $currentUser->hasRole('Admin Project') ||
-            $currentUser->hasPermission('User Manager')
-        );
+        $isSuperAdmin = $currentUser && $currentUser->isSuperAdmin();
+        $hasToken = $currentUser && $currentUser->tokens()->exists();
+
+        // Only Super Admin or users/researchers who have an issued Bearer Token can access this portal
+        if (!$isSuperAdmin && !$hasToken) {
+            abort(403, 'ท่านยังไม่ได้รับสิทธิ์เข้าถึงบริการ API (ยังไม่มี Bearer Token ที่สร้างขึ้น)');
+        }
 
         $query = PersonalAccessToken::query();
 
-        // If not admin, restricted to viewing own tokens only
-        if (!$isAdmin) {
+        // If not super admin, restricted to viewing own tokens only
+        if (!$isSuperAdmin) {
             $query->where('tokenable_id', $currentUser->id)
                   ->where('tokenable_type', User::class);
         }
@@ -52,8 +52,8 @@ class ApiManagementController extends Controller
             });
         }
 
-        // Filter by user ID if requested
-        if ($request->filled('user_id') && $isAdmin) {
+        // Filter by user ID if requested (Super Admin only)
+        if ($request->filled('user_id') && $isSuperAdmin) {
             $query->where('tokenable_id', $request->query('user_id'))
                   ->where('tokenable_type', User::class);
         }
@@ -61,25 +61,26 @@ class ApiManagementController extends Controller
         $tokens = $query->orderByDesc('id')->paginate(15)->withQueryString();
 
         // Summary metrics
-        $metricsQuery = $isAdmin ? PersonalAccessToken::query() : PersonalAccessToken::where('tokenable_id', $currentUser->id)->where('tokenable_type', User::class);
+        $metricsQuery = $isSuperAdmin ? PersonalAccessToken::query() : PersonalAccessToken::where('tokenable_id', $currentUser->id)->where('tokenable_type', User::class);
         $totalTokens = (clone $metricsQuery)->count();
         $activeTokens = (clone $metricsQuery)->where(function ($q) {
             $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
         })->count();
-        $usersWithTokens = $isAdmin 
+        $usersWithTokens = $isSuperAdmin 
             ? PersonalAccessToken::where('tokenable_type', User::class)->distinct('tokenable_id')->count('tokenable_id')
-            : 1;
+            : ($hasToken ? 1 : 0);
 
-        // User list for token creation modal
+        // User list for token creation modal (Super Admin only)
         $usersList = [];
-        if ($isAdmin) {
+        if ($isSuperAdmin) {
             $usersList = User::with(['researcher.department', 'researcher.prefix'])
                 ->where('status', '!=', 0)
                 ->orderBy('username')
                 ->get();
-        } else {
-            $usersList = collect([$currentUser->loadMissing(['researcher.department', 'researcher.prefix'])]);
         }
+
+        // User's own latest token (for auto-filling in live tester)
+        $myToken = $currentUser ? $currentUser->tokens()->latest()->first() : null;
 
         // List of all documented API endpoints
         $endpoints = $this->getEndpointsCatalog();
@@ -91,36 +92,31 @@ class ApiManagementController extends Controller
             'usersWithTokens',
             'usersList',
             'endpoints',
-            'isAdmin'
+            'isSuperAdmin',
+            'myToken'
         ));
     }
 
     /**
-     * Create / Issue a new Bearer Token for a specific user / researcher.
+     * Create / Issue a new Bearer Token for a specific user / researcher (Super Admin only).
      */
     public function createToken(Request $request): RedirectResponse
     {
         $currentUser = auth()->user();
-        $isAdmin = $currentUser && (
-            $currentUser->hasRole('The Creator') ||
-            $currentUser->hasRole('Admin') ||
-            $currentUser->hasRole('Admin Research') ||
-            $currentUser->hasPermission('User Manager')
-        );
+        if (!$currentUser || !$currentUser->isSuperAdmin()) {
+            abort(403, 'เฉพาะผู้ดูแลระบบระดับสูงสุด (The Creator) เท่านั้นที่มีสิทธิ์ออก Bearer Token');
+        }
 
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'abilities' => ['nullable', 'array'],
             'expires_in_days' => ['nullable', 'integer', 'min:1', 'max:3650'],
+            'user_id' => ['required', 'exists:user,id'],
         ];
-
-        if ($isAdmin) {
-            $rules['user_id'] = ['required', 'exists:user,id'];
-        }
 
         $validated = $request->validate($rules);
 
-        $targetUserId = $isAdmin ? $validated['user_id'] : $currentUser->id;
+        $targetUserId = (int) $validated['user_id'];
         $targetUser = User::findOrFail($targetUserId);
 
         // Determine abilities
@@ -155,24 +151,16 @@ class ApiManagementController extends Controller
     }
 
     /**
-     * Revoke a single personal access token.
+     * Revoke a single personal access token (Super Admin only).
      */
     public function revokeToken(Request $request, int $id): RedirectResponse
     {
         $currentUser = auth()->user();
-        $isAdmin = $currentUser && (
-            $currentUser->hasRole('The Creator') ||
-            $currentUser->hasRole('Admin') ||
-            $currentUser->hasRole('Admin Research') ||
-            $currentUser->hasPermission('User Manager')
-        );
-
-        $token = PersonalAccessToken::findOrFail($id);
-
-        if (!$isAdmin && $token->tokenable_id != $currentUser->id) {
-            abort(403, 'ท่านไม่มีสิทธิ์ในการเพิกถอน Token นี้');
+        if (!$currentUser || !$currentUser->isSuperAdmin()) {
+            abort(403, 'เฉพาะผู้ดูแลระบบระดับสูงสุด (The Creator) เท่านั้นที่มีสิทธิ์เพิกถอน Bearer Token');
         }
 
+        $token = PersonalAccessToken::findOrFail($id);
         $tokenName = $token->name;
         $token->delete();
 
@@ -181,20 +169,13 @@ class ApiManagementController extends Controller
     }
 
     /**
-     * Revoke all personal access tokens for a specific user.
+     * Revoke all personal access tokens for a specific user (Super Admin only).
      */
     public function revokeAllUserTokens(Request $request, int $userId): RedirectResponse
     {
         $currentUser = auth()->user();
-        $isAdmin = $currentUser && (
-            $currentUser->hasRole('The Creator') ||
-            $currentUser->hasRole('Admin') ||
-            $currentUser->hasRole('Admin Research') ||
-            $currentUser->hasPermission('User Manager')
-        );
-
-        if (!$isAdmin && $userId != $currentUser->id) {
-            abort(403, 'ท่านไม่มีสิทธิ์ในการเพิกถอน Token ของผู้ใช้นี้');
+        if (!$currentUser || !$currentUser->isSuperAdmin()) {
+            abort(403, 'เฉพาะผู้ดูแลระบบระดับสูงสุด (The Creator) เท่านั้นที่มีสิทธิ์เพิกถอน Bearer Token ทั้งหมด');
         }
 
         $targetUser = User::findOrFail($userId);
@@ -394,8 +375,8 @@ class ApiManagementController extends Controller
                         'method' => 'GET',
                         'path' => '/api/v1/master/departments',
                         'alt_paths' => [],
-                        'auth' => 'Public (Rate Limited)',
-                        'auth_type' => 'public',
+                        'auth' => 'Bearer Token Required',
+                        'auth_type' => 'bearer',
                         'title' => 'Faculty & Department Master Data',
                         'desc' => 'ดึงรายชื่อคณะ/หน่วยงานทั้งหมด (1-13) พร้อมรหัสอ้างอิงและชื่อภาษาอังกฤษ',
                         'params' => [],
@@ -406,8 +387,8 @@ class ApiManagementController extends Controller
                         'method' => 'GET',
                         'path' => '/api/v1/master/years',
                         'alt_paths' => [],
-                        'auth' => 'Public (Rate Limited)',
-                        'auth_type' => 'public',
+                        'auth' => 'Bearer Token Required',
+                        'auth_type' => 'bearer',
                         'title' => 'Fiscal Years Master Data',
                         'desc' => 'ดึงรายการปีงบประมาณ พ.ศ. ทั้งหมดในระบบฐานข้อมูล',
                         'params' => [],
@@ -418,8 +399,8 @@ class ApiManagementController extends Controller
                         'method' => 'GET',
                         'path' => '/api/v1/projects',
                         'alt_paths' => [],
-                        'auth' => 'Public / Bearer Token',
-                        'auth_type' => 'public',
+                        'auth' => 'Bearer Token Required',
+                        'auth_type' => 'bearer',
                         'title' => 'List & Filter Projects (Pagination)',
                         'desc' => 'ค้นหาและกรองโครงการวิจัย รองรับ Pagination, Sorting, กรองคณะ ปีงบประมาณ และค้นหาคำสำคัญ',
                         'params' => [
@@ -437,8 +418,8 @@ class ApiManagementController extends Controller
                         'method' => 'GET',
                         'path' => '/api/v1/projects/{id}',
                         'alt_paths' => [],
-                        'auth' => 'Public / Bearer Token',
-                        'auth_type' => 'public',
+                        'auth' => 'Bearer Token Required',
+                        'auth_type' => 'bearer',
                         'title' => 'Get Single Project Details',
                         'desc' => 'ดูรายละเอียดโครงการวิจัยรายโครงการ พร้อมข้อมูลทีมนักวิจัยและสัดส่วนการมีส่วนร่วม',
                         'params' => [
@@ -469,8 +450,8 @@ class ApiManagementController extends Controller
                         'method' => 'GET',
                         'path' => '/api/v1/publications',
                         'alt_paths' => [],
-                        'auth' => 'Public / Bearer Token',
-                        'auth_type' => 'public',
+                        'auth' => 'Bearer Token Required',
+                        'auth_type' => 'bearer',
                         'title' => 'List & Filter Publications (Pagination)',
                         'desc' => 'ค้นหาและกรองผลงานตีพิมพ์ทางวิชาการ รองรับ Pagination และการกรองตามคณะ/ปี/ผู้แต่ง',
                         'params' => [
@@ -486,8 +467,8 @@ class ApiManagementController extends Controller
                         'method' => 'GET',
                         'path' => '/api/v1/researchers/{pmis}/portfolio',
                         'alt_paths' => [],
-                        'auth' => 'Public / Bearer Token',
-                        'auth_type' => 'public',
+                        'auth' => 'Bearer Token Required',
+                        'auth_type' => 'bearer',
                         'title' => 'Complete Researcher Portfolio',
                         'desc' => 'ดึงพอร์ตผลงานวิชาการครบวงจรของนักวิจัย ทั้งข้อมูลส่วนตัว, ดัชนี H-index, Scopus, โครงการวิจัย และผลงานตีพิมพ์',
                         'params' => [

@@ -65,6 +65,28 @@
         background-color: #2563EB;
         color: #FFFFFF !important;
     }
+    /* TomSelect Searchable Dropdown inside Modal */
+    .modal .ts-wrapper {
+        width: 100% !important;
+    }
+    .modal .ts-control {
+        border-radius: 0.375rem;
+        padding: 0.5rem 0.75rem;
+    }
+    .ts-dropdown {
+        z-index: 1060 !important;
+    }
+    [data-bs-theme="dark"] .ts-control,
+    [data-bs-theme="dark"] .ts-dropdown {
+        background-color: #1E293B !important;
+        color: #F8FAFC !important;
+        border-color: #334155 !important;
+    }
+    [data-bs-theme="dark"] .ts-dropdown .option:hover,
+    [data-bs-theme="dark"] .ts-dropdown .active {
+        background-color: #334155 !important;
+        color: #FFFFFF !important;
+    }
 </style>
 @endpush
 
@@ -81,18 +103,24 @@
             </nav>
             <h1 class="h3 fw-bold mb-0 d-flex align-items-center gap-2">
                 <i class="bi bi-braces-asterisk text-primary fs-3"></i>
-                ศูนย์บริหารจัดการบริการ API และ Bearer Token
+                {{ $isSuperAdmin ? 'ศูนย์บริหารจัดการบริการ API และ Bearer Token' : 'ศูนย์บริการ API และเครื่องมือทดสอบสำหรับนักวิจัย' }}
             </h1>
             <p class="text-body-secondary small mb-0 mt-1">
-                จัดการกุญแจเข้าถึงข้อมูล (Personal Access Tokens), แคตตาล็อก Endpoint ทั้งหมด, และเครื่องมือทดสอบ API แบบเรียลไทม์
+                @if($isSuperAdmin)
+                    จัดการกุญแจเข้าถึงข้อมูล (Personal Access Tokens), แคตตาล็อก Endpoint ทั้งหมด, และเครื่องมือทดสอบ API แบบเรียลไทม์
+                @else
+                    คุณได้รับสิทธิ์เข้าถึงบริการ API เรียบร้อยแล้ว สามารถตรวจดู Endpoint ทุกจุด ทดสอบเรียกดูข้อมูลจริง และดูโค้ดตัวอย่างการเชื่อมต่อได้จากหน้านี้
+                @endif
             </p>
         </div>
 
         <div class="d-flex align-items-center gap-2">
+            @if($isSuperAdmin)
             <button type="button" class="btn btn-primary d-flex align-items-center gap-1.5 shadow-sm" data-bs-toggle="modal" data-bs-target="#createTokenModal">
                 <i class="bi bi-key-fill"></i>
                 <span>ออก Bearer Token ใหม่</span>
             </button>
+            @endif
             <a href="#endpointsTab" onclick="switchToTab('endpoints-tab')" class="btn btn-outline-secondary d-flex align-items-center gap-1.5">
                 <i class="bi bi-journal-code"></i>
                 <span>ดูรายการ Endpoints</span>
@@ -139,7 +167,8 @@
         </div>
     @endif
 
-    <!-- KPI Summary Cards -->
+    @if($isSuperAdmin)
+    <!-- KPI Summary Cards (Super Admin only) -->
     <div class="row g-3 mb-4">
         <div class="col-sm-6 col-xl-3">
             <div class="card api-kpi-card p-3 h-100">
@@ -209,17 +238,20 @@
             </div>
         </div>
     </div>
+    @endif
 
     <!-- Navigation Pills: Tokens vs Endpoints vs Developer Guide -->
     <ul class="nav nav-pills gap-2 p-1.5 bg-body-tertiary rounded-3 border mb-4" id="apiTabs" role="tablist">
+        @if($isSuperAdmin)
         <li class="nav-item" role="presentation">
             <button class="nav-link active d-flex align-items-center gap-2" id="tokens-tab" data-bs-toggle="pill" data-bs-target="#tokensTab" type="button" role="tab">
                 <i class="bi bi-shield-lock"></i>
                 <span>จัดการ Bearer Tokens ({{ $tokens->total() }})</span>
             </button>
         </li>
+        @endif
         <li class="nav-item" role="presentation">
-            <button class="nav-link d-flex align-items-center gap-2" id="endpoints-tab" data-bs-toggle="pill" data-bs-target="#endpointsTab" type="button" role="tab">
+            <button class="nav-link {{ !$isSuperAdmin ? 'active' : '' }} d-flex align-items-center gap-2" id="endpoints-tab" data-bs-toggle="pill" data-bs-target="#endpointsTab" type="button" role="tab">
                 <i class="bi bi-journal-code"></i>
                 <span>ตรวจดู Endpoint &amp; ทดสอบเรียลไทม์</span>
             </button>
@@ -234,7 +266,8 @@
 
     <!-- Tab Contents -->
     <div class="tab-content" id="apiTabsContent">
-        <!-- TAB 1: Tokens Management -->
+        @if($isSuperAdmin)
+        <!-- TAB 1: Tokens Management (Super Admin only) -->
         <div class="tab-pane fade show active" id="tokensTab" role="tabpanel">
             <div class="card border-0 shadow-sm rounded-3">
                 <div class="card-header bg-body border-bottom py-3 px-4">
@@ -398,9 +431,10 @@
                 @endif
             </div>
         </div>
+        @endif
 
         <!-- TAB 2: Endpoints Catalog & Live Tester -->
-        <div class="tab-pane fade" id="endpointsTab" role="tabpanel">
+        <div class="tab-pane fade {{ !$isSuperAdmin ? 'show active' : '' }}" id="endpointsTab" role="tabpanel">
             <div class="row g-4">
                 <!-- Left: Catalog Accordion -->
                 <div class="col-lg-7">
@@ -660,7 +694,8 @@ else:
     </div>
 </div>
 
-<!-- Modal: Create / Issue New Token -->
+@if($isSuperAdmin)
+<!-- Modal: Create / Issue New Token (Super Admin only) -->
 <div class="modal fade" id="createTokenModal" tabindex="-1" aria-labelledby="createTokenModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-lg rounded-3">
@@ -675,30 +710,28 @@ else:
                 </div>
 
                 <div class="modal-body p-4">
-                    <!-- Select Member / Researcher -->
-                    @if($isAdmin)
-                        <div class="mb-3">
-                            <label for="modalUserId" class="form-label fw-bold small">
-                                สมาชิก / นักวิจัยที่ต้องการออก Token <span class="text-danger">*</span>
-                            </label>
-                            <select name="user_id" id="modalUserId" class="form-select select2-user" required>
-                                <option value="">-- กรุณาเลือกสมาชิกหรือนักวิจัย --</option>
-                                @foreach($usersList as $u)
-                                    @php
-                                        $r = $u->researcher;
-                                        $pmisText = $r && $r->tea_code ? " [PMIS: {$r->tea_code}]" : '';
-                                        $deptText = $r && $r->department ? " - {$r->department->department_nameTH}" : '';
-                                    @endphp
-                                    <option value="{{ $u->id }}" {{ old('user_id') == $u->id ? 'selected' : '' }}>
-                                        {{ $u->name }} ({{ $u->username }}){{ $pmisText }}{{ $deptText }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <div class="form-text small text-body-secondary">
-                                Token จะถูกผูกกับสิทธิ์และโปรไฟล์ของสมาชิกท่านนี้ในระบบ
-                            </div>
+                    <!-- Select Member / Researcher with Searchable Typeahead -->
+                    <div class="mb-3">
+                        <label for="modalUserId" class="form-label fw-bold small">
+                            สมาชิก / นักวิจัยที่ต้องการออก Token <span class="text-danger">*</span>
+                        </label>
+                        <select name="user_id" id="modalUserId" class="form-select" required>
+                            <option value="">-- พิมพ์ค้นหาชื่อสมาชิก, username, รหัสนักวิจัย หรือคณะ/สังกัด --</option>
+                            @foreach($usersList as $u)
+                                @php
+                                    $r = $u->researcher;
+                                    $pmisText = $r && $r->tea_code ? " [PMIS: {$r->tea_code}]" : '';
+                                    $deptText = $r && $r->department ? " - {$r->department->department_nameTH}" : '';
+                                @endphp
+                                <option value="{{ $u->id }}" {{ old('user_id') == $u->id ? 'selected' : '' }}>
+                                    {{ $u->name }} ({{ $u->username }}){{ $pmisText }}{{ $deptText }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="form-text small text-body-secondary">
+                            Token จะถูกผูกกับสิทธิ์และโปรไฟล์ของสมาชิกท่านนี้ในระบบ (สามารถพิมพ์ค้นหาได้ทันที)
                         </div>
-                    @endif
+                    </div>
 
                     <!-- Token Name / Application Purpose -->
                     <div class="mb-3">
@@ -776,7 +809,7 @@ else:
                                         </label>
                                     </div>
                                 </div>
-                                @if($isAdmin)
+                                @if($isSuperAdmin)
                                 <div class="col-md-6">
                                     <div class="form-check">
                                         <input class="form-check-input ability-item" type="checkbox" name="abilities[]" value="rdb:admin" id="abRdbAdmin">
@@ -802,10 +835,34 @@ else:
         </div>
     </div>
 </div>
+@endif
 @endsection
 
 @push('scripts')
 <script>
+    // Initialize TomSelect for searchable Member / Researcher selection in Token Issuance modal
+    document.addEventListener('DOMContentLoaded', function () {
+        const modalUserIdEl = document.getElementById('modalUserId');
+        if (modalUserIdEl && typeof TomSelect !== 'undefined') {
+            const userTomSelect = new TomSelect(modalUserIdEl, {
+                create: false,
+                placeholder: '-- พิมพ์ค้นหาชื่อสมาชิก, username, รหัสนักวิจัย หรือคณะ/สังกัด --',
+                allowEmptyOption: true,
+                maxOptions: 1000,
+                searchField: ['text'],
+            });
+
+            const createModal = document.getElementById('createTokenModal');
+            if (createModal) {
+                createModal.addEventListener('shown.bs.modal', function () {
+                    setTimeout(() => {
+                        userTomSelect.focus();
+                    }, 150);
+                });
+            }
+        }
+    });
+
     // Tab switching helper
     function switchToTab(tabId) {
         const tabEl = document.getElementById(tabId);

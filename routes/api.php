@@ -40,31 +40,32 @@ Route::middleware('throttle:60,1')->group(function () {
 
 // Modern RESTful API v1
 Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
-    // Authentication & Token Issuance
+    // Authentication & Token Issuance (Public)
     Route::post('auth/token', [AuthController::class, 'token'])->name('api.v1.auth.token');
     Route::post('login', [AuthController::class, 'token'])->name('api.v1.login');
 
-    // Master Data
-    Route::get('master/departments', [MasterDataController::class, 'departments'])->name('api.v1.master.departments');
-    Route::get('master/years', [MasterDataController::class, 'years'])->name('api.v1.master.years');
-    Route::get('master/project-types', [MasterDataController::class, 'projectTypes'])->name('api.v1.master.projectTypes');
-
-    // Public Read Resources
-    Route::get('projects', [ProjectController::class, 'index'])->name('api.v1.projects.index');
-    Route::get('projects/{id}', [ProjectController::class, 'show'])->name('api.v1.projects.show');
-
-    Route::get('publications', [PublicationController::class, 'index'])->name('api.v1.publications.index');
-    Route::get('publications/{id}', [PublicationController::class, 'show'])->name('api.v1.publications.show');
-
-    Route::get('researchers/{id}', [ResearcherController::class, 'show'])->name('api.v1.researchers.show');
-    Route::get('researchers/{pmis}/portfolio', [ResearcherController::class, 'portfolio'])->name('api.v1.researchers.portfolio');
-
-    // Authenticated Actions (Sanctum)
+    // Tier 2: All Modern RESTful Endpoints require Bearer Token (Sanctum)
     Route::middleware('auth:sanctum')->group(function () {
+        // Master Data
+        Route::get('master/departments', [MasterDataController::class, 'departments'])->name('api.v1.master.departments');
+        Route::get('master/years', [MasterDataController::class, 'years'])->name('api.v1.master.years');
+        Route::get('master/project-types', [MasterDataController::class, 'projectTypes'])->name('api.v1.master.projectTypes');
+
+        // Resources (Read)
+        Route::get('projects', [ProjectController::class, 'index'])->name('api.v1.projects.index');
+        Route::get('projects/{id}', [ProjectController::class, 'show'])->name('api.v1.projects.show');
+
+        Route::get('publications', [PublicationController::class, 'index'])->name('api.v1.publications.index');
+        Route::get('publications/{id}', [PublicationController::class, 'show'])->name('api.v1.publications.show');
+
+        Route::get('researchers/{id}', [ResearcherController::class, 'show'])->name('api.v1.researchers.show');
+        Route::get('researchers/{pmis}/portfolio', [ResearcherController::class, 'portfolio'])->name('api.v1.researchers.portfolio');
+
+        // Authenticated Actions & User Profile
         Route::get('auth/me', [AuthController::class, 'me'])->name('api.v1.auth.me');
         Route::post('auth/logout', [AuthController::class, 'logout'])->name('api.v1.auth.logout');
 
-        // Project CRUD mutations
+        // Project CRUD mutations (Write / Admin)
         Route::post('projects', [ProjectController::class, 'store'])->name('api.v1.projects.store');
         Route::put('projects/{id}', [ProjectController::class, 'update'])->name('api.v1.projects.update');
         Route::delete('projects/{id}', [ProjectController::class, 'destroy'])->name('api.v1.projects.destroy');

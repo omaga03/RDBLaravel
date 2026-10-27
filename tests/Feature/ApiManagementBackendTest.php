@@ -118,4 +118,58 @@ class ApiManagementBackendTest extends TestCase
             ->assertJsonPath('success', true);
         $this->assertAuthenticatedAs($admin);
     }
+
+    public function test_non_superadmin_cannot_create_or_revoke_token(): void
+    {
+        $regularUser = User::where('id', '!=', 129)->first();
+        $this->assertNotNull($regularUser);
+
+        // Attempt to create token
+        $response = $this->actingAs($regularUser)
+            ->post(route('backend.api_management.tokens.create'), [
+                'user_id' => $regularUser->id,
+                'name' => 'Unauthorized Token',
+            ]);
+        $response->assertStatus(403);
+
+        // Attempt to revoke token
+        $response2 = $this->actingAs($regularUser)
+            ->delete(route('backend.api_management.tokens.revoke', 1));
+        $response2->assertStatus(403);
+    }
+
+    public function test_user_without_token_is_blocked_from_api_dashboard(): void
+    {
+        $user = User::where('id', '!=', 129)
+            ->whereDoesntHave('tokens')
+            ->first();
+        
+        if (!$user) {
+            $user = User::factory()->create();
+        }
+
+        $this->actingAs($user)
+            ->get(route('backend.api_management.index'))
+            ->assertStatus(403);
+    }
+
+    public function test_user_with_token_can_access_endpoints_and_guide_tabs_only(): void
+    {
+        $user = User::where('id', '!=', 129)->first();
+        $this->assertNotNull($user);
+
+        // Issue a token to this user
+        $user->createToken('Research Sync Token');
+
+        $response = $this->actingAs($user)->get(route('backend.api_management.index'));
+        $response->assertStatus(200);
+
+        // Can see Endpoints and Developer Guide
+        $response->assertSee('ตรวจดู Endpoint &amp; ทดสอบเรียลไทม์', false);
+        $response->assertSee('คู่มือการเชื่อมต่อสำหรับนักพัฒนา');
+
+        // Cannot see Token Management tab or issue token button
+        $response->assertDontSee('ออก Bearer Token ใหม่');
+        $response->assertDontSee('id="createTokenModal"', false);
+    }
 }
