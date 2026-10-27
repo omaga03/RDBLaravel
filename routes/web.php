@@ -253,6 +253,15 @@ Route::prefix('backend')->name('backend.')->middleware(['auth', \App\Http\Middle
     Route::get('/rdb_project/search/researcher', [RdbProjectController::class, 'searchResearchers'])->name('rdb_project.search_researcher');
     // Removed dead routes rdb_project.search_depcou / rdb_project.search_major (controller methods never existed → HTTP 500)
 
+    // API & Bearer Token Management
+    Route::prefix('api-management')->name('api_management.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Backend\ApiManagementController::class, 'index'])->name('index');
+        Route::post('/tokens', [\App\Http\Controllers\Backend\ApiManagementController::class, 'createToken'])->name('tokens.create');
+        Route::delete('/tokens/{id}', [\App\Http\Controllers\Backend\ApiManagementController::class, 'revokeToken'])->name('tokens.revoke');
+        Route::delete('/users/{userId}/tokens', [\App\Http\Controllers\Backend\ApiManagementController::class, 'revokeAllUserTokens'])->name('tokens.revoke_all');
+        Route::post('/test-endpoint', [\App\Http\Controllers\Backend\ApiManagementController::class, 'testEndpoint'])->name('test_endpoint');
+    });
+
 });
 
 // Frontend Routes

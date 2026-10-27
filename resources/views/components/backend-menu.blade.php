@@ -302,12 +302,20 @@
                             @if($isSuperAdmin)
                             <li><hr class="dropdown-divider my-1"></li>
                             <li><div class="dropdown-header text-uppercase d-flex align-items-center"><i class="bi bi-shield-lock-fill me-1.5 text-warning"></i> ความปลอดภัยและระบบ</div></li>
+                            <li><a class="dropdown-item d-flex align-items-center {{ request()->is('backend/api-management*') || request()->routeIs('backend.api_management.*') ? 'active fw-bold' : '' }}" href="{{ route('backend.api_management.index') }}"><i class="bi bi-braces-asterisk me-2 text-primary"></i> จัดการ API &amp; Bearer Token</a></li>
                             <li><a class="dropdown-item d-flex align-items-center {{ request()->is('backend/settings/access-control*') || request()->routeIs('backend.settings.access_control') ? 'active fw-bold' : '' }}" href="{{ route('backend.settings.access_control') }}"><i class="bi bi-shield-lock-fill me-2 text-warning"></i> ควบคุมล็อกอิน & นโยบายดาวน์โหลด</a></li>
                             <li><a class="dropdown-item d-flex align-items-center {{ request()->is('backend/audit-logs*') || request()->routeIs('backend.audit_log.*') ? 'active fw-bold' : '' }}" href="{{ route('backend.audit_log.index') }}"><i class="bi bi-clock-history me-2 text-info"></i> ประวัติการใช้งานระบบ (Audit Trail)</a></li>
                             @endif
                         </ul>
                     </li>
                     @endif
+
+                    <!-- 9. บริการ API -->
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->is('backend/api-management*') || request()->routeIs('backend.api_management.*') ? 'active fw-bold text-primary' : '' }}" href="{{ route('backend.api_management.index') }}" title="ศูนย์บริหารจัดการบริการ API และ Bearer Token">
+                            <i class="bi bi-braces-asterisk text-primary me-1"></i> บริการ API
+                        </a>
+                    </li>
             </ul>
             @endif
         </div>

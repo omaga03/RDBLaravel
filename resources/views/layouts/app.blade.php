@@ -758,6 +758,11 @@
                                             <i class="bi bi-person-gear me-2 text-primary"></i> จัดการผู้ใช้งาน (Users)
                                         </a>
                                     @endif
+                                    @if(Auth::user()->canAccessFullBackend())
+                                        <a class="dropdown-item d-flex align-items-center {{ request()->routeIs('backend.api_management.*') ? 'active' : '' }}" href="{{ route('backend.api_management.index') }}">
+                                            <i class="bi bi-braces-asterisk me-2 text-primary"></i> จัดการ API &amp; Bearer Token
+                                        </a>
+                                    @endif
                                     <a class="dropdown-item d-flex align-items-center {{ request()->routeIs('backend.user.show') && request()->route('id') == Auth::id() ? 'active' : '' }}" href="{{ route('backend.user.show', Auth::id()) }}">
                                         <i class="bi bi-person-circle me-2 text-primary"></i> บัญชีของฉัน
                                     </a>
