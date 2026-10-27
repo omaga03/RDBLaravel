@@ -45,7 +45,11 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
     Route::post('login', [AuthController::class, 'token'])->name('api.v1.login');
 
     // Tier 2: All Modern RESTful Endpoints require Bearer Token (Sanctum)
-    Route::middleware('auth:sanctum')->group(function () {
+    // Non-SuperAdmin users are restricted to safe GET requests only
+    Route::middleware([
+        'auth:sanctum',
+        \App\Http\Middleware\EnsureSuperAdminForNonSafeApiMethods::class,
+    ])->group(function () {
         // Master Data
         Route::get('master/departments', [MasterDataController::class, 'departments'])->name('api.v1.master.departments');
         Route::get('master/years', [MasterDataController::class, 'years'])->name('api.v1.master.years');

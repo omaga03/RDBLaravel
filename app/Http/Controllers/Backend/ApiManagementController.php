@@ -432,7 +432,7 @@ class ApiManagementController extends Controller
                         'method' => 'POST',
                         'path' => '/api/v1/projects',
                         'alt_paths' => [],
-                        'auth' => 'Bearer Token Required (Ability: project:write)',
+                        'auth' => 'Bearer Token Required (Admin สูงสุดเท่านั้น - The Creator)',
                         'auth_type' => 'bearer',
                         'title' => 'Create Project with Research Team',
                         'desc' => 'สร้างโครงการวิจัยใหม่ บันทึกทีมนักวิจัยใน transaction เดียว พร้อมตรวจสอบผลรวมสัดส่วนต้องไม่เกิน 100%',

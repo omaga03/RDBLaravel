@@ -119,6 +119,12 @@ class ProjectController extends Controller
     public function store(StoreProjectRequest $request): JsonResponse
     {
         $user = $request->user();
+        if (!$user || !$user->isSuperAdmin()) {
+            return response()->json([
+                'message' => 'เฉพาะผู้ดูแลระบบระดับสูงสุด (The Creator) เท่านั้นที่มีสิทธิ์ส่งคำขอเพิ่มหรือแก้ไขข้อมูลผ่าน API (ผู้ใช้อื่นได้รับสิทธิ์เฉพาะคำขอแบบ GET เท่านั้น)',
+            ], 403);
+        }
+
         if ($user && method_exists($user, 'tokenCan')) {
             if (!$user->tokenCan('*') && !$user->tokenCan('project:write')) {
                 return response()->json(['message' => 'Token ไม่มีสิทธิ์ในการสร้างโครงการวิจัย'], 403);
@@ -198,6 +204,12 @@ class ProjectController extends Controller
     public function update(UpdateProjectRequest $request, string $id): JsonResponse
     {
         $user = $request->user();
+        if (!$user || !$user->isSuperAdmin()) {
+            return response()->json([
+                'message' => 'เฉพาะผู้ดูแลระบบระดับสูงสุด (The Creator) เท่านั้นที่มีสิทธิ์ส่งคำขอเพิ่มหรือแก้ไขข้อมูลผ่าน API (ผู้ใช้อื่นได้รับสิทธิ์เฉพาะคำขอแบบ GET เท่านั้น)',
+            ], 403);
+        }
+
         if ($user && method_exists($user, 'tokenCan')) {
             if (!$user->tokenCan('*') && !$user->tokenCan('project:write')) {
                 return response()->json(['message' => 'Token ไม่มีสิทธิ์ในการแก้ไขโครงการวิจัย'], 403);
@@ -272,6 +284,12 @@ class ProjectController extends Controller
     public function destroy(Request $request, string $id): JsonResponse
     {
         $user = $request->user();
+        if (!$user || !$user->isSuperAdmin()) {
+            return response()->json([
+                'message' => 'เฉพาะผู้ดูแลระบบระดับสูงสุด (The Creator) เท่านั้นที่มีสิทธิ์ส่งคำขอเพิ่มหรือแก้ไขข้อมูลผ่าน API (ผู้ใช้อื่นได้รับสิทธิ์เฉพาะคำขอแบบ GET เท่านั้น)',
+            ], 403);
+        }
+
         if ($user && method_exists($user, 'tokenCan')) {
             if (!$user->tokenCan('*') && !$user->tokenCan('rdb:admin')) {
                 return response()->json(['message' => 'Token ไม่มีสิทธิ์ในการลบโครงการวิจัย (ต้องการสิทธิ์ rdb:admin)'], 403);

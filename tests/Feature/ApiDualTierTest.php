@@ -279,4 +279,45 @@ class ApiDualTierTest extends TestCase
             ->assertStatus(200)
             ->assertJsonPath('message', 'ลบโครงการวิจัยสำเร็จ');
     }
+
+    public function test_non_superadmin_is_restricted_to_get_methods_only(): void
+    {
+        $regularUser = User::where('id', '!=', 129)->first();
+        $this->assertNotNull($regularUser);
+        $this->assertFalse($regularUser->isSuperAdmin());
+
+        Sanctum::actingAs($regularUser, ['*']);
+
+        // 1. GET requests are allowed for regular users with Bearer Token
+        $this->getJson('/api/v1/projects')
+            ->assertStatus(200);
+
+        $this->getJson('/api/v1/master/departments')
+            ->assertStatus(200);
+
+        $this->getJson('/api/v1/auth/me')
+            ->assertStatus(200);
+
+        // 2. POST mutating requests are BLOCKED with 403 Forbidden
+        $this->postJson('/api/v1/projects', [
+            'title_th' => 'โครงการทดสอบโดยผู้ใช้ที่ไม่ใช่ Super Admin',
+            'fiscal_year' => 2568,
+            'budget_amount' => 50000,
+            'department_id' => 2,
+        ])
+        ->assertStatus(403)
+        ->assertJsonPath('error', 'MethodNotAllowedForRole');
+
+        // 3. PUT mutating requests are BLOCKED with 403 Forbidden
+        $this->putJson('/api/v1/projects/1', [
+            'title_th' => 'แก้ไขโครงการโดยผู้ใช้ที่ไม่ใช่ Super Admin',
+        ])
+        ->assertStatus(403)
+        ->assertJsonPath('error', 'MethodNotAllowedForRole');
+
+        // 4. DELETE mutating requests are BLOCKED with 403 Forbidden
+        $this->deleteJson('/api/v1/projects/1')
+            ->assertStatus(403)
+            ->assertJsonPath('error', 'MethodNotAllowedForRole');
+    }
 }
