@@ -275,4 +275,55 @@ class ApiDualTierTest extends TestCase
         $this->deleteJson('/api/v1/projects/1')
         ->assertStatus(405);
     }
+
+    public function test_token_issuance_via_api_is_blocked_and_must_be_issued_by_superadmin(): void
+    {
+        // 1. Calling /api/v1/auth/token returns 403 Forbidden explaining Super Admin requirement
+        $this->postJson('/api/v1/auth/token', [
+            'username' => 'testuser',
+            'password' => 'password123',
+        ])
+        ->assertStatus(403)
+        ->assertJsonPath('error', 'TokenIssuanceRestrictedToSuperAdmin');
+
+        // 2. Calling alias /api/v1/login also returns 403 Forbidden
+        $this->postJson('/api/v1/login', [
+            'username' => 'testuser',
+            'password' => 'password123',
+        ])
+        ->assertStatus(403)
+        ->assertJsonPath('error', 'TokenIssuanceRestrictedToSuperAdmin');
+    }
+
+    public function test_v1_auth_logout_revokes_current_token(): void
+    {
+        $user = User::first();
+        $this->assertNotNull($user);
+
+        // 1. Create a token for the user
+        $tokenModel = $user->createToken('logout-verification-token', ['*']);
+        $plainToken = $tokenModel->plainTextToken;
+
+        // 2. Calling auth/me with this token succeeds
+        $this->withToken($plainToken)
+            ->getJson('/api/v1/auth/me')
+            ->assertStatus(200);
+
+        // 3. Calling auth/logout with this token successfully revokes/deletes it
+        $this->withToken($plainToken)
+            ->postJson('/api/v1/auth/logout')
+            ->assertStatus(200)
+            ->assertJsonPath('message', 'ออกจากระบบและเพิกถอน Token สำเร็จ');
+
+        // 4. Token is confirmed deleted from the database
+        $this->assertDatabaseMissing('personal_access_tokens', [
+            'id' => $tokenModel->accessToken->id,
+        ]);
+
+        // 5. Reset application auth state and verify subsequent request with the revoked token returns 401 Unauthorized
+        app('auth')->forgetGuards();
+        $this->withToken($plainToken)
+            ->getJson('/api/v1/auth/me')
+            ->assertStatus(401);
+    }
 }

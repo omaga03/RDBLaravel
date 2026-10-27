@@ -40,7 +40,7 @@ Route::middleware('throttle:60,1')->group(function () {
 
 // Modern RESTful API v1
 Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
-    // Authentication & Token Issuance (Public)
+    // Authentication: Token issuance via API is disabled (restricted to Super Admin via Backend only)
     Route::post('auth/token', [AuthController::class, 'token'])->name('api.v1.auth.token');
     Route::post('login', [AuthController::class, 'token'])->name('api.v1.login');
 

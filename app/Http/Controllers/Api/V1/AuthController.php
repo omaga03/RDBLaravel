@@ -12,60 +12,15 @@ use Illuminate\Validation\ValidationException;
 class AuthController extends Controller
 {
     /**
-     * Issue a personal access token for API authentication.
+     * Token issuance via API endpoint is strictly disabled.
+     * Tokens must be issued exclusively by Super Admin via the Backend Portal.
      */
     public function token(Request $request): JsonResponse
     {
-        $request->validate([
-            'username' => ['required', 'string'],
-            'password' => ['required', 'string'],
-            'device_name' => ['nullable', 'string', 'max:100'],
-        ]);
-
-        $username = trim($request->input('username'));
-        $user = User::where('username', $username)
-            ->orWhere('email', $username)
-            ->first();
-
-        if (!$user || !Hash::check($request->input('password'), $user->password)) {
-            throw ValidationException::withMessages([
-                'username' => ['ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง'],
-            ]);
-        }
-
-        // Determine token abilities based on role
-        $abilities = ['project:read', 'publication:read'];
-
-        $isAdmin = false;
-        if (method_exists($user, 'hasRole')) {
-            if ($user->hasRole('The Creator') || $user->hasRole('Admin Research') || $user->hasRole('Admin Project')) {
-                $isAdmin = true;
-            }
-        }
-
-        if ($isAdmin) {
-            $abilities = ['*'];
-        } elseif ($user->canAccessFullBackend()) {
-            $abilities[] = 'project:write';
-            $abilities[] = 'publication:write';
-        }
-
-        $deviceName = $request->input('device_name', 'api-client');
-        $token = $user->createToken($deviceName, $abilities)->plainTextToken;
-
         return response()->json([
-            'token' => $token,
-            'token_type' => 'Bearer',
-            'abilities' => $abilities,
-            'user' => [
-                'id' => (string) $user->id,
-                'name' => (string) $user->name,
-                'username' => (string) $user->username,
-                'email' => (string) $user->email,
-                'researcher_id' => (string) ($user->researcher_id ?? ''),
-                'department_id' => (string) ($user->onboarding_department_id ?? $user->researcher?->department_id ?? ''),
-            ],
-        ]);
+            'message' => 'ไม่อนุญาตให้ออก Bearer Token ผ่าน API โดยตรง การขอรับ Token ใหม่ต้องให้ผู้ดูแลระบบระดับสูงสุด (Super Admin) สร้างให้ผ่านศูนย์บริหารจัดการ API หลังบ้านเท่านั้น',
+            'error' => 'TokenIssuanceRestrictedToSuperAdmin',
+        ], 403);
     }
 
     /**

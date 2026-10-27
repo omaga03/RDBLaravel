@@ -343,22 +343,6 @@ class ApiManagementController extends Controller
                 'description' => 'บริการ API ยุคใหม่ ปลอดภัยด้วย Bearer Token (Sanctum), มีระบบ Resource Transformer, รองรับ Pagination, Search, Sorting และ Atomic Transaction',
                 'items' => [
                     [
-                        'id' => 'v1-auth-token',
-                        'method' => 'POST',
-                        'path' => '/api/v1/auth/token',
-                        'alt_paths' => ['/api/v1/login'],
-                        'auth' => 'Public (Credentials Required)',
-                        'auth_type' => 'public',
-                        'title' => 'Issue Personal Access Token',
-                        'desc' => 'ขอรับ Bearer Token สำหรับเรียกใช้งาน API โดยใช้ username และ password ของระบบ',
-                        'params' => [
-                            ['name' => 'username', 'type' => 'string', 'desc' => 'ชื่อผู้ใช้งาน หรือ อีเมล'],
-                            ['name' => 'password', 'type' => 'string', 'desc' => 'รหัสผ่าน'],
-                            ['name' => 'device_name', 'type' => 'string', 'desc' => 'ชื่ออุปกรณ์/ระบบที่เชื่อมต่อ (Optional)'],
-                        ],
-                        'sample_url' => '/api/v1/auth/token',
-                    ],
-                    [
                         'id' => 'v1-auth-me',
                         'method' => 'GET',
                         'path' => '/api/v1/auth/me',

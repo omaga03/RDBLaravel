@@ -586,11 +586,24 @@
             <div class="card border-0 shadow-sm rounded-3 p-4 mb-4">
                 <h4 class="fw-bold text-primary mb-3 d-flex align-items-center gap-2">
                     <i class="bi bi-code-square"></i>
-                    <span>ตัวอย่างโค้ดการเชื่อมต่อ API สำหรับนักพัฒนา (Developer Code Snippets)</span>
+                    <span>คู่มือและตัวอย่างโค้ดการเชื่อมต่อ API สำหรับนักพัฒนา (Developer Guide)</span>
                 </h4>
-                <p class="text-body-secondary mb-4">
+                <p class="text-body-secondary mb-3">
                     ระบบ API ของสถาบันวิจัยและพัฒนา มหาวิทยาลัยราชภัฏเพชรบูรณ์ ทำงานบนมาตรฐาน HTTP RESTful รองรับการเรียกใช้จากทุกภาษาและ Framework
                 </p>
+
+                <!-- Security & Token Policy Callout -->
+                <div class="alert alert-info border-0 rounded-3 mb-4 d-flex align-items-start gap-3 py-3">
+                    <i class="bi bi-shield-lock-fill fs-3 text-info mt-1"></i>
+                    <div>
+                        <div class="fw-bold text-info-emphasis mb-1">นโยบายความปลอดภัยและการขอรับ Bearer Token</div>
+                        <ul class="small text-secondary mb-0 ps-3">
+                            <li><strong>การขอรับ Bearer Token ใหม่:</strong> ระบบไม่อนุญาตให้ออก Token ผ่าน API โดยตรง สมาชิก/นักวิจัยต้องติดต่อขอให้<strong>ผู้ดูแลระบบระดับสูงสุด (Super Admin)</strong> เป็นผู้ออก Token ให้ผ่านศูนย์บริหารจัดการ API หลังบ้านเท่านั้น</li>
+                            <li><strong>มาตรฐาน Read-Only:</strong> ระบบ API สำหรับนักวิจัยเปิดให้บริการเฉพาะการเรียกดูข้อมูล (คำขอแบบ <code>GET</code> เท่านั้น)</li>
+                            <li><strong>การเพิกถอน Token ด้วยตนเอง (Self-Revocation):</strong> หากท่านเลิกใช้งาน Token ใด สามารถส่งคำขอ <code>POST /api/v1/auth/logout</code> พร้อมแนบ Bearer Token เพื่อลบ Token นั้นออกจากฐานข้อมูลได้ทันที</li>
+                        </ul>
+                    </div>
+                </div>
 
                 <!-- Code Carousel / Language Tabs -->
                 <ul class="nav nav-tabs mb-3" id="codeLangTabs" role="tablist">
@@ -617,6 +630,11 @@ curl -X GET "http://laravel_rdb.test/rdbproject/jsonprojectall?dep=2&year=2567" 
 
 # 2. เรียกดูข้อมูลด้วย RESTful API v1 พร้อม Bearer Token
 curl -X GET "http://laravel_rdb.test/api/v1/projects?dep=2&year=2567" \
+     -H "Accept: application/json" \
+     -H "Authorization: Bearer YOUR_BEARER_TOKEN"
+
+# 3. เพิกถอน Token ของตนเองเมื่อเลิกใช้งาน (Self Token Deletion)
+curl -X POST "http://laravel_rdb.test/api/v1/auth/logout" \
      -H "Accept: application/json" \
      -H "Authorization: Bearer YOUR_BEARER_TOKEN"</code></pre>
                     </div>
