@@ -223,6 +223,10 @@ class ApiManagementController extends Controller
 
         $startTime = microtime(true);
 
+        // Keep reference to the current main request and session to prevent session corruption
+        $originalRequest = request();
+        $originalSession = $request->hasSession() ? $request->session() : null;
+
         try {
             // Setup internal request environment
             $serverVars = [
@@ -233,7 +237,16 @@ class ApiManagementController extends Controller
             }
 
             $subRequest = Request::create($path, $method, [], [], [], $serverVars);
-            $subResponse = app()->handle($subRequest);
+
+            // Inherit session and cookies so StartSession middleware re-uses active session instead of destroying it
+            if ($originalSession) {
+                $subRequest->setLaravelSession($originalSession);
+                $subRequest->cookies->add($request->cookies->all());
+            }
+
+            // Dispatch directly through the router
+            app()->instance('request', $subRequest);
+            $subResponse = app('router')->dispatch($subRequest);
             $durationMs = round((microtime(true) - $startTime) * 1000, 2);
 
             $statusCode = $subResponse->getStatusCode();
@@ -256,6 +269,13 @@ class ApiManagementController extends Controller
                 'error' => $e->getMessage(),
                 'url' => url($path),
             ], 500);
+        } finally {
+            // Guarantee original request and session are restored in the container
+            app()->instance('request', $originalRequest);
+            \Illuminate\Support\Facades\Facade::clearResolvedInstance('request');
+            if ($originalSession) {
+                $originalRequest->setLaravelSession($originalSession);
+            }
         }
     }
 

@@ -105,5 +105,17 @@ class ApiManagementBackendTest extends TestCase
 
         $this->assertArrayHasKey('duration_ms', $response->json());
         $this->assertArrayHasKey('data', $response->json());
+        $this->assertAuthenticatedAs($admin);
+
+        // Verify that testing a legacy web-middleware endpoint also preserves admin authentication
+        $legacyResponse = $this->actingAs($admin)
+            ->postJson(route('backend.api_management.test_endpoint'), [
+                'path' => '/rdbproject/jsonprojectall?dep=2',
+                'method' => 'GET',
+            ]);
+
+        $legacyResponse->assertStatus(200)
+            ->assertJsonPath('success', true);
+        $this->assertAuthenticatedAs($admin);
     }
 }

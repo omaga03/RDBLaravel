@@ -488,7 +488,7 @@
                         </div>
 
                         <div class="card-body p-4">
-                            <form id="liveTesterForm" onsubmit="executeTestCall(event)">
+                            <form id="liveTesterForm" class="no-loading" onsubmit="event.preventDefault(); executeTestCall();">
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold">HTTP Method &amp; Endpoint Path:</label>
                                     <div class="input-group">
@@ -512,7 +512,7 @@
                                     <input type="text" id="testerToken" class="form-control font-monospace small" placeholder="ใส่ Bearer Token หากจำเป็น (ไม่ต้องใส่คำว่า Bearer)">
                                 </div>
 
-                                <button type="submit" id="testerSubmitBtn" class="btn btn-success w-100 d-flex align-items-center justify-content-center gap-2 py-2 fw-semibold">
+                                <button type="button" id="testerSubmitBtn" onclick="executeTestCall()" class="btn btn-success w-100 d-flex align-items-center justify-content-center gap-2 py-2 fw-semibold">
                                     <i class="bi bi-send-fill" id="testerSubmitIcon"></i>
                                     <span id="testerSubmitText">ส่งคำขอเรียกดูข้อมูล (Send Request)</span>
                                 </button>
@@ -860,81 +860,133 @@ else:
         @endif
     }
 
-    // Execute live test call via proxy AJAX
-    async function executeTestCall(e) {
-        e.preventDefault();
-        
-        const path = document.getElementById('testerPath').value;
+    // Escape HTML characters for code block rendering
+    function escapeHtml(text) {
+        if (typeof text !== 'string') text = String(text);
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    // Execute live test call directly via client-side fetch (zero session interference)
+    async function executeTestCall() {
+        const pathInput = document.getElementById('testerPath');
+        let path = pathInput ? pathInput.value.trim() : '';
+        if (!path) {
+            alert('กรุณาระบุ Endpoint Path');
+            return;
+        }
+
         const method = document.getElementById('testerMethod').value;
-        const token = document.getElementById('testerToken').value;
+        const token = document.getElementById('testerToken').value.trim();
 
         const btn = document.getElementById('testerSubmitBtn');
-        const btnText = document.getElementById('testerSubmitText');
-        const btnIcon = document.getElementById('testerSubmitIcon');
         const statusBadge = document.getElementById('testerStatusBadge');
         const metricsBar = document.getElementById('testerMetricsBar');
         const resStatusBadge = document.getElementById('resStatusBadge');
         const resDurationBadge = document.getElementById('resDurationBadge');
         const responseBox = document.getElementById('testerResponseBox');
 
+        // Save original button state and show loading
+        const originalBtnHtml = btn.innerHTML;
         btn.disabled = true;
-        btnText.innerText = 'กำลังส่งคำขอ...';
-        btnIcon.className = 'spinner-border spinner-border-sm me-1';
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> กำลังส่งคำขอ...';
+        
         statusBadge.className = 'badge bg-warning text-dark';
         statusBadge.innerText = 'กำลังเรียกดูข้อมูล...';
 
-        try {
-            const res = await fetch("{{ route('backend.api_management.test_endpoint') }}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({
-                    path: path,
-                    method: method,
-                    bearer_token: token
-                })
-            });
+        const startTime = performance.now();
 
-            const result = await res.json();
-            
+        try {
+            // Build full URL for direct client-side fetch
+            const fullUrl = path.startsWith('http://') || path.startsWith('https://') 
+                ? path 
+                : (window.location.origin + '/' + path.replace(/^\//, ''));
+
+            const headers = {
+                'Accept': 'application/json'
+            };
+            if (token) {
+                headers['Authorization'] = 'Bearer ' + token;
+            }
+
+            const fetchOptions = {
+                method: method,
+                headers: headers
+            };
+
+            const res = await fetch(fullUrl, fetchOptions);
+            const durationMs = Math.round(performance.now() - startTime);
+
+            let payload;
+            const contentType = res.headers.get('content-type') || '';
+            if (contentType.includes('application/json')) {
+                payload = await res.json();
+            } else {
+                const text = await res.text();
+                try {
+                    payload = JSON.parse(text);
+                } catch {
+                    payload = text;
+                }
+            }
+
             // Render metrics
             metricsBar.classList.remove('d-none');
-            resDurationBadge.innerText = `${result.duration_ms || 0} ms`;
-            
-            if (result.status_code >= 200 && result.status_code < 300) {
+            resDurationBadge.innerText = `${durationMs} ms`;
+
+            if (res.status >= 200 && res.status < 300) {
                 resStatusBadge.className = 'badge bg-success';
-                resStatusBadge.innerText = `${result.status_code} OK`;
+                resStatusBadge.innerText = `${res.status} OK`;
                 statusBadge.className = 'badge bg-success';
                 statusBadge.innerText = 'สำเร็จ';
-            } else if (result.status_code === 422) {
+            } else if (res.status === 401) {
                 resStatusBadge.className = 'badge bg-warning text-dark';
-                resStatusBadge.innerText = `${result.status_code} Unprocessable`;
+                resStatusBadge.innerText = `401 Unauthorized`;
                 statusBadge.className = 'badge bg-warning text-dark';
-                statusBadge.innerText = 'Validation Error';
+                statusBadge.innerText = 'ต้องยืนยันตัวตน (Bearer Token)';
+            } else if (res.status === 403) {
+                resStatusBadge.className = 'badge bg-danger';
+                resStatusBadge.innerText = `403 Forbidden`;
+                statusBadge.className = 'badge bg-danger';
+                statusBadge.innerText = 'ไม่มีสิทธิ์เข้าถึง (Abilities)';
+            } else if (res.status === 404) {
+                resStatusBadge.className = 'badge bg-secondary';
+                resStatusBadge.innerText = `404 Not Found`;
+                statusBadge.className = 'badge bg-secondary';
+                statusBadge.innerText = 'ไม่พบ Endpoint หรือข้อมูล';
+            } else if (res.status === 422) {
+                resStatusBadge.className = 'badge bg-warning text-dark';
+                resStatusBadge.innerText = `422 Unprocessable`;
+                statusBadge.className = 'badge bg-warning text-dark';
+                statusBadge.innerText = 'ข้อมูลไม่ถูกต้อง';
             } else {
                 resStatusBadge.className = 'badge bg-danger';
-                resStatusBadge.innerText = `${result.status_code} Error`;
+                resStatusBadge.innerText = `${res.status} ${res.statusText || 'Error'}`;
                 statusBadge.className = 'badge bg-danger';
                 statusBadge.innerText = 'ผิดพลาด';
             }
 
             // Render JSON
-            responseBox.innerHTML = `<code>${JSON.stringify(result.data, null, 2)}</code>`;
+            const formattedJson = typeof payload === 'object' ? JSON.stringify(payload, null, 2) : payload;
+            responseBox.innerHTML = `<code>${escapeHtml(formattedJson)}</code>`;
 
         } catch (err) {
+            const durationMs = Math.round(performance.now() - startTime);
             metricsBar.classList.remove('d-none');
+            resDurationBadge.innerText = `${durationMs} ms`;
             resStatusBadge.className = 'badge bg-danger';
             resStatusBadge.innerText = 'Network Error';
             statusBadge.className = 'badge bg-danger';
             statusBadge.innerText = 'ผิดพลาด';
-            responseBox.innerHTML = `<code>${JSON.stringify({ error: err.message }, null, 2)}</code>`;
+            responseBox.innerHTML = `<code>${escapeHtml(JSON.stringify({ error: err.message || 'Network request failed' }, null, 2))}</code>`;
         } finally {
+            // Restore button state
             btn.disabled = false;
-            btnText.innerText = 'ส่งคำขอเรียกดูข้อมูล (Send Request)';
-            btnIcon.className = 'bi bi-send-fill';
+            btn.innerHTML = originalBtnHtml;
         }
     }
 
