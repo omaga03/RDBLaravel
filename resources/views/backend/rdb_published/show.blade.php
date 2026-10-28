@@ -52,9 +52,6 @@
             'รายละเอียดผลงาน' => ''
         ]"
     >
-        <a href="{{ route('backend.rdb_published.export_dspace', $item->id) }}" class="btn btn-outline-info d-inline-flex justify-content-center align-items-center shadow-sm" style="height: 38px; font-size: 0.85rem;" title="ส่งออกข้อมูลเข้าคลังปัญญา DSpace (Simple Archive Format)">
-            <i class="bi bi-file-earmark-zip me-1.5"></i> ส่งออก DSpace
-        </a>
         @if($item->workflow_status === 'published' && auth()->user()->can('requestUnlock', $item))
             <button type="button" class="btn btn-warning d-inline-flex justify-content-center align-items-center" style="min-width: 105px; height: 38px; font-size: 0.85rem;" data-bs-toggle="modal" data-bs-target="#requestUnlockModal" data-id="{{ $item->id }}" data-type="published" data-title="{{ $item->pub_name }}">
                 <i class="bi bi-unlock me-1.5"></i> ขอแก้ไข
@@ -305,6 +302,13 @@
                             <i class="bi bi-file-earmark-pdf text-danger" style="font-size: 3rem;"></i>
                         </div>
                         <h6 class="text-break mb-2">{{ $item->pub_file ?: basename($item->pf_path) }}</h6>
+                        @if(!empty($item->pub_numfile))
+                            <div class="mb-2">
+                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-2.5 py-1" style="font-variant-numeric: tabular-nums;">
+                                    <i class="bi bi-file-earmark-text me-1"></i> {{ $item->pub_numfile }} หน้า
+                                </span>
+                            </div>
+                        @endif
                         <p class="text-muted small mb-3">
                             <i class="bi bi-eye"></i> ดาวน์โหลดไฟล์ {{ number_format($item->pub_download ?? ($item->pub_view_file ?? 0)) }} ครั้ง
                         </p>

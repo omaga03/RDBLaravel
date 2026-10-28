@@ -220,6 +220,11 @@
                                     @if($project->status)
                                         <span class="badge" style="background-color: {{ $project->status->ps_color ?? '#6c757d' }}; color: #fff; font-size: 0.75rem;">{{ $project->status->ps_name }}</span>
                                     @endif
+                                    @if($project->pro_page_num)
+                                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-2 py-0.5" style="font-variant-numeric: tabular-nums;" title="จำนวนหน้าเล่มรายงาน">
+                                            <i class="bi bi-file-earmark-text me-1"></i>{{ $project->pro_page_num }} หน้า
+                                        </span>
+                                    @endif
                                     @if(request('search') && !empty($project->match_sources))
                                         <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" 
                                               data-bs-toggle="tooltip" 

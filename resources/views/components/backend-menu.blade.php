@@ -177,6 +177,7 @@
                             <li><div class="dropdown-header text-uppercase small fw-bold d-flex align-items-center"><i class="bi bi-download me-1.5 text-secondary"></i> การส่งออกข้อมูล</div></li>
                             @if($canDspacePublished)
                             <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdb_published.dspace_index') }}"><i class="bi bi-box-arrow-up-right me-2 text-info"></i>ส่งออก DSpace (คลังปัญญา)</a></li>
+                            <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdb_published.dspace_check') }}"><i class="bi bi-file-earmark-check me-2 text-primary"></i>ตรวจสอบจำนวนหน้า & สถานะ DSpace</a></li>
                             @endif
                             <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdb_published.export') }}"><i class="bi bi-file-earmark-spreadsheet me-2 text-success"></i>ส่งออกข้อมูลตีพิมพ์ (CSV)</a></li>
                         </ul>

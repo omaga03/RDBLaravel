@@ -2,145 +2,206 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    <!-- Page Header & Breadcrumb -->
+    <!-- Breadcrumb & Top Bar -->
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
         <div>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-1">
                     <li class="breadcrumb-item"><a href="{{ route('backend.site.index') }}" class="text-decoration-none">แดชบอร์ด</a></li>
                     <li class="breadcrumb-item"><a href="{{ route('backend.rdb_project.index') }}" class="text-decoration-none">จัดการโครงการวิจัย</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">ส่งออก DSpace</li>
+                    <li class="breadcrumb-item active" aria-current="page">ส่งออก DSpace (Batch Mode)</li>
                 </ol>
             </nav>
-            <h3 class="mb-0 fw-semibold text-body page-title">
-                <i class="bi bi-file-earmark-zip me-2 text-info"></i>ส่งออกแพ็กเกจคลังปัญญา DSpace (Simple Archive Format)
-            </h3>
         </div>
-        <div class="d-flex align-items-center gap-2">
+        <div>
             <a href="{{ route('backend.rdb_project.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center shadow-sm" style="height: 38px;">
                 <i class="bi bi-arrow-left me-1.5"></i> กลับหน้ารายการ
             </a>
         </div>
     </div>
 
-    <!-- Alert / Explanation -->
-    <div class="alert alert-info border-0 shadow-sm d-flex align-items-center gap-3 mb-4">
-        <i class="bi bi-info-circle-fill fs-4 text-info"></i>
-        <div>
-            <strong>DSpace Simple Archive Format (SAF):</strong>
-            ระบบจะสร้างไฟล์ <code>.zip</code> ที่บรรจุ <code>dublin_core.xml</code>, <code>metadata_dspace.xml</code>, <code>contents</code> พร้อมไฟล์รายงานฉบับเต็ม PDF เพื่อนำเข้าสู่ระบบคลังปัญญาสถาบัน (Institutional Repository) ได้ทันที
-        </div>
-    </div>
-
-    <!-- Filter Form -->
-    <div class="card shadow-sm border mb-4">
-        <div class="card-body">
-            <form action="{{ route('backend.rdb_project.dspace_index') }}" method="GET" class="row g-3">
-                <div class="col-md-5">
-                    <label class="form-label small fw-semibold">ค้นหาชื่อโครงการ / รหัส</label>
-                    <input type="text" name="q" value="{{ request('q') }}" class="form-control" placeholder="พิมพ์ชื่อโครงการ หรือ รหัสโครงการ...">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label small fw-semibold">ปีงบประมาณ</label>
-                    <select name="year_id" class="form-select">
-                        <option value="">-- ทั้งหมดทุกปี --</option>
-                        @foreach($years as $year)
-                            <option value="{{ $year->year_id }}" {{ request('year_id') == $year->year_id ? 'selected' : '' }}>{{ $year->year_name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label small fw-semibold">หน่วยงาน / คณะ</label>
-                    <select name="department_id" class="form-select">
-                        <option value="">-- ทั้งหมดทุกหน่วยงาน --</option>
-                        @foreach($departments as $dept)
-                            <option value="{{ $dept->department_id }}" {{ request('department_id') == $dept->department_id ? 'selected' : '' }}>{{ $dept->department_nameTH }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-1 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> ค้น</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Table -->
-    <div class="card shadow-sm border mb-4">
-        <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center py-3">
-            <h5 class="mb-0 fw-bold text-body">
-                <i class="bi bi-list-ul me-2 text-primary"></i>รายการโครงการวิจัยที่พร้อมส่งออก
-                <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle rounded-pill ms-2">{{ number_format($items->total()) }} รายการ</span>
-            </h5>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="text-center" style="width: 70px;">รหัส</th>
-                            <th>ชื่อโครงการ</th>
-                            <th style="width: 140px;">ปี / หน่วยงาน</th>
-                            <th style="width: 180px;">คณะผู้วิจัย</th>
-                            <th class="text-center" style="width: 120px;">ไฟล์เล่มรายงาน</th>
-                            <th class="text-center" style="width: 160px;">ดำเนินการ</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($items as $item)
-                        <tr>
-                            <td class="text-center fw-bold text-secondary">{{ $item->pro_id }}</td>
-                            <td>
-                                @if($item->pro_code)
-                                    <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle me-1">{{ $item->pro_code }}</span>
-                                @endif
-                                <a href="{{ route('backend.rdb_project.show', $item->pro_id) }}" class="fw-semibold text-decoration-none text-body hover-primary">
-                                    {{ $item->pro_nameTH ?: $item->pro_nameEN }}
-                                </a>
-                            </td>
-                            <td>
-                                <div><i class="bi bi-calendar3 me-1 text-primary"></i>{{ $item->year->year_name ?? '-' }}</div>
-                                <small class="text-body-secondary">{{ $item->department->department_nameTH ?? '-' }}</small>
-                            </td>
-                            <td>
-                                @php
-                                    $authorNames = [];
-                                    foreach ($item->rdbProjectWorks as $w) {
-                                        if ($w->researcher) {
-                                            $prefix = $w->researcher->prefix->prefix_nameTH ?? '';
-                                            $authorNames[] = trim("{$prefix}{$w->researcher->researcher_fname} {$w->researcher->researcher_lname}");
-                                        }
-                                    }
-                                @endphp
-                                <small class="text-body-secondary">{{ !empty($authorNames) ? implode(', ', array_slice($authorNames, 0, 2)) . (count($authorNames) > 2 ? '...' : '') : '-' }}</small>
-                            </td>
-                            <td class="text-center">
-                                @if($item->pro_file || $item->pro_file_path)
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-file-earmark-check me-1"></i>มีไฟล์ PDF</span>
-                                @else
-                                    <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">เฉพาะข้อมูล</span>
-                                @endif
-                            </td>
-                            <td class="text-center">
-                                <a href="{{ route('backend.rdb_project.export_dspace', $item->pro_id) }}" class="btn btn-outline-info btn-sm d-inline-flex align-items-center shadow-sm">
-                                    <i class="bi bi-download me-1.5"></i> ส่งออก ZIP
-                                </a>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="6" class="text-center py-4 text-body-secondary">ไม่พบข้อมูลโครงการวิจัยตามเงื่อนไข</td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+    <!-- Main Container Card -->
+    <div class="card shadow-sm border rounded-3 p-4 mb-4 bg-body">
+        <!-- Card Header Row -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 pb-3 mb-3 border-bottom">
+            <div class="d-flex align-items-center">
+                <h3 class="mb-0 fw-bold text-body d-flex align-items-center gap-2">
+                    <i class="bi bi-box-arrow-up-right fs-4 text-body"></i>
+                    <span>ระบบส่งออก DSpace (Batch Mode)</span>
+                </h3>
+                @if(!empty($projectIds))
+                    <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle ms-3 px-2.5 py-1.5 rounded-pill" style="font-variant-numeric: tabular-nums;">
+                        รอส่งออก {{ number_format(count($projectIds)) }} รายการ
+                    </span>
+                @endif
             </div>
-            @if($items->hasPages())
-            <div class="p-3 border-top d-flex justify-content-end">
-                {{ $items->links() }}
+
+            <div class="d-flex align-items-center gap-2">
+                <label for="change-chunk-size" class="text-body-secondary small mb-0 fw-normal">แบ่งกลุ่มละ:</label>
+                <select id="change-chunk-size" class="form-select form-select-sm" style="min-width: 125px; width: auto;">
+                    @foreach($allowedPerPage as $val)
+                        <option value="{{ $val }}" {{ $val == $perPage ? 'selected' : '' }}>{{ $val }} รายการ</option>
+                    @endforeach
+                </select>
             </div>
-            @endif
+        </div>
+
+        <!-- Alert Notification Box (Amber) -->
+        <div class="alert text-white fw-medium d-flex align-items-center gap-2 mb-4 shadow-sm" style="background-color: #f39c12; border: none; border-radius: 6px; padding: 12px 18px;">
+            <div>
+                <strong>คำแนะนำ:</strong> เมื่อดาวน์โหลดเสร็จแล้ว ให้กดปุ่ม <i class="bi bi-check-lg fw-bold"></i> เพื่อทำเครื่องหมายว่าส่งออกแล้ว
+            </div>
+        </div>
+
+        <!-- Batch Cards Grid -->
+        <div class="d-flex flex-wrap gap-3">
+            @forelse($chunks as $index => $chunk)
+                @php
+                    $firstId = reset($chunk);
+                    $lastId = end($chunk);
+                    $count = count($chunk);
+                    $batchId = "batch-" . ($index + 1);
+                @endphp
+                <div class="batch-card-wrapper position-relative" id="{{ $batchId }}">
+                    <form action="{{ route('backend.rdb_project.export_dspace_batch') }}" method="POST" class="d-inline">
+                        @csrf
+                        <input type="hidden" name="ids_json" value='@json($chunk)'>
+                        <input type="hidden" name="part_label" value="{{ $index + 1 }}">
+
+                        <button type="submit" 
+                                class="btn main-download-btn shadow-sm text-start"
+                                onclick="return confirm('เริ่มดาวน์โหลดชุดที่ {{ $index + 1 }} ใช่หรือไม่?')">
+                            <div class="d-flex align-items-center mb-1">
+                                <i class="bi bi-download fs-4 me-2 text-body"></i>
+                                <strong class="fs-5 text-body">ชุดที่ {{ $index + 1 }}</strong>
+                            </div>
+                            <div class="text-body-secondary small mt-1 ps-1" style="font-variant-numeric: tabular-nums;">
+                                ID: {{ $firstId }} – {{ $lastId }} <span class="ms-1">({{ $count }} รายการ)</span>
+                            </div>
+                        </button>
+                    </form>
+
+                    <!-- Round Status Update Button -->
+                    <button type="button" 
+                            class="btn btn-success btn-update-status rounded-circle position-absolute" 
+                            title="ทำเครื่องหมายว่าส่งออกแล้ว"
+                            data-ids='@json($chunk)'
+                            style="top: 8px; right: 8px; width: 28px; height: 28px; padding: 0; display: flex; align-items: center; justify-content: center; z-index: 5;">
+                        <i class="bi bi-check-lg fw-bold" style="font-size: 1rem;"></i>
+                    </button>
+                </div>
+            @empty
+                <div class="w-100 py-5 text-center text-body-secondary">
+                    <i class="bi bi-check2-circle text-success fs-1 d-block mb-3"></i>
+                    <h5 class="fw-semibold text-body">ไม่มีโครงการวิจัยที่รอส่งออก DSpace ในขณะนี้</h5>
+                    <p class="text-body-secondary small mb-0">โครงการวิจัยที่เสร็จสิ้นทั้งหมดได้รับการส่งออกไปยัง DSpace เรียบร้อยแล้ว หรือยังไม่มีโครงการใหม่ที่ตรงตามเงื่อนไข</p>
+                </div>
+            @endforelse
         </div>
     </div>
 </div>
+
+<style>
+.main-download-btn {
+    border: 1px solid var(--bs-border-color);
+    border-radius: 8px;
+    background-color: var(--bs-body-bg);
+    min-width: 240px;
+    padding: 14px 18px;
+    transition: all 0.25s ease;
+    cursor: pointer;
+}
+.main-download-btn:hover {
+    border-color: #0d6efd;
+    background-color: var(--bs-body-bg);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+.batch-card-wrapper {
+    display: inline-block;
+}
+.batch-done {
+    opacity: 0.45;
+    filter: grayscale(1);
+    pointer-events: none;
+}
+</style>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Dropdown pagination / chunk size change
+    const chunkSelect = document.getElementById('change-chunk-size');
+    if (chunkSelect) {
+        chunkSelect.addEventListener('change', function () {
+            const perPage = this.value;
+            const url = new URL(window.location.href);
+            url.searchParams.set('per_page', perPage);
+            window.location.href = url.href;
+        });
+    }
+
+    // Status update via AJAX
+    const statusButtons = document.querySelectorAll('.btn-update-status');
+    statusButtons.forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const wrapper = this.closest('.batch-card-wrapper');
+            const rawIds = this.getAttribute('data-ids');
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') 
+                           || document.querySelector('input[name="_token"]')?.value;
+
+            let ids = [];
+            try {
+                ids = JSON.parse(rawIds);
+            } catch (err) {
+                ids = rawIds ? [rawIds] : [];
+            }
+
+            if (!confirm('ต้องการอัพเดทสถานะชุดนี้เป็น "ส่งออกแล้ว" ใช่หรือไม่?')) {
+                return;
+            }
+
+            // Spinner
+            const originalHtml = this.innerHTML;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm text-white" style="width: 14px; height: 14px;" role="status"></span>';
+            this.disabled = true;
+
+            fetch("{{ route('backend.rdb_project.update_dspace_batch_status') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ ids: ids })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('HTTP error ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    wrapper.classList.add('batch-done');
+                    this.classList.remove('btn-success');
+                    this.classList.add('btn-secondary');
+                    this.innerHTML = '<i class="bi bi-check2-all fw-bold"></i>';
+                } else {
+                    alert('เกิดข้อผิดพลาด: ' + (data.message || 'ไม่สามารถอัปเดตได้'));
+                    this.innerHTML = originalHtml;
+                    this.disabled = false;
+                }
+            })
+            .catch(err => {
+                alert('ไม่สามารถติดต่อเซิร์ฟเวอร์ได้: ' + err.message);
+                this.innerHTML = originalHtml;
+                this.disabled = false;
+            });
+        });
+    });
+});
+</script>
+@endpush
 @endsection

@@ -5,9 +5,24 @@ namespace App\Services;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class FileUploadService
 {
+    protected ?DSpaceExportService $dspaceService = null;
+
+    public function __construct(?DSpaceExportService $dspaceService = null)
+    {
+        $this->dspaceService = $dspaceService;
+    }
+
+    protected function getDspaceService(): DSpaceExportService
+    {
+        if ($this->dspaceService === null) {
+            $this->dspaceService = app(DSpaceExportService::class);
+        }
+        return $this->dspaceService;
+    }
     // ชนิดไฟล์ที่อนุญาต
     private const ALLOWED_MIME_TYPES = [
         'application/pdf' => 'pdf',
@@ -160,13 +175,41 @@ class FileUploadService
             throw new \Exception('Failed to store file. Storage path is empty after upload.');
         }
 
+        // Auto-count PDF pages if file is PDF
+        $pageCount = null;
+        $mimeType = $file->getMimeType();
+        $isPdf = ($mimeType === 'application/pdf') || str_ends_with(strtolower($safeFileName), '.pdf');
+        if ($isPdf) {
+            try {
+                $fullDiskPath = Storage::disk('public')->path($storagePath);
+                $counted = $this->getDspaceService()->countPdfPages($fullDiskPath);
+                if ($counted > 0) {
+                    $pageCount = $counted;
+                }
+            } catch (\Throwable $e) {
+                Log::warning("Could not count pages for uploaded PDF {$storagePath}: " . $e->getMessage());
+            }
+        }
+
         return [
             'path' => $storagePath,
             'safe_name' => $safeFileName,
             'original_name' => $file->getClientOriginalName(),
             'size' => $file->getSize(),
-            'mime_type' => $file->getMimeType(),
+            'mime_type' => $mimeType,
+            'page_count' => $pageCount,
         ];
+    }
+
+    /**
+     * นับจำนวนหน้าของไฟล์ PDF ด้วยเอนจินความแม่นยำสูง (Poppler pdftotext / Smalot / FPDI fallback)
+     *
+     * @param string $filePath พาธไฟล์ (แบบเต็ม หรือสัมพัทธ์ใน Storage)
+     * @return int จำนวนหน้า (หรือ 0 หากนับไม่ได้)
+     */
+    public function countPdfPages(string $filePath): int
+    {
+        return $this->getDspaceService()->countPdfPages($filePath);
     }
 
     /**

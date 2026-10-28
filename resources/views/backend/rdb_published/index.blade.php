@@ -233,7 +233,21 @@
                                             </small>
                                         @endif
                                         @if($remainingCount > 0)
-                                            <span class="text-body-secondary small ms-1">(+{{ $remainingCount }})</span>
+                                            @php
+                                                $remainingAuthorsList = $item->authors->slice(1)->map(function($a) use ($authorTypes) {
+                                                    $p = $a->prefix->prefix_nameTH ?? '';
+                                                    $typeName = isset($authorTypes[$a->pivot->pubta_id]) ? " ({$authorTypes[$a->pivot->pubta_id]})" : '';
+                                                    return trim("{$p}{$a->researcher_fname} {$a->researcher_lname}") . $typeName;
+                                                })->filter()->values()->all();
+                                                $remainingAuthorsText = implode(', ', $remainingAuthorsList);
+                                            @endphp
+                                            <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle ms-1" 
+                                                  data-bs-toggle="tooltip" 
+                                                  data-bs-placement="top" 
+                                                  title="{{ $remainingAuthorsText }}" 
+                                                  style="cursor: help; font-size: 0.72rem;">
+                                                +{{ $remainingCount }}
+                                            </span>
                                         @endif
                                     </div>
                                 @else

@@ -544,15 +544,16 @@ class RdbProjectController extends Controller
             'researchers', 
             'group',
             'parentProject',
-            'subProjects',
+            'subProjects.rdbProjectWorks.researcher',
             'rdbProjectWorks' => function($q) {
                 $q->orderBy('position_id', 'asc');
             },
             'rdbProjectWorks.researcher',
             'rdbProjectWorks.researcher.prefix',
-            'publisheds',
-            'dips',
-            'utilizations',
+            'publisheds.researcher',
+            'dips.dipType',
+            'dips.researcher',
+            'utilizations.utilizeType',
             'files',
             'budget',
             'createdBy',
@@ -1030,6 +1031,9 @@ class RdbProjectController extends Controller
             $project->pro_file_size = $fileInfo['size'];
             $project->pro_file_mime = $fileInfo['mime_type'];
             $project->pro_file = $fileInfo['safe_name'];
+            if (!empty($fileInfo['page_count'])) {
+                $project->pro_page_num = $fileInfo['page_count'];
+            }
 
             // Public visibility: 0 = เปิด, 1 = ปิด, 2 = ร่าง (Default: 0 = เปิด)
             if ($request->filled('pro_file_show') || $request->has('pro_file_show')) {
@@ -1058,6 +1062,35 @@ class RdbProjectController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['pro_file' => $e->getMessage()]);
         }
+    }
+
+    /**
+     * Delete full report file
+     */
+    public function deleteReport($id)
+    {
+        $project = RdbProject::findOrFail($id);
+        $this->authorize('update', $project);
+
+        if ($project->pro_file_path && Storage::disk('public')->exists($project->pro_file_path)) {
+            Storage::disk('public')->delete($project->pro_file_path);
+        }
+
+        if ($project->pro_file &&
+            $project->pro_file !== $project->pro_file_path &&
+            Storage::disk('public')->exists('uploads/project_files/' . $project->pro_id . '/' . $project->pro_file)) {
+            Storage::disk('public')->delete('uploads/project_files/' . $project->pro_id . '/' . $project->pro_file);
+        }
+
+        $project->pro_file = null;
+        $project->pro_file_path = null;
+        $project->pro_file_size = null;
+        $project->pro_file_mime = null;
+        $project->pro_page_num = null;
+        $project->user_updated = auth()->id();
+        $project->save();
+
+        return redirect()->back()->with('success', 'ลบไฟล์รายงานฉบับสมบูรณ์เรียบร้อยแล้ว');
     }
 
     /**
@@ -1597,7 +1630,7 @@ class RdbProjectController extends Controller
     }
 
     /**
-     * DSpace Export Index Page for Projects
+     * DSpace Export Index Page for Projects (Batch Mode matching legacy system)
      */
     public function dspaceIndex(Request $request)
     {
@@ -1610,28 +1643,107 @@ class RdbProjectController extends Controller
 
         $this->authorize('viewAny', RdbProject::class);
 
-        $query = RdbProject::with(['year', 'type', 'department', 'rdbProjectWorks.researcher.prefix'])
-            ->where('data_show', 1);
-
-        if ($request->filled('q')) {
-            $q = trim($request->q);
-            $query->where(function($sub) use ($q) {
-                $sub->where('pro_nameTH', 'like', "%{$q}%")
-                    ->orWhere('pro_nameEN', 'like', "%{$q}%")
-                    ->orWhere('pro_code', 'like', "%{$q}%");
-            });
-        }
-        if ($request->filled('year_id')) {
-            $query->where('year_id', $request->year_id);
-        }
-        if ($request->filled('department_id')) {
-            $query->where('department_id', $request->department_id);
+        // ดึงเฉพาะโครงการที่พร้อมส่งออก DSpace (ps_id = 2 ดำเนินการเสร็จสิ้น, มีไฟล์รายงาน, ยังไม่ได้ส่งออก todspace <> 1)
+        $perPage = (int) $request->get('per_page', 25);
+        $allowedPerPage = [1, 5, 10, 25, 50, 100];
+        if (!in_array($perPage, $allowedPerPage, true)) {
+            $perPage = 25;
         }
 
-        $items = $query->orderBy('pro_date_start', 'desc')->orderBy('pro_id', 'desc')->paginate(20)->withQueryString();
-        $years = \App\Models\RdbYear::orderBy('year_name', 'desc')->get();
-        $departments = \App\Models\RdbDepartment::orderBy('department_nameTH')->get();
+        $projectIds = RdbProject::query()
+            ->where('data_show', 1)
+            ->where('ps_id', 2)
+            ->whereNotNull('pro_file')
+            ->where('pro_file', '<>', '')
+            ->where('pro_file', '<>', '0')
+            ->where(function ($q) {
+                $q->whereNull('todspace')->orWhere('todspace', '<>', 1);
+            })
+            ->orderBy('pro_id', 'asc')
+            ->pluck('pro_id')
+            ->toArray();
 
-        return view('backend.rdb_project.dspace', compact('items', 'years', 'departments'));
+        $chunks = array_chunk($projectIds, $perPage);
+
+        return view('backend.rdb_project.dspace', compact('chunks', 'perPage', 'allowedPerPage', 'projectIds'));
+    }
+
+    /**
+     * Export batch of projects to DSpace SAF ZIP package
+     */
+    public function exportDspaceBatch(Request $request, \App\Services\DSpaceExportService $dspaceService)
+    {
+        $user = auth()->user();
+        $isSuperAdmin = $user && ($user->hasRole('The Creator') || $user->hasRole('Admin') || $user->hasRole('Admin Research'));
+        $canDspace = $isSuperAdmin || ($user && ($user->hasRole(['Admin Project', 'Admin Library']) || $user->hasPermission('DSpace.Export')));
+        if (!$canDspace) {
+            abort(403, 'ไม่มีสิทธิ์ส่งออกแพ็กเกจ DSpace');
+        }
+
+        $this->authorize('viewAny', RdbProject::class);
+
+        $ids = $request->input('ids');
+        if (empty($ids) && $request->filled('ids_json')) {
+            $ids = json_decode($request->input('ids_json'), true);
+        }
+
+        if (empty($ids) || !is_array($ids)) {
+            return redirect()->back()->with('error', 'ไม่พบรหัสโครงการที่ต้องการส่งออก (No IDs provided)');
+        }
+
+        // Sanitize IDs
+        $ids = array_values(array_filter(array_map('intval', $ids)));
+        $partLabel = preg_replace('/[^a-zA-Z0-9_\-]/', '', (string) $request->input('part_label', '1'));
+
+        try {
+            $zipPath = $dspaceService->exportProjectBatch($ids, $partLabel);
+            if (!$zipPath || !file_exists($zipPath)) {
+                return redirect()->back()->with('error', 'ไม่สามารถสร้างแพ็กเกจ DSpace สำหรับชุดนี้ได้');
+            }
+
+            return response()->download($zipPath, "DSpace_Export_Part_{$partLabel}.zip")->deleteFileAfterSend(true);
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', 'เกิดข้อผิดพลาดในการส่งออก DSpace: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Update batch status to exported (todspace = 1)
+     */
+    public function updateDspaceBatchStatus(Request $request)
+    {
+        $user = auth()->user();
+        $isSuperAdmin = $user && ($user->hasRole('The Creator') || $user->hasRole('Admin') || $user->hasRole('Admin Research'));
+        $canDspace = $isSuperAdmin || ($user && ($user->hasRole(['Admin Project', 'Admin Library']) || $user->hasPermission('DSpace.Export')));
+        if (!$canDspace) {
+            return response()->json(['success' => false, 'message' => 'ไม่มีสิทธิ์ปรับปรุงสถานะ DSpace'], 403);
+        }
+
+        $ids = $request->input('ids');
+        if (is_string($ids)) {
+            $decoded = json_decode($ids, true);
+            $ids = is_array($decoded) ? $decoded : explode(',', $ids);
+        }
+
+        if (empty($ids) || !is_array($ids)) {
+            return response()->json(['success' => false, 'message' => 'ไม่พบรหัสโครงการ (No IDs provided)'], 400);
+        }
+
+        $ids = array_values(array_filter(array_map('intval', $ids)));
+
+        try {
+            RdbProject::whereIn('pro_id', $ids)->update([
+                'todspace' => 1,
+                'dspace_uuid' => date('Y-m-d H:i:s'),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'updated_count' => count($ids),
+                'message' => 'ปรับปรุงสถานะส่งออกเรียบร้อยแล้ว'
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 }

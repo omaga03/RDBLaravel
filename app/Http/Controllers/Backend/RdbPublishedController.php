@@ -350,6 +350,12 @@ class RdbPublishedController extends Controller
             $data['pf_size'] = $fileInfo['size'];
             $data['pf_mime_type'] = $fileInfo['mime_type'];
             $data['pub_file'] = $fileInfo['safe_name'];
+            if (!empty($fileInfo['page_count'])) {
+                $data['pub_numfile'] = $fileInfo['page_count'];
+            }
+            if (!empty($fileInfo['page_count'])) {
+                $data['pub_numfile'] = $fileInfo['page_count'];
+            }
         }
         
         $item = new RdbPublished();
@@ -448,6 +454,9 @@ class RdbPublishedController extends Controller
             $data['pf_size'] = $fileInfo['size'];
             $data['pf_mime_type'] = $fileInfo['mime_type'];
             $data['pub_file'] = $fileInfo['safe_name'];
+            if (!empty($fileInfo['page_count'])) {
+                $data['pub_numfile'] = $fileInfo['page_count'];
+            }
         }
 
         $item->fill($data);
@@ -757,6 +766,9 @@ class RdbPublishedController extends Controller
         $item->pf_size = $fileInfo['size'];
         $item->pf_mime_type = $fileInfo['mime_type'];
         $item->pub_file = $fileInfo['safe_name'];
+        if (!empty($fileInfo['page_count'])) {
+            $item->pub_numfile = $fileInfo['page_count'];
+        }
         $item->user_updated = auth()->id();
         $item->save();
 
@@ -784,6 +796,7 @@ class RdbPublishedController extends Controller
         $item->pf_path = null;
         $item->pf_size = null;
         $item->pf_mime_type = null;
+        $item->pub_numfile = null;
         $item->user_updated = auth()->id();
         $item->save();
         
@@ -891,7 +904,7 @@ class RdbPublishedController extends Controller
     }
 
     /**
-     * DSpace Export Index Page for Publications
+     * DSpace Export Index Page for Publications (Batch Mode)
      */
     public function dspaceIndex(Request $request)
     {
@@ -904,27 +917,304 @@ class RdbPublishedController extends Controller
 
         $this->authorize('viewAny', RdbPublished::class);
 
-        $query = RdbPublished::with(['year', 'pubtype', 'department', 'authors.prefix'])
-            ->where('data_show', 1);
+        $perPage = (int) $request->get('per_page', 25);
+        $allowedPerPage = [1, 5, 10, 25, 50, 100];
+        if (!in_array($perPage, $allowedPerPage, true)) {
+            $perPage = 25;
+        }
+
+        $statusFilter = $request->get('status', 'unexported'); // unexported, exported, all
+
+        $baseQuery = RdbPublished::query()
+            ->where('data_show', 1)
+            ->whereNotNull('pub_file')
+            ->where('pub_file', '<>', '')
+            ->where('pub_file', '<>', '0');
+
+        $totalWithFile = (clone $baseQuery)->count();
+        $exportedCount = (clone $baseQuery)->where('todspace', 1)->count();
+        $unexportedCount = (clone $baseQuery)->where(function ($q) {
+            $q->whereNull('todspace')->orWhere('todspace', '<>', 1);
+        })->count();
+
+        $query = clone $baseQuery;
+        if ($statusFilter === 'unexported') {
+            $query->where(function ($q) {
+                $q->whereNull('todspace')->orWhere('todspace', '<>', 1);
+            });
+        } elseif ($statusFilter === 'exported') {
+            $query->where('todspace', 1);
+        }
+
+        $publishedIds = $query->orderBy('id', 'asc')->pluck('id')->toArray();
+        $chunks = array_chunk($publishedIds, $perPage);
+
+        return view('backend.rdb_published.dspace', compact(
+            'chunks',
+            'perPage',
+            'allowedPerPage',
+            'publishedIds',
+            'statusFilter',
+            'totalWithFile',
+            'exportedCount',
+            'unexportedCount'
+        ));
+    }
+
+    /**
+     * Export batch of publications to DSpace SAF ZIP package
+     */
+    public function exportDspaceBatch(Request $request, \App\Services\DSpaceExportService $dspaceService)
+    {
+        $user = auth()->user();
+        $isSuperAdmin = $user && ($user->hasRole('The Creator') || $user->hasRole('Admin') || $user->hasRole('Admin Research'));
+        $canDspace = $isSuperAdmin || ($user && ($user->hasRole(['Admin Published', 'Admin Library']) || $user->hasPermission('DSpace.Export')));
+        if (!$canDspace) {
+            abort(403, 'ไม่มีสิทธิ์ส่งออกแพ็กเกจ DSpace');
+        }
+
+        $this->authorize('viewAny', RdbPublished::class);
+
+        $ids = $request->input('ids');
+        if (empty($ids) && $request->filled('ids_json')) {
+            $ids = json_decode($request->input('ids_json'), true);
+        }
+
+        if (empty($ids) || !is_array($ids)) {
+            return redirect()->back()->with('error', 'ไม่พบรหัสผลงานตีพิมพ์ที่ต้องการส่งออก');
+        }
+
+        $partLabel = $request->input('part_label', '1');
+
+        try {
+            $zipPath = $dspaceService->exportPublishedBatch($ids, $partLabel);
+            if (!$zipPath || !file_exists($zipPath)) {
+                return redirect()->back()->with('error', 'ไม่สามารถสร้างไฟล์ ZIP ส่งออกได้');
+            }
+
+            return response()->download($zipPath, basename($zipPath))->deleteFileAfterSend(true);
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', 'เกิดข้อผิดพลาดในการส่งออก DSpace: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * AJAX: Update DSpace export status for a batch of publications
+     */
+    public function updateDspaceBatchStatus(Request $request)
+    {
+        $user = auth()->user();
+        $isSuperAdmin = $user && ($user->hasRole('The Creator') || $user->hasRole('Admin') || $user->hasRole('Admin Research'));
+        $canDspace = $isSuperAdmin || ($user && ($user->hasRole(['Admin Published', 'Admin Library']) || $user->hasPermission('DSpace.Export')));
+        if (!$canDspace) {
+            return response()->json(['success' => false, 'message' => 'ไม่มีสิทธิ์ปรับปรุงสถานะ DSpace'], 403);
+        }
+
+        $ids = $request->input('ids');
+        if (is_string($ids)) {
+            $decoded = json_decode($ids, true);
+            $ids = is_array($decoded) ? $decoded : explode(',', $ids);
+        }
+
+        if (empty($ids) || !is_array($ids)) {
+            return response()->json(['success' => false, 'message' => 'ข้อมูลรหัสไม่ถูกต้อง'], 422);
+        }
+
+        try {
+            $count = RdbPublished::whereIn('id', $ids)->update(['todspace' => 1]);
+            return response()->json([
+                'success' => true,
+                'message' => "อัปเดตสถานะสำเร็จ จำนวน {$count} รายการ",
+                'updated_count' => $count
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * DSpace PDF Verification & Pre-export Check (Matching legacy exalldatatodspacecheck)
+     */
+    public function dspaceCheck(Request $request)
+    {
+        $user = auth()->user();
+        $isSuperAdmin = $user && ($user->hasRole('The Creator') || $user->hasRole('Admin') || $user->hasRole('Admin Research'));
+        $canDspace = $isSuperAdmin || ($user && ($user->hasRole(['Admin Published', 'Admin Library']) || $user->hasPermission('DSpace.Export')));
+        if (!$canDspace) {
+            abort(403, 'ไม่มีสิทธิ์เข้าถึงการตรวจสอบข้อมูล DSpace (เฉพาะผู้ดูแลระบบและเจ้าหน้าที่คลังปัญญา)');
+        }
+
+        $this->authorize('viewAny', RdbPublished::class);
+
+        $perPage = (int) $request->get('per_page', 50);
+        $allowedPerPage = [25, 50, 100];
+        if (!in_array($perPage, $allowedPerPage, true)) {
+            $perPage = 50;
+        }
+
+        $baseQuery = RdbPublished::query()
+            ->where('data_show', 1)
+            ->whereNotNull('pub_file')
+            ->where('pub_file', '<>', '')
+            ->where('pub_file', '<>', '0');
+
+        // Overall stats
+        $totalFiles = (clone $baseQuery)->count();
+        $countedFiles = (clone $baseQuery)->whereNotNull('pub_numfile')->where('pub_numfile', '>', 0)->count();
+        $uncountedFiles = (clone $baseQuery)->where(function ($q) {
+            $q->whereNull('pub_numfile')->orWhere('pub_numfile', '<=', 0);
+        })->count();
+        $status1Count = (clone $baseQuery)->where('todspace', 1)->count();
+        $status2Count = (clone $baseQuery)->where('todspace', 2)->count();
+
+        // Filtered Query
+        $query = RdbPublished::with(['department', 'researcher.prefix'])
+            ->where('data_show', 1)
+            ->whereNotNull('pub_file')
+            ->where('pub_file', '<>', '')
+            ->where('pub_file', '<>', '0');
 
         if ($request->filled('q')) {
             $q = trim($request->q);
-            $query->where(function($sub) use ($q) {
+            $query->where(function ($sub) use ($q) {
                 $sub->where('pub_name', 'like', "%{$q}%")
+                    ->orWhere('pub_file', 'like', "%{$q}%")
                     ->orWhere('pub_name_journal', 'like', "%{$q}%");
             });
         }
-        if ($request->filled('year_id')) {
-            $query->where('year_id', $request->year_id);
-        }
-        if ($request->filled('department_id')) {
-            $query->where('department_id', $request->department_id);
+
+        if ($request->filled('status')) {
+            $st = $request->status;
+            if ($st === '1') {
+                $query->where('todspace', 1);
+            } elseif ($st === '2') {
+                $query->where('todspace', 2);
+            } elseif ($st === '0' || $st === 'pending') {
+                $query->where(function ($q) {
+                    $q->whereNull('todspace')->orWhereNotIn('todspace', [1, 2]);
+                });
+            }
         }
 
-        $items = $query->orderBy('pub_date', 'desc')->orderBy('id', 'desc')->paginate(20)->withQueryString();
-        $years = \App\Models\RdbYear::orderBy('year_name', 'desc')->get();
-        $departments = \App\Models\RdbDepartment::orderBy('department_nameTH')->get();
+        if ($request->filled('page_filter')) {
+            $pf = $request->page_filter;
+            if ($pf === 'uncounted') {
+                $query->where(function ($q) {
+                    $q->whereNull('pub_numfile')->orWhere('pub_numfile', '<=', 0);
+                });
+            } elseif ($pf === 'counted') {
+                $query->whereNotNull('pub_numfile')->where('pub_numfile', '>', 0);
+            } elseif ($pf === 'low') {
+                $query->whereNotNull('pub_numfile')->where('pub_numfile', '>', 0)->where('pub_numfile', '<', 5);
+            }
+        }
 
-        return view('backend.rdb_published.dspace', compact('items', 'years', 'departments'));
+        $items = $query->orderBy('id', 'asc')->paginate($perPage)->withQueryString();
+
+        $dspaceService = app(\App\Services\DSpaceExportService::class);
+        $pdftotextBinary = $dspaceService->getPdftotextBinary();
+        $hasPdftotext = !empty($pdftotextBinary);
+
+        return view('backend.rdb_published.dspace_check', compact(
+            'items',
+            'perPage',
+            'allowedPerPage',
+            'totalFiles',
+            'countedFiles',
+            'uncountedFiles',
+            'status1Count',
+            'status2Count',
+            'hasPdftotext',
+            'pdftotextBinary'
+        ));
+    }
+
+    /**
+     * AJAX: Count PDF pages for a single publication
+     */
+    public function ajaxCountPdfPage(Request $request, \App\Services\DSpaceExportService $dspaceService)
+    {
+        $user = auth()->user();
+        $isSuperAdmin = $user && ($user->hasRole('The Creator') || $user->hasRole('Admin') || $user->hasRole('Admin Research'));
+        $canDspace = $isSuperAdmin || ($user && ($user->hasRole(['Admin Published', 'Admin Library']) || $user->hasPermission('DSpace.Export')));
+        if (!$canDspace) {
+            return response()->json(['success' => false, 'message' => 'ไม่มีสิทธิ์ดำเนินการ'], 403);
+        }
+
+        $id = $request->input('id');
+        if (empty($id)) {
+            return response()->json(['success' => false, 'message' => 'ไม่พบรหัสผลงาน'], 422);
+        }
+
+        $model = RdbPublished::find($id);
+        if (!$model || empty($model->pub_file)) {
+            return response()->json(['success' => false, 'message' => 'ไม่พบข้อมูลหรือไม่มีไฟล์แนบ'], 404);
+        }
+
+        $diskPath = $dspaceService->resolvePublishedFileOnDisk($model);
+        if (!$diskPath || !file_exists($diskPath)) {
+            return response()->json(['success' => false, 'message' => 'ไม่พบไฟล์จริงในระบบเซิร์ฟเวอร์'], 404);
+        }
+
+        try {
+            $pageCount = $dspaceService->countPdfPages($diskPath);
+            if ($pageCount > 0) {
+                $model->pub_numfile = $pageCount;
+                $model->save();
+
+                return response()->json([
+                    'success' => true,
+                    'pages' => $pageCount,
+                    'message' => 'บันทึกสำเร็จ'
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'ไม่สามารถนับหน้าได้ (ไฟล์อาจถูกบีบอัดหรือเข้ารหัส)'
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * AJAX: Update single publication DSpace status (1: บทความสมบูรณ์, 2: ตัวอย่างบทความ)
+     */
+    public function ajaxUpdateItemStatus(Request $request)
+    {
+        $user = auth()->user();
+        $isSuperAdmin = $user && ($user->hasRole('The Creator') || $user->hasRole('Admin') || $user->hasRole('Admin Research'));
+        $canDspace = $isSuperAdmin || ($user && ($user->hasRole(['Admin Published', 'Admin Library']) || $user->hasPermission('DSpace.Export')));
+        if (!$canDspace) {
+            return response()->json(['success' => false, 'message' => 'ไม่มีสิทธิ์ดำเนินการ'], 403);
+        }
+
+        $id = $request->input('id');
+        $status = (int) $request->input('status');
+
+        if (empty($id)) {
+            return response()->json(['success' => false, 'message' => 'ไม่พบรหัสผลงาน'], 422);
+        }
+
+        if (!in_array($status, [1, 2], true)) {
+            return response()->json(['success' => false, 'message' => 'สถานะไม่ถูกต้อง (ต้องเป็น 1 หรือ 2)'], 422);
+        }
+
+        $model = RdbPublished::find($id);
+        if (!$model) {
+            return response()->json(['success' => false, 'message' => 'ไม่พบข้อมูล'], 404);
+        }
+
+        $model->todspace = $status;
+        if ($model->save()) {
+            return response()->json([
+                'success' => true,
+                'status' => $status,
+                'status_text' => $status === 1 ? 'บทความสมบูรณ์' : 'ตัวอย่างบทความ'
+            ]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'บันทึกไม่สำเร็จ'], 500);
     }
 }

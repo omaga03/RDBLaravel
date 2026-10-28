@@ -19,9 +19,6 @@
             'รายละเอียดโครงการ' => ''
         ]"
     >
-        <a href="{{ route('backend.rdb_project.export_dspace', $project->pro_id) }}" class="btn btn-outline-info d-inline-flex justify-content-center align-items-center shadow-sm" style="height: 38px; font-size: 0.85rem;" title="ส่งออกข้อมูลเข้าคลังปัญญา DSpace (Simple Archive Format)">
-            <i class="bi bi-file-earmark-zip me-1.5"></i> ส่งออก DSpace
-        </a>
         @if($project->workflow_status === 'published' && auth()->user()->can('requestUnlock', $project))
             <button type="button" class="btn btn-warning d-inline-flex justify-content-center align-items-center" style="min-width: 105px; height: 38px; font-size: 0.85rem;" data-bs-toggle="modal" data-bs-target="#requestUnlockModal" data-id="{{ $project->pro_id }}" data-type="project" data-title="{{ $project->pro_nameTH }}">
                 <i class="bi bi-unlock me-1.5"></i> ขอแก้ไข
@@ -222,18 +219,15 @@
                         @endcan
                     </div>
 
-                    <!-- System Info Footer -->
-                    <div class="card-footer bg-body-tertiary py-2 px-3 small text-body-secondary">
+                    <!-- System Info (Collapsible) -->
+                    <div class="px-3 pb-2">
                         @php
                             $createdBy = $project->user_created ? \App\Models\User::find($project->user_created) : null;
                             $updatedBy = $project->user_updated ? \App\Models\User::find($project->user_updated) : null;
                             $createdByName = $createdBy?->researcher ? ($createdBy->researcher->researcher_fname . ' ' . $createdBy->researcher->researcher_lname) : ($createdBy?->username ?? '-');
                             $updatedByName = $updatedBy?->researcher ? ($updatedBy->researcher->researcher_fname . ' ' . $updatedBy->researcher->researcher_lname) : ($updatedBy?->username ?? '-');
                         @endphp
-                        <div><i class="bi bi-clock me-1"></i> สร้าง: {{ \App\Helpers\ThaiDateHelper::formatDateTime($project->created_at) }} ({{ $createdByName }})</div>
-                        @if($project->updated_at)
-                        <div><i class="bi bi-pencil me-1"></i> ปรับปรุง: {{ \App\Helpers\ThaiDateHelper::formatDateTime($project->updated_at) }} ({{ $updatedByName }})</div>
-                        @endif
+                        <x-system-info :created_at="$project->created_at" :created_by="$createdByName" :updated_at="$project->updated_at" :updated_by="$updatedByName" />
                     </div>
                 </div>
             </div>
@@ -263,7 +257,7 @@
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link fw-bold" id="related-tab" data-bs-toggle="tab" data-bs-target="#tab-related" type="button" role="tab" aria-selected="false">
                                     <i class="bi bi-diagram-3 me-1"></i> ผลงานที่เกี่ยวข้อง
-                                    <span class="badge bg-info-subtle text-info border border-info-subtle ms-1">{{ $project->publisheds->count() + $project->dips->count() + $project->utilizations->count() }}</span>
+                                    <span class="badge bg-info-subtle text-info border border-info-subtle ms-1">{{ $project->publisheds->count() + $project->dips->count() + $project->utilizations->count() + $project->subProjects->count() }}</span>
                                 </button>
                             </li>
                         </ul>
@@ -301,121 +295,102 @@
                                             </tr>
                                             <tr>
                                                 <th style="width: 25%;" class="bg-body-tertiary">ประเภททุน:</th>
-                                                <td>
+                                                <td colspan="3">
                                                     {{ $project->type->pt_name ?? '-' }}
                                                     @if($project->typeSub)
-                                                        <small class="text-body-secondary">({{ $project->typeSub->pts_name }})</small>
-                                                    @endif
-                                                </td>
-                                                <th style="width: 25%;" class="bg-body-tertiary">กลุ่มโครงการ:</th>
-                                                <td>
-                                                    <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-2 py-0.5 me-1">
-                                                        {{ $project->group->pgroup_nameTH ?? ($project->group->pgroup_nameEN ?? '-') }}
-                                                    </span>
-                                                    @if(($project->pgroup_id == 2 || ($project->pro_group && $project->pro_group != $project->pro_id)) && $project->parentProject)
-                                                        <div class="mt-1 small">
-                                                            <span class="text-body-secondary fw-semibold"><i class="bi bi-diagram-3-fill text-primary me-1"></i>ภายใต้แผนงานวิจัย:</span>
-                                                            <a href="{{ route('backend.rdb_project.show', $project->parentProject->pro_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none fw-medium text-primary hover-underline">
-                                                                {{ $project->parentProject->pro_nameTH }}
-                                                            </a>
-                                                        </div>
-                                                    @endif
-                                                    @if($project->pgroup_id == 1 && $project->subProjects && $project->subProjects->count() > 0)
-                                                        <div class="mt-2 small">
-                                                            <span class="text-body-secondary fw-semibold d-block mb-1"><i class="bi bi-collection-fill text-success me-1"></i>โครงการย่อยภายใต้แผนงานนี้ ({{ $project->subProjects->count() }} โครงการ):</span>
-                                                            <ol class="mb-0 ps-3">
-                                                                @foreach($project->subProjects as $subP)
-                                                                    <li class="mb-1">
-                                                                        <a href="{{ route('backend.rdb_project.show', $subP->pro_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body hover-underline">
-                                                                            {{ $subP->pro_nameTH }}
-                                                                        </a>
-                                                                    </li>
-                                                                @endforeach
-                                                            </ol>
-                                                        </div>
+                                                        <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle ms-1">{{ $project->typeSub->pts_name }}</span>
                                                     @endif
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <th class="bg-body-tertiary">ยุทธศาสตร์:</th>
-                                                <td colspan="3">{{ $project->strategic->strategic_name ?? '-' }}</td>
-                                            </tr>
-                                            @if($project->pro_keyword)
-                                            <tr>
-                                                <th class="bg-body-tertiary">คำสำคัญ:</th>
+                                                <th class="bg-body-tertiary">คำสำคัญ (Keywords):</th>
                                                 <td colspan="3">
-                                                    @foreach(explode(',', $project->pro_keyword) as $keyword)
-                                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle me-1 mb-1">{{ trim($keyword) }}</span>
-                                                    @endforeach
+                                                    @if($project->pro_keyword)
+                                                        @foreach(preg_split('/[,;]/u', $project->pro_keyword) as $keyword)
+                                                            @if(trim($keyword) !== '')
+                                                                <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle me-1.5 mb-1 px-2.5 py-1">
+                                                                    <i class="bi bi-tag-fill me-1 text-primary"></i>{{ trim($keyword) }}
+                                                                </span>
+                                                            @endif
+                                                        @endforeach
+                                                    @else
+                                                        <span class="text-body-secondary small fst-italic">- ยังไม่มีข้อมูลคำสำคัญ -</span>
+                                                    @endif
                                                 </td>
                                             </tr>
-                                            @endif
                                         </tbody>
                                     </table>
                                 </div>
 
-                                @if($project->pro_abstract)
                                 <div class="mt-4">
                                     <div class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-3">
                                         <h6 class="fw-bold mb-0 text-body">
                                             <i class="bi bi-file-text-fill me-1 text-primary"></i> บทคัดย่อ (Abstract)
                                         </h6>
                                     </div>
-                                    @php
-                                        $abstractParts = \App\Helpers\AbstractHelper::split($project->pro_abstract);
-                                    @endphp
 
-                                    @if(count($abstractParts) >= 2 && !empty(trim(strip_tags($abstractParts[0]))) && !empty(trim(strip_tags($abstractParts[1]))))
-                                        <div class="abstract-box p-3 p-md-4 border border-start border-4 border-primary rounded-3 mb-3 bg-body-tertiary shadow-xs">
-                                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary-subtle border-opacity-50">
-                                                <div class="d-flex align-items-center gap-2">
+                                    @if($project->pro_abstract)
+                                        @php
+                                            $abstractParts = \App\Helpers\AbstractHelper::split($project->pro_abstract);
+                                        @endphp
+
+                                        @if(count($abstractParts) >= 2 && !empty(trim(strip_tags($abstractParts[0]))) && !empty(trim(strip_tags($abstractParts[1]))))
+                                            <div class="abstract-box p-3 p-md-4 border border-start border-4 border-primary rounded-3 mb-3 bg-body-tertiary shadow-xs">
+                                                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary-subtle border-opacity-50">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 fw-semibold" style="font-size: 0.78rem;">
+                                                            <i class="bi bi-card-text me-1"></i> บทคัดย่อ (ภาษาไทย)
+                                                        </span>
+                                                        <span class="badge bg-secondary-subtle text-secondary-emphasis" style="font-size: 0.7rem;">TH</span>
+                                                    </div>
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0.5 px-2.5 rounded-pill copy-abstract-btn d-inline-flex align-items-center" style="font-size: 0.75rem;" onclick="copyAbstractText('project-abstract-th-content', this)">
+                                                        <i class="bi bi-clipboard me-1"></i> คัดลอกบทคัดย่อ
+                                                    </button>
+                                                </div>
+                                                <div id="project-abstract-th-content" class="abstract-content abstract-indent">
+                                                    {!! strip_tags($abstractParts[0], '<p><br><b><strong><i><em><u><span>') !!}
+                                                </div>
+                                            </div>
+
+                                            <div class="abstract-box p-3 p-md-4 border border-start border-4 border-info rounded-3 bg-body-tertiary shadow-xs">
+                                                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary-subtle border-opacity-50">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-2.5 py-1 fw-semibold" style="font-size: 0.78rem;">
+                                                            <i class="bi bi-translate me-1"></i> Abstract (English)
+                                                        </span>
+                                                        <span class="badge bg-secondary-subtle text-secondary-emphasis" style="font-size: 0.7rem;">EN</span>
+                                                    </div>
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0.5 px-2.5 rounded-pill copy-abstract-btn d-inline-flex align-items-center" style="font-size: 0.75rem;" onclick="copyAbstractText('project-abstract-en-content', this)">
+                                                        <i class="bi bi-clipboard me-1"></i> Copy Abstract
+                                                    </button>
+                                                </div>
+                                                <div id="project-abstract-en-content" class="abstract-content abstract-indent">
+                                                    {!! strip_tags($abstractParts[1], '<p><br><b><strong><i><em><u><span>') !!}
+                                                </div>
+                                            </div>
+                                        @else
+                                            <div class="abstract-box p-3 p-md-4 border border-start border-4 border-primary rounded-3 bg-body-tertiary shadow-xs">
+                                                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary-subtle border-opacity-50">
                                                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 fw-semibold" style="font-size: 0.78rem;">
-                                                        <i class="bi bi-card-text me-1"></i> บทคัดย่อ (ภาษาไทย)
+                                                        <i class="bi bi-file-text me-1"></i> บทคัดย่อ
                                                     </span>
-                                                    <span class="badge bg-secondary-subtle text-secondary-emphasis" style="font-size: 0.7rem;">TH</span>
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0.5 px-2.5 rounded-pill copy-abstract-btn d-inline-flex align-items-center" style="font-size: 0.75rem;" onclick="copyAbstractText('project-abstract-single-content', this)">
+                                                        <i class="bi bi-clipboard me-1"></i> คัดลอกบทคัดย่อ
+                                                    </button>
                                                 </div>
-                                                <button type="button" class="btn btn-sm btn-outline-secondary py-0.5 px-2.5 rounded-pill copy-abstract-btn d-inline-flex align-items-center" style="font-size: 0.75rem;" onclick="copyAbstractText('project-abstract-th-content', this)">
-                                                    <i class="bi bi-clipboard me-1"></i> คัดลอกบทคัดย่อ
-                                                </button>
-                                            </div>
-                                            <div id="project-abstract-th-content" class="abstract-content abstract-indent">
-                                                {!! strip_tags($abstractParts[0], '<p><br><b><strong><i><em><u><span>') !!}
-                                            </div>
-                                        </div>
-
-                                        <div class="abstract-box p-3 p-md-4 border border-start border-4 border-info rounded-3 bg-body-tertiary shadow-xs">
-                                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary-subtle border-opacity-50">
-                                                <div class="d-flex align-items-center gap-2">
-                                                    <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-2.5 py-1 fw-semibold" style="font-size: 0.78rem;">
-                                                        <i class="bi bi-translate me-1"></i> Abstract (English)
-                                                    </span>
-                                                    <span class="badge bg-secondary-subtle text-secondary-emphasis" style="font-size: 0.7rem;">EN</span>
+                                                <div id="project-abstract-single-content" class="abstract-content abstract-indent">
+                                                    {!! strip_tags($project->pro_abstract, '<p><br><b><strong><i><em><u><span>') !!}
                                                 </div>
-                                                <button type="button" class="btn btn-sm btn-outline-secondary py-0.5 px-2.5 rounded-pill copy-abstract-btn d-inline-flex align-items-center" style="font-size: 0.75rem;" onclick="copyAbstractText('project-abstract-en-content', this)">
-                                                    <i class="bi bi-clipboard me-1"></i> Copy Abstract
-                                                </button>
                                             </div>
-                                            <div id="project-abstract-en-content" class="abstract-content abstract-indent">
-                                                {!! strip_tags($abstractParts[1], '<p><br><b><strong><i><em><u><span>') !!}
-                                            </div>
-                                        </div>
+                                        @endif
                                     @else
-                                        <div class="abstract-box p-3 p-md-4 border border-start border-4 border-primary rounded-3 bg-body-tertiary shadow-xs">
-                                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary-subtle border-opacity-50">
-                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 fw-semibold" style="font-size: 0.78rem;">
-                                                    <i class="bi bi-file-text me-1"></i> บทคัดย่อ
-                                                </span>
-                                                <button type="button" class="btn btn-sm btn-outline-secondary py-0.5 px-2.5 rounded-pill copy-abstract-btn d-inline-flex align-items-center" style="font-size: 0.75rem;" onclick="copyAbstractText('project-abstract-single-content', this)">
-                                                    <i class="bi bi-clipboard me-1"></i> คัดลอกบทคัดย่อ
-                                                </button>
-                                            </div>
-                                            <div id="project-abstract-single-content" class="abstract-content abstract-indent">
-                                                {!! strip_tags($project->pro_abstract, '<p><br><b><strong><i><em><u><span>') !!}
-                                            </div>
+                                        <div class="alert alert-light border border-dashed rounded-3 p-4 text-center text-body-secondary mb-3">
+                                            <i class="bi bi-file-text fs-2 d-block mb-2 text-body-tertiary"></i>
+                                            <h6 class="fw-semibold text-body mb-1">ยังไม่มีข้อมูลบทคัดย่อ (No Abstract Provided)</h6>
+                                            <span class="small">ยังไม่ได้กรอกเนื้อหาบทคัดย่อสำหรับโครงการนี้</span>
                                         </div>
                                     @endif
                                 </div>
-                                @endif
                             </div>
 
                             <!-- Tab 2: คณะผู้วิจัย -->
@@ -559,7 +534,14 @@
                                                     </div>
                                                 </div>
                                                 @if($project->pro_file)
-                                                    <div class="small text-body-secondary text-truncate mb-2">{{ $project->pro_file }}</div>
+                                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                                        <span class="small text-body-secondary text-truncate">{{ $project->pro_file }}</span>
+                                                        @if(!empty($project->pro_page_num))
+                                                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle ms-2 flex-shrink-0" style="font-variant-numeric: tabular-nums;">
+                                                                <i class="bi bi-file-earmark-text me-1"></i>{{ $project->pro_page_num }} หน้า
+                                                            </span>
+                                                        @endif
+                                                    </div>
                                                     <div class="d-flex align-items-center justify-content-between small text-body-secondary mb-3 p-2 bg-body-tertiary rounded">
                                                         <span><i class="bi bi-shield-check me-1 text-primary"></i>การแสดงผลสาธารณะ:</span>
                                                         @if((int)$project->pro_file_show === 0)
@@ -630,6 +612,73 @@
 
                             <!-- Tab 4: ผลงานที่เกี่ยวข้อง -->
                             <div class="tab-pane fade" id="tab-related" role="tabpanel" aria-labelledby="related-tab">
+                                @if($project->parentProject)
+                                <!-- Parent Project Banner -->
+                                <div class="p-3 mb-4 rounded bg-body-tertiary border border-subtle d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                    <div>
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle mb-1">
+                                            <i class="bi bi-collection me-1"></i> โครงการชุด (โครงการหลัก)
+                                        </span>
+                                        <h6 class="mb-0 fw-semibold text-body">
+                                            <a href="{{ route('backend.rdb_project.show', $project->parentProject->pro_id) }}" class="text-decoration-none text-body hover-primary">
+                                                {{ $project->parentProject->pro_nameTH }}
+                                            </a>
+                                        </h6>
+                                    </div>
+                                    <a href="{{ route('backend.rdb_project.show', $project->parentProject->pro_id) }}" class="btn btn-sm btn-outline-primary shadow-sm">
+                                        <i class="bi bi-eye me-1"></i> ดูโครงการชุด
+                                    </a>
+                                </div>
+                                @endif
+
+                                @if($project->subProjects->count() > 0)
+                                <!-- Sub Projects -->
+                                <div class="mb-4">
+                                    <h6 class="fw-bold mb-3 text-primary">
+                                        <i class="bi bi-diagram-2 me-2"></i>โครงการย่อยในชุดโครงการ ({{ $project->subProjects->count() }})
+                                    </h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>ชื่อโครงการย่อย</th>
+                                                    <th style="width: 250px;">หัวหน้าโครงการ / คณะผู้วิจัย</th>
+                                                    <th class="text-center" style="width: 100px;">ดูข้อมูล</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($project->subProjects as $sub)
+                                                <tr>
+                                                    <td>
+                                                        <span class="fw-semibold text-body">{{ $sub->pro_nameTH }}</span>
+                                                        @if($sub->pro_nameEN)
+                                                            <small class="text-body-secondary d-block">{{ $sub->pro_nameEN }}</small>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @php
+                                                            $headWork = $sub->rdbProjectWorks->firstWhere('position_id', 2) ?? $sub->rdbProjectWorks->first();
+                                                        @endphp
+                                                        @if($headWork && $headWork->researcher)
+                                                            <small class="text-body"><i class="bi bi-person me-1 text-primary"></i>{{ $headWork->researcher->res_name }}</small>
+                                                        @else
+                                                            <span class="text-body-secondary small">-</span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <a href="{{ route('backend.rdb_project.show', $sub->pro_id) }}" class="btn btn-sm btn-outline-primary" target="_blank" title="เปิดดูโครงการย่อย">
+                                                            <i class="bi bi-eye me-1"></i>ดูข้อมูล
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <hr>
+                                @endif
+
                                 <!-- 1. Publications -->
                                 <div class="mb-4">
                                     <h6 class="fw-bold mb-3 text-info">
@@ -638,21 +687,35 @@
                                     @if($project->publisheds->count() > 0)
                                     <div class="table-responsive">
                                         <table class="table table-hover align-middle mb-0">
-                                            <thead>
+                                            <thead class="table-light">
                                                 <tr>
                                                     <th>ชื่อผลงานตีพิมพ์</th>
-                                                    <th>วารสาร / แหล่งตีพิมพ์</th>
+                                                    <th style="width: 320px;">วารสาร / แหล่งตีพิมพ์</th>
                                                     <th class="text-center" style="width: 100px;">ดูข้อมูล</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 @foreach($project->publisheds as $pub)
                                                 <tr>
-                                                    <td><span class="fw-semibold">{{ $pub->pub_name }}</span></td>
-                                                    <td><small class="text-body-secondary">{{ $pub->pub_name_journal ?? '-' }}</small></td>
+                                                    <td>
+                                                        <span class="fw-semibold text-body">{{ $pub->pub_name }}</span>
+                                                        @if($pub->researcher)
+                                                            <small class="text-body-secondary d-block mt-0.5">
+                                                                <i class="bi bi-person me-1"></i>{{ $pub->researcher->res_name }}
+                                                            </small>
+                                                        @endif
+                                                        @if($pub->pub_date)
+                                                            <small class="text-body-secondary d-block mt-0.5">
+                                                                <i class="bi bi-calendar-event me-1"></i>{{ \App\Helpers\ThaiDateHelper::format($pub->pub_date, false, true) }}
+                                                            </small>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        <small class="text-body-secondary">{{ $pub->pub_name_journal ?? '-' }}</small>
+                                                    </td>
                                                     <td class="text-center">
-                                                        <a href="{{ route('backend.rdb_published.show', $pub->getKey()) }}" class="btn btn-sm btn-outline-info" target="_blank">
-                                                            <i class="bi bi-eye"></i>
+                                                        <a href="{{ route('backend.rdb_published.show', $pub->getKey()) }}" class="btn btn-sm btn-outline-info" target="_blank" title="เปิดดูผลงานตีพิมพ์">
+                                                            <i class="bi bi-eye me-1"></i>ดูข้อมูล
                                                         </a>
                                                     </td>
                                                 </tr>
@@ -675,21 +738,46 @@
                                     @if($project->dips->count() > 0)
                                     <div class="table-responsive">
                                         <table class="table table-hover align-middle mb-0">
-                                            <thead>
+                                            <thead class="table-light">
                                                 <tr>
                                                     <th>ชื่อผลงานทรัพย์สินฯ</th>
-                                                    <th>เลขที่คำขอ</th>
+                                                    <th style="width: 280px;">ประเภท / เลขที่คำขอ-ทะเบียน</th>
                                                     <th class="text-center" style="width: 100px;">ดูข้อมูล</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 @foreach($project->dips as $dip)
                                                 <tr>
-                                                    <td><span class="fw-semibold">{{ $dip->dip_data2_name }}</span></td>
-                                                    <td><code>{{ $dip->dip_request_number ?? '-' }}</code></td>
+                                                    <td>
+                                                        <span class="fw-semibold text-body">{{ $dip->dip_data2_name }}</span>
+                                                        @if($dip->dip_data2_patent || $dip->researcher)
+                                                            <small class="text-body-secondary d-block mt-0.5">
+                                                                <i class="bi bi-person me-1"></i>{{ $dip->dip_data2_patent ?? $dip->researcher?->res_name }}
+                                                            </small>
+                                                        @endif
+                                                        @if($dip->dip_startdate || $dip->dip_data1_datestart)
+                                                            <small class="text-body-secondary d-block mt-0.5">
+                                                                <i class="bi bi-calendar-event me-1"></i>{{ \App\Helpers\ThaiDateHelper::format($dip->dip_startdate ?? $dip->dip_data1_datestart, false, true) }}
+                                                            </small>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @if($dip->dipType)
+                                                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle mb-1">{{ $dip->dipType->dipt_name }}</span>
+                                                        @endif
+                                                        @if($dip->dip_request_number)
+                                                            <div><small class="text-body-secondary">เลขที่คำขอ: </small><code>{{ $dip->dip_request_number }}</code></div>
+                                                        @endif
+                                                        @if($dip->dip_patent_number || $dip->dip_number)
+                                                            <div><small class="text-body-secondary">เลขที่ทะเบียน: </small><span class="badge bg-secondary-subtle text-secondary-emphasis">{{ $dip->dip_patent_number ?? $dip->dip_number }}</span></div>
+                                                        @endif
+                                                        @if(!$dip->dipType && !$dip->dip_request_number && !$dip->dip_patent_number && !$dip->dip_number)
+                                                            <span class="text-body-secondary small">-</span>
+                                                        @endif
+                                                    </td>
                                                     <td class="text-center">
-                                                        <a href="{{ route('backend.rdb_dip.show', $dip->dip_id) }}" class="btn btn-sm btn-outline-warning" target="_blank">
-                                                            <i class="bi bi-eye"></i>
+                                                        <a href="{{ route('backend.rdb_dip.show', $dip->dip_id) }}" class="btn btn-sm btn-outline-warning" target="_blank" title="เปิดดูทรัพย์สินทางปัญญา">
+                                                            <i class="bi bi-eye me-1"></i>ดูข้อมูล
                                                         </a>
                                                     </td>
                                                 </tr>
@@ -712,21 +800,47 @@
                                     @if($project->utilizations->count() > 0)
                                     <div class="table-responsive">
                                         <table class="table table-hover align-middle mb-0">
-                                            <thead>
+                                            <thead class="table-light">
                                                 <tr>
-                                                    <th>รายละเอียดการนำไปใช้</th>
-                                                    <th>ประเภทการนำไปใช้</th>
+                                                    <th>หน่วยงาน / ผู้นำไปใช้ประโยชน์</th>
+                                                    <th style="width: 320px;">ประเภทการนำไปใช้</th>
                                                     <th class="text-center" style="width: 100px;">ดูข้อมูล</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 @foreach($project->utilizations as $utz)
                                                 <tr>
-                                                    <td><span class="fw-semibold">{{ $utz->utz_agency_name ?? $utz->utz_location_address ?? '-' }}</span></td>
-                                                    <td><span class="badge bg-danger-subtle text-danger border border-danger-subtle">{{ $utz->utilizeType->utz_type_name ?? '-' }}</span></td>
+                                                    <td>
+                                                        <span class="fw-semibold text-body">{{ html_entity_decode($utz->utz_department_name ?: ($utz->utz_leading ?: '-')) }}</span>
+                                                        @if($utz->utz_leading && $utz->utz_leading !== $utz->utz_department_name)
+                                                            <small class="text-body-secondary d-block mt-0.5">
+                                                                <i class="bi bi-person me-1"></i>{{ $utz->utz_leading }}
+                                                                @if($utz->utz_leading_position) ({{ $utz->utz_leading_position }}) @endif
+                                                            </small>
+                                                        @endif
+                                                        @if($utz->utz_date)
+                                                            <small class="text-body-secondary d-block mt-0.5">
+                                                                <i class="bi bi-calendar-event me-1"></i>{{ \App\Helpers\ThaiDateHelper::format($utz->utz_date, false, true) }}
+                                                            </small>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @php
+                                                            $utzTypes = $utz->utilizeTypes;
+                                                        @endphp
+                                                        @forelse($utzTypes as $type)
+                                                            <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle mb-1 me-1">{{ $type->utz_typr_name }}</span>
+                                                        @empty
+                                                            @if($utz->utilizeType)
+                                                                <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle mb-1">{{ $utz->utilizeType->utz_typr_name }}</span>
+                                                            @else
+                                                                <span class="text-body-secondary small">-</span>
+                                                            @endif
+                                                        @endforelse
+                                                    </td>
                                                     <td class="text-center">
-                                                        <a href="{{ route('backend.rdbprojectutilize.show', $utz->utz_id) }}" class="btn btn-sm btn-outline-danger" target="_blank">
-                                                            <i class="bi bi-eye"></i>
+                                                        <a href="{{ route('backend.rdbprojectutilize.show', $utz->utz_id) }}" class="btn btn-sm btn-outline-danger" target="_blank" title="เปิดดูการนำไปใช้ประโยชน์">
+                                                            <i class="bi bi-eye me-1"></i>ดูข้อมูล
                                                         </a>
                                                     </td>
                                                 </tr>
@@ -920,6 +1034,11 @@
                                                 <div class="text-truncate me-2" style="max-width: 55%;">
                                                     <i class="bi bi-file-earmark-pdf text-danger fs-4 me-2 align-middle"></i>
                                                     <strong class="text-body">{{ $project->pro_file ?: basename($project->pro_file_path) }}</strong>
+                                                    @if(!empty($project->pro_page_num))
+                                                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle ms-1" style="font-variant-numeric: tabular-nums;">
+                                                            {{ $project->pro_page_num }} หน้า
+                                                        </span>
+                                                    @endif
                                                 </div>
                                                 <div class="d-flex gap-2 align-items-center">
                                                     <div class="d-flex align-items-center px-2 py-1 rounded border bg-body shadow-sm" title="ปรับการแสดงผลไฟล์นี้ (0 = เปิด, 1 = ปิด, 2 = ร่าง)">

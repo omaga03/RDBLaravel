@@ -344,9 +344,16 @@
                                             <small class="text-body-secondary d-block" style="font-size: 0.78rem;">Full Paper / Publication (PDF)</small>
                                         </div>
                                     </div>
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 flex-shrink-0" title="ดาวน์โหลด: {{ number_format($item->pub_download ?? 0) }} ครั้ง" style="font-size: 0.76rem;">
-                                        <i class="bi bi-download me-1"></i>{{ number_format($item->pub_download ?? 0) }}
-                                    </span>
+                                    <div class="d-flex flex-column align-items-end gap-1 flex-shrink-0">
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" title="ดาวน์โหลด: {{ number_format($item->pub_download ?? 0) }} ครั้ง" style="font-size: 0.76rem;">
+                                            <i class="bi bi-download me-1"></i>{{ number_format($item->pub_download ?? 0) }}
+                                        </span>
+                                        @if(!empty($item->pub_numfile))
+                                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-1.5 py-0.5" style="font-size: 0.7rem; font-variant-numeric: tabular-nums;">
+                                                <i class="bi bi-file-earmark-text me-1"></i>{{ $item->pub_numfile }} หน้า
+                                            </span>
+                                        @endif
+                                    </div>
                                 </div>
                                 <div class="btn btn-sm btn-success w-100 rounded-2 fw-medium d-flex align-items-center justify-content-center gap-1.5 py-1.5 text-white shadow-sm">
                                     <i class="bi bi-cloud-arrow-down-fill"></i> ดาวน์โหลดบทความฉบับเต็ม

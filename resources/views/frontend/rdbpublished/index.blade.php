@@ -193,6 +193,11 @@
                                             ปี {{ $item->year->year_name }}
                                         </span>
                                     @endif
+                                    @if(!empty($item->pub_numfile))
+                                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" style="font-variant-numeric: tabular-nums;" title="จำนวนหน้าเอกสาร">
+                                            <i class="bi bi-file-earmark-text me-1"></i>{{ $item->pub_numfile }} หน้า
+                                        </span>
+                                    @endif
                                 </div>
                             </td>
                             <td>

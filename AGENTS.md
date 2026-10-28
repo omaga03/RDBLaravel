@@ -36,11 +36,25 @@
 - **ดีไซน์ระบบและชุดสีอัจฉริยะ**: พาเลทสี, การจัดช่องว่าง, การจับคู่ฟอนต์ภาษาไทยและอังกฤษ
 - รายละเอียด: `.agents/skills/ui-form-controls-and-plugins/SKILL.md`, `.agents/skills/ui-dashboard-visualization/SKILL.md` และ `.agents/skills/ui-ux-pro-max/SKILL.md`
 
-## 4. File Storage & Multi-Path Fallback (legacy-data-migration)
+## 4. File Storage, Multi-Path Fallback & PDF Processing Engine (legacy-data-migration)
 - จัดเก็บไฟล์ใหม่แยกตามโฟลเดอร์โมดูลใน `storage/app/public/{module}/` (UUID ปลอดภัย)
 - มีระบบ Smart Multi-Fallback ค้นหาไฟล์เก่าอัตโนมัติ 3 ลำดับชั้น (ไฟล์ใหม่ -> โฟลเดอร์ `uploads/` -> โฟลเดอร์เดิม Yii2)
 - การดาวน์โหลดและเปิดดูไฟล์ทุกโมดูลต้องวิ่งผ่าน Controller Route เสมอ (ห้ามฮาร์ดโค้ด `asset('storage/...')` ใน Blade)
 - หากไม่พบไฟล์บนเซิร์ฟเวอร์ ต้องแสดงผลผ่าน Custom 404 Template ที่เป็นมิตร
+- **PDF Processing Engine & Page Counting Architecture (ความแม่นยำ 99.99%)**:
+  - ใช้สถาปัตยกรรม 4-Tier Fallback ใน `DSpaceExportService`:
+    1. **Tier 1 (Poppler `pdftotext`)**: ตรวจจับไบนารีระบบอัตโนมัติ (PATH, Laragon, Git for Windows, หรือ `PDFTOTEXT_PATH` ใน `.env`) รองรับเอกสาร PDF ทุกเวอร์ชันและไฟล์ที่มีการเข้ารหัสความปลอดภัย (AES-128 / Protected PDF) นับหน้าด้วย form feed `\x0c` ได้แม่นยำ 99.99%
+    2. **Tier 2 (`Smalot\PdfParser\Parser`)**: Pure PHP Parser สำหรับเซิร์ฟเวอร์ที่ไม่มี poppler-utils
+    3. **Tier 3 (`setasign\Fpdi\Fpdi`)**: Parser แบบโครงสร้าง Stream
+    4. **Tier 4 (Fast Regex)**: สแกนโครงสร้าง `/Type\s*\/Page[^s]`
+  - **การติดตั้งบนเซิร์ฟเวอร์ Production (SysAdmin Guide)**:
+    - Ubuntu / Debian: `sudo apt update && sudo apt install -y poppler-utils`
+    - CentOS / RHEL / AlmaLinux: `sudo dnf install -y poppler-utils`
+    - กำหนดพาธเองใน `.env`: `PDFTOTEXT_PATH="/usr/bin/pdftotext"`
+  - **การจัดเก็บจำนวนหน้าอัตโนมัติ (Automated Storage)**:
+    - ทุกครั้งที่มีการอัปโหลดไฟล์ PDF รายงานฉบับสมบูรณ์ของโครงการวิจัย (`pro_file`) ระบบจะนับและบันทึกจำนวนหน้าลง `rdb_project.pro_page_num` อัตโนมัติ
+    - ทุกครั้งที่มีการอัปโหลดไฟล์ PDF ผลงานตีพิมพ์ (`pub_file`) ระบบจะนับและบันทึกจำนวนหน้าลง `rdb_published.pub_numfile` อัตโนมัติ
+    - คำสั่งรันนับหน้าและบันทึกย้อนหลังทั้งระบบ: `php artisan rdb:count-pdf-pages` (ตัวเลือก `--module=all|project|published`, `--force`, `--limit=`)
 - รายละเอียด: `.agents/skills/legacy-data-migration/SKILL.md`
 
 ## 5. Security, Hardening & Academic Sync (security-and-hardening, thai-reporting-export & scopus-orcid-integration)
@@ -64,4 +78,33 @@
   - หน้ารายการค้นหา (Index Filter): หากระบุวันใดวันหนึ่งต้องระบุให้ครบทั้งสองวัน และ `date_end >= date_start` หากผิดพลาดให้ redirect กลับพร้อมแจ้งเตือนภาษาไทย
   - หน้าแบบฟอร์ม (FormRequest): ใช้กฎ `after_or_equal:pro_date_start` พร้อมแปลงค่าด้วย `ThaiDateHelper::toIsoDate()` ใน `prepareForValidation()`
 - รายละเอียด: `.agents/skills/shared-search-and-date-controls/SKILL.md`
+
+## 8. Subagents Architecture & Role Delegation
+เมื่อมีงานพัฒนาฟีเจอร์ขนาดใหญ่หรือการ Refactor ให้ Parent/Orchestrator Agent กระจายงานไปยัง 4 Subagents หลักตามขอบเขตความเชี่ยวชาญ:
+
+```
+                              ┌───────────────────────────────────┐
+                              │     Parent / Orchestrator Agent   │
+                              │ (คุมภาพรวม / วางแผน / สื่อสารกับ User)│
+                              └─────────────────┬─────────────────┘
+           ┌─────────────────────┬──────────────┴───────┬─────────────────────┐
+           ▼                     ▼                      ▼                     ▼
+┌────────────────────┐ ┌────────────────────┐ ┌────────────────────┐ ┌────────────────────┐
+│ 1. Backend Core    │ │ 2. Academic UI     │ │ 3. Security &      │ │ 4. QA & Test       │
+│    Architect       │ │    Craftsman       │ │    Compliance      │ │    Assurance       │
+└────────────────────┘ └────────────────────┘ └────────────────────┘ └────────────────────┘
+```
+
+1. **Backend Core Architect** (สถาปัตยกรรมหลังบ้านและฐานข้อมูล)
+   - **Skills ที่กำกับ**: `laravel-php`, `legacy-data-migration`, `scopus-orcid-integration`, `shared-search-and-date-controls`
+   - **หน้าที่**: ออกแบบ Thin Controllers/FormRequest/Services, ป้องกัน N+1 Queries (`with()`), จัดการ Schema/Fallback ดึงไฟล์เดิม, คุมตรรกะค้นหาและแปลงวันที่ พ.ศ. ↔ ค.ศ.
+2. **Academic UI Craftsman** (ส่วนติดต่อผู้ใช้สไตล์วิชาการ)
+   - **Skills ที่กำกับ**: `ui-standard-components`, `ui-dark-mode-and-responsive`, `ui-form-controls-and-plugins`, `ui-dashboard-visualization`, `ui-ux-pro-max`
+   - **หน้าที่**: สร้าง/แต่ง Blade Views ด้วย Semantic Tokens (Light/Dark Mode), ป้องกัน AI-Slop (คุมโทนสีวิชาการ Deep Navy / Amber), จัดการ `<x-card>`, Status Badges, `tabular-nums`, TomSelect และ Wizard UI
+3. **Security & Compliance Auditor** (ผู้ตรวจความปลอดภัยและความถูกต้องข้อมูล)
+   - **Skills ที่กำกับ**: `security-and-hardening`, `thai-reporting-export`
+   - **หน้าที่**: ตรวจสอบความปลอดภัยเชิงลึก (CSRF, XSS ใน `{!! !!}`, IDOR, Parameter Binding, Policy Gates) และดูแลการ Export ภาษาไทยด้วย UTF-8 BOM (`\xEF\xBB\xBF`)
+4. **QA & Test Assurance** (ผู้ทดสอบและสืบค้นบั๊กเชิงระบบ)
+   - **Skills ที่กำกับ**: `backend-test-assurance`
+   - **หน้าที่**: สืบสวนต้นตอบั๊ก (Root-Cause Debugging), ตรวจสอบ syntax (`php -l`), รันและดูแลชุดทดสอบ `php artisan test --filter=BackendAuditTest` ให้ผ่าน 100% ก่อนส่งมอบงาน
 

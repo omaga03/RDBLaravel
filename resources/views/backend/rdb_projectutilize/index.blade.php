@@ -181,10 +181,9 @@
 
                                 <!-- Project Reference -->
                                 @if($item->project)
-                                    <div class="mt-2 p-2 bg-body-tertiary rounded border-start border-3 border-info">
-                                        <div class="small fw-bold text-body-secondary mb-1">โครงการอ้างอิง:</div>
-                                        <a href="{{ route('backend.rdb_project.show', $item->project->pro_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body fw-bold hover-primary small text-break d-block">
-                                            <i class="bi bi-folder-symlink me-1 text-primary"></i> {{ Str::limit($item->project->pro_nameTH, 80) }}
+                                    <div class="mt-1 small">
+                                        <a href="{{ route('backend.rdb_project.show', $item->project->pro_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body hover-primary text-break">
+                                            <i class="bi bi-folder2-open me-1 text-primary"></i>{{ $item->project->pro_nameTH }}
                                         </a>
                                         @php
                                             $leader = $item->project->rdbProjectWorks->where('position_id', 1)->first();
@@ -194,19 +193,17 @@
                                                 $canManageUtzLeader = auth()->user()->hasRole(['Admin', 'The Creator', 'Admin Research', 'Admin Utilize', 'Utilize']) || auth()->user()->id === 129;
                                                 $isSelfUtzLeader = (int)auth()->user()->researcher_id === (int)$leader->researcher->researcher_id;
                                             @endphp
-                                            <div class="small text-body-secondary mt-1">
+                                            <div class="small text-body-secondary mt-0.5">
                                                 <i class="bi bi-person-circle text-primary me-1"></i>
                                                 @if($canManageUtzLeader || $isSelfUtzLeader)
-                                                    <a href="{{ route('backend.rdb_researcher.show', $leader->researcher->researcher_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body hover-primary">
+                                                    <a href="{{ route('backend.rdb_researcher.show', $leader->researcher->researcher_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body-secondary hover-primary">
                                                         {{ $leader->researcher->researcher_fname }} {{ $leader->researcher->researcher_lname }}
                                                         @if($isSelfUtzLeader)
                                                             <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1" style="font-size: 0.7rem;">(คุณ)</span>
                                                         @endif
                                                     </a>
                                                 @else
-                                                    <span class="text-body fw-bold">
-                                                        {{ $leader->researcher->researcher_fname }} {{ $leader->researcher->researcher_lname }}
-                                                    </span>
+                                                    <span>{{ $leader->researcher->researcher_fname }} {{ $leader->researcher->researcher_lname }}</span>
                                                 @endif
                                             </div>
                                         @endif

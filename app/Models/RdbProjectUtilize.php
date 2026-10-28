@@ -29,6 +29,21 @@ class RdbProjectUtilize extends Model
         return $this->belongsTo(RdbProjectUtilizeType::class, 'utz_group', 'utz_type_id');
     }
 
+    /**
+     * Get all utilize types when utz_group contains multiple comma-separated IDs
+     */
+    public function getUtilizeTypesAttribute()
+    {
+        if (empty($this->utz_group)) {
+            return collect();
+        }
+        $groupIds = array_filter(array_map('trim', explode(',', (string) $this->utz_group)));
+        if (empty($groupIds)) {
+            return collect();
+        }
+        return RdbProjectUtilizeType::whereIn('utz_type_id', $groupIds)->get();
+    }
+
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'user_created', 'id');

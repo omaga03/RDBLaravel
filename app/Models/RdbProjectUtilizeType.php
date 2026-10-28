@@ -26,4 +26,12 @@ class RdbProjectUtilizeType extends Model
     {
         return $this->belongsTo(User::class, 'user_updated');
     }
+
+    /**
+     * Accessor for utz_type_name to normalize legacy spelling utz_typr_name
+     */
+    public function getUtzTypeNameAttribute(): ?string
+    {
+        return $this->utz_typr_name;
+    }
 }

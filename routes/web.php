@@ -110,6 +110,8 @@ Route::prefix('backend')->name('backend.')->middleware(['auth', \App\Http\Middle
     });
 
     Route::get('/rdb_project/dspace', [RdbProjectController::class, 'dspaceIndex'])->name('rdb_project.dspace_index');
+    Route::post('/rdb_project/dspace/batch', [RdbProjectController::class, 'exportDspaceBatch'])->name('rdb_project.export_dspace_batch');
+    Route::post('/rdb_project/dspace/update-status', [RdbProjectController::class, 'updateDspaceBatchStatus'])->name('rdb_project.update_dspace_batch_status');
     Route::resource('rdb_project', RdbProjectController::class);
     Route::resource('rdb_researcher', RdbResearcherController::class);
     Route::post('/rdb_researcher/{id}/update-codeid', [RdbResearcherController::class, 'updateCodeId'])->name('rdb_researcher.update_codeid');
@@ -187,7 +189,15 @@ Route::prefix('backend')->name('backend.')->middleware(['auth', \App\Http\Middle
     Route::get('/rdb_published/{id}/view-file', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'viewFile'])->name('rdb_published.view_file');
 
     Route::post('/rdb_published/{id}/restore', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'restore'])->name('rdb_published.restore');
+    
+    // DSpace Export & Check for Published
     Route::get('/rdb_published/dspace', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'dspaceIndex'])->name('rdb_published.dspace_index');
+    Route::post('/rdb_published/dspace/batch', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'exportDspaceBatch'])->name('rdb_published.dspace_batch');
+    Route::post('/rdb_published/dspace/update-status', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'updateDspaceBatchStatus'])->name('rdb_published.dspace_update_status');
+    Route::get('/rdb_published/dspace/check', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'dspaceCheck'])->name('rdb_published.dspace_check');
+    Route::post('/rdb_published/dspace/ajax-count-page', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'ajaxCountPdfPage'])->name('rdb_published.dspace_ajax_count_page');
+    Route::post('/rdb_published/dspace/ajax-update-item-status', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'ajaxUpdateItemStatus'])->name('rdb_published.dspace_ajax_update_status');
+
     Route::resource('rdb_published', \App\Http\Controllers\Backend\RdbPublishedController::class);
     
     // DIP File Management
