@@ -40,6 +40,7 @@ class RdbProject extends Model
         'pro_file_path',
         'pro_file_size',
         'pro_file_mime',
+        'pro_page_num',
         'pt_id',
         'pts_id',
         'ps_id',
@@ -201,6 +202,19 @@ class RdbProject extends Model
     public function budget()
     {
         return $this->hasOne(RdbProjectBudget::class, 'pro_id', 'pro_id');
+    }
+
+    public function reviewSubmissions()
+    {
+        return $this->hasMany(RdbReviewSubmission::class, 'pro_id', 'pro_id')
+            ->orderByDesc('round_number')
+            ->orderByDesc('id');
+    }
+
+    public function latestReviewSubmission()
+    {
+        return $this->hasOne(RdbReviewSubmission::class, 'pro_id', 'pro_id')
+            ->latestOfMany('id');
     }
 
     // Legacy Chart Logic Ported

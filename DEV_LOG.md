@@ -1,5 +1,54 @@
 # บันทึกการพัฒนาประจำวัน (Development Log)
 
+## วันที่: 29 ตุลาคม 2569 (2026-10-29)
+
+### 📌 สรุปงานสำคัญที่ดำเนินการเสร็จสิ้นในวันนี้
+
+#### 1. ระบบย่อยการประเมินเล่ม/ร่างรายงานวิจัยฉบับสมบูรณ์ (Research Report Peer Review Subsystem)
+- **สถาปัตยกรรมฐานข้อมูล (Database Schema & Migrations)**:
+  - `database/migrations/2026_10_29_193000_create_rdb_project_review_tables.php` และ `2026_10_29_203000_add_scale_max_and_step_to_rdb_review_criteria_table.php`
+  - สร้าง 6 ตารางหลัก:
+    1. `rdb_review_template`: แม่แบบแบบฟอร์มเกณฑ์การประเมิน
+    2. `rdb_review_criteria`: ข้อคำถาม/เกณฑ์ประเมินย่อย รองรับระดับคะแนนและระยะห่างสเกล
+    3. `rdb_review_submission`: บันทึกการส่งเล่มรายงานวิจัยในแต่ละรอบ (Draft / Revised / Final)
+    4. `rdb_review_assignment`: บันทึกการมอบหมายผู้ทรงคุณวุฒิประเมิน
+    5. `rdb_review_score`: บันทึกคะแนนและข้อเสนอแนะรายข้อ
+    6. `rdb_review_clarification`: บทสนทนาการชี้แจง/ทักท้วงระหว่างนักวิจัยและเจ้าหน้าที่
+- **แบบฟอร์มเกณฑ์ประเมินมาตรฐานเริ่มต้น (`RdbReviewTemplateSeeder.php`)**:
+  - ติดตั้งแม่แบบเริ่มต้น 3 รูปแบบ (18 หัวข้อเกณฑ์ย่อย) พร้อมใช้งานทันที:
+    1. แบบประเมินเล่มรายงานวิจัยฉบับสมบูรณ์ (มาตรฐานระดับคะแนน 5 ระดับ + ข้อเสนอแนะ) (`hybrid`)
+    2. แบบประเมินความสมบูรณ์ของร่างรายงานวิจัย (แบบผ่าน / ต้องแก้ไข / ไม่ผ่าน) (`pass_fail`)
+    3. แบบประเมินข้อวิพากษ์และข้อเสนอแนะเชิงคุณภาพ (แบบปลายเปิดรายข้อ) (`qualitative_only`)
+
+#### 2. กลไก Single-Blind และระบบการจัดการรอบประเมิน (Service & Workflow Engine)
+- **`ProjectReviewService.php` และ `RdbProjectReviewController.php`**:
+  - **100% Single-Blind Anonymity**: ตัดข้อมูลระบุตัวตนของผู้ทรงคุณวุฒิออกจากฝั่งนักวิจัย แสดงเป็น "ผู้ทรงคุณวุฒิคนที่ 1", "ผู้ทรงคุณวุฒิคนที่ 2" และแปลงชื่อไฟล์แนบข้อเสนอแนะเป็น `reviewer_feedback_{id}.pdf`
+  - **Conflict of Interest Guard**: ป้องกันการมอบหมายเจ้าของโครงการหรือนักวิจัยร่วมในโครงการมาตรวจงานตนเอง
+  - **การมอบหมายผู้ประเมิน (1..N ท่าน)**: เลือกผู้ทรงคุณวุฒิภายในผ่าน TomSelect AJAX พร้อมแสดงจำนวนโครงการที่กำลังตรวจอยู่แบบ Real-time
+  - **ขั้นตอนตอบรับ/ปฏิเสธงาน (Accept / Decline Flow)**: ผู้ทรงคุณวุฒิกดยอมรับงาน หรือปฏิเสธพร้อมระบุเหตุผลเพื่อมอบหมายท่านอื่นแทน
+  - **ระบบการชี้แจง/ทักท้วง (Clarification & Dispute)**: นักวิจัยส่งข้อความชี้แจง/ทักท้วงพร้อมไฟล์แนบได้
+  - **ประตูอนุมัติเล่มจริงขั้นสุดท้าย (Final Approval Gate)**: เมื่อนักวิจัยส่งเล่มจริงและ Admin กดอนุมัติ ระบบจะคัดลอกไฟล์เข้า `rdb_project.pro_file` บันทึกจำนวนหน้าผ่าน Poppler Engine และตั้งสถานะ `todspace = 0` เพื่อเตรียมส่งออก DSpace
+
+#### 3. ปรับปรุง UI/UX และระบบออกแบบแบบฟอร์ม (Form Template Designer)
+- **หน้ารายการแบบฟอร์ม (`backend.project_review.templates`)**:
+  - ปรับการแสดงผลเป็นการ์ด **Accordion (ย่อ-ขยาย เปิด/ปิดได้)** ค่าเริ่มต้นยุบไว้เพื่อความสะอาดตาและเป็นระเบียบ
+  - เพิ่มปุ่ม "ขยายทั้งหมด / ย่อทั้งหมด" สำหรับดูข้อมูลภาพรวม
+- **แยกหน้าจอสร้างและแก้ไขแบบฟอร์ม (Dedicated Tabs)**:
+  - หน้าสร้างแบบฟอร์มใหม่: [`template_create.blade.php`](resources/views/backend/project_review/template_create.blade.php)
+  - หน้าแก้ไขแบบฟอร์ม: [`template_edit.blade.php`](resources/views/backend/project_review/template_edit.blade.php)
+  - เปิดทำงานในแท็บใหม่ได้ ไม่รบกวนหน้า Index
+- **ระบบสเกลคะแนนแบบระบุคะแนนเต็มและระยะห่าง (Scale Max & Step) รายข้อคำถาม**:
+  - รองรับการกำหนด เช่น คะแนนเต็ม 25 คะแนน ห่างทีละ 5 (สเกล 5 ระดับ: 5, 10, 15, 20, 25)
+  - มี **Live Preview** แสดงผลตัวอย่างสเกลทันทีขณะกรอก
+  - หน้าตรวจประเมินของผู้ทรงคุณวุฒิ ([`evaluate.blade.php`](resources/views/backend/project_review/evaluate.blade.php)) สร้างปุ่ม Radio ตามสเกลที่กำหนดอัตโนมัติ
+
+#### 4. การทดสอบและการรับประกันคุณภาพ (Test Assurance)
+- `php artisan test --filter=ProjectPeerReviewTest`: ผ่าน **2/2 tests (133 assertions)** 100%
+- `php artisan test --filter=BackendAuditTest`: ผ่าน **46/46 tests (408 assertions)** 100%
+- เคลียร์ Cache และตรวจสอบความปลอดภัย XSS/CSRF/IDOR เรียบร้อย
+
+---
+
 ## วันที่: 28 ตุลาคม 2569 (2026-10-28)
 
 ### 📌 สรุปงานสำคัญที่ดำเนินการเสร็จสิ้นในวันนี้

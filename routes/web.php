@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 // Backend Controllers
 use App\Http\Controllers\Backend\SiteController;
 use App\Http\Controllers\Backend\RdbProjectController;
+use App\Http\Controllers\Backend\RdbProjectReviewController;
 use App\Http\Controllers\Backend\RdbResearcherController;
 use App\Http\Controllers\Backend\RdbbranchController;
 use App\Http\Controllers\Backend\RdbdepartmentController;
@@ -270,6 +271,40 @@ Route::prefix('backend')->name('backend.')->middleware(['auth', \App\Http\Middle
         Route::delete('/tokens/{id}', [\App\Http\Controllers\Backend\ApiManagementController::class, 'revokeToken'])->name('tokens.revoke');
         Route::delete('/users/{userId}/tokens', [\App\Http\Controllers\Backend\ApiManagementController::class, 'revokeAllUserTokens'])->name('tokens.revoke_all');
         Route::post('/test-endpoint', [\App\Http\Controllers\Backend\ApiManagementController::class, 'testEndpoint'])->name('test_endpoint');
+    });
+
+    // Research Report Peer Review & Evaluation Subsystem (ระบบประเมินเล่ม/ร่างรายงานวิจัยฉบับสมบูรณ์)
+    Route::prefix('project-reviews')->name('project_review.')->group(function () {
+        Route::get('/', [RdbProjectReviewController::class, 'index'])->name('index');
+        Route::get('/my-reviews', [RdbProjectReviewController::class, 'myReviews'])->name('my_reviews');
+        Route::get('/search-reviewers', [RdbProjectReviewController::class, 'searchReviewers'])->name('search_reviewers');
+
+        // Form Template Designer
+        Route::get('/templates', [RdbProjectReviewController::class, 'templates'])->name('templates');
+        Route::get('/templates/create', [RdbProjectReviewController::class, 'createTemplate'])->name('templates.create');
+        Route::post('/templates', [RdbProjectReviewController::class, 'storeTemplate'])->name('templates.store');
+        Route::get('/templates/{id}/edit', [RdbProjectReviewController::class, 'editTemplate'])->name('templates.edit');
+        Route::put('/templates/{id}', [RdbProjectReviewController::class, 'updateTemplate'])->name('templates.update');
+        Route::delete('/templates/{id}', [RdbProjectReviewController::class, 'destroyTemplate'])->name('templates.destroy');
+
+        // Project Review Workspace
+        Route::get('/project/{pro_id}', [RdbProjectReviewController::class, 'project'])->name('project');
+        Route::post('/project/{pro_id}/submit', [RdbProjectReviewController::class, 'submitReport'])->name('submit_report');
+
+        // Submission Management & Workflow Actions
+        Route::post('/submission/{id}/assign', [RdbProjectReviewController::class, 'assignReviewers'])->name('assign');
+        Route::post('/submission/{id}/close-round', [RdbProjectReviewController::class, 'closeRound'])->name('close_round');
+        Route::post('/submission/{id}/clarification', [RdbProjectReviewController::class, 'storeClarification'])->name('clarification.store');
+        Route::get('/clarification/{id}/attachment', [RdbProjectReviewController::class, 'downloadClarificationAttachment'])->name('clarification.attachment');
+        Route::post('/submission/{id}/approve-final', [RdbProjectReviewController::class, 'approveFinal'])->name('approve_final');
+        Route::get('/submission/{id}/file', [RdbProjectReviewController::class, 'downloadSubmissionFile'])->name('submission.file');
+
+        // Reviewer Evaluation & Assignment Actions
+        Route::delete('/assignment/{id}', [RdbProjectReviewController::class, 'removeAssignment'])->name('assignment.remove');
+        Route::get('/assignment/{id}/evaluate', [RdbProjectReviewController::class, 'evaluate'])->name('evaluate');
+        Route::post('/assignment/{id}/respond', [RdbProjectReviewController::class, 'respondAssignment'])->name('respond');
+        Route::post('/assignment/{id}/evaluate', [RdbProjectReviewController::class, 'submitEvaluation'])->name('submit_evaluation');
+        Route::get('/assignment/{id}/annotated-file', [RdbProjectReviewController::class, 'downloadAnnotatedFile'])->name('assignment.annotated_file');
     });
 
 });

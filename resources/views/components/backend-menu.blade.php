@@ -79,6 +79,19 @@
                 $canDspaceProject = $isSuperAdmin || ($currentUser && ($currentUser->hasRole(['Admin Project', 'Admin Library']) || $currentUser->hasPermission('DSpace.Export')));
                 $canDspacePublished = $isSuperAdmin || ($currentUser && ($currentUser->hasRole(['Admin Published', 'Admin Library']) || $currentUser->hasPermission('DSpace.Export')));
                 $canManageResearchers = $isSuperAdmin || ($currentUser && ($currentUser->hasRole(['Admin Researcher', 'Admin Position']) || ($currentUser->hasPermission('RdbResearcher.View') && !$currentUser->hasRole('Researcher') && !$currentUser->researcher_id && !$currentUser->hasRole('Faculty Coordinator'))));
+                $myPendingReviewsCount = 0;
+                if ($currentUser) {
+                    try {
+                        $myPendingReviewsCount = \App\Models\RdbReviewAssignment::where(function ($q) use ($currentUser) {
+                            $q->where('reviewer_id', $currentUser->id);
+                            if (!empty($currentUser->researcher_id)) {
+                                $q->orWhere('researcher_id', $currentUser->researcher_id);
+                            }
+                        })->whereIn('status', ['pending', 'accepted'])->count();
+                    } catch (\Throwable $e) {
+                        $myPendingReviewsCount = 0;
+                    }
+                }
             @endphp
 
             @if($currentUser && !$currentUser->canAccessFullBackend())
@@ -121,12 +134,20 @@
                     <!-- 1. โครงการ -->
                     @if($isSuperAdmin || ($currentUser && ($currentUser->hasRole(['Admin Project', 'Researcher', 'Faculty Coordinator']) || $currentUser->researcher_id || $currentUser->hasPermission(['RdbProject.View', 'Project', 'MasterData.Manage']))))
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle {{ request()->is('backend/rdb_project*') || request()->is('backend/rdbgroupproject*') || request()->is('backend/rdbprojecttypesgroup*') || request()->is('backend/rdbprojecttypesmaster*') || request()->is('backend/rdbprojecttype*') || request()->is('backend/rdbprojecttypesub*') || request()->is('backend/rdbprojectposition*') || request()->is('backend/rdbprojectpersonnel*') || request()->is('backend/rdbyear*') || request()->is('backend/rdbbranch*') ? 'active fw-bold' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle {{ request()->is('backend/rdb_project*') || request()->is('backend/project-reviews*') || request()->routeIs('backend.project_review.*') || request()->is('backend/rdbgroupproject*') || request()->is('backend/rdbprojecttypesgroup*') || request()->is('backend/rdbprojecttypesmaster*') || request()->is('backend/rdbprojecttype*') || request()->is('backend/rdbprojecttypesub*') || request()->is('backend/rdbprojectposition*') || request()->is('backend/rdbprojectpersonnel*') || request()->is('backend/rdbyear*') || request()->is('backend/rdbbranch*') ? 'active fw-bold' : '' }}" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-folder2-open text-primary me-1.5"></i> โครงการ
+                            @if($myPendingReviewsCount > 0)
+                                <span class="badge rounded-pill bg-danger ms-1" style="font-size: 0.68rem; font-variant-numeric: tabular-nums;">{{ $myPendingReviewsCount }}</span>
+                            @endif
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.rdb_project.index') }}"><i class="bi bi-list-ul me-2 text-primary"></i>รายการโครงการทั้งหมด</a></li>
                             <li><a class="dropdown-item d-flex align-items-center text-warning" href="{{ route('backend.rdb_project.index', ['workflow_status' => 'unapproved']) }}"><i class="bi bi-clock-history me-2 text-warning"></i>ฉบับร่าง / รออนุมัติ</a></li>
+                            <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.project_review.index') }}"><i class="bi bi-clipboard2-check me-2 text-primary"></i>ระบบประเมินเล่มรายงานวิจัย</a></li>
+                            <li><a class="dropdown-item d-flex align-items-center justify-content-between" href="{{ route('backend.project_review.my_reviews') }}"><span><i class="bi bi-person-check me-2 text-success"></i>งานประเมินเล่มที่ได้รับมอบหมาย</span>@if($myPendingReviewsCount > 0)<span class="badge rounded-pill bg-danger ms-2" style="font-variant-numeric: tabular-nums;">{{ $myPendingReviewsCount }}</span>@endif</a></li>
+                            @if($isSuperAdmin || ($currentUser && $currentUser->hasRole('Admin Project')))
+                            <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.project_review.templates') }}"><i class="bi bi-ui-checks-grid me-2 text-info"></i>จัดการแบบฟอร์มเกณฑ์ประเมิน</a></li>
+                            @endif
                             @if($isSuperAdmin)
                             <li><a class="dropdown-item d-flex align-items-center text-danger" href="{{ route('backend.rdb_project.index', ['trashed' => 'only']) }}"><i class="bi bi-trash3 me-2 text-danger"></i>ถังขยะและกู้คืนข้อมูล</a></li>
                             @endif

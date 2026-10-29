@@ -44,6 +44,11 @@
                 </button>
             </form>
         @endif
+        @if(auth()->check() && (auth()->user()->hasRole(['The Creator', 'Admin', 'Admin Research', 'Admin Project']) || auth()->user()->id == $project->user_created || ($project->researchers && $project->researchers->contains('researcher_id', auth()->user()->researcher_id))))
+            <a href="{{ route('backend.project_review.project', $project->pro_id) }}" class="btn btn-primary d-inline-flex justify-content-center align-items-center" style="height: 38px; font-size: 0.85rem;">
+                <i class="bi bi-clipboard2-check me-1.5"></i> ระบบประเมินเล่มรายงานวิจัย
+            </a>
+        @endif
     </x-page-header>
 
     @if($project->workflow_status === 'unlock_requested')
