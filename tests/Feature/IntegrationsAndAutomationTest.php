@@ -183,11 +183,11 @@ class IntegrationsAndAutomationTest extends TestCase
         // 5. Check DSpace index pages HTTP 200
         $projectDspace = $this->actingAs($admin)->get(route('backend.rdb_project.dspace_index'));
         $projectDspace->assertStatus(200);
-        $projectDspace->assertSee('ส่งออกแพ็กเกจคลังปัญญา DSpace');
+        $projectDspace->assertSee('DSpace (Batch Mode)');
 
         $publishedDspace = $this->actingAs($admin)->get(route('backend.rdb_published.dspace_index'));
         $publishedDspace->assertStatus(200);
-        $publishedDspace->assertSee('ส่งออกแพ็กเกจคลังปัญญา DSpace');
+        $publishedDspace->assertSee('DSpace (Batch Mode)');
 
         // 6. Test specific export zip endpoint
         $published = RdbPublished::find(1997) ?? RdbPublished::first();
