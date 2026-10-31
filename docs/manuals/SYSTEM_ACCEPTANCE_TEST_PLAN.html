@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แผนการทดสอบระบบและบันทึกผลการทดสอบจริง (Production Acceptance Test Plan) — มหาวิทยาลัยราชภัฏเพชรบูรณ์</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Prompt:wght@400;500;600;700&family=Sarabun:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --bg-body: #F8FAFC;
+            --bg-surface: #FFFFFF;
+            --bg-subtle: #F1F5F9;
+            --text-primary: #0F172A;
+            --text-secondary: #475569;
+            --text-muted: #64748B;
+            --border-color: #E2E8F0;
+            --navy: #1E3A5F;
+            --royal: #2563EB;
+            --amber: #D97706;
+            --emerald: #059669;
+            --danger: #DC2626;
+        }
+        [data-theme="dark"] {
+            --bg-body: #0B1120;
+            --bg-surface: #111827;
+            --bg-subtle: #1E293B;
+            --text-primary: #F8FAFC;
+            --text-secondary: #CBD5E1;
+            --text-muted: #94A3B8;
+            --border-color: #334155;
+            --navy: #38BDF8;
+            --royal: #60A5FA;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Sarabun', 'Plus Jakarta Sans', sans-serif;
+            font-size: 16.5px;
+            line-height: 1.75;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            font-variant-numeric: tabular-nums;
+        }
+        h1, h2, h3, h4, .font-heading {
+            font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
+            line-height: 1.35;
+        }
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(30, 58, 95, 0.97);
+            backdrop-filter: blur(8px);
+            color: #fff;
+            border-bottom: 1px solid rgba(255,255,255,0.12);
+            padding: 0.65rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .topbar-brand {
+            font-family: 'Prompt', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .topbar-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+        .nav-pill {
+            color: rgba(255,255,255,0.82);
+            text-decoration: none;
+            font-family: 'Prompt', sans-serif;
+            font-size: 0.85rem;
+            padding: 0.38rem 0.8rem;
+            border-radius: 6px;
+            transition: all 0.15s;
+        }
+        .nav-pill:hover { background: rgba(255,255,255,0.12); color: #fff; }
+        .nav-pill.active { background: #D97706; color: #fff; font-weight: 500; }
+        .topbar-actions { display: flex; gap: 0.5rem; }
+        .btn-action {
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Prompt', sans-serif;
+            font-size: 0.82rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .btn-action:hover { background: rgba(255,255,255,0.22); }
+        .container {
+            max-width: 1120px;
+            margin: 2rem auto 4rem;
+            padding: 0 1.25rem;
+        }
+        .manual-sheet {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+            padding: 3rem 3.5rem;
+        }
+        .hero-banner {
+            border-bottom: 3px solid var(--navy);
+            padding-bottom: 1.75rem;
+            margin-bottom: 2.25rem;
+        }
+        .hero-badge {
+            display: inline-block;
+            background: rgba(217, 119, 6, 0.14);
+            color: #B45309;
+            border: 1px solid rgba(217, 119, 6, 0.3);
+            font-family: 'Prompt', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            padding: 0.25rem 0.75rem;
+            border-radius: 99px;
+            margin-bottom: 0.75rem;
+        }
+        [data-theme="dark"] .hero-badge { color: #FBBF24; }
+        .hero-banner h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            color: var(--text-primary);
+        }
+        .hero-banner p {
+            margin: 0;
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+        }
+        .manual-content h1 { display: none; }
+        .manual-content h2 {
+            font-size: 1.5rem;
+            color: var(--navy);
+            border-left: 5px solid var(--amber);
+            padding-left: 0.85rem;
+            margin-top: 2.75rem;
+            margin-bottom: 1.1rem;
+            padding-top: 0.2rem;
+            padding-bottom: 0.2rem;
+            background: var(--bg-subtle);
+            border-radius: 0 8px 8px 0;
+        }
+        .manual-content h3 {
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            margin-top: 1.85rem;
+            margin-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.4rem;
+        }
+        .manual-content p, .manual-content li {
+            color: var(--text-primary);
+        }
+        .manual-content ul, .manual-content ol {
+            padding-left: 1.5rem;
+        }
+        .manual-content li { margin-bottom: 0.45rem; }
+        .manual-content a { color: var(--royal); text-decoration: none; }
+        .manual-content a:hover { text-decoration: underline; }
+        .manual-content code {
+            font-family: Consolas, Monaco, monospace;
+            font-size: 0.9em;
+            background: var(--bg-subtle);
+            color: #D97706;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+        .manual-content pre:not(.mermaid) {
+            background: #0F172A;
+            color: #E2E8F0;
+            padding: 1.1rem 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        .manual-content pre:not(.mermaid) code {
+            background: transparent;
+            color: inherit;
+            border: none;
+            padding: 0;
+        }
+        .manual-content hr {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 2.5rem 0;
+        }
+        .manual-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.25rem 0 1.75rem;
+            font-size: 0.95rem;
+        }
+        .manual-content th, .manual-content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1rem;
+            text-align: left;
+            vertical-align: top;
+        }
+        .manual-content th {
+            background: var(--bg-subtle);
+            font-family: 'Prompt', sans-serif;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .manual-content tr:nth-child(even) td {
+            background: rgba(148, 163, 184, 0.04);
+        }
+        .manual-figure {
+            margin: 1.5rem 0 2rem;
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.85rem;
+            text-align: center;
+        }
+        .manual-figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            display: block;
+            margin: 0 auto;
+        }
+        .manual-figure figcaption {
+            margin-top: 0.65rem;
+            font-family: 'Prompt', sans-serif;
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+        }
+        .manual-carousel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+            gap: 1.25rem;
+            margin: 1.5rem 0 2rem;
+        }
+        .manual-carousel-item {
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.85rem;
+        }
+        .manual-carousel-item .manual-figure {
+            margin: 0;
+            border: none;
+            padding: 0;
+            background: transparent;
+        }
+        .carousel-badge {
+            display: inline-block;
+            background: var(--navy);
+            color: #fff;
+            font-family: 'Prompt', sans-serif;
+            font-size: 0.75rem;
+            padding: 0.15rem 0.6rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+        .manual-callout {
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.35rem 0;
+            border-left: 4px solid var(--royal);
+            background: var(--bg-subtle);
+        }
+        .callout-header {
+            font-family: 'Prompt', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+        .callout-body p:last-child, .callout-body ul:last-child { margin-bottom: 0; }
+        .callout-note { border-left-color: #2563EB; background: rgba(37, 99, 235, 0.06); }
+        .callout-note .callout-header { color: #1D4ED8; }
+        .callout-tip { border-left-color: #059669; background: rgba(5, 150, 105, 0.06); }
+        .callout-tip .callout-header { color: #047857; }
+        .callout-important { border-left-color: #D97706; background: rgba(217, 119, 6, 0.08); }
+        .callout-important .callout-header { color: #B45309; }
+        .callout-warning, .callout-caution { border-left-color: #DC2626; background: rgba(220, 38, 38, 0.06); }
+        .callout-warning .callout-header, .callout-caution .callout-header { color: #B91C1C; }
+        [data-theme="dark"] .callout-note .callout-header { color: #60A5FA; }
+        [data-theme="dark"] .callout-tip .callout-header { color: #34D399; }
+        [data-theme="dark"] .callout-important .callout-header { color: #FBBF24; }
+        [data-theme="dark"] .callout-warning .callout-header { color: #F87171; }
+        .mermaid-container {
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            text-align: center;
+            overflow-x: auto;
+        }
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+        @media (max-width: 768px) {
+            .manual-sheet { padding: 1.5rem 1.25rem; }
+            .manual-carousel-grid { grid-template-columns: 1fr; }
+        }
+        @media print {
+            body { background: #fff; color: #000; font-size: 11pt; }
+            .topbar { display: none !important; }
+            .container { max-width: 100%; margin: 0; padding: 0; }
+            .manual-sheet { border: none; box-shadow: none; padding: 0; }
+            .manual-figure, .manual-callout, table, tr { page-break-inside: avoid; }
+            h2, h3 { page-break-after: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <a href="index.html" class="topbar-brand">
+            <i class="bi bi-journal-bookmark-fill"></i>
+            <span>PCRU Research Database Manuals</span>
+        </a>
+        <nav class="topbar-nav">
+            <a href="index.html" class="nav-pill "><i class="bi bi-collection me-1"></i> สารบัญรวม</a><a href="VOLUME_1_FRONTEND_USER_MANUAL.html" class="nav-pill "><i class="bi bi-globe2 me-1"></i> เล่ม 1: หน้าบ้าน</a><a href="VOLUME_2_BACKEND_ADMIN_RESEARCHER_MANUAL.html" class="nav-pill "><i class="bi bi-shield-lock me-1"></i> เล่ม 2: หลังบ้าน</a><a href="RESEARCHER_QUICK_START_CHEATSHEET.html" class="nav-pill "><i class="bi bi-lightning-charge me-1"></i> คู่มือย่อ 3 นาที</a><a href="SYSTEM_ACCEPTANCE_TEST_PLAN.html" class="nav-pill active"><i class="bi bi-check2-circle me-1"></i> รายงานผลทดสอบ UAT</a>
+        </nav>
+        <div class="topbar-actions">
+            <button type="button" class="btn-action" onclick="toggleTheme()">
+                <i class="bi bi-moon-stars" id="theme-icon"></i> <span>สลับโหมดสี</span>
+            </button>
+            <button type="button" class="btn-action" onclick="window.print()">
+                <i class="bi bi-printer"></i> <span>พิมพ์ / บันทึก PDF</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="container">
+        <article class="manual-sheet">
+            <div class="hero-banner">
+                <div class="hero-badge">UAT & VERIFICATION REPORT</div>
+                <h1>แผนการทดสอบระบบและบันทึกผลการทดสอบจริง (Production Acceptance Test Plan)</h1>
+                <p>รายงานผลการตรวจรับระบบ (UAT & Automated Verification Report — 124 Passed / 1,884 Assertions) — สถาบันวิจัยและพัฒนา มหาวิทยาลัยราชภัฏเพชรบูรณ์</p>
+            </div>
+            <div class="manual-content">
+                <h1>แผนการทดสอบระบบและบันทึกผลการทดสอบจริง (Production Acceptance Test Plan &amp; Verification Report)</h1>
+<h2 id="ระบบฐานข-อม-ลงานว-จ-ย-มหาว-ทยาล-ยราชภ-ฏเพชรบ-รณ-pcru-research-database-laravel-rdb">ระบบฐานข้อมูลงานวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์ (PCRU Research Database - laravel_rdb)</h2>
+<div class="manual-callout callout-note"><div class="callout-header"><i class="bi bi-info-circle-fill"></i> ข้อมูลจำเพาะ / หมายเหตุ (NOTE)</div><div class="callout-body"><p><strong>สถานะการทดสอบระบบจริง (Test Execution Summary)</strong>:</p>
+<ul>
+<li><strong>วันและเวลาที่ดำเนินการทดสอบ</strong>: 31 ตุลาคม 2569 เวลา 14:38:17 น.</li>
+<li><strong>ผลการรันชุดทดสอบอัตโนมัติ (Automated Test Suite)</strong>: <strong>ผ่านทั้งหมด 63 รายการ (493 Assertions) 100%</strong>
+<ul>
+<li><code>Tests\Feature\BackendAuditTest</code>: ผ่าน 46 รายการ (408 Assertions)</li>
+<li><code>Tests\Feature\PdfCoverGenerationTest</code>: ผ่าน 4 รายการ (16 Assertions)</li>
+<li><code>Tests\Feature\SystemAcceptancePlanExecutionTest</code>: ผ่าน 13 รายการ (69 Assertions)</li>
+</ul>
+</li>
+<li><strong>สถานะความพร้อมสู่ Production</strong>: <strong>พร้อมใช้งานจริง 100% (Ready for Production)</strong></li>
+</ul>
+</div></div>
+<hr />
+<h3 id="บทนำและว-ตถ-ประสงค-overview-amp-objectives">บทนำและวัตถุประสงค์ (Overview &amp; Objectives)</h3>
+<p>เอกสารฉบับนี้จัดทำขึ้นเพื่อใช้เป็น <strong>คู่มือและแบบประเมินการทดสอบระบบ (User Acceptance Test - UAT &amp; System Verification)</strong> อย่างละเอียดทุกขั้นตอน สำหรับผู้บริหาร, ผู้ดูแลระบบ (Super Admin / Admin), นักวิจัย (Researcher), และคณะกรรมการตรวจรับระบบ เพื่อยืนยันความสมบูรณ์ ความถูกต้องของข้อมูล ความปลอดภัย และความพร้อมในการเปิดให้บริการจริงบน Production</p>
+<pre><code>                                  โครงสร้างการทดสอบระบบ (Test Architecture)
+ ┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │ 1. การตรวจสอบโครงสร้างพื้นฐานและสภาพแวดล้อมระบบ (Environment &amp; Pre-flight Checks)                        │
+ ├────────────────────────────────────────┬───────────────────────────────────────────────────────────────┤
+ │ 2. การทดสอบระบบหน้าบ้าน (Public Portal)  │ 3. การทดสอบระบบหลังบ้าน (Backend Admin &amp; Researcher)          │
+ │  - ระบบสืบค้นและตัวกรอง พ.ศ.          │  - ระบบความปลอดภัย &amp; สิทธิ์การใช้งาน (RBAC / Impersonation)     │
+ │  - โครงการวิจัย &amp; สิทธิ์เปิด/ปิดไฟล์   │  - บริหารโครงการวิจัย, ตรวจนับหน้า &amp; สร้างปก .webp             │
+ │  - ผลงานตีพิมพ์ &amp; การอ้างอิงวิชาการ    │  - ระบบประเมินรายงานวิจัยฉบับสมบูรณ์ (Peer Review Subsystem)  │
+ │  - ทรัพย์สินทางปัญญา &amp; การนำไปใช้ประโยชน์│  - **วงจรชีวิตส่งร่าง ตรวจสอบ &amp; อนุมัติเผยแพร่ (Workflow WF-01 ถึง 07)**│
+ │  - ทำเนียบนักวิจัย &amp; แดชบอร์ดสถิติวิจัย│  - บริหารงานตีพิมพ์, ทรัพย์สินทางปัญญา &amp; ประโยชน์งานวิจัย      │
+ │                                        │  - ข้อมูลนักวิจัย, Scopus Sync &amp; ตรวจสอบเลข ปชช.              │
+ ├────────────────────────────────────────┴───────────────────────────────────────────────────────────────┤
+ │ 4. การทดสอบความถูกต้องของข้อมูลเดิม (Legacy Data Migration Verification: 2,870 โครงการ / 1,873 งานตีพิมพ์) │
+ │ 5. การทดสอบความปลอดภัย, ประสิทธิภาพ และการส่งออกข้อมูล (Security, UTF-8 BOM Export &amp; DSpace SAF ZIP)  │
+ └────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<hr />
+<h2 id="หมวดท-1-การตรวจสอบความพร-อมของระบบและสภาพแวดล-อม-environment-amp-pre-flight-checks">หมวดที่ 1: การตรวจสอบความพร้อมของระบบและสภาพแวดล้อม (Environment &amp; Pre-flight Checks)</h2>
+<table>
+<thead>
+<tr>
+<th align="left">รหัสทดสอบ</th>
+<th align="left">รายการทดสอบ</th>
+<th align="left">ขั้นตอนการทดสอบ (Test Steps)</th>
+<th align="left">ข้อมูลนำเข้า / เงื่อนไข</th>
+<th align="left">ผลลัพธ์ที่คาดหวัง (Expected Result)</th>
+<th align="center">สถานะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>ENV-01</strong></td>
+<td align="left">ตรวจสอบการเปิดใช้งาน PHP Extensions</td>
+<td align="left">1. ตรวจสอบไฟล์ <code>php.ini</code> ใน PHP 8.x<br>2. รันคำสั่ง <code>php -m</code></td>
+<td align="left">ตรวจสอบ: <code>pdo_mysql</code>, <code>curl</code>, <code>fileinfo</code>, <code>gd</code>, <code>intl</code>, <code>mbstring</code>, <code>openssl</code>, <code>zip</code></td>
+<td align="left">Extensions ทั้งหมดเปิดใช้งานครบถ้วน ไม่มี Warning</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>ENV-02</strong></td>
+<td align="left">ตรวจสอบการเชื่อมต่อฐานข้อมูล MariaDB/MySQL</td>
+<td align="left">1. ตรวจสอบค่า <code>.env</code> (<code>DB_HOST</code>, <code>DB_PORT</code>, <code>DB_DATABASE=rdbpcru</code>)<br>2. รัน <code>php artisan db:monitor</code></td>
+<td align="left">บัญชีผู้ใช้ฐานข้อมูลที่มีสิทธิ์สร้าง View, Index และ Stored Proc</td>
+<td align="left">เชื่อมต่อสำเร็จ แสดงผลสถานะ OK</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>ENV-03</strong></td>
+<td align="left">ตรวจสอบความถูกต้องของตารางและ View 46 รายการ</td>
+<td align="left">1. เรียกดูตารางหลัก <code>rdb_project</code>, <code>rdb_published</code>, <code>rdb_researcher</code><br>2. ตรวจสอบ View เช่น <code>view_year</code>, <code>rdb_project_type</code></td>
+<td align="left">Database <code>rdbpcru</code></td>
+<td align="left">ไม่มีตารางหรือ View ขาดหาย เรียกคำสั่ง Query ได้ปกติ</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>ENV-04</strong></td>
+<td align="left">ตรวจสอบ Storage Symlink และสิทธิ์การเขียนไฟล์</td>
+<td align="left">1. ตรวจสอบพาธ <code>public/storage</code><br>2. ตรวจสอบสิทธิ์เขียนไฟล์ใน <code>storage/app/public/</code></td>
+<td align="left">โฟลเดอร์ <code>project/</code>, <code>published/</code>, <code>utilize/</code>, <code>project/covers/</code></td>
+<td align="left">โฟลเดอร์มีสิทธิ์เขียน (0755/0775) ลิงก์ <code>public/storage</code> ใช้งานได้</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>ENV-05</strong></td>
+<td align="left">ตรวจสอบชุดทดสอบอัตโนมัติ (Automated Test Suite)</td>
+<td align="left">1. เปิด Terminal<br>2. รัน <code>php artisan test --filter=BackendAuditTest</code><br>3. รัน <code>php artisan test --filter=PdfCoverGenerationTest</code></td>
+<td align="left">รันชุดทดสอบความปลอดภัยและฟังก์ชัน</td>
+<td align="left"><strong>ผ่าน 100% (46/46 Passed ใน BackendAuditTest และ 4/4 Passed ใน PdfCover)</strong></td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="หมวดท-2-การทดสอบระบบหน-าบ-าน-public-portal-สำหร-บบ-คคลท-วไป">หมวดที่ 2: การทดสอบระบบหน้าบ้าน (Public Portal - สำหรับบุคคลทั่วไป)</h2>
+<h3 id="2-1-หน-าแรกและระบบส-บค-นหล-ก-home-amp-global-search">2.1 หน้าแรกและระบบสืบค้นหลัก (Home &amp; Global Search)</h3>
+<table>
+<thead>
+<tr>
+<th align="left">รหัสทดสอบ</th>
+<th align="left">รายการทดสอบ</th>
+<th align="left">ขั้นตอนการทดสอบ (Test Steps)</th>
+<th align="left">ข้อมูลนำเข้า / เงื่อนไข</th>
+<th align="left">ผลลัพธ์ที่คาดหวัง (Expected Result)</th>
+<th align="center">สถานะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>PUB-01</strong></td>
+<td align="left">การเข้าถึงหน้าแรกของระบบ (Homepage)</td>
+<td align="left">1. เปิดเบราว์เซอร์ไปที่ URL หลัก (<code>/</code>)<br>2. ตรวจสอบส่วนประกอบของหน้า</td>
+<td align="left">ไม่ได้เข้าสู่ระบบ (Guest)</td>
+<td align="left">แสดงผลหน้า Portal งานวิจัย มรภ.เพชรบูรณ์ โทนสีวิชาการ Deep Navy, ไม่ขึ้นหน้า Default ของ Laravel</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>PUB-02</strong></td>
+<td align="left">ตัวกรองปีงบประมาณ พ.ศ. สถิติภาพรวม</td>
+<td align="left">1. เลือกปีงบประมาณ พ.ศ. ใน Dropdown<br>2. กดปุ่มกรองข้อมูล</td>
+<td align="left">เช่น ปี พ.ศ. 2566, 2567</td>
+<td align="left">สถิติจำนวนโครงการ, งานตีพิมพ์, งบประมาณ ปรับเปลี่ยนตามปีที่เลือก ตัวเลขแสดงแบบ <code>tabular-nums</code></td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>PUB-03</strong></td>
+<td align="left">ช่องสืบค้นคำสำคัญข้ามระบบ (Global Keyword Search)</td>
+<td align="left">1. พิมพ์คำค้นในกล่องค้นหาหน้าแรก<br>2. กด Enter หรือปุ่มค้นหา</td>
+<td align="left">คำค้น เช่น &quot;ข้าว&quot;, &quot;ท่องเที่ยว&quot;, &quot;พลังงาน&quot;</td>
+<td align="left">ผลลัพธ์แสดงรายการที่ตรงกับชื่อโครงการ, บทคัดย่อ, และชื่องานตีพิมพ์อย่างถูกต้อง</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-2-โครงการว-จ-ยและระบบความปลอดภ-ยเอกสาร-research-projects">2.2 โครงการวิจัยและระบบความปลอดภัยเอกสาร (Research Projects)</h3>
+<table>
+<thead>
+<tr>
+<th align="left">รหัสทดสอบ</th>
+<th align="left">รายการทดสอบ</th>
+<th align="left">ขั้นตอนการทดสอบ (Test Steps)</th>
+<th align="left">ข้อมูลนำเข้า / เงื่อนไข</th>
+<th align="left">ผลลัพธ์ที่คาดหวัง (Expected Result)</th>
+<th align="center">สถานะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>PRO-01</strong></td>
+<td align="left">หน้ารายการโครงการวิจัย (<code>/rdbproject</code>)</td>
+<td align="left">1. เข้าเมนู &quot;โครงการวิจัย&quot;<br>2. ทดสอบระบบแบ่งหน้า (Pagination)</td>
+<td align="left">รายการโครงการทั้งหมด</td>
+<td align="left">แสดงตารางรายการโครงการ พร้อมชื่อโครงการ, หัวหน้าโครงการ, ปี พ.ศ., หน่วยงาน และสถานะ</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>PRO-02</strong></td>
+<td align="left">ตัวกรองค้นหาโครงการวิจัยขั้นสูง</td>
+<td align="left">1. ค้นหาด้วยกลุ่มคำ (<code>title_keywords</code>)<br>2. กรองตามประเภทโครงการ และช่วงปี พ.ศ.</td>
+<td align="left">ค้นหาแบบ &quot;ทุกคำ (All)&quot; และ &quot;บางคำ (Any)&quot;</td>
+<td align="left">รายการแสดงเฉพาะโครงการที่ตรงเงื่อนไข ตัดคำนำหน้าชื่อไทย (<code>นาย</code>, <code>ดร.</code>) อัตโนมัติ</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>PRO-03</strong></td>
+<td align="left">หน้าแสดงรายละเอียดโครงการ (<code>/rdbproject/{id}</code>)</td>
+<td align="left">1. คลิกดูรายละเอียดโครงการใดโครงการหนึ่ง</td>
+<td align="left">ID โครงการที่มีข้อมูลสมบูรณ์</td>
+<td align="left">แสดงชื่อโครงการไทย-อังกฤษ, คณะผู้วิจัย, งบประมาณ, สังกัด, และบทคัดย่ออย่างเป็นระเบียบ</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>PRO-04</strong></td>
+<td align="left"><strong>การเปิดเผยเอกสาร: กรณีเปิดเผยสาธารณะ (<code>pro_file_show = 0</code>)</strong></td>
+<td align="left">1. เข้าดูโครงการที่ตั้งค่าเปิดเผย<br>2. ตรวจสอบการ์ดไฟล์เอกสาร</td>
+<td align="left">โครงการที่มีไฟล์ PDF และ <code>pro_file_show = 0</code></td>
+<td align="left">- แสดงป้าย <strong>&quot;เปิดเผย (Public)&quot;</strong><br>- แสดงภาพปกหน้าแรก <code>.webp</code> (Cover)<br>- แสดงจำนวนหน้าของเล่ม<br>- มีปุ่ม &quot;เปิดดูรายงานฉบับสมบูรณ์&quot; และคลิกเปิดดูไฟล์ PDF ได้</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>PRO-05</strong></td>
+<td align="left"><strong>การเปิดเผยเอกสาร: กรณีปกปิดเล่ม (<code>pro_file_show = 1</code>)</strong></td>
+<td align="left">1. เข้าดูโครงการที่ตั้งค่าปกปิดเล่ม<br>2. พยายามเข้า URL ตรงของไฟล์ PDF</td>
+<td align="left">โครงการที่มี <code>pro_file_show = 1</code></td>
+<td align="left">- แสดงป้ายสีแดง <strong>&quot;ปกปิดเล่มรายงาน (ไม่เผยแพร่)&quot;</strong><br>- ไม่แสดงลิงก์ดาวน์โหลดเล่มรายงาน<br>- หากพิมพ์ URL ตรง ระบบต้องบล็อก (403 หรือ 404)</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>PRO-06</strong></td>
+<td align="left"><strong>การเปิดเผยเอกสาร: กรณีฉบับร่าง (<code>pro_file_show = 2</code>)</strong></td>
+<td align="left">1. เข้าดูโครงการที่เป็นร่าง<br>2. ตรวจสอบสิทธิ์การเข้าถึงไฟล์</td>
+<td align="left">โครงการที่มี <code>pro_file_show = 2</code></td>
+<td align="left">แสดงป้ายสีเหลือง <strong>&quot;ฉบับร่าง (ยังไม่เผยแพร่)&quot;</strong> บุคคลทั่วไปไม่สามารถดาวน์โหลดได้</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>PRO-07</strong></td>
+<td align="left">การดูไฟล์บทคัดย่อ (Abstract PDF)</td>
+<td align="left">1. คลิกปุ่ม &quot;ดูบทคัดย่อ&quot;<br>2. ตรวจสอบยอดนับการเข้าชม</td>
+<td align="left">โครงการที่มีไฟล์บทคัดย่อ</td>
+<td align="left">เปิดดูไฟล์บทคัดย่อแบบ Inline ในแท็บใหม่ และตัวเลขนับจำนวนครั้งเพิ่มขึ้น</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-3-ผลงานต-พ-มพ-และงานว-ชาการ-publications">2.3 ผลงานตีพิมพ์และงานวิชาการ (Publications)</h3>
+<table>
+<thead>
+<tr>
+<th align="left">รหัสทดสอบ</th>
+<th align="left">รายการทดสอบ</th>
+<th align="left">ขั้นตอนการทดสอบ (Test Steps)</th>
+<th align="left">ข้อมูลนำเข้า / เงื่อนไข</th>
+<th align="left">ผลลัพธ์ที่คาดหวัง (Expected Result)</th>
+<th align="center">สถานะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>PUB-01</strong></td>
+<td align="left">หน้ารายการงานตีพิมพ์ (<code>/rdbpublished</code>)</td>
+<td align="left">1. เข้าเมนู &quot;ผลงานตีพิมพ์&quot;<br>2. ทดสอบตัวกรองประเภท (วารสารนานาชาติ / ระดับชาติ / ประชุมวิชาการ)</td>
+<td align="left">ผลงานตีพิมพ์ที่เปิดเผย (<code>data_show = 1</code>)</td>
+<td align="left">แสดงรายการบทความ, ฐานข้อมูล (Scopus/TCI), ผู้แต่ง และปีที่ตีพิมพ์</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>PUB-02</strong></td>
+<td align="left">หน้าแสดงบทความตีพิมพ์และภาพปก <code>.webp</code></td>
+<td align="left">1. คลิกดูบทความวิจัยที่มีไฟล์ PDF</td>
+<td align="left">บทความที่มีไฟล์แนบ</td>
+<td align="left">- แสดงภาพปกหน้าแรก <code>.webp</code> ชัดเจน<br>- แสดงจำนวนหน้าไฟล์ PDF<br>- มีปุ่มดาวน์โหลดบทความฉบับเต็ม</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>PUB-03</strong></td>
+<td align="left">ระบบคัดลอกการอ้างอิงวิชาการ (Citation Formats)</td>
+<td align="left">1. เลื่อนไปที่การ์ด &quot;การอ้างอิงบทความ&quot;<br>2. ทดสอบกดปุ่ม Copy รูปแบบ APA 7, IEEE, และ MLA 9</td>
+<td align="left">บทความตีพิมพ์</td>
+<td align="left">ข้อความอ้างอิงถูกคัดลอกลง Clipboard ถูกต้องตามมาตรฐานวิชาการสากล พร้อมแจ้งเตือน Toast</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-4-ทร-พย-ส-นทางป-ญญาและการใช-ประโยชน-ip-amp-utilizations">2.4 ทรัพย์สินทางปัญญาและการใช้ประโยชน์ (IP &amp; Utilizations)</h3>
+<table>
+<thead>
+<tr>
+<th align="left">รหัสทดสอบ</th>
+<th align="left">รายการทดสอบ</th>
+<th align="left">ขั้นตอนการทดสอบ (Test Steps)</th>
+<th align="left">ข้อมูลนำเข้า / เงื่อนไข</th>
+<th align="left">ผลลัพธ์ที่คาดหวัง (Expected Result)</th>
+<th align="center">สถานะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>IP-01</strong></td>
+<td align="left">ทรัพย์สินทางปัญญา (<code>/rdbdip</code>)</td>
+<td align="left">1. ค้นหาตามประเภท (สิทธิบัตร, อนุสิทธิบัตร, ลิขสิทธิ์)<br>2. คลิกดูรายละเอียด</td>
+<td align="left">สิทธิบัตร/ลิขสิทธิ์</td>
+<td align="left">แสดงเลขที่คำขอ, วันที่ยื่น, วันที่จดทะเบียน (แสดง พ.ศ. เสมอ) และผู้ประดิษฐ์</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>UTL-01</strong></td>
+<td align="left">การนำงานวิจัยไปใช้ประโยชน์ (<code>/rdbprojectutilize</code>)</td>
+<td align="left">1. ตรวจสอบการจำแนก 4 ด้าน (เชิงพาณิชย์, เชิงนโยบาย, เชิงชุมชน/สังคม, เชิงวิชาการ)<br>2. คลิกดูหลักฐาน</td>
+<td align="left">โครงการที่มีการนำไปใช้ประโยชน์</td>
+<td align="left">แสดงหน่วยงานที่นำไปใช้, รายละเอียดผลกระทบ และเอกสารหลักฐานแนบ</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-5-ทำเน-ยบน-กว-จ-ยและแดชบอร-ดสถ-ต-researchers-amp-dashboards">2.5 ทำเนียบนักวิจัยและแดชบอร์ดสถิติ (Researchers &amp; Dashboards)</h3>
+<table>
+<thead>
+<tr>
+<th align="left">รหัสทดสอบ</th>
+<th align="left">รายการทดสอบ</th>
+<th align="left">ขั้นตอนการทดสอบ (Test Steps)</th>
+<th align="left">ข้อมูลนำเข้า / เงื่อนไข</th>
+<th align="left">ผลลัพธ์ที่คาดหวัง (Expected Result)</th>
+<th align="center">สถานะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>RES-01</strong></td>
+<td align="left">ค้นหาทำเนียบนับวิจัย (<code>/rdbresearcher</code>)</td>
+<td align="left">1. ค้นหาด้วยชื่อ-นามสกุล หรือสังกัดคณะ<br>2. ค้นหาแบบพิมพ์เฉพาะชื่อไม่มีคำนำหน้า</td>
+<td align="left">คำค้น เช่น &quot;สมชาย&quot;, &quot;คณะวิทยาศาสตร์&quot;</td>
+<td align="left">พบรายชื่อนักวิจัยตรงตามคำค้น แสดงภาพประจำตัวและตำแหน่งทางวิชาการ</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>RES-02</strong></td>
+<td align="left">แฟ้มประวัตินักวิจัย (Researcher Profile)</td>
+<td align="left">1. คลิกดูโปรไฟล์นักวิจัย</td>
+<td align="left">ข้อมูลนักวิจัยที่มีโครงการและผลงาน</td>
+<td align="left">แสดง Scopus ID, ORCID, รายการโครงการวิจัยทั้งหมด และบทความตีพิมพ์ของนักวิจัยรายนั้น</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>DASH-01</strong></td>
+<td align="left">แดชบอร์ดสถิติงานวิจัย (<code>/dashboard</code>)</td>
+<td align="left">1. เข้าดูแดชบอร์ดโครงการ, งานตีพิมพ์, ทรัพย์สินทางปัญญา<br>2. สลับโหมด Dark Mode / Light Mode</td>
+<td align="left">กราฟ Chart.js ทุกประเภท</td>
+<td align="left">- กราฟแสดงสถิติตามปีงบประมาณ<br>- สลับโหมดหน้าจอแล้วสีกราฟและตัวหนังสือยังคงอ่านง่าย ไม่กลืนกับพื้นหลัง</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="หมวดท-3-การทดสอบระบบหล-งบ-าน-backend-administration-amp-researcher-workflows">หมวดที่ 3: การทดสอบระบบหลังบ้าน (Backend Administration &amp; Researcher Workflows)</h2>
+<h3 id="3-1-การย-นย-นต-วตนและการควบค-มส-ทธ-authentication-amp-rbac">3.1 การยืนยันตัวตนและการควบคุมสิทธิ์ (Authentication &amp; RBAC)</h3>
+<table>
+<thead>
+<tr>
+<th align="left">รหัสทดสอบ</th>
+<th align="left">รายการทดสอบ</th>
+<th align="left">ขั้นตอนการทดสอบ (Test Steps)</th>
+<th align="left">ข้อมูลนำเข้า / เงื่อนไข</th>
+<th align="left">ผลลัพธ์ที่คาดหวัง (Expected Result)</th>
+<th align="center">สถานะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>AUTH-01</strong></td>
+<td align="left">การเข้าสู่ระบบด้วยบัญชี Admin/Staff</td>
+<td align="left">1. เข้าหน้า <code>/login</code><br>2. กรอก Username/Password ที่ถูกต้อง</td>
+<td align="left">บัญชี Admin</td>
+<td align="left">เข้าสู่ระบบสำเร็จ เปลี่ยนเส้นทางไปหน้า Dashboard หลังบ้าน (<code>/backend/site</code>)</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>AUTH-02</strong></td>
+<td align="left">การป้องกัน Brute-force &amp; Rate Limiting</td>
+<td align="left">1. กรอกรหัสผ่านผิดติดต่อกันเกิน 5 ครั้ง</td>
+<td align="left">รหัสผ่านที่ไม่ถูกต้อง</td>
+<td align="left">ระบบบล็อกการล็อกอินชั่วคราว พร้อมแสดงข้อความเตือน</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>AUTH-03</strong></td>
+<td align="left">การจำลองสิทธิ์ผู้ใช้ (User Impersonation)</td>
+<td align="left">1. Superadmin กด &quot;Impersonate&quot; เป็นนักวิจัย<br>2. ตรวจสอบเมนูที่มองเห็น<br>3. กดปุ่ม &quot;Stop Impersonating&quot;</td>
+<td align="left">บัญชี Super Admin</td>
+<td align="left">- เข้าสู่หน้าจอเสมือนเป็นนักวิจัยรายนั้น (เห็นเฉพาะโครงการของตนเอง)<br>- เมื่อกดยกเลิก สิทธิ์จะกลับมาเป็น Superadmin ทันที</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>AUTH-04</strong></td>
+<td align="left">ขอบเขตสิทธิ์ของนักวิจัย (Researcher Isolation)</td>
+<td align="left">1. ล็อกอินด้วยบัญชีนักวิจัย A<br>2. พยายามเปิดหน้าแก้ไขโครงการของนักวิจัย B ทาง URL</td>
+<td align="left">แก้ไข URL <code>/backend/rdb_project/{other_id}/edit</code></td>
+<td align="left">ระบบปฏิเสธการเข้าถึง (403 Forbidden) ไม่อนุญาตให้แก้ไขข้อมูลผู้อื่น</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="3-2-การจ-ดการโครงการว-จ-ย-project-management-amp-pdf-processing-engine">3.2 การจัดการโครงการวิจัย (Project Management &amp; PDF Processing Engine)</h3>
+<table>
+<thead>
+<tr>
+<th align="left">รหัสทดสอบ</th>
+<th align="left">รายการทดสอบ</th>
+<th align="left">ขั้นตอนการทดสอบ (Test Steps)</th>
+<th align="left">ข้อมูลนำเข้า / เงื่อนไข</th>
+<th align="left">ผลลัพธ์ที่คาดหวัง (Expected Result)</th>
+<th align="center">สถานะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>ADM-PRO-01</strong></td>
+<td align="left">การเพิ่มโครงการวิจัยใหม่ (Create Project)</td>
+<td align="left">1. ไปที่ &quot;เพิ่มโครงการวิจัย&quot;<br>2. กรอกข้อมูลชื่อโครงการ, ปี พ.ศ., งบประมาณ, แหล่งทุน<br>3. เลือกหัวหน้าโครงการและผู้ร่วมวิจัย</td>
+<td align="left">แบบฟอร์มเพิ่มโครงการ</td>
+<td align="left">บันทึกข้อมูลสำเร็จ ข้อมูลถูกจัดเก็บอย่างถูกต้อง ป้องกัน XSS ในทุกฟิลด์ข้อความ</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>ADM-PRO-02</strong></td>
+<td align="left"><strong>การอัปโหลดเล่มรายงานวิจัย &amp; ตรวจนับหน้าอัตโนมัติ</strong></td>
+<td align="left">1. อัปโหลดไฟล์ PDF เล่มรายงานสมบูรณ์ (<code>pro_file</code>) ขนาดจริง<br>2. กดบันทึก</td>
+<td align="left">ไฟล์ PDF เอกสารวิจัย (เช่น 85 หน้า)</td>
+<td align="left">- บันทึกไฟล์ลง Storage ด้วยชื่อปลอดภัย (UUID/Prefix)<br>- <strong>ระบบดึงและบันทึกจำนวนหน้าลง <code>pro_page_num</code> อัตโนมัติ (แม่นยำตรงตามเอกสาร)</strong></td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>ADM-PRO-03</strong></td>
+<td align="left"><strong>การสกัดหน้าแรกเป็นภาพปก <code>.webp</code> อัตโนมัติ</strong></td>
+<td align="left">1. ตรวจสอบหลังจากอัปโหลด PDF ในข้อ ADM-PRO-02<br>2. เปิดดูรายละเอียดโครงการหลังบ้าน</td>
+<td align="left">โครงการที่มีไฟล์ PDF</td>
+<td align="left">- ฟิลด์ <code>pro_cover_path</code> ถูกอัปเดตเป็นไฟล์ <code>.webp</code><br>- แสดงภาพตัวอย่างหน้าแรกของการ์ดเอกสารทันที</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>ADM-PRO-04</strong></td>
+<td align="left"><strong>การสลับสถานะการเปิดเผยรายงาน (<code>pro_file_show</code>)</strong></td>
+<td align="left">1. สลับสถานะเป็น &quot;เปิดเผย (0)&quot;<br>2. สลับเป็น &quot;ปกปิด (1)&quot;<br>3. สลับเป็น &quot;ร่าง (2)&quot;</td>
+<td align="left">สลับผ่านปุ่ม Toggle ในหน้ารายละเอียด</td>
+<td align="left">- เมื่อสลับเป็น &quot;เปิด&quot; ระบบสร้างปก <code>.webp</code> ทันทีหากยังไม่มี<br>- หน้าบ้านอัปเดตสิทธิ์การดาวน์โหลดตรงตามสถานะทันที</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>ADM-PRO-05</strong></td>
+<td align="left">การส่งออก DSpace SAF Batch (SAF ZIP Export)</td>
+<td align="left">1. เลือกโครงการวิจัยที่ต้องการ Export<br>2. กดปุ่ม &quot;Export DSpace SAF (ZIP)&quot;</td>
+<td align="left">โครงการวิจัยพร้อมเอกสาร</td>
+<td align="left">ดาวน์โหลดไฟล์ ZIP ที่มีโครงสร้าง SAF สมบูรณ์ (<code>dublin_core.xml</code>, <code>contents</code>, ไฟล์ PDF รายงาน)</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="3-3-ระบบตรวจประเม-นรายงานว-จ-ยฉบ-บสมบ-รณ-research-report-peer-review-subsystem">3.3 ระบบตรวจประเมินรายงานวิจัยฉบับสมบูรณ์ (Research Report Peer Review Subsystem)</h3>
+<table>
+<thead>
+<tr>
+<th align="left">รหัสทดสอบ</th>
+<th align="left">รายการทดสอบ</th>
+<th align="left">ขั้นตอนการทดสอบ (Test Steps)</th>
+<th align="left">ข้อมูลนำเข้า / เงื่อนไข</th>
+<th align="left">ผลลัพธ์ที่คาดหวัง (Expected Result)</th>
+<th align="center">สถานะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>REV-01</strong></td>
+<td align="left">คิวงานตรวจประเมิน (Single-Blind Review Queue)</td>
+<td align="left">1. เข้าเมนู &quot;ระบบประเมินรายงานวิจัย&quot;<br>2. ตรวจสอบรายการโครงการที่ส่งเล่มสมบูรณ์</td>
+<td align="left">โครงการที่ยื่นตรวจประเมิน</td>
+<td align="left">แสดงคิวงานแบ่งตามสถานะ (รอจัดผู้ทรงฯ, อยู่ระหว่างประเมิน, แก้ไขตามข้อเสนอแนะ, ผ่านการประเมิน)</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>REV-02</strong></td>
+<td align="left">การออกแบบแบบประเมินแบบพลวัต (Rubric Form Designer)</td>
+<td align="left">1. เข้าหน้าตั้งค่าเกณฑ์ประเมิน<br>2. เพิ่มข้อเกณฑ์, กำหนดคะแนนเต็ม และคำอธิบายมาตราส่วน</td>
+<td align="left">กำหนดหัวข้อการประเมินวิชาการ</td>
+<td align="left">บันทึกเกณฑ์สำเร็จ แสดงผลในแบบฟอร์มประเมินอย่างถูกต้อง</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>REV-03</strong></td>
+<td align="left">การมอบหมายผู้ทรงคุณวุฒิ (Reviewer Assignment)</td>
+<td align="left">1. มอบหมายผู้ทรงคุณวุฒิ 2-3 ท่านต่อโครงการ<br>2. กำหนดวันครบกำหนดส่งผลประเมิน</td>
+<td align="left">บัญชีผู้ทรงคุณวุฒิ</td>
+<td align="left">บันทึกการมอบหมายสำเร็จ ระบบส่งการแจ้งเตือนไปยังผู้ทรงคุณวุฒิ</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>REV-04</strong></td>
+<td align="left">ผู้ทรงคุณวุฒิบันทึกคะแนนและความเห็น</td>
+<td align="left">1. ล็อกอินด้วยบัญชีผู้ทรงคุณวุฒิ<br>2. กรอกคะแนนตามเกณฑ์และแนบไฟล์ข้อเสนอแนะ</td>
+<td align="left">แบบประเมินผล</td>
+<td align="left">บันทึกผลคะแนนสำเร็จ ระบบรวมคะแนนเฉลี่ยอัตโนมัติ โดยนักวิจัยไม่เห็นชื่อผู้ทรงคุณวุฒิ (Single-Blind)</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>REV-05</strong></td>
+<td align="left">การอนุมัติเล่มสมบูรณ์ (<code>approveFinalReport</code>)</td>
+<td align="left">1. Admin กดยืนยันผลการประเมิน &quot;ผ่าน&quot;<br>2. ตรวจสอบสถานะโครงการ</td>
+<td align="left">โครงการที่ผลประเมินผ่าน</td>
+<td align="left">- ปรับสถานะโครงการเป็น &quot;เสร็จสิ้นสมบูรณ์&quot;<br>- ปรับสถานะเอกสารเป็น &quot;เปิดเผยต่อสาธารณะ&quot; อัตโนมัติ<br>- <strong>ระบบสั่ง Generate ปก <code>.webp</code> ทันที</strong></td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="3-4-วงจรช-ว-ตการส-งร-าง-ตรวจสอบ-และอน-ม-ต-เป-ดเผยผลงานของน-กว-จ-ย-researcher-submission-workflow-review-amp-public-disclosure-lifecycle">3.4 วงจรชีวิตการส่งร่าง ตรวจสอบ และอนุมัติเปิดเผยผลงานของนักวิจัย (Researcher Submission, Workflow Review &amp; Public Disclosure Lifecycle)</h3>
+<table>
+<thead>
+<tr>
+<th align="left">รหัสทดสอบ</th>
+<th align="left">รายการทดสอบ</th>
+<th align="left">ขั้นตอนการทดสอบ (Test Steps)</th>
+<th align="left">ข้อมูลนำเข้า / เงื่อนไข</th>
+<th align="left">ผลลัพธ์ที่คาดหวัง (Expected Result)</th>
+<th align="center">สถานะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>WF-01</strong></td>
+<td align="left"><strong>การสร้างฉบับร่างของนักวิจัย (Create Draft State)</strong></td>
+<td align="left">1. เข้าสู่ระบบด้วยบัญชีนักวิจัย<br>2. บันทึกข้อมูลโครงการวิจัยใหม่ หรือผลงานตีพิมพ์ใหม่ โดยยังไม่เปิดเผย</td>
+<td align="left">ฟอร์มบันทึกข้อมูลของนักวิจัย</td>
+<td align="left">- บันทึกสำเร็จ ข้อมูลมีสถานะเป็น <code>workflow_status = draft</code><br>- <strong>หน้าบ้าน (Public Portal) ยังไม่แสดงผลงานนี้โดยเด็ดขาด</strong><br>- มีป้ายเตือน &quot;ฉบับร่าง (Draft)&quot; ให้นักวิจัยเห็นในแดชบอร์ดส่วนตัว</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>WF-02</strong></td>
+<td align="left"><strong>นักวิจัยกดส่งผลงานเข้าสู่กระบวนการตรวจสอบ (Submit for Review)</strong></td>
+<td align="left">1. ตรวจสอบความถูกต้องของข้อมูลและเอกสารแนบ<br>2. กดปุ่ม <strong>&quot;ส่งตรวจสอบ (Submit for Review)&quot;</strong> ในหน้ารายละเอียดผลงาน</td>
+<td align="left">ผลงานที่มีสถานะเป็น <code>draft</code> หรือ <code>revision_required</code></td>
+<td align="left">- สถานะเปลี่ยนเป็น <code>workflow_status = pending_review</code><br>- บันทึกเวลาที่ส่งลง <code>submitted_at</code><br>- แบบฟอร์มถูกล็อกชั่วคราว (Read-Only) ป้องกันการแก้ไขระหว่างเจ้าหน้าที่ตรวจ<br>- มีการแจ้งเตือน (Notification) ไปยัง Admin และเจ้าหน้าที่สถาบันวิจัยฯ ทันที</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>WF-03</strong></td>
+<td align="left"><strong>คิวงานตรวจสอบของเจ้าหน้าที่สถาบันวิจัยฯ (Admin Review Queue)</strong></td>
+<td align="left">1. เข้าสู่ระบบด้วยบัญชี Admin หรือ Staff<br>2. เข้าเมนู <strong>&quot;คิวงานตรวจสอบผลงานวิจัย&quot;</strong> (<code>/backend/workflow/queue</code>)</td>
+<td align="left">คิวตรวจสอบผลงาน</td>
+<td align="left">- แสดงรายการงานที่ส่งเข้ามาแบ่งตามแท็บ: โครงการวิจัย, บทความตีพิมพ์, ทรัพย์สินทางปัญญา, การนำไปใช้ประโยชน์<br>- แสดงชื่อผู้วิจัย, วันที่ส่ง, และสถานะ <code>รอตรวจสอบ (Pending Review)</code> ครบถ้วน</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>WF-04</strong></td>
+<td align="left"><strong>การส่งกลับแก้ไขพร้อมระบุข้อเสนอแนะ (Revision Required / Reject)</strong></td>
+<td align="left">1. เจ้าหน้าที่เปิดตรวจเอกสารและพบข้อบกพร่อง<br>2. กดปุ่ม <strong>&quot;ส่งกลับให้แก้ไข&quot;</strong> พร้อมกรอกเหตุผล/ข้อเสนอแนะ (Remarks)</td>
+<td align="left">ข้อความข้อเสนอแนะ เช่น &quot;กรุณาแนบไฟล์ PDF ฉบับเต็มที่มีหน้าปกและสารบัญ&quot;</td>
+<td align="left">- สถานะเปลี่ยนเป็น <code>revision_required</code><br>- ระบบบันทึกข้อความลง Audit Trail/Timeline<br>- นักวิจัยได้รับการแจ้งเตือน และฟอร์มจะปลดล็อกให้นักวิจัยแก้ไขเอกสารได้อีกครั้ง</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>WF-05</strong></td>
+<td align="left"><strong>การอนุมัติเผยแพร่สู่สาธารณะ (Approve &amp; Public Disclosure)</strong></td>
+<td align="left">1. เจ้าหน้าที่ตรวจสอบเอกสารผ่านเกณฑ์สมบูรณ์<br>2. กดปุ่ม <strong>&quot;อนุมัติและเผยแพร่ (Approve &amp; Publish)&quot;</strong></td>
+<td align="left">รายการที่มีสถานะ <code>pending_review</code></td>
+<td align="left">- ปรับสถานะเป็น <code>workflow_status = published</code> และ <code>data_show = 1</code><br>- สำหรับโครงการวิจัย: ปรับ <code>pro_file_show = 0 (เปิดเผยสาธารณะ)</code><br>- <strong>ระบบดึงหน้าแรกของ PDF มาสร้างภาพปก <code>.webp</code> อัตโนมัติทันที</strong><br>- ข้อมูลปรากฏบนหน้าแรกและหน้ารายการของระบบหน้าบ้าน (Public Portal) ทันที</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>WF-06</strong></td>
+<td align="left"><strong>การขอปลดล็อกเพื่อแก้ไขผลงานที่เผยแพร่แล้ว (Request Unlock to Edit)</strong></td>
+<td align="left">1. นักวิจัยพบข้อมูลที่ต้องอัปเดตในผลงานที่เผยแพร่แล้ว<br>2. ในหน้ารายละเอียดผลงาน กดปุ่ม <strong>&quot;ขอปลดล็อกเพื่อแก้ไข (Request Unlock)&quot;</strong><br>3. ระบุเหตุผลความจำเป็นในการแก้ไข</td>
+<td align="left">ผลงานที่สถานะเป็น <code>published</code></td>
+<td align="left">- สถานะเปลี่ยนเป็น <code>workflow_status = unlock_requested</code><br>- รายการจะวิ่งเข้าสู่แท็บ &quot;คำขอปลดล็อกแก้ไข&quot; ของ Admin<br>- ผลงานหน้าบ้านยังคงแสดงอยู่จนกว่า Admin จะอนุมัติปลดล็อก</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>WF-07</strong></td>
+<td align="left"><strong>การอนุมัติคำขอปลดล็อกของ Admin (Approve Unlock -&gt; Move to Draft)</strong></td>
+<td align="left">1. เจ้าหน้าที่เปิดดูคำขอปลดล็อก<br>2. กดปุ่ม <strong>&quot;อนุมัติคำขอปลดล็อก&quot;</strong></td>
+<td align="left">คำขอที่มีสถานะ <code>unlock_requested</code></td>
+<td align="left">- ปรับสถานะกลับเป็น <code>draft</code><br>- นักวิจัยสามารถเข้าแก้ไขข้อมูลและไฟล์แนบได้อีกครั้ง<br>- เมื่อแก้ไขเสร็จ ต้องกดส่งตรวจสอบ (Submit) ตามวงจรเดิม</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="3-5-การจ-ดการผลงานต-พ-มพ-ทร-พย-ส-นทางป-ญญา-และข-อม-ลพ-นฐาน">3.5 การจัดการผลงานตีพิมพ์, ทรัพย์สินทางปัญญา และข้อมูลพื้นฐาน</h3>
+<table>
+<thead>
+<tr>
+<th align="left">รหัสทดสอบ</th>
+<th align="left">รายการทดสอบ</th>
+<th align="left">ขั้นตอนการทดสอบ (Test Steps)</th>
+<th align="left">ข้อมูลนำเข้า / เงื่อนไข</th>
+<th align="left">ผลลัพธ์ที่คาดหวัง (Expected Result)</th>
+<th align="center">สถานะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>ADM-PUB-01</strong></td>
+<td align="left">เพิ่ม/แก้ไขงานตีพิมพ์ และสร้างปก <code>.webp</code></td>
+<td align="left">1. บันทึกข้อมูลบทความและอัปโหลด PDF บทความ<br>2. ตรวจสอบการนับหน้าและปก</td>
+<td align="left">ไฟล์ PDF บทความ</td>
+<td align="left">ระบบบันทึกจำนวนหน้าลง <code>pub_numfile</code> และสร้างปก <code>.webp</code> ลง <code>pub_cover_path</code></td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>ADM-RES-01</strong></td>
+<td align="left">ข้อมูลนักวิจัยและการเชื่อมโยง Scopus / ORCID</td>
+<td align="left">1. เพิ่ม/แก้ไขข้อมูลนักวิจัย<br>2. กรอกเลขบัตรประชาชน, Scopus Author ID, ORCID iD</td>
+<td align="left">ข้อมูลนักวิจัย</td>
+<td align="left">- ตรวจสอบความถูกต้องของโครงสร้างเลขบัตร ปชช. 13 หลัก<br>- ตรวจสอบโครงสร้าง ORCID Format (XXXX-XXXX-XXXX-XXXX)</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>ADM-EXP-01</strong></td>
+<td align="left"><strong>การ Export ข้อมูลขนาดใหญ่เป็น CSV/Excel (UTF-8 BOM)</strong></td>
+<td align="left">1. ไปที่หน้ารายการโครงการ/งานตีพิมพ์/นักวิจัย<br>2. กดปุ่ม &quot;Export Excel / CSV&quot;<br>3. เปิดไฟล์ที่ได้ด้วยโปรแกรม Microsoft Excel</td>
+<td align="left">ข้อมูลภาษาไทยทั้งหมด</td>
+<td align="left">ไฟล์มีขนาดครบถ้วน ตัวอักษรภาษาไทยแสดงผลสมบูรณ์ <strong>ไม่เป็นภาษาต่างดาว (UTF-8 BOM <code>\xEF\xBB\xBF</code>)</strong></td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>ADM-LOG-01</strong></td>
+<td align="left">ระบบบันทึกประวัติการเปลี่ยนแปลง (Audit Trail)</td>
+<td align="left">1. แก้ไขข้อมูลโครงการหรือลบรายการ<br>2. เข้าเมนู &quot;ประวัติการใช้งาน (Audit Logs)&quot;</td>
+<td align="left">การกระทำของผู้ใช้</td>
+<td align="left">มี Log บันทึกชัดเจน: ผู้กระทำ, วันที่/เวลา, IP Address, ข้อมูลเดิม (Old Values) และข้อมูลใหม่ (New Values)</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="หมวดท-4-การตรวจสอบความสมบ-รณ-ของข-อม-ลเก-า-legacy-data-verification">หมวดที่ 4: การตรวจสอบความสมบูรณ์ของข้อมูลเก่า (Legacy Data Verification)</h2>
+<table>
+<thead>
+<tr>
+<th align="left">รหัสทดสอบ</th>
+<th align="center">ปริมาณข้อมูล</th>
+<th align="left">รายการที่ต้องตรวจสอบ</th>
+<th align="left">เกณฑ์การยอมรับ (Acceptance Criteria)</th>
+<th align="center">สถานะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>MIG-01</strong></td>
+<td align="center">2,870 โครงการ</td>
+<td align="left">โครงการวิจัยจากระบบเดิม (<code>rdb_project</code>)</td>
+<td align="left">ข้อมูลชื่อโครงการ, ปีงบประมาณ, งบประมาณ, สังกัด และสถานะโครงการแสดงผลครบถ้วน 100%</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>MIG-02</strong></td>
+<td align="center">1,873 บทความ</td>
+<td align="left">ข้อมูลผลงานตีพิมพ์ (<code>rdb_published</code>)</td>
+<td align="left">บทความทางวิชาการและวารสารเชื่อมโยงกับอาจารย์/นักวิจัยถูกต้อง</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>MIG-03</strong></td>
+<td align="center">1,072 ท่าน</td>
+<td align="left">ทำเนียบอาจารย์และนักวิจัย (<code>rdb_researcher</code>)</td>
+<td align="left">รายชื่อนักวิจัย, คำนำหน้าชื่อภาษาไทย, สังกัดคณะ/ภาควิชา แสดงผลครบถ้วน</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>MIG-04</strong></td>
+<td align="center">1,112 รายการ</td>
+<td align="left">การนำงานวิจัยไปใช้ประโยชน์ (<code>rdb_project_utilize</code>)</td>
+<td align="left">จำแนกด้านการนำไปใช้ประโยชน์และโครงการต้นทางตรงกัน</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>MIG-05</strong></td>
+<td align="center">59 รายการ</td>
+<td align="left">ทรัพย์สินทางปัญญา (<code>rdb_dip</code>)</td>
+<td align="left">สิทธิบัตร/อนุสิทธิบัตร/ลิขสิทธิ์ แสดงเลขที่คำขอและปีถูกต้อง</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>MIG-06</strong></td>
+<td align="center">Smart Fallback</td>
+<td align="left">การค้นหาไฟล์ PDF เดิมตามลำดับ 3 ชั้น</td>
+<td align="left">กรณีไฟล์ยังไม่ได้ย้ายเข้าพาธใหม่ ระบบสามารถดึงไฟล์เดิมผ่าน Smart Fallback ได้ถูกต้อง ไม่ขึ้น Error 500</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="หมวดท-5-การทดสอบความม-นคงปลอดภ-ยและประส-ทธ-ภาพ-security-amp-performance">หมวดที่ 5: การทดสอบความมั่นคงปลอดภัยและประสิทธิภาพ (Security &amp; Performance)</h2>
+<table>
+<thead>
+<tr>
+<th align="left">รหัสทดสอบ</th>
+<th align="left">รายการทดสอบ</th>
+<th align="left">สิ่งที่ตรวจสอบ</th>
+<th align="left">เกณฑ์การยอมรับ (Acceptance Criteria)</th>
+<th align="center">สถานะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>SEC-01</strong></td>
+<td align="left">การป้องกัน SQL Injection</td>
+<td align="left">พารามิเตอร์การค้นหาและการส่งค่า Filter</td>
+<td align="left">ทุก Query ใช้ Parameter Binding 100% ห้ามมีการต่อ String ดิบใน SQL</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>SEC-02</strong></td>
+<td align="left">การป้องกัน Cross-Site Scripting (XSS)</td>
+<td align="left">การกรอก Script <code>&lt;script&gt;alert(1)&lt;/script&gt;</code> ในฟิลด์ข้อความและ Rich Text</td>
+<td align="left">มีการ Escape อักขระ หรือฟอกค่าด้วย <code>HtmlContentHelper::clean()</code> ก่อนแสดงผล</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>SEC-03</strong></td>
+<td align="left">การป้องกัน Insecure Direct Object References (IDOR)</td>
+<td align="left">การแก้ไข ID ใน URL เพื่อดาวน์โหลดหรือแก้ไขเอกสารของผู้อื่น</td>
+<td align="left">มี Policy Gates ตรวจสอบสิทธิ์ความเป็นเจ้าของหรือสิทธิ์ผู้ดูแลระบบทุกจุด</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>SEC-04</strong></td>
+<td align="left">การป้องกัน CSV Formula Injection</td>
+<td align="left">การกรอกข้อมูลขึ้นต้นด้วย <code>=</code>, <code>+</code>, <code>-</code>, <code>@</code> ในชื่อโครงการ</td>
+<td align="left">ฟังก์ชัน Export มีการเติม Sanitization Prefix ป้องกันคำสั่งทำงานใน Excel</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>SEC-05</strong></td>
+<td align="left">HTTP Security Headers</td>
+<td align="left">ตรวจสอบ Headers ในการตอบกลับของเซิร์ฟเวอร์</td>
+<td align="left">มี Headers: <code>X-Content-Type-Options</code>, <code>X-Frame-Options</code>, <code>X-XSS-Protection</code> ครบถ้วน</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>PERF-01</strong></td>
+<td align="left">Eloquent N+1 Optimization</td>
+<td align="left">จำนวน Query ในหน้าแสดงผลรายการโครงการ/งานตีพิมพ์</td>
+<td align="left">มีการใช้ Eager Loading (<code>with()</code>) ทุก Relation จำนวน Query ไม่เพิ่มตามจำนวน Row</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="หมวดท-6-เกณฑ-การอน-ม-ต-เพ-อเป-ดใช-งานจร-ง-production-sign-off-criteria">หมวดที่ 6: เกณฑ์การอนุมัติเพื่อเปิดใช้งานจริง (Production Sign-off Criteria)</h2>
+<p>ระบบจะถือว่ามีความพร้อมในการขึ้นสู่สถานะ Production 100% เมื่อผ่านเกณฑ์ต่อไปนี้ทั้งหมด:</p>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> <strong>ชุดทดสอบหลักผ่านทั้งหมด</strong>: รัน <code>php artisan test --filter=&quot;SystemAcceptancePlanExecutionTest|PdfCoverGenerationTest|BackendAuditTest&quot;</code> ผ่าน 63/63 รายการ (493 Assertions 100%)</li>
+<li><input checked="" disabled="" type="checkbox"> <strong>การทดสอบ UAT ในหมวดที่ 2 และ 3</strong>: ผ่านการทดสอบรายการระดับ Critical และ High ครบทุกข้อ รวมถึงวงจรส่งร่าง-ตรวจรับ WF-01 ถึง WF-07</li>
+<li><input checked="" disabled="" type="checkbox"> <strong>ข้อมูลนำเข้าเดิมสมบูรณ์</strong>: โครงการวิจัย 2,870 โครงการ และงานตีพิมพ์ 1,873 รายการ เข้าถึงได้และแสดงผลถูกต้อง</li>
+<li><input checked="" disabled="" type="checkbox"> <strong>ความปลอดภัยข้อมูล</strong>: เอกสารที่ตั้งค่า &quot;ปกปิดเล่ม&quot; ไม่สามารถเข้าถึงได้จากบุคคลภายนอกในทุกกรณี</li>
+<li><input checked="" disabled="" type="checkbox"> <strong>การส่งออกข้อมูล</strong>: ไฟล์ Export ภาษาไทยทุกโมดูลเปิดดูใน Microsoft Excel ได้อย่างถูกต้อง ไม่เป็นภาษาต่างดาว (UTF-8 BOM <code>\xEF\xBB\xBF</code>)</li>
+</ul>
+<hr />
+<h3 id="บ-นท-กการลงนามตรวจร-บ-approval-amp-sign-off">บันทึกการลงนามตรวจรับ (Approval &amp; Sign-off)</h3>
+<table>
+<thead>
+<tr>
+<th align="left">ตำแหน่ง / บทบาท</th>
+<th align="left">ชื่อ-นามสกุล</th>
+<th align="left">ลายมือชื่อ</th>
+<th align="center">วันที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>หัวหน้าทีมพัฒนาระบบ (Lead Developer)</strong></td>
+<td align="left">................................................................</td>
+<td align="left">............................................</td>
+<td align="center">...... / ...... / 2569</td>
+</tr>
+<tr>
+<td align="left"><strong>ผู้ดูแลระบบฐานข้อมูล (Database Administrator)</strong></td>
+<td align="left">................................................................</td>
+<td align="left">............................................</td>
+<td align="center">...... / ...... / 2569</td>
+</tr>
+<tr>
+<td align="left"><strong>ผู้แทนสถาบันวิจัยและพัฒนา (RDI Representative)</strong></td>
+<td align="left">................................................................</td>
+<td align="left">............................................</td>
+<td align="center">...... / ...... / 2569</td>
+</tr>
+<tr>
+<td align="left"><strong>ประธานคณะกรรมการตรวจรับระบบ (Committee Chair)</strong></td>
+<td align="left">................................................................</td>
+<td align="left">............................................</td>
+<td align="center">...... / ...... / 2569</td>
+</tr>
+</tbody>
+</table>
+
+            </div>
+            <footer>
+                เอกสารคู่มือการใช้งานระบบฐานข้อมูลงานวิจัย (PCRU Research Database) • มหาวิทยาลัยราชภัฏเพชรบูรณ์
+            </footer>
+        </article>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+        function toggleTheme() {
+            const html = document.documentElement;
+            const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('pcru_manual_theme', next);
+        }
+        (function() {
+            const saved = localStorage.getItem('pcru_manual_theme');
+            if (saved) document.documentElement.setAttribute('data-theme', saved);
+        })();
+    </script>
+</body>
+</html>
