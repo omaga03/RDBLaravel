@@ -392,6 +392,15 @@ class RdbPublishedController extends Controller
 
         $item->save();
 
+        // สร้างภาพประกอบหน้าแรก .webp หากมีไฟล์แนบ
+        if (!empty($item->pub_file) || !empty($item->pf_path)) {
+            try {
+                app(\App\Services\PdfCoverService::class)->generatePublishedCover($item, true);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Generate published cover failed: ' . $e->getMessage());
+            }
+        }
+
         if ($request->filled('researcher_id')) {
             $item->authors()->attach($request->researcher_id, [
                 'pubw_main' => 1,
@@ -489,6 +498,15 @@ class RdbPublishedController extends Controller
         }
         
         $item->save();
+
+        // สร้างภาพประกอบหน้าแรก .webp หากมีไฟล์แนบ
+        if (!empty($item->pub_file) || !empty($item->pf_path)) {
+            try {
+                app(\App\Services\PdfCoverService::class)->generatePublishedCover($item, true);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Generate published cover failed: ' . $e->getMessage());
+            }
+        }
         
         return redirect()->route('backend.rdb_published.show', $item->id)->with('success', 'อัปเดตข้อมูลเรียบร้อยแล้ว');
     }
@@ -772,6 +790,15 @@ class RdbPublishedController extends Controller
         $item->user_updated = auth()->id();
         $item->save();
 
+        // สร้างภาพประกอบหน้าแรก .webp หากมีไฟล์แนบ
+        if (!empty($item->pub_file) || !empty($item->pf_path)) {
+            try {
+                app(\App\Services\PdfCoverService::class)->generatePublishedCover($item, true);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Generate published cover failed: ' . $e->getMessage());
+            }
+        }
+
         return back()->with('success', 'อัปโหลดไฟล์เรียบร้อยแล้ว');
     }
 
@@ -799,6 +826,15 @@ class RdbPublishedController extends Controller
         $item->pub_numfile = null;
         $item->user_updated = auth()->id();
         $item->save();
+
+        // สร้างภาพประกอบหน้าแรก .webp หากมีไฟล์แนบ
+        if (!empty($item->pub_file) || !empty($item->pf_path)) {
+            try {
+                app(\App\Services\PdfCoverService::class)->generatePublishedCover($item, true);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Generate published cover failed: ' . $e->getMessage());
+            }
+        }
         
         return back()->with('success', 'ลบไฟล์เรียบร้อยแล้ว');
     }
@@ -849,6 +885,15 @@ class RdbPublishedController extends Controller
         $item->data_show = 0;
         $item->save();
 
+        // สร้างภาพประกอบหน้าแรก .webp หากมีไฟล์แนบ
+        if (!empty($item->pub_file) || !empty($item->pf_path)) {
+            try {
+                app(\App\Services\PdfCoverService::class)->generatePublishedCover($item, true);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Generate published cover failed: ' . $e->getMessage());
+            }
+        }
+
         return redirect()->route('backend.rdb_published.index')->with('success', 'ลบข้อมูลเรียบร้อยแล้ว (Soft Delete)');
     }
 
@@ -860,6 +905,15 @@ class RdbPublishedController extends Controller
         $item->data_show = 1;
         $item->user_updated = auth()->id();
         $item->save();
+
+        // สร้างภาพประกอบหน้าแรก .webp หากมีไฟล์แนบ
+        if (!empty($item->pub_file) || !empty($item->pf_path)) {
+            try {
+                app(\App\Services\PdfCoverService::class)->generatePublishedCover($item, true);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Generate published cover failed: ' . $e->getMessage());
+            }
+        }
 
         return redirect()->back()->with('success', 'กู้คืนข้อมูลการตีพิมพ์เรียบร้อยแล้ว');
     }
@@ -873,6 +927,15 @@ class RdbPublishedController extends Controller
             $item->depcou_id = $mainOfficeAuthor->depcou_id;
             $item->branch_id = $mainOfficeAuthor->depcat_id;
             $item->save();
+
+        // สร้างภาพประกอบหน้าแรก .webp หากมีไฟล์แนบ
+        if (!empty($item->pub_file) || !empty($item->pf_path)) {
+            try {
+                app(\App\Services\PdfCoverService::class)->generatePublishedCover($item, true);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Generate published cover failed: ' . $e->getMessage());
+            }
+        }
         }
     }
 

@@ -22,6 +22,13 @@
         @if($project->getReportFilePath() && (int)$project->pro_file_show === 0)
             <div class="mb-3">
                 <h6>📑 รายงานฉบับสมบูรณ์ (Full Report)</h6>
+                @if($project->cover_url)
+                    <div class="mb-2">
+                        <a href="{{ route('frontend.rdb_project.view_report', $project->pro_id) }}" target="_blank">
+                            <img src="{{ $project->cover_url }}" alt="หน้าแรกรายงาน" class="img-fluid rounded border shadow-sm" style="max-height: 200px; object-fit: contain;">
+                        </a>
+                    </div>
+                @endif
                 <a href="{{ route('frontend.rdb_project.view_report', $project->pro_id) }}" 
                    class="btn btn-info btn-sm" target="_blank">
                     <i class="fa fa-file-pdf"></i> ดูรายงาน

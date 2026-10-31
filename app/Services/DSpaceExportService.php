@@ -432,6 +432,8 @@ class DSpaceExportService
             $legacyCandidates = [
                 base_path('yii2_rdb-main/frontend/web/datafiles/' . $model->pro_id . '/' . $rawFile),
                 public_path('datafiles/' . $model->pro_id . '/' . $rawFile),
+                storage_path('app/public/project/' . $rawFile),
+                storage_path('app/public/' . $rawFile),
                 storage_path('app/public/reports/' . $rawFile),
                 storage_path('app/public/abstracts/' . $rawFile),
                 storage_path('app/public/uploads/projects/' . $rawFile),

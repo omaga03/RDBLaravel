@@ -1057,6 +1057,15 @@ class RdbProjectController extends Controller
             $project->user_updated = auth()->id();
             $project->save();
 
+            // สร้างภาพประกอบหน้าแรก .webp หากเปิดเผยแพร่ (pro_file_show == 0)
+            if ((int)$project->pro_file_show === 0) {
+                try {
+                    app(\App\Services\PdfCoverService::class)->generateProjectCover($project, true);
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning('Generate project cover failed: ' . $e->getMessage());
+                }
+            }
+
             $statusName = $completedStatus ? $completedStatus->ps_name : 'ดำเนินการเสร็จสิ้น';
             return redirect()->back()->with('success', 'อัปโหลดรายงานฉบับสมบูรณ์เรียบร้อยแล้ว และระบบได้ปรับสถานะโครงการเป็น "' . $statusName . '" อัตโนมัติ');
         } catch (\Exception $e) {
@@ -1588,6 +1597,15 @@ class RdbProjectController extends Controller
 
         $project->user_updated = auth()->id();
         $project->save();
+
+        // สร้างภาพประกอบหน้าแรก .webp หากเปิดเผยแพร่ (pro_file_show == 0)
+        if ((int)$project->pro_file_show === 0) {
+            try {
+                app(\App\Services\PdfCoverService::class)->generateProjectCover($project);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Generate project cover on toggle failed: ' . $e->getMessage());
+            }
+        }
 
         return response()->json([
             'success' => true,

@@ -539,6 +539,14 @@
                                                     </div>
                                                 </div>
                                                 @if($project->pro_file)
+                                                    @if($project->cover_url)
+                                                        <div class="text-center mb-3">
+                                                            <a href="{{ route('backend.rdb_project.view_report', $project->pro_id) }}" target="_blank">
+                                                                <img src="{{ $project->cover_url }}" alt="ปกรายงานวิจัย" class="img-fluid rounded border shadow-sm" style="max-height: 200px; object-fit: contain;">
+                                                            </a>
+                                                            <div class="small text-body-secondary mt-1"><i class="bi bi-image me-1"></i>หน้าแรก (.webp)</div>
+                                                        </div>
+                                                    @endif
                                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                                         <span class="small text-body-secondary text-truncate">{{ $project->pro_file }}</span>
                                                         @if(!empty($project->pro_page_num))

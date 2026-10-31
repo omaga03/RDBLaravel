@@ -37,6 +37,7 @@ class RdbPublished extends Model
         'pf_path',
         'pf_size',
         'pf_mime_type',
+        'pub_cover_path',
         'pub_score',
         'pub_budget',
         'pub_note',
@@ -142,5 +143,21 @@ class RdbPublished extends Model
     public function updatedBy()
     {
         return $this->belongsTo(User::class, 'user_updated');
+    }
+
+    /**
+     * ดึง URL ภาพประกอบหน้าแรกของผลงานตีพิมพ์ (.webp)
+     */
+    public function getCoverUrl(): ?string
+    {
+        if (!empty($this->pub_cover_path) && \Illuminate\Support\Facades\Storage::disk('public')->exists($this->pub_cover_path)) {
+            return asset('storage/' . $this->pub_cover_path);
+        }
+        return null;
+    }
+
+    public function getCoverUrlAttribute(): ?string
+    {
+        return $this->getCoverUrl();
     }
 }

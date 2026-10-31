@@ -329,6 +329,13 @@
                         $filePath = $item->getPublishedFilePath();
                     @endphp
                     @if($filePath)
+                        @if($item->cover_url)
+                            <div class="text-center mb-3">
+                                <a href="{{ route('frontend.rdbpublished.view_file', $item->id) }}" target="_blank">
+                                    <img src="{{ $item->cover_url }}" alt="ปกบทความวิจัย" class="img-fluid rounded border shadow-sm" style="max-height: 220px; object-fit: contain;">
+                                </a>
+                            </div>
+                        @endif
                         <a href="{{ route('frontend.rdbpublished.view_file', $item->id) }}" 
                            target="_blank" 
                            class="file-cta-card card border border-success-subtle text-decoration-none shadow-sm"

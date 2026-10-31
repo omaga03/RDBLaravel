@@ -482,6 +482,13 @@ class ProjectReviewService
                 }
                 $project->user_updated = $admin->id;
                 $project->save();
+
+                // สร้างภาพประกอบหน้าแรก .webp เมื่อเล่มจริงได้รับการอนุมัติเผยแพร่
+                try {
+                    app(\App\Services\PdfCoverService::class)->generateProjectCover($project, true);
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning('Generate final report cover failed: ' . $e->getMessage());
+                }
             }
 
             $this->notifyProjectMembers($submission, new ReviewFinalApprovedNotification($submission));

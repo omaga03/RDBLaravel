@@ -298,9 +298,18 @@
                 </div>
                 <div class="card-body text-center p-4">
                     @if($item->pub_file || $item->pf_path)
-                        <div class="mb-3">
-                            <i class="bi bi-file-earmark-pdf text-danger" style="font-size: 3rem;"></i>
-                        </div>
+                        @if($item->cover_url)
+                            <div class="mb-3">
+                                <a href="{{ route('backend.rdb_published.view_file', $item->id) }}" target="_blank">
+                                    <img src="{{ $item->cover_url }}" alt="Cover" class="img-fluid rounded border shadow-sm" style="max-height: 220px; object-fit: contain;">
+                                </a>
+                                <div class="small text-body-secondary mt-1"><i class="bi bi-image me-1"></i>หน้าแรก (.webp)</div>
+                            </div>
+                        @else
+                            <div class="mb-3">
+                                <i class="bi bi-file-earmark-pdf text-danger" style="font-size: 3rem;"></i>
+                            </div>
+                        @endif
                         <h6 class="text-break mb-2">{{ $item->pub_file ?: basename($item->pf_path) }}</h6>
                         @if(!empty($item->pub_numfile))
                             <div class="mb-2">

@@ -40,6 +40,7 @@ class RdbProject extends Model
         'pro_file_path',
         'pro_file_size',
         'pro_file_mime',
+        'pro_cover_path',
         'pro_page_num',
         'pt_id',
         'pts_id',
@@ -379,5 +380,21 @@ class RdbProject extends Model
     public function usingNewReportPath(): bool
     {
         return !empty($this->pro_file_path);
+    }
+
+    /**
+     * ดึง URL ภาพประกอบหน้าแรกของเล่มรายงานวิจัยฉบับสมบูรณ์ (.webp)
+     */
+    public function getCoverUrl(): ?string
+    {
+        if (!empty($this->pro_cover_path) && \Illuminate\Support\Facades\Storage::disk('public')->exists($this->pro_cover_path)) {
+            return asset('storage/' . $this->pro_cover_path);
+        }
+        return null;
+    }
+
+    public function getCoverUrlAttribute(): ?string
+    {
+        return $this->getCoverUrl();
     }
 }
