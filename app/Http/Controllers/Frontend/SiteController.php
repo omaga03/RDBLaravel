@@ -29,20 +29,27 @@ class SiteController extends Controller
         }
 
         // 1. Get Years for Dropdown (Only up to the latest active year)
-        $years_list = RdbYear::where('year_id', '<=', $latest_active_year_id)
-                             ->orderBy('year_name', 'desc')
-                             ->get();
+        $years_list = $latest_active_year_id
+            ? RdbYear::where('year_id', '<=', $latest_active_year_id)->orderBy('year_name', 'desc')->get()
+            : RdbYear::orderBy('year_name', 'desc')->get();
 
         // 2. Determine Year to Show
         if ($request->filled('year_id')) {
             $max_year = RdbYear::find($request->year_id);
         } else {
             // Default to the latest active year
-            $max_year = RdbYear::find($latest_active_year_id);
+            $max_year = $latest_active_year_id ? RdbYear::find($latest_active_year_id) : null;
         }
 
         if (!$max_year) {
-            return view('frontend.site.index', ['no_data' => true]);
+            $currentThaiYear = (int)date('Y') + 543;
+            $max_year = (object)[
+                'year_id' => 0,
+                'year_name' => $currentThaiYear
+            ];
+            if ($years_list->isEmpty()) {
+                $years_list = collect([$max_year]);
+            }
         }
 
         // 3. Departments for Chart (Type 1 = Academic faculties + central divisions)
@@ -53,13 +60,15 @@ class SiteController extends Controller
                                     ->toArray();
 
         // 4. Determine 4 comparison years up to $max_year (sorted ascending)
-        $chartYears = RdbYear::where('year_id', '<=', $latest_active_year_id)
-                             ->where('year_name', '<=', $max_year->year_name)
-                             ->orderBy('year_name', 'desc')
-                             ->take(4)
-                             ->get()
-                             ->sortBy('year_name')
-                             ->values();
+        $chartYears = $latest_active_year_id
+            ? RdbYear::where('year_id', '<=', $latest_active_year_id)
+                     ->where('year_name', '<=', $max_year->year_name)
+                     ->orderBy('year_name', 'desc')
+                     ->take(4)
+                     ->get()
+                     ->sortBy('year_name')
+                     ->values()
+            : collect();
         $chartYearIds = $chartYears->pluck('year_id')->toArray();
 
         // 5. Query Project counts and budgets grouped by year and department

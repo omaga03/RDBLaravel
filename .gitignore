@@ -55,6 +55,9 @@ yii2_rdb-main/
 check_*.php
 update_*.php
 database/*.sql
+database/**/*.sql
+*.sql
+!/backups/structure_ordered_*.sql
 
 # Assets/Uploads
 /public/uploads/*

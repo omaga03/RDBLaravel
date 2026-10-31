@@ -4,6 +4,18 @@
 
 ---
 
+## 📋 ภาพรวมระบบ (System Overview)
+
+ระบบบริหารจัดการฐานข้อมูลงานวิจัย (Research Database Management System) ถูกออกแบบมาเพื่อจัดเก็บ บริหารจัดการ และเผยแพร่ข้อมูลผลงานวิจัยอย่างเป็นระบบ โดยประกอบด้วยโมดูลหลัก:
+1. **📊 หน้าหลักและแดชบอร์ด (Dashboard & Analytics):** แสดงสถิติงานวิจัย งบประมาณ กำลังคน และกราฟเปรียบเทียบตามปีงบประมาณ
+2. **📝 โครงการวิจัย (Research Projects):** บริหารจัดการโครงการ ทุนอุดหนุน สถานะ และระบบประเมินเล่มรายงานวิจัย (Peer Review)
+3. **📑 ผลงานตีพิมพ์ (Publications):** ฐานข้อมูลบทความวิจัย วารสารระดับชาติและนานาชาติ (TCI, Scopus, WoS)
+4. **💡 ทรัพย์สินทางปัญญา (Intellectual Property - DIP):** สิทธิบัตร อนุสิทธิบัตร ลิขสิทธิ์ และเครื่องหมายการค้า
+5. **🚀 การนำไปใช้ประโยชน์ (Utilization):** ติดตามผลงานวิจัยเชิงพาณิชย์ เชิงนโยบาย เชิงสาธารณะ และเชิงวิชาการ
+6. **👨‍🔬 ข้อมูลนักวิจัย (Researchers):** ข้อมูลส่วนตัว ผลงานสะสม และการเชื่อมโยง Scopus / ORCID
+
+---
+
 ## 📌 สิ่งที่ต้องเตรียมไว้ในเครื่อง
 ติดตั้งโปรแกรม **Laragon (Full)** ไว้ที่ `C:\laragon` ให้เรียบร้อย
 
@@ -20,7 +32,6 @@
    * คลิกขวาที่ Laragon -> **PHP** -> **php.ini** (โปรแกรม Notepad จะเปิดขึ้นมา)
    * กด `Ctrl + F` ค้นหาคำว่า `;extension=zip`
    * **ลบเครื่องหมาย `;` ด้านหน้าออก** ให้เหลือเพียง `extension=zip`
-   * ตรวจสอบว่า Extension เหล่านี้เปิดอยู่ด้วย: `pdo_mysql`, `mysqli`, `curl`, `fileinfo`, `gd`, `intl`, `mbstring`, `openssl`, `bcmath`, `exif`
    * กดบันทึกไฟล์ (`Ctrl + S`) แล้วปิด Notepad
 5. กดปุ่ม **"Stop"** แล้วกด **"Start All"** ในหน้าต่าง Laragon
 
@@ -29,7 +40,7 @@
 ## 💻 ขั้นตอนที่ 2: เปิด Terminal ของ Laragon
 
 > ⚠️ **ข้อสำคัญมาก:** ห้ามเปิด CMD หรือ PowerShell ธรรมดาจาก Windows  
-> ให้คลิกปุ่ม **"Terminal"** บนหน้าต่าง Laragon เท่านั้น (หน้าต่างสีดำจะเปิดขึ้นมาพร้อมสภาพแวดล้อมและ PATH ที่ตั้งค่าไว้เสร็จสรรพ)
+> ให้คลิกปุ่ม **"Terminal"** บนหน้าต่าง Laragon เท่านั้น (หน้าต่างสีดำจะเปิดขึ้นมาพร้อมสภาพแวดล้อมที่ตั้งค่าไว้เสร็จสรรพ)
 
 ---
 
@@ -73,7 +84,7 @@ npm run build
 # 1. สร้างฐานข้อมูล rdbpcru เปล่า
 mysql -u root -e "CREATE DATABASE IF NOT EXISTS rdbpcru CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
-# 2. นำเข้าข้อมูลจริงจากไฟล์ SQL Dump
+# 2. นำเข้าข้อมูลจริงจากไฟล์ SQL Dump (เช่น DB_PCRURDI_691031.sql)
 mysql -u root --default-character-set=utf8mb4 --max_allowed_packet=128M rdbpcru -e "source C:/laragon/www/laravel_rdb/database/migrations/DB_PCRURDI_691031.sql"
 
 # 3. รันคำสั่งสร้าง View Aliases (ป้องกันปัญหา Table / View เดิม)
@@ -110,5 +121,5 @@ php artisan test --filter=BackendAuditTest
   * **ชื่อผู้ใช้งาน:** `admin` (หรืออีเมล `admin@pcru.ac.th`)
   * **รหัสผ่าน:** `admin1234`
 * **นักวิจัย (Researcher):**
-  * **ชื่อผู้ใช้งาน:** `655169`
+  * **ชื่อผู้ใช้งาน:** `655169` (ดร. ชลธิชา ระลึก)
   * **รหัสผ่าน:** `password123`
