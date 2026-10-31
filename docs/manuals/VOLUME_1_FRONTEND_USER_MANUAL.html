@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เล่มที่ 1: คู่มือการใช้งานระบบหน้าบ้าน (Volume 1: Frontend Public User Manual) — มหาวิทยาลัยราชภัฏเพชรบูรณ์</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Prompt:wght@400;500;600;700&family=Sarabun:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --bg-body: #F8FAFC;
+            --bg-surface: #FFFFFF;
+            --bg-subtle: #F1F5F9;
+            --text-primary: #0F172A;
+            --text-secondary: #475569;
+            --text-muted: #64748B;
+            --border-color: #E2E8F0;
+            --navy: #1E3A5F;
+            --royal: #2563EB;
+            --amber: #D97706;
+            --emerald: #059669;
+            --danger: #DC2626;
+        }
+        [data-theme="dark"] {
+            --bg-body: #0B1120;
+            --bg-surface: #111827;
+            --bg-subtle: #1E293B;
+            --text-primary: #F8FAFC;
+            --text-secondary: #CBD5E1;
+            --text-muted: #94A3B8;
+            --border-color: #334155;
+            --navy: #38BDF8;
+            --royal: #60A5FA;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Sarabun', 'Plus Jakarta Sans', sans-serif;
+            font-size: 16.5px;
+            line-height: 1.75;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            font-variant-numeric: tabular-nums;
+        }
+        h1, h2, h3, h4, .font-heading {
+            font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
+            line-height: 1.35;
+        }
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(30, 58, 95, 0.97);
+            backdrop-filter: blur(8px);
+            color: #fff;
+            border-bottom: 1px solid rgba(255,255,255,0.12);
+            padding: 0.65rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .topbar-brand {
+            font-family: 'Prompt', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .topbar-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+        .nav-pill {
+            color: rgba(255,255,255,0.82);
+            text-decoration: none;
+            font-family: 'Prompt', sans-serif;
+            font-size: 0.85rem;
+            padding: 0.38rem 0.8rem;
+            border-radius: 6px;
+            transition: all 0.15s;
+        }
+        .nav-pill:hover { background: rgba(255,255,255,0.12); color: #fff; }
+        .nav-pill.active { background: #D97706; color: #fff; font-weight: 500; }
+        .topbar-actions { display: flex; gap: 0.5rem; }
+        .btn-action {
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Prompt', sans-serif;
+            font-size: 0.82rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .btn-action:hover { background: rgba(255,255,255,0.22); }
+        .container {
+            max-width: 1120px;
+            margin: 2rem auto 4rem;
+            padding: 0 1.25rem;
+        }
+        .manual-sheet {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+            padding: 3rem 3.5rem;
+        }
+        .hero-banner {
+            border-bottom: 3px solid var(--navy);
+            padding-bottom: 1.75rem;
+            margin-bottom: 2.25rem;
+        }
+        .hero-badge {
+            display: inline-block;
+            background: rgba(217, 119, 6, 0.14);
+            color: #B45309;
+            border: 1px solid rgba(217, 119, 6, 0.3);
+            font-family: 'Prompt', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            padding: 0.25rem 0.75rem;
+            border-radius: 99px;
+            margin-bottom: 0.75rem;
+        }
+        [data-theme="dark"] .hero-badge { color: #FBBF24; }
+        .hero-banner h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            color: var(--text-primary);
+        }
+        .hero-banner p {
+            margin: 0;
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+        }
+        .manual-content h1 { display: none; }
+        .manual-content h2 {
+            font-size: 1.5rem;
+            color: var(--navy);
+            border-left: 5px solid var(--amber);
+            padding-left: 0.85rem;
+            margin-top: 2.75rem;
+            margin-bottom: 1.1rem;
+            padding-top: 0.2rem;
+            padding-bottom: 0.2rem;
+            background: var(--bg-subtle);
+            border-radius: 0 8px 8px 0;
+        }
+        .manual-content h3 {
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            margin-top: 1.85rem;
+            margin-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.4rem;
+        }
+        .manual-content p, .manual-content li {
+            color: var(--text-primary);
+        }
+        .manual-content ul, .manual-content ol {
+            padding-left: 1.5rem;
+        }
+        .manual-content li { margin-bottom: 0.45rem; }
+        .manual-content a { color: var(--royal); text-decoration: none; }
+        .manual-content a:hover { text-decoration: underline; }
+        .manual-content code {
+            font-family: Consolas, Monaco, monospace;
+            font-size: 0.9em;
+            background: var(--bg-subtle);
+            color: #D97706;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+        .manual-content pre:not(.mermaid) {
+            background: #0F172A;
+            color: #E2E8F0;
+            padding: 1.1rem 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        .manual-content pre:not(.mermaid) code {
+            background: transparent;
+            color: inherit;
+            border: none;
+            padding: 0;
+        }
+        .manual-content hr {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 2.5rem 0;
+        }
+        .manual-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.25rem 0 1.75rem;
+            font-size: 0.95rem;
+        }
+        .manual-content th, .manual-content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1rem;
+            text-align: left;
+            vertical-align: top;
+        }
+        .manual-content th {
+            background: var(--bg-subtle);
+            font-family: 'Prompt', sans-serif;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .manual-content tr:nth-child(even) td {
+            background: rgba(148, 163, 184, 0.04);
+        }
+        .manual-figure {
+            margin: 1.5rem 0 2rem;
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.85rem;
+            text-align: center;
+        }
+        .manual-figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            display: block;
+            margin: 0 auto;
+        }
+        .manual-figure figcaption {
+            margin-top: 0.65rem;
+            font-family: 'Prompt', sans-serif;
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+        }
+        .manual-carousel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+            gap: 1.25rem;
+            margin: 1.5rem 0 2rem;
+        }
+        .manual-carousel-item {
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.85rem;
+        }
+        .manual-carousel-item .manual-figure {
+            margin: 0;
+            border: none;
+            padding: 0;
+            background: transparent;
+        }
+        .carousel-badge {
+            display: inline-block;
+            background: var(--navy);
+            color: #fff;
+            font-family: 'Prompt', sans-serif;
+            font-size: 0.75rem;
+            padding: 0.15rem 0.6rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+        .manual-callout {
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.35rem 0;
+            border-left: 4px solid var(--royal);
+            background: var(--bg-subtle);
+        }
+        .callout-header {
+            font-family: 'Prompt', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+        .callout-body p:last-child, .callout-body ul:last-child { margin-bottom: 0; }
+        .callout-note { border-left-color: #2563EB; background: rgba(37, 99, 235, 0.06); }
+        .callout-note .callout-header { color: #1D4ED8; }
+        .callout-tip { border-left-color: #059669; background: rgba(5, 150, 105, 0.06); }
+        .callout-tip .callout-header { color: #047857; }
+        .callout-important { border-left-color: #D97706; background: rgba(217, 119, 6, 0.08); }
+        .callout-important .callout-header { color: #B45309; }
+        .callout-warning, .callout-caution { border-left-color: #DC2626; background: rgba(220, 38, 38, 0.06); }
+        .callout-warning .callout-header, .callout-caution .callout-header { color: #B91C1C; }
+        [data-theme="dark"] .callout-note .callout-header { color: #60A5FA; }
+        [data-theme="dark"] .callout-tip .callout-header { color: #34D399; }
+        [data-theme="dark"] .callout-important .callout-header { color: #FBBF24; }
+        [data-theme="dark"] .callout-warning .callout-header { color: #F87171; }
+        .mermaid-container {
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            text-align: center;
+            overflow-x: auto;
+        }
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+        @media (max-width: 768px) {
+            .manual-sheet { padding: 1.5rem 1.25rem; }
+            .manual-carousel-grid { grid-template-columns: 1fr; }
+        }
+        @media print {
+            body { background: #fff; color: #000; font-size: 11pt; }
+            .topbar { display: none !important; }
+            .container { max-width: 100%; margin: 0; padding: 0; }
+            .manual-sheet { border: none; box-shadow: none; padding: 0; }
+            .manual-figure, .manual-callout, table, tr { page-break-inside: avoid; }
+            h2, h3 { page-break-after: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <a href="index.html" class="topbar-brand">
+            <i class="bi bi-journal-bookmark-fill"></i>
+            <span>PCRU Research Database Manuals</span>
+        </a>
+        <nav class="topbar-nav">
+            <a href="index.html" class="nav-pill "><i class="bi bi-collection me-1"></i> สารบัญรวมคู่มือ</a><a href="VOLUME_1_FRONTEND_USER_MANUAL.html" class="nav-pill active"><i class="bi bi-globe2 me-1"></i> เล่ม 1: ระบบหน้าบ้าน</a><a href="VOLUME_2_BACKEND_ADMIN_RESEARCHER_MANUAL.html" class="nav-pill "><i class="bi bi-shield-lock me-1"></i> เล่ม 2: ระบบหลังบ้าน & นักวิจัย</a><a href="RESEARCHER_QUICK_START_CHEATSHEET.html" class="nav-pill "><i class="bi bi-lightning-charge me-1"></i> คู่มือฉบับย่อ 3 นาที</a>
+        </nav>
+        <div class="topbar-actions">
+            <button type="button" class="btn-action" onclick="toggleTheme()">
+                <i class="bi bi-moon-stars" id="theme-icon"></i> <span>สลับโหมดสี</span>
+            </button>
+            <button type="button" class="btn-action" onclick="window.print()">
+                <i class="bi bi-printer"></i> <span>พิมพ์ / บันทึก PDF</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="container">
+        <article class="manual-sheet">
+            <div class="hero-banner">
+                <div class="hero-badge">VOLUME 1 — PUBLIC PORTAL</div>
+                <h1>เล่มที่ 1: คู่มือการใช้งานระบบหน้าบ้าน (Volume 1: Frontend Public User Manual)</h1>
+                <p>สำหรับประชาชนทั่วไป นักศึกษา คณาจารย์ และหน่วยงานภายนอก — สถาบันวิจัยและพัฒนา มหาวิทยาลัยราชภัฏเพชรบูรณ์</p>
+            </div>
+            <div class="manual-content">
+                <h1>เล่มที่ 1: คู่มือการใช้งานระบบหน้าบ้าน (Volume 1: Frontend Public User Manual)</h1>
+<h2 id="ระบบฐานข-อม-ลงานว-จ-ย-มหาว-ทยาล-ยราชภ-ฏเพชรบ-รณ-pcru-research-database">ระบบฐานข้อมูลงานวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์ (PCRU Research Database)</h2>
+<div class="manual-callout callout-note"><div class="callout-header"><i class="bi bi-info-circle-fill"></i> ข้อมูลจำเพาะ / หมายเหตุ (NOTE)</div><div class="callout-body"><p><strong>ข้อมูลจำเพาะของเอกสาร (Document Control)</strong></p>
+<ul>
+<li><strong>รหัสเอกสาร</strong>: <code>PCRU-RDB-MAN-VOL1-2569</code></li>
+<li><strong>กลุ่มผู้ใช้งานเป้าหมาย</strong>: คณาจารย์, นักวิจัย, นักศึกษา, บุคลากรทางการศึกษา, หน่วยงานภาครัฐ/เอกชน และประชาชนทั่วไป</li>
+<li><strong>รูปแบบการใช้งาน</strong>: ระบบเว็บแอปพลิเคชันสาธารณะ (Public Web Portal) รองรับคอมพิวเตอร์ แท็บเล็ต และสมาร์ตโฟน</li>
+<li><strong>URL เข้าใช้งาน</strong>: <code>http://laravel_rdb.test/</code> (หรือโดเมนหลักของสถาบันวิจัยและพัฒนา มหาวิทยาลัยราชภัฏเพชรบูรณ์)</li>
+</ul>
+</div></div>
+<hr />
+<h2 id="สารบ-ญ-table-of-contents">สารบัญ (Table of Contents)</h2>
+<ol>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-1-%E0%B8%A0%E0%B8%B2%E0%B8%9E%E0%B8%A3%E0%B8%A7%E0%B8%A1%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%99%E0%B8%B3%E0%B8%97%E0%B8%B2%E0%B8%87-system-overview--interface-navigation">บทที่ 1: ภาพรวมระบบและการนำทาง (System Overview &amp; Interface Navigation)</a></li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-2-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%B7%E0%B8%9A%E0%B8%84%E0%B9%89%E0%B8%99%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B8%AD%E0%B8%B1%E0%B8%88%E0%B8%89%E0%B8%A3%E0%B8%B4%E0%B8%A2%E0%B8%B0-smart-search--dynamic-filtering">บทที่ 2: การสืบค้นข้อมูลงานวิจัยอัจฉริยะ (Smart Search &amp; Dynamic Filtering)</a></li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-3-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B9%82%E0%B8%A1%E0%B8%94%E0%B8%B9%E0%B8%A5%E0%B9%82%E0%B8%84%E0%B8%A3%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-research-projects-directory">บทที่ 3: การใช้งานโมดูลโครงการวิจัย (Research Projects Directory)</a></li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-4-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B9%82%E0%B8%A1%E0%B8%94%E0%B8%B9%E0%B8%A5%E0%B8%9C%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%95%E0%B8%B5%E0%B8%9E%E0%B8%B4%E0%B8%A1%E0%B8%9E%E0%B9%8C%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-publications--academic-citations">บทที่ 4: การใช้งานโมดูลผลงานตีพิมพ์และงานวิชาการ (Publications &amp; Academic Citations)</a></li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-5-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B9%82%E0%B8%A1%E0%B8%94%E0%B8%B9%E0%B8%A5%E0%B8%97%E0%B8%A3%E0%B8%B1%E0%B8%9E%E0%B8%A2%E0%B9%8C%E0%B8%AA%E0%B8%B4%E0%B8%99%E0%B8%97%E0%B8%B2%E0%B8%87%E0%B8%9B%E0%B8%B1%E0%B8%8D%E0%B8%8D%E0%B8%B2-intellectual-property---dip">บทที่ 5: การใช้งานโมดูลทรัพย์สินทางปัญญา (Intellectual Property - DIP)</a></li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-6-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B9%82%E0%B8%A1%E0%B8%94%E0%B8%B9%E0%B8%A5%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%99%E0%B8%B3%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B9%84%E0%B8%9B%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%82%E0%B8%A2%E0%B8%8A%E0%B8%99%E0%B9%8C-research-utilizations">บทที่ 6: การใช้งานโมดูลการนำงานวิจัยไปใช้ประโยชน์ (Research Utilizations)</a></li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-7-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%B3%E0%B9%80%E0%B8%99%E0%B8%B5%E0%B8%A2%E0%B8%9A%E0%B8%99%E0%B8%B1%E0%B8%81%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-researchers-directory--academic-portfolio">บทที่ 7: การใช้งานทำเนียบนักวิจัย (Researchers Directory &amp; Academic Portfolio)</a></li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-8-%E0%B9%81%E0%B8%94%E0%B8%8A%E0%B8%9A%E0%B8%AD%E0%B8%A3%E0%B9%8C%E0%B8%94%E0%B8%AA%E0%B8%96%E0%B8%B4%E0%B8%95%E0%B8%B4%E0%B8%AA%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%99%E0%B9%80%E0%B8%97%E0%B8%A8%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%9F%E0%B8%B5%E0%B8%94%E0%B8%82%E0%B9%88%E0%B8%B2%E0%B8%A7%E0%B8%AA%E0%B8%B2%E0%B8%A3-dashboards--rss-feeds">บทที่ 8: แดชบอร์ดสถิติสารสนเทศและฟีดข่าวสาร (Dashboards &amp; RSS Feeds)</a></li>
+</ol>
+<hr />
+<h2 id="บทท-1-ภาพรวมระบบและการนำทาง-system-overview-amp-interface-navigation">บทที่ 1: ภาพรวมระบบและการนำทาง (System Overview &amp; Interface Navigation)</h2>
+<h3 id="1-1-แนะนำระบบฐานข-อม-ลงานว-จ-ย-มหาว-ทยาล-ยราชภ-ฏเพชรบ-รณ">1.1 แนะนำระบบฐานข้อมูลงานวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์</h3>
+<p>ระบบฐานข้อมูลงานวิจัย (PCRU Research Database) พัฒนาขึ้นภายใต้แนวคิด <strong>Scholarly Editorial Craftsmanship</strong> เพื่อเป็นศูนย์กลางคลังปัญญาและสารสนเทศงานวิจัยของมหาวิทยาลัยราชภัฏเพชรบูรณ์ โดยรวบรวมข้อมูลโครงการวิจัยกว่า <strong>2,870 โครงการ</strong>, ผลงานตีพิมพ์ทางวิชาการกว่า <strong>1,873 บทความ</strong>, ข้อมูลการนำไปใช้ประโยชน์กว่า <strong>1,112 รายการ</strong>, ทรัพย์สินทางปัญญา <strong>59 รายการ</strong> และทำเนียบนักวิจัยกว่า <strong>1,072 ท่าน</strong> ให้ประชาชนและนักวิชาการสามารถสืบค้นและเข้าถึงองค์ความรู้ได้อย่างสะดวกรวดเร็ว</p>
+<h3 id="1-2-โครงสร-างหน-าจอหล-ก-portal-layout-walkthrough">1.2 โครงสร้างหน้าจอหลัก (Portal Layout Walkthrough)</h3>
+<figure class="manual-figure"><a href="./screenshots/frontend_01_home.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/frontend_01_home.png" alt="หน้าแรกของระบบฐานข้อมูลงานวิจัย พร้อมจุดสำคัญ 1-3" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้าแรกของระบบฐานข้อมูลงานวิจัย พร้อมจุดสำคัญ 1-3</figcaption></figure>
+<p><strong>คำอธิบายหมายเลขกำกับบนหน้าจอ:</strong></p>
+<ul>
+<li><strong>หมายเลข <code>[1]</code> แถบเมนูนำทางหลัก (Main Navigation Bar)</strong>: ใช้สำหรับสลับเข้าสู่โมดูลหลักทั้ง 7 ส่วน ได้แก่ หน้าแรก, โครงการวิจัย, ผลงานตีพิมพ์, ทรัพย์สินทางปัญญา, การนำไปใช้ประโยชน์, ทำเนียบนักวิจัย, แดชบอร์ดสถิติ รวมถึงปุ่มสลับธีมมืด/สว่าง และปุ่มเข้าสู่ระบบสำหรับเจ้าหน้าที่/นักวิจัย</li>
+<li><strong>หมายเลข <code>[2]</code> แบนเนอร์สืบค้นอัจฉริยะและตัวกรองปีงบประมาณ (Hero Search &amp; Fiscal Year Filter)</strong>: พื้นที่สำหรับพิมพ์คำค้นหาแบบครอบคลุมทุกโมดูล หรือเลือกกรองข้อมูลเฉพาะปีงบประมาณ พ.ศ. ที่ต้องการดูสถิติ</li>
+<li><strong>หมายเลข <code>[3]</code> การ์ดสรุปสถิติภาพรวมงานวิจัย (Executive Stat Cards)</strong>: แสดงตัวเลขสถิติสำคัญของมหาวิทยาลัยด้วยรูปแบบตัวเลขเรียงหลักตรงกัน (<code>tabular-nums</code>) แยกตามจำนวนโครงการวิจัย, งบประมาณวิจัยสะสม, ผลงานตีพิมพ์ และการใช้ประโยชน์</li>
+</ul>
+<h3 id="1-3-การสล-บโหมดส-หน-าจอ-light-mode-dark-mode-switcher">1.3 การสลับโหมดสีหน้าจอ (Light Mode / Dark Mode Switcher)</h3>
+<p>ระบบรองรับการแสดงผล 2 โหมดสีตามมาตรฐานสายตาทางวิชาการ:</p>
+<ol>
+<li><strong>โหมดสว่าง (Daylight Editorial Slate)</strong>: พื้นหลังโทนขาวอมเทาอ่อน สบายตา เหมาะสำหรับการอ่านในสภาพแวดล้อมแสงปกติและการสั่งพิมพ์เอกสาร</li>
+<li><strong>โหมดมืด (Carbon-Navy Night Reading)</strong>: พื้นหลังโทนสีน้ำเงินเข้มวิชาการ (<code>#0F172A</code>) ลดแสงสีฟ้าสะท้อนเข้าตา เหมาะสำหรับการอ่านบทคัดย่อหรือตรวจทานข้อมูลในเวลากลางคืน</li>
+</ol>
+<p><strong>ขั้นตอนการสลับโหมดสี:</strong></p>
+<ol>
+<li>มองไปที่มุมขวาบนของแถบเมนูนำทางหลัก (<code>[1]</code>)</li>
+<li>คลิกที่ไอคอน <strong>รูปดวงอาทิตย์ (<code>☀️</code>) / รูปพระจันทร์เสี้ยว (<code>🌙</code>)</strong></li>
+<li>หน้าจอจะเปลี่ยนโทนสีทันทีโดยไม่ต้องโหลดหน้าเว็บใหม่ และระบบจะจดจำค่าที่เลือกไว้ในเบราว์เซอร์อัตโนมัติ</li>
+</ol>
+<hr />
+<h2 id="บทท-2-การส-บค-นข-อม-ลงานว-จ-ยอ-จฉร-ยะ-smart-search-amp-dynamic-filtering">บทที่ 2: การสืบค้นข้อมูลงานวิจัยอัจฉริยะ (Smart Search &amp; Dynamic Filtering)</h2>
+<p>ระบบสืบค้นของ PCRU Research Database ออกแบบมาให้รองรับพฤติกรรมการค้นหาข้อมูลภาษาไทยและภาษาอังกฤษอย่างแม่นยำ ดังแผนผังการทำงานต่อไปนี้:</p>
+<div class="mermaid-container"><pre class="mermaid">
+flowchart LR
+    A["ผู้ใช้งานพิมพ์คำค้น / ชื่อนักวิจัย"] --&gt; B{"ระบบประมวลผลคำค้น"}
+    B --&gt;|"พบคำนำหน้าชื่อไทย (นาย/นาง/ดร./ผศ.)"| C["ตัดคำนำหน้าอัตโนมัติและแยกคำ"]
+    B --&gt;|"พิมพ์หลายคำเว้นวรรค"| D["ค้นหาแบบกลุ่มคำ (AND / OR)"]
+    C --&gt; E["แสดงผลลัพธ์พร้อมไฮไลต์แหล่งที่พบ"]
+    D --&gt; E
+</pre></div>
+<h3 id="2-1-การค-นหาด-วนจากหน-าแรก-global-quick-search">2.1 การค้นหาด่วนจากหน้าแรก (Global Quick Search)</h3>
+<ol>
+<li>คลิกที่ช่องค้นหาในส่วนที่ <code>[2]</code> บนหน้าแรก</li>
+<li>พิมพ์คำสำคัญที่ต้องการ เช่น <code>&quot;เกษตรอินทรีย์&quot;</code>, <code>&quot;การท่องเที่ยวเพชรบูรณ์&quot;</code>, หรือ <code>&quot;พลังงานทดแทน&quot;</code></li>
+<li>กดปุ่ม <strong>Enter</strong> บนแป้นพิมพ์ หรือคลิกปุ่ม <strong>&quot;ค้นหา&quot;</strong></li>
+<li>ระบบจะแสดงรายการโครงการวิจัยและผลงานที่เกี่ยวข้องทันที</li>
+</ol>
+<h3 id="2-2-การใช-ต-วกรองป-งบประมาณ-พ-ศ-fiscal-year-filter">2.2 การใช้ตัวกรองปีงบประมาณ พ.ศ. (Fiscal Year Filter)</h3>
+<ol>
+<li>ในหน้าแรกหรือหน้าแดชบอร์ด คลิกที่ Dropdown <strong>&quot;ปีงบประมาณ พ.ศ.&quot;</strong></li>
+<li>เลือกปี พ.ศ. ที่ต้องการ (เช่น <code>2568</code>, <code>2567</code>, <code>2566</code>)</li>
+<li>ระบบจะกรองตัวเลขสถิติและกราฟทั้งหมดให้แสดงเฉพาะข้อมูลของปีงบประมาณนั้นทันที</li>
+</ol>
+<h3 id="2-3-เทคน-คการค-นหาแบบกล-มคำ-multi-keyword-search-mode">2.3 เทคนิคการค้นหาแบบกลุ่มคำ (Multi-Keyword Search Mode)</h3>
+<p>ในหน้าค้นหาของแต่ละโมดูล ผู้ใช้สามารถเลือกตรรกะการจับคู่คำค้นได้ 2 รูปแบบ:</p>
+<ul>
+<li><strong>โหมด &quot;ทุกคำ (Match All - AND)&quot;</strong>: ใช้เมื่อต้องการผลลัพธ์ที่มีคำค้นครบทุกคำ เช่น พิมพ์ <code>&quot;ข้าวไร่ เพชรบูรณ์&quot;</code> ระบบจะแสดงเฉพาะงานวิจัยที่มีทั้งคำว่า &quot;ข้าวไร่&quot; และ &quot;เพชรบูรณ์&quot; อยู่ด้วยกัน</li>
+<li><strong>โหมด &quot;บางคำ (Match Any - OR)&quot;</strong>: ใช้เมื่อต้องการขยายวงการค้นหา เช่น พิมพ์ <code>&quot;มะขาม ข้าวโพด&quot;</code> ระบบจะแสดงงานวิจัยที่มีคำว่า &quot;มะขาม&quot; หรือ &quot;ข้าวโพด&quot; อย่างใดอย่างหนึ่งหรือทั้งสองคำ</li>
+</ul>
+<div class="manual-callout callout-tip"><div class="callout-header"><i class="bi bi-lightbulb-fill"></i> เคล็ดลับการใช้งาน (TIP)</div><div class="callout-body"><p><strong>ระบบตัดคำนำหน้าชื่อภาษาไทยอัตโนมัติ</strong>: เมื่อต้องการค้นหาชื่อนักวิจัย ท่านสามารถพิมพ์ชื่อ-นามสกุลได้ทันที หรือแม้จะคัดลอกชื่อที่มีคำนำหน้าติดมา เช่น <code>&quot;ผศ.ดร.สมชาย ใจดี&quot;</code> หรือ <code>&quot;นางสาวสมหญิง&quot;</code> ระบบจะตัดคำนำหน้า (<code>นาย</code>, <code>นาง</code>, <code>นางสาว</code>, <code>ดร.</code>, <code>ผศ.</code>, <code>รศ.</code>, <code>ศ.</code>) ออกให้อัตโนมัติ เพื่อให้ค้นพบข้อมูลนักวิจัยได้ 100% แม้ฐานข้อมูลจะเก็บคำนำหน้าแยกฟิลด์กัน</p>
+</div></div>
+<hr />
+<h2 id="บทท-3-การใช-งานโมด-ลโครงการว-จ-ย-research-projects-directory">บทที่ 3: การใช้งานโมดูลโครงการวิจัย (Research Projects Directory)</h2>
+<h3 id="3-1-การเข-าด-และกรองรายการโครงการว-จ-ย-rdbproject">3.1 การเข้าดูและกรองรายการโครงการวิจัย (<code>/rdbproject</code>)</h3>
+<figure class="manual-figure"><a href="./screenshots/frontend_02_projects_directory.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/frontend_02_projects_directory.png" alt="หน้ารายการโครงการวิจัยและแผงตัวกรองขั้นสูง" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้ารายการโครงการวิจัยและแผงตัวกรองขั้นสูง</figcaption></figure>
+<p><strong>ขั้นตอนการใช้งานหน้ารายการโครงการวิจัย:</strong></p>
+<ol>
+<li><strong>ส่วนที่ <code>[1]</code> แผงตัวกรองค้นหาขั้นสูง (Search &amp; Filter Panel)</strong>:
+<ul>
+<li><strong>ชื่อโครงการ / คำสำคัญ</strong>: พิมพ์ชื่อเรื่องภาษาไทยหรือภาษาอังกฤษ</li>
+<li><strong>นักวิจัย</strong>: พิมพ์ชื่อผู้วิจัย (มีระบบ Autocomplete แนะนำรายชื่ออัตโนมัติขณะพิมพ์)</li>
+<li><strong>ปีงบประมาณ / ประเภทโครงการ / หน่วยงานคณะ</strong>: เลือกกรองตามสังกัดคณะหรือแหล่งทุน</li>
+<li><strong>ช่วงวันที่เริ่มต้น - สิ้นสุด</strong>: เลือกจากปฏิทินรูปแบบ พ.ศ. (ระบบตรวจสอบความถูกต้องว่าวันสิ้นสุดต้องไม่น้อยกว่าวันเริ่มต้นเสมอ)</li>
+</ul>
+</li>
+<li><strong>ส่วนที่ <code>[2]</code> ตารางแสดงผลรายการโครงการวิจัย (Projects Data Table)</strong>:
+<ul>
+<li>แสดงปีงบประมาณ พ.ศ., รหัสโครงการ, ชื่อโครงการวิจัย, คณะผู้วิจัยพร้อมระบุบทบาท (หัวหน้าโครงการ/ผู้ร่วมวิจัย), สังกัดคณะ, งบประมาณ และสถานะโครงการ</li>
+<li>คลิกที่ <strong>ชื่อโครงการวิจัย</strong> หรือปุ่ม <strong>&quot;ดูรายละเอียด&quot;</strong> เพื่อเข้าสู่หน้าข้อมูลโครงการฉบับเต็ม</li>
+</ul>
+</li>
+</ol>
+<h3 id="3-2-หน-าแสดงรายละเอ-ยดโครงการว-จ-ย-rdbproject-id">3.2 หน้าแสดงรายละเอียดโครงการวิจัย (<code>/rdbproject/{id}</code>)</h3>
+<figure class="manual-figure"><a href="./screenshots/frontend_03_project_show.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/frontend_03_project_show.png" alt="หน้ารายละเอียดโครงการวิจัย การ์ดไฟล์เอกสาร และรูปแบบการอ้างอิง" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้ารายละเอียดโครงการวิจัย การ์ดไฟล์เอกสาร และรูปแบบการอ้างอิง</figcaption></figure>
+<p><strong>ส่วนประกอบสำคัญในหน้ารายละเอียดโครงการ:</strong></p>
+<ul>
+<li><strong>ส่วนที่ <code>[1]</code> ข้อมูลหลักและบทคัดย่อ (Project Metadata &amp; Abstract)</strong>:
+<ul>
+<li>แสดงชื่อโครงการ (ภาษาไทย / ภาษาอังกฤษ), ประเภททุนวิจัย, ยุทธศาสตร์การวิจัย, งบประมาณที่ได้รับจัดสรร และระยะเวลาดำเนินงาน (แสดงวันที่ภาษาไทย พ.ศ. เต็ม เช่น <code>1 ตุลาคม 2567</code>)</li>
+<li>แสดงรายชื่อคณะผู้วิจัยทุกคน พร้อมสัดส่วนการทำวิจัย (%) และลิงก์คลิกไปดูโปรไฟล์ของนักวิจัยแต่ละท่าน</li>
+<li>แสดงบทคัดย่อ (Abstract) พร้อมปุ่ม <strong>&quot;คัดลอกบทคัดย่อ&quot;</strong> มุมขวาบนของกล่องข้อความ</li>
+</ul>
+</li>
+<li><strong>ส่วนที่ <code>[2]</code> การ์ดไฟล์เอกสารโครงการและการอ้างอิง (Files &amp; Citations Card)</strong>:
+<ul>
+<li>แสดงไฟล์บทคัดย่อ (Abstract PDF) และไฟล์เล่มรายงานวิจัยฉบับสมบูรณ์ (Full Report PDF)</li>
+<li>แสดงภาพตัวอย่างหน้าแรกของเอกสาร (<code>.webp</code> First-Page Cover Preview) และป้ายจำนวนหน้าเอกสาร (<code>XX หน้า</code>)</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-3-ความเข-าใจเก-ยวก-บระด-บส-ทธ-การเป-ดเผยเล-มรายงานว-จ-ย-3-ระด-บ">3.3 ความเข้าใจเกี่ยวกับระดับสิทธิ์การเปิดเผยเล่มรายงานวิจัย 3 ระดับ</h3>
+<p>เพื่อคุ้มครองทรัพย์สินทางปัญญาและข้อมูลที่อยู่ระหว่างการจดสิทธิบัตร ระบบแบ่งสถานะของเล่มรายงานวิจัยฉบับสมบูรณ์ (<code>pro_file_show</code>) ออกเป็น 3 สถานะชัดเจน:</p>
+<table>
+<thead>
+<tr>
+<th align="left">สถานะเอกสาร</th>
+<th align="left">ป้ายสัญลักษณ์ที่แสดงบนหน้าจอ</th>
+<th align="left">สิทธิ์การเข้าถึงของประชาชนทั่วไป</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>1. เปิดเผยสาธารณะ (<code>Public</code>)</strong></td>
+<td align="left">ป้ายสีเขียว <code>เปิดเผยต่อสาธารณะ</code> พร้อมภาพปกหน้าแรก <code>.webp</code> และจำนวนหน้า</td>
+<td align="left"><strong>สามารถคลิกเปิดอ่านและดาวน์โหลดไฟล์ PDF เล่มสมบูรณ์ได้ทันที</strong></td>
+</tr>
+<tr>
+<td align="left"><strong>2. ปกปิดเล่มรายงาน (<code>Concealed</code>)</strong></td>
+<td align="left">ป้ายสีแดง <code>&lt;i class=&quot;bi bi-shield-lock-fill&quot;&gt;&lt;/i&gt; เล่มรายงานวิจัยถูกปกปิด (ไม่สามารถเปิดเผยข้อมูลได้)</code></td>
+<td align="left">อ่านข้อมูลโครงการและบทคัดย่อได้ แต่ <strong>ไม่สามารถดาวน์โหลดไฟล์เล่มรายงานฉบับสมบูรณ์ได้</strong></td>
+</tr>
+<tr>
+<td align="left"><strong>3. ฉบับร่าง (<code>Draft</code>)</strong></td>
+<td align="left">ป้ายสีเหลือง <code>&lt;i class=&quot;bi bi-pencil-square&quot;&gt;&lt;/i&gt; เล่มรายงานวิจัยอยู่ในสถานะฉบับร่าง (ยังไม่เผยแพร่)</code></td>
+<td align="left">อยู่ระหว่างการตรวจประเมินหรือรอการอนุมัติ ยังไม่เปิดให้ดาวน์โหลด</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="บทท-4-การใช-งานโมด-ลผลงานต-พ-มพ-และงานว-ชาการ-publications-amp-academic-citations">บทที่ 4: การใช้งานโมดูลผลงานตีพิมพ์และงานวิชาการ (Publications &amp; Academic Citations)</h2>
+<h3 id="4-1-การค-นหาผลงานต-พ-มพ-เผยแพร-rdbpublished">4.1 การค้นหาผลงานตีพิมพ์เผยแพร่ (<code>/rdbpublished</code>)</h3>
+<figure class="manual-figure"><a href="./screenshots/frontend_04_published_index.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/frontend_04_published_index.png" alt="หน้ารายการผลงานตีพิมพ์และตัวกรองฐานข้อมูลวารสาร" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้ารายการผลงานตีพิมพ์และตัวกรองฐานข้อมูลวารสาร</figcaption></figure>
+<p><strong>ขั้นตอนการสืบค้นผลงานตีพิมพ์:</strong></p>
+<ol>
+<li>ในส่วนที่ <code>[1]</code> สามารถกรองตาม <strong>ชื่อบทความ</strong>, <strong>ชื่อวารสาร/งานประชุมวิชาการ</strong>, <strong>ชื่อผู้แต่ง</strong>, <strong>ปีที่ตีพิมพ์ พ.ศ.</strong> และ <strong>ประเภทฐานข้อมูล (เช่น Scopus, Web of Science, TCI กลุ่ม 1, TCI กลุ่ม 2)</strong></li>
+<li>ในส่วนที่ <code>[2]</code> ตารางผลลัพธ์จะแสดงชื่อบทความ, ชื่อวารสาร, ระดับฐานข้อมูล, ปี พ.ศ. ที่ตีพิมพ์ และชื่อนักวิจัยผู้ประพันธ์หลัก</li>
+<li>คลิกที่ชื่อบทความเพื่อเข้าดูรายละเอียดฉบับเต็ม</li>
+</ol>
+<h3 id="4-2-หน-ารายละเอ-ยดบทความต-พ-มพ-และระบบค-ดลอกการอ-างอ-งอ-ตโนม-ต-rdbpublished-id">4.2 หน้ารายละเอียดบทความตีพิมพ์และระบบคัดลอกการอ้างอิงอัตโนมัติ (<code>/rdbpublished/{id}</code>)</h3>
+<figure class="manual-figure"><a href="./screenshots/frontend_05_published_show.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/frontend_05_published_show.png" alt="หน้ารายละเอียดผลงานตีพิมพ์ การ์ดดาวน์โหลด Full Paper และกล่องคัดลอก Citation" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้ารายละเอียดผลงานตีพิมพ์ การ์ดดาวน์โหลด Full Paper และกล่องคัดลอก Citation</figcaption></figure>
+<p><strong>การใช้งานฟังก์ชันเด่นในหน้ารายละเอียดบทความ:</strong></p>
+<ol>
+<li><strong>การดาวน์โหลดบทความฉบับเต็ม (Full Paper PDF)</strong> (ในกรอบ <code>[2]</code> ด้านขวาบน):
+<ul>
+<li>แสดง <strong>ภาพปกหน้าแรกของบทความ (<code>.webp</code>)</strong> ที่สกัดจากไฟล์จริง</li>
+<li>แสดง <strong>จำนวนหน้าทั้งหมดของไฟล์ PDF</strong> และ <strong>สถิติจำนวนครั้งที่ถูกดาวน์โหลด</strong></li>
+<li>คลิกปุ่มสีเขียว <strong>&quot;ดาวน์โหลดบทความฉบับเต็ม&quot;</strong> เพื่อเปิดอ่านหรือบันทึกไฟล์ PDF</li>
+</ul>
+</li>
+<li><strong>การคัดลอกรูปแบบการอ้างอิงทางวิชาการ (Academic Citations Generator)</strong> (ในกรอบ <code>[2]</code> ด้านขวาล่าง):
+<ul>
+<li>ระบบสร้างข้อความอ้างอิงตามมาตรฐานสากลให้อัตโนมัติ 3 รูปแบบ:
+<ul>
+<li><strong>แท็บ <code>APA 7</code></strong>: รูปแบบ American Psychological Association (7th Edition)</li>
+<li><strong>แท็บ <code>IEEE</code></strong>: รูปแบบวิศวกรรมศาสตร์และเทคโนโลยี (ตัวเลขลำดับ <code>[1]</code>)</li>
+<li><strong>แท็บ <code>MLA 9</code></strong>: รูปแบบมนุษยศาสตร์และศิลปศาสตร์</li>
+</ul>
+</li>
+<li>คลิกเลือกแท็บที่ต้องการ แล้วกดปุ่ม <strong>&quot;คัดลอกการอ้างอิง&quot;</strong> ระบบจะคัดลอกข้อความพร้อมรูปแบบตัวเอียงของชื่อวารสารลงใน Clipboard ทันที</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="บทท-5-การใช-งานโมด-ลทร-พย-ส-นทางป-ญญา-intellectual-property-dip">บทที่ 5: การใช้งานโมดูลทรัพย์สินทางปัญญา (Intellectual Property - DIP)</h2>
+<figure class="manual-figure"><a href="./screenshots/frontend_06_dip_index.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/frontend_06_dip_index.png" alt="หน้ารายการทรัพย์สินทางปัญญา สิทธิบัตร อนุสิทธิบัตร และลิขสิทธิ์" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้ารายการทรัพย์สินทางปัญญา สิทธิบัตร อนุสิทธิบัตร และลิขสิทธิ์</figcaption></figure>
+<h3 id="ข-นตอนการส-บค-นข-อม-ลทร-พย-ส-นทางป-ญญา-rdbdip">ขั้นตอนการสืบค้นข้อมูลทรัพย์สินทางปัญญา (<code>/rdbdip</code>)</h3>
+<ol>
+<li>เลือกเมนู <strong>&quot;ทรัพย์สินทางปัญญา&quot;</strong> จากแถบเมนูด้านบน</li>
+<li>ในส่วนที่ <code>[1]</code> สามารถค้นหาจาก <strong>ชื่อผลงาน</strong>, <strong>เลขที่คำขอ</strong>, <strong>ประเภททรัพย์สินทางปัญญา</strong> (สิทธิบัตรการประดิษฐ์, สิทธิบัตรการออกแบบผลิตภัณฑ์, อนุสิทธิบัตร, ลิขสิทธิ์) หรือ <strong>ชื่อผู้ประดิษฐ์</strong></li>
+<li>ในส่วนที่ <code>[2]</code> ตารางแสดงรายการผลงานพร้อมเลขที่คำขอ, วันที่ยื่นคำขอ (รูปแบบ พ.ศ.), ผู้สร้างสรรค์ และโครงการวิจัยต้นทาง</li>
+<li>คลิกที่รายการเพื่อดูรายละเอียดคำขอและเปิดดูเอกสารรับรอง (กรณีเปิดเผยไฟล์)</li>
+</ol>
+<hr />
+<h2 id="บทท-6-การใช-งานโมด-ลการนำงานว-จ-ยไปใช-ประโยชน-research-utilizations">บทที่ 6: การใช้งานโมดูลการนำงานวิจัยไปใช้ประโยชน์ (Research Utilizations)</h2>
+<figure class="manual-figure"><a href="./screenshots/frontend_07_utilize_index.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/frontend_07_utilize_index.png" alt="หน้ารายการการนำงานวิจัยไปใช้ประโยชน์ 4 มิติ" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้ารายการการนำงานวิจัยไปใช้ประโยชน์ 4 มิติ</figcaption></figure>
+<h3 id="ข-นตอนการส-บค-นข-อม-ลการนำไปใช-ประโยชน-rdbprojectutilize">ขั้นตอนการสืบค้นข้อมูลการนำไปใช้ประโยชน์ (<code>/rdbprojectutilize</code>)</h3>
+<ol>
+<li>เลือกเมนู <strong>&quot;การนำไปใช้ประโยชน์&quot;</strong> จากแถบเมนูหลัก</li>
+<li>ในส่วนที่ <code>[1]</code> สามารถกรองตาม:
+<ul>
+<li><strong>ประเภทการนำไปใช้ประโยชน์ 4 ด้าน</strong>: เชิงพาณิชย์, เชิงนโยบาย, เชิงสาธารณะ/ชุมชนและสังคม, เชิงวิชาการ</li>
+<li><strong>พื้นที่การนำไปใช้ประโยชน์</strong>: ค้นหาตามจังหวัด, อำเภอ, ตำบล (ระบบเชื่อมโยงฐานข้อมูลพื้นที่ประเทศไทย)</li>
+<li><strong>ชื่อหน่วยงานที่ใช้ประโยชน์</strong> หรือ <strong>ชื่อโครงการวิจัยต้นทาง</strong></li>
+</ul>
+</li>
+<li>ในส่วนที่ <code>[2]</code> คลิกดูรายละเอียดเพื่อศึกษาผลกระทบ (Impact) และเปิดดูไฟล์หนังสือรับรองการนำไปใช้ประโยชน์</li>
+</ol>
+<hr />
+<h2 id="บทท-7-การใช-งานทำเน-ยบน-กว-จ-ย-researchers-directory-amp-academic-portfolio">บทที่ 7: การใช้งานทำเนียบนักวิจัย (Researchers Directory &amp; Academic Portfolio)</h2>
+<div class="manual-carousel-grid"><div class="manual-carousel-item"><div class="carousel-badge">ภาพชุดที่ 1</div><figure class="manual-figure"><a href="./screenshots/frontend_08_researcher_index.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/frontend_08_researcher_index.png" alt="หน้าทำเนียบนักวิจัยและการค้นหาตามคณะ" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้าทำเนียบนักวิจัยและการค้นหาตามคณะ</figcaption></figure>
+</div><div class="manual-carousel-item"><div class="carousel-badge">ภาพชุดที่ 2</div><figure class="manual-figure"><a href="./screenshots/frontend_09_researcher_show.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/frontend_09_researcher_show.png" alt="หน้าแฟ้มประวัตินักวิจัย (Academic Portfolio) พร้อมลิงก์ Scopus และ ORCID" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้าแฟ้มประวัตินักวิจัย (Academic Portfolio) พร้อมลิงก์ Scopus และ ORCID</figcaption></figure>
+</div></div>
+<h3 id="7-1-การค-นหาทำเน-ยบน-กว-จ-ย-rdbresearcher">7.1 การค้นหาทำเนียบนักวิจัย (<code>/rdbresearcher</code>)</h3>
+<ol>
+<li>พิมพ์ชื่อหรือนามสกุลนักวิจัย (ภาษาไทยหรือภาษาอังกฤษ) ในช่องค้นหาส่วนที่ <code>[1]</code> หรือเลือกกรองตาม <strong>คณะ/หน่วยงานสังกัด</strong></li>
+<li>ตารางส่วนที่ <code>[2]</code> จะแสดงรูปภาพประจำตัว, ชื่อ-นามสกุล, ตำแหน่งทางวิชาการ, สังกัดคณะ และจำนวนผลงานวิจัยสะสม</li>
+</ol>
+<h3 id="7-2-การด-แฟ-มประว-ต-และผลงานน-กว-จ-ยรายบ-คคล-rdbresearcher-id">7.2 การดูแฟ้มประวัติและผลงานนักวิจัยรายบุคคล (<code>/rdbresearcher/{id}</code>)</h3>
+<ol>
+<li><strong>ส่วนที่ <code>[1]</code> ข้อมูลประวัติและรหัสสากลของนักวิจัย</strong>:
+<ul>
+<li>แสดงสังกัดคณะ/สาขาวิชา, ความเชี่ยวชาญ และข้อมูลติดต่อ</li>
+<li>แสดงรหัส <strong>Scopus Author ID</strong> และ <strong>ORCID iD</strong> (สามารถคลิกที่ปุ่มลิงก์เพื่อเปิดดูโปรไฟล์ของนักวิจัยบนเว็บไซต์ Scopus และ ORCID ได้โดยตรง)</li>
+</ul>
+</li>
+<li><strong>ส่วนที่ <code>[2]</code> แท็บรวมผลงานทางวิชาการทั้งหมดของนักวิจัย</strong>:
+<ul>
+<li>แสดงรายการโครงการวิจัยทั้งหมดที่นักวิจัยเป็นหัวหน้าโครงการหรือผู้ร่วมวิจัย</li>
+<li>แสดงรายการผลงานตีพิมพ์, ทรัพย์สินทางปัญญา และการนำไปใช้ประโยชน์ทั้งหมดของนักวิจัยท่านนั้นในหน้าเดียว</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="บทท-8-แดชบอร-ดสถ-ต-สารสนเทศและฟ-ดข-าวสาร-dashboards-amp-rss-feeds">บทที่ 8: แดชบอร์ดสถิติสารสนเทศและฟีดข่าวสาร (Dashboards &amp; RSS Feeds)</h2>
+<figure class="manual-figure"><a href="./screenshots/frontend_10_dashboard.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/frontend_10_dashboard.png" alt="หน้าแดชบอร์ดสถิติสารสนเทศงานวิจัยและกราฟวิเคราะห์แนวโน้ม" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้าแดชบอร์ดสถิติสารสนเทศงานวิจัยและกราฟวิเคราะห์แนวโน้ม</figcaption></figure>
+<h3 id="8-1-การใช-งานแดชบอร-ดสถ-ต-งานว-จ-ย-dashboard">8.1 การใช้งานแดชบอร์ดสถิติงานวิจัย (<code>/dashboard</code>)</h3>
+<ol>
+<li><strong>ส่วนที่ <code>[1]</code> แถบเลือกมิติข้อมูลและตัวกรองปีงบประมาณ</strong>:
+<ul>
+<li>เลือกสลับดูแดชบอร์ดเฉพาะด้านได้ 6 มิติ ได้แก่: <strong>ภาพรวมทั้งหมด (Overview)</strong>, <strong>โครงการวิจัย (Projects)</strong>, <strong>ผลงานตีพิมพ์ (Publications)</strong>, <strong>ทรัพย์สินทางปัญญา (IP)</strong>, <strong>การนำไปใช้ประโยชน์ (Utilizations)</strong>, <strong>นักวิจัย (Researchers)</strong> และ <strong>ประกันคุณภาพ (QA)</strong></li>
+<li>เลือกช่วงปีงบประมาณ พ.ศ. ที่ต้องการเปรียบเทียบข้อมูล</li>
+</ul>
+</li>
+<li><strong>ส่วนที่ <code>[2]</code> กราฟวิเคราะห์ข้อมูลแบบโต้ตอบ (Interactive Charts)</strong>:
+<ul>
+<li>แสดงกราฟแท่งและกราฟเส้นเปรียบเทียบจำนวนโครงการและงบประมาณแยกตามคณะ/หน่วยงาน</li>
+<li>เมื่อนำเมาส์ชี้ (Hover) บนแท่งกราฟ ระบบจะแสดง Tooltip รายละเอียดตัวเลขงบประมาณและสัดส่วนอย่างชัดเจน</li>
+</ul>
+</li>
+</ol>
+<h3 id="8-2-การร-บข-อม-ลผ-าน-rss-feeds-และข-าวประชาส-มพ-นธ">8.2 การรับข้อมูลผ่าน RSS Feeds และข่าวประชาสัมพันธ์</h3>
+<ul>
+<li>บุคคลทั่วไปและระบบห้องสมุดสามารถดึงฟีดข้อมูลข่าวสารงานวิจัยและงานประชุมวิชาการไปแสดงผลต่อได้ผ่าน URL มาตรฐาน XML RSS:
+<ul>
+<li><strong>RSS ข่าวประชาสัมพันธ์วิจัย</strong>: <code>/feeds/news</code></li>
+<li><strong>RSS งานประชุมวิชาการระดับชาติ/นานาชาติ</strong>: <code>/feeds/conferences</code></li>
+</ul>
+</li>
+</ul>
+
+            </div>
+            <footer>
+                เอกสารคู่มือการใช้งานระบบฐานข้อมูลงานวิจัย (PCRU Research Database) • มหาวิทยาลัยราชภัฏเพชรบูรณ์
+            </footer>
+        </article>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+        function toggleTheme() {
+            const html = document.documentElement;
+            const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('pcru_manual_theme', next);
+        }
+        (function() {
+            const saved = localStorage.getItem('pcru_manual_theme');
+            if (saved) document.documentElement.setAttribute('data-theme', saved);
+        })();
+    </script>
+</body>
+</html>

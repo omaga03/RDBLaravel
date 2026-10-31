@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เล่มที่ 2: คู่มือการใช้งานระบบหลังบ้าน (Volume 2: Backend Admin & Researcher Manual) — มหาวิทยาลัยราชภัฏเพชรบูรณ์</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Prompt:wght@400;500;600;700&family=Sarabun:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --bg-body: #F8FAFC;
+            --bg-surface: #FFFFFF;
+            --bg-subtle: #F1F5F9;
+            --text-primary: #0F172A;
+            --text-secondary: #475569;
+            --text-muted: #64748B;
+            --border-color: #E2E8F0;
+            --navy: #1E3A5F;
+            --royal: #2563EB;
+            --amber: #D97706;
+            --emerald: #059669;
+            --danger: #DC2626;
+        }
+        [data-theme="dark"] {
+            --bg-body: #0B1120;
+            --bg-surface: #111827;
+            --bg-subtle: #1E293B;
+            --text-primary: #F8FAFC;
+            --text-secondary: #CBD5E1;
+            --text-muted: #94A3B8;
+            --border-color: #334155;
+            --navy: #38BDF8;
+            --royal: #60A5FA;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Sarabun', 'Plus Jakarta Sans', sans-serif;
+            font-size: 16.5px;
+            line-height: 1.75;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            font-variant-numeric: tabular-nums;
+        }
+        h1, h2, h3, h4, .font-heading {
+            font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
+            line-height: 1.35;
+        }
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(30, 58, 95, 0.97);
+            backdrop-filter: blur(8px);
+            color: #fff;
+            border-bottom: 1px solid rgba(255,255,255,0.12);
+            padding: 0.65rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .topbar-brand {
+            font-family: 'Prompt', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .topbar-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+        .nav-pill {
+            color: rgba(255,255,255,0.82);
+            text-decoration: none;
+            font-family: 'Prompt', sans-serif;
+            font-size: 0.85rem;
+            padding: 0.38rem 0.8rem;
+            border-radius: 6px;
+            transition: all 0.15s;
+        }
+        .nav-pill:hover { background: rgba(255,255,255,0.12); color: #fff; }
+        .nav-pill.active { background: #D97706; color: #fff; font-weight: 500; }
+        .topbar-actions { display: flex; gap: 0.5rem; }
+        .btn-action {
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Prompt', sans-serif;
+            font-size: 0.82rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .btn-action:hover { background: rgba(255,255,255,0.22); }
+        .container {
+            max-width: 1120px;
+            margin: 2rem auto 4rem;
+            padding: 0 1.25rem;
+        }
+        .manual-sheet {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+            padding: 3rem 3.5rem;
+        }
+        .hero-banner {
+            border-bottom: 3px solid var(--navy);
+            padding-bottom: 1.75rem;
+            margin-bottom: 2.25rem;
+        }
+        .hero-badge {
+            display: inline-block;
+            background: rgba(217, 119, 6, 0.14);
+            color: #B45309;
+            border: 1px solid rgba(217, 119, 6, 0.3);
+            font-family: 'Prompt', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            padding: 0.25rem 0.75rem;
+            border-radius: 99px;
+            margin-bottom: 0.75rem;
+        }
+        [data-theme="dark"] .hero-badge { color: #FBBF24; }
+        .hero-banner h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            color: var(--text-primary);
+        }
+        .hero-banner p {
+            margin: 0;
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+        }
+        .manual-content h1 { display: none; }
+        .manual-content h2 {
+            font-size: 1.5rem;
+            color: var(--navy);
+            border-left: 5px solid var(--amber);
+            padding-left: 0.85rem;
+            margin-top: 2.75rem;
+            margin-bottom: 1.1rem;
+            padding-top: 0.2rem;
+            padding-bottom: 0.2rem;
+            background: var(--bg-subtle);
+            border-radius: 0 8px 8px 0;
+        }
+        .manual-content h3 {
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            margin-top: 1.85rem;
+            margin-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.4rem;
+        }
+        .manual-content p, .manual-content li {
+            color: var(--text-primary);
+        }
+        .manual-content ul, .manual-content ol {
+            padding-left: 1.5rem;
+        }
+        .manual-content li { margin-bottom: 0.45rem; }
+        .manual-content a { color: var(--royal); text-decoration: none; }
+        .manual-content a:hover { text-decoration: underline; }
+        .manual-content code {
+            font-family: Consolas, Monaco, monospace;
+            font-size: 0.9em;
+            background: var(--bg-subtle);
+            color: #D97706;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+        .manual-content pre:not(.mermaid) {
+            background: #0F172A;
+            color: #E2E8F0;
+            padding: 1.1rem 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        .manual-content pre:not(.mermaid) code {
+            background: transparent;
+            color: inherit;
+            border: none;
+            padding: 0;
+        }
+        .manual-content hr {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 2.5rem 0;
+        }
+        .manual-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.25rem 0 1.75rem;
+            font-size: 0.95rem;
+        }
+        .manual-content th, .manual-content td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1rem;
+            text-align: left;
+            vertical-align: top;
+        }
+        .manual-content th {
+            background: var(--bg-subtle);
+            font-family: 'Prompt', sans-serif;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .manual-content tr:nth-child(even) td {
+            background: rgba(148, 163, 184, 0.04);
+        }
+        .manual-figure {
+            margin: 1.5rem 0 2rem;
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.85rem;
+            text-align: center;
+        }
+        .manual-figure img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            display: block;
+            margin: 0 auto;
+        }
+        .manual-figure figcaption {
+            margin-top: 0.65rem;
+            font-family: 'Prompt', sans-serif;
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+        }
+        .manual-carousel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+            gap: 1.25rem;
+            margin: 1.5rem 0 2rem;
+        }
+        .manual-carousel-item {
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.85rem;
+        }
+        .manual-carousel-item .manual-figure {
+            margin: 0;
+            border: none;
+            padding: 0;
+            background: transparent;
+        }
+        .carousel-badge {
+            display: inline-block;
+            background: var(--navy);
+            color: #fff;
+            font-family: 'Prompt', sans-serif;
+            font-size: 0.75rem;
+            padding: 0.15rem 0.6rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+        .manual-callout {
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.35rem 0;
+            border-left: 4px solid var(--royal);
+            background: var(--bg-subtle);
+        }
+        .callout-header {
+            font-family: 'Prompt', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+        .callout-body p:last-child, .callout-body ul:last-child { margin-bottom: 0; }
+        .callout-note { border-left-color: #2563EB; background: rgba(37, 99, 235, 0.06); }
+        .callout-note .callout-header { color: #1D4ED8; }
+        .callout-tip { border-left-color: #059669; background: rgba(5, 150, 105, 0.06); }
+        .callout-tip .callout-header { color: #047857; }
+        .callout-important { border-left-color: #D97706; background: rgba(217, 119, 6, 0.08); }
+        .callout-important .callout-header { color: #B45309; }
+        .callout-warning, .callout-caution { border-left-color: #DC2626; background: rgba(220, 38, 38, 0.06); }
+        .callout-warning .callout-header, .callout-caution .callout-header { color: #B91C1C; }
+        [data-theme="dark"] .callout-note .callout-header { color: #60A5FA; }
+        [data-theme="dark"] .callout-tip .callout-header { color: #34D399; }
+        [data-theme="dark"] .callout-important .callout-header { color: #FBBF24; }
+        [data-theme="dark"] .callout-warning .callout-header { color: #F87171; }
+        .mermaid-container {
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            text-align: center;
+            overflow-x: auto;
+        }
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+        @media (max-width: 768px) {
+            .manual-sheet { padding: 1.5rem 1.25rem; }
+            .manual-carousel-grid { grid-template-columns: 1fr; }
+        }
+        @media print {
+            body { background: #fff; color: #000; font-size: 11pt; }
+            .topbar { display: none !important; }
+            .container { max-width: 100%; margin: 0; padding: 0; }
+            .manual-sheet { border: none; box-shadow: none; padding: 0; }
+            .manual-figure, .manual-callout, table, tr { page-break-inside: avoid; }
+            h2, h3 { page-break-after: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <a href="index.html" class="topbar-brand">
+            <i class="bi bi-journal-bookmark-fill"></i>
+            <span>PCRU Research Database Manuals</span>
+        </a>
+        <nav class="topbar-nav">
+            <a href="index.html" class="nav-pill "><i class="bi bi-collection me-1"></i> สารบัญรวมคู่มือ</a><a href="VOLUME_1_FRONTEND_USER_MANUAL.html" class="nav-pill "><i class="bi bi-globe2 me-1"></i> เล่ม 1: ระบบหน้าบ้าน</a><a href="VOLUME_2_BACKEND_ADMIN_RESEARCHER_MANUAL.html" class="nav-pill active"><i class="bi bi-shield-lock me-1"></i> เล่ม 2: ระบบหลังบ้าน & นักวิจัย</a><a href="RESEARCHER_QUICK_START_CHEATSHEET.html" class="nav-pill "><i class="bi bi-lightning-charge me-1"></i> คู่มือฉบับย่อ 3 นาที</a>
+        </nav>
+        <div class="topbar-actions">
+            <button type="button" class="btn-action" onclick="toggleTheme()">
+                <i class="bi bi-moon-stars" id="theme-icon"></i> <span>สลับโหมดสี</span>
+            </button>
+            <button type="button" class="btn-action" onclick="window.print()">
+                <i class="bi bi-printer"></i> <span>พิมพ์ / บันทึก PDF</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="container">
+        <article class="manual-sheet">
+            <div class="hero-banner">
+                <div class="hero-badge">VOLUME 2 — BACKEND & WORKFLOW</div>
+                <h1>เล่มที่ 2: คู่มือการใช้งานระบบหลังบ้าน (Volume 2: Backend Admin & Researcher Manual)</h1>
+                <p>สำหรับนักวิจัย ผู้ทรงคุณวุฒิ ผู้ประสานงานคณะ และผู้ดูแลระบบ — สถาบันวิจัยและพัฒนา มหาวิทยาลัยราชภัฏเพชรบูรณ์</p>
+            </div>
+            <div class="manual-content">
+                <h1>เล่มที่ 2: คู่มือการใช้งานระบบหลังบ้าน (Volume 2: Backend Administrative &amp; Researcher Manual)</h1>
+<h2 id="ระบบฐานข-อม-ลงานว-จ-ย-มหาว-ทยาล-ยราชภ-ฏเพชรบ-รณ-pcru-research-database">ระบบฐานข้อมูลงานวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์ (PCRU Research Database)</h2>
+<div class="manual-callout callout-note"><div class="callout-header"><i class="bi bi-info-circle-fill"></i> ข้อมูลจำเพาะ / หมายเหตุ (NOTE)</div><div class="callout-body"><p><strong>ข้อมูลจำเพาะของเอกสาร (Document Control)</strong></p>
+<ul>
+<li><strong>รหัสเอกสาร</strong>: <code>PCRU-RDB-MAN-VOL2-2569</code></li>
+<li><strong>กลุ่มผู้ใช้งานเป้าหมาย</strong>: นักวิจัย (Researcher), ผู้ทรงคุณวุฒิประเมินงานวิจัย (Reviewer), ผู้ประสานงานคณะ (Faculty Coordinator), เจ้าหน้าที่สถาบันวิจัยและพัฒนา (Admin / Domain Admin) และผู้ดูแลระบบสูงสุด (Super Admin)</li>
+<li><strong>URL เข้าสู่ระบบหลังบ้าน</strong>: <code>http://laravel_rdb.test/login</code> ➔ <code>/backend/site</code></li>
+</ul>
+</div></div>
+<hr />
+<h2 id="สารบ-ญ-table-of-contents">สารบัญ (Table of Contents)</h2>
+<ol>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-1-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%80%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B8%AA%E0%B8%B9%E0%B9%88%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%9B%E0%B8%A5%E0%B8%AD%E0%B8%94%E0%B8%A0%E0%B8%B1%E0%B8%A2%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B8%9A%E0%B8%B1%E0%B8%8D%E0%B8%8A%E0%B8%B5-authentication--account-security">บทที่ 1: การเข้าสู่ระบบและความปลอดภัยของบัญชี (Authentication &amp; Account Security)</a></li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-2-%E0%B9%82%E0%B8%84%E0%B8%A3%E0%B8%87%E0%B8%AA%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%87%E0%B8%9A%E0%B8%97%E0%B8%9A%E0%B8%B2%E0%B8%97-%E0%B8%AA%E0%B8%B4%E0%B8%97%E0%B8%98%E0%B8%B4%E0%B9%8C%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%88%E0%B8%B3%E0%B8%A5%E0%B8%AD%E0%B8%87%E0%B8%AA%E0%B8%B4%E0%B8%97%E0%B8%98%E0%B8%B4%E0%B9%8C-rbac--impersonation">บทที่ 2: โครงสร้างบทบาท สิทธิ์การใช้งาน และการจำลองสิทธิ์ (RBAC &amp; Impersonation)</a></li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-3-%E0%B8%A7%E0%B8%87%E0%B8%88%E0%B8%A3%E0%B8%8A%E0%B8%B5%E0%B8%A7%E0%B8%B4%E0%B8%95%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B9%88%E0%B8%87%E0%B8%A3%E0%B9%88%E0%B8%B2%E0%B8%87-%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%AA%E0%B8%AD%E0%B8%9A-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%AD%E0%B8%99%E0%B8%B8%E0%B8%A1%E0%B8%B1%E0%B8%95%E0%B8%B4%E0%B9%80%E0%B8%9B%E0%B8%B4%E0%B8%94%E0%B9%80%E0%B8%9C%E0%B8%A2%E0%B8%9C%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99-workflow-lifecycle-wf-01-%E0%B8%96%E0%B8%B6%E0%B8%87-wf-07">บทที่ 3: วงจรชีวิตการส่งร่าง ตรวจสอบ และอนุมัติเปิดเผยผลงาน (Workflow Lifecycle: WF-01 ถึง WF-07)</a></li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-4-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%AB%E0%B8%B2%E0%B8%A3%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%82%E0%B8%84%E0%B8%A3%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B8%82%E0%B8%B1%E0%B9%89%E0%B8%99%E0%B8%AA%E0%B8%B9%E0%B8%87-%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%99%E0%B8%B1%E0%B8%9A%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2-pdf-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%9B%E0%B8%81-webp">บทที่ 4: การบริหารจัดการโครงการวิจัยขั้นสูง ระบบนับหน้า PDF และปก .webp</a></li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-5-%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99%E0%B9%80%E0%B8%A5%E0%B9%88%E0%B8%A1%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B8%89%E0%B8%9A%E0%B8%B1%E0%B8%9A%E0%B8%AA%E0%B8%A1%E0%B8%9A%E0%B8%B9%E0%B8%A3%E0%B8%93%E0%B9%8C-peer-review-subsystem">บทที่ 5: ระบบตรวจประเมินเล่มรายงานวิจัยฉบับสมบูรณ์ (Peer Review Subsystem)</a></li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-6-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%AB%E0%B8%B2%E0%B8%A3%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9C%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%95%E0%B8%B5%E0%B8%9E%E0%B8%B4%E0%B8%A1%E0%B8%9E%E0%B9%8C-%E0%B8%97%E0%B8%A3%E0%B8%B1%E0%B8%9E%E0%B8%A2%E0%B9%8C%E0%B8%AA%E0%B8%B4%E0%B8%99%E0%B8%97%E0%B8%B2%E0%B8%87%E0%B8%9B%E0%B8%B1%E0%B8%8D%E0%B8%8D%E0%B8%B2-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%82%E0%B8%A2%E0%B8%8A%E0%B8%99%E0%B9%8C">บทที่ 6: การบริหารจัดการผลงานตีพิมพ์ ทรัพย์สินทางปัญญา และการใช้ประโยชน์</a></li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-7-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%AB%E0%B8%B2%E0%B8%A3%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%99%E0%B8%B1%E0%B8%81%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%80%E0%B8%8A%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%A1%E0%B9%82%E0%B8%A2%E0%B8%87%E0%B8%90%E0%B8%B2%E0%B8%99%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%AA%E0%B8%B2%E0%B8%81%E0%B8%A5-scopus--orcid">บทที่ 7: การบริหารข้อมูลนักวิจัยและการเชื่อมโยงฐานข้อมูลสากล (Scopus &amp; ORCID)</a></li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-8-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B9%88%E0%B8%87%E0%B8%AD%E0%B8%AD%E0%B8%81%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5-utf-8-bom-excel-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%80%E0%B8%8A%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%A1%E0%B8%95%E0%B9%88%E0%B8%AD%E0%B8%84%E0%B8%A5%E0%B8%B1%E0%B8%87%E0%B8%9B%E0%B8%B1%E0%B8%8D%E0%B8%8D%E0%B8%B2-dspace-saf">บทที่ 8: การส่งออกข้อมูล UTF-8 BOM Excel และการเชื่อมต่อคลังปัญญา DSpace SAF</a></li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-9-%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%95%E0%B8%B4%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99-audit-logs-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%84%E0%B9%88%E0%B8%B2%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%9B%E0%B8%A5%E0%B8%AD%E0%B8%94%E0%B8%A0%E0%B8%B1%E0%B8%A2%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A">บทที่ 9: ประวัติการใช้งาน (Audit Logs) และการตั้งค่าความปลอดภัยของระบบ</a></li>
+</ol>
+<hr />
+<h2 id="บทท-1-การเข-าส-ระบบและความปลอดภ-ยของบ-ญช-authentication-amp-account-security">บทที่ 1: การเข้าสู่ระบบและความปลอดภัยของบัญชี (Authentication &amp; Account Security)</h2>
+<figure class="manual-figure"><a href="./screenshots/backend_01_login.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/backend_01_login.png" alt="หน้าจอเข้าสู่ระบบด้วย Google SSO และฟอร์มบัญชีผู้ใช้งาน" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้าจอเข้าสู่ระบบด้วย Google SSO และฟอร์มบัญชีผู้ใช้งาน</figcaption></figure>
+<h3 id="1-1-ข-นตอนการเข-าส-ระบบ-sign-in-procedure">1.1 ขั้นตอนการเข้าสู่ระบบ (Sign-in Procedure)</h3>
+<ol>
+<li>คลิกปุ่ม <strong>&quot;เข้าสู่ระบบ (Login)&quot;</strong> ที่มุมขวาบนของหน้าเว็บหลัก หรือไปที่ URL <code>/login</code></li>
+<li><strong>วิธีที่ 1: เข้าสู่ระบบด้วย Google Workspace มหาวิทยาลัย (แนะนำสำหรับอาจารย์และบุคลากร)</strong> (กรอบ <code>[1]</code>):
+<ul>
+<li>คลิกปุ่ม <strong>&quot;เข้าสู่ระบบด้วยบัญชี Google (@pcru.ac.th)&quot;</strong></li>
+<li>เลือกอีเมลของมหาวิทยาลัย ระบบจะตรวจสอบและเชื่อมโยงกับข้อมูลนักวิจัยในฐานข้อมูลโดยอัตโนมัติ</li>
+</ul>
+</li>
+<li><strong>วิธีที่ 2: เข้าสู่ระบบด้วยชื่อผู้ใช้และรหัสผ่าน (สำหรับผู้ดูแลระบบและบัญชีเดิม)</strong> (กรอบ <code>[2]</code>):
+<ul>
+<li>คลิกเปิดส่วนฟอร์มเข้าสู่ระบบ กรอก <strong>Username / Email</strong> และ <strong>Password</strong></li>
+<li>กดปุ่ม <strong>&quot;เข้าสู่ระบบ&quot;</strong> เพื่อเข้าสู่หน้าแดชบอร์ดหลังบ้าน (<code>/backend/site</code>)</li>
+</ul>
+</li>
+</ol>
+<div class="manual-callout callout-important"><div class="callout-header"><i class="bi bi-exclamation-diamond-fill"></i> ข้อสำคัญ (IMPORTANT)</div><div class="callout-body"><p><strong>นโยบายการสมัครสมาชิกใหม่</strong>: ระบบไม่อนุญาตให้บุคคลภายนอกสมัครสมาชิกด้วยตนเองผ่านฟอร์มปกติ การลงทะเบียนผู้ใช้งานใหม่ทั้งหมดต้องผ่าน <strong>Google SSO ของมหาวิทยาลัย</strong> และผ่านการอนุมัติผูกโปรไฟล์นักวิจัย (Onboarding Approval) จากผู้ดูแลระบบเท่านั้น เพื่อป้องกันบัญชีปลอม</p>
+</div></div>
+<h3 id="1-2-ภาพรวมหน-าแดชบอร-ดหล-งบ-าน-backend-site">1.2 ภาพรวมหน้าแดชบอร์ดหลังบ้าน (<code>/backend/site</code>)</h3>
+<figure class="manual-figure"><a href="./screenshots/backend_02_dashboard.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/backend_02_dashboard.png" alt="หน้าแดชบอร์ดระบบหลังบ้านสำหรับผู้ดูแลระบบและนักวิจัย" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้าแดชบอร์ดระบบหลังบ้านสำหรับผู้ดูแลระบบและนักวิจัย</figcaption></figure>
+<ul>
+<li><strong>หมายเลข <code>[1]</code> แถบเมนูจัดการหลังบ้านและศูนย์แจ้งเตือน (Backend Navbar &amp; Notification Bell)</strong>: แสดงเมนูตามสิทธิ์ของผู้ใช้, ปุ่มสลับบทบาท (Role Switcher), กระดิ่งแจ้งเตือนงานใหม่ และเมนูโปรไฟล์</li>
+<li><strong>หมายเลข <code>[2]</code> การ์ดสรุปสถานะงานวิจัยและงานรอดำเนินการ</strong>: แสดงจำนวนโครงการ, งานตีพิมพ์ และรายการที่รอตรวจสอบ</li>
+<li><strong>หมายเลข <code>[3]</code> กราฟวิเคราะห์สถิติและรายการเคลื่อนไหวล่าสุด</strong>: แสดงสถิติแยกตามปีงบประมาณ พ.ศ.</li>
+</ul>
+<hr />
+<h2 id="บทท-2-โครงสร-างบทบาท-ส-ทธ-การใช-งาน-และการจำลองส-ทธ-rbac-amp-impersonation">บทที่ 2: โครงสร้างบทบาท สิทธิ์การใช้งาน และการจำลองสิทธิ์ (RBAC &amp; Impersonation)</h2>
+<div class="manual-carousel-grid"><div class="manual-carousel-item"><div class="carousel-badge">ภาพชุดที่ 1</div><figure class="manual-figure"><a href="./screenshots/backend_13_rbac_roles.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/backend_13_rbac_roles.png" alt="หน้าจัดการบทบาทและสิทธิ์การใช้งาน (RBAC Management)" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้าจัดการบทบาทและสิทธิ์การใช้งาน (RBAC Management)</figcaption></figure>
+</div><div class="manual-carousel-item"><div class="carousel-badge">ภาพชุดที่ 2</div><figure class="manual-figure"><a href="./screenshots/backend_14_users_index.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/backend_14_users_index.png" alt="หน้าจัดการบัญชีผู้ใช้งานและการจำลองสิทธิ์ (User Management &amp;amp; Impersonation)" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้าจัดการบัญชีผู้ใช้งานและการจำลองสิทธิ์ (User Management &amp;amp; Impersonation)</figcaption></figure>
+</div></div>
+<h3 id="2-1-ตารางระด-บส-ทธ-ผ-ใช-งานในระบบ-role-permission-matrix">2.1 ตารางระดับสิทธิ์ผู้ใช้งานในระบบ (Role Permission Matrix)</h3>
+<table>
+<thead>
+<tr>
+<th align="left">ชื่อบทบาท (Role)</th>
+<th align="left">ขอบเขตการเข้าถึงข้อมูล (Data Scope)</th>
+<th align="left">สิทธิ์การดำเนินการหลัก</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>The Creator / Super Admin</strong></td>
+<td align="left">ทั้งมหาวิทยาลัย (All Faculties)</td>
+<td align="left">จัดการทุกโมดูล, ตั้งค่าระบบ, จัดการสิทธิ์ RBAC, จำลองสิทธิ์ (Impersonate), ดู Audit Logs</td>
+</tr>
+<tr>
+<td align="left"><strong>Admin / Admin Research</strong></td>
+<td align="left">ทั้งมหาวิทยาลัย</td>
+<td align="left">ตรวจรับและอนุมัติผลงานทุกประเภท, ส่งออกข้อมูล Excel และ DSpace SAF</td>
+</tr>
+<tr>
+<td align="left"><strong>Domain Admins</strong> (<code>Admin Project</code>, <code>Admin Published</code>, <code>Admin Dip</code>, <code>Admin Utilize</code>)</td>
+<td align="left">ทั้งมหาวิทยาลัย (เฉพาะโมดูลที่รับผิดชอบ)</td>
+<td align="left">เพิ่ม/แก้ไข/อนุมัติข้อมูลเฉพาะในโมดูลที่ได้รับมอบหมายโดยตรงโดยไม่ต้องรอปลดล็อก</td>
+</tr>
+<tr>
+<td align="left"><strong>Faculty Coordinator</strong></td>
+<td align="left">เฉพาะคณะ/หน่วยงานที่สังกัด</td>
+<td align="left">ตรวจสอบและกลั่นกรองผลงานของอาจารย์ในคณะตนเอง</td>
+</tr>
+<tr>
+<td align="left"><strong>Researcher (นักวิจัย)</strong></td>
+<td align="left"><strong>เฉพาะผลงานของตนเองเท่านั้น (Strict Isolation)</strong></td>
+<td align="left">สร้างร่างผลงาน, อัปโหลดไฟล์ PDF, ส่งตรวจรับ, ขอปลดล็อกเพื่อแก้ไข, ประเมินเล่มรายงานตามที่ได้รับมอบหมาย</td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-2-การจำลองส-ทธ-เป-นน-กว-จ-ยหร-อผ-ใช-รายอ-น-user-impersonation">2.2 การจำลองสิทธิ์เป็นนักวิจัยหรือผู้ใช้รายอื่น (User Impersonation)</h3>
+<p>ฟังก์ชันสำหรับ Super Admin เพื่อใช้ตรวจสอบหน้าจอหรือช่วยเหลืออาจารย์ที่มีปัญหาการใช้งานโดยไม่ต้องขอรหัสผ่านของอาจารย์:</p>
+<ol>
+<li>ไปที่เมนู <strong>&quot;จัดการผู้ใช้งาน&quot;</strong> (<code>/backend/user</code>) หรือ <strong>&quot;ทำเนียบนักวิจัย&quot;</strong> (<code>/backend/rdb_researcher</code>)</li>
+<li>ค้นหาชื่อนักวิจัยที่ต้องการตรวจสอบ แล้วคลิกปุ่มไอคอน <strong>&quot;จำลองสิทธิ์ (Impersonate)&quot;</strong></li>
+<li>ระบบจะสลับเข้าสู่มุมมองของนักวิจัยท่านนั้นทันที โดยแสดงแถบแจ้งเตือนสีเหลืองด้านบนสุดของหน้าจอ</li>
+<li>เมื่อตรวจสอบเสร็จสิ้น ให้คลิกปุ่ม <strong>&quot;หยุดการจำลองสิทธิ์ (Stop Impersonating)&quot;</strong> บนแถบด้านบนเพื่อกลับสู่บัญชีผู้ดูแลระบบตามเดิม</li>
+</ol>
+<hr />
+<h2 id="บทท-3-วงจรช-ว-ตการส-งร-าง-ตรวจสอบ-และอน-ม-ต-เป-ดเผยผลงาน-workflow-lifecycle-wf-01-ถ-ง-wf-07">บทที่ 3: วงจรชีวิตการส่งร่าง ตรวจสอบ และอนุมัติเปิดเผยผลงาน (Workflow Lifecycle: WF-01 ถึง WF-07)</h2>
+<p>ระบบควบคุมคุณภาพข้อมูลวิจัยด้วยกลไก <strong>State-Driven Approval Workflow</strong> เพื่อป้องกันการแก้ไขข้อมูลโดยพลการหลังจากเผยแพร่แล้ว และรับประกันว่าข้อมูลที่แสดงหน้าบ้านผ่านการตรวจสอบจากสถาบันวิจัยและพัฒนาแล้วทุกรายการ:</p>
+<div class="mermaid-container"><pre class="mermaid">
+stateDiagram-v2
+    [*] --&gt; Draft : WF-01 นักวิจัยสร้างฉบับร่าง
+    Draft --&gt; PendingReview : WF-02 นักวิจัยกดส่งตรวจสอบ (Submit)
+    PendingReview --&gt; RevisionRequired : WF-04 เจ้าหน้าที่ส่งกลับให้แก้ไข (Reject + Remarks)
+    RevisionRequired --&gt; PendingReview : นักวิจัยแก้ไขและกดส่งตรวจสอบใหม่
+    PendingReview --&gt; Published : WF-05 เจ้าหน้าที่อนุมัติเผยแพร่ (Approve &amp; Publish + สร้างปก .webp)
+    Published --&gt; UnlockRequested : WF-06 นักวิจัยขอปลดล็อกเพื่อแก้ไข (Request Unlock + เหตุผล)
+    UnlockRequested --&gt; Draft : WF-07 Admin อนุมัติปลดล็อก (ย้ายกลับเป็นฉบับร่าง)
+    UnlockRequested --&gt; Published : Admin ปฏิเสธคำขอปลดล็อก (คงสถานะเผยแพร่เดิม)
+</pre></div>
+<figure class="manual-figure"><a href="./screenshots/backend_03_workflow_queue.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/backend_03_workflow_queue.png" alt="หน้าคิวงานตรวจสอบและอนุมัติผลงานวิจัย (Review Queue)" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้าคิวงานตรวจสอบและอนุมัติผลงานวิจัย (Review Queue)</figcaption></figure>
+<h3 id="3-1-ค-ม-อปฏ-บ-ต-สำหร-บน-กว-จ-ย-researcher-submission-steps">3.1 คู่มือปฏิบัติสำหรับนักวิจัย (Researcher Submission Steps)</h3>
+<ol>
+<li><strong>ขั้นที่ 1: การบันทึกฉบับร่าง (<code>WF-01 Draft</code>)</strong>
+<ul>
+<li>เมื่อนักวิจัยกดเพิ่มข้อมูลในโมดูลโครงการวิจัย, ผลงานตีพิมพ์, ทรัพย์สินทางปัญญา หรือการนำไปใช้ประโยชน์ รายการใหม่จะมีสถานะเริ่มต้นเป็น <strong><code>ฉบับร่าง (Draft)</code></strong></li>
+<li>ในสถานะนี้ นักวิจัยสามารถแก้ไขข้อมูลและเปลี่ยนไฟล์แนบได้ตลอดเวลา โดยข้อมูลจะยังไม่ปรากฏบนหน้าบ้านสาธารณะ</li>
+</ul>
+</li>
+<li><strong>ขั้นที่ 2: การกดส่งผลงานให้เจ้าหน้าที่ตรวจสอบ (<code>WF-02 Submit for Review</code>)</strong>
+<ul>
+<li>เมื่อกรอกข้อมูลและแนบไฟล์ PDF ครบถ้วนแล้ว ให้เข้าที่หน้ารายละเอียดของรายการนั้น</li>
+<li>คลิกปุ่มสีน้ำเงิน <strong>&quot;ส่งตรวจสอบ (Submit for Review)&quot;</strong></li>
+<li>สถานะจะเปลี่ยนเป็น <strong><code>รอตรวจสอบ (Pending Review)</code></strong> แบบฟอร์มจะถูกล็อกชั่วคราว และระบบจะส่งแจ้งเตือนไปยังเจ้าหน้าที่สถาบันวิจัยฯ ทันที</li>
+</ul>
+</li>
+<li><strong>ขั้นที่ 3: กรณีได้รับแจ้งให้แก้ไขข้อมูล (<code>WF-04 Revision Required</code>)</strong>
+<ul>
+<li>หากเจ้าหน้าที่ตรวจพบข้อมูลไม่สมบูรณ์ นักวิจัยจะได้รับการแจ้งเตือนผ่านกระดิ่งแจ้งเตือน พร้อมกล่องข้อความสีแดงแสดง <strong>&quot;เหตุผลและข้อเสนอแนะจากผู้ตรวจสอบ&quot;</strong></li>
+<li>นักวิจัยสามารถคลิก <strong>&quot;แก้ไขข้อมูล&quot;</strong> ปรับปรุงตามคำแนะนำ แล้วกด <strong>&quot;ส่งตรวจสอบ&quot;</strong> อีกครั้ง</li>
+</ul>
+</li>
+<li><strong>ขั้นที่ 4: การขอปลดล็อกเพื่อแก้ไขผลงานที่เผยแพร่แล้ว (<code>WF-06 Request Unlock</code>)</strong>
+<ul>
+<li>เมื่อผลงานได้รับอนุมัติเป็น <strong><code>เผยแพร่แล้ว (Published)</code></strong> ปุ่มแก้ไขและปุ่มลบจะถูกซ่อนและล็อกไว้ตามมาตรฐานธรรมาภิบาลข้อมูล</li>
+<li>หากนักวิจัยมีความจำเป็นต้องแก้ไขข้อมูล ให้คลิกปุ่ม <strong>&quot;ขอปลดล็อกเพื่อแก้ไข (Request Unlock)&quot;</strong> กรอกเหตุผลความจำเป็น แล้วกดยืนยันเพื่อรอ Admin อนุมัติ</li>
+</ul>
+</li>
+</ol>
+<h3 id="3-2-ค-ม-อปฏ-บ-ต-สำหร-บเจ-าหน-าท-และผ-ด-แลระบบ-admin-review-queue-steps">3.2 คู่มือปฏิบัติสำหรับเจ้าหน้าที่และผู้ดูแลระบบ (Admin Review Queue Steps)</h3>
+<ol>
+<li>คลิกเมนู <strong>&quot;คิวงานตรวจสอบ (Review Queue)&quot;</strong> (<code>/backend/workflow/queue</code>)</li>
+<li>ในส่วนที่ <code>[1]</code> เลือกแท็บประเภทผลงานที่ต้องการตรวจ: <strong>โครงการวิจัย</strong>, <strong>ผลงานตีพิมพ์</strong>, <strong>ทรัพย์สินทางปัญญา</strong>, <strong>การนำไปใช้ประโยชน์</strong> หรือ <strong>คำขอปลดล็อกแก้ไข</strong></li>
+<li>ในส่วนที่ <code>[2]</code> คลิกเปิดดูรายละเอียดและตรวจสอบไฟล์เอกสารแนบของนักวิจัย:
+<ul>
+<li><strong>กรณีข้อมูลถูกต้องสมบูรณ์ (<code>WF-05</code>)</strong>: คลิกปุ่มสีเขียว <strong>&quot;อนุมัติและเผยแพร่ (Approve)&quot;</strong> ➔ ระบบจะเปลี่ยนสถานะเป็น <code>Published</code>, เปิดการแสดงผลหน้าบ้าน (<code>data_show = 1</code>) และสั่งสร้างภาพปก <code>.webp</code> อัตโนมัติทันที</li>
+<li><strong>กรณีต้องแก้ไข (<code>WF-04</code>)</strong>: คลิกปุ่มสีแดง <strong>&quot;ส่งกลับแก้ไข (Reject)&quot;</strong> ➔ กรอกหมายเหตุชี้แจงจุดที่ต้องแก้ไข แล้วกดยืนยัน</li>
+<li><strong>กรณีพิจารณาคำขอปลดล็อก (<code>WF-07</code>)</strong>: ในแท็บคำขอปลดล็อก คลิก <strong>&quot;อนุมัติปลดล็อก&quot;</strong> เพื่อคืนสถานะกลับเป็น <code>Draft</code> ให้นักวิจัยแก้ไข หรือคลิก <strong>&quot;ปฏิเสธคำขอ&quot;</strong> เพื่อคงสถานะเผยแพร่เดิม</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="บทท-4-การบร-หารจ-ดการโครงการว-จ-ยข-นส-ง-ระบบน-บหน-า-pdf-และปก-webp">บทที่ 4: การบริหารจัดการโครงการวิจัยขั้นสูง ระบบนับหน้า PDF และปก .webp</h2>
+<div class="manual-carousel-grid"><div class="manual-carousel-item"><div class="carousel-badge">ภาพชุดที่ 1</div><figure class="manual-figure"><a href="./screenshots/backend_04_projects_index.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/backend_04_projects_index.png" alt="หน้ารายการจัดการโครงการวิจัยหลังบ้าน" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้ารายการจัดการโครงการวิจัยหลังบ้าน</figcaption></figure>
+</div><div class="manual-carousel-item"><div class="carousel-badge">ภาพชุดที่ 2</div><figure class="manual-figure"><a href="./screenshots/backend_05_project_show.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/backend_05_project_show.png" alt="หน้ารายละเอียดโครงการวิจัยหลังบ้าน การจัดการไฟล์รายงาน และการตั้งค่าการเปิดเผย" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้ารายละเอียดโครงการวิจัยหลังบ้าน การจัดการไฟล์รายงาน และการตั้งค่าการเปิดเผย</figcaption></figure>
+</div></div>
+<h3 id="4-1-การสร-างและแก-ไขข-อม-ลโครงการว-จ-ย-backend-rdb-project">4.1 การสร้างและแก้ไขข้อมูลโครงการวิจัย (<code>/backend/rdb_project</code>)</h3>
+<ol>
+<li>คลิกปุ่ม <strong>&quot;+ เพิ่มโครงการวิจัยใหม่&quot;</strong> มุมขวาบนของหน้ารายการ</li>
+<li>กรอกข้อมูลตามขั้นตอนของฟอร์ม:
+<ul>
+<li><strong>ข้อมูลหลัก</strong>: รหัสโครงการ, ปีงบประมาณ พ.ศ., ประเภททุนวิจัย, ชื่อโครงการ (ไทย/อังกฤษ)</li>
+<li><strong>ระยะเวลาโครงการ</strong>: เลือกวันที่เริ่มต้นและวันที่สิ้นสุดจากปฏิทิน พ.ศ. (ระบบแปลงเก็บเป็น ISO <code>YYYY-MM-DD</code> อัตโนมัติ)</li>
+<li><strong>งบประมาณ</strong>: ระบุงบประมาณรวม และสามารถจำแนกงบประมาณรายงวดในหน้ารายละเอียดโครงการ</li>
+</ul>
+</li>
+<li>ในหน้ารายละเอียดโครงการ (<code>/backend/rdb_project/{id}</code>) สามารถเพิ่มรายชื่อ <strong>คณะผู้วิจัย</strong> พร้อมระบุตำแหน่งในโครงการ (หัวหน้าโครงการ,ที่ปรึกษา, ผู้ร่วมวิจัย) และสัดส่วนร้อยละของการทำวิจัย</li>
+</ol>
+<h3 id="4-2-การอ-ปโหลดไฟล-รายงานและการทำงานอ-ตโนม-ต-ของเคร-องยนต-pdf-automated-pdf-engine">4.2 การอัปโหลดไฟล์รายงานและการทำงานอัตโนมัติของเครื่องยนต์ PDF (Automated PDF Engine)</h3>
+<p>เมื่อมีการอัปโหลดไฟล์ PDF เล่มรายงานฉบับสมบูรณ์ (<code>pro_file</code>) ในหน้ารายละเอียดโครงการ ระบบจะทำงานอัตโนมัติ 3 ขั้นตอนทันที:</p>
+<ol>
+<li><strong>การจัดเก็บไฟล์ปลอดภัย (UUID Safe Storage)</strong>: เปลี่ยนชื่อไฟล์ภายในเป็นรหัสปลอดภัยและจัดเก็บใน <code>storage/app/public/project/</code></li>
+<li><strong>การตรวจนับจำนวนหน้าอัตโนมัติ (4-Tier PDF Page Counter)</strong>:
+<ul>
+<li>ระบบเรียกใช้ <code>Poppler pdftotext</code> / <code>PdfParser</code> / <code>FPDI</code> นับจำนวนหน้าทั้งหมดของไฟล์ PDF (รองรับแม้แต่ไฟล์ PDF ที่ตั้งรหัสป้องกันการแก้ไข) และบันทึกจำนวนหน้าลงฟิลด์ <code>pro_page_num</code> ทันทีด้วยความแม่นยำ 99.99%</li>
+</ul>
+</li>
+<li><strong>การสกัดหน้าแรกเป็นภาพปก <code>.webp</code> อัตโนมัติ (5-Tier WebP Cover Generator)</strong>:
+<ul>
+<li>ระบบดึงหน้าแรกของไฟล์ PDF แปลงเป็นภาพ <code>.webp</code> ความละเอียดสูงขนาดกะทัดรัด บันทึกไว้ที่ <code>storage/app/public/project/covers/</code> เพื่อใช้แสดงเป็นภาพปกหน้าแรกทั้งในหน้าบ้านและหลังบ้าน</li>
+</ul>
+</li>
+</ol>
+<h3 id="4-3-การสล-บสถานะการเป-ดเผยเล-มรายงาน-pro-file-show-toggle">4.3 การสลับสถานะการเปิดเผยเล่มรายงาน (<code>pro_file_show</code> Toggle)</h3>
+<p>ในหน้ารายละเอียดโครงการวิจัย การ์ด <strong>&quot;รายงานฉบับสมบูรณ์&quot;</strong> ผู้ดูแลระบบสามารถคลิกสลับสถานะการเปิดเผยไฟล์ได้ 3 สถานะทันที:</p>
+<ul>
+<li><strong><code>เปิด (0 - Public)</code></strong>: เปิดให้ประชาชนทั่วไปดาวน์โหลดเล่มรายงานได้ และระบบจะสร้างภาพปก <code>.webp</code> ทันทีหากยังไม่มี</li>
+<li><strong><code>ปิด (1 - Concealed)</code></strong>: ปกปิดเล่มรายงานไม่ให้ดาวน์โหลด (แสดงเฉพาะข้อมูลโครงการและบทคัดย่อ)</li>
+<li><strong><code>ร่าง (2 - Draft)</code></strong>: สถานะระหว่างดำเนินการตรวจรับ</li>
+</ul>
+<hr />
+<h2 id="บทท-5-ระบบตรวจประเม-นเล-มรายงานว-จ-ยฉบ-บสมบ-รณ-peer-review-subsystem">บทที่ 5: ระบบตรวจประเมินเล่มรายงานวิจัยฉบับสมบูรณ์ (Peer Review Subsystem)</h2>
+<figure class="manual-figure"><a href="./screenshots/backend_07_peer_review_index.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/backend_07_peer_review_index.png" alt="หน้าจัดการระบบประเมินรายงานวิจัยฉบับสมบูรณ์ (Single-Blind Peer Review)" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้าจัดการระบบประเมินรายงานวิจัยฉบับสมบูรณ์ (Single-Blind Peer Review)</figcaption></figure>
+<p>ระบบรองรับการประเมินคุณภาพรายงานวิจัยฉบับสมบูรณ์แบบ <strong>Single-Blind Peer Review</strong> (ผู้ทรงคุณวุฒิทราบชื่อผู้วิจัย แต่ผู้วิจัยไม่ทราบชื่อผู้ทรงคุณวุฒิ) โดยมีขั้นตอนครบวงจรดังนี้:</p>
+<h3 id="5-1-การสร-างและปร-บแต-งแบบประเม-น-dynamic-rubric-form-designer">5.1 การสร้างและปรับแต่งแบบประเมิน (Dynamic Rubric Form Designer)</h3>
+<ol>
+<li>ผู้ดูแลระบบเข้าเมนู <strong>&quot;ระบบประเมินรายงานวิจัย&quot;</strong> ➔ คลิกปุ่ม <strong>&quot;จัดการเกณฑ์แบบประเมิน (Rubric Templates)&quot;</strong> (<code>/backend/project-reviews/templates</code>)</li>
+<li>สามารถสร้างชุดแบบประเมิน กำหนดหัวข้อเกณฑ์การประเมิน (Criteria), คะแนนเต็มของแต่ละข้อ และกำหนดระดับสเกลการให้คะแนน (เช่น สเกล 1-5 หรือคะแนนดิบ) ได้อย่างอิสระ</li>
+</ol>
+<h3 id="5-2-ข-นตอนการส-งเล-มรายงานและมอบหมายผ-ทรงค-ณว-ฒ">5.2 ขั้นตอนการส่งเล่มรายงานและมอบหมายผู้ทรงคุณวุฒิ</h3>
+<ol>
+<li><strong>นักวิจัยส่งไฟล์เล่มรายงานเพื่อรับการประเมิน</strong>:
+<ul>
+<li>เข้าที่หน้าประเมินของโครงการ (<code>/backend/project-reviews/project/{pro_id}</code>)</li>
+<li>เลือกประเภทการส่ง (<code>ส่งร่างครั้งแรก Initial Draft</code>, <code>ส่งฉบับแก้ไขตามข้อเสนอแนะ Revised Draft</code>, หรือ <code>ส่งเล่มสมบูรณ์ Final Report</code>) และอัปโหลดไฟล์ PDF</li>
+</ul>
+</li>
+<li><strong>ผู้ดูแลระบบมอบหมายผู้ทรงคุณวุฒิ (Assign Reviewers)</strong>:
+<ul>
+<li>ค้นหาและเลือกผู้ทรงคุณวุฒิ 2-3 ท่าน เลือกแบบประเมินที่ต้องการใช้ และกำหนดวันครบกำหนดส่งผลประเมิน</li>
+</ul>
+</li>
+<li><strong>ผู้ทรงคุณวุฒิบันทึกผลการประเมิน</strong>:
+<ul>
+<li>ผู้ทรงคุณวุฒิเข้าเมนู <strong>&quot;งานประเมินของฉัน (My Reviews)&quot;</strong> (<code>/backend/project-reviews/my-reviews</code>)</li>
+<li>กดตอบรับการประเมิน เปิดอ่านไฟล์รายงาน กรอกคะแนนรายข้อ ความคิดเห็นเชิงวิชาการ และแนบไฟล์ที่มีการคอมเมนต์กลับเข้าสู่ระบบ</li>
+</ul>
+</li>
+<li><strong>การสรุปผลและอนุมัติเล่มรายงานสมบูรณ์ (<code>Approve Final Report</code>)</strong>:
+<ul>
+<li>เมื่อผู้ทรงคุณวุฒิประเมินครบและนักวิจัยส่งเล่มสมบูรณ์ที่แก้ไขเรียบร้อยแล้ว ผู้ดูแลระบบกดปุ่ม <strong>&quot;อนุมัติเล่มรายงานฉบับสมบูรณ์&quot;</strong></li>
+<li>ระบบจะปรับสถานะโครงการเป็นเสร็จสิ้นสมบูรณ์ และสร้างภาพปก <code>.webp</code> พร้อมเปิดเผยแพร่โดยอัตโนมัติ</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="บทท-6-การบร-หารจ-ดการผลงานต-พ-มพ-ทร-พย-ส-นทางป-ญญา-และการใช-ประโยชน">บทที่ 6: การบริหารจัดการผลงานตีพิมพ์ ทรัพย์สินทางปัญญา และการใช้ประโยชน์</h2>
+<div class="manual-carousel-grid"><div class="manual-carousel-item"><div class="carousel-badge">ภาพชุดที่ 1</div><figure class="manual-figure"><a href="./screenshots/backend_08_published_index.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/backend_08_published_index.png" alt="หน้ารายการจัดการผลงานตีพิมพ์หลังบ้าน" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้ารายการจัดการผลงานตีพิมพ์หลังบ้าน</figcaption></figure>
+</div><div class="manual-carousel-item"><div class="carousel-badge">ภาพชุดที่ 2</div><figure class="manual-figure"><a href="./screenshots/backend_09_published_show.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/backend_09_published_show.png" alt="หน้ารายละเอียดผลงานตีพิมพ์หลังบ้าน การแสดงภาพปก .webp และการจัดการผู้แต่ง" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้ารายละเอียดผลงานตีพิมพ์หลังบ้าน การแสดงภาพปก .webp และการจัดการผู้แต่ง</figcaption></figure>
+</div><div class="manual-carousel-item"><div class="carousel-badge">ภาพชุดที่ 3</div><figure class="manual-figure"><a href="./screenshots/backend_10_dip_index.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/backend_10_dip_index.png" alt="หน้าจัดการทรัพย์สินทางปัญญาหลังบ้าน" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้าจัดการทรัพย์สินทางปัญญาหลังบ้าน</figcaption></figure>
+</div><div class="manual-carousel-item"><div class="carousel-badge">ภาพชุดที่ 4</div><figure class="manual-figure"><a href="./screenshots/backend_11_utilize_index.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/backend_11_utilize_index.png" alt="หน้าจัดการการนำงานวิจัยไปใช้ประโยชน์หลังบ้าน" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้าจัดการการนำงานวิจัยไปใช้ประโยชน์หลังบ้าน</figcaption></figure>
+</div></div>
+<h3 id="6-1-การจ-ดการผลงานต-พ-มพ-backend-rdb-published">6.1 การจัดการผลงานตีพิมพ์ (<code>/backend/rdb_published</code>)</h3>
+<ol>
+<li>คลิก <strong>&quot;+ เพิ่มผลงานตีพิมพ์&quot;</strong> กรอกชื่อบทความ, ชื่อวารสาร, ปี พ.ศ., ประเภทฐานข้อมูลวารสาร, งบประมาณสนับสนุนการตีพิมพ์ และเชื่อมโยงโครงการวิจัยต้นทาง (ถ้ามี)</li>
+<li>เมื่ออัปโหลดไฟล์ PDF บทความ (<code>pub_file</code>) ระบบจะตรวจนับจำนวนหน้าลงฟิลด์ <code>pub_numfile</code> และสกัดหน้าแรกเป็นภาพปก <code>.webp</code> แสดงในหน้ารายละเอียดทันที</li>
+<li>ในหน้ารายละเอียด สามารถเพิ่มรายชื่อผู้แต่งร่วม (Co-Authors) และระบุสถานะเป็นผู้ประพันธ์ชื่อแรก (First Author) หรือผู้ประพันธ์บรรณกิจ (Corresponding Author)</li>
+</ol>
+<h3 id="6-2-การจ-ดการทร-พย-ส-นทางป-ญญา-backend-rdb-dip-และการนำไปใช-ประโยชน-backend-rdbprojectutilize">6.2 การจัดการทรัพย์สินทางปัญญา (<code>/backend/rdb_dip</code>) และการนำไปใช้ประโยชน์ (<code>/backend/rdbprojectutilize</code>)</h3>
+<ul>
+<li><strong>ทรัพย์สินทางปัญญา</strong>: บันทึกเลขที่คำขอ, ประเภทสิทธิบัตร/อนุสิทธิบัตร/ลิขสิทธิ์, วันที่ยื่นคำขอ, วันที่จดทะเบียน และแนบไฟล์เอกสารรับรอง</li>
+<li><strong>การนำไปใช้ประโยชน์</strong>: ค้นหาโครงการวิจัยต้นทางด้วยระบบ Autocomplete, เลือกประเภทการใช้ประโยชน์ 4 มิติ, ระบุพื้นที่ (จังหวัด/อำเภอ/ตำบล) และแนบไฟล์หลักฐานรับรองผลกระทบ</li>
+</ul>
+<hr />
+<h2 id="บทท-7-การบร-หารข-อม-ลน-กว-จ-ยและการเช-อมโยงฐานข-อม-ลสากล-scopus-amp-orcid">บทที่ 7: การบริหารข้อมูลนักวิจัยและการเชื่อมโยงฐานข้อมูลสากล (Scopus &amp; ORCID)</h2>
+<figure class="manual-figure"><a href="./screenshots/backend_12_researcher_index.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/backend_12_researcher_index.png" alt="หน้าจัดการทำเนียบนักวิจัยหลังบ้านและการตรวจสอบข้อมูล" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้าจัดการทำเนียบนักวิจัยหลังบ้านและการตรวจสอบข้อมูล</figcaption></figure>
+<h3 id="ข-นตอนการจ-ดการข-อม-ลน-กว-จ-ย-backend-rdb-researcher">ขั้นตอนการจัดการข้อมูลนักวิจัย (<code>/backend/rdb_researcher</code>)</h3>
+<ol>
+<li><strong>การตรวจสอบรหัสประจำตัวประชาชน 13 หลัก</strong>: ระบบมีอัลกอริทึมตรวจสอบหลักตรวจสอบ (Check Digit Modulo 11) ตามมาตรฐานกรมการปกครอง เพื่อป้องกันการกรอกเลขบัตรประชาชนผิดพลาด</li>
+<li><strong>การเชื่อมโยงฐานข้อมูล Scopus และ ORCID</strong>:
+<ul>
+<li>ระบุ <strong>Scopus Author ID</strong> และ <strong>ORCID iD</strong> (รูปแบบ <code>XXXX-XXXX-XXXX-XXXX</code>)</li>
+<li>ระบบรองรับการซิงก์ค่าดัชนีทางวิชาการ (<strong>h-index</strong>, จำนวนการอ้างอิงสะสม) เพื่อนำมาแสดงในแดชบอร์ดศักยภาพนักวิจัยของมหาวิทยาลัย</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="บทท-8-การส-งออกข-อม-ล-utf-8-bom-excel-และการเช-อมต-อคล-งป-ญญา-dspace-saf">บทที่ 8: การส่งออกข้อมูล UTF-8 BOM Excel และการเชื่อมต่อคลังปัญญา DSpace SAF</h2>
+<figure class="manual-figure"><a href="./screenshots/backend_06_project_dspace.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/backend_06_project_dspace.png" alt="หน้าระบบส่งออกแพ็กเกจคลังปัญญา DSpace แบบกลุ่ม (DSpace SAF Batch Export)" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้าระบบส่งออกแพ็กเกจคลังปัญญา DSpace แบบกลุ่ม (DSpace SAF Batch Export)</figcaption></figure>
+<h3 id="8-1-การส-งออกรายงานข-อม-ลเป-นไฟล-csv-microsoft-excel-utf-8-bom">8.1 การส่งออกรายงานข้อมูลเป็นไฟล์ CSV / Microsoft Excel (UTF-8 BOM)</h3>
+<p>ในหน้ารายการของโครงการวิจัย, ผลงานตีพิมพ์, นักวิจัย และการนำไปใช้ประโยชน์:</p>
+<ol>
+<li>เลือกตัวกรองข้อมูลที่ต้องการ (เช่น กรองเฉพาะปีงบประมาณ 2568 หรือเฉพาะคณะที่ต้องการ)</li>
+<li>คลิกปุ่ม <strong>&quot;ส่งออก Excel / CSV (Export)&quot;</strong></li>
+<li>ระบบจะสตรีมไฟล์ <code>.csv</code> ที่ฝังรหัส <strong>UTF-8 BOM (<code>\xEF\xBB\xBF</code>)</strong> และผ่านการป้องกัน CSV Formula Injection ทำให้สามารถดับเบิลคลิกเปิดในโปรแกรม <strong>Microsoft Excel</strong> ได้ทันทีโดยตัวอักษรภาษาไทยถูกต้อง 100% ไม่มีปัญหาภาษาต่างดาว</li>
+</ol>
+<h3 id="8-2-การส-งออกแพ-กเกจคล-งป-ญญา-dspace-dspace-simple-archive-format-saf-zip">8.2 การส่งออกแพ็กเกจคลังปัญญา DSpace (DSpace Simple Archive Format - SAF ZIP)</h3>
+<p>สำหรับเจ้าหน้าที่บรรณารักษ์และผู้ดูแลคลังปัญญามหาวิทยาลัย (Institutional Repository):</p>
+<ol>
+<li>เข้าที่เมนู <strong>&quot;ส่งออก DSpace (Batch Mode)&quot;</strong> ในโมดูลโครงการวิจัย (<code>/backend/rdb_project/dspace</code>) หรือผลงานตีพิมพ์ (<code>/backend/rdb_published/dspace</code>)</li>
+<li>เลือกขนาดกลุ่มการส่งออก (เช่น ชุดละ 20 หรือ 50 รายการ)</li>
+<li>คลิกปุ่ม <strong>&quot;ดาวน์โหลดแพ็กเกจ DSpace ชุดที่ X&quot;</strong> ➔ ระบบจะสร้างไฟล์ <code>.zip</code> ตามโครงสร้างมาตรฐาน DSpace SAF ที่ประกอบด้วยไฟล์ <code>dublin_core.xml</code> (พร้อมข้อมูลเลขหน้าอัตโนมัติ), ไฟล์ <code>contents</code> และไฟล์ PDF ฉบับเต็ม</li>
+<li>หลังจากนำเข้าสู่ระบบ DSpace สำเร็จ ให้คลิกปุ่มเครื่องหมายถูก <strong><code>✓ อัปเดตสถานะส่งออกแล้ว</code></strong> เพื่อบันทึกว่าชุดข้อมูลดังกล่าวถูกส่งออกเรียบร้อยแล้ว</li>
+</ol>
+<h3 id="8-3-คำส-งด-แลร-กษาระบบผ-าน-cli-สำหร-บผ-ด-แลระบบเซ-ร-ฟเวอร-artisan-maintenance-commands">8.3 คำสั่งดูแลรักษาระบบผ่าน CLI สำหรับผู้ดูแลระบบเซิร์ฟเวอร์ (Artisan Maintenance Commands)</h3>
+<p>ผู้ดูแลระบบสามารถรันคำสั่งประมวลผลย้อนหลังทั้งฐานข้อมูลผ่าน Terminal ได้ตลอดเวลา:</p>
+<pre><code class="language-powershell"># 1. คำสั่งตรวจนับและบันทึกจำนวนหน้า PDF อัตโนมัติย้อนหลังทั้งระบบ
+php artisan rdb:count-pdf-pages --module=all
+
+# 2. คำสั่งสกัดหน้าแรกของ PDF มาสร้างเป็นภาพปก .webp ย้อนหลังทั้งระบบ
+php artisan rdb:generate-pdf-covers --module=all
+</code></pre>
+<hr />
+<h2 id="บทท-9-ประว-ต-การใช-งาน-audit-logs-และการต-งค-าความปลอดภ-ยของระบบ">บทที่ 9: ประวัติการใช้งาน (Audit Logs) และการตั้งค่าความปลอดภัยของระบบ</h2>
+<div class="manual-carousel-grid"><div class="manual-carousel-item"><div class="carousel-badge">ภาพชุดที่ 1</div><figure class="manual-figure"><a href="./screenshots/backend_15_audit_logs.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/backend_15_audit_logs.png" alt="หน้าตรวจสอบประวัติการใช้งานและการแก้ไขข้อมูล (Audit Logs &amp;amp; Diff Viewer)" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้าตรวจสอบประวัติการใช้งานและการแก้ไขข้อมูล (Audit Logs &amp;amp; Diff Viewer)</figcaption></figure>
+</div><div class="manual-carousel-item"><div class="carousel-badge">ภาพชุดที่ 2</div><figure class="manual-figure"><a href="./screenshots/backend_16_access_control.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/backend_16_access_control.png" alt="หน้าตั้งค่าการควบคุมการเข้าถึงและความปลอดภัยของเอกสาร (Access Control Settings)" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้าตั้งค่าการควบคุมการเข้าถึงและความปลอดภัยของเอกสาร (Access Control Settings)</figcaption></figure>
+</div></div>
+<h3 id="9-1-การตรวจสอบประว-ต-การกระทำในระบบ-backend-audit-logs">9.1 การตรวจสอบประวัติการกระทำในระบบ (<code>/backend/audit-logs</code>)</h3>
+<ol>
+<li>ผู้ดูแลระบบสามารถกรองดูประวัติการใช้งานตาม <strong>ชื่อผู้ใช้</strong>, <strong>ประเภทเหตุการณ์</strong> (<code>created</code>, <code>updated</code>, <code>deleted</code>, <code>submit</code>, <code>approve</code>, <code>reject</code>, <code>request_unlock</code>) หรือ <strong>ประเภทข้อมูล</strong></li>
+<li>คลิกปุ่ม <strong>&quot;ดูรายละเอียดการเปลี่ยนแปลง&quot;</strong> เพื่อเปรียบเทียบค่าข้อมูลเดิม (<strong>Old Values</strong>) และค่าข้อมูลใหม่ (<strong>New Values</strong>) พร้อมดูหมายเลข IP Address และเวลาที่ดำเนินการอย่างละเอียด</li>
+</ol>
+<h3 id="9-2-การต-งค-านโยบายการเข-าถ-งเอกสาร-backend-settings-access-control">9.2 การตั้งค่านโยบายการเข้าถึงเอกสาร (<code>/backend/settings/access-control</code>)</h3>
+<ol>
+<li>ไปที่เมนู <strong>&quot;ตั้งค่าการควบคุมการเข้าถึง&quot;</strong></li>
+<li>ผู้ดูแลระบบสามารถกำหนดนโยบายระดับมหาวิทยาลัยได้ว่า การดาวน์โหลดไฟล์เอกสารวิจัยฉบับเต็มในหน้าบ้านจะอนุญาตให้:
+<ul>
+<li><strong>เปิดให้ดาวน์โหลดได้โดยเสรีสำหรับสาธารณะ (Public Access)</strong> (ค่าเริ่มต้นสำหรับเอกสารที่ตั้งค่าเปิดเผย) หรือ</li>
+<li><strong>บังคับให้ต้องเข้าสู่ระบบก่อนดาวน์โหลด (Authenticated Only)</strong></li>
+</ul>
+</li>
+<li>คลิก <strong>&quot;บันทึกการตั้งค่า&quot;</strong> เพื่อบังคับใช้นโยบายทั้งระบบทันที</li>
+</ol>
+
+            </div>
+            <footer>
+                เอกสารคู่มือการใช้งานระบบฐานข้อมูลงานวิจัย (PCRU Research Database) • มหาวิทยาลัยราชภัฏเพชรบูรณ์
+            </footer>
+        </article>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+        function toggleTheme() {
+            const html = document.documentElement;
+            const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('pcru_manual_theme', next);
+        }
+        (function() {
+            const saved = localStorage.getItem('pcru_manual_theme');
+            if (saved) document.documentElement.setAttribute('data-theme', saved);
+        })();
+    </script>
+</body>
+</html>
