@@ -23,10 +23,10 @@ class WorkflowController extends Controller
     private function resolveModel(string $type, $id)
     {
         return match ($type) {
-            'project' => RdbProject::findOrFail($id),
-            'published' => RdbPublished::findOrFail($id),
-            'dip' => RdbDip::findOrFail($id),
-            'utilize' => RdbProjectUtilize::findOrFail($id),
+            'project' => RdbProject::withoutGlobalScopes()->findOrFail($id),
+            'published' => RdbPublished::withoutGlobalScopes()->findOrFail($id),
+            'dip' => RdbDip::withoutGlobalScopes()->findOrFail($id),
+            'utilize' => RdbProjectUtilize::withoutGlobalScopes()->findOrFail($id),
             default => abort(404, 'ไม่พบประเภทโมดูลที่ระบุ'),
         };
     }
@@ -45,32 +45,32 @@ class WorkflowController extends Controller
         $deptId = ($activeScope && $activeScope->role_name === 'Faculty Coordinator') ? $activeScope->department_id : null;
 
         // 1. Projects Queue
-        $projectQuery = RdbProject::where('workflow_status', 'pending_review')->with(['researchers', 'department']);
+        $projectQuery = RdbProject::withoutGlobalScopes()->where('workflow_status', 'pending_review')->with(['researchers', 'department']);
         if ($deptId) {
             $projectQuery->where('department_id', $deptId);
         }
         $projects = $projectQuery->orderBy('submitted_at', 'asc')->paginate(10, ['*'], 'projects_page');
 
         // 2. Publications Queue
-        $pubQuery = RdbPublished::where('workflow_status', 'pending_review')->with(['researcher', 'department', 'pubtype']);
+        $pubQuery = RdbPublished::withoutGlobalScopes()->where('workflow_status', 'pending_review')->with(['researcher', 'department', 'pubtype']);
         if ($deptId) {
             $pubQuery->where('department_id', $deptId);
         }
         $publications = $pubQuery->orderBy('submitted_at', 'asc')->paginate(10, ['*'], 'pubs_page');
 
         // 3. IP / DIP Queue
-        $dipQuery = RdbDip::where('workflow_status', 'pending_review')->with(['researcher', 'dipType']);
+        $dipQuery = RdbDip::withoutGlobalScopes()->where('workflow_status', 'pending_review')->with(['researcher', 'dipType']);
         $dips = $dipQuery->orderBy('submitted_at', 'asc')->paginate(10, ['*'], 'dips_page');
 
         // 4. Utilizations Queue
-        $utilizeQuery = RdbProjectUtilize::where('workflow_status', 'pending_review')->with(['project', 'utilizeType']);
+        $utilizeQuery = RdbProjectUtilize::withoutGlobalScopes()->where('workflow_status', 'pending_review')->with(['project', 'utilizeType']);
         $utilizes = $utilizeQuery->orderBy('submitted_at', 'asc')->paginate(10, ['*'], 'utilizes_page');
 
         // 5. Unlock Requests Queue (All models with workflow_status = unlock_requested)
-        $unlockProjQuery = RdbProject::where('workflow_status', 'unlock_requested')->with(['researchers', 'department']);
-        $unlockPubQuery = RdbPublished::where('workflow_status', 'unlock_requested')->with(['researcher', 'department', 'pubtype']);
-        $unlockDipQuery = RdbDip::where('workflow_status', 'unlock_requested')->with(['researcher', 'dipType']);
-        $unlockUtzQuery = RdbProjectUtilize::where('workflow_status', 'unlock_requested')->with(['project', 'utilizeType']);
+        $unlockProjQuery = RdbProject::withoutGlobalScopes()->where('workflow_status', 'unlock_requested')->with(['researchers', 'department']);
+        $unlockPubQuery = RdbPublished::withoutGlobalScopes()->where('workflow_status', 'unlock_requested')->with(['researcher', 'department', 'pubtype']);
+        $unlockDipQuery = RdbDip::withoutGlobalScopes()->where('workflow_status', 'unlock_requested')->with(['researcher', 'dipType']);
+        $unlockUtzQuery = RdbProjectUtilize::withoutGlobalScopes()->where('workflow_status', 'unlock_requested')->with(['project', 'utilizeType']);
         if ($deptId) {
             $unlockProjQuery->where('department_id', $deptId);
             $unlockPubQuery->where('department_id', $deptId);
