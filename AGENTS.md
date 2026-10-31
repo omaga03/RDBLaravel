@@ -80,19 +80,19 @@
 - รายละเอียด: `.agents/skills/shared-search-and-date-controls/SKILL.md`
 
 ## 8. Subagents Architecture & Role Delegation
-เมื่อมีงานพัฒนาฟีเจอร์ขนาดใหญ่หรือการ Refactor ให้ Parent/Orchestrator Agent กระจายงานไปยัง 4 Subagents หลักตามขอบเขตความเชี่ยวชาญ:
+เมื่อมีงานพัฒนาฟีเจอร์ขนาดใหญ่ การแก้ไขเอกสาร หรือการ Refactor ให้ Parent/Orchestrator Agent กระจายงานไปยัง 5 Subagents หลักตามขอบเขตความเชี่ยวชาญ:
 
 ```
-                              ┌───────────────────────────────────┐
-                              │     Parent / Orchestrator Agent   │
-                              │ (คุมภาพรวม / วางแผน / สื่อสารกับ User)│
-                              └─────────────────┬─────────────────┘
-           ┌─────────────────────┬──────────────┴───────┬─────────────────────┐
-           ▼                     ▼                      ▼                     ▼
-┌────────────────────┐ ┌────────────────────┐ ┌────────────────────┐ ┌────────────────────┐
-│ 1. Backend Core    │ │ 2. Academic UI     │ │ 3. Security &      │ │ 4. QA & Test       │
-│    Architect       │ │    Craftsman       │ │    Compliance      │ │    Assurance       │
-└────────────────────┘ └────────────────────┘ └────────────────────┘ └────────────────────┘
+                                         ┌───────────────────────────────────┐
+                                         │     Parent / Orchestrator Agent   │
+                                         │ (คุมภาพรวม / วางแผน / สื่อสารกับ User)│
+                                         └─────────────────┬─────────────────┘
+           ┌─────────────────────┬─────────────────────────┼─────────────────────────┬─────────────────────┐
+           ▼                     ▼                         ▼                         ▼                     ▼
+┌────────────────────┐ ┌────────────────────┐   ┌────────────────────┐    ┌────────────────────┐ ┌────────────────────┐
+│ 1. Backend Core    │ │ 2. Academic UI     │   │ 3. Security &      │    │ 4. QA & Test       │ │ 5. Documentation & │
+│    Architect       │ │    Craftsman       │   │    Compliance      │    │    Assurance       │ │    Manual Curator  │
+└────────────────────┘ └────────────────────┘   └────────────────────┘    └────────────────────┘ └────────────────────┘
 ```
 
 1. **Backend Core Architect** (สถาปัตยกรรมหลังบ้านและฐานข้อมูล)
@@ -106,5 +106,16 @@
    - **หน้าที่**: ตรวจสอบความปลอดภัยเชิงลึก (CSRF, XSS ใน `{!! !!}`, IDOR, Parameter Binding, Policy Gates) และดูแลการ Export ภาษาไทยด้วย UTF-8 BOM (`\xEF\xBB\xBF`)
 4. **QA & Test Assurance** (ผู้ทดสอบและสืบค้นบั๊กเชิงระบบ)
    - **Skills ที่กำกับ**: `backend-test-assurance`
-   - **หน้าที่**: สืบสวนต้นตอบั๊ก (Root-Cause Debugging), ตรวจสอบ syntax (`php -l`), รันและดูแลชุดทดสอบ `php artisan test --filter=BackendAuditTest` ให้ผ่าน 100% ก่อนส่งมอบงาน
+   - **หน้าที่**: สืบสวนต้นตอบั๊ก (Root-Cause Debugging), ตรวจสอบ syntax (`php -l`), รันและดูแลชุดทดสอบ `php artisan test --filter=BackendAuditTest` และ `SystemAcceptancePlanExecutionTest` ให้ผ่าน 100% ก่อนส่งมอบงาน
+5. **Documentation & Manual Curator** (ผู้ดูแลคู่มือติดตั้งระบบ `README.md` และชุดเล่มคู่มือการใช้งาน `docs/manuals/`)
+   - **Skills ที่กำกับ**: `documentation-and-manuals` (`.agents/skills/documentation-and-manuals/SKILL.md`)
+   - **หน้าที่**:
+     - ดูแลและปรับปรุง `README.md` ให้เป็นคู่มือการติดตั้งและกู้คืนระบบจาก Git บน Laragon (`httpd`, `php-8.x`, `mariadb`) ที่ผู้เริ่มต้นทำตามได้ 100% พร้อมรายการ PHP Extensions ครบถ้วน
+     - ดูแลและอัปเดตชุดเล่มคู่มือการใช้งานใน `docs/manuals/` ทั้งรูปแบบ `.md` และ `.html` ให้ตรงกับฟีเจอร์ของระบบเสมอ ได้แก่:
+       - `VOLUME_1_FRONTEND_USER_MANUAL.{md,html}` (เล่ม 1: คู่มือระบบหน้าบ้าน 8 บท)
+       - `VOLUME_2_BACKEND_ADMIN_RESEARCHER_MANUAL.{md,html}` (เล่ม 2: คู่มือระบบหลังบ้านและนักวิจัย 9 บท)
+       - `RESEARCHER_QUICK_START_CHEATSHEET.{md,html}` (คู่มือฉบับย่อ 3 นาทีสำหรับนักวิจัย)
+       - `SYSTEM_ACCEPTANCE_TEST_PLAN.{md,html}` (แผนและรายงานผลการตรวจรับระบบ UAT)
+       - `USER_MANUAL_DEVELOPMENT_PLAN.{md,html}` และ `index.html` (หน้าสารบัญรวมศูนย์คู่มือ)
+     - ควบคุมการจับภาพหน้าจอจริง (`docs/manuals/screenshots/*.png` ความละเอียด 1920x1080 พร้อมกรอบสีแดงและตัวเลขกำกับขั้นตอน `[1]`, `[2]`, `[3]`) และการคอมไพล์ HTML5 ด้วยสคริปต์ใน `.agents/skills/documentation-and-manuals/scripts/`
 
