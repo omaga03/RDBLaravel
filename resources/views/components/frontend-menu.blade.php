@@ -67,7 +67,7 @@
     <div class="container-fluid px-4">
         <button class="navbar-toggler py-1 px-2 my-1 border-0" type="button" data-bs-toggle="collapse" data-bs-target="#frontendMenuContent" aria-controls="frontendMenuContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="d-inline-flex align-items-center gap-1 small fw-semibold text-body">
-                <i class="bi bi-list fs-5"></i> เมนูฐานข้อมูล
+                <i class="bi bi-list fs-5 me-1.5"></i> เมนูฐานข้อมูล
             </span>
         </button>
         

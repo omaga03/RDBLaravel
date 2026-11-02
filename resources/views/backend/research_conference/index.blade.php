@@ -138,7 +138,7 @@
                                         @can('delete', $item)
                                         <form action="{{ route('backend.research_conference.restore', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันกู้คืนข่าวงานประชุมนี้จากถังขยะ?');">
                                             @csrf
-                                            <button type="submit" class="btn btn-sm btn-success" title="กู้คืนข้อมูล"><i class="bi bi-arrow-counterclockwise"></i> กู้คืน</button>
+                                            <button type="submit" class="btn btn-sm btn-success" title="กู้คืนข้อมูล"><i class="bi bi-arrow-counterclockwise me-1.5"></i> กู้คืน</button>
                                         </form>
                                         @endcan
                                     @endif

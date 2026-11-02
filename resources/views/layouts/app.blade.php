@@ -307,10 +307,12 @@
             background: rgba(255, 255, 255, 0.22) !important;
             border-color: rgba(255, 255, 255, 0.35) !important;
         }
+        .search-header[aria-expanded="true"] .btn-toggle-search .bi-chevron-down,
         .btn-toggle-search[aria-expanded="true"] .bi-chevron-down {
             transform: rotate(180deg);
             transition: transform 0.2s ease;
         }
+        .search-header[aria-expanded="false"] .btn-toggle-search .bi-chevron-down,
         .btn-toggle-search[aria-expanded="false"] .bi-chevron-down {
             transform: rotate(0deg);
             transition: transform 0.2s ease;
@@ -552,6 +554,344 @@
             background-color: var(--bs-secondary-bg);
             color: var(--bs-body-color);
         }
+
+        /* ==========================================================================
+           Backend Left Sidebar Layout & Responsive Breakpoints
+           ========================================================================== */
+        .rdb-backend-wrapper {
+            display: flex;
+            align-items: stretch;
+            min-height: calc(100vh - 58px);
+            width: 100%;
+            position: relative;
+        }
+        .rdb-backend-main {
+            flex: 1 1 0%;
+            min-width: 0; /* Prevents wide tables from overflowing flex container */
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        .rdb-sidebar {
+            width: 265px;
+            flex: 0 0 265px;
+            background-color: var(--bs-tertiary-bg);
+            position: sticky;
+            top: 58px;
+            height: calc(100vh - 58px);
+            display: flex;
+            flex-direction: column;
+            z-index: 1035;
+            transition: width 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+                        flex-basis 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+                        transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+                        box-shadow 0.22s ease;
+        }
+        [data-bs-theme="dark"] .rdb-sidebar {
+            background-color: #0D162B;
+            border-right-color: rgba(255, 255, 255, 0.07) !important;
+        }
+        [data-bs-theme="light"] .rdb-sidebar {
+            background-color: #FFFFFF;
+            border-right-color: #E2E8F0 !important;
+        }
+        .rdb-sidebar-body {
+            flex: 1 1 auto;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+        }
+        .rdb-sidebar-section-title {
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--bs-secondary-color);
+            padding: 0.55rem 0.75rem 0.25rem;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+        .rdb-sidebar-section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background-color: var(--bs-border-color);
+            margin-left: 0.5rem;
+            opacity: 0.6;
+        }
+        .rdb-side-link {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.52rem 0.75rem !important;
+            font-size: 0.86rem;
+            font-weight: 500;
+            color: var(--bs-body-color) !important;
+            border-radius: var(--rdb-radius-sm);
+            margin-bottom: 2px;
+            transition: background-color 0.15s ease, color 0.15s ease;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .rdb-side-icon {
+            font-size: 1rem;
+            flex-shrink: 0;
+            width: 1.25rem;
+            text-align: center;
+        }
+        .rdb-side-link:hover {
+            background-color: rgba(37, 99, 235, 0.08);
+            color: var(--rdb-secondary) !important;
+        }
+        [data-bs-theme="dark"] .rdb-side-link:hover {
+            background-color: rgba(59, 130, 246, 0.14);
+            color: #93C5FD !important;
+        }
+        .rdb-side-link.active {
+            background: var(--rdb-gradient-primary) !important;
+            color: #FFFFFF !important;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+        }
+        .rdb-side-link.active .rdb-side-icon {
+            color: #FFFFFF !important;
+        }
+        .rdb-side-link.active-parent {
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--rdb-secondary) !important;
+            font-weight: 600;
+        }
+        [data-bs-theme="dark"] .rdb-side-link.active-parent {
+            background-color: rgba(59, 130, 246, 0.18);
+            color: #93C5FD !important;
+        }
+        .rdb-side-chevron {
+            font-size: 0.72rem;
+            transition: transform 0.2s ease;
+            margin-left: auto;
+            opacity: 0.7;
+        }
+        .rdb-side-toggle[aria-expanded="true"] .rdb-side-chevron {
+            transform: rotate(180deg);
+        }
+        /* ==========================================================================
+           Fractional Spacing Utilities & Uniform Icon-to-Text Spacing System
+           ========================================================================== */
+        .me-0\.5 { margin-right: 0.2rem !important; }
+        .me-1\.5 { margin-right: 0.45rem !important; }
+        .me-2\.5 { margin-right: 0.75rem !important; }
+        .ms-0\.5 { margin-left: 0.2rem !important; }
+        .ms-1\.5 { margin-left: 0.45rem !important; }
+        .ms-2\.5 { margin-left: 0.75rem !important; }
+        .mt-0\.5 { margin-top: 0.2rem !important; }
+        .mt-1\.5 { margin-top: 0.45rem !important; }
+        .mt-2\.5 { margin-top: 0.75rem !important; }
+        .mb-0\.5 { margin-bottom: 0.2rem !important; }
+        .mb-1\.5 { margin-bottom: 0.45rem !important; }
+        .mb-2\.5 { margin-bottom: 0.75rem !important; }
+        .gap-0\.5 { gap: 0.2rem !important; }
+        .gap-1\.5 { gap: 0.45rem !important; }
+        .gap-2\.5 { gap: 0.75rem !important; }
+        .p-1\.5 { padding: 0.38rem !important; }
+        .p-2\.5 { padding: 0.65rem !important; }
+        .p-3\.5 { padding: 1.25rem !important; }
+        .px-1\.5 { padding-left: 0.38rem !important; padding-right: 0.38rem !important; }
+        .px-2\.5 { padding-left: 0.65rem !important; padding-right: 0.65rem !important; }
+        .px-3\.5 { padding-left: 1.25rem !important; padding-right: 1.25rem !important; }
+        .py-0\.5 { padding-top: 0.15rem !important; padding-bottom: 0.15rem !important; }
+        .py-1\.5 { padding-top: 0.38rem !important; padding-bottom: 0.38rem !important; }
+        .py-2\.5 { padding-top: 0.65rem !important; padding-bottom: 0.65rem !important; }
+        .py-3\.5 { padding-top: 1.25rem !important; padding-bottom: 1.25rem !important; }
+
+        /* Uniform Icon Alignment in Menus & Dropdowns (Frontend & Backend) */
+        .frontend-subnav .nav-link > i.bi:not(:only-child) {
+            margin-right: 0.45rem !important;
+        }
+        .frontend-subnav .dropdown-item > i.bi:not(:only-child),
+        .rdb-navbar .dropdown-item > i.bi:not(:only-child) {
+            margin-right: 0.5rem !important;
+            width: 1.15rem;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .rdb-side-submenu {
+            padding-left: 0.7rem;
+            margin-left: 1rem;
+            border-left: 1.5px solid var(--bs-border-color);
+            margin-top: 4px;
+            margin-bottom: 8px;
+        }
+        .rdb-sub-divider {
+            height: 1px;
+            background-color: var(--bs-border-color);
+            margin: 0.5rem 0.5rem;
+            opacity: 0.65;
+            list-style: none;
+        }
+        .rdb-sub-header {
+            font-size: 0.69rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--bs-secondary-color);
+            padding: 0.38rem 0.6rem 0.22rem;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.48rem;
+        }
+        .rdb-sub-header > i.bi {
+            margin-right: 0 !important;
+            width: 1.15rem;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .rdb-sub-collapse-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            font-size: 0.76rem;
+            font-weight: 600;
+            color: var(--bs-secondary-color);
+            padding: 0.44rem 0.68rem;
+            border-radius: var(--rdb-radius-sm);
+            background-color: rgba(148, 163, 184, 0.08);
+            border: 1px dashed var(--bs-border-color);
+            margin: 0.28rem 0;
+            text-decoration: none;
+            transition: all 0.15s ease;
+        }
+        .rdb-sub-collapse-btn > span {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.48rem;
+        }
+        .rdb-sub-collapse-btn > span > i.bi {
+            margin-right: 0 !important;
+            width: 1.15rem;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .rdb-sub-collapse-btn:hover {
+            color: var(--rdb-secondary);
+            border-color: var(--rdb-secondary);
+            background-color: rgba(37, 99, 235, 0.06);
+        }
+        .rdb-sub-collapse-btn[aria-expanded="true"] .rdb-side-chevron {
+            transform: rotate(180deg);
+        }
+        .rdb-sub-dash {
+            color: var(--bs-secondary-color);
+            font-weight: 600;
+            margin-right: 0.42rem;
+            opacity: 0.75;
+            flex-shrink: 0;
+        }
+        .rdb-sub-link {
+            display: flex;
+            align-items: center;
+            padding: 0.45rem 0.65rem !important;
+            font-size: 0.82rem;
+            line-height: 1.4;
+            font-weight: 400;
+            color: var(--bs-body-color) !important;
+            border-radius: var(--rdb-radius-sm);
+            margin-bottom: 3px;
+            transition: background-color 0.15s ease, color 0.15s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .rdb-sub-link > i.bi {
+            margin-right: 0.5rem !important;
+            width: 1.15rem;
+            text-align: center;
+            flex-shrink: 0;
+            font-size: 0.9rem;
+        }
+        .rdb-sub-link:hover {
+            background-color: rgba(37, 99, 235, 0.08);
+            color: var(--rdb-secondary) !important;
+        }
+        .rdb-sub-link.active {
+            background-color: rgba(37, 99, 235, 0.14) !important;
+            color: var(--rdb-secondary) !important;
+            font-weight: 600 !important;
+        }
+        [data-bs-theme="dark"] .rdb-sub-link.active {
+            background-color: rgba(59, 130, 246, 0.24) !important;
+            color: #93C5FD !important;
+        }
+
+        /* Desktop Mini-Sidebar Collapsed State (>= 992px) */
+        @media (min-width: 992px) {
+            body.rdb-sidebar-collapsed .rdb-sidebar:not(:hover) {
+                width: 68px;
+                flex: 0 0 68px;
+            }
+            body.rdb-sidebar-collapsed .rdb-sidebar:not(:hover) .sidebar-text,
+            body.rdb-sidebar-collapsed .rdb-sidebar:not(:hover) .rdb-sidebar-section-title,
+            body.rdb-sidebar-collapsed .rdb-sidebar:not(:hover) .rdb-side-submenu,
+            body.rdb-sidebar-collapsed .rdb-sidebar:not(:hover) .sidebar-brand-wrap,
+            body.rdb-sidebar-collapsed .rdb-sidebar:not(:hover) .sidebar-badge {
+                display: none !important;
+            }
+            body.rdb-sidebar-collapsed .rdb-sidebar:not(:hover) .rdb-sidebar-header {
+                justify-content: center !important;
+                padding-left: 0.5rem !important;
+                padding-right: 0.5rem !important;
+            }
+            body.rdb-sidebar-collapsed .rdb-sidebar:not(:hover) .rdb-side-link {
+                justify-content: center;
+                padding: 0.6rem 0.5rem !important;
+            }
+            body.rdb-sidebar-collapsed .rdb-sidebar:not(:hover) .rdb-side-icon {
+                font-size: 1.15rem;
+                margin: 0 !important;
+            }
+            body.rdb-sidebar-collapsed .rdb-sidebar:hover {
+                box-shadow: var(--rdb-shadow-lg);
+            }
+        }
+
+        /* Mobile & Tablet Offcanvas Drawer (< 992px) */
+        .rdb-sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(9, 15, 30, 0.55);
+            backdrop-filter: blur(2px);
+            z-index: 1050;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        @media (max-width: 991.98px) {
+            .rdb-sidebar {
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                height: 100vh;
+                width: 280px;
+                max-width: 85vw;
+                flex: none;
+                z-index: 1055;
+                transform: translateX(-100%);
+                box-shadow: var(--rdb-shadow-lg);
+            }
+            body.rdb-sidebar-mobile-open .rdb-sidebar {
+                transform: translateX(0);
+            }
+            body.rdb-sidebar-mobile-open .rdb-sidebar-backdrop {
+                display: block;
+                opacity: 1;
+            }
+            body.rdb-sidebar-mobile-open {
+                overflow: hidden;
+            }
+        }
     </style>
     <!-- IMask CDN -->
     <script src="https://unpkg.com/imask"></script>
@@ -563,6 +903,9 @@
     @stack('styles')
 </head>
 <body>
+    @php
+        $useBackendSidebar = request()->is('backend*') && Auth::check();
+    @endphp
     <div id="app">
         @if(session()->has('impersonator_id'))
             <div class="alert alert-warning border-0 rounded-0 mb-0 py-2 px-4 d-flex justify-content-between align-items-center shadow-sm" style="position: sticky; top: 0; z-index: 1060; background: #fff3cd; color: #664d03;">
@@ -587,6 +930,16 @@
         @endif
         <nav class="navbar navbar-expand-md shadow-sm rdb-navbar sticky-top" style="z-index: 1050;">
             <div class="{{ request()->is('backend*') ? 'container-fluid px-4' : 'container' }}">
+                @if($useBackendSidebar)
+                    <!-- Mobile Offcanvas Sidebar Trigger (< 992px) -->
+                    <button type="button" class="btn btn-sm btn-link text-white p-1.5 me-2 d-lg-none" id="rdbMobileSidebarTrigger" aria-label="เปิดเมนูจัดการระบบ" title="เปิดเมนูจัดการระบบ">
+                        <i class="bi bi-list fs-4"></i>
+                    </button>
+                    <!-- Desktop Mini/Expanded Sidebar Trigger (>= 992px) -->
+                    <button type="button" class="btn btn-sm btn-link text-white-50 p-1.5 me-2 d-none d-lg-inline-flex align-items-center" id="rdbDesktopSidebarTrigger" title="ย่อ/ขยายแถบเมนูด้านข้าง">
+                        <i class="bi bi-layout-sidebar-inset fs-5"></i>
+                    </button>
+                @endif
                 <a class="navbar-brand" href="{{ url('/') }}">
                     <img src="https://research.pcru.ac.th/rdb/images/pcru.png" alt="PCRU Logo" style="height: 36px;" class="me-2">
                     <span class="brand-badge ms-1">PCRU RDB</span>
@@ -595,33 +948,9 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <!-- Sidebar Toggle Button Removed from Navbar -->
-
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <!-- Left Side Of Navbar (Row 1) -->
+                    <!-- Left Side Of Navbar (Row 1) — Backend menus moved to Left Sidebar -->
                     <ul class="navbar-nav me-auto">
-                        @auth
-                            @if(request()->is('backend*'))
-                                @if(Auth::user()->canAccessFullBackend())
-                                    <li class="nav-item">
-                                        <a class="nav-link {{ request()->routeIs('backend.site.index') || request()->is('backend') ? 'active fw-bold' : '' }}" href="{{ route('backend.site.index') }}">
-                                            <i class="bi bi-speedometer2 text-primary me-1"></i> แดชบอร์ด
-                                        </a>
-                                    </li>
-                                @else
-                                    <li class="nav-item">
-                                        <a class="nav-link {{ request()->routeIs('backend.onboarding.*') ? 'active fw-bold text-warning' : '' }}" href="{{ route('backend.onboarding.index') }}">
-                                            <i class="bi bi-person-check-fill text-warning me-1"></i> ยืนยันตัวตนนักวิจัย
-                                        </a>
-                                    </li>
-                                @endif
-                                <li class="nav-item">
-                                    <a class="nav-link text-body-secondary" href="{{ route('home') }}" target="_blank" title="เปิดหน้าเว็บไซต์ส่วนสาธารณะ (เปิดแท็บใหม่)">
-                                        <i class="bi bi-box-arrow-up-right text-info me-1"></i> ดูหน้าบ้าน
-                                    </a>
-                                </li>
-                            @endif
-                        @endauth
                     </ul>
 
                     <!-- Right Side Of Navbar (Row 1) -->
@@ -788,27 +1117,42 @@
             </div>
         </nav>
 
-        <!-- Row 2: Subnav Menu (Backend vs Frontend) -->
-        @if(request()->is('backend*'))
-            @auth
-            <x-backend-menu />
-            @endauth
-        @else
-            <x-frontend-menu />
-        @endif
+        @if($useBackendSidebar)
+            <!-- Modern Left Sidebar Backend Layout -->
+            <div class="rdb-backend-wrapper">
+                <x-backend-sidebar />
+                <main class="rdb-backend-main py-3 py-md-4">
+                    <div class="container-fluid px-3 px-md-4">
+                        <!-- Alerts handled by SweetAlert2 Toast now -->
+                        <div id="flash-messages" style="display: none;" 
+                             data-success="{{ session('success') }}" 
+                             data-error="{{ session('error') }}"
+                             data-errors="{{ $errors->any() ? json_encode($errors->all()) : '' }}">
+                        </div>
 
-        <main class="py-4">
-            <div class="container-fluid px-4">
-                <!-- Alerts handled by SweetAlert2 Toast now -->
-                <div id="flash-messages" style="display: none;" 
-                     data-success="{{ session('success') }}" 
-                     data-error="{{ session('error') }}"
-                     data-errors="{{ $errors->any() ? json_encode($errors->all()) : '' }}">
-                </div>
-
-                @yield('content')
+                        @yield('content')
+                    </div>
+                </main>
             </div>
-        </main>
+        @else
+            <!-- Public Frontend Subnav Menu -->
+            @unless(request()->is('backend*'))
+                <x-frontend-menu />
+            @endunless
+
+            <main class="py-4">
+                <div class="container-fluid px-4">
+                    <!-- Alerts handled by SweetAlert2 Toast now -->
+                    <div id="flash-messages" style="display: none;" 
+                         data-success="{{ session('success') }}" 
+                         data-error="{{ session('error') }}"
+                         data-errors="{{ $errors->any() ? json_encode($errors->all()) : '' }}">
+                    </div>
+
+                    @yield('content')
+                </div>
+            </main>
+        @endif
 
         @unless(request()->is('backend*'))
         <footer class="border-top mt-4 py-4 bg-body-tertiary">
@@ -833,7 +1177,79 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-             // Sidebar Toggle Logic
+            // Backend Left Sidebar Responsive & Collapse Logic
+            const body = document.body;
+            const desktopTrigger = document.getElementById('rdbDesktopSidebarTrigger');
+            const sidebarCollapseBtn = document.getElementById('rdbSidebarCollapseBtn');
+            const sidebarCollapseIcon = document.getElementById('rdbSidebarCollapseIcon');
+            const mobileTrigger = document.getElementById('rdbMobileSidebarTrigger');
+            const mobileCloseBtn = document.getElementById('rdbSidebarCloseBtn');
+            const backdrop = document.getElementById('rdbSidebarBackdrop');
+
+            const applyDesktopSidebarState = (isCollapsed) => {
+                if (isCollapsed) {
+                    body.classList.add('rdb-sidebar-collapsed');
+                    if (sidebarCollapseIcon) {
+                        sidebarCollapseIcon.className = 'bi bi-layout-sidebar';
+                    }
+                } else {
+                    body.classList.remove('rdb-sidebar-collapsed');
+                    if (sidebarCollapseIcon) {
+                        sidebarCollapseIcon.className = 'bi bi-layout-sidebar-inset';
+                    }
+                }
+            };
+
+            // Restore saved Desktop Sidebar state or auto-adapt on medium laptop screens (992px - 1200px)
+            const savedSidebarState = localStorage.getItem('pcru_backend_sidebar_collapsed');
+            if (savedSidebarState !== null) {
+                applyDesktopSidebarState(savedSidebarState === 'true');
+            } else if (window.innerWidth >= 992 && window.innerWidth < 1200) {
+                applyDesktopSidebarState(true);
+            }
+
+            const toggleDesktopSidebar = () => {
+                const nextCollapsed = !body.classList.contains('rdb-sidebar-collapsed');
+                applyDesktopSidebarState(nextCollapsed);
+                localStorage.setItem('pcru_backend_sidebar_collapsed', nextCollapsed ? 'true' : 'false');
+            };
+
+            if (desktopTrigger) desktopTrigger.addEventListener('click', toggleDesktopSidebar);
+            if (sidebarCollapseBtn) sidebarCollapseBtn.addEventListener('click', toggleDesktopSidebar);
+
+            // Mobile & Tablet Offcanvas Drawer (< 992px)
+            const closeMobileSidebar = () => body.classList.remove('rdb-sidebar-mobile-open');
+            if (mobileTrigger) {
+                mobileTrigger.addEventListener('click', () => {
+                    body.classList.toggle('rdb-sidebar-mobile-open');
+                });
+            }
+            if (mobileCloseBtn) mobileCloseBtn.addEventListener('click', closeMobileSidebar);
+            if (backdrop) backdrop.addEventListener('click', closeMobileSidebar);
+
+            // Close mobile drawer automatically on window resize to desktop
+            window.addEventListener('resize', () => {
+                if (window.innerWidth >= 992 && body.classList.contains('rdb-sidebar-mobile-open')) {
+                    closeMobileSidebar();
+                }
+            });
+
+            // Accordion behavior: when expanding any top-level sidebar menu, collapse all other top-level menus
+            const sidebarAccordion = document.getElementById('rdbSidebarAccordion');
+            if (sidebarAccordion && typeof bootstrap !== 'undefined') {
+                sidebarAccordion.addEventListener('show.bs.collapse', (event) => {
+                    const targetMenu = event.target;
+                    if (!targetMenu.classList.contains('rdb-side-submenu')) return;
+                    sidebarAccordion.querySelectorAll('.rdb-side-submenu.show').forEach((openMenu) => {
+                        if (openMenu !== targetMenu) {
+                            const bsCollapse = bootstrap.Collapse.getInstance(openMenu) || new bootstrap.Collapse(openMenu, { toggle: false });
+                            bsCollapse.hide();
+                        }
+                    });
+                });
+            }
+
+             // Legacy Sidebar Toggle Logic
             const sidebarToggle = document.getElementById('sidebarToggle');
             const sidebarCol = document.getElementById('sidebar-col');
             const mainContentCol = document.getElementById('main-content-col');

@@ -107,9 +107,10 @@
 4. **QA & Test Assurance** (ผู้ทดสอบและสืบค้นบั๊กเชิงระบบ)
    - **Skills ที่กำกับ**: `backend-test-assurance`
    - **หน้าที่**: สืบสวนต้นตอบั๊ก (Root-Cause Debugging), ตรวจสอบ syntax (`php -l`), รันและดูแลชุดทดสอบ `php artisan test --filter=BackendAuditTest` และ `SystemAcceptancePlanExecutionTest` ให้ผ่าน 100% ก่อนส่งมอบงาน
-5. **Documentation & Manual Curator** (ผู้ดูแลคู่มือติดตั้งระบบ `README.md` และชุดเล่มคู่มือการใช้งาน `docs/manuals/`)
-   - **Skills ที่กำกับ**: `documentation-and-manuals` (`.agents/skills/documentation-and-manuals/SKILL.md`)
+5. **Documentation & Manual Curator** (ผู้ดูแลคู่มือติดตั้งระบบ `README.md`, แผนภาพระบบ, และชุดเล่มคู่มือการใช้งาน `docs/manuals/`)
+   - **Skills ที่กำกับ**: `documentation-and-manuals` (`.agents/skills/documentation-and-manuals/SKILL.md`), `diagram-design` (`.agents/skills/diagram-design/SKILL.md`)
    - **หน้าที่**:
+     - ออกแบบและเรนเดอร์แผนภาพระบบ (System Architecture, Workflows, 5-Tier Fallbacks, Data Models) เป็น HTML + Inline SVG คมชัดระดับ Editorial คุณภาพสูงสำหรับแทรกลงในคู่มือ
      - ดูแลและปรับปรุง `README.md` ให้เป็นคู่มือการติดตั้งและกู้คืนระบบจาก Git บน Laragon (`httpd`, `php-8.x`, `mariadb`) ที่ผู้เริ่มต้นทำตามได้ 100% พร้อมรายการ PHP Extensions ครบถ้วน
      - ดูแลและอัปเดตชุดเล่มคู่มือการใช้งานใน `docs/manuals/` ทั้งรูปแบบ `.md` และ `.html` ให้ตรงกับฟีเจอร์ของระบบเสมอ ได้แก่:
        - `VOLUME_1_FRONTEND_USER_MANUAL.{md,html}` (เล่ม 1: คู่มือระบบหน้าบ้าน 8 บท)

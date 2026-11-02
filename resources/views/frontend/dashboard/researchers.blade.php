@@ -107,7 +107,7 @@
                                         </div>
                                         @if(!empty($r->department_nameTH))
                                             <small class="text-body-secondary d-flex align-items-center gap-1 mt-0.5 text-truncate" title="{{ $r->department_nameTH }}">
-                                                <i class="bi bi-buildings text-secondary"></i>{{ $r->department_nameTH }}
+                                                <i class="bi bi-buildings text-secondary me-1.5"></i> {{ $r->department_nameTH }}
                                             </small>
                                         @endif
                                     </td>
@@ -162,7 +162,7 @@
                                         </div>
                                         @if(!empty($r->department_nameTH))
                                             <small class="text-body-secondary d-flex align-items-center gap-1 mt-0.5 text-truncate" title="{{ $r->department_nameTH }}">
-                                                <i class="bi bi-buildings text-secondary"></i>{{ $r->department_nameTH }}
+                                                <i class="bi bi-buildings text-secondary me-1.5"></i> {{ $r->department_nameTH }}
                                             </small>
                                         @endif
                                     </td>
@@ -249,7 +249,7 @@
                                         </div>
                                         @if($res->department)
                                             <small class="text-body-secondary d-flex align-items-center gap-1 mt-0.5" title="{{ $res->department->department_nameTH }}">
-                                                <i class="bi bi-buildings text-secondary"></i>{{ $res->department->department_nameTH }}
+                                                <i class="bi bi-buildings text-secondary me-1.5"></i> {{ $res->department->department_nameTH }}
                                             </small>
                                         @endif
                                     </td>

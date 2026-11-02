@@ -69,7 +69,7 @@
             <div class="card h-100 border shadow-sm border-success-subtle bg-success-subtle bg-opacity-10">
                 <div class="card-body p-3 text-center">
                     <span class="text-success small fw-bold d-block mb-1">
-                        <i class="bi bi-check-circle-fill"></i> ทะเบียนแล้ว
+                        <i class="bi bi-check-circle-fill me-1.5"></i> ทะเบียนแล้ว
                     </span>
                     <h4 class="fw-bold mb-0 text-success">{{ number_format($registeredCount) }}</h4>
                 </div>
@@ -81,7 +81,7 @@
             <div class="card h-100 border shadow-sm">
                 <div class="card-body p-3 text-center">
                     <span class="text-body-secondary small fw-bold d-block mb-1">
-                        <i class="bi bi-hourglass-top"></i> ยื่นคำขอ
+                        <i class="bi bi-hourglass-top me-1.5"></i> ยื่นคำขอ
                     </span>
                     <h4 class="fw-bold mb-0 text-body">{{ number_format($pendingCount) }}</h4>
                 </div>
@@ -171,7 +171,7 @@
                                         </a>
                                         @if($dip->project)
                                             <small class="text-body-secondary d-block mt-0.5">
-                                                <i class="bi bi-link-45deg text-primary"></i> โครงการ: {{ strip_tags((string) $dip->project->pro_nameTH) }}
+                                                <i class="bi bi-link-45deg text-primary me-1.5"></i> โครงการ: {{ strip_tags((string) $dip->project->pro_nameTH) }}
                                             </small>
                                         @endif
                                     </td>

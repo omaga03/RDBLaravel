@@ -477,7 +477,7 @@
                         </div>
                         <div>
                             <button onclick="window.print()" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1 shadow-xs">
-                                <i class="bi bi-printer"></i> พิมพ์ตารางนี้
+                                <i class="bi bi-printer me-1.5"></i> พิมพ์ตารางนี้
                             </button>
                         </div>
                     </div>
@@ -875,7 +875,7 @@
                         </div>
                         <div>
                             <button onclick="window.print()" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1 shadow-xs">
-                                <i class="bi bi-printer"></i> พิมพ์ตารางนี้
+                                <i class="bi bi-printer me-1.5"></i> พิมพ์ตารางนี้
                             </button>
                         </div>
                     </div>
@@ -1006,7 +1006,7 @@
                         </div>
                         <div>
                             <a href="{{ route('frontend.dashboard.utilizations') }}" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1 shadow-xs">
-                                <i class="bi bi-map"></i> ดูแผนที่ GIS การใช้ประโยชน์
+                                <i class="bi bi-map me-1.5"></i> ดูแผนที่ GIS การใช้ประโยชน์
                             </a>
                         </div>
                     </div>

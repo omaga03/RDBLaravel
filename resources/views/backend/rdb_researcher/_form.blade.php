@@ -43,7 +43,7 @@
 </div>
 
 <hr>
-<h5 class="text-primary mb-3"><i class="bi bi-person-lines-fill"></i> ข้อมูลส่วนตัว</h5>
+<h5 class="text-primary mb-3"><i class="bi bi-person-lines-fill me-1.5"></i> ข้อมูลส่วนตัว</h5>
 
 {{-- Row 3: Prefix, Gender, Fname(TH), Lname(TH) --}}
 <div class="row mb-3">

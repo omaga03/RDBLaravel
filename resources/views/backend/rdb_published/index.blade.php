@@ -165,24 +165,24 @@
                                 </div>
                                 <div class="d-flex flex-wrap gap-2 align-items-center mt-2 small">
                                     @if($item->workflow_status === 'published')
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle" title="เผยแพร่แล้ว (ล็อกการแก้ไข)"><i class="bi bi-shield-check"></i> เผยแพร่แล้ว</span>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle" title="เผยแพร่แล้ว (ล็อกการแก้ไข)"><i class="bi bi-shield-check me-1.5"></i> เผยแพร่แล้ว</span>
                                     @elseif($item->workflow_status === 'unlock_requested')
-                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" title="ยื่นขอเปิดสิทธิ์แก้ไขแล้ว"><i class="bi bi-unlock"></i> ยื่นขอแก้ไข</span>
+                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" title="ยื่นขอเปิดสิทธิ์แก้ไขแล้ว"><i class="bi bi-unlock me-1.5"></i> ยื่นขอแก้ไข</span>
                                     @elseif($item->workflow_status === 'pending_review')
-                                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" title="รอการตรวจสอบ"><i class="bi bi-clock-history"></i> รอตรวจรับ</span>
+                                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" title="รอการตรวจสอบ"><i class="bi bi-clock-history me-1.5"></i> รอตรวจรับ</span>
                                     @elseif($item->workflow_status === 'revision_required')
-                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle" title="ส่งกลับแก้ไข"><i class="bi bi-exclamation-triangle-fill"></i> ส่งกลับแก้ไข</span>
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle" title="ส่งกลับแก้ไข"><i class="bi bi-exclamation-triangle-fill me-1.5"></i> ส่งกลับแก้ไข</span>
                                     @else
-                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle" title="ฉบับร่าง"><i class="bi bi-pencil"></i> ฉบับร่าง</span>
+                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle" title="ฉบับร่าง"><i class="bi bi-pencil me-1.5"></i> ฉบับร่าง</span>
                                     @endif
                                     @if(isset($item->data_show))
                                         @if($item->data_show)
                                             <span class="badge bg-success-subtle text-success border border-success-subtle" title="เผยแพร่สู่สาธารณะ">
-                                                <i class="bi bi-eye"></i> สาธารณะ
+                                                <i class="bi bi-eye me-1.5"></i> สาธารณะ
                                             </span>
                                         @else
                                             <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle" title="ซ่อนไว้ (ไม่แสดงหน้าบ้าน)">
-                                                <i class="bi bi-eye-slash"></i> ซ่อน
+                                                <i class="bi bi-eye-slash me-1.5"></i> ซ่อน
                                             </span>
                                         @endif
                                     @endif
@@ -266,11 +266,11 @@
                                     @else
                                         @if($item->workflow_status === 'published' && auth()->user()->can('requestUnlock', $item))
                                             <button type="button" class="btn btn-outline-warning text-dark" data-bs-toggle="modal" data-bs-target="#requestUnlockModal" data-id="{{ $item->getKey() }}" data-type="published" data-title="{{ $item->pub_name }}" title="ผลงานนี้เผยแพร่แล้ว ยื่นขอเปิดสิทธิ์แก้ไขจาก Admin">
-                                                <i class="bi bi-unlock"></i> ขอแก้ไข
+                                                <i class="bi bi-unlock me-1.5"></i> ขอแก้ไข
                                             </button>
                                         @elseif($item->workflow_status === 'unlock_requested')
                                             <span class="btn btn-sm btn-outline-warning disabled" title="ยื่นขอเปิดสิทธิ์แก้ไขแล้ว รอ Admin อนุมัติ">
-                                                <i class="bi bi-hourglass-split"></i> รออนุมัติ
+                                                <i class="bi bi-hourglass-split me-1.5"></i> รออนุมัติ
                                             </span>
                                         @endif
                                     @endcan
@@ -278,14 +278,14 @@
                                     @if(auth()->user()->can('approveUnlock', $item) && $item->workflow_status === 'unlock_requested')
                                         <form action="{{ route('backend.workflow.approve_unlock', ['type' => 'published', 'id' => $item->getKey()]) }}" method="POST" class="d-inline" onsubmit="return confirm('อนุมัติให้แก้ไข และย้ายผลงานนี้ไปฉบับร่างหรือไม่?');">
                                             @csrf
-                                            <button type="submit" class="btn btn-sm btn-success" title="อนุมัติให้แก้ไข (ย้ายไปฉบับร่าง)"><i class="bi bi-unlock"></i> ปลดล็อก</button>
+                                            <button type="submit" class="btn btn-sm btn-success" title="อนุมัติให้แก้ไข (ย้ายไปฉบับร่าง)"><i class="bi bi-unlock me-1.5"></i> ปลดล็อก</button>
                                         </form>
                                     @endif
                                     @if((int)$item->data_show === 0)
                                         @can('delete', $item)
                                         <form action="{{ route('backend.rdb_published.restore', $item->getKey()) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันกู้คืนข้อมูลการตีพิมพ์นี้จากถังขยะ?');">
                                             @csrf
-                                            <button type="submit" class="btn btn-sm btn-success" title="กู้คืนข้อมูล"><i class="bi bi-arrow-counterclockwise"></i> กู้คืน</button>
+                                            <button type="submit" class="btn btn-sm btn-success" title="กู้คืนข้อมูล"><i class="bi bi-arrow-counterclockwise me-1.5"></i> กู้คืน</button>
                                         </form>
                                         @endcan
                                     @endif

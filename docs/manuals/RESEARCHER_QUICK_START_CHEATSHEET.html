@@ -35,6 +35,9 @@
             --royal: #60A5FA;
         }
         * { box-sizing: border-box; }
+        html {
+            scroll-behavior: smooth;
+        }
         body {
             margin: 0;
             font-family: 'Sarabun', 'Plus Jakarta Sans', sans-serif;
@@ -44,7 +47,18 @@
             color: var(--text-primary);
             font-variant-numeric: tabular-nums;
         }
-        h1, h2, h3, h4, .font-heading {
+        h1, h2, h3, h4, .font-heading, .manual-anchor {
+            font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
+            line-height: 1.35;
+            scroll-margin-top: 85px;
+        }
+        .manual-anchor {
+            display: block;
+            position: relative;
+            visibility: hidden;
+            height: 0;
+            width: 0;
+        }
             font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
             line-height: 1.35;
         }
@@ -362,18 +376,20 @@
                 <p>Researcher Quick-Start Cheatsheet (PCRU Research Database) — สถาบันวิจัยและพัฒนา มหาวิทยาลัยราชภัฏเพชรบูรณ์</p>
             </div>
             <div class="manual-content">
-                <h1>คู่มือฉบับย่อสำหรับนักวิจัย: การส่งผลงานและขออนุมัติเผยแพร่ใน 3 นาที (Researcher Quick-Start Cheatsheet)</h1>
-<h2 id="ระบบฐานข-อม-ลงานว-จ-ย-มหาว-ทยาล-ยราชภ-ฏเพชรบ-รณ-pcru-research-database">ระบบฐานข้อมูลงานวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์ (PCRU Research Database)</h2>
+                <a id="%E0%B8%84%E0%B8%B9%E0%B9%88%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%89%E0%B8%9A%E0%B8%B1%E0%B8%9A%E0%B8%A2%E0%B9%88%E0%B8%AD%E0%B8%AA%E0%B8%B3%E0%B8%AB%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B8%99%E0%B8%B1%E0%B8%81%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B9%88%E0%B8%87%E0%B8%9C%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%82%E0%B8%AD%E0%B8%AD%E0%B8%99%E0%B8%B8%E0%B8%A1%E0%B8%B1%E0%B8%95%E0%B8%B4%E0%B9%80%E0%B8%9C%E0%B8%A2%E0%B9%81%E0%B8%9E%E0%B8%A3%E0%B9%88%E0%B9%83%E0%B8%99-3-%E0%B8%99%E0%B8%B2%E0%B8%97%E0%B8%B5-researcher-quick-start-cheatsheet" class="manual-anchor"></a><h1 id="คู่มือฉบับย่อสำหรับนักวิจัย-การส่งผลงานและขออนุมัติเผยแพร่ใน-3-นาที-researcher-quick-start-cheatsheet">คู่มือฉบับย่อสำหรับนักวิจัย: การส่งผลงานและขออนุมัติเผยแพร่ใน 3 นาที (Researcher Quick-Start Cheatsheet)</h1>
+<a id="%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%90%E0%B8%B2%E0%B8%99%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-%E0%B8%A1%E0%B8%AB%E0%B8%B2%E0%B8%A7%E0%B8%B4%E0%B8%97%E0%B8%A2%E0%B8%B2%E0%B8%A5%E0%B8%B1%E0%B8%A2%E0%B8%A3%E0%B8%B2%E0%B8%8A%E0%B8%A0%E0%B8%B1%E0%B8%8F%E0%B9%80%E0%B8%9E%E0%B8%8A%E0%B8%A3%E0%B8%9A%E0%B8%B9%E0%B8%A3%E0%B8%93%E0%B9%8C-pcru-research-database" class="manual-anchor"></a><h2 id="ระบบฐานข้อมูลงานวิจัย-มหาวิทยาลัยราชภัฏเพชรบูรณ์-pcru-research-database">ระบบฐานข้อมูลงานวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์ (PCRU Research Database)</h2>
 <hr />
-<h3 id="ภาพรวม-4-ข-นตอนหล-กของน-กว-จ-ย">ภาพรวม 4 ขั้นตอนหลักของนักวิจัย</h3>
+<a id="%E0%B8%A0%E0%B8%B2%E0%B8%9E%E0%B8%A3%E0%B8%A7%E0%B8%A1-4-%E0%B8%82%E0%B8%B1%E0%B9%89%E0%B8%99%E0%B8%95%E0%B8%AD%E0%B8%99%E0%B8%AB%E0%B8%A5%E0%B8%B1%E0%B8%81%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B8%99%E0%B8%B1%E0%B8%81%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2" class="manual-anchor"></a><h3 id="ภาพรวม-4-ขั้นตอนหลักของนักวิจัย">ภาพรวม 4 ขั้นตอนหลักของนักวิจัย</h3>
+
 <div class="mermaid-container"><pre class="mermaid">
 flowchart LR
-    S1["1. ล็อกอิน Google SSO\n(@pcru.ac.th)"] --&gt; S2["2. สร้างฉบับร่าง (Draft)\n&amp; อัปโหลดไฟล์ PDF"]
-    S2 --&gt; S3["3. กดปุ่ม 'ส่งตรวจสอบ'\n(Submit for Review)"]
-    S3 --&gt; S4["4. สถาบันวิจัยฯ อนุมัติ\nเผยแพร่ขึ้นหน้าบ้านอัตโนมัติ"]
+    S1["1. ล็อกอิน Google SSO (@pcru.ac.th)"] --&gt; S2["2. สร้างฉบับร่าง Draft และแนบไฟล์ PDF"]
+    S2 --&gt; S3["3. กดปุ่มส่งตรวจสอบ Submit for Review"]
+    S3 --&gt; S4["4. สถาบันวิจัยฯ อนุมัติ เผยแพร่ขึ้นหน้าบ้าน"]
 </pre></div>
+
 <hr />
-<h3 id="ข-นตอนท-1-การเข-าส-ระบบและการเข-าถ-งเมน-น-กว-จ-ย">ขั้นตอนที่ 1: การเข้าสู่ระบบและการเข้าถึงเมนูนักวิจัย</h3>
+<a id="%E0%B8%82%E0%B8%B1%E0%B9%89%E0%B8%99%E0%B8%95%E0%B8%AD%E0%B8%99%E0%B8%97%E0%B8%B5%E0%B9%88-1-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%80%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B8%AA%E0%B8%B9%E0%B9%88%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%80%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B8%96%E0%B8%B6%E0%B8%87%E0%B9%80%E0%B8%A1%E0%B8%99%E0%B8%B9%E0%B8%99%E0%B8%B1%E0%B8%81%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2" class="manual-anchor"></a><h3 id="ขั้นตอนที่-1-การเข้าสู่ระบบและการเข้าถึงเมนูนักวิจัย">ขั้นตอนที่ 1: การเข้าสู่ระบบและการเข้าถึงเมนูนักวิจัย</h3>
 <ol>
 <li>เปิดเว็บเบราว์เซอร์ไปที่หน้าเข้าสู่ระบบ (<code>/login</code>)</li>
 <li>คลิกปุ่ม <strong>&quot;เข้าสู่ระบบด้วยบัญชี Google (@pcru.ac.th)&quot;</strong></li>
@@ -387,7 +403,7 @@ flowchart LR
 </li>
 </ol>
 <hr />
-<h3 id="ข-นตอนท-2-การบ-นท-กข-อม-ลฉบ-บร-าง-draft-และการแนบไฟล-pdf">ขั้นตอนที่ 2: การบันทึกข้อมูลฉบับร่าง (<code>Draft</code>) และการแนบไฟล์ PDF</h3>
+<a id="%E0%B8%82%E0%B8%B1%E0%B9%89%E0%B8%99%E0%B8%95%E0%B8%AD%E0%B8%99%E0%B8%97%E0%B8%B5%E0%B9%88-2-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9A%E0%B8%B1%E0%B8%99%E0%B8%97%E0%B8%B6%E0%B8%81%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%89%E0%B8%9A%E0%B8%B1%E0%B8%9A%E0%B8%A3%E0%B9%88%E0%B8%B2%E0%B8%87-draft-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%81%E0%B8%99%E0%B8%9A%E0%B9%84%E0%B8%9F%E0%B8%A5%E0%B9%8C-pdf" class="manual-anchor"></a><h3 id="ขั้นตอนที่-2-การบันทึกข้อมูลฉบับร่าง-draft-และการแนบไฟล์-pdf">ขั้นตอนที่ 2: การบันทึกข้อมูลฉบับร่าง (<code>Draft</code>) และการแนบไฟล์ PDF</h3>
 <ol>
 <li>เข้าไปยังโมดูลที่ต้องการบันทึก (เช่น <strong>ผลงานตีพิมพ์</strong> หรือ <strong>โครงการวิจัย</strong>) แล้วคลิกปุ่ม <strong>&quot;+ เพิ่มข้อมูลใหม่&quot;</strong></li>
 <li>กรอกรายละเอียดข้อมูลให้ครบถ้วน (วันที่ทั้งหมดในระบบใช้รูปแบบ <strong>พ.ศ.</strong>)</li>
@@ -400,7 +416,7 @@ flowchart LR
 <li>คลิก <strong>&quot;บันทึกข้อมูล&quot;</strong> ➔ รายการจะถูกบันทึกในสถานะ <strong><code>ฉบับร่าง (Draft)</code></strong> (ท่านยังสามารถแก้ไขเพิ่มเติมได้ตลอดเวลา และข้อมูลจะยังไม่แสดงต่อสาธารณะ)</li>
 </ol>
 <hr />
-<h3 id="ข-นตอนท-3-การกดส-งผลงานให-สถาบ-นว-จ-ยฯ-ตรวจสอบ-submit-for-review">ขั้นตอนที่ 3: การกดส่งผลงานให้สถาบันวิจัยฯ ตรวจสอบ (<code>Submit for Review</code>)</h3>
+<a id="%E0%B8%82%E0%B8%B1%E0%B9%89%E0%B8%99%E0%B8%95%E0%B8%AD%E0%B8%99%E0%B8%97%E0%B8%B5%E0%B9%88-3-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%81%E0%B8%94%E0%B8%AA%E0%B9%88%E0%B8%87%E0%B8%9C%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B9%83%E0%B8%AB%E0%B9%89%E0%B8%AA%E0%B8%96%E0%B8%B2%E0%B8%9A%E0%B8%B1%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B8%AF-%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%AA%E0%B8%AD%E0%B8%9A-submit-for-review" class="manual-anchor"></a><h3 id="ขั้นตอนที่-3-การกดส่งผลงานให้สถาบันวิจัยฯ-ตรวจสอบ-submit-for-review">ขั้นตอนที่ 3: การกดส่งผลงานให้สถาบันวิจัยฯ ตรวจสอบ (<code>Submit for Review</code>)</h3>
 <ol>
 <li>เมื่อตรวจสอบความถูกต้องของข้อมูลและไฟล์แนบเรียบร้อยแล้ว ให้เปิดหน้ารายละเอียดของผลงานนั้น</li>
 <li>คลิกปุ่มสีน้ำเงิน <strong>&quot;ส่งตรวจสอบ (Submit for Review)&quot;</strong></li>
@@ -412,7 +428,7 @@ flowchart LR
 </li>
 </ol>
 <hr />
-<h3 id="ข-นตอนท-4-การต-ดตามผลและการแก-ไขข-อม-ลภายหล-ง">ขั้นตอนที่ 4: การติดตามผลและการแก้ไขข้อมูลภายหลัง</h3>
+<a id="%E0%B8%82%E0%B8%B1%E0%B9%89%E0%B8%99%E0%B8%95%E0%B8%AD%E0%B8%99%E0%B8%97%E0%B8%B5%E0%B9%88-4-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%B4%E0%B8%94%E0%B8%95%E0%B8%B2%E0%B8%A1%E0%B8%9C%E0%B8%A5%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%81%E0%B8%81%E0%B9%89%E0%B9%84%E0%B8%82%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%A0%E0%B8%B2%E0%B8%A2%E0%B8%AB%E0%B8%A5%E0%B8%B1%E0%B8%87" class="manual-anchor"></a><h3 id="ขั้นตอนที่-4-การติดตามผลและการแก้ไขข้อมูลภายหลัง">ขั้นตอนที่ 4: การติดตามผลและการแก้ไขข้อมูลภายหลัง</h3>
 <table>
 <thead>
 <tr>
@@ -463,6 +479,23 @@ flowchart LR
         (function() {
             const saved = localStorage.getItem('pcru_manual_theme');
             if (saved) document.documentElement.setAttribute('data-theme', saved);
+
+            // Smooth scrolling on hash links with Unicode support
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    const rawHash = this.getAttribute('href').slice(1);
+                    if (!rawHash) return;
+                    const decoded = decodeURIComponent(rawHash);
+                    const targetEl = document.getElementById(decoded) || 
+                                     document.getElementById(rawHash) || 
+                                     document.getElementById(encodeURIComponent(decoded));
+                    if (targetEl) {
+                        e.preventDefault();
+                        history.pushState(null, null, '#' + rawHash);
+                        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
         })();
     </script>
 </body>

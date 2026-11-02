@@ -358,7 +358,7 @@
                                     </span>
                                 </div>
                                 <div class="btn btn-sm btn-success w-100 rounded-2 fw-medium d-flex align-items-center justify-content-center gap-1.5 py-1.5 text-white shadow-sm">
-                                    <i class="bi bi-cloud-arrow-down-fill"></i> ดาวน์โหลดเอกสารหลัก
+                                    <i class="bi bi-cloud-arrow-down-fill me-1.5"></i> ดาวน์โหลดเอกสารหลัก
                                 </div>
                             </div>
                         </a>

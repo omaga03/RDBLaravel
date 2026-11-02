@@ -74,7 +74,7 @@
         <!-- Alert Notification Box (Amber) -->
         <div class="alert text-white fw-medium d-flex align-items-center gap-2 mb-4 shadow-sm" style="background-color: #f39c12; border: none; border-radius: 6px; padding: 12px 18px;">
             <div>
-                <strong>คำแนะนำ:</strong> เมื่อดาวน์โหลดแพ็กเกจ ZIP เสร็จแล้ว ให้กดปุ่ม <i class="bi bi-check-lg fw-bold"></i> เพื่อทำเครื่องหมายว่าส่งออกแล้ว หรือไปที่ <a href="{{ route('backend.rdb_published.dspace_check') }}" class="text-white text-decoration-underline fw-bold">หน้าตรวจสอบจำนวนหน้า & สถานะไฟล์ PDF</a> เพื่อตรวจความสมบูรณ์ก่อนส่งออก
+                <strong>คำแนะนำ:</strong> เมื่อดาวน์โหลดแพ็กเกจ ZIP เสร็จแล้ว ให้กดปุ่ม <i class="bi bi-check-lg fw-bold me-1.5"></i> เพื่อทำเครื่องหมายว่าส่งออกแล้ว หรือไปที่ <a href="{{ route('backend.rdb_published.dspace_check') }}" class="text-white text-decoration-underline fw-bold">หน้าตรวจสอบจำนวนหน้า & สถานะไฟล์ PDF</a> เพื่อตรวจความสมบูรณ์ก่อนส่งออก
             </div>
         </div>
 

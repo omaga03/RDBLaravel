@@ -127,4 +127,11 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Backend Navigation Layout Mode ('sidebar' or 'topbar')
+    |--------------------------------------------------------------------------
+    */
+    'backend_layout' => env('BACKEND_LAYOUT', 'sidebar'),
 ];

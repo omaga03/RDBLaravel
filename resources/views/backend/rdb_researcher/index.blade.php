@@ -110,7 +110,7 @@
                                         <div class="small text-body-secondary">
                                             @if($researcher->scopus_authorId)
                                                 <span class="me-3" title="Scopus Author ID">
-                                                    <i class="bi bi-journal-bookmark-fill text-info"></i> Scopus: 
+                                                    <i class="bi bi-journal-bookmark-fill text-info me-1.5"></i> Scopus: 
                                                     <a href="https://www.scopus.com/authid/detail.uri?authorId={{ $researcher->scopus_authorId }}" target="_blank" class="text-decoration-none">
                                                         {{ $researcher->scopus_authorId }}
                                                     </a>
@@ -121,7 +121,7 @@
                                             @endif
                                             @if($researcher->orcid)
                                                 <span title="ORCID">
-                                                    <i class="bi bi-link-45deg text-success"></i> ORCID: 
+                                                    <i class="bi bi-link-45deg text-success me-1.5"></i> ORCID: 
                                                     <a href="https://orcid.org/{{ $researcher->orcid }}" target="_blank" class="text-decoration-none">
                                                         {{ $researcher->orcid }}
                                                     </a>

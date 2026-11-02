@@ -46,3 +46,25 @@ Use this skill whenever updating `README.md`, adding or modifying system feature
 4. **`README.md` Beginner-Friendliness Rule**:
    - การแก้ไข `README.md` ต้องเขียนแบบ Step-by-Step สำหรับผู้ที่ไม่เคยใช้งานมาก่อนให้สามารถทำตามได้ตั้งแต่ต้นจนจบ
    - ต้องระบุรายการ PHP Extensions ที่จำเป็นครบถ้วน (`pdo_mysql`, `curl`, `fileinfo`, `gd`, `intl`, `mbstring`, `openssl`, `zip`) และห้ามเผลอลบขั้นตอนการตั้งค่า `.env`, `storage:link`, หรือการตรวจสอบ Views ทั้ง 46 รายการ
+
+---
+
+## 3. Exhaustive Manual & SOP Standards (มาตรฐานความลึกและสมบูรณ์ของคู่มือ - Anti-Brevity Rule)
+
+> [!IMPORTANT]
+> **ข้อยกเว้นกฎความกระชับ (Brevity Exception)**: 
+> ห้ามนำกฎความกระชับ (เช่น Caveman mode หรือ "Keep responses concise") มาปรับใช้กับการเขียนคู่มือใน `docs/manuals/` โดยเด็ดขาด คู่มือผู้ใช้ต้องเป็น **คู่มือการปฏิบัติงานฉบับสมบูรณ์ (Comprehensive Standard Operating Procedure - SOP)** ที่ครอบคลุมทุกฟังก์ชัน ทุกขั้นตอน และทุกรายละเอียดของระบบ
+
+### กฎความลึกของเนื้อหาในแต่ละบท (Depth Requirements):
+1. **พจนานุกรมฟิลด์และแบบฟอร์ม (Form Field Dictionary)**:
+   - ทุกแบบฟอร์มบันทึกข้อมูล ต้องมีตารางระบุ: ชื่อฟิลด์, ประเภทอินพุต (Text, Dropdown, Datepicker, TomSelect, Textarea), กฎความถูกต้อง (Validation / Mandatory vs Optional), และคำอธิบายความหมายอย่างละเอียด
+2. **ขั้นตอนการปฏิบัติงานทีละสเต็ป (Step-by-Step SOP)**:
+   - เขียนลำดับการคลิก `[1]`, `[2]`, `[3]` ชัดเจน พร้อมระบุชื่อปุ่ม สีปุ่ม และผลลัพธ์ที่จะเกิดขึ้นบนหน้าจอ
+3. **สถานะและป้ายสัญลักษณ์ (Status Badges & Visual Semantics)**:
+   - ต้องมีตารางระบุป้ายสถานะทุกสี ทุกข้อความ (เช่น ป้ายสีเขียว `เผยแพร่แล้ว`, ป้ายสีเหลือง `ยื่นขอแก้ไข`, ป้ายสีฟ้า `รอตรวจรับ`, ป้ายสีแดง `ส่งกลับแก้ไข`, ป้ายสีเทา `ฉบับร่าง`) พร้อมอธิบายผลกระทบต่อสิทธิ์การแก้ไข/ลบ
+4. **การครอบคลุมโมดูลครบถ้วน (Zero-Omission Principle)**:
+   - ห้ามตัดทอนหรือละเลยโมดูลใดๆ โดยเฉพาะ **ระบบจัดการข้อมูลพื้นฐาน (Master Data Management 17 โมดูล)**, **ระบบ Onboarding & Researcher Linking**, และ **ระบบ Peer Review ครบ 8 สถานะ**
+5. **การบูรณาการแผนภาพ (Editorial Diagram Integration)**:
+   - ใช้ Skill `diagram-design` ร่วมกับ Mermaid ในการวาดแผนภาพกระบวนการ (Workflows, Data Flow, Lifecycle) แทรกในจุดที่มีขั้นตอนซับซ้อนเสมอ
+6. **กรณีผิดพลาดและการแก้ไข (Troubleshooting & Validation Warnings)**:
+   - ต้องระบุข้อความแจ้งเตือนเมื่อกรอกข้อมูลไม่ถูกต้อง (เช่น วันที่สิ้นสุดน้อยกว่าวันเริ่มต้น, สัดส่วนผู้วิจัยไม่เท่ากับ 100%, ไฟล์ PDF เกินขนาด) และวิธีแก้ไขที่ถูกต้องเสมอ

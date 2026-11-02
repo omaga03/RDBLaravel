@@ -5,11 +5,12 @@
 @endphp
 
 <div class="card search-box mb-4 shadow-sm">
-    <div class="card-header search-header d-flex justify-content-between align-items-center"  
+    <div class="card-header search-header d-flex justify-content-between align-items-center {{ $collapsed ? 'collapsed' : '' }}"  
          data-bs-toggle="collapse" 
          data-bs-target="#searchCollapse" 
-         aria-expanded="{{ ($collapsed && !$hasAdvancedParams && !request()->filled('search')) ? 'false' : 'true' }}" 
-         aria-controls="searchCollapse">
+         aria-expanded="{{ $collapsed ? 'false' : 'true' }}" 
+         aria-controls="searchCollapse"
+         style="cursor: pointer;">
         
         <h5 class="mb-0 fw-semibold d-flex align-items-center">
             <i class="bi bi-search me-2 opacity-75"></i> ค้นหาข้อมูล (Search)
@@ -26,7 +27,7 @@
             @endif
             @if(request()->except(['page', 'trash']))
                 <a href="{{ $action }}" class="btn btn-sm btn-warning shadow-sm" title="ล้างค่าการค้นหา" onclick="event.stopPropagation();">
-                    <i class="bi bi-arrow-counterclockwise"></i> ล้างตัวกรอง
+                    <i class="bi bi-arrow-counterclockwise me-1.5"></i> ล้างตัวกรอง
                 </a>
             @endif
             <button type="button" class="btn btn-sm btn-toggle-search d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px; padding: 0;" aria-label="Toggle search panel">
@@ -35,7 +36,7 @@
         </div>
     </div>
     
-    <div class="collapse {{ ($collapsed && !$hasAdvancedParams && !request()->filled('search')) ? '' : 'show' }}" id="searchCollapse">
+    <div class="collapse {{ $collapsed ? '' : 'show' }}" id="searchCollapse">
         <div class="card-body p-4">
             <form action="{{ $action }}" method="GET">
                 @if(request()->filled('trash'))
@@ -88,7 +89,7 @@
                                     <i class="bi bi-x-circle me-1"></i> ล้างค่า
                                 </a>
                             @endif
-                            <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> ค้นหา</button>
+                            <button class="btn btn-primary" type="submit"><i class="bi bi-search me-1.5"></i> ค้นหา</button>
                         </div>
                     </div>
                     
@@ -98,8 +99,8 @@
                         
                         <div class="row mt-3">
                             <div class="col-12 text-end">
-                                <a href="{{ $action }}" class="btn btn-secondary me-2"><i class="bi bi-arrow-counterclockwise"></i> ล้างค่า</a>
-                                <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> ค้นหา</button>
+                                <a href="{{ $action }}" class="btn btn-secondary me-2"><i class="bi bi-arrow-counterclockwise me-1.5"></i> ล้างค่า</a>
+                                <button type="submit" class="btn btn-primary"><i class="bi bi-search me-1.5"></i> ค้นหา</button>
                             </div>
                         </div>
                     </div>

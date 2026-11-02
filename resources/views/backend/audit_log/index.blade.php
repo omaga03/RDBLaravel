@@ -123,7 +123,7 @@
                                 </td>
                                 <td class="text-end pe-3">
                                     <a href="{{ route('backend.audit_log.show', $log->id) }}" class="btn btn-sm btn-outline-primary py-0 px-2" title="ดูรายละเอียด Diff">
-                                        <i class="bi bi-eye"></i> ดู Diff
+                                        <i class="bi bi-eye me-1.5"></i> ดู Diff
                                     </a>
                                 </td>
                             </tr>

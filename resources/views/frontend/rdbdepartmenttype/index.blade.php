@@ -3,7 +3,7 @@
 @section('content')
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-diagram-3"></i> ชนิดหน่วยงาน (Department Types)</h2>
+        <h2><i class="bi bi-diagram-3 me-1.5"></i> ชนิดหน่วยงาน (Department Types)</h2>
     </div>
 
     @if(session('success'))
@@ -17,7 +17,7 @@
                     <input type="text" class="form-control" name="search" value="{{ request('search') }}" placeholder="ค้นหาชนิดหน่วยงาน...">
                 </div>
                 <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> ค้นหา</button>
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search me-1.5"></i> ค้นหา</button>
                 </div>
             </form>
 

@@ -39,16 +39,16 @@
     @if(isset($item) && $item->department_id)
         {{-- Edit Mode: Back to Show --}}
         <a href="{{ route('backend.rdbdepartment.show', $item->department_id) }}" class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i> ย้อนกลับ
+            <i class="bi bi-arrow-left me-1.5"></i> ย้อนกลับ
         </a>
     @else
         {{-- Create Mode: Back to Index --}}
         <a href="{{ route('backend.rdbdepartment.index') }}" class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i> ย้อนกลับ
+            <i class="bi bi-arrow-left me-1.5"></i> ย้อนกลับ
         </a>
     @endif
 
     <button type="button" class="btn btn-primary" onclick="this.form.submit()">
-        <i class="bi bi-save"></i> บันทึกข้อมูล
+        <i class="bi bi-save me-1.5"></i> บันทึกข้อมูล
     </button>
 </div>

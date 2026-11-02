@@ -82,7 +82,7 @@
                 <label for="utz_files_upload" class="form-label fw-bold">ไฟล์แนบ</label>
                 @if($isEdit && $item->utz_files)
                     <div class="mb-2 p-2 bg-body-tertiary rounded border">
-                        <small class="text-body-secondary d-block mb-1 fw-semibold"><i class="bi bi-paperclip"></i> ไฟล์ปัจจุบัน:</small>
+                        <small class="text-body-secondary d-block mb-1 fw-semibold"><i class="bi bi-paperclip me-1.5"></i> ไฟล์ปัจจุบัน:</small>
                         <div class="d-flex flex-wrap gap-2">
                             @foreach(explode(',', $item->utz_files) as $file)
                                 @if(trim($file))

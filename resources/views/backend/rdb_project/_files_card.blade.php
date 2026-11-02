@@ -1,8 +1,8 @@
 <div class="card shadow-sm mb-4">
     <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
-        <h5 class="mb-0"><i class="bi bi-file-earmark-arrow-down"></i> ไฟล์เอกสาร (Files)</h5>
+        <h5 class="mb-0"><i class="bi bi-file-earmark-arrow-down me-1.5"></i> ไฟล์เอกสาร (Files)</h5>
         <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#projectFilesModal">
-            <i class="bi bi-gear"></i> จัดการ
+            <i class="bi bi-gear me-1.5"></i> จัดการ
         </button>
     </div>
     <div class="card-body">
@@ -14,7 +14,7 @@
                         📄 บทคัดย่อ<br><small class="text-muted">Abstract File</small>
                     </span>
                     <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle rounded-pill" title="จำนวนดาวน์โหลด">
-                        <i class="bi bi-eye"></i> {{ $project->pro_count_abs ?? 0 }}
+                        <i class="bi bi-eye me-1.5"></i> {{ $project->pro_count_abs ?? 0 }}
                     </span>
                 </a>
             @else
@@ -30,7 +30,7 @@
                         📚 รายงานฉบับสมบูรณ์<br><small class="text-muted">Full Report</small>
                     </span>
                     <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle rounded-pill" title="จำนวนดาวน์โหลด">
-                        <i class="bi bi-eye"></i> {{ $project->pro_count_full ?? 0 }}
+                        <i class="bi bi-eye me-1.5"></i> {{ $project->pro_count_full ?? 0 }}
                     </span>
                 </a>
             @else

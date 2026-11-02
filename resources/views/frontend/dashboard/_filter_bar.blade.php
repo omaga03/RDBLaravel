@@ -1,9 +1,9 @@
 <div class="card border shadow-sm mb-4 bg-body-tertiary" style="border-radius: var(--rdb-radius-md) !important;">
-    <div class="card-header bg-transparent border-bottom d-flex align-items-center justify-content-between py-2.5 px-3"
+    <div class="card-header bg-transparent border-bottom d-flex align-items-center justify-content-between py-2.5 px-3 collapsed"
          style="cursor: pointer;"
          data-bs-toggle="collapse" 
          data-bs-target="#intelligenceFiltersCollapse" 
-         aria-expanded="{{ (isset($activeFilterCount) && $activeFilterCount > 0) ? 'true' : 'false' }}" 
+         aria-expanded="false" 
          aria-controls="intelligenceFiltersCollapse">
         <div class="d-flex align-items-center gap-2">
             <i class="bi bi-sliders text-primary fs-5"></i>
@@ -25,11 +25,11 @@
                 </a>
             @endif
             <button type="button" class="btn btn-sm btn-light border py-0.5 px-2 text-body-secondary" aria-label="Toggle filters">
-                <i class="bi bi-chevron-down filter-collapse-icon {{ (isset($activeFilterCount) && $activeFilterCount > 0) ? 'rotate-180' : '' }}"></i>
+                <i class="bi bi-chevron-down filter-collapse-icon"></i>
             </button>
         </div>
     </div>
-    <div class="collapse {{ (isset($activeFilterCount) && $activeFilterCount > 0) ? 'show' : '' }}" id="intelligenceFiltersCollapse">
+    <div class="collapse" id="intelligenceFiltersCollapse">
         <div class="card-body p-3">
             <form action="{{ url()->current() }}" method="GET" id="dashboardFiltersForm">
             <div class="row g-2.5 align-items-end">
@@ -462,7 +462,7 @@
                 <!-- Submit & Reset Action Buttons -->
                 <div class="col-12 col-lg-auto d-flex align-items-center gap-1.5 ms-lg-auto">
                     <button type="submit" class="btn btn-sm btn-primary fw-semibold px-3 shadow-xs d-inline-flex align-items-center gap-1">
-                        <i class="bi bi-funnel-fill"></i> กรองข้อมูล
+                        <i class="bi bi-funnel-fill me-1.5"></i> กรองข้อมูล
                     </button>
                     @if(isset($activeFilterCount) && $activeFilterCount > 0)
                         <a href="{{ url()->current() }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center" title="ล้างค่าทั้งหมด">

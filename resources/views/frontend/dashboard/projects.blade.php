@@ -69,7 +69,7 @@
             <div class="card h-100 border shadow-sm {{ $overdueCount > 0 ? 'border-danger-subtle bg-danger-subtle bg-opacity-10' : '' }}">
                 <div class="card-body p-3 text-center">
                     <span class="text-danger small fw-bold d-block mb-1">
-                        <i class="bi bi-exclamation-triangle-fill"></i> ค้างส่ง
+                        <i class="bi bi-exclamation-triangle-fill me-1.5"></i> ค้างส่ง
                     </span>
                     <h4 class="fw-bold mb-0 text-danger">{{ number_format($overdueCount) }}</h4>
                 </div>

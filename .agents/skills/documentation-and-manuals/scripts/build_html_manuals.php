@@ -34,6 +34,18 @@ $manuals = [
     ],
 ];
 
+function manualSlug(string $text): string
+{
+    $text = html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $text = mb_strtolower($text, 'UTF-8');
+    // Keep Unicode letters (\p{L}), Unicode marks/combining vowels (\p{M}), numbers (\p{N}), spaces, and hyphens
+    $text = preg_replace('/[^\p{L}\p{M}\p{N}\s\-]+/u', '', $text);
+    // Replace whitespace with hyphens
+    $text = str_replace(' ', '-', $text);
+    $text = preg_replace('/\s+/u', '-', $text);
+    return trim($text, '-');
+}
+
 function convertMarkdownToEditorialHtml(string $md): string
 {
     // Normalize line endings
@@ -52,9 +64,12 @@ function convertMarkdownToEditorialHtml(string $md): string
         return "\n\n" . $html . "\n\n";
     }, $md);
 
-    // 2. Convert ```mermaid ... ``` blocks into <div class="mermaid">
-    $md = preg_replace_callback('/```mermaid\n(.*?)\n```/s', function ($m) {
-        return "\n\n<div class=\"mermaid-container\"><pre class=\"mermaid\">\n" . htmlspecialchars(trim($m[1]), ENT_NOQUOTES) . "\n</pre></div>\n\n";
+    // 2. Extract ```mermaid ... ``` blocks into placeholders so CommonMark won't parse 4-space indentation as <pre><code>
+    $mermaidBlocks = [];
+    $md = preg_replace_callback('/```mermaid\r?\n(.*?)\r?\n```/s', function ($m) use (&$mermaidBlocks) {
+        $idx = count($mermaidBlocks);
+        $mermaidBlocks[$idx] = trim($m[1]);
+        return "\n\n<!--MERMAID_PLACEHOLDER_{$idx}-->\n\n";
     }, $md);
 
     // 3. Convert GitHub Alerts > [!NOTE], > [!TIP], > [!IMPORTANT], > [!WARNING]
@@ -76,18 +91,39 @@ function convertMarkdownToEditorialHtml(string $md): string
     // 4. Parse remaining Markdown with CommonMark
     $html = Str::markdown($md);
 
-    // 5. Add id attributes to h2 and h3 for TOC navigation and wrap images in figure captions
-    $html = preg_replace_callback('/<h([23])>(.*?)<\/h\1>/s', function ($m) {
+    // 5. Add id attributes to h1-h4 for TOC navigation and wrap images in figure captions
+    $html = preg_replace_callback('/<h([1-4])>(.*?)<\/h\1>/s', function ($m) {
         $level = $m[1];
-        $text = strip_tags($m[2]);
-        $slug = trim(preg_replace('/[^\p{L}\p{N}]+/u', '-', mb_strtolower($text, 'UTF-8')), '-');
-        return "<h{$level} id=\"{$slug}\">{$m[2]}</h{$level}>";
+        $text = $m[2];
+        $slug = manualSlug($text);
+        $slugCollapsed = trim(preg_replace('/-+/', '-', $slug), '-');
+        
+        $anchors = array_unique(array_filter([
+            $slug,
+            $slugCollapsed,
+            rawurlencode($slug),
+            rawurlencode($slugCollapsed),
+        ]));
+        
+        $primary = array_shift($anchors);
+        $extraAnchorsHtml = '';
+        foreach ($anchors as $alias) {
+            $extraAnchorsHtml .= "<a id=\"{$alias}\" class=\"manual-anchor\"></a>";
+        }
+        return "{$extraAnchorsHtml}<h{$level} id=\"{$primary}\">{$m[2]}</h{$level}>";
     }, $html);
 
     $html = preg_replace_callback('/<p><img src="([^"]+)" alt="([^"]*)"\s*\/?><\/p>/', function ($m) {
         $src = $m[1];
         $alt = $m[2];
         return '<figure class="manual-figure"><a href="' . $src . '" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="' . $src . '" alt="' . htmlspecialchars($alt) . '" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> ' . htmlspecialchars($alt) . '</figcaption></figure>';
+    }, $html);
+
+    // 6. Restore Mermaid blocks from placeholders
+    $html = preg_replace_callback('/(?:<p>\s*)?<!--MERMAID_PLACEHOLDER_(\d+)-->(?:\s*<\/p>)?/', function ($m) use ($mermaidBlocks) {
+        $idx = (int)$m[1];
+        $code = $mermaidBlocks[$idx] ?? '';
+        return "\n<div class=\"mermaid-container\"><pre class=\"mermaid\">\n" . htmlspecialchars($code, ENT_NOQUOTES) . "\n</pre></div>\n";
     }, $html);
 
     return $html;
@@ -147,6 +183,9 @@ function wrapInEditorialTemplate(string $title, string $subtitle, string $badge,
             --royal: #60A5FA;
         }
         * { box-sizing: border-box; }
+        html {
+            scroll-behavior: smooth;
+        }
         body {
             margin: 0;
             font-family: 'Sarabun', 'Plus Jakarta Sans', sans-serif;
@@ -156,7 +195,18 @@ function wrapInEditorialTemplate(string $title, string $subtitle, string $badge,
             color: var(--text-primary);
             font-variant-numeric: tabular-nums;
         }
-        h1, h2, h3, h4, .font-heading {
+        h1, h2, h3, h4, .font-heading, .manual-anchor {
+            font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
+            line-height: 1.35;
+            scroll-margin-top: 85px;
+        }
+        .manual-anchor {
+            display: block;
+            position: relative;
+            visibility: hidden;
+            height: 0;
+            width: 0;
+        }
             font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
             line-height: 1.35;
         }
@@ -494,6 +544,23 @@ function wrapInEditorialTemplate(string $title, string $subtitle, string $badge,
         (function() {
             const saved = localStorage.getItem('pcru_manual_theme');
             if (saved) document.documentElement.setAttribute('data-theme', saved);
+
+            // Smooth scrolling on hash links with Unicode support
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    const rawHash = this.getAttribute('href').slice(1);
+                    if (!rawHash) return;
+                    const decoded = decodeURIComponent(rawHash);
+                    const targetEl = document.getElementById(decoded) || 
+                                     document.getElementById(rawHash) || 
+                                     document.getElementById(encodeURIComponent(decoded));
+                    if (targetEl) {
+                        e.preventDefault();
+                        history.pushState(null, null, '#' + rawHash);
+                        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
         })();
     </script>
 </body>
@@ -525,7 +592,7 @@ $indexBody = <<<'HTML'
 
     <div style="border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; background: var(--bg-subtle); display: flex; flex-direction: column; justify-content: space-between;">
         <div>
-            <span class="hero-badge">VOLUME 2 • 9 บทเรียน</span>
+            <span class="hero-badge">VOLUME 2 • 10 บทเรียน</span>
             <h3 style="margin-top: 0.25rem; border: none; padding: 0;">เล่มที่ 2: คู่มือการใช้งานระบบหลังบ้าน (Admin & Researcher)</h3>
             <p style="color: var(--text-secondary); font-size: 0.95rem;">สำหรับนักวิจัย ผู้ทรงคุณวุฒิ และผู้ดูแลระบบ ครอบคลุม Google SSO, สิทธิ์ RBAC & Impersonation, วงจรการส่งร่างและอนุมัติผลงาน (WF-01 ถึง WF-07), ระบบตรวจนับหน้า PDF & ปก .webp, ระบบ Peer Review, ส่งออก Excel UTF-8 BOM และคลังปัญญา DSpace SAF</p>
         </div>

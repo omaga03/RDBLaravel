@@ -149,7 +149,7 @@
                             <tr>
                                 <th>ที่ตั้ง / จังหวัด:</th>
                                 <td>
-                                    <i class="bi bi-geo-alt text-danger"></i> {{ $item->changwat->tambon_t }}, {{ $item->changwat->amphoe_t }}, {{ $item->changwat->changwat_t }}
+                                    <i class="bi bi-geo-alt text-danger me-1.5"></i> {{ $item->changwat->tambon_t }}, {{ $item->changwat->amphoe_t }}, {{ $item->changwat->changwat_t }}
                                 </td>
                             </tr>
                             @endif

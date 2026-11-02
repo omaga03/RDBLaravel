@@ -564,7 +564,7 @@
                                     ความเร็ว: <span id="resDurationBadge" class="fw-bold font-monospace">0 ms</span>
                                 </div>
                                 <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" onclick="copyResponseJson()">
-                                    <i class="bi bi-clipboard"></i> คัดลอก JSON
+                                    <i class="bi bi-clipboard me-1.5"></i> คัดลอก JSON
                                 </button>
                             </div>
 

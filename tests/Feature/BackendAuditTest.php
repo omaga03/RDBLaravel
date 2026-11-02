@@ -1528,6 +1528,30 @@ class BackendAuditTest extends TestCase
             $res2141->assertSee('Abstract (English)');
         }
     }
+
+    public function test_backend_left_sidebar_and_grouped_submenus()
+    {
+        $admin = User::find(129) ?? User::first();
+        $this->assertNotNull($admin);
+
+        $sidebarRes = $this->actingAs($admin)->get(route('backend.site.index'));
+        $sidebarRes->assertStatus(200);
+        $sidebarRes->assertSee('id="rdbBackendSidebar"', false);
+        $sidebarRes->assertSee('class="rdb-backend-wrapper"', false);
+        $sidebarRes->assertSee('class="rdb-sub-dash">-</span>', false);
+        $sidebarRes->assertSee('class="rdb-sub-divider"', false);
+        $sidebarRes->assertSee('id="sidebarMasterProject"', false);
+        $sidebarRes->assertSee('id="sidebarMasterPublished"', false);
+        $sidebarRes->assertSee('data-bs-parent="#rdbSidebarAccordion"', false);
+        $sidebarRes->assertDontSee('<div class="backend-subnav', false);
+
+        if (RdbProject::find(2890)) {
+            $projRes = $this->actingAs($admin)->get(route('backend.rdb_project.show', 2890));
+            $projRes->assertStatus(200);
+            $projRes->assertDontSee('หลักฐานการเงิน: ไม่ครบถ้วน');
+            $projRes->assertSee('text-wrap text-start lh-base', false);
+        }
+    }
 }
 
 

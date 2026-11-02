@@ -35,6 +35,9 @@
             --royal: #60A5FA;
         }
         * { box-sizing: border-box; }
+        html {
+            scroll-behavior: smooth;
+        }
         body {
             margin: 0;
             font-family: 'Sarabun', 'Plus Jakarta Sans', sans-serif;
@@ -44,7 +47,18 @@
             color: var(--text-primary);
             font-variant-numeric: tabular-nums;
         }
-        h1, h2, h3, h4, .font-heading {
+        h1, h2, h3, h4, .font-heading, .manual-anchor {
+            font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
+            line-height: 1.35;
+            scroll-margin-top: 85px;
+        }
+        .manual-anchor {
+            display: block;
+            position: relative;
+            visibility: hidden;
+            height: 0;
+            width: 0;
+        }
             font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
             line-height: 1.35;
         }
@@ -362,8 +376,8 @@
                 <p>สำหรับประชาชนทั่วไป นักศึกษา คณาจารย์ และหน่วยงานภายนอก — สถาบันวิจัยและพัฒนา มหาวิทยาลัยราชภัฏเพชรบูรณ์</p>
             </div>
             <div class="manual-content">
-                <h1>เล่มที่ 1: คู่มือการใช้งานระบบหน้าบ้าน (Volume 1: Frontend Public User Manual)</h1>
-<h2 id="ระบบฐานข-อม-ลงานว-จ-ย-มหาว-ทยาล-ยราชภ-ฏเพชรบ-รณ-pcru-research-database">ระบบฐานข้อมูลงานวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์ (PCRU Research Database)</h2>
+                <a id="%E0%B9%80%E0%B8%A5%E0%B9%88%E0%B8%A1%E0%B8%97%E0%B8%B5%E0%B9%88-1-%E0%B8%84%E0%B8%B9%E0%B9%88%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B8%9A%E0%B9%89%E0%B8%B2%E0%B8%99-volume-1-frontend-public-user-manual" class="manual-anchor"></a><h1 id="เล่มที่-1-คู่มือการใช้งานระบบหน้าบ้าน-volume-1-frontend-public-user-manual">เล่มที่ 1: คู่มือการใช้งานระบบหน้าบ้าน (Volume 1: Frontend Public User Manual)</h1>
+<a id="%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%90%E0%B8%B2%E0%B8%99%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-%E0%B8%A1%E0%B8%AB%E0%B8%B2%E0%B8%A7%E0%B8%B4%E0%B8%97%E0%B8%A2%E0%B8%B2%E0%B8%A5%E0%B8%B1%E0%B8%A2%E0%B8%A3%E0%B8%B2%E0%B8%8A%E0%B8%A0%E0%B8%B1%E0%B8%8F%E0%B9%80%E0%B8%9E%E0%B8%8A%E0%B8%A3%E0%B8%9A%E0%B8%B9%E0%B8%A3%E0%B8%93%E0%B9%8C-pcru-research-database" class="manual-anchor"></a><h2 id="ระบบฐานข้อมูลงานวิจัย-มหาวิทยาลัยราชภัฏเพชรบูรณ์-pcru-research-database">ระบบฐานข้อมูลงานวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์ (PCRU Research Database)</h2>
 <div class="manual-callout callout-note"><div class="callout-header"><i class="bi bi-info-circle-fill"></i> ข้อมูลจำเพาะ / หมายเหตุ (NOTE)</div><div class="callout-body"><p><strong>ข้อมูลจำเพาะของเอกสาร (Document Control)</strong></p>
 <ul>
 <li><strong>รหัสเอกสาร</strong>: <code>PCRU-RDB-MAN-VOL1-2569</code></li>
@@ -373,250 +387,724 @@
 </ul>
 </div></div>
 <hr />
-<h2 id="สารบ-ญ-table-of-contents">สารบัญ (Table of Contents)</h2>
+<a id="%E0%B8%AA%E0%B8%B2%E0%B8%A3%E0%B8%9A%E0%B8%B1%E0%B8%8D-table-of-contents" class="manual-anchor"></a><h2 id="สารบัญ-table-of-contents">สารบัญ (Table of Contents)</h2>
 <ol>
-<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-1-%E0%B8%A0%E0%B8%B2%E0%B8%9E%E0%B8%A3%E0%B8%A7%E0%B8%A1%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%99%E0%B8%B3%E0%B8%97%E0%B8%B2%E0%B8%87-system-overview--interface-navigation">บทที่ 1: ภาพรวมระบบและการนำทาง (System Overview &amp; Interface Navigation)</a></li>
-<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-2-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%B7%E0%B8%9A%E0%B8%84%E0%B9%89%E0%B8%99%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B8%AD%E0%B8%B1%E0%B8%88%E0%B8%89%E0%B8%A3%E0%B8%B4%E0%B8%A2%E0%B8%B0-smart-search--dynamic-filtering">บทที่ 2: การสืบค้นข้อมูลงานวิจัยอัจฉริยะ (Smart Search &amp; Dynamic Filtering)</a></li>
-<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-3-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B9%82%E0%B8%A1%E0%B8%94%E0%B8%B9%E0%B8%A5%E0%B9%82%E0%B8%84%E0%B8%A3%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-research-projects-directory">บทที่ 3: การใช้งานโมดูลโครงการวิจัย (Research Projects Directory)</a></li>
-<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-4-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B9%82%E0%B8%A1%E0%B8%94%E0%B8%B9%E0%B8%A5%E0%B8%9C%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%95%E0%B8%B5%E0%B8%9E%E0%B8%B4%E0%B8%A1%E0%B8%9E%E0%B9%8C%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-publications--academic-citations">บทที่ 4: การใช้งานโมดูลผลงานตีพิมพ์และงานวิชาการ (Publications &amp; Academic Citations)</a></li>
-<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-5-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B9%82%E0%B8%A1%E0%B8%94%E0%B8%B9%E0%B8%A5%E0%B8%97%E0%B8%A3%E0%B8%B1%E0%B8%9E%E0%B8%A2%E0%B9%8C%E0%B8%AA%E0%B8%B4%E0%B8%99%E0%B8%97%E0%B8%B2%E0%B8%87%E0%B8%9B%E0%B8%B1%E0%B8%8D%E0%B8%8D%E0%B8%B2-intellectual-property---dip">บทที่ 5: การใช้งานโมดูลทรัพย์สินทางปัญญา (Intellectual Property - DIP)</a></li>
-<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-6-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B9%82%E0%B8%A1%E0%B8%94%E0%B8%B9%E0%B8%A5%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%99%E0%B8%B3%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B9%84%E0%B8%9B%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%82%E0%B8%A2%E0%B8%8A%E0%B8%99%E0%B9%8C-research-utilizations">บทที่ 6: การใช้งานโมดูลการนำงานวิจัยไปใช้ประโยชน์ (Research Utilizations)</a></li>
-<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-7-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%B3%E0%B9%80%E0%B8%99%E0%B8%B5%E0%B8%A2%E0%B8%9A%E0%B8%99%E0%B8%B1%E0%B8%81%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-researchers-directory--academic-portfolio">บทที่ 7: การใช้งานทำเนียบนักวิจัย (Researchers Directory &amp; Academic Portfolio)</a></li>
-<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-8-%E0%B9%81%E0%B8%94%E0%B8%8A%E0%B8%9A%E0%B8%AD%E0%B8%A3%E0%B9%8C%E0%B8%94%E0%B8%AA%E0%B8%96%E0%B8%B4%E0%B8%95%E0%B8%B4%E0%B8%AA%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%99%E0%B9%80%E0%B8%97%E0%B8%A8%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%9F%E0%B8%B5%E0%B8%94%E0%B8%82%E0%B9%88%E0%B8%B2%E0%B8%A7%E0%B8%AA%E0%B8%B2%E0%B8%A3-dashboards--rss-feeds">บทที่ 8: แดชบอร์ดสถิติสารสนเทศและฟีดข่าวสาร (Dashboards &amp; RSS Feeds)</a></li>
-</ol>
-<hr />
-<h2 id="บทท-1-ภาพรวมระบบและการนำทาง-system-overview-amp-interface-navigation">บทที่ 1: ภาพรวมระบบและการนำทาง (System Overview &amp; Interface Navigation)</h2>
-<h3 id="1-1-แนะนำระบบฐานข-อม-ลงานว-จ-ย-มหาว-ทยาล-ยราชภ-ฏเพชรบ-รณ">1.1 แนะนำระบบฐานข้อมูลงานวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์</h3>
-<p>ระบบฐานข้อมูลงานวิจัย (PCRU Research Database) พัฒนาขึ้นภายใต้แนวคิด <strong>Scholarly Editorial Craftsmanship</strong> เพื่อเป็นศูนย์กลางคลังปัญญาและสารสนเทศงานวิจัยของมหาวิทยาลัยราชภัฏเพชรบูรณ์ โดยรวบรวมข้อมูลโครงการวิจัยกว่า <strong>2,870 โครงการ</strong>, ผลงานตีพิมพ์ทางวิชาการกว่า <strong>1,873 บทความ</strong>, ข้อมูลการนำไปใช้ประโยชน์กว่า <strong>1,112 รายการ</strong>, ทรัพย์สินทางปัญญา <strong>59 รายการ</strong> และทำเนียบนักวิจัยกว่า <strong>1,072 ท่าน</strong> ให้ประชาชนและนักวิชาการสามารถสืบค้นและเข้าถึงองค์ความรู้ได้อย่างสะดวกรวดเร็ว</p>
-<h3 id="1-2-โครงสร-างหน-าจอหล-ก-portal-layout-walkthrough">1.2 โครงสร้างหน้าจอหลัก (Portal Layout Walkthrough)</h3>
-<figure class="manual-figure"><a href="./screenshots/frontend_01_home.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/frontend_01_home.png" alt="หน้าแรกของระบบฐานข้อมูลงานวิจัย พร้อมจุดสำคัญ 1-3" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้าแรกของระบบฐานข้อมูลงานวิจัย พร้อมจุดสำคัญ 1-3</figcaption></figure>
-<p><strong>คำอธิบายหมายเลขกำกับบนหน้าจอ:</strong></p>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-1-%E0%B8%A0%E0%B8%B2%E0%B8%9E%E0%B8%A3%E0%B8%A7%E0%B8%A1%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%99%E0%B8%B3%E0%B8%97%E0%B8%B2%E0%B8%87-system-overview--interface-navigation">บทที่ 1: ภาพรวมระบบและการนำทาง (System Overview &amp; Interface Navigation)</a>
 <ul>
-<li><strong>หมายเลข <code>[1]</code> แถบเมนูนำทางหลัก (Main Navigation Bar)</strong>: ใช้สำหรับสลับเข้าสู่โมดูลหลักทั้ง 7 ส่วน ได้แก่ หน้าแรก, โครงการวิจัย, ผลงานตีพิมพ์, ทรัพย์สินทางปัญญา, การนำไปใช้ประโยชน์, ทำเนียบนักวิจัย, แดชบอร์ดสถิติ รวมถึงปุ่มสลับธีมมืด/สว่าง และปุ่มเข้าสู่ระบบสำหรับเจ้าหน้าที่/นักวิจัย</li>
-<li><strong>หมายเลข <code>[2]</code> แบนเนอร์สืบค้นอัจฉริยะและตัวกรองปีงบประมาณ (Hero Search &amp; Fiscal Year Filter)</strong>: พื้นที่สำหรับพิมพ์คำค้นหาแบบครอบคลุมทุกโมดูล หรือเลือกกรองข้อมูลเฉพาะปีงบประมาณ พ.ศ. ที่ต้องการดูสถิติ</li>
-<li><strong>หมายเลข <code>[3]</code> การ์ดสรุปสถิติภาพรวมงานวิจัย (Executive Stat Cards)</strong>: แสดงตัวเลขสถิติสำคัญของมหาวิทยาลัยด้วยรูปแบบตัวเลขเรียงหลักตรงกัน (<code>tabular-nums</code>) แยกตามจำนวนโครงการวิจัย, งบประมาณวิจัยสะสม, ผลงานตีพิมพ์ และการใช้ประโยชน์</li>
+<li>1.1 แนะนำระบบและพันธกิจคลังปัญญา มรภ.เพชรบูรณ์</li>
+<li>1.2 แผนผังสถาปัตยกรรมระบบหน้าบ้าน (Public System Architecture)</li>
+<li>1.3 โครงสร้างหน้าจอหลักและแถบเมนูนำทาง (Portal Layout Walkthrough)</li>
+<li>1.4 การสลับโหมดการแสดงผล สว่าง/มืด (Light Mode &amp; Dark Mode Switcher)</li>
 </ul>
-<h3 id="1-3-การสล-บโหมดส-หน-าจอ-light-mode-dark-mode-switcher">1.3 การสลับโหมดสีหน้าจอ (Light Mode / Dark Mode Switcher)</h3>
-<p>ระบบรองรับการแสดงผล 2 โหมดสีตามมาตรฐานสายตาทางวิชาการ:</p>
-<ol>
-<li><strong>โหมดสว่าง (Daylight Editorial Slate)</strong>: พื้นหลังโทนขาวอมเทาอ่อน สบายตา เหมาะสำหรับการอ่านในสภาพแวดล้อมแสงปกติและการสั่งพิมพ์เอกสาร</li>
-<li><strong>โหมดมืด (Carbon-Navy Night Reading)</strong>: พื้นหลังโทนสีน้ำเงินเข้มวิชาการ (<code>#0F172A</code>) ลดแสงสีฟ้าสะท้อนเข้าตา เหมาะสำหรับการอ่านบทคัดย่อหรือตรวจทานข้อมูลในเวลากลางคืน</li>
-</ol>
-<p><strong>ขั้นตอนการสลับโหมดสี:</strong></p>
-<ol>
-<li>มองไปที่มุมขวาบนของแถบเมนูนำทางหลัก (<code>[1]</code>)</li>
-<li>คลิกที่ไอคอน <strong>รูปดวงอาทิตย์ (<code>☀️</code>) / รูปพระจันทร์เสี้ยว (<code>🌙</code>)</strong></li>
-<li>หน้าจอจะเปลี่ยนโทนสีทันทีโดยไม่ต้องโหลดหน้าเว็บใหม่ และระบบจะจดจำค่าที่เลือกไว้ในเบราว์เซอร์อัตโนมัติ</li>
+</li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-2-%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%B7%E0%B8%9A%E0%B8%84%E0%B9%89%E0%B8%99%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B8%AD%E0%B8%B1%E0%B8%88%E0%B8%89%E0%B8%A3%E0%B8%B4%E0%B8%A2%E0%B8%B0-smart-search--dynamic-filtering">บทที่ 2: ระบบการสืบค้นข้อมูลงานวิจัยอัจฉริยะ (Smart Search &amp; Dynamic Filtering)</a>
+<ul>
+<li>2.1 การค้นหาด่วนจากหน้าแรก (Global Quick Search)</li>
+<li>2.2 การใช้ตัวกรองปีงบประมาณ พ.ศ. (Fiscal Year Filtering)</li>
+<li>2.3 กลไกการค้นหาแบบกลุ่มคำ (Multi-Keyword Search Logic: AND / OR)</li>
+<li>2.4 ระบบตัดคำนำหน้าชื่อภาษาไทยอัตโนมัติ (Thai Title Prefix Normalization)</li>
+<li>2.5 ปฏิทิน พ.ศ. และการตรวจสอบช่วงวันที่ (Thai Date Range Validation)</li>
+</ul>
+</li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-3-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B9%82%E0%B8%A1%E0%B8%94%E0%B8%B9%E0%B8%A5%E0%B9%82%E0%B8%84%E0%B8%A3%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-research-projects-directory">บทที่ 3: การใช้งานโมดูลโครงการวิจัย (Research Projects Directory)</a>
+<ul>
+<li>3.1 หน้ารวมรายการโครงการวิจัยและแผงค้นหาละเอียด (<code>/rdbproject</code>)</li>
+<li>3.2 พจนานุกรมช่องค้นหาและตัวกรองโครงการวิจัย (Filter Fields Dictionary)</li>
+<li>3.3 ตารางแสดงผลรายการโครงการและป้ายสถานะ (Status Badges Reference)</li>
+<li>3.4 หน้าแสดงรายละเอียดโครงการวิจัยฉบับเต็ม (<code>/rdbproject/{id}</code>)</li>
+<li>3.5 ระดับการเข้าถึงและสิทธิ์เปิดเผยเล่มรายงานวิจัย 3 ระดับ (Document Access Policy)</li>
+<li>3.6 ระบบพรีวิวภาพปกหน้าแรก (.webp) และป้ายแสดงจำนวนหน้าเอกสาร</li>
+</ul>
+</li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-4-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B9%82%E0%B8%A1%E0%B8%94%E0%B8%B9%E0%B8%A5%E0%B8%9C%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%95%E0%B8%B5%E0%B8%9E%E0%B8%B4%E0%B8%A1%E0%B8%9E%E0%B9%8C%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-publications--academic-citations">บทที่ 4: การใช้งานโมดูลผลงานตีพิมพ์และงานวิชาการ (Publications &amp; Academic Citations)</a>
+<ul>
+<li>4.1 หน้ารวมรายการบทความตีพิมพ์และตัวกรองฐานข้อมูล (<code>/rdbpublished</code>)</li>
+<li>4.2 ระดับชั้นฐานข้อมูลวิชาการ (Academic Database Tiers)</li>
+<li>4.3 หน้ารายละเอียดบทความวิจัยและการดาวน์โหลดไฟล์ Full Paper (<code>/rdbpublished/{id}</code>)</li>
+<li>4.4 ระบบสร้างข้อความอ้างอิงอัตโนมัติใน 1 คลิก (Academic Citations Generator)</li>
+</ul>
+</li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-5-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B9%82%E0%B8%A1%E0%B8%94%E0%B8%B9%E0%B8%A5%E0%B8%97%E0%B8%A3%E0%B8%B1%E0%B8%9E%E0%B8%A2%E0%B9%8C%E0%B8%AA%E0%B8%B4%E0%B8%99%E0%B8%97%E0%B8%B2%E0%B8%87%E0%B8%9B%E0%B8%B1%E0%B8%8D%E0%B8%8D%E0%B8%B2-intellectual-property---dip">บทที่ 5: การใช้งานโมดูลทรัพย์สินทางปัญญา (Intellectual Property - DIP)</a>
+<ul>
+<li>5.1 หน้ารวมรายการทรัพย์สินทางปัญญา (<code>/rdbdip</code>)</li>
+<li>5.2 การจำแนกประเภททรัพย์สินทางปัญญา</li>
+<li>5.3 หน้ารายละเอียดคำขอ การตรวจสอบเลขที่คำขอ และเอกสารสำคัญ (<code>/rdbdip/{id}</code>)</li>
+</ul>
+</li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-6-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B9%82%E0%B8%A1%E0%B8%94%E0%B8%B9%E0%B8%A5%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%99%E0%B8%B3%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B9%84%E0%B8%9B%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%82%E0%B8%A2%E0%B8%8A%E0%B8%99%E0%B9%8C-research-utilizations">บทที่ 6: การใช้งานโมดูลการนำงานวิจัยไปใช้ประโยชน์ (Research Utilizations)</a>
+<ul>
+<li>6.1 มิติการนำผลงานวิจัยไปใช้ประโยชน์ 4 ด้าน</li>
+<li>6.2 การสืบค้นผลงานตามพื้นที่ภูมิศาสตร์ (จังหวัด / อำเภอ / ตำบล)</li>
+<li>6.3 หน้ารายละเอียดการใช้ประโยชน์ การประเมินผลกระทบ และหลักฐานรับรอง (<code>/rdbprojectutilize/{id}</code>)</li>
+</ul>
+</li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-7-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%B3%E0%B9%80%E0%B8%99%E0%B8%B5%E0%B8%A2%E0%B8%9A%E0%B8%99%E0%B8%B1%E0%B8%81%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-researchers-directory--academic-portfolio">บทที่ 7: การใช้งานทำเนียบนักวิจัย (Researchers Directory &amp; Academic Portfolio)</a>
+<ul>
+<li>7.1 หน้ารวมทำเนียบนักวิจัยและการค้นหาตามสังกัดคณะ (<code>/rdbresearcher</code>)</li>
+<li>7.2 หน้าแฟ้มประวัติและผลงานวิจัยสะสมของนักวิจัย (<code>/rdbresearcher/{id}</code>)</li>
+<li>7.3 การเชื่อมต่อฐานข้อมูลสากล Scopus Author ID, ORCID iD และดัชนี h-index</li>
+<li>7.4 แท็บรวมผลงานแบบบูรณาการ 4 มิติในหน้าเดียว (Portfolio Tabs)</li>
+</ul>
+</li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-8-%E0%B9%81%E0%B8%94%E0%B8%8A%E0%B8%9A%E0%B8%AD%E0%B8%A3%E0%B9%8C%E0%B8%94%E0%B8%AA%E0%B8%96%E0%B8%B4%E0%B8%95%E0%B8%B4%E0%B8%AA%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%99%E0%B9%80%E0%B8%97%E0%B8%A8%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%9F%E0%B8%B5%E0%B8%94%E0%B8%82%E0%B9%88%E0%B8%B2%E0%B8%A7%E0%B8%AA%E0%B8%B2%E0%B8%A3-dashboards--rss-feeds">บทที่ 8: แดชบอร์ดสถิติสารสนเทศและฟีดข่าวสาร (Dashboards &amp; RSS Feeds)</a>
+<ul>
+<li>8.1 การใช้งานศูนย์สารสนเทศงานวิจัย (Intelligence Dashboards: 6 มิติ)</li>
+<li>8.2 แถบตัวกรองแดชบอร์ดและการวิเคราะห์ข้อมูลเปรียบเทียบข้ามปี พ.ศ.</li>
+<li>8.3 กราฟสถิติแบบโต้ตอบ (Interactive Chart.js) และการตรวจสอบข้อมูล Tooltip</li>
+<li>8.4 การสมัครรับฟีดข่าวสารและงานประชุมวิชาการผ่าน XML RSS Feeds</li>
+</ul>
+</li>
 </ol>
 <hr />
-<h2 id="บทท-2-การส-บค-นข-อม-ลงานว-จ-ยอ-จฉร-ยะ-smart-search-amp-dynamic-filtering">บทที่ 2: การสืบค้นข้อมูลงานวิจัยอัจฉริยะ (Smart Search &amp; Dynamic Filtering)</h2>
-<p>ระบบสืบค้นของ PCRU Research Database ออกแบบมาให้รองรับพฤติกรรมการค้นหาข้อมูลภาษาไทยและภาษาอังกฤษอย่างแม่นยำ ดังแผนผังการทำงานต่อไปนี้:</p>
+<a id="บทที่-1-ภาพรวมระบบและการนำทาง-system-overview-interface-navigation" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-1-%E0%B8%A0%E0%B8%B2%E0%B8%9E%E0%B8%A3%E0%B8%A7%E0%B8%A1%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%99%E0%B8%B3%E0%B8%97%E0%B8%B2%E0%B8%87-system-overview--interface-navigation" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-1-%E0%B8%A0%E0%B8%B2%E0%B8%9E%E0%B8%A3%E0%B8%A7%E0%B8%A1%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%99%E0%B8%B3%E0%B8%97%E0%B8%B2%E0%B8%87-system-overview-interface-navigation" class="manual-anchor"></a><h2 id="บทที่-1-ภาพรวมระบบและการนำทาง-system-overview--interface-navigation">บทที่ 1: ภาพรวมระบบและการนำทาง (System Overview &amp; Interface Navigation)</h2>
+<a id="11-%E0%B9%81%E0%B8%99%E0%B8%B0%E0%B8%99%E0%B8%B3%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%9E%E0%B8%B1%E0%B8%99%E0%B8%98%E0%B8%81%E0%B8%B4%E0%B8%88%E0%B8%84%E0%B8%A5%E0%B8%B1%E0%B8%87%E0%B8%9B%E0%B8%B1%E0%B8%8D%E0%B8%8D%E0%B8%B2-%E0%B8%A1%E0%B8%A3%E0%B8%A0%E0%B9%80%E0%B8%9E%E0%B8%8A%E0%B8%A3%E0%B8%9A%E0%B8%B9%E0%B8%A3%E0%B8%93%E0%B9%8C" class="manual-anchor"></a><h3 id="11-แนะนำระบบและพันธกิจคลังปัญญา-มรภเพชรบูรณ์">1.1 แนะนำระบบและพันธกิจคลังปัญญา มรภ.เพชรบูรณ์</h3>
+<p>ระบบฐานข้อมูลงานวิจัย (PCRU Research Database) พัฒนาขึ้นภายใต้แนวคิด <strong>Scholarly Editorial Craftsmanship</strong> โดยสถาบันวิจัยและพัฒนา มหาวิทยาลัยราชภัฏเพชรบูรณ์ เพื่อเป็นคลังสารสนเทศกลางระดับสถาบันในการรวบรวม จัดหมวดหมู่ เผยแพร่ และคุ้มครองสิทธิ์ผลงานทางวิชาการ ปัจจุบันระบบจัดเก็บและให้บริการข้อมูลอย่างเป็นรูปธรรม ประกอบด้วย:</p>
+<ul>
+<li><strong>โครงการวิจัย (Research Projects)</strong>: กว่า 2,870 โครงการ ครอบคลุมทั้งทุนงบประมาณแผ่นดิน, ทุนงบประมาณรายได้, ทุน บพข./บพท./วช. และทุนจากภาคเอกชน</li>
+<li><strong>ผลงานตีพิมพ์ทางวิชาการ (Publications)</strong>: กว่า 1,873 บทความ ทั้งในวารสารระดับนานาชาติ (Scopus / Web of Science) และวารสารระดับชาติ (TCI กลุ่ม 1 และ 2)</li>
+<li><strong>การนำงานวิจัยไปใช้ประโยชน์ (Research Utilizations)</strong>: กว่า 1,112 รายการ ครอบคลุม 4 มิติการพัฒนาพื้นที่</li>
+<li><strong>ทรัพย์สินทางปัญญา (Intellectual Property)</strong>: สิทธิบัตร อนุสิทธิบัตร และลิขสิทธิ์รวม 59 รายการ</li>
+<li><strong>ทำเนียบนักวิจัย (Researchers Portfolio)</strong>: กว่า 1,072 ท่าน พร้อมข้อมูลเชื่อมโยงดัชนีสากล</li>
+</ul>
+<hr />
+<a id="12-%E0%B9%81%E0%B8%9C%E0%B8%99%E0%B8%9C%E0%B8%B1%E0%B8%87%E0%B8%AA%E0%B8%96%E0%B8%B2%E0%B8%9B%E0%B8%B1%E0%B8%95%E0%B8%A2%E0%B8%81%E0%B8%A3%E0%B8%A3%E0%B8%A1%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B8%9A%E0%B9%89%E0%B8%B2%E0%B8%99-public-system-architecture" class="manual-anchor"></a><h3 id="12-แผนผังสถาปัตยกรรมระบบหน้าบ้าน-public-system-architecture">1.2 แผนผังสถาปัตยกรรมระบบหน้าบ้าน (Public System Architecture)</h3>
+
 <div class="mermaid-container"><pre class="mermaid">
-flowchart LR
-    A["ผู้ใช้งานพิมพ์คำค้น / ชื่อนักวิจัย"] --&gt; B{"ระบบประมวลผลคำค้น"}
-    B --&gt;|"พบคำนำหน้าชื่อไทย (นาย/นาง/ดร./ผศ.)"| C["ตัดคำนำหน้าอัตโนมัติและแยกคำ"]
-    B --&gt;|"พิมพ์หลายคำเว้นวรรค"| D["ค้นหาแบบกลุ่มคำ (AND / OR)"]
-    C --&gt; E["แสดงผลลัพธ์พร้อมไฮไลต์แหล่งที่พบ"]
-    D --&gt; E
+flowchart TD
+    User(["ผู้ใช้งานภายนอก, นักศึกษา, คณาจารย์"]) --&gt; Home["หน้าแรก (Portal Home)"]
+    Home --&gt; Nav["แถบนำทางหลัก (Main Navbar)"]
+    
+    Nav --&gt; M1["1. โครงการวิจัย (/rdbproject)"]
+    Nav --&gt; M2["2. ผลงานตีพิมพ์ (/rdbpublished)"]
+    Nav --&gt; M3["3. ทรัพย์สินทางปัญญา (/rdbdip)"]
+    Nav --&gt; M4["4. การใช้ประโยชน์ (/rdbprojectutilize)"]
+    Nav --&gt; M5["5. ทำเนียบนักวิจัย (/rdbresearcher)"]
+    Nav --&gt; M6["6. แดชบอร์ดสารสนเทศ (/dashboard)"]
+    Nav --&gt; M7["7. ข่าวและประชุม (/researchnews)"]
+
+    M1 --&gt; D1["หน้ารายละเอียด: บทคัดย่อ, ปก WebP, เล่มรายงาน 3 ระดับสิทธิ์"]
+    M2 --&gt; D2["หน้ารายละเอียด: ข้อมูลวารสาร, DOI, Full Paper, Citation 3 สไตล์"]
+    M3 --&gt; D3["หน้ารายละเอียด: เลขที่คำขอ, ผู้ประดิษฐ์, เอกสารรับรอง"]
+    M4 --&gt; D4["หน้ารายละเอียด: 4 มิติใช้ประโยชน์, พื้นที่ภูมิศาสตร์, ผลกระทบ"]
+    M5 --&gt; D5["หน้ารายละเอียด: Scopus ID, ORCID, h-index, ผลงานรวม"]
 </pre></div>
-<h3 id="2-1-การค-นหาด-วนจากหน-าแรก-global-quick-search">2.1 การค้นหาด่วนจากหน้าแรก (Global Quick Search)</h3>
-<ol>
-<li>คลิกที่ช่องค้นหาในส่วนที่ <code>[2]</code> บนหน้าแรก</li>
-<li>พิมพ์คำสำคัญที่ต้องการ เช่น <code>&quot;เกษตรอินทรีย์&quot;</code>, <code>&quot;การท่องเที่ยวเพชรบูรณ์&quot;</code>, หรือ <code>&quot;พลังงานทดแทน&quot;</code></li>
-<li>กดปุ่ม <strong>Enter</strong> บนแป้นพิมพ์ หรือคลิกปุ่ม <strong>&quot;ค้นหา&quot;</strong></li>
-<li>ระบบจะแสดงรายการโครงการวิจัยและผลงานที่เกี่ยวข้องทันที</li>
-</ol>
-<h3 id="2-2-การใช-ต-วกรองป-งบประมาณ-พ-ศ-fiscal-year-filter">2.2 การใช้ตัวกรองปีงบประมาณ พ.ศ. (Fiscal Year Filter)</h3>
-<ol>
-<li>ในหน้าแรกหรือหน้าแดชบอร์ด คลิกที่ Dropdown <strong>&quot;ปีงบประมาณ พ.ศ.&quot;</strong></li>
-<li>เลือกปี พ.ศ. ที่ต้องการ (เช่น <code>2568</code>, <code>2567</code>, <code>2566</code>)</li>
-<li>ระบบจะกรองตัวเลขสถิติและกราฟทั้งหมดให้แสดงเฉพาะข้อมูลของปีงบประมาณนั้นทันที</li>
-</ol>
-<h3 id="2-3-เทคน-คการค-นหาแบบกล-มคำ-multi-keyword-search-mode">2.3 เทคนิคการค้นหาแบบกลุ่มคำ (Multi-Keyword Search Mode)</h3>
-<p>ในหน้าค้นหาของแต่ละโมดูล ผู้ใช้สามารถเลือกตรรกะการจับคู่คำค้นได้ 2 รูปแบบ:</p>
-<ul>
-<li><strong>โหมด &quot;ทุกคำ (Match All - AND)&quot;</strong>: ใช้เมื่อต้องการผลลัพธ์ที่มีคำค้นครบทุกคำ เช่น พิมพ์ <code>&quot;ข้าวไร่ เพชรบูรณ์&quot;</code> ระบบจะแสดงเฉพาะงานวิจัยที่มีทั้งคำว่า &quot;ข้าวไร่&quot; และ &quot;เพชรบูรณ์&quot; อยู่ด้วยกัน</li>
-<li><strong>โหมด &quot;บางคำ (Match Any - OR)&quot;</strong>: ใช้เมื่อต้องการขยายวงการค้นหา เช่น พิมพ์ <code>&quot;มะขาม ข้าวโพด&quot;</code> ระบบจะแสดงงานวิจัยที่มีคำว่า &quot;มะขาม&quot; หรือ &quot;ข้าวโพด&quot; อย่างใดอย่างหนึ่งหรือทั้งสองคำ</li>
-</ul>
-<div class="manual-callout callout-tip"><div class="callout-header"><i class="bi bi-lightbulb-fill"></i> เคล็ดลับการใช้งาน (TIP)</div><div class="callout-body"><p><strong>ระบบตัดคำนำหน้าชื่อภาษาไทยอัตโนมัติ</strong>: เมื่อต้องการค้นหาชื่อนักวิจัย ท่านสามารถพิมพ์ชื่อ-นามสกุลได้ทันที หรือแม้จะคัดลอกชื่อที่มีคำนำหน้าติดมา เช่น <code>&quot;ผศ.ดร.สมชาย ใจดี&quot;</code> หรือ <code>&quot;นางสาวสมหญิง&quot;</code> ระบบจะตัดคำนำหน้า (<code>นาย</code>, <code>นาง</code>, <code>นางสาว</code>, <code>ดร.</code>, <code>ผศ.</code>, <code>รศ.</code>, <code>ศ.</code>) ออกให้อัตโนมัติ เพื่อให้ค้นพบข้อมูลนักวิจัยได้ 100% แม้ฐานข้อมูลจะเก็บคำนำหน้าแยกฟิลด์กัน</p>
-</div></div>
+
 <hr />
-<h2 id="บทท-3-การใช-งานโมด-ลโครงการว-จ-ย-research-projects-directory">บทที่ 3: การใช้งานโมดูลโครงการวิจัย (Research Projects Directory)</h2>
-<h3 id="3-1-การเข-าด-และกรองรายการโครงการว-จ-ย-rdbproject">3.1 การเข้าดูและกรองรายการโครงการวิจัย (<code>/rdbproject</code>)</h3>
-<figure class="manual-figure"><a href="./screenshots/frontend_02_projects_directory.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/frontend_02_projects_directory.png" alt="หน้ารายการโครงการวิจัยและแผงตัวกรองขั้นสูง" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้ารายการโครงการวิจัยและแผงตัวกรองขั้นสูง</figcaption></figure>
-<p><strong>ขั้นตอนการใช้งานหน้ารายการโครงการวิจัย:</strong></p>
-<ol>
-<li><strong>ส่วนที่ <code>[1]</code> แผงตัวกรองค้นหาขั้นสูง (Search &amp; Filter Panel)</strong>:
+<a id="13-%E0%B9%82%E0%B8%84%E0%B8%A3%E0%B8%87%E0%B8%AA%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%87%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B8%88%E0%B8%AD%E0%B8%AB%E0%B8%A5%E0%B8%B1%E0%B8%81%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B9%81%E0%B8%96%E0%B8%9A%E0%B9%80%E0%B8%A1%E0%B8%99%E0%B8%B9%E0%B8%99%E0%B8%B3%E0%B8%97%E0%B8%B2%E0%B8%87-portal-layout-walkthrough" class="manual-anchor"></a><h3 id="13-โครงสร้างหน้าจอหลักและแถบเมนูนำทาง-portal-layout-walkthrough">1.3 โครงสร้างหน้าจอหลักและแถบเมนูนำทาง (Portal Layout Walkthrough)</h3>
+<figure class="manual-figure"><a href="./screenshots/frontend_01_home.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/frontend_01_home.png" alt="หน้าแรกของระบบฐานข้อมูลงานวิจัย พร้อมจุดสำคัญ 1-3" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้าแรกของระบบฐานข้อมูลงานวิจัย พร้อมจุดสำคัญ 1-3</figcaption></figure>
+<a id="%E0%B8%84%E0%B8%B3%E0%B8%AD%E0%B8%98%E0%B8%B4%E0%B8%9A%E0%B8%B2%E0%B8%A2%E0%B8%AA%E0%B9%88%E0%B8%A7%E0%B8%99%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%81%E0%B8%AD%E0%B8%9A%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B8%88%E0%B8%AD%E0%B8%AB%E0%B8%A5%E0%B8%B1%E0%B8%81" class="manual-anchor"></a><h4 id="คำอธิบายส่วนประกอบหน้าจอหลัก">คำอธิบายส่วนประกอบหน้าจอหลัก:</h4>
 <ul>
-<li><strong>ชื่อโครงการ / คำสำคัญ</strong>: พิมพ์ชื่อเรื่องภาษาไทยหรือภาษาอังกฤษ</li>
-<li><strong>นักวิจัย</strong>: พิมพ์ชื่อผู้วิจัย (มีระบบ Autocomplete แนะนำรายชื่ออัตโนมัติขณะพิมพ์)</li>
-<li><strong>ปีงบประมาณ / ประเภทโครงการ / หน่วยงานคณะ</strong>: เลือกกรองตามสังกัดคณะหรือแหล่งทุน</li>
-<li><strong>ช่วงวันที่เริ่มต้น - สิ้นสุด</strong>: เลือกจากปฏิทินรูปแบบ พ.ศ. (ระบบตรวจสอบความถูกต้องว่าวันสิ้นสุดต้องไม่น้อยกว่าวันเริ่มต้นเสมอ)</li>
+<li><strong>หมายเลข <code>[1]</code> แถบเมนูนำทางหลัก (Universal Navigation Bar)</strong>:
+<ul>
+<li><strong>โลโก้มหาวิทยาลัย</strong>: คลิกเพื่อกลับสู่หน้าแรกของระบบได้ตลอดเวลา</li>
+<li><strong>เมนูโมดูลสารสนเทศ 7 เมนู</strong>: เข้าถึงโมดูลวิจัยได้อย่างรวดเร็ว</li>
+<li><strong>ปุ่มสลับโหมดสี (Theme Switcher)</strong>: ปุ่มรูปดวงอาทิตย์/พระจันทร์</li>
+<li><strong>ปุ่มเข้าสู่ระบบ (Login)</strong>: นำเข้าสู่ระบบหลังบ้านด้วย Google Workspace หรือ Username</li>
 </ul>
 </li>
-<li><strong>ส่วนที่ <code>[2]</code> ตารางแสดงผลรายการโครงการวิจัย (Projects Data Table)</strong>:
+<li><strong>หมายเลข <code>[2]</code> แบนเนอร์ค้นหาและตัวกรองปี พ.ศ. (Hero Search &amp; Year Filter)</strong>:
 <ul>
-<li>แสดงปีงบประมาณ พ.ศ., รหัสโครงการ, ชื่อโครงการวิจัย, คณะผู้วิจัยพร้อมระบุบทบาท (หัวหน้าโครงการ/ผู้ร่วมวิจัย), สังกัดคณะ, งบประมาณ และสถานะโครงการ</li>
-<li>คลิกที่ <strong>ชื่อโครงการวิจัย</strong> หรือปุ่ม <strong>&quot;ดูรายละเอียด&quot;</strong> เพื่อเข้าสู่หน้าข้อมูลโครงการฉบับเต็ม</li>
+<li><strong>ช่องสืบค้นรวม</strong>: พิมพ์คำค้นหาเพื่อค้นหาข้อมูลข้ามทุกโมดูลในระบบ</li>
+<li><strong>Dropdown ปีงบประมาณ พ.ศ.</strong>: เลือกปีงบประมาณที่ต้องการเจาะจงดูข้อมูลสถิติ</li>
+</ul>
+</li>
+<li><strong>หมายเลข <code>[3]</code> การ์ดสถิติภาพรวมงานวิจัย (Executive Counter Cards)</strong>:
+<ul>
+<li>แสดงยอดรวมสะสมของโครงการวิจัย, งบประมาณสนับสนุนรวม, บทความตีพิมพ์ และการนำไปใช้ประโยชน์ โดยแสดงตัวเลขด้วยรูปแบบ <code>tabular-nums</code> เพื่อให้แนวหลักตัวเลขตรงกันอย่างเป็นระเบียบ</li>
+</ul>
+</li>
+</ul>
+<hr />
+<a id="14-การสลับโหมดการแสดงผล-สว่างมืด-light-mode-dark-mode-switcher" class="manual-anchor"></a><a id="14-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%A5%E0%B8%B1%E0%B8%9A%E0%B9%82%E0%B8%AB%E0%B8%A1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%81%E0%B8%AA%E0%B8%94%E0%B8%87%E0%B8%9C%E0%B8%A5-%E0%B8%AA%E0%B8%A7%E0%B9%88%E0%B8%B2%E0%B8%87%E0%B8%A1%E0%B8%B7%E0%B8%94-light-mode--dark-mode-switcher" class="manual-anchor"></a><a id="14-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%A5%E0%B8%B1%E0%B8%9A%E0%B9%82%E0%B8%AB%E0%B8%A1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%81%E0%B8%AA%E0%B8%94%E0%B8%87%E0%B8%9C%E0%B8%A5-%E0%B8%AA%E0%B8%A7%E0%B9%88%E0%B8%B2%E0%B8%87%E0%B8%A1%E0%B8%B7%E0%B8%94-light-mode-dark-mode-switcher" class="manual-anchor"></a><h3 id="14-การสลับโหมดการแสดงผล-สว่างมืด-light-mode--dark-mode-switcher">1.4 การสลับโหมดการแสดงผล สว่าง/มืด (Light Mode &amp; Dark Mode Switcher)</h3>
+<p>ระบบถูกออกแบบให้รองรับการอ่านเอกสารทางวิชาการที่ใช้ระยะเวลานาน โดยมี 2 โหมดสีมาตรฐาน:</p>
+<ol>
+<li><strong>Daylight Editorial Slate (โหมดสว่าง)</strong>: พื้นหลังโทนสว่างนวลตา สบายตา ตัวหนังสือคมชัดระดับ 1px Hairline เหมาะสำหรับการทำงานเวลากลางวันและการสั่งพิมพ์</li>
+<li><strong>Carbon-Navy Night Reading (โหมดมืด)</strong>: พื้นหลังโทนสีน้ำเงินเข้มวิชาการ (<code>#0F172A</code>) ผสมผสานสีกรมท่า (<code>#1E293B</code>) ตัดแสงสีฟ้าสะท้อนเข้าตา เหมาะสำหรับการอ่านบทคัดย่อหรือวิเคราะห์สถิติในเวลากลางคืน</li>
+</ol>
+<p><strong>ขั้นตอนการใช้งาน:</strong></p>
+<ol>
+<li>คลิกที่ไอคอน <strong>ดวงอาทิตย์ (<code>☀️</code>) / พระจันทร์ (<code>🌙</code>)</strong> บนแถบเมนูขวาบน</li>
+<li>ธีมของหน้าจอจะสลับทันทีโดยไม่มีการรีเฟรชหน้าเว็บ (Zero-Flicker Transition)</li>
+<li>ระบบจะบันทึกสถานะลงใน <code>localStorage</code> ของเบราว์เซอร์ เพื่อให้เปิดใช้งานโหมดเดิมเสมอในการเข้าชมครั้งถัดไป</li>
+</ol>
+<hr />
+<a id="บทที่-2-ระบบการสืบค้นข้อมูลงานวิจัยอัจฉริยะ-smart-search-dynamic-filtering" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-2-%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%B7%E0%B8%9A%E0%B8%84%E0%B9%89%E0%B8%99%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B8%AD%E0%B8%B1%E0%B8%88%E0%B8%89%E0%B8%A3%E0%B8%B4%E0%B8%A2%E0%B8%B0-smart-search--dynamic-filtering" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-2-%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%B7%E0%B8%9A%E0%B8%84%E0%B9%89%E0%B8%99%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B8%AD%E0%B8%B1%E0%B8%88%E0%B8%89%E0%B8%A3%E0%B8%B4%E0%B8%A2%E0%B8%B0-smart-search-dynamic-filtering" class="manual-anchor"></a><h2 id="บทที่-2-ระบบการสืบค้นข้อมูลงานวิจัยอัจฉริยะ-smart-search--dynamic-filtering">บทที่ 2: ระบบการสืบค้นข้อมูลงานวิจัยอัจฉริยะ (Smart Search &amp; Dynamic Filtering)</h2>
+<a id="21-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%84%E0%B9%89%E0%B8%99%E0%B8%AB%E0%B8%B2%E0%B8%94%E0%B9%88%E0%B8%A7%E0%B8%99%E0%B8%88%E0%B8%B2%E0%B8%81%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B9%81%E0%B8%A3%E0%B8%81-global-quick-search" class="manual-anchor"></a><h3 id="21-การค้นหาด่วนจากหน้าแรก-global-quick-search">2.1 การค้นหาด่วนจากหน้าแรก (Global Quick Search)</h3>
+<ol>
+<li>พิมพ์คำค้นหาลงในช่องค้นหาบนแบนเนอร์หลักหน้าแรก</li>
+<li>ระบบจะค้นหาคำดังกล่าวครอบคลุมทั้ง:
+<ul>
+<li>ชื่อโครงการวิจัย (ไทยและอังกฤษ)</li>
+<li>ชื่อบทความตีพิมพ์ และชื่อวารสาร</li>
+<li>คำสำคัญ (Keywords)</li>
+<li>บทคัดย่อ (Abstracts)</li>
+<li>ชื่อ-นามสกุลของนักวิจัย</li>
+</ul>
+</li>
+<li>กดปุ่ม <strong>Enter</strong> หรือคลิกปุ่ม <strong>&quot;ค้นหา&quot;</strong> เพื่อเข้าสู่หน้ารายการผลการค้นหา</li>
+</ol>
+<hr />
+<a id="22-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%95%E0%B8%B1%E0%B8%A7%E0%B8%81%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B8%9B%E0%B8%B5%E0%B8%87%E0%B8%9A%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%A1%E0%B8%B2%E0%B8%93-%E0%B8%9E%E0%B8%A8-fiscal-year-filtering" class="manual-anchor"></a><h3 id="22-การใช้ตัวกรองปีงบประมาณ-พศ-fiscal-year-filtering">2.2 การใช้ตัวกรองปีงบประมาณ พ.ศ. (Fiscal Year Filtering)</h3>
+<ul>
+<li>ที่แถบตัวกรองปีงบประมาณ สามารถเลือกดูสถิติและผลงานเฉพาะปี พ.ศ. ที่สนใจได้ (เช่น <code>2568</code>, <code>2567</code>, <code>2566</code>, ...)</li>
+<li>เมื่อเลือกปีงบประมาณ ตัวเลขสถิติบนการ์ดและรายการผลงานแนะนำด้านล่างจะปรับเปลี่ยนตามปีงบประมาณนั้นทันที</li>
+</ul>
+<hr />
+<a id="23-กลไกการค้นหาแบบกลุ่มคำ-multi-keyword-search-logic-and-or" class="manual-anchor"></a><a id="23-%E0%B8%81%E0%B8%A5%E0%B9%84%E0%B8%81%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%84%E0%B9%89%E0%B8%99%E0%B8%AB%E0%B8%B2%E0%B9%81%E0%B8%9A%E0%B8%9A%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%84%E0%B8%B3-multi-keyword-search-logic-and--or" class="manual-anchor"></a><a id="23-%E0%B8%81%E0%B8%A5%E0%B9%84%E0%B8%81%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%84%E0%B9%89%E0%B8%99%E0%B8%AB%E0%B8%B2%E0%B9%81%E0%B8%9A%E0%B8%9A%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%84%E0%B8%B3-multi-keyword-search-logic-and-or" class="manual-anchor"></a><h3 id="23-กลไกการค้นหาแบบกลุ่มคำ-multi-keyword-search-logic-and--or">2.3 กลไกการค้นหาแบบกลุ่มคำ (Multi-Keyword Search Logic: AND / OR)</h3>
+<p>ในหน้ารายการของโครงการวิจัยและผลงานตีพิมพ์ ระบบมีกล่องค้นหาแบบกลุ่มคำที่ผู้ใช้สามารถพิมพ์หลายคำโดยคั่นด้วยช่องว่าง พร้อมเลือกตรรกะการจับคู่ได้ 2 โหมด:</p>
+
+<div class="mermaid-container"><pre class="mermaid">
+flowchart TD
+    Keywords["คำค้นหา: เกษตร อินทรีย์ เพชรบูรณ์"] --&gt; Choice{"เลือกโหมดการจับคู่"}
+    Choice --&gt;|โหมด AND ตรงทุกคำ| M_ALL["ค้นหาเฉพาะรายการที่มีทั้ง 3 คำครบถ้วน (High Precision)"]
+    Choice --&gt;|โหมด OR ตรงบางคำ| M_ANY["ค้นหารายการที่มีคำใดคำหนึ่ง หรือทั้ง 3 คำ (High Recall)"]
+</pre></div>
+
+<ul>
+<li><strong>1. โหมด &quot;เจอทั้งหมด (ตรงทุกคำ - AND)&quot;</strong> <em>(ค่าเริ่มต้น)</em>:
+<ul>
+<li>ใช้เมื่อต้องการผลลัพธ์ที่ตรงจุดและแคบลง เช่น ค้นหา <code>&quot;ข้าวไร่ เขาค้อ&quot;</code> ผลลัพธ์จะต้องมีทั้งคำว่า &quot;ข้าวไร่&quot; และ &quot;เขาค้อ&quot; ปรากฏอยู่ในชื่อเรื่องพร้อมกัน</li>
+</ul>
+</li>
+<li><strong>2. โหมด &quot;เจอบางคำ (ตรงคำใดคำหนึ่ง - OR)&quot;</strong>:
+<ul>
+<li>ใช้เมื่อต้องการค้นหาทางเลือกหรือคำที่มีความหมายใกล้เคียงกัน เช่น ค้นหา <code>&quot;พลังงาน แสงอาทิตย์ ลม ชีวมวล&quot;</code> ระบบจะแสดงรายการที่มีคำใดคำหนึ่งปรากฏอยู่</li>
+</ul>
+</li>
+</ul>
+<hr />
+<a id="24-%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%95%E0%B8%B1%E0%B8%94%E0%B8%84%E0%B8%B3%E0%B8%99%E0%B8%B3%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B8%8A%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%A0%E0%B8%B2%E0%B8%A9%E0%B8%B2%E0%B9%84%E0%B8%97%E0%B8%A2%E0%B8%AD%E0%B8%B1%E0%B8%95%E0%B9%82%E0%B8%99%E0%B8%A1%E0%B8%B1%E0%B8%95%E0%B8%B4-thai-title-prefix-normalization" class="manual-anchor"></a><h3 id="24-ระบบตัดคำนำหน้าชื่อภาษาไทยอัตโนมัติ-thai-title-prefix-normalization">2.4 ระบบตัดคำนำหน้าชื่อภาษาไทยอัตโนมัติ (Thai Title Prefix Normalization)</h3>
+<p>เพื่อแก้ปัญหาการค้นหาชื่อนักวิจัยไม่พบเนื่องจากการกรอกคำนำหน้าไม่ตรงกัน ระบบได้ติดตั้งอัลกอริทึมตัดคำนำหน้าชื่อไทยอัตโนมัติ:</p>
+<ul>
+<li>เมื่อผู้ใช้พิมพ์คำค้นหา เช่น <code>&quot;ศ.ดร.สมชาย&quot;</code>, <code>&quot;ผศ.สมหญิง&quot;</code>, <code>&quot;อาจารย์นายแพทย์วิทยา&quot;</code>, หรือ <code>&quot;นางสาวกานดา&quot;</code></li>
+<li>ระบบจะทำการตัดคำนำหน้าทางวิชาการและคำนำหน้านามทั่วไป (<code>นาย</code>, <code>นาง</code>, <code>นางสาว</code>, <code>อาจารย์</code>, <code>ดร.</code>, <code>ผศ.</code>, <code>รศ.</code>, <code>ศ.</code>, <code>พญ.</code>, <code>นพ.</code>) ออกอย่างชาญฉลาด แล้วนำเฉพาะชื่อและนามสกุลไปสืบค้นในฐานข้อมูล</li>
+<li>ผลลัพธ์: ผู้ใช้จะค้นพบข้อมูลนักวิจัยอย่างแม่นยำ 100% เสมอ ไม่ว่าจะคัดลอกชื่อที่มีคำนำหน้าติดมาหรือไม่ก็ตาม</li>
+</ul>
+<hr />
+<a id="25-%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%97%E0%B8%B4%E0%B8%99-%E0%B8%9E%E0%B8%A8-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%8A%E0%B9%88%E0%B8%A7%E0%B8%87%E0%B8%A7%E0%B8%B1%E0%B8%99%E0%B8%97%E0%B8%B5%E0%B9%88-thai-date-range-validation" class="manual-anchor"></a><h3 id="25-ปฏิทิน-พศ-และการตรวจสอบช่วงวันที่-thai-date-range-validation">2.5 ปฏิทิน พ.ศ. และการตรวจสอบช่วงวันที่ (Thai Date Range Validation)</h3>
+<p>ทุกหน้าที่มีการกรองตามช่วงเวลา ระบบจะใช้ปฏิทินที่แสดงผลเป็นปีพุทธศักราช (พ.ศ.) เสมอ พร้อมกลไกการตรวจสอบความถูกต้อง 2 ขั้น:</p>
+<ol>
+<li><strong>การกรอกข้อมูลแบบครบช่วง (Pair Requirement)</strong>: หากผู้ใช้เลือกใส่วันที่เริ่มต้น จะต้องระบุวันที่สิ้นสุดด้วยเสมอ หรือหากใส่วันที่สิ้นสุด จะต้องระบุวันที่เริ่มต้นด้วยเช่นกัน</li>
+<li><strong>การตรวจสอบลำดับเวลา (Chronological Order Check)</strong>:
+<ul>
+<li>วันที่สิ้นสุด (<code>date_end</code>) จะต้อง <strong>มากกว่าหรือเท่ากับ</strong> วันที่เริ่มต้น (<code>date_start</code>) เสมอ</li>
+<li>หากผู้ใช้เลือกวันที่สิ้นสุดมาก่อนวันที่เริ่มต้น ระบบจะปฏิเสธการค้นหาและแสดงข้อความแจ้งเตือนภาษาไทยทันที: <code>&quot;วันที่สิ้นสุดต้องมากกว่าหรือเท่ากับวันที่เริ่มต้น&quot;</code></li>
 </ul>
 </li>
 </ol>
-<h3 id="3-2-หน-าแสดงรายละเอ-ยดโครงการว-จ-ย-rdbproject-id">3.2 หน้าแสดงรายละเอียดโครงการวิจัย (<code>/rdbproject/{id}</code>)</h3>
-<figure class="manual-figure"><a href="./screenshots/frontend_03_project_show.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/frontend_03_project_show.png" alt="หน้ารายละเอียดโครงการวิจัย การ์ดไฟล์เอกสาร และรูปแบบการอ้างอิง" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้ารายละเอียดโครงการวิจัย การ์ดไฟล์เอกสาร และรูปแบบการอ้างอิง</figcaption></figure>
-<p><strong>ส่วนประกอบสำคัญในหน้ารายละเอียดโครงการ:</strong></p>
+<hr />
+<a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-3-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B9%82%E0%B8%A1%E0%B8%94%E0%B8%B9%E0%B8%A5%E0%B9%82%E0%B8%84%E0%B8%A3%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-research-projects-directory" class="manual-anchor"></a><h2 id="บทที่-3-การใช้งานโมดูลโครงการวิจัย-research-projects-directory">บทที่ 3: การใช้งานโมดูลโครงการวิจัย (Research Projects Directory)</h2>
+<a id="31-%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%A7%E0%B8%A1%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%82%E0%B8%84%E0%B8%A3%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B9%81%E0%B8%9C%E0%B8%87%E0%B8%84%E0%B9%89%E0%B8%99%E0%B8%AB%E0%B8%B2%E0%B8%A5%E0%B8%B0%E0%B9%80%E0%B8%AD%E0%B8%B5%E0%B8%A2%E0%B8%94-rdbproject" class="manual-anchor"></a><h3 id="31-หน้ารวมรายการโครงการวิจัยและแผงค้นหาละเอียด-rdbproject">3.1 หน้ารวมรายการโครงการวิจัยและแผงค้นหาละเอียด (<code>/rdbproject</code>)</h3>
+<figure class="manual-figure"><a href="./screenshots/frontend_02_projects_directory.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/frontend_02_projects_directory.png" alt="หน้ารายการโครงการวิจัยและแผงตัวกรองขั้นสูง" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้ารายการโครงการวิจัยและแผงตัวกรองขั้นสูง</figcaption></figure>
+<p>หน้ารวมโครงการวิจัยออกแบบมาเพื่อรองรับการสืบค้นข้อมูลระดับลึกตามตำแหน่งในภาพ:</p>
 <ul>
-<li><strong>ส่วนที่ <code>[1]</code> ข้อมูลหลักและบทคัดย่อ (Project Metadata &amp; Abstract)</strong>:
+<li><strong>หมายเลข <code>[1]</code> แผงค้นหาและตัวกรองละเอียด (Collapsible Search &amp; Filter Panel)</strong>:
 <ul>
-<li>แสดงชื่อโครงการ (ภาษาไทย / ภาษาอังกฤษ), ประเภททุนวิจัย, ยุทธศาสตร์การวิจัย, งบประมาณที่ได้รับจัดสรร และระยะเวลาดำเนินงาน (แสดงวันที่ภาษาไทย พ.ศ. เต็ม เช่น <code>1 ตุลาคม 2567</code>)</li>
-<li>แสดงรายชื่อคณะผู้วิจัยทุกคน พร้อมสัดส่วนการทำวิจัย (%) และลิงก์คลิกไปดูโปรไฟล์ของนักวิจัยแต่ละท่าน</li>
-<li>แสดงบทคัดย่อ (Abstract) พร้อมปุ่ม <strong>&quot;คัดลอกบทคัดย่อ&quot;</strong> มุมขวาบนของกล่องข้อความ</li>
+<li><strong>ช่องค้นหาชื่อโครงการวิจัย</strong>: พิมพ์ชื่อโครงการเพื่อค้นหาแบบ Autocomplete ทันที</li>
+<li><strong>โหมดคำค้นหากลุ่มคำ (AND / OR)</strong>: สลับเลือกระหว่าง &quot;ตรงทุกคำ (AND)&quot; หรือ &quot;ตรงบางคำ (OR)&quot;</li>
+<li><strong>ตัวกรองระดับลึก</strong>: เลือกปีงบประมาณ พ.ศ., ประเภททุน, คณะ/สังกัด, และปฏิทินช่วงวันที่เริ่มต้น-สิ้นสุด</li>
+<li><strong>ปุ่มค้นหาและล้างเงื่อนไข</strong>: ปุ่มสีน้ำเงิน <strong>&quot;ค้นหา&quot;</strong> เมื่อกดแล้วแผงค้นหาจะพับเก็บลงอัตโนมัติเพื่อให้เห็นผลลัพธ์ชัดเจน และปุ่มสีเทา <strong>&quot;ล้างตัวกรอง&quot;</strong> เพื่อคืนค่าเริ่มต้น</li>
 </ul>
 </li>
-<li><strong>ส่วนที่ <code>[2]</code> การ์ดไฟล์เอกสารโครงการและการอ้างอิง (Files &amp; Citations Card)</strong>:
+<li><strong>หมายเลข <code>[2]</code> ตารางแสดงผลรายการโครงการและป้ายสถานะ (Projects Data Table &amp; Badges)</strong>:
 <ul>
-<li>แสดงไฟล์บทคัดย่อ (Abstract PDF) และไฟล์เล่มรายงานวิจัยฉบับสมบูรณ์ (Full Report PDF)</li>
-<li>แสดงภาพตัวอย่างหน้าแรกของเอกสาร (<code>.webp</code> First-Page Cover Preview) และป้ายจำนวนหน้าเอกสาร (<code>XX หน้า</code>)</li>
+<li><strong>คอลัมน์รายละเอียด</strong>: แสดงรหัสโครงการ, ชื่อโครงการภาษาไทยและภาษาอังกฤษ, แหล่งทุน, และงบประมาณรวม</li>
+<li><strong>รายชื่อนักวิจัยและบทบาท</strong>: ไฮไลต์ชื่อหัวหน้าโครงการและคณะผู้ร่วมวิจัย</li>
+<li><strong>ป้ายสถานะโครงการ</strong>: บ่งบอกสถานะ <code>เสร็จสิ้นโครงการ</code> (สีเขียว) หรือ <code>กำลังดำเนินการ</code> (สีเหลือง)</li>
+<li><strong>ปุ่มเปิดดูรายละเอียด</strong>: คลิกที่ชื่อโครงการเพื่อเปิดเข้าสู่หน้าแสดงข้อมูลฉบับเต็ม (<code>/rdbproject/{id}</code>)</li>
 </ul>
 </li>
 </ul>
-<h3 id="3-3-ความเข-าใจเก-ยวก-บระด-บส-ทธ-การเป-ดเผยเล-มรายงานว-จ-ย-3-ระด-บ">3.3 ความเข้าใจเกี่ยวกับระดับสิทธิ์การเปิดเผยเล่มรายงานวิจัย 3 ระดับ</h3>
-<p>เพื่อคุ้มครองทรัพย์สินทางปัญญาและข้อมูลที่อยู่ระหว่างการจดสิทธิบัตร ระบบแบ่งสถานะของเล่มรายงานวิจัยฉบับสมบูรณ์ (<code>pro_file_show</code>) ออกเป็น 3 สถานะชัดเจน:</p>
+<hr />
+<a id="32-%E0%B8%9E%E0%B8%88%E0%B8%99%E0%B8%B2%E0%B8%99%E0%B8%B8%E0%B8%81%E0%B8%A3%E0%B8%A1%E0%B8%8A%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B8%84%E0%B9%89%E0%B8%99%E0%B8%AB%E0%B8%B2%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%95%E0%B8%B1%E0%B8%A7%E0%B8%81%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B9%82%E0%B8%84%E0%B8%A3%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-filter-fields-dictionary" class="manual-anchor"></a><h3 id="32-พจนานุกรมช่องค้นหาและตัวกรองโครงการวิจัย-filter-fields-dictionary">3.2 พจนานุกรมช่องค้นหาและตัวกรองโครงการวิจัย (Filter Fields Dictionary)</h3>
 <table>
 <thead>
 <tr>
-<th align="left">สถานะเอกสาร</th>
-<th align="left">ป้ายสัญลักษณ์ที่แสดงบนหน้าจอ</th>
-<th align="left">สิทธิ์การเข้าถึงของประชาชนทั่วไป</th>
+<th align="left">ชื่อฟิลด์ในฟอร์ม</th>
+<th align="left">ประเภทอินพุต</th>
+<th align="left">ความหมายและแนวทางการใช้งาน</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td align="left"><strong>1. เปิดเผยสาธารณะ (<code>Public</code>)</strong></td>
-<td align="left">ป้ายสีเขียว <code>เปิดเผยต่อสาธารณะ</code> พร้อมภาพปกหน้าแรก <code>.webp</code> และจำนวนหน้า</td>
-<td align="left"><strong>สามารถคลิกเปิดอ่านและดาวน์โหลดไฟล์ PDF เล่มสมบูรณ์ได้ทันที</strong></td>
+<td align="left"><strong>ปีงบประมาณ (<code>year_id</code>)</strong></td>
+<td align="left">Dropdown</td>
+<td align="left">เลือกปีงบประมาณ พ.ศ. ที่โครงการได้รับอนุมัติจัดสรรทุน</td>
 </tr>
 <tr>
-<td align="left"><strong>2. ปกปิดเล่มรายงาน (<code>Concealed</code>)</strong></td>
-<td align="left">ป้ายสีแดง <code>&lt;i class=&quot;bi bi-shield-lock-fill&quot;&gt;&lt;/i&gt; เล่มรายงานวิจัยถูกปกปิด (ไม่สามารถเปิดเผยข้อมูลได้)</code></td>
-<td align="left">อ่านข้อมูลโครงการและบทคัดย่อได้ แต่ <strong>ไม่สามารถดาวน์โหลดไฟล์เล่มรายงานฉบับสมบูรณ์ได้</strong></td>
+<td align="left"><strong>ประเภททุนวิจัย (<code>pt_id</code>)</strong></td>
+<td align="left">Cascading Dropdown</td>
+<td align="left">ประเภทแหล่งทุน (จะแสดงรายการตามปีงบประมาณที่เลือก)</td>
 </tr>
 <tr>
-<td align="left"><strong>3. ฉบับร่าง (<code>Draft</code>)</strong></td>
-<td align="left">ป้ายสีเหลือง <code>&lt;i class=&quot;bi bi-pencil-square&quot;&gt;&lt;/i&gt; เล่มรายงานวิจัยอยู่ในสถานะฉบับร่าง (ยังไม่เผยแพร่)</code></td>
-<td align="left">อยู่ระหว่างการตรวจประเมินหรือรอการอนุมัติ ยังไม่เปิดให้ดาวน์โหลด</td>
+<td align="left"><strong>ประเภทโครงการย่อย (<code>pts_id</code>)</strong></td>
+<td align="left">Cascading Dropdown</td>
+<td align="left">กลุ่มทุนย่อยเฉพาะด้าน</td>
+</tr>
+<tr>
+<td align="left"><strong>รหัสโครงการ (<code>pro_code</code>)</strong></td>
+<td align="left">Text Input</td>
+<td align="left">รหัสอ้างอิงโครงการตามสัญญาหรือระบบงบประมาณ</td>
+</tr>
+<tr>
+<td align="left"><strong>กลุ่มโครงการ (<code>pgroup_id</code>)</strong></td>
+<td align="left">Dropdown</td>
+<td align="left">หมวดหมู่โครงการตามพันธกิจมหาวิทยาลัย</td>
+</tr>
+<tr>
+<td align="left"><strong>งบประมาณเริ่มต้น-สิ้นสุด</strong></td>
+<td align="left">Number Input (คู่)</td>
+<td align="left">ระบุช่วงจำนวนเงินงบประมาณ (บาท) เช่น <code>100,000</code> ถึง <code>500,000</code></td>
+</tr>
+<tr>
+<td align="left"><strong>ชื่อโครงการวิจัย (<code>pro_id</code>)</strong></td>
+<td align="left">TomSelect AJAX</td>
+<td align="left">ช่องค้นหาชื่อโครงการแบบพิมพ์แล้วมีรายชื่อแนะนำอัตโนมัติ</td>
+</tr>
+<tr>
+<td align="left"><strong>ค้นหาแบบกลุ่มคำ (<code>title_keywords</code>)</strong></td>
+<td align="left">Text + Radio Mode</td>
+<td align="left">พิมพ์กลุ่มคำคั่นด้วยเว้นวรรค พร้อมเลือกว่าจะใช้โหมด AND หรือ OR</td>
+</tr>
+<tr>
+<td align="left"><strong>นักวิจัย (<code>researcher_id</code>)</strong></td>
+<td align="left">TomSelect Autocomplete</td>
+<td align="left">พิมพ์ชื่อผู้วิจัยเพื่อค้นหาโครงการที่อาจารย์ท่านนั้นมีส่วนร่วม</td>
+</tr>
+<tr>
+<td align="left"><strong>หน่วยงาน/คณะ (<code>department_id</code>)</strong></td>
+<td align="left">Dropdown</td>
+<td align="left">คัดกรองตามคณะหรือศูนย์สำนักที่สังกัด</td>
+</tr>
+<tr>
+<td align="left"><strong>บทคัดย่อ (<code>pro_abstract</code>)</strong></td>
+<td align="left">Text Input</td>
+<td align="left">ค้นหาคำที่ปรากฏในเนื้อหาบทคัดย่อภาษาไทยหรือภาษาอังกฤษ</td>
+</tr>
+<tr>
+<td align="left"><strong>ช่วงวันที่ (<code>date_start</code> - <code>date_end</code>)</strong></td>
+<td align="left">Buddhist Datepicker</td>
+<td align="left">ระบุช่วงวันเริ่มและวันสิ้นสุดสัญญาโครงการวิจัย</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2 id="บทท-4-การใช-งานโมด-ลผลงานต-พ-มพ-และงานว-ชาการ-publications-amp-academic-citations">บทที่ 4: การใช้งานโมดูลผลงานตีพิมพ์และงานวิชาการ (Publications &amp; Academic Citations)</h2>
-<h3 id="4-1-การค-นหาผลงานต-พ-มพ-เผยแพร-rdbpublished">4.1 การค้นหาผลงานตีพิมพ์เผยแพร่ (<code>/rdbpublished</code>)</h3>
+<a id="33-%E0%B8%95%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B9%81%E0%B8%AA%E0%B8%94%E0%B8%87%E0%B8%9C%E0%B8%A5%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%82%E0%B8%84%E0%B8%A3%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%9B%E0%B9%89%E0%B8%B2%E0%B8%A2%E0%B8%AA%E0%B8%96%E0%B8%B2%E0%B8%99%E0%B8%B0-status-badges-reference" class="manual-anchor"></a><h3 id="33-ตารางแสดงผลรายการโครงการและป้ายสถานะ-status-badges-reference">3.3 ตารางแสดงผลรายการโครงการและป้ายสถานะ (Status Badges Reference)</h3>
+<p>ในตารางรายการโครงการ ข้อมูลแต่ละแถวจะแสดงป้ายสถานะ (Badges) เพื่อบ่งชี้คุณลักษณะสำคัญของโครงการ:</p>
+<table>
+<thead>
+<tr>
+<th align="left">สัญลักษณ์ / ป้ายสถานะ</th>
+<th align="center">สีของป้าย</th>
+<th align="left">ความหมาย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>#XXXX</code></td>
+<td align="center">สีเทาอ่อน</td>
+<td align="left">รหัสไอดีโครงการในฐานข้อมูล</td>
+</tr>
+<tr>
+<td align="left"><code>ปี พ.ศ. 2568</code></td>
+<td align="center">สีกรมท่าอ่อน</td>
+<td align="left">ปีงบประมาณที่ได้รับอนุมัติทุน</td>
+</tr>
+<tr>
+<td align="left"><code>฿500,000</code></td>
+<td align="center">สีเขียวอ่อน</td>
+<td align="left">งบประมาณรวมที่ได้รับการจัดสรร</td>
+</tr>
+<tr>
+<td align="left"><code>เสร็จสิ้นโครงการ</code></td>
+<td align="center">สีเขียวเข้ม</td>
+<td align="left">โครงการวิจัยได้ส่งมอบเล่มรายงานสมบูรณ์และปิดโครงการแล้ว</td>
+</tr>
+<tr>
+<td align="left"><code>กำลังดำเนินการ</code></td>
+<td align="center">สีเหลืองส้ม</td>
+<td align="left">โครงการอยู่ระหว่างการดำเนินงานวิจัย</td>
+</tr>
+<tr>
+<td align="left"><code>พบคำค้นหาใน: ...</code></td>
+<td align="center">สีส้มประกาย</td>
+<td align="left">ป้ายไฮไลต์ Match Sources แสดงให้ทราบว่าพบคำค้นหาในส่วนใด (ชื่อเรื่อง, นักวิจัย, หรือบทคัดย่อ)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<a id="34-%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B9%81%E0%B8%AA%E0%B8%94%E0%B8%87%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%A5%E0%B8%B0%E0%B9%80%E0%B8%AD%E0%B8%B5%E0%B8%A2%E0%B8%94%E0%B9%82%E0%B8%84%E0%B8%A3%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B8%89%E0%B8%9A%E0%B8%B1%E0%B8%9A%E0%B9%80%E0%B8%95%E0%B9%87%E0%B8%A1-rdbprojectid" class="manual-anchor"></a><h3 id="34-หน้าแสดงรายละเอียดโครงการวิจัยฉบับเต็ม-rdbprojectid">3.4 หน้าแสดงรายละเอียดโครงการวิจัยฉบับเต็ม (<code>/rdbproject/{id}</code>)</h3>
+<figure class="manual-figure"><a href="./screenshots/frontend_03_project_show.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/frontend_03_project_show.png" alt="หน้ารายละเอียดโครงการวิจัย การ์ดไฟล์เอกสาร และรูปแบบการอ้างอิง" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้ารายละเอียดโครงการวิจัย การ์ดไฟล์เอกสาร และรูปแบบการอ้างอิง</figcaption></figure>
+<a id="%E0%B8%84%E0%B8%B3%E0%B8%AD%E0%B8%98%E0%B8%B4%E0%B8%9A%E0%B8%B2%E0%B8%A2%E0%B8%AA%E0%B9%88%E0%B8%A7%E0%B8%99%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%81%E0%B8%AD%E0%B8%9A%E0%B8%AA%E0%B8%B3%E0%B8%84%E0%B8%B1%E0%B8%8D%E0%B8%95%E0%B8%B2%E0%B8%A1%E0%B8%AB%E0%B8%A1%E0%B8%B2%E0%B8%A2%E0%B9%80%E0%B8%A5%E0%B8%82%E0%B9%83%E0%B8%99%E0%B8%A0%E0%B8%B2%E0%B8%9E" class="manual-anchor"></a><h4 id="คำอธิบายส่วนประกอบสำคัญตามหมายเลขในภาพ">คำอธิบายส่วนประกอบสำคัญตามหมายเลขในภาพ:</h4>
+<ul>
+<li><strong>หมายเลข <code>[1]</code> บัตรข้อมูลสรุปโครงการวิจัยและบทคัดย่อ (Project Profile &amp; Abstract Card)</strong>:
+<ul>
+<li><strong>ข้อมูลพื้นฐานโครงการ</strong>: แสดงชื่อโครงการเต็มทั้งภาษาไทยและภาษาอังกฤษ, รหัสโครงการ, ปีงบประมาณ พ.ศ., แหล่งทุนวิจัย, สังกัดคณะ, และยอดเงินงบประมาณรวม</li>
+<li><strong>คณะผู้วิจัยและสัดส่วนงาน</strong>: แสดงรายชื่อหัวหน้าโครงการ ผู้ร่วมวิจัย และที่ปรึกษา พร้อมสัดส่วนการทำวิจัย (%) และลิงก์ไปยังหน้าโปรไฟล์นักวิจัย</li>
+<li><strong>บทคัดย่อ 2 ภาษา (Abstracts)</strong>: แสดงบทคัดย่อภาษาไทยและอังกฤษ พร้อมปุ่ม <strong>&quot;คัดลอกบทคัดย่อ&quot;</strong> สำหรับนำข้อความไปอ้างอิงได้อย่างสะดวกรวดเร็ว</li>
+</ul>
+</li>
+<li><strong>หมายเลข <code>[2]</code> การ์ดเอกสารเล่มรายงานวิจัยและพรีวิวภาพปก WebP (Document Access Card)</strong>:
+<ul>
+<li><strong>พรีวิวภาพปกหน้าแรก (.webp)</strong>: สกัดจากหน้าแรกของ PDF ให้เห็นรูปเล่มเอกสารจริงอย่างคมชัด</li>
+<li><strong>ป้ายจำนวนหน้าเอกสารจริง</strong>: แสดงจำนวนหน้าทั้งหมดของเล่ม เช่น <code>&lt;i class=&quot;bi bi-file-earmark-text&quot;&gt;&lt;/i&gt; 101 หน้า</code></li>
+<li><strong>ปุ่มดาวน์โหลดเอกสาร PDF</strong>: คลิกเพื่อดาวน์โหลดเล่มรายงานวิจัยฉบับสมบูรณ์ (กรณีเป็นเอกสารเปิดเผยสาธารณะ)</li>
+</ul>
+</li>
+</ul>
+<hr />
+<a id="35-%E0%B8%A3%E0%B8%B0%E0%B8%94%E0%B8%B1%E0%B8%9A%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%80%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B8%96%E0%B8%B6%E0%B8%87%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%AA%E0%B8%B4%E0%B8%97%E0%B8%98%E0%B8%B4%E0%B9%8C%E0%B9%80%E0%B8%9B%E0%B8%B4%E0%B8%94%E0%B9%80%E0%B8%9C%E0%B8%A2%E0%B9%80%E0%B8%A5%E0%B9%88%E0%B8%A1%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-3-%E0%B8%A3%E0%B8%B0%E0%B8%94%E0%B8%B1%E0%B8%9A-document-access-policy" class="manual-anchor"></a><h3 id="35-ระดับการเข้าถึงและสิทธิ์เปิดเผยเล่มรายงานวิจัย-3-ระดับ-document-access-policy">3.5 ระดับการเข้าถึงและสิทธิ์เปิดเผยเล่มรายงานวิจัย 3 ระดับ (Document Access Policy)</h3>
+<p>เพื่อรักษาสมดุลระหว่างการเปิดเผยองค์ความรู้กับการคุ้มครองสิทธิ์ทางปัญญา ระบบกำหนดนโยบายเปิดเผยไฟล์เล่มรายงานวิจัยฉบับสมบูรณ์ (<code>pro_file_show</code>) ออกเป็น 3 ระดับ:</p>
+
+<div class="mermaid-container"><pre class="mermaid">
+flowchart TD
+    UserReq["ผู้ใช้งานคลิกเปิดหน้าโครงการวิจัย"] --&gt; Check{"ระบบตรวจสอบสถานะ pro_file_show"}
+    
+    Check --&gt;|ค่า 0: เปิดเผยสาธารณะ Public| S0["ป้ายสีเขียว: เปิดเผยสาธารณะ\n• แสดงภาพปก WebP คมชัด\n• แสดงป้ายนับหน้าเอกสาร\n• อนุญาตให้ดาวน์โหลดเล่มรายงาน PDF"]
+    Check --&gt;|ค่า 1: ปกปิดเล่มรายงาน Concealed| S1["ป้ายสีแดง: จำกัดการเข้าถึง (สิทธิบัตร/ความลับ)\n• ซ่อนปุ่มดาวน์โหลดเล่มสมบูรณ์\n• แสดงเฉพาะบทคัดย่อและข้อมูลบรรณานุกรม\n• เพื่อคุ้มครองสิทธิ์การจดทะเบียนนวัตกรรม"]
+    Check --&gt;|ค่า 2: ฉบับร่าง Draft| S2["ป้ายสีเหลือง: อยู่ระหว่างตรวจรับ\n• ซ่อนปุ่มดาวน์โหลดเล่มเอกสาร\n• เปิดดูได้เฉพาะนักวิจัยเจ้าของโครงการและ Admin"]
+</pre></div>
+
+<table>
+<thead>
+<tr>
+<th align="left">ระดับสิทธิ์</th>
+<th align="center">ป้ายสถานะ</th>
+<th align="center">การแสดงภาพปก WebP</th>
+<th align="center">สิทธิ์ดาวน์โหลด PDF</th>
+<th align="left">วัตถุประสงค์การใช้งาน</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>1. เปิดเผยสาธารณะ (Public - ค่า 0)</strong></td>
+<td align="center"><code>badge bg-success-subtle</code></td>
+<td align="center">แสดงปกจริง</td>
+<td align="center"><strong>ดาวน์โหลดได้ทันที</strong></td>
+<td align="left">เผยแพร่องค์ความรู้สู่สังคมและชุมชน</td>
+</tr>
+<tr>
+<td align="left"><strong>2. ปกปิดเล่มรายงาน (Concealed - ค่า 1)</strong></td>
+<td align="center"><code>badge bg-danger-subtle</code></td>
+<td align="center">ซ่อนปก / แสดงโลโก้</td>
+<td align="center"><strong>จำกัดการเข้าถึง</strong></td>
+<td align="left">คุ้มครองทรัพย์สินทางปัญญา / รอจดสิทธิบัตร</td>
+</tr>
+<tr>
+<td align="left"><strong>3. ฉบับร่าง (Draft - ค่า 2)</strong></td>
+<td align="center"><code>badge bg-warning-subtle</code></td>
+<td align="center">ซ่อนปก</td>
+<td align="center"><strong>ล็อกดาวน์โหลด</strong></td>
+<td align="left">เอกสารอยู่ระหว่างรอบตรวจรับและแก้ไข</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<a id="36-%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%9E%E0%B8%A3%E0%B8%B5%E0%B8%A7%E0%B8%B4%E0%B8%A7%E0%B8%A0%E0%B8%B2%E0%B8%9E%E0%B8%9B%E0%B8%81%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B9%81%E0%B8%A3%E0%B8%81-webp-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%9B%E0%B9%89%E0%B8%B2%E0%B8%A2%E0%B9%81%E0%B8%AA%E0%B8%94%E0%B8%87%E0%B8%88%E0%B8%B3%E0%B8%99%E0%B8%A7%E0%B8%99%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B9%80%E0%B8%AD%E0%B8%81%E0%B8%AA%E0%B8%B2%E0%B8%A3" class="manual-anchor"></a><h3 id="36-ระบบพรีวิวภาพปกหน้าแรก-webp-และป้ายแสดงจำนวนหน้าเอกสาร">3.6 ระบบพรีวิวภาพปกหน้าแรก (.webp) และป้ายแสดงจำนวนหน้าเอกสาร</h3>
+<ul>
+<li><strong>ภาพปกหน้าแรก (Cover Preview)</strong>: ระบบสกัดหน้าแรกของไฟล์ PDF มาบีบอัดเป็นรูปภาพแบบ <code>.webp</code> อัตโนมัติ แสดงผลอย่างคมชัด สวยงาม ช่วยให้ผู้ใช้งานมองเห็นรูปแบบรูปเล่มเอกสารจริงก่อนตัดสินใจดาวน์โหลด</li>
+<li><strong>ป้ายแสดงจำนวนหน้า</strong>: แสดงจำนวนหน้าทั้งหมดของเอกสาร เช่น <code>120 หน้า</code> (แสดงเฉพาะในหน้ารายละเอียดโครงการ เพื่อความสะอาดตาของตารางรายการ)</li>
+</ul>
+<hr />
+<a id="บทที่-4-การใช้งานโมดูลผลงานตีพิมพ์และงานวิชาการ-publications-academic-citations" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-4-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B9%82%E0%B8%A1%E0%B8%94%E0%B8%B9%E0%B8%A5%E0%B8%9C%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%95%E0%B8%B5%E0%B8%9E%E0%B8%B4%E0%B8%A1%E0%B8%9E%E0%B9%8C%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-publications--academic-citations" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-4-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B9%82%E0%B8%A1%E0%B8%94%E0%B8%B9%E0%B8%A5%E0%B8%9C%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%95%E0%B8%B5%E0%B8%9E%E0%B8%B4%E0%B8%A1%E0%B8%9E%E0%B9%8C%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-publications-academic-citations" class="manual-anchor"></a><h2 id="บทที่-4-การใช้งานโมดูลผลงานตีพิมพ์และงานวิชาการ-publications--academic-citations">บทที่ 4: การใช้งานโมดูลผลงานตีพิมพ์และงานวิชาการ (Publications &amp; Academic Citations)</h2>
+<a id="41-%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%A7%E0%B8%A1%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9A%E0%B8%97%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%95%E0%B8%B5%E0%B8%9E%E0%B8%B4%E0%B8%A1%E0%B8%9E%E0%B9%8C%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%95%E0%B8%B1%E0%B8%A7%E0%B8%81%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B8%90%E0%B8%B2%E0%B8%99%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5-rdbpublished" class="manual-anchor"></a><h3 id="41-หน้ารวมรายการบทความตีพิมพ์และตัวกรองฐานข้อมูล-rdbpublished">4.1 หน้ารวมรายการบทความตีพิมพ์และตัวกรองฐานข้อมูล (<code>/rdbpublished</code>)</h3>
 <figure class="manual-figure"><a href="./screenshots/frontend_04_published_index.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/frontend_04_published_index.png" alt="หน้ารายการผลงานตีพิมพ์และตัวกรองฐานข้อมูลวารสาร" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้ารายการผลงานตีพิมพ์และตัวกรองฐานข้อมูลวารสาร</figcaption></figure>
-<p><strong>ขั้นตอนการสืบค้นผลงานตีพิมพ์:</strong></p>
+<a id="%E0%B8%84%E0%B8%B3%E0%B8%AD%E0%B8%98%E0%B8%B4%E0%B8%9A%E0%B8%B2%E0%B8%A2%E0%B8%AA%E0%B9%88%E0%B8%A7%E0%B8%99%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%81%E0%B8%AD%E0%B8%9A%E0%B8%95%E0%B8%B2%E0%B8%A1%E0%B8%AB%E0%B8%A1%E0%B8%B2%E0%B8%A2%E0%B9%80%E0%B8%A5%E0%B8%82%E0%B9%83%E0%B8%99%E0%B8%A0%E0%B8%B2%E0%B8%9E" class="manual-anchor"></a><h4 id="คำอธิบายส่วนประกอบตามหมายเลขในภาพ">คำอธิบายส่วนประกอบตามหมายเลขในภาพ:</h4>
+<ul>
+<li><strong>หมายเลข <code>[1]</code> แผงตัวกรองผลงานตีพิมพ์และฐานข้อมูลวารสาร (Publication Database Filters)</strong>:
+<ul>
+<li><strong>ช่องค้นหาชื่อบทความ / วารสาร</strong>: พิมพ์ชื่อผลงาน หรือชื่อวารสารทางวิชาการ</li>
+<li><strong>ตัวกรองระดับฐานข้อมูล (Database Tiers)</strong>: เลือกคัดกรองเฉพาะวารสารระดับนานาชาติ <code>Scopus</code>, <code>Web of Science</code>, หรือระดับชาติ <code>TCI กลุ่ม 1</code>, <code>TCI กลุ่ม 2</code></li>
+<li><strong>ตัวกรองปี พ.ศ. และสังกัดคณะ</strong>: เจาะจงปีที่ตีพิมพ์เผยแพร่ และคณะของอาจารย์ผู้ประพันธ์</li>
+<li><strong>ปุ่มดำเนินการ</strong>: คลิก <strong>&quot;ค้นหา&quot;</strong> เพื่อประมวลผลทันที หรือคลิก <strong>&quot;ล้างตัวกรอง&quot;</strong> เพื่อรีเซ็ต</li>
+</ul>
+</li>
+<li><strong>หมายเลข <code>[2]</code> ตารางรายการผลงานตีพิมพ์และระดับฐานข้อมูลสากล (Publications Directory Table)</strong>:
+<ul>
+<li><strong>ชื่อเรื่องและข้อมูลวารสาร</strong>: แสดงชื่อบทความภาษาอังกฤษ/ไทย พร้อมชื่อวารสาร, Volume, Issue, หน้า และปี พ.ศ.</li>
+<li><strong>ป้ายระดับฐานข้อมูล (Database Badges)</strong>: แสดงป้ายสีสดใส เช่น <code>Scopus Q1</code>, <code>Scopus Q2</code>, หรือ <code>TCI 1</code></li>
+<li><strong>คณะผู้ประพันธ์</strong>: ระบุชื่อผู้เขียน First Author และ Corresponding Author อย่างชัดเจน</li>
+<li><strong>ปุ่มเข้าดูรายละเอียด</strong>: คลิกที่ชื่อบทความเพื่อเปิดหน้าดูบทคัดย่อและคัดลอก Citation</li>
+</ul>
+</li>
+</ul>
+<hr />
+<a id="42-%E0%B8%A3%E0%B8%B0%E0%B8%94%E0%B8%B1%E0%B8%9A%E0%B8%8A%E0%B8%B1%E0%B9%89%E0%B8%99%E0%B8%90%E0%B8%B2%E0%B8%99%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-academic-database-tiers" class="manual-anchor"></a><h3 id="42-ระดับชั้นฐานข้อมูลวิชาการ-academic-database-tiers">4.2 ระดับชั้นฐานข้อมูลวิชาการ (Academic Database Tiers)</h3>
+<p>ระบบจัดหมวดหมู่ฐานข้อมูลวารสารตามเกณฑ์มาตรฐาน ก.พ.อ. และ กพอ. ดังนี้:</p>
 <ol>
-<li>ในส่วนที่ <code>[1]</code> สามารถกรองตาม <strong>ชื่อบทความ</strong>, <strong>ชื่อวารสาร/งานประชุมวิชาการ</strong>, <strong>ชื่อผู้แต่ง</strong>, <strong>ปีที่ตีพิมพ์ พ.ศ.</strong> และ <strong>ประเภทฐานข้อมูล (เช่น Scopus, Web of Science, TCI กลุ่ม 1, TCI กลุ่ม 2)</strong></li>
-<li>ในส่วนที่ <code>[2]</code> ตารางผลลัพธ์จะแสดงชื่อบทความ, ชื่อวารสาร, ระดับฐานข้อมูล, ปี พ.ศ. ที่ตีพิมพ์ และชื่อนักวิจัยผู้ประพันธ์หลัก</li>
-<li>คลิกที่ชื่อบทความเพื่อเข้าดูรายละเอียดฉบับเต็ม</li>
+<li><strong>ฐานข้อมูลระดับนานาชาติชั้นนำ</strong>:
+<ul>
+<li><code>Scopus</code> (Q1, Q2, Q3, Q4)</li>
+<li><code>Web of Science</code> (SCIE, SSCI, AHCI, ESCI)</li>
+</ul>
+</li>
+<li><strong>ฐานข้อมูลระดับชาติ (ศูนย์ดัชนีการอ้างอิงวารสารไทย - TCI)</strong>:
+<ul>
+<li><code>TCI กลุ่ม 1</code> (วารสารที่มีคุณภาพระดับประเทศสูง ผ่านการรับรอง)</li>
+<li><code>TCI กลุ่ม 2</code> (วารสารที่ผ่านการรับรองคุณภาพมาตรฐาน)</li>
+</ul>
+</li>
+<li><strong>รายงานสืบเนื่องจากการประชุมวิชาการ (Proceedings)</strong>:
+<ul>
+<li>การประชุมวิชาการระดับนานาชาติ (International Conference Proceedings)</li>
+<li>การประชุมวิชาการระดับชาติ (National Conference Proceedings)</li>
+</ul>
+</li>
 </ol>
-<h3 id="4-2-หน-ารายละเอ-ยดบทความต-พ-มพ-และระบบค-ดลอกการอ-างอ-งอ-ตโนม-ต-rdbpublished-id">4.2 หน้ารายละเอียดบทความตีพิมพ์และระบบคัดลอกการอ้างอิงอัตโนมัติ (<code>/rdbpublished/{id}</code>)</h3>
+<hr />
+<a id="43-%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%A5%E0%B8%B0%E0%B9%80%E0%B8%AD%E0%B8%B5%E0%B8%A2%E0%B8%94%E0%B8%9A%E0%B8%97%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%94%E0%B8%B2%E0%B8%A7%E0%B8%99%E0%B9%8C%E0%B9%82%E0%B8%AB%E0%B8%A5%E0%B8%94%E0%B9%84%E0%B8%9F%E0%B8%A5%E0%B9%8C-full-paper-rdbpublishedid" class="manual-anchor"></a><h3 id="43-หน้ารายละเอียดบทความวิจัยและการดาวน์โหลดไฟล์-full-paper-rdbpublishedid">4.3 หน้ารายละเอียดบทความวิจัยและการดาวน์โหลดไฟล์ Full Paper (<code>/rdbpublished/{id}</code>)</h3>
 <figure class="manual-figure"><a href="./screenshots/frontend_05_published_show.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/frontend_05_published_show.png" alt="หน้ารายละเอียดผลงานตีพิมพ์ การ์ดดาวน์โหลด Full Paper และกล่องคัดลอก Citation" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้ารายละเอียดผลงานตีพิมพ์ การ์ดดาวน์โหลด Full Paper และกล่องคัดลอก Citation</figcaption></figure>
-<p><strong>การใช้งานฟังก์ชันเด่นในหน้ารายละเอียดบทความ:</strong></p>
+<a id="%E0%B8%84%E0%B8%B3%E0%B8%AD%E0%B8%98%E0%B8%B4%E0%B8%9A%E0%B8%B2%E0%B8%A2%E0%B8%AA%E0%B9%88%E0%B8%A7%E0%B8%99%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%81%E0%B8%AD%E0%B8%9A%E0%B8%95%E0%B8%B2%E0%B8%A1%E0%B8%AB%E0%B8%A1%E0%B8%B2%E0%B8%A2%E0%B9%80%E0%B8%A5%E0%B8%82%E0%B9%83%E0%B8%99%E0%B8%A0%E0%B8%B2%E0%B8%9E" class="manual-anchor"></a><h4 id="คำอธิบายส่วนประกอบตามหมายเลขในภาพ">คำอธิบายส่วนประกอบตามหมายเลขในภาพ:</h4>
+<ul>
+<li><strong>หมายเลข <code>[1]</code> ข้อมูลบรรณานุกรม วารสาร และบทคัดย่อ (Bibliographic Metadata &amp; Abstract Card)</strong>:
+<ul>
+<li><strong>ข้อมูลวารสารต้นทาง</strong>: แสดงชื่อวารสารวิชาการ, Volume, Issue, เลขหน้า และปี พ.ศ. ที่ตีพิมพ์</li>
+<li><strong>ป้ายลิงก์ DOI สากล</strong>: หากบทความมีรหัส DOI จะมีปุ่มลิงก์สีน้ำเงินเชื่อมต่อไปยังเว็บไซต์สำนักพิมพ์ต้นทางโดยตรง</li>
+<li><strong>คณะผู้แต่งและบทบาท</strong>: ระบุชัดเจนว่าท่านใดเป็น <code>First Author (ผู้แต่งชื่อแรก)</code> หรือ <code>Corresponding Author (ผู้แต่งบรรณกิจ)</code></li>
+<li><strong>กล่องบทคัดย่อ (Abstract)</strong>: แสดงบทคัดย่อภาษาอังกฤษและไทยอย่างสมบูรณ์ พร้อมปุ่มคัดลอกบทคัดย่อ</li>
+</ul>
+</li>
+<li><strong>หมายเลข <code>[2]</code> กล่องคัดลอก Citation อัตโนมัติและการ์ดดาวน์โหลด Full Paper (1-Click Citation &amp; Download)</strong>:
+<ul>
+<li><strong>เครื่องมือสร้างข้อความอ้างอิงอัตโนมัติ</strong>: เลือกแท็บ <code>APA 7</code>, <code>IEEE</code>, หรือ <code>MLA 9</code> แล้วกดปุ่มสีน้ำเงิน <strong>&quot;คัดลอกการอ้างอิง&quot;</strong> ข้อความที่จัดรูปแบบถูกต้องจะถูกคัดลอกลง Clipboard ทันทีในคลิกเดียว</li>
+<li><strong>การ์ดดาวน์โหลดเอกสาร Full Paper</strong>: แสดงภาพหน้าแรก <code>.webp</code> ขนาดกะทัดรัด, จำนวนหน้าจริง และปุ่มดาวน์โหลดไฟล์บทความฉบับเต็ม PDF</li>
+</ul>
+</li>
+</ul>
+<hr />
+<a id="44-%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%AA%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%87%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%AD%E0%B9%89%E0%B8%B2%E0%B8%87%E0%B8%AD%E0%B8%B4%E0%B8%87%E0%B8%AD%E0%B8%B1%E0%B8%95%E0%B9%82%E0%B8%99%E0%B8%A1%E0%B8%B1%E0%B8%95%E0%B8%B4%E0%B9%83%E0%B8%99-1-%E0%B8%84%E0%B8%A5%E0%B8%B4%E0%B8%81-academic-citations-generator" class="manual-anchor"></a><h3 id="44-ระบบสร้างข้อความอ้างอิงอัตโนมัติใน-1-คลิก-academic-citations-generator">4.4 ระบบสร้างข้อความอ้างอิงอัตโนมัติใน 1 คลิก (Academic Citations Generator)</h3>
+<p>ที่ด้านขวาล่างของหน้ารายละเอียดบทความ ระบบได้ติดตั้งเครื่องมือสร้างข้อความอ้างอิงทางวิชาการ (Citations) อัตโนมัติ 3 รูปแบบมาตรฐาน:</p>
+
+<div class="mermaid-container"><pre class="mermaid">
+flowchart LR
+    Step1["1. ผู้ใช้งานเลือกแท็บรูปแบบ:\nAPA 7 / IEEE / MLA 9"] --&gt; Step2["2. ระบบรวบรวมข้อมูลบรรณานุกรม:\nชื่อผู้แต่ง, ปี, ชื่อเรื่อง, วารสาร, DOI"]
+    Step2 --&gt; Step3["3. จัดรูปแบบตามหลักสากล:\nจัดลำดับอักษรและตัวเอียง (Italics)"]
+    Step3 --&gt; Step4["4. คลิกปุ่ม 'คัดลอกการอ้างอิง'\n➔ สำเนาลง Clipboard ใน 1 คลิก พร้อม Toast แจ้งเตือน"]
+</pre></div>
+
+<table>
+<thead>
+<tr>
+<th align="left">รูปแบบ (Style)</th>
+<th align="left">สายวิชาการที่นิยมใช้</th>
+<th align="left">โครงสร้างการจัดวาง</th>
+<th align="left">ตัวอย่างผลลัพธ์ที่ได้จากการคัดลอก</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>APA 7th</strong></td>
+<td align="left">สังคมศาสตร์, การศึกษา, วิทยาศาสตร์ทั่วไป</td>
+<td align="left"><code>Author(s). (Year). Title. *Journal*, Vol(Issue), Pages. https://doi.org/...</code></td>
+<td align="left"><code>Somchai, J. (2567). AI in Thai Agriculture. *PCRU Academic Journal*, 12(2), 45-58. https://doi.org/10.1234/pcru.2024.01</code></td>
+</tr>
+<tr>
+<td align="left"><strong>IEEE</strong></td>
+<td align="left">วิศวกรรมศาสตร์, คอมพิวเตอร์, เทคโนโลยี</td>
+<td align="left"><code>[1] Author(s), &quot;Title,&quot; *Journal*, vol. X, no. Y, pp. xx-yy, Month Year.</code></td>
+<td align="left"><code>[1] J. Somchai and S. Jai, &quot;AI in Thai Agriculture,&quot; *PCRU Academic Journal*, vol. 12, no. 2, pp. 45-58, 2567.</code></td>
+</tr>
+<tr>
+<td align="left"><strong>MLA 9th</strong></td>
+<td align="left">มนุษยศาสตร์, ภาษาศาสตร์, วรรณกรรม</td>
+<td align="left"><code>Author(s). &quot;Title.&quot; *Journal*, vol. X, no. Y, Year, pp. xx-yy.</code></td>
+<td align="left"><code>Somchai, Jai. &quot;AI in Thai Agriculture.&quot; *PCRU Academic Journal*, vol. 12, no. 2, 2567, pp. 45-58.</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ขั้นตอนการใช้งาน:</strong></p>
 <ol>
-<li><strong>การดาวน์โหลดบทความฉบับเต็ม (Full Paper PDF)</strong> (ในกรอบ <code>[2]</code> ด้านขวาบน):
-<ul>
-<li>แสดง <strong>ภาพปกหน้าแรกของบทความ (<code>.webp</code>)</strong> ที่สกัดจากไฟล์จริง</li>
-<li>แสดง <strong>จำนวนหน้าทั้งหมดของไฟล์ PDF</strong> และ <strong>สถิติจำนวนครั้งที่ถูกดาวน์โหลด</strong></li>
-<li>คลิกปุ่มสีเขียว <strong>&quot;ดาวน์โหลดบทความฉบับเต็ม&quot;</strong> เพื่อเปิดอ่านหรือบันทึกไฟล์ PDF</li>
-</ul>
-</li>
-<li><strong>การคัดลอกรูปแบบการอ้างอิงทางวิชาการ (Academic Citations Generator)</strong> (ในกรอบ <code>[2]</code> ด้านขวาล่าง):
-<ul>
-<li>ระบบสร้างข้อความอ้างอิงตามมาตรฐานสากลให้อัตโนมัติ 3 รูปแบบ:
-<ul>
-<li><strong>แท็บ <code>APA 7</code></strong>: รูปแบบ American Psychological Association (7th Edition)</li>
-<li><strong>แท็บ <code>IEEE</code></strong>: รูปแบบวิศวกรรมศาสตร์และเทคโนโลยี (ตัวเลขลำดับ <code>[1]</code>)</li>
-<li><strong>แท็บ <code>MLA 9</code></strong>: รูปแบบมนุษยศาสตร์และศิลปศาสตร์</li>
-</ul>
-</li>
-<li>คลิกเลือกแท็บที่ต้องการ แล้วกดปุ่ม <strong>&quot;คัดลอกการอ้างอิง&quot;</strong> ระบบจะคัดลอกข้อความพร้อมรูปแบบตัวเอียงของชื่อวารสารลงใน Clipboard ทันที</li>
-</ul>
-</li>
+<li>คลิกเลือกแท็บรูปแบบที่ต้องการใช้งาน (<code>APA 7</code>, <code>IEEE</code>, หรือ <code>MLA 9</code>)</li>
+<li>คลิกปุ่มสีน้ำเงิน <strong>&quot;คัดลอกการอ้างอิง (Copy Citation)&quot;</strong></li>
+<li>ระบบจะคัดลอกข้อความพร้อมจัดรูปแบบตัวเอียงลงใน Clipboard ทันที และแสดงกล่องแจ้งเตือน Toast สีเขียวมุมขวาบน</li>
 </ol>
 <hr />
-<h2 id="บทท-5-การใช-งานโมด-ลทร-พย-ส-นทางป-ญญา-intellectual-property-dip">บทที่ 5: การใช้งานโมดูลทรัพย์สินทางปัญญา (Intellectual Property - DIP)</h2>
+<a id="บทที่-5-การใช้งานโมดูลทรัพย์สินทางปัญญา-intellectual-property-dip" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-5-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B9%82%E0%B8%A1%E0%B8%94%E0%B8%B9%E0%B8%A5%E0%B8%97%E0%B8%A3%E0%B8%B1%E0%B8%9E%E0%B8%A2%E0%B9%8C%E0%B8%AA%E0%B8%B4%E0%B8%99%E0%B8%97%E0%B8%B2%E0%B8%87%E0%B8%9B%E0%B8%B1%E0%B8%8D%E0%B8%8D%E0%B8%B2-intellectual-property---dip" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-5-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B9%82%E0%B8%A1%E0%B8%94%E0%B8%B9%E0%B8%A5%E0%B8%97%E0%B8%A3%E0%B8%B1%E0%B8%9E%E0%B8%A2%E0%B9%8C%E0%B8%AA%E0%B8%B4%E0%B8%99%E0%B8%97%E0%B8%B2%E0%B8%87%E0%B8%9B%E0%B8%B1%E0%B8%8D%E0%B8%8D%E0%B8%B2-intellectual-property-dip" class="manual-anchor"></a><h2 id="บทที่-5-การใช้งานโมดูลทรัพย์สินทางปัญญา-intellectual-property---dip">บทที่ 5: การใช้งานโมดูลทรัพย์สินทางปัญญา (Intellectual Property - DIP)</h2>
+<a id="51-%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%A7%E0%B8%A1%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%A3%E0%B8%B1%E0%B8%9E%E0%B8%A2%E0%B9%8C%E0%B8%AA%E0%B8%B4%E0%B8%99%E0%B8%97%E0%B8%B2%E0%B8%87%E0%B8%9B%E0%B8%B1%E0%B8%8D%E0%B8%8D%E0%B8%B2-rdbdip" class="manual-anchor"></a><h3 id="51-หน้ารวมรายการทรัพย์สินทางปัญญา-rdbdip">5.1 หน้ารวมรายการทรัพย์สินทางปัญญา (<code>/rdbdip</code>)</h3>
 <figure class="manual-figure"><a href="./screenshots/frontend_06_dip_index.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/frontend_06_dip_index.png" alt="หน้ารายการทรัพย์สินทางปัญญา สิทธิบัตร อนุสิทธิบัตร และลิขสิทธิ์" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้ารายการทรัพย์สินทางปัญญา สิทธิบัตร อนุสิทธิบัตร และลิขสิทธิ์</figcaption></figure>
-<h3 id="ข-นตอนการส-บค-นข-อม-ลทร-พย-ส-นทางป-ญญา-rdbdip">ขั้นตอนการสืบค้นข้อมูลทรัพย์สินทางปัญญา (<code>/rdbdip</code>)</h3>
+<a id="%E0%B8%84%E0%B8%B3%E0%B8%AD%E0%B8%98%E0%B8%B4%E0%B8%9A%E0%B8%B2%E0%B8%A2%E0%B8%AA%E0%B9%88%E0%B8%A7%E0%B8%99%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%81%E0%B8%AD%E0%B8%9A%E0%B8%95%E0%B8%B2%E0%B8%A1%E0%B8%AB%E0%B8%A1%E0%B8%B2%E0%B8%A2%E0%B9%80%E0%B8%A5%E0%B8%82%E0%B9%83%E0%B8%99%E0%B8%A0%E0%B8%B2%E0%B8%9E" class="manual-anchor"></a><h4 id="คำอธิบายส่วนประกอบตามหมายเลขในภาพ">คำอธิบายส่วนประกอบตามหมายเลขในภาพ:</h4>
+<ul>
+<li><strong>หมายเลข <code>[1]</code> แผงค้นหาและตัวกรองทรัพย์สินทางปัญญา (IP Filter Panel)</strong>:
+<ul>
+<li><strong>ช่องค้นหาชื่อผลงาน / สิ่งประดิษฐ์</strong>: ค้นหาตามชื่อนวัตกรรมหรืองานสร้างสรรค์</li>
+<li><strong>ตัวกรองประเภททรัพย์สินทางปัญญา</strong>: สิทธิบัตรการประดิษฐ์, อนุสิทธิบัตร, สิทธิบัตรการออกแบบ, หรือลิขสิทธิ์</li>
+<li><strong>ค้นหาตามเลขที่คำขอ / เลขที่ประกาศ</strong>: พิมพ์เลขที่คำขอรับความคุ้มครอง หรือเลขที่สิทธิบัตร</li>
+<li><strong>ตัวกรองสังกัดคณะและปี พ.ศ.</strong>: เจาะจงคณะของผู้ประดิษฐ์และปีที่ยื่นคำขอ</li>
+</ul>
+</li>
+<li><strong>หมายเลข <code>[2]</code> ตารางแสดงผลรายการทรัพย์สินทางปัญญา (IP Registry Table)</strong>:
+<ul>
+<li><strong>ชื่อผลงานและคณะผู้ประดิษฐ์</strong>: แสดงชื่อนวัตกรรมพร้อมรายชื่ออาจารย์และนักวิจัยเจ้าของผลงาน</li>
+<li><strong>ป้ายประเภทและสถานะความคุ้มครอง</strong>: แสดงป้ายประเภท เช่น <code>อนุสิทธิบัตร</code>, <code>ลิขสิทธิ์</code> พร้อมเลขที่คำขอ</li>
+<li><strong>วันที่สำคัญ</strong>: แสดงวันที่ยื่นคำขอรับความคุ้มครอง และวันที่ได้รับการจดทะเบียน (รูปแบบ พ.ศ.)</li>
+<li><strong>ปุ่มเปิดดูรายละเอียด</strong>: คลิกเพื่อเปิดดูข้อมูลทางเทคนิค โครงการวิจัยต้นทาง และหนังสือรับรอง</li>
+</ul>
+</li>
+</ul>
+<hr />
+<a id="52-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%88%E0%B8%B3%E0%B9%81%E0%B8%99%E0%B8%81%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A0%E0%B8%97%E0%B8%97%E0%B8%A3%E0%B8%B1%E0%B8%9E%E0%B8%A2%E0%B9%8C%E0%B8%AA%E0%B8%B4%E0%B8%99%E0%B8%97%E0%B8%B2%E0%B8%87%E0%B8%9B%E0%B8%B1%E0%B8%8D%E0%B8%8D%E0%B8%B2" class="manual-anchor"></a><h3 id="52-การจำแนกประเภททรัพย์สินทางปัญญา">5.2 การจำแนกประเภททรัพย์สินทางปัญญา</h3>
+<p>ระบบรองรับการจัดเก็บทรัพย์สินทางปัญญา 4 ประเภทหลัก:</p>
 <ol>
-<li>เลือกเมนู <strong>&quot;ทรัพย์สินทางปัญญา&quot;</strong> จากแถบเมนูด้านบน</li>
-<li>ในส่วนที่ <code>[1]</code> สามารถค้นหาจาก <strong>ชื่อผลงาน</strong>, <strong>เลขที่คำขอ</strong>, <strong>ประเภททรัพย์สินทางปัญญา</strong> (สิทธิบัตรการประดิษฐ์, สิทธิบัตรการออกแบบผลิตภัณฑ์, อนุสิทธิบัตร, ลิขสิทธิ์) หรือ <strong>ชื่อผู้ประดิษฐ์</strong></li>
-<li>ในส่วนที่ <code>[2]</code> ตารางแสดงรายการผลงานพร้อมเลขที่คำขอ, วันที่ยื่นคำขอ (รูปแบบ พ.ศ.), ผู้สร้างสรรค์ และโครงการวิจัยต้นทาง</li>
-<li>คลิกที่รายการเพื่อดูรายละเอียดคำขอและเปิดดูเอกสารรับรอง (กรณีเปิดเผยไฟล์)</li>
+<li><strong>สิทธิบัตรการประดิษฐ์ (Invention Patent)</strong>: การประดิษฐ์คิดค้นที่มีการแก้ปัญหาทางเทคนิคและมีความใหม่ในระดับก้าวหน้า</li>
+<li><strong>อนุสิทธิบัตร (Petty Patent)</strong>: การประดิษฐ์ที่มีการปรับปรุงหรือพัฒนาขึ้นใหม่ที่มีประโยชน์ในทางอุตสาหกรรม</li>
+<li><strong>สิทธิบัตรการออกแบบผลิตภัณฑ์ (Design Patent)</strong>: ความคิดสร้างสรรค์เกี่ยวกับรูปร่าง ลวดลาย หรือสีสันของผลิตภัณฑ์</li>
+<li><strong>ลิขสิทธิ์ (Copyright)</strong>: งานสร้างสรรค์ทางวรรณกรรม โปรแกรมคอมพิวเตอร์ ดนตรีกรรม หรืองานศิลปะ</li>
 </ol>
 <hr />
-<h2 id="บทท-6-การใช-งานโมด-ลการนำงานว-จ-ยไปใช-ประโยชน-research-utilizations">บทที่ 6: การใช้งานโมดูลการนำงานวิจัยไปใช้ประโยชน์ (Research Utilizations)</h2>
+<a id="53-%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%A5%E0%B8%B0%E0%B9%80%E0%B8%AD%E0%B8%B5%E0%B8%A2%E0%B8%94%E0%B8%84%E0%B8%B3%E0%B8%82%E0%B8%AD-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B9%80%E0%B8%A5%E0%B8%82%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%84%E0%B8%B3%E0%B8%82%E0%B8%AD-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B9%80%E0%B8%AD%E0%B8%81%E0%B8%AA%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%B3%E0%B8%84%E0%B8%B1%E0%B8%8D-rdbdipid" class="manual-anchor"></a><h3 id="53-หน้ารายละเอียดคำขอ-การตรวจสอบเลขที่คำขอ-และเอกสารสำคัญ-rdbdipid">5.3 หน้ารายละเอียดคำขอ การตรวจสอบเลขที่คำขอ และเอกสารสำคัญ (<code>/rdbdip/{id}</code>)</h3>
+<ul>
+<li><strong>ข้อมูลสถานะคำขอ</strong>: แสดงเลขที่คำขอ (Application No.), วันที่ยื่นคำขอรับความคุ้มครอง (แสดงรูปแบบ พ.ศ.), วันที่ได้รับการจดทะเบียน และเลขที่สิทธิบัตร (ถ้ามี)</li>
+<li><strong>คณะผู้ประดิษฐ์</strong>: แสดงรายชื่ออาจารย์และนักวิจัยผู้ประดิษฐ์คิดค้นผลงาน</li>
+<li><strong>โครงการวิจัยต้นทาง</strong>: ลิงก์เชื่อมโยงไปยังโครงการวิจัยที่เป็นที่มาของสิ่งประดิษฐ์ดังกล่าว</li>
+<li><strong>เอกสารรับรอง</strong>: กรณีที่มีการอนุญาตให้เปิดเผย สามารถคลิกเปิดดูไฟล์หนังสือสำคัญการจดทะเบียนได้</li>
+</ul>
+<hr />
+<a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-6-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B9%82%E0%B8%A1%E0%B8%94%E0%B8%B9%E0%B8%A5%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%99%E0%B8%B3%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B9%84%E0%B8%9B%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%82%E0%B8%A2%E0%B8%8A%E0%B8%99%E0%B9%8C-research-utilizations" class="manual-anchor"></a><h2 id="บทที่-6-การใช้งานโมดูลการนำงานวิจัยไปใช้ประโยชน์-research-utilizations">บทที่ 6: การใช้งานโมดูลการนำงานวิจัยไปใช้ประโยชน์ (Research Utilizations)</h2>
+<a id="61-%E0%B8%A1%E0%B8%B4%E0%B8%95%E0%B8%B4%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%99%E0%B8%B3%E0%B8%9C%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B9%84%E0%B8%9B%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%82%E0%B8%A2%E0%B8%8A%E0%B8%99%E0%B9%8C-4-%E0%B8%94%E0%B9%89%E0%B8%B2%E0%B8%99" class="manual-anchor"></a><h3 id="61-มิติการนำผลงานวิจัยไปใช้ประโยชน์-4-ด้าน">6.1 มิติการนำผลงานวิจัยไปใช้ประโยชน์ 4 ด้าน</h3>
+<p>ระบบจำแนกประโยชน์ที่เกิดขึ้นจากงานวิจัยตามกรอบมาตรฐานของสำนักงานการวิจัยแห่งชาติ (วช.) เป็น 4 มิติ:</p>
+
+<div class="mermaid-container"><pre class="mermaid">
+flowchart LR
+    A["ผลงานวิจัย มรภ.เพชรบูรณ์"] --&gt; U1["1. เชิงพาณิชย์ (Commercial)"]
+    A --&gt; U2["2. เชิงนโยบาย (Policy)"]
+    A --&gt; U3["3. เชิงชุมชนและสังคม (Social)"]
+    A --&gt; U4["4. เชิงวิชาการ (Academic)"]
+
+    U1 --&gt; E1["ถ่ายทอดเทคโนโลยี / ลิขสิทธิ์ / สตาร์ทอัพ"]
+    U2 --&gt; E2["แผนพัฒนา อปท. / ข้อบัญญัติท้องถิ่น / นโยบายจังหวัด"]
+    U3 --&gt; E3["ยกระดับวิสาหกิจชุมชน / คุณภาพชีวิต / สิ่งแวดล้อม"]
+    U4 --&gt; E4["หลักสูตรการเรียนการสอน / ตำรา / นวัตกรรมความรู้"]
+</pre></div>
+
+<hr />
+<a id="62-การสืบค้นผลงานตามพื้นที่ภูมิศาสตร์-จังหวัด-อำเภอ-ตำบล" class="manual-anchor"></a><a id="62-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%B7%E0%B8%9A%E0%B8%84%E0%B9%89%E0%B8%99%E0%B8%9C%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%95%E0%B8%B2%E0%B8%A1%E0%B8%9E%E0%B8%B7%E0%B9%89%E0%B8%99%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%A0%E0%B8%B9%E0%B8%A1%E0%B8%B4%E0%B8%A8%E0%B8%B2%E0%B8%AA%E0%B8%95%E0%B8%A3%E0%B9%8C-%E0%B8%88%E0%B8%B1%E0%B8%87%E0%B8%AB%E0%B8%A7%E0%B8%B1%E0%B8%94--%E0%B8%AD%E0%B8%B3%E0%B9%80%E0%B8%A0%E0%B8%AD--%E0%B8%95%E0%B8%B3%E0%B8%9A%E0%B8%A5" class="manual-anchor"></a><a id="62-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%B7%E0%B8%9A%E0%B8%84%E0%B9%89%E0%B8%99%E0%B8%9C%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%95%E0%B8%B2%E0%B8%A1%E0%B8%9E%E0%B8%B7%E0%B9%89%E0%B8%99%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%A0%E0%B8%B9%E0%B8%A1%E0%B8%B4%E0%B8%A8%E0%B8%B2%E0%B8%AA%E0%B8%95%E0%B8%A3%E0%B9%8C-%E0%B8%88%E0%B8%B1%E0%B8%87%E0%B8%AB%E0%B8%A7%E0%B8%B1%E0%B8%94-%E0%B8%AD%E0%B8%B3%E0%B9%80%E0%B8%A0%E0%B8%AD-%E0%B8%95%E0%B8%B3%E0%B8%9A%E0%B8%A5" class="manual-anchor"></a><h3 id="62-การสืบค้นผลงานตามพื้นที่ภูมิศาสตร์-จังหวัด--อำเภอ--ตำบล">6.2 การสืบค้นผลงานตามพื้นที่ภูมิศาสตร์ (จังหวัด / อำเภอ / ตำบล)</h3>
+<p>จุดเด่นของระบบฐานข้อมูลวิจัย มรภ.เพชรบูรณ์ คือการบันทึกพิกัดพื้นที่การใช้ประโยชน์อย่างละเอียด:</p>
+<ul>
+<li><strong>ตัวกรองระดับจังหวัด</strong>: เลือกจังหวัดที่นำผลงานวิจัยไปประยุกต์ใช้ (เช่น เพชรบูรณ์, พิษณุโลก, พิจิตร ฯลฯ)</li>
+<li><strong>ตัวกรองระดับอำเภอและตำบล</strong>: สามารถเจาะจงลึกไปถึงระดับอำเภอ (เช่น อำเภอเมืองเพชรบูรณ์, อำเภอหล่มสัก, อำเภอเขาค้อ) และระดับตำบล เพื่อติดตามการขับเคลื่อนการพัฒนาท้องถิ่น</li>
+</ul>
+<hr />
+<a id="63-%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%A5%E0%B8%B0%E0%B9%80%E0%B8%AD%E0%B8%B5%E0%B8%A2%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%82%E0%B8%A2%E0%B8%8A%E0%B8%99%E0%B9%8C-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99%E0%B8%9C%E0%B8%A5%E0%B8%81%E0%B8%A3%E0%B8%B0%E0%B8%97%E0%B8%9A-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%AB%E0%B8%A5%E0%B8%B1%E0%B8%81%E0%B8%90%E0%B8%B2%E0%B8%99%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B8%A3%E0%B8%AD%E0%B8%87-rdbprojectutilizeid" class="manual-anchor"></a><h3 id="63-หน้ารายละเอียดการใช้ประโยชน์-การประเมินผลกระทบ-และหลักฐานรับรอง-rdbprojectutilizeid">6.3 หน้ารายละเอียดการใช้ประโยชน์ การประเมินผลกระทบ และหลักฐานรับรอง (<code>/rdbprojectutilize/{id}</code>)</h3>
 <figure class="manual-figure"><a href="./screenshots/frontend_07_utilize_index.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/frontend_07_utilize_index.png" alt="หน้ารายการการนำงานวิจัยไปใช้ประโยชน์ 4 มิติ" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้ารายการการนำงานวิจัยไปใช้ประโยชน์ 4 มิติ</figcaption></figure>
-<h3 id="ข-นตอนการส-บค-นข-อม-ลการนำไปใช-ประโยชน-rdbprojectutilize">ขั้นตอนการสืบค้นข้อมูลการนำไปใช้ประโยชน์ (<code>/rdbprojectutilize</code>)</h3>
-<ol>
-<li>เลือกเมนู <strong>&quot;การนำไปใช้ประโยชน์&quot;</strong> จากแถบเมนูหลัก</li>
-<li>ในส่วนที่ <code>[1]</code> สามารถกรองตาม:
+<a id="%E0%B8%84%E0%B8%B3%E0%B8%AD%E0%B8%98%E0%B8%B4%E0%B8%9A%E0%B8%B2%E0%B8%A2%E0%B8%AA%E0%B9%88%E0%B8%A7%E0%B8%99%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%81%E0%B8%AD%E0%B8%9A%E0%B8%95%E0%B8%B2%E0%B8%A1%E0%B8%AB%E0%B8%A1%E0%B8%B2%E0%B8%A2%E0%B9%80%E0%B8%A5%E0%B8%82%E0%B9%83%E0%B8%99%E0%B8%A0%E0%B8%B2%E0%B8%9E" class="manual-anchor"></a><h4 id="คำอธิบายส่วนประกอบตามหมายเลขในภาพ">คำอธิบายส่วนประกอบตามหมายเลขในภาพ:</h4>
 <ul>
-<li><strong>ประเภทการนำไปใช้ประโยชน์ 4 ด้าน</strong>: เชิงพาณิชย์, เชิงนโยบาย, เชิงสาธารณะ/ชุมชนและสังคม, เชิงวิชาการ</li>
-<li><strong>พื้นที่การนำไปใช้ประโยชน์</strong>: ค้นหาตามจังหวัด, อำเภอ, ตำบล (ระบบเชื่อมโยงฐานข้อมูลพื้นที่ประเทศไทย)</li>
-<li><strong>ชื่อหน่วยงานที่ใช้ประโยชน์</strong> หรือ <strong>ชื่อโครงการวิจัยต้นทาง</strong></li>
+<li><strong>หมายเลข <code>[1]</code> แผงตัวกรองมิติการใช้ประโยชน์และพื้นที่ภูมิศาสตร์ (Utilization Dimension &amp; Location Filters)</strong>:
+<ul>
+<li><strong>ตัวกรองมิติ 4 ด้าน</strong>: เลือกดูผลงานเฉพาะเชิงพาณิชย์, เชิงนโยบาย, เชิงชุมชนและสังคม, หรือเชิงวิชาการ</li>
+<li><strong>ตัวกรองพื้นที่ภูมิศาสตร์</strong>: ระบุจังหวัด (เช่น เพชรบูรณ์), อำเภอ (เช่น เมือง, หล่มสัก, เขาค้อ) และตำบล</li>
+<li><strong>ค้นหาตามชื่อโครงการวิจัย / หน่วยงานที่นำไปใช้</strong>: ระบุชื่อกลุ่มวิสาหกิจชุมชน หรือ อปท. ผู้ใช้ประโยชน์</li>
 </ul>
 </li>
-<li>ในส่วนที่ <code>[2]</code> คลิกดูรายละเอียดเพื่อศึกษาผลกระทบ (Impact) และเปิดดูไฟล์หนังสือรับรองการนำไปใช้ประโยชน์</li>
-</ol>
+<li><strong>หมายเลข <code>[2]</code> ตารางรายการผลงานนำไปใช้ประโยชน์และหลักฐานรับรอง (Research Utilizations Table)</strong>:
+<ul>
+<li><strong>ชื่อผลงานและโครงการต้นทาง</strong>: ลิงก์เชื่อมโยงกลับไปยังโครงการวิจัยที่เป็นฐานความรู้</li>
+<li><strong>ป้ายมิติการใช้ประโยชน์</strong>: แสดงป้ายสีเด่นชัด เช่น <code>เชิงชุมชนและสังคม (Social)</code> หรือ <code>เชิงพาณิชย์ (Commercial)</code></li>
+<li><strong>หน่วยงานและพื้นที่ประยุกต์ใช้</strong>: แสดงชื่อองค์กรผู้รับการถ่ายทอดเทคโนโลยีและพิกัดพื้นที่</li>
+<li><strong>หลักฐานรับรองผลกระทบ</strong>: ปุ่มเปิดดูไฟล์หนังสือรับรองการใช้ประโยชน์จริงที่ลงนามโดยหน่วยงานภายนอก</li>
+</ul>
+</li>
+</ul>
 <hr />
-<h2 id="บทท-7-การใช-งานทำเน-ยบน-กว-จ-ย-researchers-directory-amp-academic-portfolio">บทที่ 7: การใช้งานทำเนียบนักวิจัย (Researchers Directory &amp; Academic Portfolio)</h2>
-<div class="manual-carousel-grid"><div class="manual-carousel-item"><div class="carousel-badge">ภาพชุดที่ 1</div><figure class="manual-figure"><a href="./screenshots/frontend_08_researcher_index.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/frontend_08_researcher_index.png" alt="หน้าทำเนียบนักวิจัยและการค้นหาตามคณะ" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้าทำเนียบนักวิจัยและการค้นหาตามคณะ</figcaption></figure>
-</div><div class="manual-carousel-item"><div class="carousel-badge">ภาพชุดที่ 2</div><figure class="manual-figure"><a href="./screenshots/frontend_09_researcher_show.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/frontend_09_researcher_show.png" alt="หน้าแฟ้มประวัตินักวิจัย (Academic Portfolio) พร้อมลิงก์ Scopus และ ORCID" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้าแฟ้มประวัตินักวิจัย (Academic Portfolio) พร้อมลิงก์ Scopus และ ORCID</figcaption></figure>
-</div></div>
-<h3 id="7-1-การค-นหาทำเน-ยบน-กว-จ-ย-rdbresearcher">7.1 การค้นหาทำเนียบนักวิจัย (<code>/rdbresearcher</code>)</h3>
-<ol>
-<li>พิมพ์ชื่อหรือนามสกุลนักวิจัย (ภาษาไทยหรือภาษาอังกฤษ) ในช่องค้นหาส่วนที่ <code>[1]</code> หรือเลือกกรองตาม <strong>คณะ/หน่วยงานสังกัด</strong></li>
-<li>ตารางส่วนที่ <code>[2]</code> จะแสดงรูปภาพประจำตัว, ชื่อ-นามสกุล, ตำแหน่งทางวิชาการ, สังกัดคณะ และจำนวนผลงานวิจัยสะสม</li>
-</ol>
-<h3 id="7-2-การด-แฟ-มประว-ต-และผลงานน-กว-จ-ยรายบ-คคล-rdbresearcher-id">7.2 การดูแฟ้มประวัติและผลงานนักวิจัยรายบุคคล (<code>/rdbresearcher/{id}</code>)</h3>
-<ol>
-<li><strong>ส่วนที่ <code>[1]</code> ข้อมูลประวัติและรหัสสากลของนักวิจัย</strong>:
+<a id="บทที่-7-การใช้งานทำเนียบนักวิจัย-researchers-directory-academic-portfolio" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-7-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%B3%E0%B9%80%E0%B8%99%E0%B8%B5%E0%B8%A2%E0%B8%9A%E0%B8%99%E0%B8%B1%E0%B8%81%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-researchers-directory--academic-portfolio" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-7-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%97%E0%B8%B3%E0%B9%80%E0%B8%99%E0%B8%B5%E0%B8%A2%E0%B8%9A%E0%B8%99%E0%B8%B1%E0%B8%81%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-researchers-directory-academic-portfolio" class="manual-anchor"></a><h2 id="บทที่-7-การใช้งานทำเนียบนักวิจัย-researchers-directory--academic-portfolio">บทที่ 7: การใช้งานทำเนียบนักวิจัย (Researchers Directory &amp; Academic Portfolio)</h2>
+<a id="71-%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%A7%E0%B8%A1%E0%B8%97%E0%B8%B3%E0%B9%80%E0%B8%99%E0%B8%B5%E0%B8%A2%E0%B8%9A%E0%B8%99%E0%B8%B1%E0%B8%81%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%84%E0%B9%89%E0%B8%99%E0%B8%AB%E0%B8%B2%E0%B8%95%E0%B8%B2%E0%B8%A1%E0%B8%AA%E0%B8%B1%E0%B8%87%E0%B8%81%E0%B8%B1%E0%B8%94%E0%B8%84%E0%B8%93%E0%B8%B0-rdbresearcher" class="manual-anchor"></a><h3 id="71-หน้ารวมทำเนียบนักวิจัยและการค้นหาตามสังกัดคณะ-rdbresearcher">7.1 หน้ารวมทำเนียบนักวิจัยและการค้นหาตามสังกัดคณะ (<code>/rdbresearcher</code>)</h3>
+<figure class="manual-figure"><a href="./screenshots/frontend_08_researcher_index.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/frontend_08_researcher_index.png" alt="หน้าทำเนียบนักวิจัยและการค้นหาตามคณะ" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้าทำเนียบนักวิจัยและการค้นหาตามคณะ</figcaption></figure>
+<a id="%E0%B8%84%E0%B8%B3%E0%B8%AD%E0%B8%98%E0%B8%B4%E0%B8%9A%E0%B8%B2%E0%B8%A2%E0%B8%AA%E0%B9%88%E0%B8%A7%E0%B8%99%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%81%E0%B8%AD%E0%B8%9A%E0%B8%95%E0%B8%B2%E0%B8%A1%E0%B8%AB%E0%B8%A1%E0%B8%B2%E0%B8%A2%E0%B9%80%E0%B8%A5%E0%B8%82%E0%B9%83%E0%B8%99%E0%B8%A0%E0%B8%B2%E0%B8%9E" class="manual-anchor"></a><h4 id="คำอธิบายส่วนประกอบตามหมายเลขในภาพ">คำอธิบายส่วนประกอบตามหมายเลขในภาพ:</h4>
 <ul>
-<li>แสดงสังกัดคณะ/สาขาวิชา, ความเชี่ยวชาญ และข้อมูลติดต่อ</li>
-<li>แสดงรหัส <strong>Scopus Author ID</strong> และ <strong>ORCID iD</strong> (สามารถคลิกที่ปุ่มลิงก์เพื่อเปิดดูโปรไฟล์ของนักวิจัยบนเว็บไซต์ Scopus และ ORCID ได้โดยตรง)</li>
+<li><strong>หมายเลข <code>[1]</code> แผงค้นหานักวิจัยและตัวกรองสังกัดคณะ (Researcher Search &amp; Filter Panel)</strong>:
+<ul>
+<li><strong>ช่องค้นหาชื่อนักวิจัย</strong>: พิมพ์ชื่อหรือนามสกุล (มีระบบตัดคำนำหน้า ศ./รศ./ผศ./ดร./นาย/นาง อัตโนมัติ)</li>
+<li><strong>ตัวกรองคณะ/หน่วยงาน</strong>: เลือกแสดงนักวิจัยเฉพาะคณะ เช่น วิทยาศาสตร์ฯ, ครุศาสตร์, วิทยาการจัดการ ฯลฯ</li>
+<li><strong>ปุ่มค้นหาและล้างเงื่อนไข</strong>: ปุ่มสีน้ำเงินสั่งค้นหาทันที และปุ่มสีเทาคืนค่าเริ่มต้น</li>
 </ul>
 </li>
-<li><strong>ส่วนที่ <code>[2]</code> แท็บรวมผลงานทางวิชาการทั้งหมดของนักวิจัย</strong>:
+<li><strong>หมายเลข <code>[2]</code> ทำเนียบรายชื่อนักวิจัย (Researcher Cards Grid)</strong>:
 <ul>
-<li>แสดงรายการโครงการวิจัยทั้งหมดที่นักวิจัยเป็นหัวหน้าโครงการหรือผู้ร่วมวิจัย</li>
-<li>แสดงรายการผลงานตีพิมพ์, ทรัพย์สินทางปัญญา และการนำไปใช้ประโยชน์ทั้งหมดของนักวิจัยท่านนั้นในหน้าเดียว</li>
+<li><strong>รูปถ่ายและข้อมูลวิชาการ</strong>: แสดงภาพถ่ายนักวิจัย, ตำแหน่งทางวิชาการ (ศ., รศ., ผศ., อ.), และสาขาวิชาเชี่ยวชาญ</li>
+<li><strong>ป้ายดัชนีทางวิชาการ</strong>: ไฮไลต์ป้าย <code>Scopus Author ID</code>, <code>ORCID iD</code> และค่า <code>h-index</code> ประจำตัว</li>
+<li><strong>ปุ่มเปิดดูแฟ้มประวัติ (View Portfolio)</strong>: คลิกเพื่อเปิดดูหน้าประวัติและผลงานวิจัยสะสมทั้ง 4 มิติ</li>
 </ul>
 </li>
-</ol>
+</ul>
 <hr />
-<h2 id="บทท-8-แดชบอร-ดสถ-ต-สารสนเทศและฟ-ดข-าวสาร-dashboards-amp-rss-feeds">บทที่ 8: แดชบอร์ดสถิติสารสนเทศและฟีดข่าวสาร (Dashboards &amp; RSS Feeds)</h2>
+<a id="72-%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B9%81%E0%B8%9F%E0%B9%89%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%95%E0%B8%B4%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%9C%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B8%AA%E0%B8%B0%E0%B8%AA%E0%B8%A1%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B8%99%E0%B8%B1%E0%B8%81%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-rdbresearcherid" class="manual-anchor"></a><h3 id="72-หน้าแฟ้มประวัติและผลงานวิจัยสะสมของนักวิจัย-rdbresearcherid">7.2 หน้าแฟ้มประวัติและผลงานวิจัยสะสมของนักวิจัย (<code>/rdbresearcher/{id}</code>)</h3>
+<figure class="manual-figure"><a href="./screenshots/frontend_09_researcher_show.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/frontend_09_researcher_show.png" alt="หน้าแฟ้มประวัตินักวิจัย (Academic Portfolio) พร้อมลิงก์ Scopus และ ORCID" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้าแฟ้มประวัตินักวิจัย (Academic Portfolio) พร้อมลิงก์ Scopus และ ORCID</figcaption></figure>
+<a id="%E0%B8%84%E0%B8%B3%E0%B8%AD%E0%B8%98%E0%B8%B4%E0%B8%9A%E0%B8%B2%E0%B8%A2%E0%B8%AA%E0%B9%88%E0%B8%A7%E0%B8%99%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%81%E0%B8%AD%E0%B8%9A%E0%B8%95%E0%B8%B2%E0%B8%A1%E0%B8%AB%E0%B8%A1%E0%B8%B2%E0%B8%A2%E0%B9%80%E0%B8%A5%E0%B8%82%E0%B9%83%E0%B8%99%E0%B8%A0%E0%B8%B2%E0%B8%9E" class="manual-anchor"></a><h4 id="คำอธิบายส่วนประกอบตามหมายเลขในภาพ">คำอธิบายส่วนประกอบตามหมายเลขในภาพ:</h4>
+<ul>
+<li><strong>หมายเลข <code>[1]</code> แฟ้มประวัตินักวิจัย สังกัด และดัชนีทางวิชาการสากล (Researcher Academic Identity Card)</strong>:
+<ul>
+<li><strong>ข้อมูลส่วนบุคคลและตำแหน่ง</strong>: ตำแหน่งทางวิชาการ, สาขาความเชี่ยวชาญ, สังกัดคณะ/ภาควิชา, และอีเมลติดต่อทางการ</li>
+<li><strong>ป้ายเชื่อมโยงฐานข้อมูลสากล</strong>:
+<ul>
+<li>ปุ่มสีส้ม <code>Scopus Author ID</code>: ลิงก์ตรงไปยังฐานข้อมูล Elsevier พร้อมแสดงค่า <strong>h-index</strong> และจำนวนการอ้างอิง</li>
+<li>ปุ่มสีเขียว <code>ORCID iD</code>: ลิงก์ตรงไปยังประวัติผลงานวิจัยระดับนานาชาติ 16 หลัก</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>หมายเลข <code>[2]</code> แผงแท็บผลงานวิจัยแบบบูรณาการ 4 มิติ (Integrated Portfolio Tabs)</strong>:
+<ul>
+<li><strong>แท็บที่ 1 โครงการวิจัย</strong>: แสดงทุกโครงการที่อาจารย์เป็นหัวหน้าหรือผู้ร่วมวิจัย พร้อมปีงบประมาณและบทบาท</li>
+<li><strong>แท็บที่ 2 ผลงานตีพิมพ์</strong>: แสดงบทความวิจัยที่ได้รับการตีพิมพ์ใน Scopus, WoS, และ TCI</li>
+<li><strong>แท็บที่ 3 ทรัพย์สินทางปัญญา</strong>: แสดงสิทธิบัตรและลิขสิทธิ์ที่อาจารย์เป็นผู้ประดิษฐ์</li>
+<li><strong>แท็บที่ 4 การนำไปใช้ประโยชน์</strong>: แสดงโครงการที่นำผลงานไปขับเคลื่อนชุมชนและสังคมจริง</li>
+</ul>
+</li>
+</ul>
+<hr />
+<a id="73-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%80%E0%B8%8A%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%A1%E0%B8%95%E0%B9%88%E0%B8%AD%E0%B8%90%E0%B8%B2%E0%B8%99%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%AA%E0%B8%B2%E0%B8%81%E0%B8%A5-scopus-author-id-orcid-id-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%94%E0%B8%B1%E0%B8%8A%E0%B8%99%E0%B8%B5-h-index" class="manual-anchor"></a><h3 id="73-การเชื่อมต่อฐานข้อมูลสากล-scopus-author-id-orcid-id-และดัชนี-h-index">7.3 การเชื่อมต่อฐานข้อมูลสากล Scopus Author ID, ORCID iD และดัชนี h-index</h3>
+<p>ระบบเชื่อมโยงข้อมูลนักวิจัยเข้ากับฐานข้อมูลระดับโลกอย่างเป็นทางการ:</p>
+<ul>
+<li><strong>Scopus Author ID</strong>: แสดงป้ายลิงก์สีส้มไปยังโปรไฟล์ของนักวิจัยบนฐานข้อมูล Elsevier Scopus พร้อมดัชนี <strong>h-index</strong> และจำนวนการอ้างอิงสะสม</li>
+<li><strong>ORCID iD</strong>: แสดงป้ายสีเขียวพร้อมรหัส 16 หลักสากล (<code>XXXX-XXXX-XXXX-XXXX</code>) สามารถคลิกเพื่อเปิดดูประวัติการตีพิมพ์ระดับนานาชาติบนเว็บไซต์ ORCID ได้ทันที</li>
+</ul>
+<hr />
+<a id="74-%E0%B9%81%E0%B8%97%E0%B9%87%E0%B8%9A%E0%B8%A3%E0%B8%A7%E0%B8%A1%E0%B8%9C%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B9%81%E0%B8%9A%E0%B8%9A%E0%B8%9A%E0%B8%B9%E0%B8%A3%E0%B8%93%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-4-%E0%B8%A1%E0%B8%B4%E0%B8%95%E0%B8%B4%E0%B9%83%E0%B8%99%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B9%80%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B8%A7-portfolio-tabs" class="manual-anchor"></a><h3 id="74-แท็บรวมผลงานแบบบูรณาการ-4-มิติในหน้าเดียว-portfolio-tabs">7.4 แท็บรวมผลงานแบบบูรณาการ 4 มิติในหน้าเดียว (Portfolio Tabs)</h3>
+<p>ด้านล่างของหน้าโปรไฟล์นักวิจัย มีแท็บรวบรวมผลงานวิชาการทั้งหมดของนักวิจัยท่านนั้นในที่เดียว:</p>
+<ul>
+<li><strong>แท็บโครงการวิจัย</strong>: แสดงทุกโครงการที่อาจารย์เป็นหัวหน้าหรือผู้ร่วมวิจัย พร้อมระบุปีงบประมาณและบทบาท</li>
+<li><strong>แท็บผลงานตีพิมพ์</strong>: แสดงบทความวิจัยที่ได้รับการตีพิมพ์ทั้งหมด จัดเรียงตามปีล่าสุด</li>
+<li><strong>แท็บทรัพย์สินทางปัญญา</strong>: แสดงรายการสิทธิบัตรและลิขสิทธิ์ที่มีชื่ออาจารย์เป็นผู้ประดิษฐ์</li>
+<li><strong>แท็บการนำไปใช้ประโยชน์</strong>: แสดงโครงการที่นำผลงานของอาจารย์ไปสร้างผลกระทบต่อชุมชนและสังคม</li>
+</ul>
+<hr />
+<a id="บทที่-8-แดชบอร์ดสถิติสารสนเทศและฟีดข่าวสาร-dashboards-rss-feeds" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-8-%E0%B9%81%E0%B8%94%E0%B8%8A%E0%B8%9A%E0%B8%AD%E0%B8%A3%E0%B9%8C%E0%B8%94%E0%B8%AA%E0%B8%96%E0%B8%B4%E0%B8%95%E0%B8%B4%E0%B8%AA%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%99%E0%B9%80%E0%B8%97%E0%B8%A8%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%9F%E0%B8%B5%E0%B8%94%E0%B8%82%E0%B9%88%E0%B8%B2%E0%B8%A7%E0%B8%AA%E0%B8%B2%E0%B8%A3-dashboards--rss-feeds" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-8-%E0%B9%81%E0%B8%94%E0%B8%8A%E0%B8%9A%E0%B8%AD%E0%B8%A3%E0%B9%8C%E0%B8%94%E0%B8%AA%E0%B8%96%E0%B8%B4%E0%B8%95%E0%B8%B4%E0%B8%AA%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%99%E0%B9%80%E0%B8%97%E0%B8%A8%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%9F%E0%B8%B5%E0%B8%94%E0%B8%82%E0%B9%88%E0%B8%B2%E0%B8%A7%E0%B8%AA%E0%B8%B2%E0%B8%A3-dashboards-rss-feeds" class="manual-anchor"></a><h2 id="บทที่-8-แดชบอร์ดสถิติสารสนเทศและฟีดข่าวสาร-dashboards--rss-feeds">บทที่ 8: แดชบอร์ดสถิติสารสนเทศและฟีดข่าวสาร (Dashboards &amp; RSS Feeds)</h2>
+<a id="81-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A8%E0%B8%B9%E0%B8%99%E0%B8%A2%E0%B9%8C%E0%B8%AA%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%99%E0%B9%80%E0%B8%97%E0%B8%A8%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-intelligence-dashboards-6-%E0%B8%A1%E0%B8%B4%E0%B8%95%E0%B8%B4" class="manual-anchor"></a><h3 id="81-การใช้งานศูนย์สารสนเทศงานวิจัย-intelligence-dashboards-6-มิติ">8.1 การใช้งานศูนย์สารสนเทศงานวิจัย (Intelligence Dashboards: 6 มิติ)</h3>
 <figure class="manual-figure"><a href="./screenshots/frontend_10_dashboard.png" target="_blank" title="คลิกเพื่อดูภาพขนาดเต็ม"><img src="./screenshots/frontend_10_dashboard.png" alt="หน้าแดชบอร์ดสถิติสารสนเทศงานวิจัยและกราฟวิเคราะห์แนวโน้ม" loading="lazy"></a><figcaption><i class="bi bi-camera me-1"></i> หน้าแดชบอร์ดสถิติสารสนเทศงานวิจัยและกราฟวิเคราะห์แนวโน้ม</figcaption></figure>
-<h3 id="8-1-การใช-งานแดชบอร-ดสถ-ต-งานว-จ-ย-dashboard">8.1 การใช้งานแดชบอร์ดสถิติงานวิจัย (<code>/dashboard</code>)</h3>
-<ol>
-<li><strong>ส่วนที่ <code>[1]</code> แถบเลือกมิติข้อมูลและตัวกรองปีงบประมาณ</strong>:
+<a id="%E0%B8%84%E0%B8%B3%E0%B8%AD%E0%B8%98%E0%B8%B4%E0%B8%9A%E0%B8%B2%E0%B8%A2%E0%B8%AA%E0%B9%88%E0%B8%A7%E0%B8%99%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%81%E0%B8%AD%E0%B8%9A%E0%B8%95%E0%B8%B2%E0%B8%A1%E0%B8%AB%E0%B8%A1%E0%B8%B2%E0%B8%A2%E0%B9%80%E0%B8%A5%E0%B8%82%E0%B9%83%E0%B8%99%E0%B8%A0%E0%B8%B2%E0%B8%9E" class="manual-anchor"></a><h4 id="คำอธิบายส่วนประกอบตามหมายเลขในภาพ">คำอธิบายส่วนประกอบตามหมายเลขในภาพ:</h4>
 <ul>
-<li>เลือกสลับดูแดชบอร์ดเฉพาะด้านได้ 6 มิติ ได้แก่: <strong>ภาพรวมทั้งหมด (Overview)</strong>, <strong>โครงการวิจัย (Projects)</strong>, <strong>ผลงานตีพิมพ์ (Publications)</strong>, <strong>ทรัพย์สินทางปัญญา (IP)</strong>, <strong>การนำไปใช้ประโยชน์ (Utilizations)</strong>, <strong>นักวิจัย (Researchers)</strong> และ <strong>ประกันคุณภาพ (QA)</strong></li>
-<li>เลือกช่วงปีงบประมาณ พ.ศ. ที่ต้องการเปรียบเทียบข้อมูล</li>
+<li><strong>หมายเลข <code>[1]</code> แถบตัวกรองแดชบอร์ดข้ามปีงบประมาณและหน่วยงาน (Dashboard Filter Bar)</strong>:
+<ul>
+<li><strong>ตัวกรองปีงบประมาณ พ.ศ.</strong>: เลือกเปรียบเทียบสถิติย้อนหลังรายปี หรือเลือก &quot;ทุกปีงบประมาณ&quot;</li>
+<li><strong>ตัวกรองสังกัดคณะ</strong>: เจาะจงดูตัวเลขสถิติเฉพาะหน่วยงานที่ต้องการวิเคราะห์</li>
+<li><strong>ระบบพับเก็บอัตโนมัติ</strong>: เมื่อกดค้นหา แถบตัวกรองจะพับเก็บลงทันที เพื่อเปิดพื้นที่ให้เห็นกราฟสถิติเต็มหน้าจอ</li>
 </ul>
 </li>
-<li><strong>ส่วนที่ <code>[2]</code> กราฟวิเคราะห์ข้อมูลแบบโต้ตอบ (Interactive Charts)</strong>:
+<li><strong>หมายเลข <code>[2]</code> พื้นที่แสดงผลกราฟสถิติแบบโต้ตอบและการ์ดสรุปเชิงลึก (Interactive Visualization Area)</strong>:
 <ul>
-<li>แสดงกราฟแท่งและกราฟเส้นเปรียบเทียบจำนวนโครงการและงบประมาณแยกตามคณะ/หน่วยงาน</li>
-<li>เมื่อนำเมาส์ชี้ (Hover) บนแท่งกราฟ ระบบจะแสดง Tooltip รายละเอียดตัวเลขงบประมาณและสัดส่วนอย่างชัดเจน</li>
+<li><strong>การ์ดตัวเลขสรุป 4 มิติ</strong>: แสดงยอดรวมสะสมของโครงการ งบประมาณ บทความ และการใช้ประโยชน์ ด้วยฟอนต์ <code>tabular-nums</code></li>
+<li><strong>กราฟแท่งและกราฟโดนัท (Chart.js)</strong>: แสดงการกระจายตัวของงบประมาณและผลงาน สามารถนำเมาส์ไปชี้ (Hover) เพื่อดู Tooltip ละเอียด และคลิกชื่อกลุ่มข้อมูลบน Legend เพื่อเปิด/ปิดชุดข้อมูลได้อย่างอิสระ</li>
 </ul>
 </li>
-</ol>
-<h3 id="8-2-การร-บข-อม-ลผ-าน-rss-feeds-และข-าวประชาส-มพ-นธ">8.2 การรับข้อมูลผ่าน RSS Feeds และข่าวประชาสัมพันธ์</h3>
-<ul>
-<li>บุคคลทั่วไปและระบบห้องสมุดสามารถดึงฟีดข้อมูลข่าวสารงานวิจัยและงานประชุมวิชาการไปแสดงผลต่อได้ผ่าน URL มาตรฐาน XML RSS:
-<ul>
-<li><strong>RSS ข่าวประชาสัมพันธ์วิจัย</strong>: <code>/feeds/news</code></li>
-<li><strong>RSS งานประชุมวิชาการระดับชาติ/นานาชาติ</strong>: <code>/feeds/conferences</code></li>
 </ul>
-</li>
+<hr />
+<a id="82-%E0%B9%81%E0%B8%96%E0%B8%9A%E0%B8%95%E0%B8%B1%E0%B8%A7%E0%B8%81%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B9%81%E0%B8%94%E0%B8%8A%E0%B8%9A%E0%B8%AD%E0%B8%A3%E0%B9%8C%E0%B8%94%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A7%E0%B8%B4%E0%B9%80%E0%B8%84%E0%B8%A3%E0%B8%B2%E0%B8%B0%E0%B8%AB%E0%B9%8C%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B9%80%E0%B8%9B%E0%B8%A3%E0%B8%B5%E0%B8%A2%E0%B8%9A%E0%B9%80%E0%B8%97%E0%B8%B5%E0%B8%A2%E0%B8%9A%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B8%A1%E0%B8%9B%E0%B8%B5-%E0%B8%9E%E0%B8%A8" class="manual-anchor"></a><h3 id="82-แถบตัวกรองแดชบอร์ดและการวิเคราะห์ข้อมูลเปรียบเทียบข้ามปี-พศ">8.2 แถบตัวกรองแดชบอร์ดและการวิเคราะห์ข้อมูลเปรียบเทียบข้ามปี พ.ศ.</h3>
+<ul>
+<li><strong>แผงตัวกรองสารสนเทศ (Intelligence Filters)</strong>: สามารถเลือกกรองเฉพาะปีงบประมาณ พ.ศ. หรือคณะที่สนใจ</li>
+<li>เมื่อกดกรอง ระบบจะคำนวณและเรนเดอร์กราฟใหม่ทันที โดยกล่องตัวกรองจะพับเก็บลงอัตโนมัติเพื่อให้เห็นกราฟสถิติได้เต็มหน้าจอ</li>
+</ul>
+<hr />
+<a id="83-%E0%B8%81%E0%B8%A3%E0%B8%B2%E0%B8%9F%E0%B8%AA%E0%B8%96%E0%B8%B4%E0%B8%95%E0%B8%B4%E0%B9%81%E0%B8%9A%E0%B8%9A%E0%B9%82%E0%B8%95%E0%B9%89%E0%B8%95%E0%B8%AD%E0%B8%9A-interactive-chartjs-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5-tooltip" class="manual-anchor"></a><h3 id="83-กราฟสถิติแบบโต้ตอบ-interactive-chartjs-และการตรวจสอบข้อมูล-tooltip">8.3 กราฟสถิติแบบโต้ตอบ (Interactive Chart.js) และการตรวจสอบข้อมูล Tooltip</h3>
+<ul>
+<li>กราฟทั้งหมดสร้างด้วย <strong>Chart.js 4.x</strong> รองรับการโต้ตอบแบบอินเทอร์แอคทีฟ</li>
+<li><strong>Hover Inspection</strong>: เมื่อนำเมาส์ไปชี้ที่แท่งกราฟหรือเส้นข้อมูล จะมี Tooltip แสดงตัวเลขงบประมาณ, ร้อยละสัดส่วน และจำนวนโครงการอย่างแม่นยำ</li>
+<li><strong>Responsive Legend Toggle</strong>: สามารถคลิกที่ชื่อกลุ่มข้อมูลบนแถบคำอธิบาย (Legend) เพื่อเปิด/ปิดการแสดงผลของชุดข้อมูลนั้นๆ ได้อย่างอิสระ</li>
+</ul>
+<hr />
+<a id="84-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%A1%E0%B8%B1%E0%B8%84%E0%B8%A3%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B8%9F%E0%B8%B5%E0%B8%94%E0%B8%82%E0%B9%88%E0%B8%B2%E0%B8%A7%E0%B8%AA%E0%B8%B2%E0%B8%A3%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9C%E0%B9%88%E0%B8%B2%E0%B8%99-xml-rss-feeds" class="manual-anchor"></a><h3 id="84-การสมัครรับฟีดข่าวสารและงานประชุมวิชาการผ่าน-xml-rss-feeds">8.4 การสมัครรับฟีดข่าวสารและงานประชุมวิชาการผ่าน XML RSS Feeds</h3>
+<p>สำหรับผู้ใช้งานที่ใช้โปรแกรมอ่านข่าว RSS Reader หรือผู้ดูแลเว็บไซต์คณะที่ต้องการดึงข่าวสารไปแสดงผลอัตโนมัติ ระบบเปิดให้บริการฟีดมาตรฐาน XML RSS 2.0:</p>
+<ul>
+<li><strong>RSS ข่าวประชาสัมพันธ์และทุนวิจัย</strong>: <code>http://laravel_rdb.test/feeds/news</code></li>
+<li><strong>RSS งานประชุมวิชาการระดับชาติและนานาชาติ</strong>: <code>http://laravel_rdb.test/feeds/conferences</code></li>
 </ul>
 
             </div>
@@ -638,6 +1126,23 @@ flowchart LR
         (function() {
             const saved = localStorage.getItem('pcru_manual_theme');
             if (saved) document.documentElement.setAttribute('data-theme', saved);
+
+            // Smooth scrolling on hash links with Unicode support
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    const rawHash = this.getAttribute('href').slice(1);
+                    if (!rawHash) return;
+                    const decoded = decodeURIComponent(rawHash);
+                    const targetEl = document.getElementById(decoded) || 
+                                     document.getElementById(rawHash) || 
+                                     document.getElementById(encodeURIComponent(decoded));
+                    if (targetEl) {
+                        e.preventDefault();
+                        history.pushState(null, null, '#' + rawHash);
+                        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
         })();
     </script>
 </body>

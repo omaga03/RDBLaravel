@@ -3,7 +3,7 @@
 @section('content')
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-list-stars"></i> แผนยุทธศาสตร์ (Strategic Plans)</h2>
+        <h2><i class="bi bi-list-stars me-1.5"></i> แผนยุทธศาสตร์ (Strategic Plans)</h2>
     </div>
 
     <div class="card shadow-sm mb-4">
@@ -13,7 +13,7 @@
                     <input type="text" class="form-control" name="search" value="{{ request('search') }}" placeholder="ค้นหาชื่อแผน...">
                 </div>
                 <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> ค้นหา</button>
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search me-1.5"></i> ค้นหา</button>
                 </div>
             </form>
         </div>

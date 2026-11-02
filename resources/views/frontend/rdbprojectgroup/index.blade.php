@@ -17,7 +17,7 @@
             </select>
         </div>
         <div class="col-md-3 d-flex gap-2">
-            <button class="btn btn-primary"><i class="bi bi-search"></i> ค้นหา</button>
+            <button class="btn btn-primary"><i class="bi bi-search me-1.5"></i> ค้นหา</button>
             <a href="{{ route('frontend.rdbprojectgroup.index') }}" class="btn btn-outline-secondary">ล้าง</a>
         </div>
     </form>

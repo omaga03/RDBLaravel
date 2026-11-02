@@ -31,5 +31,5 @@
 <hr>
 <div class="d-flex justify-content-end">
     <a href="{{ route('backend.rdbdepmajor.index') }}" class="btn btn-secondary me-2">ยกเลิก</a>
-    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> บันทึกข้อมูล</button>
+    <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1.5"></i> บันทึกข้อมูล</button>
 </div>

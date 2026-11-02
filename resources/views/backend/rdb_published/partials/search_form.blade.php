@@ -2,10 +2,10 @@
     <div class="card-header py-3">
         <ul class="nav nav-tabs card-header-tabs" id="searchTabs" role="tablist">
             <li class="nav-item">
-                <button class="nav-link {{ request('search_mode') != 'advanced' ? 'active' : '' }}" id="simple-tab" data-bs-toggle="tab" data-bs-target="#simple-search" type="button" role="tab"><i class="bi bi-search"></i> ค้นหาทั่วไป</button>
+                <button class="nav-link {{ request('search_mode') != 'advanced' ? 'active' : '' }}" id="simple-tab" data-bs-toggle="tab" data-bs-target="#simple-search" type="button" role="tab"><i class="bi bi-search me-1.5"></i> ค้นหาทั่วไป</button>
             </li>
             <li class="nav-item">
-                <button class="nav-link {{ request('search_mode') == 'advanced' ? 'active' : '' }}" id="advanced-tab" data-bs-toggle="tab" data-bs-target="#advanced-search" type="button" role="tab"><i class="bi bi-sliders"></i> ค้นหาละเอียด</button>
+                <button class="nav-link {{ request('search_mode') == 'advanced' ? 'active' : '' }}" id="advanced-tab" data-bs-toggle="tab" data-bs-target="#advanced-search" type="button" role="tab"><i class="bi bi-sliders me-1.5"></i> ค้นหาละเอียด</button>
             </li>
         </ul>
     </div>
@@ -16,7 +16,7 @@
                 <form action="{{ route('backend.rdb_published.index') }}" method="GET">
                     <div class="input-group">
                         <input type="text" class="form-control form-control-lg" name="q" value="{{ request('q') }}" placeholder="พิมพ์ชื่อผลงาน, ชื่อวารสาร, หรือชื่อนักวิจัย...">
-                        <button class="btn btn-primary px-4" type="submit"><i class="bi bi-search"></i> ค้นหา</button>
+                        <button class="btn btn-primary px-4" type="submit"><i class="bi bi-search me-1.5"></i> ค้นหา</button>
                         @if(request('q'))
                             <a href="{{ route('backend.rdb_published.index') }}" class="btn btn-secondary px-3" title="ล้างค่า"><i class="bi bi-x-lg"></i></a>
                         @endif
@@ -133,8 +133,8 @@
 
                     <!-- Actions -->
                     <div class="d-flex justify-content-end mt-3 gap-2">
-                         <a href="{{ route('backend.rdb_published.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-clockwise"></i> ล้างค่า</a>
-                        <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> ค้นหา</button>
+                         <a href="{{ route('backend.rdb_published.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-clockwise me-1.5"></i> ล้างค่า</a>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-search me-1.5"></i> ค้นหา</button>
                     </div>
                 </form>
             </div>

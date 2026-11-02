@@ -64,7 +64,7 @@
                         <th>คำนวณงบประมาณ:</th>
                         <td>
                             @if($item->pt_type == '1')
-                                <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle"><i class="bi bi-check-circle"></i> คำนวณ</span>
+                                <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle"><i class="bi bi-check-circle me-1.5"></i> คำนวณ</span>
                             @else
                                 <span class="text-muted">-</span>
                             @endif
@@ -74,7 +74,7 @@
                         <th>การนำไปใช้ประโยชน์ (QA):</th>
                         <td>
                             @if($item->pt_utz == '1')
-                                <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle"><i class="bi bi-check-circle"></i> คำนวณ</span>
+                                <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle"><i class="bi bi-check-circle me-1.5"></i> คำนวณ</span>
                             @else
                                 <span class="text-muted">-</span>
                             @endif

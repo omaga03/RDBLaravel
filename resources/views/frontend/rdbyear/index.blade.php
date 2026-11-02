@@ -3,7 +3,7 @@
 @section('content')
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-calendar3"></i> ปีงบประมาณ (Academic Years)</h2>
+        <h2><i class="bi bi-calendar3 me-1.5"></i> ปีงบประมาณ (Academic Years)</h2>
     </div>
 
     @if(session('success'))

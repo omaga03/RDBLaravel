@@ -363,7 +363,7 @@
                                     </div>
                                 </div>
                                 <div class="btn btn-sm btn-success w-100 rounded-2 fw-medium d-flex align-items-center justify-content-center gap-1.5 py-1.5 text-white shadow-sm">
-                                    <i class="bi bi-cloud-arrow-down-fill"></i> ดาวน์โหลดบทความฉบับเต็ม
+                                    <i class="bi bi-cloud-arrow-down-fill me-1.5"></i> ดาวน์โหลดบทความฉบับเต็ม
                                 </div>
                             </div>
                         </a>
@@ -464,7 +464,7 @@
                                 {!! strip_tags((string) $pubCitationApa, '<i><em><b><strong>') !!}
                             </div>
                             <button type="button" class="btn btn-sm btn-outline-primary w-100 py-1.5 d-flex align-items-center justify-content-center gap-1.5" style="font-size: 0.78rem;" onclick="copyCitation('text-pub-apa7', this)">
-                                <i class="bi bi-clipboard"></i> คัดลอก APA 7
+                                <i class="bi bi-clipboard me-1.5"></i> คัดลอก APA 7
                             </button>
                         </div>
 
@@ -474,7 +474,7 @@
                                 {!! strip_tags((string) $pubCitationIeee, '<i><em><b><strong>') !!}
                             </div>
                             <button type="button" class="btn btn-sm btn-outline-primary w-100 py-1.5 d-flex align-items-center justify-content-center gap-1.5" style="font-size: 0.78rem;" onclick="copyCitation('text-pub-ieee', this)">
-                                <i class="bi bi-clipboard"></i> คัดลอก IEEE
+                                <i class="bi bi-clipboard me-1.5"></i> คัดลอก IEEE
                             </button>
                         </div>
 
@@ -484,7 +484,7 @@
                                 {!! strip_tags((string) $pubCitationMla, '<i><em><b><strong>') !!}
                             </div>
                             <button type="button" class="btn btn-sm btn-outline-primary w-100 py-1.5 d-flex align-items-center justify-content-center gap-1.5" style="font-size: 0.78rem;" onclick="copyCitation('text-pub-mla9', this)">
-                                <i class="bi bi-clipboard"></i> คัดลอก MLA 9
+                                <i class="bi bi-clipboard me-1.5"></i> คัดลอก MLA 9
                             </button>
                         </div>
                     </div>

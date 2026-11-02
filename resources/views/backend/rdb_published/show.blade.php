@@ -197,7 +197,7 @@
                                 <th>โครงการที่เกี่ยวข้อง:</th>
                                 <td>
                                     <a href="{{ route('backend.rdb_project.show', $item->project->pro_id) }}" target="_blank" class="text-decoration-none">
-                                        <i class="bi bi-folder-symlink"></i> {{ $item->project->pro_nameTH }}
+                                        <i class="bi bi-folder-symlink me-1.5"></i> {{ $item->project->pro_nameTH }}
                                     </a>
                                 </td>
                             </tr>
@@ -319,7 +319,7 @@
                             </div>
                         @endif
                         <p class="text-muted small mb-3">
-                            <i class="bi bi-eye"></i> ดาวน์โหลดไฟล์ {{ number_format($item->pub_download ?? ($item->pub_view_file ?? 0)) }} ครั้ง
+                            <i class="bi bi-eye me-1.5"></i> ดาวน์โหลดไฟล์ {{ number_format($item->pub_download ?? ($item->pub_view_file ?? 0)) }} ครั้ง
                         </p>
                         <div class="d-grid gap-2">
                             <a href="{{ route('backend.rdb_published.view_file', $item->id) }}" 
@@ -479,14 +479,14 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="authorModalLabel"><i class="bi bi-people-fill"></i> จัดการผู้แต่ง/นักวิจัย (Manage Authors)</h5>
+                <h5 class="modal-title" id="authorModalLabel"><i class="bi bi-people-fill me-1.5"></i> จัดการผู้แต่ง/นักวิจัย (Manage Authors)</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <!-- Add/Edit Form -->
                 <div class="card mb-3 border">
                     <div class="card-body">
-                        <h6 class="fw-bold mb-3" id="authorFormTitle"><i class="bi bi-person-plus"></i> เพิ่มผู้แต่งใหม่ (Add New)</h6>
+                        <h6 class="fw-bold mb-3" id="authorFormTitle"><i class="bi bi-person-plus me-1.5"></i> เพิ่มผู้แต่งใหม่ (Add New)</h6>
                         <form id="authorForm" method="POST" action="{{ route('backend.rdb_published.store_author', $item->id) }}">
                             @csrf
                             <input type="hidden" name="_method" id="authorFormMethod" value="POST">
@@ -524,10 +524,10 @@
                                 </div>
                                 <div class="col-md-12 text-end mt-2">
                                     <button type="button" class="btn btn-secondary btn-sm" id="btnCancelEdit" style="display: none;" onclick="resetAuthorForm()">
-                                        <i class="bi bi-x-circle"></i> ยกเลิก
+                                        <i class="bi bi-x-circle me-1.5"></i> ยกเลิก
                                     </button>
                                     <button type="submit" class="btn btn-success btn-sm">
-                                        <i class="bi bi-save"></i> บันทึกข้อมูล
+                                        <i class="bi bi-save me-1.5"></i> บันทึกข้อมูล
                                     </button>
                                 </div>
                             </div>
@@ -743,7 +743,7 @@
                 
                 if (mode === 'edit') {
                     // Update UI to Edit Mode
-                    formTitle.innerHTML = '<i class="bi bi-pencil-square"></i> แก้ไขข้อมูล: ' + researcherName;
+                    formTitle.innerHTML = '<i class="bi bi-pencil-square me-1.5"></i> แก้ไขข้อมูล: ' + researcherName;
                     formMethod.value = 'PUT';
                     btnCancel.style.display = 'inline-block';
                     
@@ -814,7 +814,7 @@
         var checkBud = document.getElementById('checkBud');
         var authorForm = document.getElementById('authorForm');
         
-        formTitle.innerHTML = '<i class="bi bi-person-plus"></i> เพิ่มผู้แต่งใหม่ (Add New)';
+        formTitle.innerHTML = '<i class="bi bi-person-plus me-1.5"></i> เพิ่มผู้แต่งใหม่ (Add New)';
         formMethod.value = 'POST';
         btnCancel.style.display = 'none';
         

@@ -49,7 +49,7 @@
         <!-- Alert Notification Box (Amber) -->
         <div class="alert text-white fw-medium d-flex align-items-center gap-2 mb-4 shadow-sm" style="background-color: #f39c12; border: none; border-radius: 6px; padding: 12px 18px;">
             <div>
-                <strong>คำแนะนำ:</strong> เมื่อดาวน์โหลดเสร็จแล้ว ให้กดปุ่ม <i class="bi bi-check-lg fw-bold"></i> เพื่อทำเครื่องหมายว่าส่งออกแล้ว
+                <strong>คำแนะนำ:</strong> เมื่อดาวน์โหลดเสร็จแล้ว ให้กดปุ่ม <i class="bi bi-check-lg fw-bold me-1.5"></i> เพื่อทำเครื่องหมายว่าส่งออกแล้ว
             </div>
         </div>
 

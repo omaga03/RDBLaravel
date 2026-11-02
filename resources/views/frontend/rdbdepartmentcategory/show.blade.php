@@ -4,7 +4,7 @@
 <div class="container py-4">
     <div class="card shadow-sm">
         <div class="card-header bg-body-tertiary">
-            <h4 class="mb-0"><i class="bi bi-building"></i> รายละเอียดประเภทหน่วยงาน</h4>
+            <h4 class="mb-0"><i class="bi bi-building me-1.5"></i> รายละเอียดประเภทหน่วยงาน</h4>
         </div>
         <div class="card-body">
             <div class="table-responsive">

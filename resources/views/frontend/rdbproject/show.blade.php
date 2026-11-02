@@ -407,7 +407,7 @@
                                     </span>
                                 </div>
                                 <div class="btn btn-sm btn-outline-primary w-100 rounded-2 fw-medium d-flex align-items-center justify-content-center gap-1.5 py-1.5">
-                                    <i class="bi bi-box-arrow-up-right"></i> เปิดอ่านบทคัดย่อ
+                                    <i class="bi bi-box-arrow-up-right me-1.5"></i> เปิดอ่านบทคัดย่อ
                                 </div>
                             </div>
                         </a>
@@ -447,7 +447,7 @@
                                             </span>
                                         </div>
                                         <div class="btn btn-sm btn-outline-warning w-100 rounded-2 fw-medium d-flex align-items-center justify-content-center gap-1.5 py-1.5 shadow-sm text-dark">
-                                            <i class="bi bi-box-arrow-in-right"></i> เข้าสู่ระบบเพื่อดาวน์โหลดรายงาน
+                                            <i class="bi bi-box-arrow-in-right me-1.5"></i> เข้าสู่ระบบเพื่อดาวน์โหลดรายงาน
                                         </div>
                                     </div>
                                 </a>
@@ -479,7 +479,7 @@
                                             </div>
                                         </div>
                                         <div class="btn btn-sm btn-success w-100 rounded-2 fw-medium d-flex align-items-center justify-content-center gap-1.5 py-1.5 text-white shadow-sm">
-                                            <i class="bi bi-cloud-arrow-down-fill"></i> ดาวน์โหลดรายงานฉบับสมบูรณ์
+                                            <i class="bi bi-cloud-arrow-down-fill me-1.5"></i> ดาวน์โหลดรายงานฉบับสมบูรณ์
                                         </div>
                                     </div>
                                 </a>
@@ -592,7 +592,7 @@
                                 {!! strip_tags((string) $citationApa, '<i><em><b><strong>') !!}
                             </div>
                             <button type="button" class="btn btn-sm btn-outline-primary w-100 py-1.5 d-flex align-items-center justify-content-center gap-1.5" style="font-size: 0.78rem;" onclick="copyCitation('text-apa7', this)">
-                                <i class="bi bi-clipboard"></i> คัดลอก APA 7
+                                <i class="bi bi-clipboard me-1.5"></i> คัดลอก APA 7
                             </button>
                         </div>
 
@@ -602,7 +602,7 @@
                                 {!! strip_tags((string) $citationIeee, '<i><em><b><strong>') !!}
                             </div>
                             <button type="button" class="btn btn-sm btn-outline-primary w-100 py-1.5 d-flex align-items-center justify-content-center gap-1.5" style="font-size: 0.78rem;" onclick="copyCitation('text-ieee', this)">
-                                <i class="bi bi-clipboard"></i> คัดลอก IEEE
+                                <i class="bi bi-clipboard me-1.5"></i> คัดลอก IEEE
                             </button>
                         </div>
 
@@ -612,7 +612,7 @@
                                 {!! strip_tags((string) $citationMla, '<i><em><b><strong>') !!}
                             </div>
                             <button type="button" class="btn btn-sm btn-outline-primary w-100 py-1.5 d-flex align-items-center justify-content-center gap-1.5" style="font-size: 0.78rem;" onclick="copyCitation('text-mla9', this)">
-                                <i class="bi bi-clipboard"></i> คัดลอก MLA 9
+                                <i class="bi bi-clipboard me-1.5"></i> คัดลอก MLA 9
                             </button>
                         </div>
                     </div>

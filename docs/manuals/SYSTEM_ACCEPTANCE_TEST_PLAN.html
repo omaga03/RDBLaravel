@@ -35,6 +35,9 @@
             --royal: #60A5FA;
         }
         * { box-sizing: border-box; }
+        html {
+            scroll-behavior: smooth;
+        }
         body {
             margin: 0;
             font-family: 'Sarabun', 'Plus Jakarta Sans', sans-serif;
@@ -44,7 +47,18 @@
             color: var(--text-primary);
             font-variant-numeric: tabular-nums;
         }
-        h1, h2, h3, h4, .font-heading {
+        h1, h2, h3, h4, .font-heading, .manual-anchor {
+            font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
+            line-height: 1.35;
+            scroll-margin-top: 85px;
+        }
+        .manual-anchor {
+            display: block;
+            position: relative;
+            visibility: hidden;
+            height: 0;
+            width: 0;
+        }
             font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
             line-height: 1.35;
         }
@@ -362,14 +376,14 @@
                 <p>รายงานผลการตรวจรับระบบ (UAT & Automated Verification Report — 124 Passed / 1,884 Assertions) — สถาบันวิจัยและพัฒนา มหาวิทยาลัยราชภัฏเพชรบูรณ์</p>
             </div>
             <div class="manual-content">
-                <h1>แผนการทดสอบระบบและบันทึกผลการทดสอบจริง (Production Acceptance Test Plan &amp; Verification Report)</h1>
-<h2 id="ระบบฐานข-อม-ลงานว-จ-ย-มหาว-ทยาล-ยราชภ-ฏเพชรบ-รณ-pcru-research-database-laravel-rdb">ระบบฐานข้อมูลงานวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์ (PCRU Research Database - laravel_rdb)</h2>
+                <a id="แผนการทดสอบระบบและบันทึกผลการทดสอบจริง-production-acceptance-test-plan-verification-report" class="manual-anchor"></a><a id="%E0%B9%81%E0%B8%9C%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%94%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%9A%E0%B8%B1%E0%B8%99%E0%B8%97%E0%B8%B6%E0%B8%81%E0%B8%9C%E0%B8%A5%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%94%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%88%E0%B8%A3%E0%B8%B4%E0%B8%87-production-acceptance-test-plan--verification-report" class="manual-anchor"></a><a id="%E0%B9%81%E0%B8%9C%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%94%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%9A%E0%B8%B1%E0%B8%99%E0%B8%97%E0%B8%B6%E0%B8%81%E0%B8%9C%E0%B8%A5%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%94%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%88%E0%B8%A3%E0%B8%B4%E0%B8%87-production-acceptance-test-plan-verification-report" class="manual-anchor"></a><h1 id="แผนการทดสอบระบบและบันทึกผลการทดสอบจริง-production-acceptance-test-plan--verification-report">แผนการทดสอบระบบและบันทึกผลการทดสอบจริง (Production Acceptance Test Plan &amp; Verification Report)</h1>
+<a id="ระบบฐานข้อมูลงานวิจัย-มหาวิทยาลัยราชภัฏเพชรบูรณ์-pcru-research-database-laravelrdb" class="manual-anchor"></a><a id="%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%90%E0%B8%B2%E0%B8%99%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-%E0%B8%A1%E0%B8%AB%E0%B8%B2%E0%B8%A7%E0%B8%B4%E0%B8%97%E0%B8%A2%E0%B8%B2%E0%B8%A5%E0%B8%B1%E0%B8%A2%E0%B8%A3%E0%B8%B2%E0%B8%8A%E0%B8%A0%E0%B8%B1%E0%B8%8F%E0%B9%80%E0%B8%9E%E0%B8%8A%E0%B8%A3%E0%B8%9A%E0%B8%B9%E0%B8%A3%E0%B8%93%E0%B9%8C-pcru-research-database---laravelrdb" class="manual-anchor"></a><a id="%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%90%E0%B8%B2%E0%B8%99%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-%E0%B8%A1%E0%B8%AB%E0%B8%B2%E0%B8%A7%E0%B8%B4%E0%B8%97%E0%B8%A2%E0%B8%B2%E0%B8%A5%E0%B8%B1%E0%B8%A2%E0%B8%A3%E0%B8%B2%E0%B8%8A%E0%B8%A0%E0%B8%B1%E0%B8%8F%E0%B9%80%E0%B8%9E%E0%B8%8A%E0%B8%A3%E0%B8%9A%E0%B8%B9%E0%B8%A3%E0%B8%93%E0%B9%8C-pcru-research-database-laravelrdb" class="manual-anchor"></a><h2 id="ระบบฐานข้อมูลงานวิจัย-มหาวิทยาลัยราชภัฏเพชรบูรณ์-pcru-research-database---laravelrdb">ระบบฐานข้อมูลงานวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์ (PCRU Research Database - laravel_rdb)</h2>
 <div class="manual-callout callout-note"><div class="callout-header"><i class="bi bi-info-circle-fill"></i> ข้อมูลจำเพาะ / หมายเหตุ (NOTE)</div><div class="callout-body"><p><strong>สถานะการทดสอบระบบจริง (Test Execution Summary)</strong>:</p>
 <ul>
-<li><strong>วันและเวลาที่ดำเนินการทดสอบ</strong>: 31 ตุลาคม 2569 เวลา 14:38:17 น.</li>
-<li><strong>ผลการรันชุดทดสอบอัตโนมัติ (Automated Test Suite)</strong>: <strong>ผ่านทั้งหมด 63 รายการ (493 Assertions) 100%</strong>
+<li><strong>วันและเวลาที่ดำเนินการทดสอบล่าสุด</strong>: 2 พฤศจิกายน 2569 เวลา 22:48:11 น.</li>
+<li><strong>ผลการรันชุดทดสอบอัตโนมัติ (Automated Test Suite)</strong>: <strong>ผ่านทั้งหมด 64 รายการ (506 Assertions) 100%</strong>
 <ul>
-<li><code>Tests\Feature\BackendAuditTest</code>: ผ่าน 46 รายการ (408 Assertions)</li>
+<li><code>Tests\Feature\BackendAuditTest</code>: ผ่าน 47 รายการ (421 Assertions)</li>
 <li><code>Tests\Feature\PdfCoverGenerationTest</code>: ผ่าน 4 รายการ (16 Assertions)</li>
 <li><code>Tests\Feature\SystemAcceptancePlanExecutionTest</code>: ผ่าน 13 รายการ (69 Assertions)</li>
 </ul>
@@ -378,7 +392,7 @@
 </ul>
 </div></div>
 <hr />
-<h3 id="บทนำและว-ตถ-ประสงค-overview-amp-objectives">บทนำและวัตถุประสงค์ (Overview &amp; Objectives)</h3>
+<a id="บทนำและวัตถุประสงค์-overview-objectives" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%99%E0%B8%B3%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%95%E0%B8%96%E0%B8%B8%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%AA%E0%B8%87%E0%B8%84%E0%B9%8C-overview--objectives" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%99%E0%B8%B3%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%95%E0%B8%96%E0%B8%B8%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%AA%E0%B8%87%E0%B8%84%E0%B9%8C-overview-objectives" class="manual-anchor"></a><h3 id="บทนำและวัตถุประสงค์-overview--objectives">บทนำและวัตถุประสงค์ (Overview &amp; Objectives)</h3>
 <p>เอกสารฉบับนี้จัดทำขึ้นเพื่อใช้เป็น <strong>คู่มือและแบบประเมินการทดสอบระบบ (User Acceptance Test - UAT &amp; System Verification)</strong> อย่างละเอียดทุกขั้นตอน สำหรับผู้บริหาร, ผู้ดูแลระบบ (Super Admin / Admin), นักวิจัย (Researcher), และคณะกรรมการตรวจรับระบบ เพื่อยืนยันความสมบูรณ์ ความถูกต้องของข้อมูล ความปลอดภัย และความพร้อมในการเปิดให้บริการจริงบน Production</p>
 <pre><code>                                  โครงสร้างการทดสอบระบบ (Test Architecture)
  ┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -397,7 +411,7 @@
  └────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 </code></pre>
 <hr />
-<h2 id="หมวดท-1-การตรวจสอบความพร-อมของระบบและสภาพแวดล-อม-environment-amp-pre-flight-checks">หมวดที่ 1: การตรวจสอบความพร้อมของระบบและสภาพแวดล้อม (Environment &amp; Pre-flight Checks)</h2>
+<a id="หมวดที่-1-การตรวจสอบความพร้อมของระบบและสภาพแวดล้อม-environment-pre-flight-checks" class="manual-anchor"></a><a id="%E0%B8%AB%E0%B8%A1%E0%B8%A7%E0%B8%94%E0%B8%97%E0%B8%B5%E0%B9%88-1-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%9E%E0%B8%A3%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%AA%E0%B8%A0%E0%B8%B2%E0%B8%9E%E0%B9%81%E0%B8%A7%E0%B8%94%E0%B8%A5%E0%B9%89%E0%B8%AD%E0%B8%A1-environment--pre-flight-checks" class="manual-anchor"></a><a id="%E0%B8%AB%E0%B8%A1%E0%B8%A7%E0%B8%94%E0%B8%97%E0%B8%B5%E0%B9%88-1-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%9E%E0%B8%A3%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%AA%E0%B8%A0%E0%B8%B2%E0%B8%9E%E0%B9%81%E0%B8%A7%E0%B8%94%E0%B8%A5%E0%B9%89%E0%B8%AD%E0%B8%A1-environment-pre-flight-checks" class="manual-anchor"></a><h2 id="หมวดที่-1-การตรวจสอบความพร้อมของระบบและสภาพแวดล้อม-environment--pre-flight-checks">หมวดที่ 1: การตรวจสอบความพร้อมของระบบและสภาพแวดล้อม (Environment &amp; Pre-flight Checks)</h2>
 <table>
 <thead>
 <tr>
@@ -447,14 +461,14 @@
 <td align="left">ตรวจสอบชุดทดสอบอัตโนมัติ (Automated Test Suite)</td>
 <td align="left">1. เปิด Terminal<br>2. รัน <code>php artisan test --filter=BackendAuditTest</code><br>3. รัน <code>php artisan test --filter=PdfCoverGenerationTest</code></td>
 <td align="left">รันชุดทดสอบความปลอดภัยและฟังก์ชัน</td>
-<td align="left"><strong>ผ่าน 100% (46/46 Passed ใน BackendAuditTest และ 4/4 Passed ใน PdfCover)</strong></td>
+<td align="left"><strong>ผ่าน 100% (47/47 Passed ใน BackendAuditTest และ 4/4 Passed ใน PdfCover)</strong></td>
 <td align="center">[x] ผ่าน (Pass)</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2 id="หมวดท-2-การทดสอบระบบหน-าบ-าน-public-portal-สำหร-บบ-คคลท-วไป">หมวดที่ 2: การทดสอบระบบหน้าบ้าน (Public Portal - สำหรับบุคคลทั่วไป)</h2>
-<h3 id="2-1-หน-าแรกและระบบส-บค-นหล-ก-home-amp-global-search">2.1 หน้าแรกและระบบสืบค้นหลัก (Home &amp; Global Search)</h3>
+<a id="หมวดที่-2-การทดสอบระบบหน้าบ้าน-public-portal-สำหรับบุคคลทั่วไป" class="manual-anchor"></a><a id="%E0%B8%AB%E0%B8%A1%E0%B8%A7%E0%B8%94%E0%B8%97%E0%B8%B5%E0%B9%88-2-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%94%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B8%9A%E0%B9%89%E0%B8%B2%E0%B8%99-public-portal---%E0%B8%AA%E0%B8%B3%E0%B8%AB%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B8%9A%E0%B8%B8%E0%B8%84%E0%B8%84%E0%B8%A5%E0%B8%97%E0%B8%B1%E0%B9%88%E0%B8%A7%E0%B9%84%E0%B8%9B" class="manual-anchor"></a><a id="%E0%B8%AB%E0%B8%A1%E0%B8%A7%E0%B8%94%E0%B8%97%E0%B8%B5%E0%B9%88-2-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%94%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B8%9A%E0%B9%89%E0%B8%B2%E0%B8%99-public-portal-%E0%B8%AA%E0%B8%B3%E0%B8%AB%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B8%9A%E0%B8%B8%E0%B8%84%E0%B8%84%E0%B8%A5%E0%B8%97%E0%B8%B1%E0%B9%88%E0%B8%A7%E0%B9%84%E0%B8%9B" class="manual-anchor"></a><h2 id="หมวดที่-2-การทดสอบระบบหน้าบ้าน-public-portal---สำหรับบุคคลทั่วไป">หมวดที่ 2: การทดสอบระบบหน้าบ้าน (Public Portal - สำหรับบุคคลทั่วไป)</h2>
+<a id="21-หน้าแรกและระบบสืบค้นหลัก-home-global-search" class="manual-anchor"></a><a id="21-%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B9%81%E0%B8%A3%E0%B8%81%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%AA%E0%B8%B7%E0%B8%9A%E0%B8%84%E0%B9%89%E0%B8%99%E0%B8%AB%E0%B8%A5%E0%B8%B1%E0%B8%81-home--global-search" class="manual-anchor"></a><a id="21-%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B9%81%E0%B8%A3%E0%B8%81%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%AA%E0%B8%B7%E0%B8%9A%E0%B8%84%E0%B9%89%E0%B8%99%E0%B8%AB%E0%B8%A5%E0%B8%B1%E0%B8%81-home-global-search" class="manual-anchor"></a><h3 id="21-หน้าแรกและระบบสืบค้นหลัก-home--global-search">2.1 หน้าแรกและระบบสืบค้นหลัก (Home &amp; Global Search)</h3>
 <table>
 <thead>
 <tr>
@@ -493,7 +507,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="2-2-โครงการว-จ-ยและระบบความปลอดภ-ยเอกสาร-research-projects">2.2 โครงการวิจัยและระบบความปลอดภัยเอกสาร (Research Projects)</h3>
+<a id="22-%E0%B9%82%E0%B8%84%E0%B8%A3%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%9B%E0%B8%A5%E0%B8%AD%E0%B8%94%E0%B8%A0%E0%B8%B1%E0%B8%A2%E0%B9%80%E0%B8%AD%E0%B8%81%E0%B8%AA%E0%B8%B2%E0%B8%A3-research-projects" class="manual-anchor"></a><h3 id="22-โครงการวิจัยและระบบความปลอดภัยเอกสาร-research-projects">2.2 โครงการวิจัยและระบบความปลอดภัยเอกสาร (Research Projects)</h3>
 <table>
 <thead>
 <tr>
@@ -564,7 +578,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="2-3-ผลงานต-พ-มพ-และงานว-ชาการ-publications">2.3 ผลงานตีพิมพ์และงานวิชาการ (Publications)</h3>
+<a id="23-%E0%B8%9C%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%95%E0%B8%B5%E0%B8%9E%E0%B8%B4%E0%B8%A1%E0%B8%9E%E0%B9%8C%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-publications" class="manual-anchor"></a><h3 id="23-ผลงานตีพิมพ์และงานวิชาการ-publications">2.3 ผลงานตีพิมพ์และงานวิชาการ (Publications)</h3>
 <table>
 <thead>
 <tr>
@@ -603,7 +617,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="2-4-ทร-พย-ส-นทางป-ญญาและการใช-ประโยชน-ip-amp-utilizations">2.4 ทรัพย์สินทางปัญญาและการใช้ประโยชน์ (IP &amp; Utilizations)</h3>
+<a id="24-ทรัพย์สินทางปัญญาและการใช้ประโยชน์-ip-utilizations" class="manual-anchor"></a><a id="24-%E0%B8%97%E0%B8%A3%E0%B8%B1%E0%B8%9E%E0%B8%A2%E0%B9%8C%E0%B8%AA%E0%B8%B4%E0%B8%99%E0%B8%97%E0%B8%B2%E0%B8%87%E0%B8%9B%E0%B8%B1%E0%B8%8D%E0%B8%8D%E0%B8%B2%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%82%E0%B8%A2%E0%B8%8A%E0%B8%99%E0%B9%8C-ip--utilizations" class="manual-anchor"></a><a id="24-%E0%B8%97%E0%B8%A3%E0%B8%B1%E0%B8%9E%E0%B8%A2%E0%B9%8C%E0%B8%AA%E0%B8%B4%E0%B8%99%E0%B8%97%E0%B8%B2%E0%B8%87%E0%B8%9B%E0%B8%B1%E0%B8%8D%E0%B8%8D%E0%B8%B2%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%82%E0%B8%A2%E0%B8%8A%E0%B8%99%E0%B9%8C-ip-utilizations" class="manual-anchor"></a><h3 id="24-ทรัพย์สินทางปัญญาและการใช้ประโยชน์-ip--utilizations">2.4 ทรัพย์สินทางปัญญาและการใช้ประโยชน์ (IP &amp; Utilizations)</h3>
 <table>
 <thead>
 <tr>
@@ -634,7 +648,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="2-5-ทำเน-ยบน-กว-จ-ยและแดชบอร-ดสถ-ต-researchers-amp-dashboards">2.5 ทำเนียบนักวิจัยและแดชบอร์ดสถิติ (Researchers &amp; Dashboards)</h3>
+<a id="25-ทำเนียบนักวิจัยและแดชบอร์ดสถิติ-researchers-dashboards" class="manual-anchor"></a><a id="25-%E0%B8%97%E0%B8%B3%E0%B9%80%E0%B8%99%E0%B8%B5%E0%B8%A2%E0%B8%9A%E0%B8%99%E0%B8%B1%E0%B8%81%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B9%81%E0%B8%94%E0%B8%8A%E0%B8%9A%E0%B8%AD%E0%B8%A3%E0%B9%8C%E0%B8%94%E0%B8%AA%E0%B8%96%E0%B8%B4%E0%B8%95%E0%B8%B4-researchers--dashboards" class="manual-anchor"></a><a id="25-%E0%B8%97%E0%B8%B3%E0%B9%80%E0%B8%99%E0%B8%B5%E0%B8%A2%E0%B8%9A%E0%B8%99%E0%B8%B1%E0%B8%81%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B9%81%E0%B8%94%E0%B8%8A%E0%B8%9A%E0%B8%AD%E0%B8%A3%E0%B9%8C%E0%B8%94%E0%B8%AA%E0%B8%96%E0%B8%B4%E0%B8%95%E0%B8%B4-researchers-dashboards" class="manual-anchor"></a><h3 id="25-ทำเนียบนักวิจัยและแดชบอร์ดสถิติ-researchers--dashboards">2.5 ทำเนียบนักวิจัยและแดชบอร์ดสถิติ (Researchers &amp; Dashboards)</h3>
 <table>
 <thead>
 <tr>
@@ -674,8 +688,8 @@
 </tbody>
 </table>
 <hr />
-<h2 id="หมวดท-3-การทดสอบระบบหล-งบ-าน-backend-administration-amp-researcher-workflows">หมวดที่ 3: การทดสอบระบบหลังบ้าน (Backend Administration &amp; Researcher Workflows)</h2>
-<h3 id="3-1-การย-นย-นต-วตนและการควบค-มส-ทธ-authentication-amp-rbac">3.1 การยืนยันตัวตนและการควบคุมสิทธิ์ (Authentication &amp; RBAC)</h3>
+<a id="หมวดที่-3-การทดสอบระบบหลังบ้าน-backend-administration-researcher-workflows" class="manual-anchor"></a><a id="%E0%B8%AB%E0%B8%A1%E0%B8%A7%E0%B8%94%E0%B8%97%E0%B8%B5%E0%B9%88-3-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%94%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%AB%E0%B8%A5%E0%B8%B1%E0%B8%87%E0%B8%9A%E0%B9%89%E0%B8%B2%E0%B8%99-backend-administration--researcher-workflows" class="manual-anchor"></a><a id="%E0%B8%AB%E0%B8%A1%E0%B8%A7%E0%B8%94%E0%B8%97%E0%B8%B5%E0%B9%88-3-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%94%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%AB%E0%B8%A5%E0%B8%B1%E0%B8%87%E0%B8%9A%E0%B9%89%E0%B8%B2%E0%B8%99-backend-administration-researcher-workflows" class="manual-anchor"></a><h2 id="หมวดที่-3-การทดสอบระบบหลังบ้าน-backend-administration--researcher-workflows">หมวดที่ 3: การทดสอบระบบหลังบ้าน (Backend Administration &amp; Researcher Workflows)</h2>
+<a id="31-การยืนยันตัวตนและการควบคุมสิทธิ์-authentication-rbac" class="manual-anchor"></a><a id="31-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A2%E0%B8%B7%E0%B8%99%E0%B8%A2%E0%B8%B1%E0%B8%99%E0%B8%95%E0%B8%B1%E0%B8%A7%E0%B8%95%E0%B8%99%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%84%E0%B8%A7%E0%B8%9A%E0%B8%84%E0%B8%B8%E0%B8%A1%E0%B8%AA%E0%B8%B4%E0%B8%97%E0%B8%98%E0%B8%B4%E0%B9%8C-authentication--rbac" class="manual-anchor"></a><a id="31-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A2%E0%B8%B7%E0%B8%99%E0%B8%A2%E0%B8%B1%E0%B8%99%E0%B8%95%E0%B8%B1%E0%B8%A7%E0%B8%95%E0%B8%99%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%84%E0%B8%A7%E0%B8%9A%E0%B8%84%E0%B8%B8%E0%B8%A1%E0%B8%AA%E0%B8%B4%E0%B8%97%E0%B8%98%E0%B8%B4%E0%B9%8C-authentication-rbac" class="manual-anchor"></a><h3 id="31-การยืนยันตัวตนและการควบคุมสิทธิ์-authentication--rbac">3.1 การยืนยันตัวตนและการควบคุมสิทธิ์ (Authentication &amp; RBAC)</h3>
 <table>
 <thead>
 <tr>
@@ -720,9 +734,17 @@
 <td align="left">ระบบปฏิเสธการเข้าถึง (403 Forbidden) ไม่อนุญาตให้แก้ไขข้อมูลผู้อื่น</td>
 <td align="center">[x] ผ่าน (Pass)</td>
 </tr>
+<tr>
+<td align="left"><strong>AUTH-05</strong></td>
+<td align="left">แถบเมนูด้านซ้ายหลังบ้านแบบ Accordion และการแบ่งกลุ่มเมนูย่อย</td>
+<td align="left">1. เปิดหน้าหลังบ้าน <code>/backend/site</code><br>2. คลิกขยายหมวดเมนูหลักและตรวจสอบการยุบตัวของเมนูอื่น<br>3. ทดสอบย่อขนาดหน้าจอเป็น Tablet/Mobile</td>
+<td align="left"><code>&lt;x-backend-sidebar /&gt;</code></td>
+<td align="left">แสดงแถบเมนูด้านซ้ายพร้อมแบ่งกลุ่มย่อย <code>-</code> ชัดเจน, เมนูอื่นยุบตัวอัตโนมัติแบบ Accordion และตารางกว้างไม่ล้นขอบจอ</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
 </tbody>
 </table>
-<h3 id="3-2-การจ-ดการโครงการว-จ-ย-project-management-amp-pdf-processing-engine">3.2 การจัดการโครงการวิจัย (Project Management &amp; PDF Processing Engine)</h3>
+<a id="32-การจัดการโครงการวิจัย-project-management-pdf-processing-engine" class="manual-anchor"></a><a id="32-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%82%E0%B8%84%E0%B8%A3%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-project-management--pdf-processing-engine" class="manual-anchor"></a><a id="32-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%82%E0%B8%84%E0%B8%A3%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-project-management-pdf-processing-engine" class="manual-anchor"></a><h3 id="32-การจัดการโครงการวิจัย-project-management--pdf-processing-engine">3.2 การจัดการโครงการวิจัย (Project Management &amp; PDF Processing Engine)</h3>
 <table>
 <thead>
 <tr>
@@ -777,7 +799,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="3-3-ระบบตรวจประเม-นรายงานว-จ-ยฉบ-บสมบ-รณ-research-report-peer-review-subsystem">3.3 ระบบตรวจประเมินรายงานวิจัยฉบับสมบูรณ์ (Research Report Peer Review Subsystem)</h3>
+<a id="33-%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B8%89%E0%B8%9A%E0%B8%B1%E0%B8%9A%E0%B8%AA%E0%B8%A1%E0%B8%9A%E0%B8%B9%E0%B8%A3%E0%B8%93%E0%B9%8C-research-report-peer-review-subsystem" class="manual-anchor"></a><h3 id="33-ระบบตรวจประเมินรายงานวิจัยฉบับสมบูรณ์-research-report-peer-review-subsystem">3.3 ระบบตรวจประเมินรายงานวิจัยฉบับสมบูรณ์ (Research Report Peer Review Subsystem)</h3>
 <table>
 <thead>
 <tr>
@@ -832,7 +854,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="3-4-วงจรช-ว-ตการส-งร-าง-ตรวจสอบ-และอน-ม-ต-เป-ดเผยผลงานของน-กว-จ-ย-researcher-submission-workflow-review-amp-public-disclosure-lifecycle">3.4 วงจรชีวิตการส่งร่าง ตรวจสอบ และอนุมัติเปิดเผยผลงานของนักวิจัย (Researcher Submission, Workflow Review &amp; Public Disclosure Lifecycle)</h3>
+<a id="34-วงจรชีวิตการส่งร่าง-ตรวจสอบ-และอนุมัติเปิดเผยผลงานของนักวิจัย-researcher-submission-workflow-review-public-disclosure-lifecycle" class="manual-anchor"></a><a id="34-%E0%B8%A7%E0%B8%87%E0%B8%88%E0%B8%A3%E0%B8%8A%E0%B8%B5%E0%B8%A7%E0%B8%B4%E0%B8%95%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B9%88%E0%B8%87%E0%B8%A3%E0%B9%88%E0%B8%B2%E0%B8%87-%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%AA%E0%B8%AD%E0%B8%9A-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%AD%E0%B8%99%E0%B8%B8%E0%B8%A1%E0%B8%B1%E0%B8%95%E0%B8%B4%E0%B9%80%E0%B8%9B%E0%B8%B4%E0%B8%94%E0%B9%80%E0%B8%9C%E0%B8%A2%E0%B8%9C%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B8%99%E0%B8%B1%E0%B8%81%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-researcher-submission-workflow-review--public-disclosure-lifecycle" class="manual-anchor"></a><a id="34-%E0%B8%A7%E0%B8%87%E0%B8%88%E0%B8%A3%E0%B8%8A%E0%B8%B5%E0%B8%A7%E0%B8%B4%E0%B8%95%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B9%88%E0%B8%87%E0%B8%A3%E0%B9%88%E0%B8%B2%E0%B8%87-%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%AA%E0%B8%AD%E0%B8%9A-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%AD%E0%B8%99%E0%B8%B8%E0%B8%A1%E0%B8%B1%E0%B8%95%E0%B8%B4%E0%B9%80%E0%B8%9B%E0%B8%B4%E0%B8%94%E0%B9%80%E0%B8%9C%E0%B8%A2%E0%B8%9C%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B8%99%E0%B8%B1%E0%B8%81%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-researcher-submission-workflow-review-public-disclosure-lifecycle" class="manual-anchor"></a><h3 id="34-วงจรชีวิตการส่งร่าง-ตรวจสอบ-และอนุมัติเปิดเผยผลงานของนักวิจัย-researcher-submission-workflow-review--public-disclosure-lifecycle">3.4 วงจรชีวิตการส่งร่าง ตรวจสอบ และอนุมัติเปิดเผยผลงานของนักวิจัย (Researcher Submission, Workflow Review &amp; Public Disclosure Lifecycle)</h3>
 <table>
 <thead>
 <tr>
@@ -903,7 +925,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="3-5-การจ-ดการผลงานต-พ-มพ-ทร-พย-ส-นทางป-ญญา-และข-อม-ลพ-นฐาน">3.5 การจัดการผลงานตีพิมพ์, ทรัพย์สินทางปัญญา และข้อมูลพื้นฐาน</h3>
+<a id="35-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9C%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%95%E0%B8%B5%E0%B8%9E%E0%B8%B4%E0%B8%A1%E0%B8%9E%E0%B9%8C-%E0%B8%97%E0%B8%A3%E0%B8%B1%E0%B8%9E%E0%B8%A2%E0%B9%8C%E0%B8%AA%E0%B8%B4%E0%B8%99%E0%B8%97%E0%B8%B2%E0%B8%87%E0%B8%9B%E0%B8%B1%E0%B8%8D%E0%B8%8D%E0%B8%B2-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%9E%E0%B8%B7%E0%B9%89%E0%B8%99%E0%B8%90%E0%B8%B2%E0%B8%99" class="manual-anchor"></a><h3 id="35-การจัดการผลงานตีพิมพ์-ทรัพย์สินทางปัญญา-และข้อมูลพื้นฐาน">3.5 การจัดการผลงานตีพิมพ์, ทรัพย์สินทางปัญญา และข้อมูลพื้นฐาน</h3>
 <table>
 <thead>
 <tr>
@@ -951,7 +973,7 @@
 </tbody>
 </table>
 <hr />
-<h2 id="หมวดท-4-การตรวจสอบความสมบ-รณ-ของข-อม-ลเก-า-legacy-data-verification">หมวดที่ 4: การตรวจสอบความสมบูรณ์ของข้อมูลเก่า (Legacy Data Verification)</h2>
+<a id="%E0%B8%AB%E0%B8%A1%E0%B8%A7%E0%B8%94%E0%B8%97%E0%B8%B5%E0%B9%88-4-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%AA%E0%B8%A1%E0%B8%9A%E0%B8%B9%E0%B8%A3%E0%B8%93%E0%B9%8C%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B9%80%E0%B8%81%E0%B9%88%E0%B8%B2-legacy-data-verification" class="manual-anchor"></a><h2 id="หมวดที่-4-การตรวจสอบความสมบูรณ์ของข้อมูลเก่า-legacy-data-verification">หมวดที่ 4: การตรวจสอบความสมบูรณ์ของข้อมูลเก่า (Legacy Data Verification)</h2>
 <table>
 <thead>
 <tr>
@@ -1008,7 +1030,7 @@
 </tbody>
 </table>
 <hr />
-<h2 id="หมวดท-5-การทดสอบความม-นคงปลอดภ-ยและประส-ทธ-ภาพ-security-amp-performance">หมวดที่ 5: การทดสอบความมั่นคงปลอดภัยและประสิทธิภาพ (Security &amp; Performance)</h2>
+<a id="หมวดที่-5-การทดสอบความมั่นคงปลอดภัยและประสิทธิภาพ-security-performance" class="manual-anchor"></a><a id="%E0%B8%AB%E0%B8%A1%E0%B8%A7%E0%B8%94%E0%B8%97%E0%B8%B5%E0%B9%88-5-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%94%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%A1%E0%B8%B1%E0%B9%88%E0%B8%99%E0%B8%84%E0%B8%87%E0%B8%9B%E0%B8%A5%E0%B8%AD%E0%B8%94%E0%B8%A0%E0%B8%B1%E0%B8%A2%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%AA%E0%B8%B4%E0%B8%97%E0%B8%98%E0%B8%B4%E0%B8%A0%E0%B8%B2%E0%B8%9E-security--performance" class="manual-anchor"></a><a id="%E0%B8%AB%E0%B8%A1%E0%B8%A7%E0%B8%94%E0%B8%97%E0%B8%B5%E0%B9%88-5-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%94%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%A1%E0%B8%B1%E0%B9%88%E0%B8%99%E0%B8%84%E0%B8%87%E0%B8%9B%E0%B8%A5%E0%B8%AD%E0%B8%94%E0%B8%A0%E0%B8%B1%E0%B8%A2%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%AA%E0%B8%B4%E0%B8%97%E0%B8%98%E0%B8%B4%E0%B8%A0%E0%B8%B2%E0%B8%9E-security-performance" class="manual-anchor"></a><h2 id="หมวดที่-5-การทดสอบความมั่นคงปลอดภัยและประสิทธิภาพ-security--performance">หมวดที่ 5: การทดสอบความมั่นคงปลอดภัยและประสิทธิภาพ (Security &amp; Performance)</h2>
 <table>
 <thead>
 <tr>
@@ -1065,7 +1087,7 @@
 </tbody>
 </table>
 <hr />
-<h2 id="หมวดท-6-เกณฑ-การอน-ม-ต-เพ-อเป-ดใช-งานจร-ง-production-sign-off-criteria">หมวดที่ 6: เกณฑ์การอนุมัติเพื่อเปิดใช้งานจริง (Production Sign-off Criteria)</h2>
+<a id="%E0%B8%AB%E0%B8%A1%E0%B8%A7%E0%B8%94%E0%B8%97%E0%B8%B5%E0%B9%88-6-%E0%B9%80%E0%B8%81%E0%B8%93%E0%B8%91%E0%B9%8C%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AD%E0%B8%99%E0%B8%B8%E0%B8%A1%E0%B8%B1%E0%B8%95%E0%B8%B4%E0%B9%80%E0%B8%9E%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B9%80%E0%B8%9B%E0%B8%B4%E0%B8%94%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%88%E0%B8%A3%E0%B8%B4%E0%B8%87-production-sign-off-criteria" class="manual-anchor"></a><h2 id="หมวดที่-6-เกณฑ์การอนุมัติเพื่อเปิดใช้งานจริง-production-sign-off-criteria">หมวดที่ 6: เกณฑ์การอนุมัติเพื่อเปิดใช้งานจริง (Production Sign-off Criteria)</h2>
 <p>ระบบจะถือว่ามีความพร้อมในการขึ้นสู่สถานะ Production 100% เมื่อผ่านเกณฑ์ต่อไปนี้ทั้งหมด:</p>
 <ul>
 <li><input checked="" disabled="" type="checkbox"> <strong>ชุดทดสอบหลักผ่านทั้งหมด</strong>: รัน <code>php artisan test --filter=&quot;SystemAcceptancePlanExecutionTest|PdfCoverGenerationTest|BackendAuditTest&quot;</code> ผ่าน 63/63 รายการ (493 Assertions 100%)</li>
@@ -1075,7 +1097,7 @@
 <li><input checked="" disabled="" type="checkbox"> <strong>การส่งออกข้อมูล</strong>: ไฟล์ Export ภาษาไทยทุกโมดูลเปิดดูใน Microsoft Excel ได้อย่างถูกต้อง ไม่เป็นภาษาต่างดาว (UTF-8 BOM <code>\xEF\xBB\xBF</code>)</li>
 </ul>
 <hr />
-<h3 id="บ-นท-กการลงนามตรวจร-บ-approval-amp-sign-off">บันทึกการลงนามตรวจรับ (Approval &amp; Sign-off)</h3>
+<a id="บันทึกการลงนามตรวจรับ-approval-sign-off" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%B1%E0%B8%99%E0%B8%97%E0%B8%B6%E0%B8%81%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A5%E0%B8%87%E0%B8%99%E0%B8%B2%E0%B8%A1%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%A3%E0%B8%B1%E0%B8%9A-approval--sign-off" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%B1%E0%B8%99%E0%B8%97%E0%B8%B6%E0%B8%81%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A5%E0%B8%87%E0%B8%99%E0%B8%B2%E0%B8%A1%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%A3%E0%B8%B1%E0%B8%9A-approval-sign-off" class="manual-anchor"></a><h3 id="บันทึกการลงนามตรวจรับ-approval--sign-off">บันทึกการลงนามตรวจรับ (Approval &amp; Sign-off)</h3>
 <table>
 <thead>
 <tr>
@@ -1132,6 +1154,23 @@
         (function() {
             const saved = localStorage.getItem('pcru_manual_theme');
             if (saved) document.documentElement.setAttribute('data-theme', saved);
+
+            // Smooth scrolling on hash links with Unicode support
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    const rawHash = this.getAttribute('href').slice(1);
+                    if (!rawHash) return;
+                    const decoded = decodeURIComponent(rawHash);
+                    const targetEl = document.getElementById(decoded) || 
+                                     document.getElementById(rawHash) || 
+                                     document.getElementById(encodeURIComponent(decoded));
+                    if (targetEl) {
+                        e.preventDefault();
+                        history.pushState(null, null, '#' + rawHash);
+                        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
         })();
     </script>
 </body>

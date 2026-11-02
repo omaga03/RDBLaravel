@@ -49,7 +49,7 @@
                                 <div class="fw-bold text-primary">
                                     @if($item->year)
                                         <span class="me-2 text-danger" title="ปีงบประมาณ">
-                                            <i class="bi bi-calendar-event"></i> {{ $item->year->year_name }} : 
+                                            <i class="bi bi-calendar-event me-1.5"></i> {{ $item->year->year_name }} : 
                                         </span>
                                     @endif
                                     {{ $item->pt_name }}
@@ -62,22 +62,22 @@
                                 <div class="small text-muted mt-1">
                                     @if($item->projectTypeGroup)
                                         <span class="me-3" title="กลุ่มประเภททุน">
-                                            <i class="bi bi-collection text-secondary"></i> {{ $item->projectTypeGroup->pttg_name }}
+                                            <i class="bi bi-collection text-secondary me-1.5"></i> {{ $item->projectTypeGroup->pttg_name }}
                                         </span>
                                     @endif
                                     @if(isset($fors[$item->pt_for]))
                                         <span class="me-3" title="สำหรับ">
-                                            <i class="bi bi-person-badge text-info"></i> {{ $fors[$item->pt_for] }}
+                                            <i class="bi bi-person-badge text-info me-1.5"></i> {{ $fors[$item->pt_for] }}
                                         </span>
                                     @endif
                                     @if($item->pt_type == '1')
                                         <span class="me-3 text-warning" title="คำนวณงบประมาณ">
-                                            <i class="bi bi-calculator"></i> คำนวณเงิน
+                                            <i class="bi bi-calculator me-1.5"></i> คำนวณเงิน
                                         </span>
                                     @endif
                                     @if($item->pt_utz == '1')
                                         <span class="text-success" title="การนำไปใช้ประโยชน์ (QA)">
-                                            <i class="bi bi-check-circle-fill"></i> คำนวณ QA
+                                            <i class="bi bi-check-circle-fill me-1.5"></i> คำนวณ QA
                                         </span>
                                     @endif
                                 </div>

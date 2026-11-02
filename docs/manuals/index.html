@@ -35,6 +35,9 @@
             --royal: #60A5FA;
         }
         * { box-sizing: border-box; }
+        html {
+            scroll-behavior: smooth;
+        }
         body {
             margin: 0;
             font-family: 'Sarabun', 'Plus Jakarta Sans', sans-serif;
@@ -44,7 +47,18 @@
             color: var(--text-primary);
             font-variant-numeric: tabular-nums;
         }
-        h1, h2, h3, h4, .font-heading {
+        h1, h2, h3, h4, .font-heading, .manual-anchor {
+            font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
+            line-height: 1.35;
+            scroll-margin-top: 85px;
+        }
+        .manual-anchor {
+            display: block;
+            position: relative;
+            visibility: hidden;
+            height: 0;
+            width: 0;
+        }
             font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
             line-height: 1.35;
         }
@@ -374,7 +388,7 @@
 
     <div style="border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; background: var(--bg-subtle); display: flex; flex-direction: column; justify-content: space-between;">
         <div>
-            <span class="hero-badge">VOLUME 2 • 9 บทเรียน</span>
+            <span class="hero-badge">VOLUME 2 • 10 บทเรียน</span>
             <h3 style="margin-top: 0.25rem; border: none; padding: 0;">เล่มที่ 2: คู่มือการใช้งานระบบหลังบ้าน (Admin & Researcher)</h3>
             <p style="color: var(--text-secondary); font-size: 0.95rem;">สำหรับนักวิจัย ผู้ทรงคุณวุฒิ และผู้ดูแลระบบ ครอบคลุม Google SSO, สิทธิ์ RBAC & Impersonation, วงจรการส่งร่างและอนุมัติผลงาน (WF-01 ถึง WF-07), ระบบตรวจนับหน้า PDF & ปก .webp, ระบบ Peer Review, ส่งออก Excel UTF-8 BOM และคลังปัญญา DSpace SAF</p>
         </div>
@@ -409,6 +423,23 @@
         (function() {
             const saved = localStorage.getItem('pcru_manual_theme');
             if (saved) document.documentElement.setAttribute('data-theme', saved);
+
+            // Smooth scrolling on hash links with Unicode support
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    const rawHash = this.getAttribute('href').slice(1);
+                    if (!rawHash) return;
+                    const decoded = decodeURIComponent(rawHash);
+                    const targetEl = document.getElementById(decoded) || 
+                                     document.getElementById(rawHash) || 
+                                     document.getElementById(encodeURIComponent(decoded));
+                    if (targetEl) {
+                        e.preventDefault();
+                        history.pushState(null, null, '#' + rawHash);
+                        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
         })();
     </script>
 </body>

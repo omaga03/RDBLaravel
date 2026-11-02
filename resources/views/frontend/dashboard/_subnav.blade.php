@@ -30,7 +30,7 @@
                 <i class="bi bi-clock-history text-primary me-1"></i> ปรับปรุงข้อมูลล่าสุด: {{ date('d/m/Y') }}
             </span>
             <button onclick="window.print()" class="btn btn-sm btn-outline-secondary d-none d-md-inline-flex align-items-center gap-1 shadow-xs" title="พิมพ์รายงานสรุป">
-                <i class="bi bi-printer"></i> พิมพ์
+                <i class="bi bi-printer me-1.5"></i> พิมพ์
             </button>
         </div>
     </div>

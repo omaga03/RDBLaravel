@@ -204,11 +204,6 @@
                                                                     <i class="bi bi-cash me-1"></i>งบประมาณ {{ number_format($project->pro_budget, 0) }} บาท
                                                                 </span>
                                                             @endif
-                                                            @if(!empty($project->pro_page_num))
-                                                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" style="font-variant-numeric: tabular-nums;" title="จำนวนหน้าเล่มรายงาน">
-                                                                    <i class="bi bi-file-earmark-text me-1"></i>{{ $project->pro_page_num }} หน้า
-                                                                </span>
-                                                            @endif
                                                         </div>
                                                     </td>
                                                     <td class="text-center">
@@ -283,11 +278,6 @@
                                                             @if($pub->pubtype)
                                                                 <span class="badge bg-body-secondary text-body border">
                                                                     {{ $pub->pubtype->pubtype_name ?? $pub->pubtype->pubtype_subgroup ?? '-' }}
-                                                                </span>
-                                                            @endif
-                                                            @if(!empty($pub->pub_numfile))
-                                                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" style="font-variant-numeric: tabular-nums;" title="จำนวนหน้าเอกสาร">
-                                                                    <i class="bi bi-file-earmark-text me-1"></i>{{ $pub->pub_numfile }} หน้า
                                                                 </span>
                                                             @endif
                                                         </div>
@@ -446,7 +436,7 @@
                                                             @endif
                                                             @if($dip->project)
                                                                 <span class="text-body-secondary">
-                                                                    <i class="bi bi-link-45deg"></i> โครงการ:
+                                                                    <i class="bi bi-link-45deg me-1.5"></i> โครงการ:
                                                                     <a href="{{ route('frontend.rdbproject.show', $dip->project->pro_id) }}" target="_blank" class="text-primary text-decoration-none hover-underline text-break">
                                                                         {{ strip_tags((string) $dip->project->pro_nameTH) }}
                                                                     </a>

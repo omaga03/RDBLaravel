@@ -218,7 +218,7 @@
                                               data-bs-placement="top" 
                                               data-bs-html="true"
                                               title="<strong>พบคำค้นหาใน:</strong><br>• {{ implode('<br>• ', $item->match_sources) }}">
-                                            <i class="bi bi-search"></i> {{ count($item->match_sources) }}
+                                            <i class="bi bi-search me-1.5"></i> {{ count($item->match_sources) }}
                                         </span>
                                     @endif
                                 </div>
@@ -261,7 +261,7 @@
                             </td>
                             <td class="text-center">
                                 <a href="{{ route('frontend.rdbprojectutilize.show', $item->utz_id) }}" class="btn btn-outline-primary btn-sm" title="ดูรายละเอียด">
-                                    <i class="bi bi-eye"></i> ดูข้อมูล
+                                    <i class="bi bi-eye me-1.5"></i> ดูข้อมูล
                                 </a>
                             </td>
                         </tr>

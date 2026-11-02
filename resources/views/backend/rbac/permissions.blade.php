@@ -7,7 +7,7 @@
         <div>
             <div class="d-flex align-items-center gap-2 mb-1">
                 <a href="{{ route('backend.rbac.index') }}" class="btn btn-sm btn-outline-secondary">
-                    <i class="bi bi-arrow-left"></i> ย้อนกลับ
+                    <i class="bi bi-arrow-left me-1.5"></i> ย้อนกลับ
                 </a>
                 <h3 class="mb-0 fw-bold text-body">
                     <i class="bi bi-shield-lock-fill text-primary me-2"></i>กำหนดสิทธิ์การใช้งาน (Permission Matrix)

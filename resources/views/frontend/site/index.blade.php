@@ -362,7 +362,7 @@
                                                 <div class="small text-body-secondary d-flex align-items-center flex-wrap gap-2">
                                                     <span><i class="bi bi-calendar3 me-1"></i>ปี {{ $project->year->year_name ?? '-' }}</span>
                                                     @if($project->type)
-                                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle text-wrap text-start lh-base">
                                                             <i class="bi bi-tag-fill me-1"></i>{{ $project->type->pt_name }}
                                                             @if(str_contains($project->type->pt_name, 'ภายนอก') && $project->typeSub)
                                                                 • {{ $project->typeSub->pts_name }}

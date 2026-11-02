@@ -3,9 +3,9 @@
 
 > [!NOTE]
 > **สถานะการทดสอบระบบจริง (Test Execution Summary)**:
-> - **วันและเวลาที่ดำเนินการทดสอบ**: 31 ตุลาคม 2569 เวลา 14:38:17 น.
-> - **ผลการรันชุดทดสอบอัตโนมัติ (Automated Test Suite)**: **ผ่านทั้งหมด 63 รายการ (493 Assertions) 100%**
->   - `Tests\Feature\BackendAuditTest`: ผ่าน 46 รายการ (408 Assertions)
+> - **วันและเวลาที่ดำเนินการทดสอบล่าสุด**: 2 พฤศจิกายน 2569 เวลา 22:48:11 น.
+> - **ผลการรันชุดทดสอบอัตโนมัติ (Automated Test Suite)**: **ผ่านทั้งหมด 64 รายการ (506 Assertions) 100%**
+>   - `Tests\Feature\BackendAuditTest`: ผ่าน 47 รายการ (421 Assertions)
 >   - `Tests\Feature\PdfCoverGenerationTest`: ผ่าน 4 รายการ (16 Assertions)
 >   - `Tests\Feature\SystemAcceptancePlanExecutionTest`: ผ่าน 13 รายการ (69 Assertions)
 > - **สถานะความพร้อมสู่ Production**: **พร้อมใช้งานจริง 100% (Ready for Production)**
@@ -43,7 +43,7 @@
 | **ENV-02** | ตรวจสอบการเชื่อมต่อฐานข้อมูล MariaDB/MySQL | 1. ตรวจสอบค่า `.env` (`DB_HOST`, `DB_PORT`, `DB_DATABASE=rdbpcru`)<br>2. รัน `php artisan db:monitor` | บัญชีผู้ใช้ฐานข้อมูลที่มีสิทธิ์สร้าง View, Index และ Stored Proc | เชื่อมต่อสำเร็จ แสดงผลสถานะ OK | [x] ผ่าน (Pass) |
 | **ENV-03** | ตรวจสอบความถูกต้องของตารางและ View 46 รายการ | 1. เรียกดูตารางหลัก `rdb_project`, `rdb_published`, `rdb_researcher`<br>2. ตรวจสอบ View เช่น `view_year`, `rdb_project_type` | Database `rdbpcru` | ไม่มีตารางหรือ View ขาดหาย เรียกคำสั่ง Query ได้ปกติ | [x] ผ่าน (Pass) |
 | **ENV-04** | ตรวจสอบ Storage Symlink และสิทธิ์การเขียนไฟล์ | 1. ตรวจสอบพาธ `public/storage`<br>2. ตรวจสอบสิทธิ์เขียนไฟล์ใน `storage/app/public/` | โฟลเดอร์ `project/`, `published/`, `utilize/`, `project/covers/` | โฟลเดอร์มีสิทธิ์เขียน (0755/0775) ลิงก์ `public/storage` ใช้งานได้ | [x] ผ่าน (Pass) |
-| **ENV-05** | ตรวจสอบชุดทดสอบอัตโนมัติ (Automated Test Suite) | 1. เปิด Terminal<br>2. รัน `php artisan test --filter=BackendAuditTest`<br>3. รัน `php artisan test --filter=PdfCoverGenerationTest` | รันชุดทดสอบความปลอดภัยและฟังก์ชัน | **ผ่าน 100% (46/46 Passed ใน BackendAuditTest และ 4/4 Passed ใน PdfCover)** | [x] ผ่าน (Pass) |
+| **ENV-05** | ตรวจสอบชุดทดสอบอัตโนมัติ (Automated Test Suite) | 1. เปิด Terminal<br>2. รัน `php artisan test --filter=BackendAuditTest`<br>3. รัน `php artisan test --filter=PdfCoverGenerationTest` | รันชุดทดสอบความปลอดภัยและฟังก์ชัน | **ผ่าน 100% (47/47 Passed ใน BackendAuditTest และ 4/4 Passed ใน PdfCover)** | [x] ผ่าน (Pass) |
 
 ---
 
@@ -104,6 +104,7 @@
 | **AUTH-02** | การป้องกัน Brute-force & Rate Limiting | 1. กรอกรหัสผ่านผิดติดต่อกันเกิน 5 ครั้ง | รหัสผ่านที่ไม่ถูกต้อง | ระบบบล็อกการล็อกอินชั่วคราว พร้อมแสดงข้อความเตือน | [x] ผ่าน (Pass) |
 | **AUTH-03** | การจำลองสิทธิ์ผู้ใช้ (User Impersonation) | 1. Superadmin กด "Impersonate" เป็นนักวิจัย<br>2. ตรวจสอบเมนูที่มองเห็น<br>3. กดปุ่ม "Stop Impersonating" | บัญชี Super Admin | - เข้าสู่หน้าจอเสมือนเป็นนักวิจัยรายนั้น (เห็นเฉพาะโครงการของตนเอง)<br>- เมื่อกดยกเลิก สิทธิ์จะกลับมาเป็น Superadmin ทันที | [x] ผ่าน (Pass) |
 | **AUTH-04** | ขอบเขตสิทธิ์ของนักวิจัย (Researcher Isolation) | 1. ล็อกอินด้วยบัญชีนักวิจัย A<br>2. พยายามเปิดหน้าแก้ไขโครงการของนักวิจัย B ทาง URL | แก้ไข URL `/backend/rdb_project/{other_id}/edit` | ระบบปฏิเสธการเข้าถึง (403 Forbidden) ไม่อนุญาตให้แก้ไขข้อมูลผู้อื่น | [x] ผ่าน (Pass) |
+| **AUTH-05** | แถบเมนูด้านซ้ายหลังบ้านแบบ Accordion และการแบ่งกลุ่มเมนูย่อย | 1. เปิดหน้าหลังบ้าน `/backend/site`<br>2. คลิกขยายหมวดเมนูหลักและตรวจสอบการยุบตัวของเมนูอื่น<br>3. ทดสอบย่อขนาดหน้าจอเป็น Tablet/Mobile | `<x-backend-sidebar />` | แสดงแถบเมนูด้านซ้ายพร้อมแบ่งกลุ่มย่อย `-` ชัดเจน, เมนูอื่นยุบตัวอัตโนมัติแบบ Accordion และตารางกว้างไม่ล้นขอบจอ | [x] ผ่าน (Pass) |
 
 ### 3.2 การจัดการโครงการวิจัย (Project Management & PDF Processing Engine)
 

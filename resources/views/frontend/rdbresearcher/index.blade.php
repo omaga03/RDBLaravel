@@ -138,7 +138,7 @@
                             <a href="{{ route('frontend.rdbresearcher.show', $item->researcher_id) }}"
                                target="_blank" rel="noopener noreferrer"
                                class="btn btn-outline-primary btn-sm">
-                                <i class="bi bi-eye"></i> ดูข้อมูล
+                                <i class="bi bi-eye me-1.5"></i> ดูข้อมูล
                             </a>
                         </td>
                     </tr>

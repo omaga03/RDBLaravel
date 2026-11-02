@@ -96,7 +96,7 @@
     </div>
 
     {{-- Search Bar --}}
-    <x-search-bar :searchRoute="route('backend.user.index')" :collapsed="request()->hasAny(['search', 'role', 'onboarding_status']) ? false : true">
+    <x-search-bar :searchRoute="route('backend.user.index')" :collapsed="true">
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label fw-bold"><i class="bi bi-shield-check me-1 text-primary"></i>บทบาท (Role)</label>

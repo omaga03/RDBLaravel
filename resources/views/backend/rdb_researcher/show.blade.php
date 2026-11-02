@@ -103,7 +103,7 @@
                                     <form action="{{ route('backend.rdb_researcher.sync_scopus', $item->researcher_id) }}" method="POST" class="d-inline">
                                         @csrf
                                         <button type="submit" class="btn btn-sm btn-outline-info py-0 px-2" title="Sync h-index จาก Scopus">
-                                            <i class="bi bi-arrow-repeat"></i> Sync
+                                            <i class="bi bi-arrow-repeat me-1.5"></i> Sync
                                         </button>
                                     </form>
                                 </div>
@@ -198,13 +198,13 @@
                                                         </div>
                                                         <small class="text-muted">
                                                             @if($project->type)
-                                                                <i class="bi bi-tag"></i> {{ $project->type->pt_name }}
+                                                                <i class="bi bi-tag me-1.5"></i> {{ $project->type->pt_name }}
                                                                 @if($project->typeSub)
                                                                     • {{ $project->typeSub->pts_name }}
                                                                 @endif
                                                             @endif
                                                             @if($project->pro_budget)
-                                                                <span class="ms-2"><i class="bi bi-cash"></i> งบฯ {{ number_format($project->pro_budget, 0) }} บาท</span>
+                                                                <span class="ms-2"><i class="bi bi-cash me-1.5"></i> งบฯ {{ number_format($project->pro_budget, 0) }} บาท</span>
                                                             @endif
                                                         </small>
                                                     </td>
@@ -248,7 +248,7 @@
                                                     <td>
                                                         @if($pub->pub_date)
                                                             <div class="fw-bold">
-                                                                <i class="bi bi-calendar-event"></i> {{ \App\Helpers\ThaiDateHelper::format($pub->pub_date, false, true) }}
+                                                                <i class="bi bi-calendar-event me-1.5"></i> {{ \App\Helpers\ThaiDateHelper::format($pub->pub_date, false, true) }}
                                                             </div>
                                                         @endif
                                                         @if($pub->pubtype && $pub->pubtype->pubtype_subgroup)
@@ -359,7 +359,7 @@
                                                             </a>
                                                         </div>
                                                         @if($dip->dip_request_number)
-                                                            <small class="text-muted"><i class="bi bi-upc"></i> เลขที่คำขอ: {{ strip_tags($dip->dip_request_number) }}</small>
+                                                            <small class="text-muted"><i class="bi bi-upc me-1.5"></i> เลขที่คำขอ: {{ strip_tags($dip->dip_request_number) }}</small>
                                                         @endif
                                                     </td>
                                                     <td>
@@ -424,13 +424,13 @@
                         <label for="citizen_id_modal" class="form-label">เลขบัตรประจำตัวประชาชน</label>
                         <input type="text" class="form-control" id="citizen_id_modal" name="citizen_id" placeholder="0-0000-00000-00-0" autocomplete="off" required>
                         <div class="form-text text-danger help-text">
-                            <i class="bi bi-exclamation-circle"></i> ระบุเลขบัตรประชาชนเพื่อคำนวณและสร้าง Code ID ใหม่ ระบบจะทำการตรวจสอบความถูกต้องของเลขบัตรก่อนบันทึก
+                            <i class="bi bi-exclamation-circle me-1.5"></i> ระบุเลขบัตรประชาชนเพื่อคำนวณและสร้าง Code ID ใหม่ ระบบจะทำการตรวจสอบความถูกต้องของเลขบัตรก่อนบันทึก
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
-                    <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> บันทึกและสร้าง Code ID</button>
+                    <button type="submit" class="btn btn-success"><i class="bi bi-save me-1.5"></i> บันทึกและสร้าง Code ID</button>
                 </div>
             </form>
         </div>
@@ -458,7 +458,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
-                    <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> บันทึกรูปภาพ</button>
+                    <button type="submit" class="btn btn-success"><i class="bi bi-save me-1.5"></i> บันทึกรูปภาพ</button>
                 </div>
             </form>
         </div>

@@ -3,7 +3,7 @@
 @section('content')
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="bi bi-person-badge"></i> คำนำหน้าชื่อ (Name Prefixes)</h2>
+        <h2><i class="bi bi-person-badge me-1.5"></i> คำนำหน้าชื่อ (Name Prefixes)</h2>
     </div>
 
     @if(session('success'))
@@ -17,7 +17,7 @@
                     <input type="text" class="form-control" name="search" value="{{ request('search') }}" placeholder="ค้นหาคำนำหน้า...">
                 </div>
                 <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> ค้นหา</button>
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search me-1.5"></i> ค้นหา</button>
                 </div>
             </form>
 

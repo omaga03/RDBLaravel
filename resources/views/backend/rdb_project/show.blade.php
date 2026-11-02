@@ -112,29 +112,7 @@
                         <!-- Budget Highlight -->
                         <div class="text-center p-3 mb-3 bg-body-secondary rounded border border-secondary-subtle">
                             <span class="text-body-secondary small fw-bold text-uppercase d-block mb-1">งบประมาณโครงการ</span>
-                            <h3 class="fw-bold mb-1 text-success">฿{{ number_format($project->pro_budget, 2) }}</h3>
-                            @php
-                                $ckbAnnuity = (int) ($project->budget->ckb_annuity ?? 1);
-                            @endphp
-                            <div class="d-flex justify-content-center align-items-center gap-1 mt-1">
-                                @if($ckbAnnuity === 0)
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle">
-                                        <i class="bi bi-check-circle-fill me-1"></i>หลักฐานการเงิน: ครบถ้วน
-                                    </span>
-                                @else
-                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
-                                        <i class="bi bi-exclamation-circle-fill me-1"></i>หลักฐานการเงิน: ไม่ครบถ้วน
-                                    </span>
-                                @endif
-                                @can('update', $project)
-                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-1.5" data-bs-toggle="modal" data-bs-target="#projectBudgetModal" title="ปรับปรุงสถานะหลักฐานทางการเงิน">
-                                        <i class="bi bi-pencil-square" style="font-size: 0.75rem;"></i>
-                                    </button>
-                                @endcan
-                            </div>
-                            @if(!empty($project->budget?->ckb_note))
-                                <div class="small text-body-secondary mt-1"><i class="bi bi-chat-left-text me-1"></i>{{ $project->budget->ckb_note }}</div>
-                            @endif
+                            <h3 class="fw-bold mb-0 text-success">฿{{ number_format($project->pro_budget, 2) }}</h3>
                         </div>
 
                         <!-- Key Details List -->
@@ -144,17 +122,19 @@
                                 <span class="fw-bold text-body">{{ $project->year->year_name ?? '-' }}</span>
                             </li>
                             <li class="list-group-item bg-transparent d-flex justify-content-between px-0">
-                                <span class="text-body-secondary">หน่วยงาน/คณะ:</span>
-                                <span class="fw-bold text-body text-end ms-2">{{ $project->department->department_nameTH ?? '-' }}</span>
+                                <span class="text-body-secondary flex-shrink-0">หน่วยงาน/คณะ:</span>
+                                <span class="fw-bold text-body text-end ms-2 text-break">{{ $project->department->department_nameTH ?? '-' }}</span>
                             </li>
                             <li class="list-group-item bg-transparent d-flex justify-content-between px-0">
-                                <span class="text-body-secondary">ประเภททุน:</span>
-                                <span class="fw-bold text-body text-end ms-2">{{ $project->type->pt_name ?? '-' }}</span>
+                                <span class="text-body-secondary flex-shrink-0">ประเภททุน:</span>
+                                <span class="fw-bold text-body text-end ms-2 text-break">{{ $project->type->pt_name ?? '-' }}</span>
                             </li>
                             @if($project->typeSub)
-                            <li class="list-group-item bg-transparent d-flex justify-content-between px-0">
-                                <span class="text-body-secondary">ทุนย่อย:</span>
-                                <span class="fw-bold text-body text-end ms-2">{{ $project->typeSub->pts_name }}</span>
+                            <li class="list-group-item bg-transparent px-0">
+                                <div class="d-flex justify-content-between align-items-start gap-2">
+                                    <span class="text-body-secondary flex-shrink-0">ทุนย่อย:</span>
+                                    <span class="fw-semibold text-body text-end text-break" style="line-height: 1.45;">{{ $project->typeSub->pts_name }}</span>
+                                </div>
                             </li>
                             @endif
                             <li class="list-group-item bg-transparent d-flex justify-content-between px-0">
@@ -300,10 +280,14 @@
                                             </tr>
                                             <tr>
                                                 <th style="width: 25%;" class="bg-body-tertiary">ประเภททุน:</th>
-                                                <td colspan="3">
-                                                    {{ $project->type->pt_name ?? '-' }}
+                                                <td colspan="3" class="text-break">
+                                                    <div class="fw-semibold text-body">{{ $project->type->pt_name ?? '-' }}</div>
                                                     @if($project->typeSub)
-                                                        <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle ms-1">{{ $project->typeSub->pts_name }}</span>
+                                                        <div class="mt-1">
+                                                            <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle text-wrap text-start lh-base fw-normal px-2.5 py-1.5" style="max-width: 100%; word-break: break-word;">
+                                                                <i class="bi bi-arrow-return-right me-1.5 text-secondary"></i>{{ $project->typeSub->pts_name }}
+                                                            </span>
+                                                        </div>
                                                     @endif
                                                 </td>
                                             </tr>
@@ -313,7 +297,7 @@
                                                     @if($project->pro_keyword)
                                                         @foreach(preg_split('/[,;]/u', $project->pro_keyword) as $keyword)
                                                             @if(trim($keyword) !== '')
-                                                                <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle me-1.5 mb-1 px-2.5 py-1">
+                                                                <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle text-wrap text-start lh-base me-1.5 mb-1 px-2.5 py-1">
                                                                     <i class="bi bi-tag-fill me-1 text-primary"></i>{{ trim($keyword) }}
                                                                 </span>
                                                             @endif
@@ -609,7 +593,7 @@
                                                 </td>
                                                 <td class="text-center">
                                                     <a href="{{ route('backend.rdb_project.file.download', [$project->pro_id, $file->id]) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
-                                                        <i class="bi bi-download"></i> ดาวน์โหลด
+                                                        <i class="bi bi-download me-1.5"></i> ดาวน์โหลด
                                                     </a>
                                                 </td>
                                             </tr>
@@ -983,16 +967,16 @@
                     <div class="modal-dialog modal-lg">
                         <div class="modal-content">
                             <div class="modal-header text-white" style="background: var(--rdb-gradient-primary);">
-                                <h5 class="modal-title" id="projectFilesModalLabel"><i class="bi bi-file-earmark-arrow-up"></i> จัดการไฟล์เอกสารโครงการ (Manage Project Files)</h5>
+                                <h5 class="modal-title" id="projectFilesModalLabel"><i class="bi bi-file-earmark-arrow-up me-1.5"></i> จัดการไฟล์เอกสารโครงการ (Manage Project Files)</h5>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
                                 <!-- Abstract File -->
                                 <div class="card mb-3">
                                     <div class="card-header d-flex justify-content-between align-items-center">
-                                        <span><i class="bi bi-file-earmark-text"></i> ไฟล์บทคัดย่อ (Abstract File)</span>
+                                        <span><i class="bi bi-file-earmark-text me-1.5"></i> ไฟล์บทคัดย่อ (Abstract File)</span>
                                         @if($project->pro_abstract_file)
-                                            <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle"><i class="bi bi-check-circle"></i> มีไฟล์แล้ว</span>
+                                            <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle"><i class="bi bi-check-circle me-1.5"></i> มีไฟล์แล้ว</span>
                                         @else
                                             <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">ยังไม่มีไฟล์</span>
                                         @endif
@@ -1023,7 +1007,7 @@
                                             <div class="input-group">
                                                 <input type="file" name="pro_abstract_file" class="form-control form-control-sm" accept=".pdf" required>
                                                 <button type="submit" class="btn btn-primary btn-sm">
-                                                    <i class="bi bi-upload"></i> {{ $project->pro_abstract_file ? 'เปลี่ยนไฟล์' : 'อัปโหลด' }}
+                                                    <i class="bi bi-upload me-1.5"></i> {{ $project->pro_abstract_file ? 'เปลี่ยนไฟล์' : 'อัปโหลด' }}
                                                 </button>
                                             </div>
                                             <small class="text-muted">รองรับเฉพาะไฟล์ PDF ขนาดไม่เกิน 20MB</small>
@@ -1034,9 +1018,9 @@
                                 <!-- Full Report File -->
                                 <div class="card">
                                     <div class="card-header d-flex justify-content-between align-items-center">
-                                        <span><i class="bi bi-file-earmark-richtext"></i> ไฟล์รายงานฉบับสมบูรณ์ (Full Report)</span>
+                                        <span><i class="bi bi-file-earmark-richtext me-1.5"></i> ไฟล์รายงานฉบับสมบูรณ์ (Full Report)</span>
                                         @if($project->pro_file || $project->pro_file_path)
-                                            <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle"><i class="bi bi-check-circle"></i> มีไฟล์แล้ว</span>
+                                            <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle"><i class="bi bi-check-circle me-1.5"></i> มีไฟล์แล้ว</span>
                                         @else
                                             <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">ยังไม่มีไฟล์</span>
                                         @endif
@@ -1104,14 +1088,14 @@
                                 <!-- Additional Files -->
                                 <div class="card mt-3">
                                     <div class="card-header d-flex justify-content-between align-items-center">
-                                        <span><i class="bi bi-paperclip"></i> ไฟล์เพิ่มเติม (Additional Files)</span>
+                                        <span><i class="bi bi-paperclip me-1.5"></i> ไฟล์เพิ่มเติม (Additional Files)</span>
                                         <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">{{ $project->files->count() }} ไฟล์</span>
                                     </div>
                                     <div class="card-body">
                                         <!-- Add/Edit File Form -->
                                         <div class="card mb-3 border">
                                             <div class="card-body">
-                                                <h6 class="fw-bold mb-3" id="fileFormTitle"><i class="bi bi-file-earmark-plus"></i> เพิ่มเอกสารใหม่ (Add New File)</h6>
+                                                <h6 class="fw-bold mb-3" id="fileFormTitle"><i class="bi bi-file-earmark-plus me-1.5"></i> เพิ่มเอกสารใหม่ (Add New File)</h6>
                                                 <form id="fileForm" method="POST" action="{{ route('backend.rdb_project.file.store', $project->pro_id) }}" enctype="multipart/form-data">
                                                     @csrf
                                                     <input type="hidden" name="_method" id="fileFormMethod" value="POST">
@@ -1129,7 +1113,7 @@
                                                             <label class="form-label small">หมายเหตุ (Note)</label>
                                                             <div class="input-group input-group-sm">
                                                                 <input type="text" name="rf_note" id="fileNoteInput" class="form-control">
-                                                                <button type="submit" class="btn btn-primary" id="fileSubmitBtn"><i class="bi bi-plus-circle"></i> เพิ่ม</button>
+                                                                <button type="submit" class="btn btn-primary" id="fileSubmitBtn"><i class="bi bi-plus-circle me-1.5"></i> เพิ่ม</button>
                                                                 <button type="button" class="btn btn-secondary d-none" id="fileCancelBtn">ยกเลิก</button>
                                                             </div>
                                                         </div>
@@ -1176,7 +1160,7 @@
                                                                         }
                                                                     @endphp
                                                                     <a href="{{ route('backend.rdb_project.file.download', [$project->pro_id, $file->id]) }}" target="_blank" class="text-reset text-decoration-none">
-                                                                        <i class="bi bi-paperclip"></i> {{ $shortName }}
+                                                                        <i class="bi bi-paperclip me-1.5"></i> {{ $shortName }}
                                                                     </a>
                                                                 </small>
                                                             </td>
@@ -1242,14 +1226,14 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header text-white" style="background: var(--rdb-gradient-primary);">
-                <h5 class="modal-title" id="researcherModalLabel"><i class="bi bi-people-fill"></i> จัดการนักวิจัยในโครงการ (Manage Researchers)</h5>
+                <h5 class="modal-title" id="researcherModalLabel"><i class="bi bi-people-fill me-1.5"></i> จัดการนักวิจัยในโครงการ (Manage Researchers)</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <!-- Add/Edit Form -->
                 <div class="card mb-3 border">
                     <div class="card-body">
-                        <h6 class="fw-bold mb-3" id="formTitle"><i class="bi bi-person-plus"></i> เพิ่มนักวิจัยใหม่ (Add New)</h6>
+                        <h6 class="fw-bold mb-3" id="formTitle"><i class="bi bi-person-plus me-1.5"></i> เพิ่มนักวิจัยใหม่ (Add New)</h6>
                         <form id="researcherForm" method="POST" action="{{ route('backend.rdb_project.researcher.store', $project->pro_id) }}">
                             @csrf
                             <input type="hidden" name="_method" id="formMethod" value="POST">
@@ -1494,12 +1478,12 @@
                 positionSelect.value = pid;
                 ratioInput.value = ratio;
 
-                submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> บันทึก';
+                submitBtn.innerHTML = '<i class="bi bi-check-circle me-1.5"></i> บันทึก';
                 submitBtn.classList.remove('btn-primary');
                 submitBtn.classList.add('btn-warning');
                 
                 cancelBtn.classList.remove('d-none');
-                formTitle.innerHTML = '<i class="bi bi-pencil-square"></i> แก้ไขข้อมูล (Edit)';
+                formTitle.innerHTML = '<i class="bi bi-pencil-square me-1.5"></i> แก้ไขข้อมูล (Edit)';
             });
         });
 
@@ -1532,12 +1516,12 @@
                 document.getElementById('hidden_researcher_id').remove();
             }
 
-            submitBtn.innerHTML = '<i class="bi bi-plus-circle"></i> เพิ่ม';
+            submitBtn.innerHTML = '<i class="bi bi-plus-circle me-1.5"></i> เพิ่ม';
             submitBtn.classList.add('btn-primary');
             submitBtn.classList.remove('btn-warning');
             
             cancelBtn.classList.add('d-none');
-            formTitle.innerHTML = '<i class="bi bi-person-plus"></i> เพิ่มนักวิจัยใหม่ (Add New)';
+            formTitle.innerHTML = '<i class="bi bi-person-plus me-1.5"></i> เพิ่มนักวิจัยใหม่ (Add New)';
             
             // Re-enable TomSelect if it exists
             if(tomSelectControl) {
@@ -1579,15 +1563,15 @@
                 
                 // Show current filename
                 currentFileDisplay.classList.remove('d-none');
-                currentFileDisplay.innerHTML = `<i class="bi bi-paperclip"></i> ไฟล์ปัจจุบัน: ${filename} (เลือกใหม่เพื่อเปลี่ยน)`;
+                currentFileDisplay.innerHTML = `<i class="bi bi-paperclip me-1.5"></i> ไฟล์ปัจจุบัน: ${filename} (เลือกใหม่เพื่อเปลี่ยน)`;
                 fileInput.required = false; // Not required on edit
 
-                fileSubmitBtn.innerHTML = '<i class="bi bi-check-circle"></i> บันทึก';
+                fileSubmitBtn.innerHTML = '<i class="bi bi-check-circle me-1.5"></i> บันทึก';
                 fileSubmitBtn.classList.remove('btn-primary');
                 fileSubmitBtn.classList.add('btn-warning');
                 
                 fileCancelBtn.classList.remove('d-none');
-                fileFormTitle.innerHTML = '<i class="bi bi-pencil-square"></i> แก้ไขเอกสาร (Edit File)';
+                fileFormTitle.innerHTML = '<i class="bi bi-pencil-square me-1.5"></i> แก้ไขเอกสาร (Edit File)';
             });
         });
 
@@ -1603,12 +1587,12 @@
             fileInput.required = true; // Required on add
             if(rfFilesShow) rfFilesShow.checked = true;
 
-            fileSubmitBtn.innerHTML = '<i class="bi bi-plus-circle"></i> เพิ่ม';
+            fileSubmitBtn.innerHTML = '<i class="bi bi-plus-circle me-1.5"></i> เพิ่ม';
             fileSubmitBtn.classList.add('btn-primary');
             fileSubmitBtn.classList.remove('btn-warning');
             
             fileCancelBtn.classList.add('d-none');
-            fileFormTitle.innerHTML = '<i class="bi bi-file-earmark-plus"></i> เพิ่มเอกสารใหม่ (Add New File)';
+            fileFormTitle.innerHTML = '<i class="bi bi-file-earmark-plus me-1.5"></i> เพิ่มเอกสารใหม่ (Add New File)';
         });
 
 

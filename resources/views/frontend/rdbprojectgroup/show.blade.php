@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    <a href="{{ route('frontend.rdbprojectgroup.index') }}" class="btn btn-sm btn-outline-secondary mb-3"><i class="bi bi-arrow-left"></i> กลับ</a>
+    <a href="{{ route('frontend.rdbprojectgroup.index') }}" class="btn btn-sm btn-outline-secondary mb-3"><i class="bi bi-arrow-left me-1.5"></i> กลับ</a>
 
     <div class="card shadow-sm border mb-4">
         <div class="card-body">

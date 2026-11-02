@@ -69,7 +69,7 @@
             <div class="card h-100 border shadow-sm">
                 <div class="card-body p-3 text-center">
                     <span class="text-secondary small fw-bold d-block mb-1">
-                        <i class="bi bi-megaphone"></i> ประชุม
+                        <i class="bi bi-megaphone me-1.5"></i> ประชุม
                     </span>
                     <h4 class="fw-bold mb-0 text-body">{{ number_format($confCount) }}</h4>
                 </div>

@@ -4,7 +4,7 @@
 <div class="container py-4">
     <div class="card shadow-sm">
         <div class="card-header bg-body-tertiary">
-            <h4 class="mb-0"><i class="bi bi-calendar3"></i> รายละเอียดปีงบประมาณ</h4>
+            <h4 class="mb-0"><i class="bi bi-calendar3 me-1.5"></i> รายละเอียดปีงบประมาณ</h4>
         </div>
         <div class="card-body">
             <div class="table-responsive">

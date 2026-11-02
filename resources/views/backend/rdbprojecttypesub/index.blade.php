@@ -52,13 +52,13 @@
                                     {{ $item->pts_name }}
                                 </div>
                                 <div class="small text-muted ms-3">
-                                    <i class="bi bi-arrow-return-right"></i> {{ $item->projectType->pt_name ?? '-' }}
+                                    <i class="bi bi-arrow-return-right me-1.5"></i> {{ $item->projectType->pt_name ?? '-' }}
                                 </div>
                             </td>
                             <td>
                                 @if($item->pts_file || $item->pts_path)
                                     <a href="{{ route('backend.rdbprojecttypesub.view_file', $item->pts_id) }}" target="_blank" class="text-decoration-none">
-                                        <i class="bi bi-file-earmark-text"></i> ดาวน์โหลด
+                                        <i class="bi bi-file-earmark-text me-1.5"></i> ดาวน์โหลด
                                     </a>
                                 @else
                                     <span class="text-muted">-</span>

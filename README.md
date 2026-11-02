@@ -117,7 +117,7 @@ php artisan storage:link
 ```bash
 php artisan test --filter=BackendAuditTest
 ```
-*(ระบบจะตรวจความถูกต้องทั้งหมด 46 รายการ ผลลัพธ์ต้องแสดง **46 passed** สีเขียวทั้งหมด)*
+*(ระบบจะตรวจความถูกต้องทั้งหมด 47 รายการ ผลลัพธ์ต้องแสดง **47 passed (421 assertions)** สีเขียวทั้งหมด)*
 
 ---
 
@@ -135,3 +135,39 @@ php artisan test --filter=BackendAuditTest
 * **นักวิจัย (Researcher):**
   * **ชื่อผู้ใช้งาน:** `655169` (ดร. ชลธิชา ระลึก)
   * **รหัสผ่าน:** `password123`
+
+---
+
+## 📚 ศูนย์รวมคู่มือการใช้งานระบบ (User Manuals & SOP Portal)
+
+ระบบมาพร้อมชุดเอกสารคู่มือปฏิบัติงานมาตรฐาน (SOP) ฉบับสมบูรณ์ในโฟลเดอร์ `docs/manuals/` ทั้งรูปแบบ Markdown (`.md`) และเว็บเพจ HTML5 (`.html`) ที่รองรับการค้นหา สารบัญคลิกข้ามบท โหมดมืด/สว่าง และการสั่งพิมพ์:
+
+* **หน้าสารบัญรวมศูนย์ (Documentation Portal):** [`docs/manuals/index.html`](docs/manuals/index.html)
+* **เล่มที่ 1: คู่มือระบบหน้าบ้าน (Volume 1 - Frontend Manual 8 บท):** [`VOLUME_1_FRONTEND_USER_MANUAL.md`](docs/manuals/VOLUME_1_FRONTEND_USER_MANUAL.md) | [`.html`](docs/manuals/VOLUME_1_FRONTEND_USER_MANUAL.html)
+* **เล่มที่ 2: คู่มือระบบหลังบ้านและนักวิจัย (Volume 2 - Backend Manual 10 บท):** [`VOLUME_2_BACKEND_ADMIN_RESEARCHER_MANUAL.md`](docs/manuals/VOLUME_2_BACKEND_ADMIN_RESEARCHER_MANUAL.md) | [`.html`](docs/manuals/VOLUME_2_BACKEND_ADMIN_RESEARCHER_MANUAL.html)
+* **คู่มือฉบับย่อ 3 นาทีสำหรับนักวิจัย (Quick-Start Cheatsheet):** [`RESEARCHER_QUICK_START_CHEATSHEET.md`](docs/manuals/RESEARCHER_QUICK_START_CHEATSHEET.md) | [`.html`](docs/manuals/RESEARCHER_QUICK_START_CHEATSHEET.html)
+* **แผนและรายงานผลการตรวจรับระบบ (UAT & Acceptance Test Report):** [`SYSTEM_ACCEPTANCE_TEST_PLAN.md`](docs/manuals/SYSTEM_ACCEPTANCE_TEST_PLAN.md) | [`.html`](docs/manuals/SYSTEM_ACCEPTANCE_TEST_PLAN.html)
+
+```bash
+# คำสั่งคอมไพล์คู่มือ Markdown ทั้งหมดเป็น HTML5 Portal อัตโนมัติ
+php .agents/skills/documentation-and-manuals/scripts/build_html_manuals.php
+```
+
+---
+
+## 📝 บันทึกการอัปเดตระบบล่าสุด (Changelog / Update Log)
+
+### อัปเดตประจำวันที่ 2 พฤศจิกายน 2569 (Release 2026.11)
+1. **ปรับโครงสร้างเมนูระบบหลังบ้านเป็นแถบด้านซ้าย (Responsive Left Sidebar & Accordion Navigation):**
+   * ย้ายเมนูจัดการระบบหลังบ้านทั้งหมดมาไว้ที่แถบด้านซ้าย (`<x-backend-sidebar />`) พร้อมตัดเมนูแถบบนแบบเดิมออกเพื่อเพิ่มพื้นที่แสดงผลแนวตั้ง
+   * จัดกลุ่มเมนูย่อยเป็นโซนชัดเจน (`ข้อมูลโครงการ`, `ประเมินเล่มรายงาน`, `การส่งออกข้อมูล`) พร้อมสัญลักษณ์ `-` นำหน้าและเส้นคั่นแบ่งโซน
+   * ยุบรวมเมนู **ตั้งค่าข้อมูลพื้นฐาน (Master Data)** ให้พับเก็บ/กางออกย่อยได้ (`#sidebarMasterProject`, `#sidebarMasterPublished`)
+   * ระบบพับเก็บแบบ **Accordion อัตโนมัติ** (`data-bs-parent="#rdbSidebarAccordion"`): เมื่อคลิกขยายหมวดเมนูหลักใด หมวดเมนูอื่นที่เปิดอยู่จะยุบเก็บให้อัตโนมัติทันที
+   * รองรับทุกขนาดหน้าจอ: ย่อเป็น Mini Sidebar (`68px`) บนจอโน้ตบุ๊กขนาดกลาง และเปลี่ยนเป็น Offcanvas Drawer บนแท็บเล็ต/มือถือ (`< 992px`) พร้อมป้องกันตารางกว้างดันหน้าจอล้น (`min-width: 0`)
+2. **จัดระเบียบระยะห่างไอคอนและข้อความทั้งระบบ (Uniform Icon-to-Text Spacing System):**
+   * เพิ่มชุด CSS Fractional Spacing Utilities (`.me-1.5`, `.gap-1.5`, `.px-2.5`, `.py-1.5` ฯลฯ) และปรับระยะห่างไอคอนคู่ข้อความให้เท่ากันทั้งระบบหน้าบ้านและหลังบ้าน (67 ไฟล์ Blade)
+3. **ปรับปรุงหน้ารายละเอียดโครงการวิจัย (`/backend/rdb_project/{id}`):**
+   * นำป้าย `หลักฐานการเงิน: ไม่ครบถ้วน` เดิมออกจากการ์ดงบประมาณโครงการ
+   * ปรับการแสดงผลชื่อโครงการทุนย่อย (`pts_name`) และป้ายคำสำคัญที่มีความยาวมากให้ตัดขึ้นบรรทัดใหม่อัตโนมัติ (`text-wrap text-start lh-base`) ไม่ล้นขอบจอเล็ก
+4. **ยกระดับชุดคู่มือผู้ใช้งาน (`docs/manuals/`) สู่ระดับ Comprehensive SOP:**
+   * ขยายเนื้อหาคู่มือเล่ม 1 และเล่ม 2 ให้ครอบคลุมพจนานุกรมฟิลด์แบบฟอร์ม, ขั้นตอนคลิกทีละจุด `[1]`, `[2]`, `[3]`, แผนภาพ Mermaid Workflow และแก้ไขสารบัญ (TOC) ให้ลิงก์ข้ามไปยังหัวข้อบทหลักได้อย่างแม่นยำ

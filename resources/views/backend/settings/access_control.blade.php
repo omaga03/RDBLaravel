@@ -144,7 +144,7 @@
                             <div class="input-group input-group-sm mt-1">
                                 <input type="text" class="form-control font-monospace" id="callbackUriInput" value="{{ $googleCallbackUrl }}" readonly>
                                 <button class="btn btn-outline-info" type="button" onclick="navigator.clipboard.writeText(document.getElementById('callbackUriInput').value); alert('คัดลอก URL เรียบร้อยแล้ว');">
-                                    <i class="bi bi-clipboard"></i> คัดลอก
+                                    <i class="bi bi-clipboard me-1.5"></i> คัดลอก
                                 </button>
                             </div>
                         </div>

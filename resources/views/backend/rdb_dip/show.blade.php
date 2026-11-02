@@ -205,7 +205,7 @@
                             @if($item->dip_url)
                             <tr>
                                 <th>ลิงก์ที่เกี่ยวข้อง:</th>
-                                <td><a href="{{ $item->dip_url }}" target="_blank" class="text-decoration-none"><i class="bi bi-link-45deg"></i> เปิดลิงก์ภายนอก</a></td>
+                                <td><a href="{{ $item->dip_url }}" target="_blank" class="text-decoration-none"><i class="bi bi-link-45deg me-1.5"></i> เปิดลิงก์ภายนอก</a></td>
                             </tr>
                             @endif
                         </table>
@@ -340,7 +340,7 @@
                     <div class="text-center mb-3">
                         <i class="bi bi-file-earmark-pdf text-danger" style="font-size: 2.5rem;"></i>
                         <div class="text-muted small py-1">
-                            <i class="bi bi-file-earmark-check"></i> เอกสารทรัพย์สินทางปัญญาหลัก
+                            <i class="bi bi-file-earmark-check me-1.5"></i> เอกสารทรัพย์สินทางปัญญาหลัก
                         </div>
                         <div class="d-grid gap-2 mt-2">
                             @if($item->dip_files || $item->dip_path)
