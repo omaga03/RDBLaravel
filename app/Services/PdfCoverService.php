@@ -6,19 +6,40 @@ use App\Models\RdbProject;
 use App\Models\RdbPublished;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 class PdfCoverService
 {
     protected DSpaceExportService $dspaceService;
     protected bool $pdftoppmChecked = false;
     protected ?string $cachedPdftoppm = null;
+    protected bool $pythonChecked = false;
+    protected ?string $cachedPython = null;
     protected bool $ghostscriptChecked = false;
     protected ?string $cachedGhostscript = null;
 
     public function __construct(DSpaceExportService $dspaceService)
     {
         $this->dspaceService = $dspaceService;
+    }
+
+    /**
+     * ตรวจสอบชื่อ Engine หลักที่ระบบใช้งานสำหรับการเรนเดอร์หน้าแรกของ PDF ทั้งหน้า
+     */
+    public function getActiveEngineDescription(): string
+    {
+        if ($pdftoppm = $this->getPdftoppmBinary()) {
+            return "Poppler pdftoppm Full-Page Rasterizer [{$pdftoppm}]";
+        }
+        if ($python = $this->getPythonPyMuPdfBinary()) {
+            return "MuPDF (PyMuPDF) Full-Page Rasterizer [{$python}]";
+        }
+        if (extension_loaded('imagick') && class_exists('\Imagick')) {
+            return "PHP Imagick Full-Page Rasterizer";
+        }
+        if ($gs = $this->getGhostscriptBinary()) {
+            return "Ghostscript CLI Full-Page Rasterizer [{$gs}]";
+        }
+        return "Academic GD Fallback Cover Generator (No PDF Rasterizer found)";
     }
 
     /**
@@ -87,12 +108,99 @@ class PdfCoverService
     }
 
     /**
+     * ดึงหรือค้นหาไบนารี Python ที่ติดตั้ง PyMuPDF (fitz) และ Pillow สำหรับเรนเดอร์หน้าแรกของ PDF ทั้งหน้า
+     */
+    public function getPythonPyMuPdfBinary(): ?string
+    {
+        if ($this->pythonChecked) {
+            return $this->cachedPython;
+        }
+        $this->pythonChecked = true;
+
+        $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+        $candidates = [];
+
+        $custom = env('PYTHON_PATH');
+        if (!empty($custom) && file_exists($custom)) {
+            $candidates[] = $custom;
+        }
+
+        if ($isWindows) {
+            $winPaths = [
+                'F:\laragon\bin\python\python-3.10\python.exe',
+                'C:\laragon\bin\python\python-3.10\python.exe',
+                'D:\laragon\bin\python\python-3.10\python.exe',
+            ];
+            foreach (['F:\laragon\bin\python', 'C:\laragon\bin\python', 'D:\laragon\bin\python'] as $baseDir) {
+                if (is_dir($baseDir)) {
+                    foreach (glob($baseDir . '\python*\python.exe') ?: [] as $foundExe) {
+                        $winPaths[] = $foundExe;
+                    }
+                }
+            }
+            foreach ($winPaths as $p) {
+                if (file_exists($p) && !in_array($p, $candidates, true)) {
+                    $candidates[] = $p;
+                }
+            }
+
+            $whereOut = @shell_exec('where python 2>nul');
+            if (!empty($whereOut)) {
+                foreach (array_filter(array_map('trim', explode("\n", $whereOut))) as $line) {
+                    if (file_exists($line) && !in_array($line, $candidates, true)) {
+                        $candidates[] = $line;
+                    }
+                }
+            }
+        } else {
+            foreach (['/usr/bin/python3', '/usr/local/bin/python3', '/bin/python3'] as $p) {
+                if (file_exists($p)) {
+                    $candidates[] = $p;
+                }
+            }
+            $whichOut = @shell_exec('which python3 2>/dev/null');
+            if (!empty($whichOut)) {
+                $first = trim(explode("\n", trim($whichOut))[0]);
+                if ($first && file_exists($first) && !in_array($first, $candidates, true)) {
+                    $candidates[] = $first;
+                }
+            }
+        }
+
+        $nullDev = $isWindows ? 'nul' : '/dev/null';
+        foreach ($candidates as $pythonBin) {
+            $checkCmd = escapeshellarg($pythonBin) . ' -c "import pymupdf, PIL; print(199)" 2>' . $nullDev;
+            $out = trim((string) @shell_exec($checkCmd));
+            if ($out === '199') {
+                return $this->cachedPython = $pythonBin;
+            }
+        }
+
+        return $this->cachedPython = null;
+    }
+
+    /**
+     * ดึงหรือค้นหาไบนารี Ghostscript CLI พร้อมแคชผลลัพธ์
+     */
+    public function getGhostscriptBinary(): ?string
+    {
+        if (!$this->ghostscriptChecked) {
+            $this->ghostscriptChecked = true;
+            $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+            $gsCmd = $isWindows ? 'gswin64c' : 'gs';
+            $test = @shell_exec($isWindows ? "where $gsCmd 2>nul" : "which $gsCmd 2>/dev/null");
+            $this->cachedGhostscript = !empty($test) ? trim(explode("\n", trim($test))[0]) : null;
+        }
+
+        return $this->cachedGhostscript;
+    }
+
+    /**
      * สร้างภาพหน้าปก .webp สำหรับเล่มรายงานวิจัยฉบับสมบูรณ์ (RdbProject)
      */
     public function generateProjectCover(RdbProject $project, bool $force = false): ?string
     {
         // ตรวจสอบว่าให้เผยแพร่ข้อมูลหรือไม่ (0 = เปิดเผยแพร่, 1 = ปิด, 2 = ร่าง)
-        // หาก pro_file_show != 0 และไม่ force ให้ข้าม
         if ((int)$project->pro_file_show !== 0 && !$force) {
             return null;
         }
@@ -113,24 +221,16 @@ class PdfCoverService
         $relativeStoragePath = $folder . '/' . $filename;
         $absoluteTargetPath = Storage::disk('public')->path($relativeStoragePath);
 
-        // ตรวจสอบและสร้างโฟลเดอร์ปลายทาง
         $targetDir = dirname($absoluteTargetPath);
         if (!is_dir($targetDir)) {
             @mkdir($targetDir, 0755, true);
         }
 
-        $metadata = [
-            'type' => 'รายงานวิจัยฉบับสมบูรณ์',
-            'title' => $project->pro_nameTH ?: $project->pro_nameEN ?: 'โครงการวิจัย',
-            'code' => $project->pro_code ?: ('PCRU-PRO-' . $project->pro_id),
-            'author' => optional($project->researcher)->full_name ?: 'นักวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์',
-            'year' => optional($project->year)->year_name ? ('ปีงบประมาณ พ.ศ. ' . $project->year->year_name) : '',
-            'department' => optional($project->department)->department_nameTH ?: 'มหาวิทยาลัยราชภัฏเพชรบูรณ์',
-        ];
+        $metadata = $this->buildProjectMetadata($project);
 
         $success = $this->extractFirstPageToWebp($pdfPath, $absoluteTargetPath, $metadata);
 
-        if ($success && file_exists($absoluteTargetPath)) {
+        if ($success && file_exists($absoluteTargetPath) && filesize($absoluteTargetPath) > 0) {
             $project->pro_cover_path = $relativeStoragePath;
             $project->saveQuietly();
             return $relativeStoragePath;
@@ -144,17 +244,14 @@ class PdfCoverService
      */
     public function generatePublishedCover(RdbPublished $published, bool $force = false): ?string
     {
-        // ตรวจสอบสถานะการเผยแพร่ (data_show == 1 หรือ pub_download == 1)
         if ($published->data_show != 1 && !$force) {
             return null;
         }
 
-        // หากมี cover อยู่แล้วและไฟล์ยังอยู่ และไม่ force
         if (!$force && !empty($published->pub_cover_path) && Storage::disk('public')->exists($published->pub_cover_path)) {
             return $published->pub_cover_path;
         }
 
-        // ค้นหาพาธไฟล์ PDF บนดิสก์
         $pdfPath = $this->dspaceService->resolvePublishedFileOnDisk($published);
         if (!$pdfPath || !file_exists($pdfPath)) {
             return null;
@@ -170,18 +267,11 @@ class PdfCoverService
             @mkdir($targetDir, 0755, true);
         }
 
-        $metadata = [
-            'type' => 'บทความวิจัยตีพิมพ์',
-            'title' => $published->pub_name ?: 'ผลงานตีพิมพ์ทางวิชาการ',
-            'code' => optional($published->pubtype)->pubtype_name ?: 'งานตีพิมพ์เผยแพร่',
-            'author' => optional($published->researcher)->full_name ?: 'นักวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์',
-            'year' => optional($published->year)->year_name ? ('ปีงบประมาณ พ.ศ. ' . $published->year->year_name) : '',
-            'department' => optional($published->department)->department_nameTH ?: 'มหาวิทยาลัยราชภัฏเพชรบูรณ์',
-        ];
+        $metadata = $this->buildPublishedMetadata($published);
 
         $success = $this->extractFirstPageToWebp($pdfPath, $absoluteTargetPath, $metadata);
 
-        if ($success && file_exists($absoluteTargetPath)) {
+        if ($success && file_exists($absoluteTargetPath) && filesize($absoluteTargetPath) > 0) {
             $published->pub_cover_path = $relativeStoragePath;
             $published->saveQuietly();
             return $relativeStoragePath;
@@ -191,36 +281,186 @@ class PdfCoverService
     }
 
     /**
-     * ดึงหน้าแรกของ PDF ออกมาเป็น .webp ด้วยสถาปัตยกรรม 5-Tier Fallback
+     * เตรียมข้อมูล Metadata ของโครงการวิจัยสำหรับปกสำรอง
+     */
+    public function buildProjectMetadata(RdbProject $project): array
+    {
+        return [
+            'type' => 'รายงานวิจัยฉบับสมบูรณ์',
+            'title' => $project->pro_nameTH ?: $project->pro_nameEN ?: 'โครงการวิจัย',
+            'code' => $project->pro_code ?: ('PCRU-PRO-' . $project->pro_id),
+            'author' => 'นักวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์',
+            'year' => optional($project->year)->year_name ? ('ปีงบประมาณ พ.ศ. ' . $project->year->year_name) : '',
+            'department' => optional($project->department)->department_nameTH ?: 'มหาวิทยาลัยราชภัฏเพชรบูรณ์',
+        ];
+    }
+
+    /**
+     * เตรียมข้อมูล Metadata ของผลงานตีพิมพ์สำหรับปกสำรอง
+     */
+    public function buildPublishedMetadata(RdbPublished $published): array
+    {
+        return [
+            'type' => 'บทความวิจัยตีพิมพ์',
+            'title' => $published->pub_name ?: 'ผลงานตีพิมพ์ทางวิชาการ',
+            'code' => optional($published->pubtype)->pubtype_name ?: 'งานตีพิมพ์เผยแพร่',
+            'author' => 'นักวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์',
+            'year' => optional($published->year)->year_name ? ('ปีงบประมาณ พ.ศ. ' . $published->year->year_name) : '',
+            'department' => optional($published->department)->department_nameTH ?: 'มหาวิทยาลัยราชภัฏเพชรบูรณ์',
+        ];
+    }
+
+    /**
+     * เรนเดอร์ภาพหน้าแรกของ PDF ทั้งหน้าแบบ Batch (ความเร็วสูงสำหรับ CLI หลายพันไฟล์)
+     *
+     * @param array<int, array{key: int|string, pdf: string, webp: string, meta: array}> $batchItems
+     * @return array<int|string, bool>
+     */
+    public function renderBatchFirstPageToWebp(array $batchItems): array
+    {
+        if (empty($batchItems)) {
+            return [];
+        }
+
+        $results = [];
+        $python = $this->getPythonPyMuPdfBinary();
+
+        if ($python) {
+            $payload = [];
+            foreach ($batchItems as $item) {
+                $targetDir = dirname($item['webp']);
+                if (!is_dir($targetDir)) {
+                    @mkdir($targetDir, 0755, true);
+                }
+                $payload[] = [
+                    'key' => (string) $item['key'],
+                    'pdf' => $item['pdf'],
+                    'webp' => $item['webp'],
+                ];
+            }
+
+            $tmpJson = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'rdb_pdf_batch_in_' . uniqid() . '.json';
+            $tmpOutJson = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'rdb_pdf_batch_out_' . uniqid() . '.json';
+            $tmpPy = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'rdb_pdf_batch_' . uniqid() . '.py';
+
+            @file_put_contents($tmpJson, json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+
+            $pyScript = <<<'PYTHON'
+import sys, json, os
+import pymupdf
+from PIL import Image
+
+pymupdf.TOOLS.mupdf_display_errors(False)
+pymupdf.TOOLS.mupdf_display_warnings(False)
+
+def main():
+    json_path = sys.argv[1]
+    out_path = sys.argv[2]
+    with open(json_path, 'r', encoding='utf-8') as f:
+        items = json.load(f)
+    out = {}
+    for item in items:
+        key = item['key']
+        pdf_path = item['pdf']
+        webp_path = item['webp']
+        try:
+            if os.path.isfile(webp_path):
+                os.remove(webp_path)
+            doc = pymupdf.open(pdf_path)
+            if len(doc) < 1:
+                doc.close()
+                out[key] = False
+                continue
+            page = doc[0]
+            rect = page.rect
+            w = rect.width if rect.width > 0 else 595.0
+            zoom = max(1.2, min(3.0, 800.0 / w))
+            pix = page.get_pixmap(matrix=pymupdf.Matrix(zoom, zoom), alpha=False)
+            img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+            if img.width > 800:
+                new_h = max(1, int(img.height * (800.0 / img.width)))
+                img = img.resize((800, new_h), Image.Resampling.LANCZOS)
+            img.save(webp_path, "WEBP", quality=85, method=4)
+            img.close()
+            pix = None
+            doc.close()
+            out[key] = os.path.isfile(webp_path) and os.path.getsize(webp_path) > 0
+        except Exception:
+            out[key] = False
+    with open(out_path, 'w', encoding='utf-8') as f:
+        json.dump(out, f)
+
+if __name__ == '__main__':
+    main()
+PYTHON;
+
+            @file_put_contents($tmpPy, $pyScript);
+            $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+            $nullDev = $isWindows ? 'nul' : '/dev/null';
+            $cmd = escapeshellarg($python) . ' ' . escapeshellarg($tmpPy) . ' ' . escapeshellarg($tmpJson) . ' ' . escapeshellarg($tmpOutJson) . ' >' . $nullDev . ' 2>&1';
+            @shell_exec($cmd);
+
+            $rawOut = is_file($tmpOutJson) ? @file_get_contents($tmpOutJson) : null;
+
+            @unlink($tmpJson);
+            @unlink($tmpOutJson);
+            @unlink($tmpPy);
+
+            $decoded = is_string($rawOut) ? @json_decode(trim($rawOut), true) : null;
+            if (is_array($decoded)) {
+                foreach ($batchItems as $item) {
+                    $k = (string) $item['key'];
+                    if (!empty($decoded[$k]) && file_exists($item['webp']) && filesize($item['webp']) > 0) {
+                        $results[$item['key']] = true;
+                    } else {
+                        // หาก PDF เสียหายหรืออ่านไม่ได้ ให้ใช้ Fallback
+                        $results[$item['key']] = $this->generateAcademicGdCover($item['webp'], $item['meta'] ?? []);
+                    }
+                }
+                return $results;
+            }
+        }
+
+        // Fallback เรียกทีละรายการ
+        foreach ($batchItems as $item) {
+            $results[$item['key']] = $this->extractFirstPageToWebp($item['pdf'], $item['webp'], $item['meta'] ?? []);
+        }
+
+        return $results;
+    }
+
+    /**
+     * เรนเดอร์หน้าแรกของ PDF ทั้งหน้า (Full-Page Rasterization) ออกมาเป็น .webp
+     * ห้ามดึงเฉพาะภาพย่อย (Embedded Image/Logo) ที่ฝังในหน้าแรกเด็ดขาด เพื่อให้ได้ภาพหน้าปกเต็มหน้า 100%
      */
     public function extractFirstPageToWebp(string $pdfPath, string $targetWebpPath, array $metadata = []): bool
     {
-        // Tier 1: Poppler pdftoppm (ดีที่สุด คมชัด แม่นยำระดับ 100%)
+        // Tier 1: Poppler pdftoppm (เรนเดอร์หน้าแรกทั้งหน้า)
         if ($this->extractViaPdftoppm($pdfPath, $targetWebpPath)) {
             return true;
         }
 
-        // Tier 2: PHP Imagick Extension
+        // Tier 2: MuPDF / PyMuPDF (เรนเดอร์หน้าแรกทั้งหน้า คมชัด รองรับฟอนต์ไทย/เวกเตอร์/ตารางครบถ้วน)
+        if ($this->extractViaPyMuPdf($pdfPath, $targetWebpPath)) {
+            return true;
+        }
+
+        // Tier 3: PHP Imagick Extension (เรนเดอร์หน้าแรก [0] ทั้งหน้า)
         if ($this->extractViaImagick($pdfPath, $targetWebpPath)) {
             return true;
         }
 
-        // Tier 3: Ghostscript CLI
+        // Tier 4: Ghostscript CLI (เรนเดอร์หน้าแรก -dFirstPage=1 -dLastPage=1 ทั้งหน้า)
         if ($this->extractViaGhostscript($pdfPath, $targetWebpPath)) {
             return true;
         }
 
-        // Tier 4: Embedded Image Extraction via Smalot\PdfParser
-        if ($this->extractViaPdfParserEmbeddedImage($pdfPath, $targetWebpPath)) {
-            return true;
-        }
-
-        // Tier 5: Academic Editorial Cover Generator via PHP GD (ทำงานได้ 100% ทุกเซิร์ฟเวอร์)
+        // Tier 5: Academic Editorial Cover Generator via PHP GD (กรณีไฟล์ PDF เสียหายหรือเซิร์ฟเวอร์ไม่มี PDF Engine)
         return $this->generateAcademicGdCover($targetWebpPath, $metadata);
     }
 
     /**
-     * Tier 1: Poppler pdftoppm
+     * Tier 1: Poppler pdftoppm (เรนเดอร์หน้าแรกทั้งหน้า)
      */
     protected function extractViaPdftoppm(string $pdfPath, string $targetWebpPath): bool
     {
@@ -257,7 +497,43 @@ class PdfCoverService
     }
 
     /**
-     * Tier 2: PHP Imagick Extension
+     * Tier 2: MuPDF / PyMuPDF เรนเดอร์หน้าแรกของ PDF ทั้งหน้าเป็น .webp โดยตรง
+     */
+    protected function extractViaPyMuPdf(string $pdfPath, string $targetWebpPath): bool
+    {
+        $python = $this->getPythonPyMuPdfBinary();
+        if (!$python || !is_file($pdfPath)) {
+            return false;
+        }
+
+        $payloadB64 = base64_encode(json_encode([
+            'pdf' => $pdfPath,
+            'webp' => $targetWebpPath,
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+
+        $pyInline = 'import sys, json, base64, pymupdf; from PIL import Image; '
+            . 'pymupdf.TOOLS.mupdf_display_errors(False); pymupdf.TOOLS.mupdf_display_warnings(False); '
+            . 'd = json.loads(base64.b64decode(sys.argv[1]).decode("utf-8")); '
+            . 'doc = pymupdf.open(d["pdf"]); '
+            . 'page = doc[0]; '
+            . 'w = page.rect.width if page.rect.width > 0 else 595.0; '
+            . 'z = max(1.2, min(3.0, 800.0 / w)); '
+            . 'pix = page.get_pixmap(matrix=pymupdf.Matrix(z, z), alpha=False); '
+            . 'img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples); '
+            . 'img = img.resize((800, max(1, int(img.height * (800.0 / img.width)))), Image.Resampling.LANCZOS) if img.width > 800 else img; '
+            . 'img.save(d["webp"], "WEBP", quality=85, method=4); '
+            . 'doc.close(); print("OK")';
+
+        $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+        $nullDev = $isWindows ? 'nul' : '/dev/null';
+        $cmd = escapeshellarg($python) . ' -c ' . escapeshellarg($pyInline) . ' ' . escapeshellarg($payloadB64) . ' 2>' . $nullDev;
+        $out = trim((string) @shell_exec($cmd));
+
+        return $out === 'OK' && file_exists($targetWebpPath) && filesize($targetWebpPath) > 0;
+    }
+
+    /**
+     * Tier 3: PHP Imagick Extension (เรนเดอร์หน้าแรกทั้งหน้า)
      */
     protected function extractViaImagick(string $pdfPath, string $targetWebpPath): bool
     {
@@ -282,24 +558,17 @@ class PdfCoverService
     }
 
     /**
-     * Tier 3: Ghostscript CLI (พร้อมแคชผลลัพธ์การค้นหาไบนารี)
+     * Tier 4: Ghostscript CLI (เรนเดอร์หน้าแรกทั้งหน้า)
      */
     protected function extractViaGhostscript(string $pdfPath, string $targetWebpPath): bool
     {
-        if (!$this->ghostscriptChecked) {
-            $this->ghostscriptChecked = true;
-            $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
-            $gsCmd = $isWindows ? 'gswin64c' : 'gs';
-            $test = @shell_exec($isWindows ? "where $gsCmd 2>nul" : "which $gsCmd 2>/dev/null");
-            $this->cachedGhostscript = !empty($test) ? trim(explode("\n", trim($test))[0]) : null;
-        }
-
-        if (!$this->cachedGhostscript) {
+        $gs = $this->getGhostscriptBinary();
+        if (!$gs) {
             return false;
         }
 
         $tempPng = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'gs_cover_' . uniqid() . '.png';
-        $cmd = escapeshellarg($this->cachedGhostscript) . " -sDEVICE=png16m -dFirstPage=1 -dLastPage=1 -r150 -o " . escapeshellarg($tempPng) . " " . escapeshellarg($pdfPath);
+        $cmd = escapeshellarg($gs) . " -sDEVICE=png16m -dFirstPage=1 -dLastPage=1 -r150 -o " . escapeshellarg($tempPng) . " " . escapeshellarg($pdfPath);
         @exec($cmd, $out, $ret);
 
         if (file_exists($tempPng) && filesize($tempPng) > 0) {
@@ -312,62 +581,7 @@ class PdfCoverService
     }
 
     /**
-     * Tier 4: ดึงภาพที่ฝังอยู่ในหน้าแรกด้วย Fast Binary Stream Scan (DCTDecode JPEG)
-     * ทำงานระดับมิลลิวินาทีโดยไม่ใช้ Smalot\PdfParser เพื่อป้องกันปัญหา Font CMap / Stream Memory Exhausted 100%
-     */
-    protected function extractViaPdfParserEmbeddedImage(string $pdfPath, string $targetWebpPath): bool
-    {
-        if (!is_file($pdfPath) || !is_readable($pdfPath)) {
-            return false;
-        }
-
-        $fileSize = @filesize($pdfPath);
-        if (!$fileSize || $fileSize <= 0) {
-            return false;
-        }
-
-        // สแกนหาภาพ JPEG (DCTDecode) ในช่วง 1.5 MB แรกของไฟล์ PDF ด้วย strpos (ความเร็วสูง ไม่กิน RAM)
-        $chunk = @file_get_contents($pdfPath, false, null, 0, 1572864);
-        if ($chunk !== false) {
-            $offset = 0;
-            $attempts = 0;
-            while ($attempts < 5 && ($jpegStart = strpos($chunk, "\xFF\xD8\xFF", $offset)) !== false) {
-                $attempts++;
-                $jpegEnd = strpos($chunk, "\xFF\xD9", $jpegStart + 2048);
-                if ($jpegEnd === false) {
-                    break;
-                }
-                $length = ($jpegEnd - $jpegStart) + 2;
-                $offset = $jpegEnd + 2;
-
-                if ($length >= 2048 && $length <= 1200000) {
-                    $jpegBytes = substr($chunk, $jpegStart, $length);
-                    $gdImg = @imagecreatefromstring($jpegBytes);
-                    unset($jpegBytes);
-                    if ($gdImg) {
-                        $w = imagesx($gdImg);
-                        $h = imagesy($gdImg);
-                        if ($w >= 180 && $h >= 180 && function_exists('imagewebp')) {
-                            $saved = @imagewebp($gdImg, $targetWebpPath, 85);
-                            imagedestroy($gdImg);
-                            if ($saved && file_exists($targetWebpPath) && filesize($targetWebpPath) > 0) {
-                                unset($chunk);
-                                return true;
-                            }
-                        } else {
-                            imagedestroy($gdImg);
-                        }
-                    }
-                }
-            }
-            unset($chunk);
-        }
-
-        return false;
-    }
-
-    /**
-     * Tier 5: สร้างปกวิชาการด้วย PHP GD สไตล์ Scholarly Minimalist (รันได้ 100% บนทุกเครื่อง)
+     * Tier 5: สร้างปกวิชาการด้วย PHP GD สไตล์ Scholarly Minimalist พร้อมรองรับฟอนต์ภาษาไทย TTF
      */
     protected function generateAcademicGdCover(string $targetWebpPath, array $metadata = []): bool
     {
@@ -381,12 +595,10 @@ class PdfCoverService
         $im = imagecreatetruecolor($width, $height);
 
         // สีธีมสไตล์วิชาการ (Academic Navy & Citations)
-        $bgTop = imagecolorallocate($im, 248, 250, 252);     // Slate 50
-        $bgBottom = imagecolorallocate($im, 241, 245, 249);  // Slate 100
-        $navy = imagecolorallocate($im, 30, 58, 95);         // Deep Navy #1E3A5F
-        $amber = imagecolorallocate($im, 217, 119, 6);       // Amber #D97706
-        $dark = imagecolorallocate($im, 15, 23, 42);         // Slate 900
-        $gray = imagecolorallocate($im, 100, 116, 139);      // Slate 500
+        $navy = imagecolorallocate($im, 30, 58, 95);          // Deep Navy #1E3A5F
+        $amber = imagecolorallocate($im, 217, 119, 6);        // Amber #D97706
+        $dark = imagecolorallocate($im, 15, 23, 42);          // Slate 900
+        $gray = imagecolorallocate($im, 100, 116, 139);       // Slate 500
         $lightBorder = imagecolorallocate($im, 226, 232, 240); // Slate 200
         $white = imagecolorallocate($im, 255, 255, 255);
 
@@ -406,46 +618,57 @@ class PdfCoverService
 
         // แถบสี Deep Academic Navy ด้านบน
         imagefilledrectangle($im, 20, 20, $width - 21, 95, $navy);
-
-        // ป้ายประเภทเอกสาร Amber
-        imagefilledrectangle($im, 35, 35, 190, 65, $amber);
-
-        // ข้อความบนแถบ Header
-        $typeLabel = $metadata['type'] ?? 'เอกสารงานวิจัย';
-        $codeLabel = $metadata['code'] ?? 'PCRU-RDB';
-        imagestring($im, 4, 45, 42, $this->sanitizeAscii($typeLabel, 'RESEARCH'), $white);
-        imagestring($im, 3, 210, 44, 'PCRU RESEARCH DATABASE', $white);
-        imagestring($im, 2, 210, 62, $this->sanitizeAscii($codeLabel, 'DOCUMENT'), $gray);
+        imagefilledrectangle($im, 35, 35, 215, 68, $amber);
 
         // วาดการ์ดเนื้อหาตรงกลาง
         imagefilledrectangle($im, 40, 130, $width - 41, $height - 120, $white);
         imagerectangle($im, 40, 130, $width - 41, $height - 120, $lightBorder);
-
-        // แถบตกแต่งซ้าย
         imagefilledrectangle($im, 40, 130, 48, $height - 120, $navy);
 
-        // ข้อความชื่อเรื่อง (Wrap 35 ตัวอักษร)
+        $ttfFont = $this->resolveThaiTtfFont();
+        $typeLabel = $metadata['type'] ?? 'เอกสารงานวิจัย';
+        $codeLabel = $metadata['code'] ?? 'PCRU-RDB';
         $rawTitle = $metadata['title'] ?? 'Research Report / Published Article';
-        $lines = explode("\n", wordwrap($this->sanitizeAscii($rawTitle, 'RESEARCH DOCUMENT'), 36, "\n", true));
-        $startY = 170;
-        imagestring($im, 3, 65, $startY - 25, 'DOCUMENT TITLE:', $amber);
-        foreach (array_slice($lines, 0, 7) as $idx => $line) {
-            imagestring($im, 5, 65, $startY + ($idx * 26), $line, $dark);
+        $author = $metadata['author'] ?? 'นักวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์';
+        $dept = $metadata['department'] ?? 'มหาวิทยาลัยราชภัฏเพชรบูรณ์';
+        $year = $metadata['year'] ?? ('ปีงบประมาณ พ.ศ. ' . (date('Y') + 543));
+
+        if ($ttfFont && function_exists('imagettftext')) {
+            @imagettftext($im, 11, 0, 45, 57, $white, $ttfFont, $typeLabel);
+            @imagettftext($im, 12, 0, 230, 50, $white, $ttfFont, 'PCRU RESEARCH DATABASE');
+            @imagettftext($im, 10, 0, 230, 72, $lightBorder, $ttfFont, $codeLabel);
+
+            @imagettftext($im, 11, 0, 65, 165, $amber, $ttfFont, 'ชื่อผลงานวิจัย / บทความวิชาการ:');
+            $wrappedLines = $this->wrapUtf8Text($rawTitle, 38);
+            foreach (array_slice($wrappedLines, 0, 7) as $idx => $line) {
+                @imagettftext($im, 14, 0, 65, 200 + ($idx * 30), $dark, $ttfFont, $line);
+            }
+
+            @imagettftext($im, 10, 0, 65, 440, $gray, $ttfFont, 'ผู้วิจัย / เจ้าของผลงาน:');
+            @imagettftext($im, 13, 0, 65, 466, $navy, $ttfFont, $author);
+
+            @imagettftext($im, 10, 0, 65, 520, $gray, $ttfFont, 'หน่วยงานและปีงบประมาณ:');
+            @imagettftext($im, 12, 0, 65, 546, $dark, $ttfFont, $dept);
+            @imagettftext($im, 12, 0, 65, 574, $amber, $ttfFont, $year);
+        } else {
+            imagestring($im, 4, 45, 42, $this->sanitizeAscii($typeLabel, 'RESEARCH'), $white);
+            imagestring($im, 3, 225, 44, 'PCRU RESEARCH DATABASE', $white);
+            imagestring($im, 2, 225, 62, $this->sanitizeAscii($codeLabel, 'DOCUMENT'), $gray);
+
+            $lines = explode("\n", wordwrap($this->sanitizeAscii($rawTitle, 'RESEARCH DOCUMENT'), 36, "\n", true));
+            $startY = 170;
+            imagestring($im, 3, 65, $startY - 25, 'DOCUMENT TITLE:', $amber);
+            foreach (array_slice($lines, 0, 7) as $idx => $line) {
+                imagestring($im, 5, 65, $startY + ($idx * 26), $line, $dark);
+            }
+
+            imagestring($im, 3, 65, 400, 'AUTHOR / RESEARCHER:', $gray);
+            imagestring($im, 4, 65, 422, $this->sanitizeAscii($author, 'Researcher PCRU'), $navy);
+
+            imagestring($im, 3, 65, 480, 'INSTITUTION & FISCAL YEAR:', $gray);
+            imagestring($im, 4, 65, 502, $this->sanitizeAscii($dept, 'Phetchabun Rajabhat University'), $dark);
+            imagestring($im, 3, 65, 525, $this->sanitizeAscii($year, 'Fiscal Year ' . (date('Y') + 543)), $amber);
         }
-
-        // ข้อมูลผู้เขียน/นักวิจัย
-        $authorY = 400;
-        imagestring($im, 3, 65, $authorY, 'AUTHOR / RESEARCHER:', $gray);
-        $author = $metadata['author'] ?? 'Faculty Researcher';
-        imagestring($im, 4, 65, $authorY + 22, $this->sanitizeAscii($author, 'Researcher PCRU'), $navy);
-
-        // ข้อมูลหน่วยงานและปี
-        $metaY = 480;
-        imagestring($im, 3, 65, $metaY, 'INSTITUTION & FISCAL YEAR:', $gray);
-        $dept = $metadata['department'] ?? 'Phetchabun Rajabhat University';
-        $year = $metadata['year'] ?? date('Y');
-        imagestring($im, 4, 65, $metaY + 22, $this->sanitizeAscii($dept, 'Phetchabun Rajabhat University'), $dark);
-        imagestring($im, 3, 65, $metaY + 45, $this->sanitizeAscii($year, 'Fiscal Year ' . (date('Y') + 543)), $amber);
 
         // ป้ายสัญลักษณ์ด้านล่าง
         imagefilledrectangle($im, 20, $height - 80, $width - 21, $height - 21, $navy);
@@ -456,6 +679,63 @@ class PdfCoverService
         imagedestroy($im);
 
         return $saved && file_exists($targetWebpPath);
+    }
+
+    /**
+     * ค้นหาไฟล์ฟอนต์ภาษาไทย (.ttf) บนระบบสำหรับ GD Fallback
+     */
+    protected function resolveThaiTtfFont(): ?string
+    {
+        $candidates = [
+            'C:\Windows\Fonts\tahoma.ttf',
+            'C:\Windows\Fonts\leelawui.ttf',
+            'C:\Windows\Fonts\angsana.ttc',
+            '/usr/share/fonts/truetype/tlwg/Garuda.ttf',
+            '/usr/share/fonts/truetype/tlwg/Loma.ttf',
+            '/usr/share/fonts/truetype/noto/NotoSansThai-Regular.ttf',
+            '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+        ];
+        foreach ($candidates as $font) {
+            if (file_exists($font)) {
+                return $font;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * ตัดบรรทัดข้อความภาษาไทย/อังกฤษแบบ UTF-8
+     */
+    protected function wrapUtf8Text(string $text, int $maxCharsPerLine = 38): array
+    {
+        $text = trim(preg_replace('/\s+/u', ' ', $text));
+        if ($text === '') {
+            return ['เอกสารงานวิจัย'];
+        }
+        $words = preg_split('/(\s+)/u', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+        $lines = [];
+        $current = '';
+
+        foreach ($words as $part) {
+            if (mb_strlen($current . $part, 'UTF-8') <= $maxCharsPerLine) {
+                $current .= $part;
+            } else {
+                if (trim($current) !== '') {
+                    $lines[] = trim($current);
+                    $current = '';
+                }
+                while (mb_strlen($part, 'UTF-8') > $maxCharsPerLine) {
+                    $lines[] = mb_substr($part, 0, $maxCharsPerLine, 'UTF-8');
+                    $part = mb_substr($part, $maxCharsPerLine, null, 'UTF-8');
+                }
+                $current = ltrim($part);
+            }
+        }
+        if (trim($current) !== '') {
+            $lines[] = trim($current);
+        }
+
+        return $lines ?: [$text];
     }
 
     /**
@@ -512,7 +792,6 @@ class PdfCoverService
         if (empty($str)) {
             return $fallback;
         }
-        // แปลง UTF-8 ภาษาไทย หรืออักขระพิเศษเป็นข้อความที่อ่านได้
         $clean = preg_replace('/[^\x20-\x7E]/', '', $str);
         if (strlen(trim($clean)) < 3) {
             return $fallback ?: 'RESEARCH DOCUMENT';
