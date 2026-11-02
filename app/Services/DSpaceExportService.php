@@ -790,9 +790,16 @@ class DSpaceExportService
         }
 
         // Tier 2: Smalot\PdfParser - High-precision object parser (parses compressed cross-references & Page trees)
-        if (class_exists(\Smalot\PdfParser\Parser::class)) {
+        if (class_exists(\Smalot\PdfParser\Parser::class) && @filesize($filePath) <= 10485760) {
+            $parser = null;
+            $pdf = null;
+            $pages = null;
             try {
-                $parser = new \Smalot\PdfParser\Parser();
+                $config = new \Smalot\PdfParser\Config();
+                $config->setRetainImageContent(false); // ประหยัดหน่วยความจำ ไม่เก็บเนื้อไฟล์รูปภาพขณะนับหน้า
+                $config->setDecodeMemoryLimit(8 * 1024 * 1024);
+
+                $parser = new \Smalot\PdfParser\Parser([], $config);
                 $pdf = $parser->parseFile($filePath);
 
                 // 2.1 Page object collection count
@@ -808,6 +815,9 @@ class DSpaceExportService
                 }
             } catch (\Throwable $e) {
                 // Parser threw exception (e.g. encrypted or non-standard syntax), proceed to Tier 3/4
+            } finally {
+                unset($pages, $pdf, $parser);
+                gc_collect_cycles();
             }
         }
 

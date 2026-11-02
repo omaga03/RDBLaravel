@@ -28,6 +28,9 @@ class GeneratePdfCoversCommand extends Command
 
     public function handle(PdfCoverService $coverService): int
     {
+        @ini_set('memory_limit', '1024M');
+        @set_time_limit(0);
+
         $module = strtolower($this->option('module') ?: 'all');
         $force = (bool)$this->option('force');
         $limit = $this->option('limit') ? (int)$this->option('limit') : null;
@@ -61,7 +64,8 @@ class GeneratePdfCoversCommand extends Command
     {
         $this->info(">> Processing Research Projects (rdb_project)...");
 
-        $query = RdbProject::where('data_show', 1)
+        $query = RdbProject::with(['year', 'department'])
+            ->where('data_show', 1)
             ->where(function ($q) {
                 $q->where('pro_file_show', 0)
                   ->orWhere('pro_file_show', '0');
@@ -79,11 +83,11 @@ class GeneratePdfCoversCommand extends Command
             });
         }
 
-        if ($limit) {
-            $query->limit($limit);
+        $total = $query->count();
+        if ($limit && $total > $limit) {
+            $total = $limit;
         }
 
-        $total = $query->count();
         if ($total === 0) {
             $this->line("   No projects need cover generation.");
             return;
@@ -94,18 +98,27 @@ class GeneratePdfCoversCommand extends Command
 
         $success = 0;
         $failed = 0;
+        $processed = 0;
 
-        $query->chunk(50, function ($projects) use ($coverService, $force, $bar, &$success, &$failed) {
+        $query->chunkById(50, function ($projects) use ($coverService, $force, $limit, $bar, &$success, &$failed, &$processed) {
             foreach ($projects as $project) {
+                if ($limit && $processed >= $limit) {
+                    return false;
+                }
                 $path = $coverService->generateProjectCover($project, $force);
                 if ($path) {
                     $success++;
                 } else {
                     $failed++;
                 }
+                $processed++;
                 $bar->advance();
             }
-        });
+            gc_collect_cycles();
+            if ($limit && $processed >= $limit) {
+                return false;
+            }
+        }, 'pro_id');
 
         $bar->finish();
         $this->newLine();
@@ -117,7 +130,8 @@ class GeneratePdfCoversCommand extends Command
     {
         $this->info(">> Processing Published Articles (rdb_published)...");
 
-        $query = RdbPublished::where('data_show', 1)
+        $query = RdbPublished::with(['year', 'department', 'pubtype'])
+            ->where('data_show', 1)
             ->where(function ($q) {
                 $q->whereNotNull('pf_path')->where('pf_path', '<>', '')
                   ->orWhere(function ($q2) {
@@ -131,11 +145,11 @@ class GeneratePdfCoversCommand extends Command
             });
         }
 
-        if ($limit) {
-            $query->limit($limit);
+        $total = $query->count();
+        if ($limit && $total > $limit) {
+            $total = $limit;
         }
 
-        $total = $query->count();
         if ($total === 0) {
             $this->line("   No published articles need cover generation.");
             return;
@@ -146,18 +160,27 @@ class GeneratePdfCoversCommand extends Command
 
         $success = 0;
         $failed = 0;
+        $processed = 0;
 
-        $query->chunk(50, function ($items) use ($coverService, $force, $bar, &$success, &$failed) {
+        $query->chunkById(50, function ($items) use ($coverService, $force, $limit, $bar, &$success, &$failed, &$processed) {
             foreach ($items as $item) {
+                if ($limit && $processed >= $limit) {
+                    return false;
+                }
                 $path = $coverService->generatePublishedCover($item, $force);
                 if ($path) {
                     $success++;
                 } else {
                     $failed++;
                 }
+                $processed++;
                 $bar->advance();
             }
-        });
+            gc_collect_cycles();
+            if ($limit && $processed >= $limit) {
+                return false;
+            }
+        }, 'id');
 
         $bar->finish();
         $this->newLine();

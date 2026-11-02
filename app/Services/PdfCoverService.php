@@ -11,6 +11,10 @@ use Illuminate\Support\Str;
 class PdfCoverService
 {
     protected DSpaceExportService $dspaceService;
+    protected bool $pdftoppmChecked = false;
+    protected ?string $cachedPdftoppm = null;
+    protected bool $ghostscriptChecked = false;
+    protected ?string $cachedGhostscript = null;
 
     public function __construct(DSpaceExportService $dspaceService)
     {
@@ -18,13 +22,18 @@ class PdfCoverService
     }
 
     /**
-     * ดึงหรือค้นหาไบนารี pdftoppm บนระบบ (Poppler CLI)
+     * ดึงหรือค้นหาไบนารี pdftoppm บนระบบ (Poppler CLI) พร้อมแคชผลลัพธ์ในหน่วยความจำ
      */
     public function getPdftoppmBinary(): ?string
     {
+        if ($this->pdftoppmChecked) {
+            return $this->cachedPdftoppm;
+        }
+        $this->pdftoppmChecked = true;
+
         $custom = env('PDFTOPPM_PATH');
         if (!empty($custom) && file_exists($custom)) {
-            return $custom;
+            return $this->cachedPdftoppm = $custom;
         }
 
         $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
@@ -37,15 +46,17 @@ class PdfCoverService
             if (!empty($lines)) {
                 $first = reset($lines);
                 if (file_exists($first)) {
-                    return $first;
+                    return $this->cachedPdftoppm = $first;
                 }
-                return 'pdftoppm';
+                return $this->cachedPdftoppm = 'pdftoppm';
             }
         }
 
         // 2. ตรวจสอบพาธมาตรฐานใน Windows (Laragon / Git / Poppler)
         if ($isWindows) {
             $candidates = [
+                'F:\laragon\bin\poppler\bin\pdftoppm.exe',
+                'F:\laragon\bin\git\mingw64\bin\pdftoppm.exe',
                 'C:\laragon\bin\poppler\bin\pdftoppm.exe',
                 'C:\laragon\bin\git\mingw64\bin\pdftoppm.exe',
                 'C:\Program Files\Git\mingw64\bin\pdftoppm.exe',
@@ -55,7 +66,7 @@ class PdfCoverService
             ];
             foreach ($candidates as $cand) {
                 if (file_exists($cand)) {
-                    return $cand;
+                    return $this->cachedPdftoppm = $cand;
                 }
             }
         }
@@ -68,11 +79,11 @@ class PdfCoverService
         ];
         foreach ($linuxCandidates as $cand) {
             if (file_exists($cand)) {
-                return $cand;
+                return $this->cachedPdftoppm = $cand;
             }
         }
 
-        return null;
+        return $this->cachedPdftoppm = null;
     }
 
     /**
@@ -271,19 +282,24 @@ class PdfCoverService
     }
 
     /**
-     * Tier 3: Ghostscript CLI
+     * Tier 3: Ghostscript CLI (พร้อมแคชผลลัพธ์การค้นหาไบนารี)
      */
     protected function extractViaGhostscript(string $pdfPath, string $targetWebpPath): bool
     {
-        $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
-        $gsCmd = $isWindows ? 'gswin64c' : 'gs';
-        $test = @shell_exec($isWindows ? "where $gsCmd 2>nul" : "which $gsCmd 2>/dev/null");
-        if (empty($test)) {
+        if (!$this->ghostscriptChecked) {
+            $this->ghostscriptChecked = true;
+            $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+            $gsCmd = $isWindows ? 'gswin64c' : 'gs';
+            $test = @shell_exec($isWindows ? "where $gsCmd 2>nul" : "which $gsCmd 2>/dev/null");
+            $this->cachedGhostscript = !empty($test) ? trim(explode("\n", trim($test))[0]) : null;
+        }
+
+        if (!$this->cachedGhostscript) {
             return false;
         }
 
         $tempPng = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'gs_cover_' . uniqid() . '.png';
-        $cmd = escapeshellarg(trim($gsCmd)) . " -sDEVICE=png16m -dFirstPage=1 -dLastPage=1 -r150 -o " . escapeshellarg($tempPng) . " " . escapeshellarg($pdfPath);
+        $cmd = escapeshellarg($this->cachedGhostscript) . " -sDEVICE=png16m -dFirstPage=1 -dLastPage=1 -r150 -o " . escapeshellarg($tempPng) . " " . escapeshellarg($pdfPath);
         @exec($cmd, $out, $ret);
 
         if (file_exists($tempPng) && filesize($tempPng) > 0) {
@@ -296,48 +312,55 @@ class PdfCoverService
     }
 
     /**
-     * Tier 4: ดึงภาพที่ฝังอยู่ในหน้าแรกผ่าน Smalot\PdfParser
+     * Tier 4: ดึงภาพที่ฝังอยู่ในหน้าแรกด้วย Fast Binary Stream Scan (DCTDecode JPEG)
+     * ทำงานระดับมิลลิวินาทีโดยไม่ใช้ Smalot\PdfParser เพื่อป้องกันปัญหา Font CMap / Stream Memory Exhausted 100%
      */
     protected function extractViaPdfParserEmbeddedImage(string $pdfPath, string $targetWebpPath): bool
     {
-        if (!class_exists('\Smalot\PdfParser\Parser')) {
+        if (!is_file($pdfPath) || !is_readable($pdfPath)) {
             return false;
         }
 
-        try {
-            $parser = new \Smalot\PdfParser\Parser();
-            $pdf = $parser->parseFile($pdfPath);
-            $pages = $pdf->getPages();
-            if (empty($pages)) {
-                return false;
-            }
+        $fileSize = @filesize($pdfPath);
+        if (!$fileSize || $fileSize <= 0) {
+            return false;
+        }
 
-            $firstPage = $pages[0];
-            $images = $firstPage->getXObjects();
+        // สแกนหาภาพ JPEG (DCTDecode) ในช่วง 1.5 MB แรกของไฟล์ PDF ด้วย strpos (ความเร็วสูง ไม่กิน RAM)
+        $chunk = @file_get_contents($pdfPath, false, null, 0, 1572864);
+        if ($chunk !== false) {
+            $offset = 0;
+            $attempts = 0;
+            while ($attempts < 5 && ($jpegStart = strpos($chunk, "\xFF\xD8\xFF", $offset)) !== false) {
+                $attempts++;
+                $jpegEnd = strpos($chunk, "\xFF\xD9", $jpegStart + 2048);
+                if ($jpegEnd === false) {
+                    break;
+                }
+                $length = ($jpegEnd - $jpegStart) + 2;
+                $offset = $jpegEnd + 2;
 
-            foreach ($images as $xobj) {
-                if (method_exists($xobj, 'getHeader') && method_exists($xobj, 'getContent')) {
-                    $header = $xobj->getHeader();
-                    if ($header && (string)$header->get('Subtype') === 'Image') {
-                        $content = $xobj->getContent();
-                        if (!empty($content)) {
-                            $gdImg = @imagecreatefromstring($content);
-                            if ($gdImg) {
-                                if (function_exists('imagewebp')) {
-                                    $saved = imagewebp($gdImg, $targetWebpPath, 85);
-                                    imagedestroy($gdImg);
-                                    if ($saved && file_exists($targetWebpPath)) {
-                                        return true;
-                                    }
-                                }
-                                imagedestroy($gdImg);
+                if ($length >= 2048 && $length <= 1200000) {
+                    $jpegBytes = substr($chunk, $jpegStart, $length);
+                    $gdImg = @imagecreatefromstring($jpegBytes);
+                    unset($jpegBytes);
+                    if ($gdImg) {
+                        $w = imagesx($gdImg);
+                        $h = imagesy($gdImg);
+                        if ($w >= 180 && $h >= 180 && function_exists('imagewebp')) {
+                            $saved = @imagewebp($gdImg, $targetWebpPath, 85);
+                            imagedestroy($gdImg);
+                            if ($saved && file_exists($targetWebpPath) && filesize($targetWebpPath) > 0) {
+                                unset($chunk);
+                                return true;
                             }
+                        } else {
+                            imagedestroy($gdImg);
                         }
                     }
                 }
             }
-        } catch (\Throwable $e) {
-            Log::debug('PdfParser embedded image extraction skipped: ' . $e->getMessage());
+            unset($chunk);
         }
 
         return false;
