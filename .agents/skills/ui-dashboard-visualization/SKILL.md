@@ -16,14 +16,21 @@ Use this skill whenever designing, building, redesigning, or critiquing dashboar
    - หนึ่งหน้าจอต้องตอบคำถามหลักได้ทันทีโดยไม่ต้องเลื่อนเมาส์ (เช่น *"ปีงบประมาณนี้มีผลงานวิจัยและงบประมาณเท่าไร เติบโตจากปีก่อนหรือไม่ และมีงานใดรอตรวจอนุมัติ?"*)
    - ลำดับสายตา (Visual Hierarchy): `Header & Fiscal Year Filter` → `KPI Cards / Strip` → `Main Trend Chart` → `Ranked Breakdowns (คณะ/แหล่งทุน/วารสาร)` → `Actionable Queues`
 2. **Quiet & Colour Follows the Entity (สงบ สุขุม ใช้สีตามความหมายของข้อมูล)**:
-   - **การ์ดและกรอบต้องมีสีพื้นจาง ๆ (Subtle Tinted Surface)**: หากใช้สีขาวล้วนหรือดำเรียบเสมอกันทุกการ์ด การ์ดจะดูกลืนกันไปหมดและขาดมิติ (Visual Separation) ให้ผสมผสาน **เส้นขอบบน 3px Hairline** ควบคู่กับ **สีพื้นหลังจาง ๆ 4% ใน Light Mode (`rgba(..., 0.04)`) หรือ 8% ใน Dark Mode (`rgba(..., 0.08)`)** ตามเฉดสีประจำโมดูล:
-     - **โครงการวิจัย (Projects)**: Royal Blue `#2563EB` → `background-color: rgba(37, 99, 235, 0.04);`
-     - **งบประมาณ (Budget)**: Academic Emerald `#059669` → `background-color: rgba(5, 150, 105, 0.04);`
-     - **ผลงานตีพิมพ์ (Publications)**: Scholarly Teal `#0D9488` → `background-color: rgba(13, 148, 136, 0.04);`
-     - **นักวิจัยและกำลังคน (Researchers)**: Deep Indigo `#4F46E5` → `background-color: rgba(79, 70, 229, 0.04);`
-     - **ทรัพย์สินทางปัญญา (IP / DIP)**: Citation Amber `#D97706` → `background-color: rgba(217, 119, 6, 0.04);`
-     - **การใช้ประโยชน์ (Utilization)**: Crimson Coral `#DC2626` → `background-color: rgba(220, 38, 38, 0.04);`
-     - **ข่าวสารและการประชุม (News & Conf)**: Slate Grey `#64748B` → `background-color: rgba(100, 116, 139, 0.04);`
+   - **การ์ดและกรอบต้องมีสีพื้นจางตามโทนหมวดหมู่ (Calibrated Dual-Mode Tinted Surfaces)**:
+     - หากใช้สีขาวล้วนหรือดำเรียบเสมอกันทุกการ์ด การ์ดจะดูกลืนกันไปหมดและขาดมิติ (Visual Separation)
+     - แต่หากใช้ค่าความทึบแสงต่ำเกินไป (เช่น 4%) โดยเฉพาะใน **Dark Mode** จะมองไม่เห็นสีพื้นเลย
+     - จึงกำหนดให้ใช้ระบบคลาสมาตรฐาน `.rdb-card-tint-*` ซึ่งมีการปรับระดับความทึบแสงให้เหมาะสมกับแต่ละโหมดอัตโนมัติ:
+       - **Light Mode**: ความทึบแสง ~8% (`rgba(..., 0.08)`) คู่กับเส้นขอบบน 3px คมชัด
+       - **Dark Mode**: ความทึบแสง ~18% (`rgba(..., 0.18)`) พร้อมเส้นขอบบางสีเข้าคู่ (`rgba(..., 0.35)`) เพื่อให้โทนอัญมณี (Jewel Tones) เปล่งประกายและแยกแยะหมวดหมู่ออกจากผืนผ้าใบมืดได้อย่างชัดเจนทันทีที่มอง
+     - **ตารางคลาสมาตรฐานของระบบ**:
+       - **โครงการวิจัย (Projects)**: `.rdb-card-tint-blue` (Royal Blue `#2563EB`)
+       - **งบประมาณ (Budget)**: `.rdb-card-tint-green` (Emerald `#059669`)
+       - **ผลงานตีพิมพ์ (Publications)**: `.rdb-card-tint-teal` (Scholarly Teal `#0D9488`)
+       - **นักวิจัยและกำลังคน (Researchers)**: `.rdb-card-tint-indigo` (Deep Indigo `#4F46E5`) หรือ `.rdb-card-tint-emerald` (`#10B981`)
+       - **ทรัพย์สินทางปัญญา (IP / DIP)**: `.rdb-card-tint-amber` (Citation Amber `#D97706`)
+       - **การใช้ประโยชน์ (Utilization)**: `.rdb-card-tint-red` (Crimson Coral `#DC2626`)
+       - **ข่าวสารและการประชุม (News & Conf)**: `.rdb-card-tint-slate` (Slate Grey `#64748B`)
+       - **มิติอื่น ๆ / ทุนวิจัย**: `.rdb-card-tint-purple` (Royal Purple `#7C3AED`)
 3. **Wordless (กระชับ ไม่เขียนประโยคเยิ่นเย้อใต้ตัวเลข)**:
    - บนการ์ดแสดงเฉพาะ **ชื่อตัวชี้วัด**, **ตัวเลขหลัก (`tabular-nums`)**, **หน่วยนับ**, และ **ค่าเปรียบเทียบสั้นๆ (1–2 คำ)** เช่น `▲ +14.2% จากปี 2568`
    - คำอธิบายยาวๆ หรือสูตรคำนวณให้ใส่ไว้ใน `title` / Bootstrap Tooltip เท่านั้น
@@ -61,12 +68,12 @@ Use this skill whenever designing, building, redesigning, or critiquing dashboar
 </div>
 ```
 
-### 2.2 Analytical KPI Card with Honest YoY Delta & Subtle Tint (สำหรับหน้า Intelligence Dashboard)
-ใช้เส้นขอบบน `3px` และสีพื้นหลังจาง ๆ `rgba(..., 0.04)` พร้อมป้ายเปรียบเทียบปีงบประมาณก่อนหน้า (Delta Badge) ครบทุกมิติ:
+### 2.2 Analytical KPI Card with Honest YoY Delta & Calibrated Tint (สำหรับหน้า Intelligence Dashboard)
+ใช้คลาสมาตรฐาน `.rdb-card-tint-*` (มีเส้นขอบบน `3px` และสีพื้นหลังที่ปรับระดับตาม Light/Dark mode อัตโนมัติ) พร้อมป้ายเปรียบเทียบปีงบประมาณก่อนหน้า (Delta Badge) ครบทุกมิติ:
 
 ```blade
-<div class="card shadow-sm border h-100 position-relative overflow-hidden hover-card" 
-     style="border-top: 3px solid #2563EB !important; background-color: rgba(37, 99, 235, 0.04); border-radius: var(--rdb-radius-md) !important;">
+<div class="card shadow-sm border h-100 position-relative overflow-hidden hover-card rdb-card-tint-blue" 
+     style="border-radius: var(--rdb-radius-md) !important;">
     <div class="card-body p-3.5 d-flex flex-column justify-content-between position-relative" style="z-index: 1;">
         <div>
             <div class="d-flex align-items-center justify-content-between mb-2">

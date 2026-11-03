@@ -62,8 +62,8 @@
     <div class="row g-3 mb-4">
         <!-- 1. QA Publications Weighted Score & Score 5 -->
         <div class="col-xl-3 col-md-6">
-            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card" 
-                 style="border-top: 3px solid #2563EB !important; background-color: rgba(37, 99, 235, 0.04); border-radius: var(--rdb-radius-md) !important;">
+            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card rdb-card-tint-blue" 
+                 style="border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5 d-flex flex-column justify-content-between">
                     <div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -83,7 +83,7 @@
 
         <!-- 2. Avg Research Budget per Personnel & Score 5 -->
         <div class="col-xl-3 col-md-6">
-            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #059669 !important; background-color: rgba(5, 150, 105, 0.04); border-radius: var(--rdb-radius-md) !important;">
+            <div class="card h-100 border shadow-sm rdb-card-tint-green" style="border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5 d-flex flex-column justify-content-between">
                     <div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -103,7 +103,7 @@
 
         <!-- 3. QA Certified Utilizations -->
         <div class="col-xl-3 col-md-6">
-            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #DC2626 !important; background-color: rgba(220, 38, 38, 0.04); border-radius: var(--rdb-radius-md) !important;">
+            <div class="card h-100 border shadow-sm rdb-card-tint-red" style="border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-danger small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-patch-check-fill text-danger me-1"></i> ใช้ประโยชน์ผ่านเกณฑ์ QA
@@ -116,7 +116,7 @@
 
         <!-- 4. First-time Grantee Researchers -->
         <div class="col-xl-3 col-md-6">
-            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #4F46E5 !important; background-color: rgba(79, 70, 229, 0.04); border-radius: var(--rdb-radius-md) !important;">
+            <div class="card h-100 border shadow-sm rdb-card-tint-indigo" style="border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-primary small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-person-plus-fill text-primary me-1"></i> นักวิจัยรับทุนครั้งแรก

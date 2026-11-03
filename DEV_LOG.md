@@ -182,7 +182,19 @@
 - **เมนูแถบข้างด้านซ้าย (Backend Sidebar)**:
   - ย้ายเมนู "แดชบอร์ดภาพรวม" ออกจากส่วนเมนูด้านซ้าย และลบปุ่ม "ไปหน้าบ้าน (Public Portal)" ที่ส่วนท้ายด้านล่างของ Sidebar เพื่อลดความซ้ำซ้อนและเพิ่มพื้นที่ใช้งาน
 
-#### 7. การทดสอบและการรับประกันคุณภาพ (Automated Test Assurance)
+#### 7. ปรับระดับความคมชัดของสีพื้นหลังการ์ด (Calibrated Jewel Tint) และแก้ไข Hover ปุ่มนำทาง
+- **แก้ปัญหาปุ่มนำทาง "เปิดดูหน้าบ้าน" ตัวอักษรกลืนเป็นสีขาวเมื่อเมาส์ชี้ (Hover Whiteout Fix)**:
+  - สร้างคลาสเฉพาะ `.rdb-nav-portal-btn` และ `.rdb-nav-btn-active` แทนการใช้ `btn-outline-light text-white`
+  - เมื่อนำเมาส์ไปชี้ (Hover) พื้นหลังจะเป็นสีขาวทึบ `#ffffff` พร้อมตัวอักษรและไอคอนสีน้ำเงินเข้มวิชาการ `#0F172A` อย่างคมชัด ไม่เกิดปัญหาข้อความสีขาวกลืนกับพื้นหลังขาวอีกต่อไป
+- **ยกระดับความชัดเจนของสีพื้นหลังการ์ดใน Dark Mode (`.rdb-card-tint-*`)**:
+  - เปลี่ยนจากการฮาร์ดโค้ด `background-color: rgba(..., 0.04)` แบบเดิมที่จางเกินไปใน Dark Mode จนมองไม่ออก
+  - สร้างชุดคลาสมาตรฐาน `.rdb-card-tint-blue`, `.rdb-card-tint-green`, `.rdb-card-tint-emerald`, `.rdb-card-tint-teal`, `.rdb-card-tint-indigo`, `.rdb-card-tint-amber`, `.rdb-card-tint-red`, `.rdb-card-tint-slate`, `.rdb-card-tint-purple`
+  - **Dark Mode**: เพิ่มความทึบแสงของสีพื้นหลังเป็น 18% (`rgba(..., 0.18)`) พร้อมเส้นขอบ 1px สีเข้าคู่ (`rgba(..., 0.35)`) และเส้นขอบบน 3px ทำให้โทนสีอัญมณีของแต่ละหมวดแยกออกจากพื้นหลังสีเข้มได้อย่างชัดเจนทันที
+  - **Light Mode**: ความทึบแสง 8% (`rgba(..., 0.08)`) สุขุม อ่านง่ายระดับวิชาการ
+  - นำไปปรับใช้กับการ์ด KPI ทุกใบทั้งหน้าบ้านและหลังบ้าน: แดชบอร์ดหลังบ้าน (`/backend`), หน้าภาพรวม (`/dashboard/overview`), โครงการวิจัย (`projects`), ผลงานตีพิมพ์ (`publications`), ทรัพย์สินทางปัญญา (`ip`), นักวิจัย (`researchers`), การใช้ประโยชน์ (`utilizations`) และมาตรฐานคุณภาพ (`qa`)
+- **อัปเดต Skill [`.agents/skills/ui-dashboard-visualization/SKILL.md`](.agents/skills/ui-dashboard-visualization/SKILL.md)**: บันทึกมาตรฐาน `.rdb-card-tint-*` และเกณฑ์ความทึบแสง 2 โหมด
+
+#### 8. การทดสอบและการรับประกันคุณภาพ (Automated Test Assurance)
 - `php artisan test --filter="DspaceBatchExportTest"`: ผ่าน **15/15 tests (51 assertions)**
 - `php artisan test --filter=BackendAuditTest`: ผ่าน **47/47 tests (421 assertions)**
 - รวมผ่านการทดสอบ 100% ไม่มีข้อผิดพลาดตกค้าง

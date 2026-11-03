@@ -498,6 +498,160 @@
             box-shadow: 0 4px 14px rgba(37, 99, 235, 0.5);
         }
 
+        /* Backend Topbar Quick Nav Buttons */
+        .rdb-nav-portal-btn {
+            color: #ffffff !important;
+            border: 1px solid rgba(255, 255, 255, 0.45) !important;
+            background-color: rgba(255, 255, 255, 0.1) !important;
+            transition: all 0.2s ease-in-out !important;
+        }
+        .rdb-nav-portal-btn i {
+            color: #ffffff !important;
+            transition: color 0.2s ease-in-out !important;
+        }
+        .rdb-nav-portal-btn:hover {
+            color: #0F172A !important;
+            background-color: #ffffff !important;
+            border-color: #ffffff !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+        }
+        .rdb-nav-portal-btn:hover i {
+            color: #0F172A !important;
+        }
+        .rdb-nav-btn-active {
+            color: #0F172A !important;
+            background-color: #ffffff !important;
+            border: 1px solid #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+        }
+        .rdb-nav-btn-active i {
+            color: #2563EB !important;
+        }
+
+        /* ==========================================================================
+           RDB Dashboard Tinted Academic Cards (Light & Dark Mode Calibrated)
+           ========================================================================== */
+        .rdb-card-tint-blue {
+            border-top: 3px solid #2563EB !important;
+            border-color: rgba(37, 99, 235, 0.25) !important;
+            background-color: rgba(37, 99, 235, 0.08) !important;
+        }
+        .rdb-card-tint-green {
+            border-top: 3px solid #059669 !important;
+            border-color: rgba(5, 150, 105, 0.25) !important;
+            background-color: rgba(5, 150, 105, 0.08) !important;
+        }
+        .rdb-card-tint-emerald {
+            border-top: 3px solid #10B981 !important;
+            border-color: rgba(16, 185, 129, 0.25) !important;
+            background-color: rgba(16, 185, 129, 0.08) !important;
+        }
+        .rdb-card-tint-teal {
+            border-top: 3px solid #0D9488 !important;
+            border-color: rgba(13, 148, 136, 0.25) !important;
+            background-color: rgba(13, 148, 136, 0.08) !important;
+        }
+        .rdb-card-tint-indigo {
+            border-top: 3px solid #4F46E5 !important;
+            border-color: rgba(79, 70, 229, 0.25) !important;
+            background-color: rgba(79, 70, 229, 0.08) !important;
+        }
+        .rdb-card-tint-amber {
+            border-top: 3px solid #D97706 !important;
+            border-color: rgba(217, 119, 6, 0.3) !important;
+            background-color: rgba(217, 119, 6, 0.09) !important;
+        }
+        .rdb-card-tint-red {
+            border-top: 3px solid #DC2626 !important;
+            border-color: rgba(220, 38, 38, 0.25) !important;
+            background-color: rgba(220, 38, 38, 0.08) !important;
+        }
+        .rdb-card-tint-slate {
+            border-top: 3px solid #64748B !important;
+            border-color: rgba(100, 116, 139, 0.25) !important;
+            background-color: rgba(100, 116, 139, 0.08) !important;
+        }
+        .rdb-card-tint-purple {
+            border-top: 3px solid #7C3AED !important;
+            border-color: rgba(124, 58, 237, 0.25) !important;
+            background-color: rgba(124, 58, 237, 0.08) !important;
+        }
+
+        /* Dark Mode: Vibrant Jewel Tint & Crisp Border on dark background */
+        [data-bs-theme="dark"] .rdb-card-tint-blue {
+            border-color: rgba(59, 130, 246, 0.35) !important;
+            background-color: rgba(37, 99, 235, 0.18) !important;
+        }
+        [data-bs-theme="dark"] .rdb-card-tint-green {
+            border-color: rgba(16, 185, 129, 0.35) !important;
+            background-color: rgba(5, 150, 105, 0.20) !important;
+        }
+        [data-bs-theme="dark"] .rdb-card-tint-emerald {
+            border-color: rgba(52, 211, 153, 0.35) !important;
+            background-color: rgba(16, 185, 129, 0.18) !important;
+        }
+        [data-bs-theme="dark"] .rdb-card-tint-teal {
+            border-color: rgba(45, 212, 191, 0.35) !important;
+            background-color: rgba(13, 148, 136, 0.18) !important;
+        }
+        [data-bs-theme="dark"] .rdb-card-tint-indigo {
+            border-color: rgba(129, 140, 248, 0.35) !important;
+            background-color: rgba(79, 70, 229, 0.20) !important;
+        }
+        [data-bs-theme="dark"] .rdb-card-tint-amber {
+            border-color: rgba(251, 191, 36, 0.38) !important;
+            background-color: rgba(217, 119, 6, 0.20) !important;
+        }
+        [data-bs-theme="dark"] .rdb-card-tint-red {
+            border-color: rgba(248, 113, 113, 0.35) !important;
+            background-color: rgba(220, 38, 38, 0.18) !important;
+        }
+        [data-bs-theme="dark"] .rdb-card-tint-slate {
+            border-color: rgba(148, 163, 184, 0.30) !important;
+            background-color: rgba(100, 116, 139, 0.18) !important;
+        }
+        [data-bs-theme="dark"] .rdb-card-tint-purple {
+            border-color: rgba(167, 139, 250, 0.35) !important;
+            background-color: rgba(124, 58, 237, 0.20) !important;
+        }
+
+        /* Hover interactions */
+        .hover-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease !important;
+        }
+        .hover-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
+        [data-bs-theme="dark"] .hover-card.rdb-card-tint-blue:hover {
+            background-color: rgba(37, 99, 235, 0.25) !important;
+        }
+        [data-bs-theme="dark"] .hover-card.rdb-card-tint-green:hover {
+            background-color: rgba(5, 150, 105, 0.27) !important;
+        }
+        [data-bs-theme="dark"] .hover-card.rdb-card-tint-emerald:hover {
+            background-color: rgba(16, 185, 129, 0.25) !important;
+        }
+        [data-bs-theme="dark"] .hover-card.rdb-card-tint-teal:hover {
+            background-color: rgba(13, 148, 136, 0.25) !important;
+        }
+        [data-bs-theme="dark"] .hover-card.rdb-card-tint-indigo:hover {
+            background-color: rgba(79, 70, 229, 0.27) !important;
+        }
+        [data-bs-theme="dark"] .hover-card.rdb-card-tint-amber:hover {
+            background-color: rgba(217, 119, 6, 0.27) !important;
+        }
+        [data-bs-theme="dark"] .hover-card.rdb-card-tint-red:hover {
+            background-color: rgba(220, 38, 38, 0.25) !important;
+        }
+        [data-bs-theme="dark"] .hover-card.rdb-card-tint-slate:hover {
+            background-color: rgba(100, 116, 139, 0.24) !important;
+        }
+        [data-bs-theme="dark"] .hover-card.rdb-card-tint-purple:hover {
+            background-color: rgba(124, 58, 237, 0.27) !important;
+        }
+
         /* Theme Toggle Button */
         #theme-toggle {
             width: 34px;
@@ -947,7 +1101,7 @@
                 @if(request()->is('backend*'))
                     <div class="d-none d-sm-inline-flex align-items-center gap-1.5 ms-2 ps-2 border-start border-white-50">
                         <a href="{{ route('backend.site.index') }}"
-                           class="btn btn-sm {{ request()->routeIs('backend.site.index') || request()->is('backend') ? 'btn-light text-primary fw-bold shadow-sm' : 'btn-outline-light text-white' }} d-inline-flex align-items-center gap-1.5 py-1 px-2.5 rounded-pill"
+                           class="btn btn-sm {{ request()->routeIs('backend.site.index') || request()->is('backend') ? 'rdb-nav-btn-active' : 'rdb-nav-portal-btn' }} d-inline-flex align-items-center gap-1.5 py-1 px-2.5 rounded-pill"
                            style="font-size: 0.82rem;"
                            title="แดชบอร์ดภาพรวมระบบหลังบ้าน">
                             <i class="bi bi-speedometer2"></i>
@@ -956,7 +1110,7 @@
                         <a href="{{ route('home') }}"
                            target="_blank"
                            rel="noopener noreferrer"
-                           class="btn btn-sm btn-outline-light text-white d-inline-flex align-items-center gap-1.5 py-1 px-2.5 rounded-pill"
+                           class="btn btn-sm rdb-nav-portal-btn d-inline-flex align-items-center gap-1.5 py-1 px-2.5 rounded-pill"
                            style="font-size: 0.82rem;"
                            title="เปิดดูหน้าบ้าน (Public Portal) ในแท็บใหม่">
                             <i class="bi bi-box-arrow-up-right"></i>

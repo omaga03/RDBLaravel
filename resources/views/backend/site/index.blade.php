@@ -67,7 +67,7 @@
     <div class="row g-3 mb-4">
         <!-- 1. Projects -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card shadow-sm border h-100 position-relative overflow-hidden hover-card" style="border-top: 3px solid #2563EB !important; background-color: rgba(37, 99, 235, 0.04);">
+            <div class="card shadow-sm border h-100 position-relative overflow-hidden hover-card rdb-card-tint-blue">
                 <div class="card-body p-3 d-flex flex-column justify-content-between">
                     <div>
                         <div class="d-flex align-items-center justify-content-between mb-1">
@@ -112,7 +112,7 @@
 
         <!-- 2. Researchers -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card shadow-sm border h-100 position-relative overflow-hidden hover-card" style="border-top: 3px solid #10B981 !important; background-color: rgba(16, 185, 129, 0.04);">
+            <div class="card shadow-sm border h-100 position-relative overflow-hidden hover-card rdb-card-tint-emerald">
                 <div class="card-body p-3 d-flex flex-column justify-content-between">
                     <div>
                         <div class="d-flex align-items-center justify-content-between mb-1">
@@ -153,7 +153,7 @@
 
         <!-- 3. Publications -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card shadow-sm border h-100 position-relative overflow-hidden hover-card" style="border-top: 3px solid #0D9488 !important; background-color: rgba(13, 148, 136, 0.04);">
+            <div class="card shadow-sm border h-100 position-relative overflow-hidden hover-card rdb-card-tint-teal">
                 <div class="card-body p-3 d-flex flex-column justify-content-between">
                     <div>
                         <div class="d-flex align-items-center justify-content-between mb-1">
@@ -194,7 +194,7 @@
 
         <!-- 4. Intellectual Property -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card shadow-sm border h-100 position-relative overflow-hidden hover-card" style="border-top: 3px solid #D97706 !important; background-color: rgba(217, 119, 6, 0.04);">
+            <div class="card shadow-sm border h-100 position-relative overflow-hidden hover-card rdb-card-tint-amber">
                 <div class="card-body p-3 d-flex flex-column justify-content-between">
                     <div>
                         <div class="d-flex align-items-center justify-content-between mb-1">
@@ -235,7 +235,7 @@
 
         <!-- 5. Utilization -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card shadow-sm border h-100 position-relative overflow-hidden hover-card" style="border-top: 3px solid #DC2626 !important; background-color: rgba(220, 38, 38, 0.04);">
+            <div class="card shadow-sm border h-100 position-relative overflow-hidden hover-card rdb-card-tint-red">
                 <div class="card-body p-3 d-flex flex-column justify-content-between">
                     <div>
                         <div class="d-flex align-items-center justify-content-between mb-1">
@@ -276,7 +276,7 @@
 
         <!-- 6. News & Conferences -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card shadow-sm border h-100 position-relative overflow-hidden hover-card" style="border-top: 3px solid #64748B !important; background-color: rgba(100, 116, 139, 0.04);">
+            <div class="card shadow-sm border h-100 position-relative overflow-hidden hover-card rdb-card-tint-slate">
                 <div class="card-body p-3 d-flex flex-column justify-content-between">
                     <div>
                         <div class="d-flex align-items-center justify-content-between mb-1">

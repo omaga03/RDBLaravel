@@ -13,7 +13,7 @@
     <div class="row g-3 mb-4">
         <!-- 1. Total Budget -->
         <div class="col-xxl-2 col-xl-4 col-md-6 col-sm-12">
-            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card" style="border-top: 3px solid #059669 !important; background-color: rgba(5, 150, 105, 0.04); border-radius: var(--rdb-radius-md) !important;">
+            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card rdb-card-tint-green" style="border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5 position-relative d-flex flex-column justify-content-between" style="z-index: 1;">
                     <div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -59,7 +59,7 @@
 
         <!-- 2. Projects -->
         <div class="col-xxl-2 col-xl-4 col-md-6 col-sm-6">
-            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card" style="border-top: 3px solid #2563EB !important; background-color: rgba(37, 99, 235, 0.04); border-radius: var(--rdb-radius-md) !important;">
+            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card rdb-card-tint-blue" style="border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5 position-relative d-flex flex-column justify-content-between" style="z-index: 1;">
                     <div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -99,7 +99,7 @@
 
         <!-- 3. Publications -->
         <div class="col-xxl-2 col-xl-4 col-md-6 col-sm-6">
-            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card" style="border-top: 3px solid #0D9488 !important; background-color: rgba(13, 148, 136, 0.04); border-radius: var(--rdb-radius-md) !important;">
+            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card rdb-card-tint-teal" style="border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5 position-relative d-flex flex-column justify-content-between" style="z-index: 1;">
                     <div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -143,7 +143,7 @@
 
         <!-- 4. Utilizations -->
         <div class="col-xxl-2 col-xl-4 col-md-6 col-sm-6">
-            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card" style="border-top: 3px solid #DC2626 !important; background-color: rgba(220, 38, 38, 0.04); border-radius: var(--rdb-radius-md) !important;">
+            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card rdb-card-tint-red" style="border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5 position-relative d-flex flex-column justify-content-between" style="z-index: 1;">
                     <div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -183,7 +183,7 @@
 
         <!-- 5. Intellectual Property (IP) -->
         <div class="col-xxl-2 col-xl-4 col-md-6 col-sm-6">
-            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card" style="border-top: 3px solid #D97706 !important; background-color: rgba(217, 119, 6, 0.04); border-radius: var(--rdb-radius-md) !important;">
+            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card rdb-card-tint-amber" style="border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5 position-relative d-flex flex-column justify-content-between" style="z-index: 1;">
                     <div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -223,7 +223,7 @@
 
         <!-- 6. Researchers -->
         <div class="col-xxl-2 col-xl-4 col-md-6 col-sm-6">
-            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card" style="border-top: 3px solid #4F46E5 !important; background-color: rgba(79, 70, 229, 0.04); border-radius: var(--rdb-radius-md) !important;">
+            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card rdb-card-tint-indigo" style="border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5 position-relative d-flex flex-column justify-content-between" style="z-index: 1;">
                     <div>
                         <div class="d-flex justify-content-between align-items-center mb-2">

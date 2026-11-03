@@ -13,8 +13,8 @@
     <div class="row g-3 mb-4">
         <!-- Total Publications -->
         <div class="col-xl-3 col-md-6">
-            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card" 
-                 style="border-top: 3px solid #0D9488 !important; background-color: rgba(13, 148, 136, 0.04); border-radius: var(--rdb-radius-md) !important;">
+            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card rdb-card-tint-teal" 
+                 style="border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5 d-flex flex-column justify-content-between">
                     <div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -34,7 +34,7 @@
 
         <!-- Scopus / WoS (International) -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #D97706 !important; background-color: rgba(217, 119, 6, 0.04); border-radius: var(--rdb-radius-md) !important;">
+            <div class="card h-100 border shadow-sm rdb-card-tint-amber" style="border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-warning-emphasis small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-globe-americas me-1 text-warning"></i> Scopus & WoS
@@ -47,7 +47,7 @@
 
         <!-- TCI 1 -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #10B981 !important; background-color: rgba(16, 185, 129, 0.04); border-radius: var(--rdb-radius-md) !important;">
+            <div class="card h-100 border shadow-sm rdb-card-tint-emerald" style="border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-success small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-patch-check-fill me-1"></i> TCI กลุ่ม 1
@@ -60,7 +60,7 @@
 
         <!-- TCI 2 -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #3B82F6 !important; background-color: rgba(59, 130, 246, 0.04); border-radius: var(--rdb-radius-md) !important;">
+            <div class="card h-100 border shadow-sm rdb-card-tint-blue" style="border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-info small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-award-fill me-1"></i> TCI กลุ่ม 2
@@ -73,7 +73,7 @@
 
         <!-- Proceedings -->
         <div class="col-xl-1 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #64748B !important; background-color: rgba(100, 116, 139, 0.04); border-radius: var(--rdb-radius-md) !important;">
+            <div class="card h-100 border shadow-sm rdb-card-tint-slate" style="border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3 text-center">
                     <span class="text-secondary small fw-bold d-block mb-1">
                         <i class="bi bi-megaphone me-1.5"></i> ประชุม
@@ -85,7 +85,7 @@
 
         <!-- Linked with Grants -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #6366F1 !important; background-color: rgba(99, 102, 241, 0.04); border-radius: var(--rdb-radius-md) !important;">
+            <div class="card h-100 border shadow-sm rdb-card-tint-indigo" style="border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-primary small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-link-45deg me-1"></i> ต่อยอดจากทุนวิจัย
