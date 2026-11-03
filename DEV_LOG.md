@@ -98,11 +98,16 @@
     - `POST /backend/rdb_published/{id}/regenerate-cover` -> `RdbPublishedController@regenerateCover`
     - พร้อมการตรวจสอบสิทธิ์ `authorize('update', ...)` รัดกุมตามนโยบายความปลอดภัย
 - **ปรับปรุงระบบสร้างหน้าปกสำรองภาษาไทย (Academic GD Cover Fallback) ใน [`PdfCoverService.php`](app/Services/PdfCoverService.php)**:
-  - แก้ไขการดึงชื่อผู้วิจัยของผลงานตีพิมพ์ (`buildPublishedMetadata`): ดึงจากความสัมพันธ์ `authors` (Many-to-Many via `rdb_published_work`), `publishedWorks` และ `researcher` พร้อมคำนำหน้าชื่อ (`prefix`) เช่น `ผู้ช่วยศาสตราจารย์ ปรมะ แก้วพวง` แทนการฮาร์ดโค้ดข้อความทั่วไป
+  - แก้ไขการดึงชื่อผู้วิจัยของผลงานตีพิมพ์ (`buildPublishedMetadata`): ดึงจากความสัมพันธ์ `authors` (Many-to-Many via `rdb_published_work`), `publishedWorks`, `researcher` และสำรองไปยังนักวิจัยของโครงการที่เกี่ยวข้อง (`project->researchers`) พร้อมคำนำหน้าทางวิชาการครบทุกคน
+  - ระบบจัดเรียงและตัดขึ้นบรรทัดใหม่อัจฉริยะ (Intelligent Author Line Packing): คำนวณความกว้างพิกเซลจริงด้วย `imagettfbbox` ไม่เกิน 460px ต่อบรรทัด แสดงชื่อนักวิจัยครบทุกคนอย่างชัดเจน ไม่ตัดทอนด้วย "และคณะ"
   - จัดการตัดคำภาษาไทย (Thai Semantic Phrase Wrapping) ใน `wrapUtf8Text`: วิเคราะห์จุดแบ่งประโยคและคำสำคัญวิชาการ ป้องกันปัญหาวรรณยุกต์และสระตกหล่นหรือขาดออกจากพยัญชนะ
   - เลือกลำดับฟอนต์ภาษาไทย TrueType คมชัดสูง (`Leelawadee UI Bold` / `C:\Windows\Fonts\LeelaUIb.ttf`)
   - อัปเกรดดีไซน์ปกสำรองสไตล์วิชาการ (Academic Navy `#0f172a` + Gold `#b45309`) พร้อมคำนวณตำแหน่งแนวตั้งไดนามิกไม่ให้ข้อความชื่อเรื่องยาวทับซ้อนกับชื่อผู้แต่งและคณะ
   - เพิ่มพารามิเตอร์ Cache-busting `?v=` ใน Accessor `cover_url` ของ `RdbProject` และ `RdbPublished` ช่วยให้เบราว์เซอร์แสดงภาพหน้าปกที่สร้างใหม่ได้ทันทีโดยไม่ต้องกดรีเฟรชแคช
+  - **ประมวลผลดึงและสร้างภาพหน้าแรก PDF ใหม่ทั้งหมดทั้งระบบ (`php artisan rdb:generate-pdf-covers --module=all --force`)**:
+    - **โครงการวิจัย (`rdb_project`)**: สำเร็จครบ **1,864 โครงการ (100%)**
+    - **ผลงานตีพิมพ์ (`rdb_published`)**: สำเร็จครบ **1,601 รายการ (100%)**
+    - ไม่มีรายการที่ผิดพลาด (0 skipped/failed)
 
 #### 7. สถาปัตยกรรม Academic SEO, Google Scholar Metadata & Dynamic XML Sitemaps
 - **สร้างทักษะควบคุมมาตรฐาน ([`.agents/skills/academic-seo-and-indexing/SKILL.md`](.agents/skills/academic-seo-and-indexing/SKILL.md))**:
