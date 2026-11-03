@@ -14,7 +14,7 @@
         <!-- Total Researchers -->
         <div class="col-xl-3 col-md-6">
             <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card" 
-                 style="border-top: 3px solid #4F46E5 !important; border-radius: var(--rdb-radius-md) !important;">
+                 style="border-top: 3px solid #4F46E5 !important; background-color: rgba(79, 70, 229, 0.04); border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5 d-flex flex-column justify-content-between">
                     <div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -34,7 +34,7 @@
 
         <!-- Scopus Author ID Profiles -->
         <div class="col-xl-3 col-md-6">
-            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #D97706 !important; border-radius: var(--rdb-radius-md) !important;">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #D97706 !important; background-color: rgba(217, 119, 6, 0.04); border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-warning-emphasis small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-journal-text me-1 text-warning"></i> Scopus Author ID
@@ -47,7 +47,7 @@
 
         <!-- ORCID ID Profiles -->
         <div class="col-xl-3 col-md-6">
-            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #10B981 !important; border-radius: var(--rdb-radius-md) !important;">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #10B981 !important; background-color: rgba(16, 185, 129, 0.04); border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-success small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-person-badge me-1"></i> ORCID ID
@@ -60,7 +60,7 @@
 
         <!-- Faculty Count -->
         <div class="col-xl-3 col-md-6">
-            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #2563EB !important; border-radius: var(--rdb-radius-md) !important;">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #2563EB !important; background-color: rgba(37, 99, 235, 0.04); border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-primary small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-building me-1"></i> หน่วยงานวิชาการ

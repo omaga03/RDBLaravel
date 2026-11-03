@@ -207,15 +207,20 @@ class SiteController extends Controller
         $prevTotalProjects = 0;
         $prevTotalBudget = 0.0;
         $prevTotalPublished = 0;
+        $prevTotalResearchers = 0;
+        $prevTotalDip = 0;
+        $prevTotalUtilize = 0;
 
         if ($selectedYear) {
             $prevYear = $availableYears->first(fn($y) => (int)$y->year_name < (int)$selectedYear->year_name);
             if ($prevYear) {
+                // Projects & Budget
                 $prevProjQ = RdbProject::where('year_id', $prevYear->year_id);
                 $scopeProject($prevProjQ);
                 $prevTotalProjects = $prevProjQ->count();
                 $prevTotalBudget = (float) $prevProjQ->sum('pro_budget');
 
+                // Published
                 $prevPubQ = RdbPublished::where(function ($q) use ($prevYear) {
                     $q->where('year_id', $prevYear->year_id)
                       ->orWhere('year_bud', $prevYear->year_id);
@@ -231,6 +236,59 @@ class SiteController extends Controller
                     });
                 }
                 $prevTotalPublished = $prevPubQ->count();
+
+                // Researchers
+                if ($isSuperAdmin) {
+                    $prevTotalResearchers = RdbResearcher::whereHas('rdbProjects', function ($q) use ($prevYear) {
+                        $q->where('year_id', $prevYear->year_id);
+                    })->count();
+                } elseif ($isFacultyCoord && $facultyDeptId) {
+                    $prevTotalResearchers = RdbResearcher::where('department_id', $facultyDeptId)->count();
+                } else {
+                    $prevTotalResearchers = $user?->researcher ? 1 : 0;
+                }
+
+                // Intellectual Property (DIP)
+                $prevCeYear = (int)$prevYear->year_name - 543;
+                $prevDipQ = RdbDip::where(function ($q) use ($prevYear, $prevCeYear) {
+                    $q->whereHas('project', function ($pq) use ($prevYear) {
+                        $pq->where('year_id', $prevYear->year_id);
+                    })->orWhereYear('dip_request_date', $prevCeYear);
+                });
+                if ($isFacultyCoord && $facultyDeptId) {
+                    $prevDipQ->whereHas('project', function ($q) use ($facultyDeptId) {
+                        $q->where('department_id', $facultyDeptId);
+                    });
+                } elseif ($isResearcher) {
+                    $prevDipQ->where(function ($q) use ($researcherId, $user) {
+                        $q->where('user_created', $user->id);
+                        if ($researcherId) {
+                            $q->orWhere('researcher_id', $researcherId);
+                        }
+                    });
+                }
+                $prevTotalDip = $prevDipQ->count();
+
+                // Utilization
+                $prevUtilQ = RdbProjectUtilize::where(function ($q) use ($prevYear) {
+                    $q->where('utz_year_id', $prevYear->year_id)
+                      ->orWhere('utz_year_bud', $prevYear->year_id);
+                });
+                if ($isFacultyCoord && $facultyDeptId) {
+                    $prevUtilQ->whereHas('project', function ($q) use ($facultyDeptId) {
+                        $q->where('department_id', $facultyDeptId);
+                    });
+                } elseif ($isResearcher) {
+                    $prevUtilQ->where(function ($q) use ($researcherId, $user) {
+                        $q->where('user_created', $user->id);
+                        if ($researcherId) {
+                            $q->orWhereHas('project.rdbProjectWorks', function ($wq) use ($researcherId) {
+                                $wq->where('rdb_project_work.researcher_id', $researcherId);
+                            });
+                        }
+                    });
+                }
+                $prevTotalUtilize = $prevUtilQ->count();
             }
         }
 
@@ -245,6 +303,15 @@ class SiteController extends Controller
             'published_prev' => $prevTotalPublished,
             'published_diff' => $totalPublished - $prevTotalPublished,
             'published_pct' => $prevTotalPublished > 0 ? round((($totalPublished - $prevTotalPublished) / $prevTotalPublished) * 100, 1) : null,
+            'researcher_prev' => $prevTotalResearchers,
+            'researcher_diff' => $totalResearchers - $prevTotalResearchers,
+            'researcher_pct' => $prevTotalResearchers > 0 ? round((($totalResearchers - $prevTotalResearchers) / $prevTotalResearchers) * 100, 1) : null,
+            'dip_prev' => $prevTotalDip,
+            'dip_diff' => $totalDip - $prevTotalDip,
+            'dip_pct' => $prevTotalDip > 0 ? round((($totalDip - $prevTotalDip) / $prevTotalDip) * 100, 1) : null,
+            'utilize_prev' => $prevTotalUtilize,
+            'utilize_diff' => $totalUtilize - $prevTotalUtilize,
+            'utilize_pct' => $prevTotalUtilize > 0 ? round((($totalUtilize - $prevTotalUtilize) / $prevTotalUtilize) * 100, 1) : null,
         ];
 
         // 11. Ranked Breakdown by Status with Share Bars

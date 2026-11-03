@@ -14,7 +14,7 @@
         <!-- Total IP -->
         <div class="col-xl-3 col-md-6">
             <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card" 
-                 style="border-top: 3px solid #D97706 !important; border-radius: var(--rdb-radius-md) !important;">
+                 style="border-top: 3px solid #D97706 !important; background-color: rgba(217, 119, 6, 0.04); border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5 d-flex flex-column justify-content-between">
                     <div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -34,7 +34,7 @@
 
         <!-- Patents (สิทธิบัตรการประดิษฐ์) -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #EF4444 !important; border-radius: var(--rdb-radius-md) !important;">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #EF4444 !important; background-color: rgba(239, 68, 68, 0.04); border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-danger small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-patch-check-fill me-1"></i> สิทธิบัตร
@@ -47,7 +47,7 @@
 
         <!-- Petty Patents (อนุสิทธิบัตร) -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #2563EB !important; border-radius: var(--rdb-radius-md) !important;">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #2563EB !important; background-color: rgba(37, 99, 235, 0.04); border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-primary small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-gear-wide-connected me-1"></i> อนุสิทธิบัตร
@@ -60,7 +60,7 @@
 
         <!-- Copyrights (ลิขสิทธิ์) -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #0D9488 !important; border-radius: var(--rdb-radius-md) !important;">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #0D9488 !important; background-color: rgba(13, 148, 136, 0.04); border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-info small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-c-circle-fill me-1"></i> ลิขสิทธิ์
@@ -73,7 +73,7 @@
 
         <!-- Registered -->
         <div class="col-xl-1 col-md-3 col-sm-6">
-            <div class="card h-100 border shadow-sm border-success-subtle bg-success-subtle bg-opacity-10" style="border-top: 3px solid #10B981 !important; border-radius: var(--rdb-radius-md) !important;">
+            <div class="card h-100 border shadow-sm border-success-subtle bg-success-subtle bg-opacity-10" style="border-top: 3px solid #10B981 !important; background-color: rgba(16, 185, 129, 0.04); border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3 text-center">
                     <span class="text-success small fw-bold d-block mb-1">
                         <i class="bi bi-check-circle-fill me-1.5"></i> จดทะเบียน
@@ -85,7 +85,7 @@
 
         <!-- Pending -->
         <div class="col-xl-2 col-md-3 col-sm-6">
-            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #64748B !important; border-radius: var(--rdb-radius-md) !important;">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #64748B !important; background-color: rgba(100, 116, 139, 0.04); border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3 text-center">
                     <span class="text-body-secondary small fw-bold d-block mb-1">
                         <i class="bi bi-hourglass-top me-1.5"></i> รอจดทะเบียน

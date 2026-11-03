@@ -332,30 +332,70 @@ class DashboardController extends Controller
         $prevTotalProjects = 0;
         $prevTotalBudget = 0.0;
         $prevTotalPublished = 0;
+        $prevTotalResearchers = 0;
+        $prevTotalDips = 0;
+        $prevTotalUtilizations = 0;
 
         if ($selectedYear) {
             $prevYear = $years->first(fn($y) => (int)$y->year_name < (int)$selectedYear->year_name);
             if ($prevYear) {
                 $prevProQ = RdbProject::where('year_id', $prevYear->year_id);
                 $prevPubQ = RdbPublished::where(fn($q) => $q->where('year_id', $prevYear->year_id)->orWhere('year_bud', $prevYear->year_id));
+                $prevUtilQ = RdbProjectUtilize::where(fn($q) => $q->where('utz_year_id', $prevYear->year_id)->orWhere('utz_year_bud', $prevYear->year_id));
+
+                $prevCeYear = (int)$prevYear->year_name - 543;
+                $prevDipQ = RdbDip::where(function ($q) use ($prevYear, $prevCeYear) {
+                    $q->whereHas('project', function ($pq) use ($prevYear) {
+                        $pq->where('year_id', $prevYear->year_id);
+                    })->orWhereYear('dip_request_date', $prevCeYear);
+                });
 
                 if ($deptId) {
                     $prevProQ->where('department_id', $deptId);
                     $prevPubQ->where('department_id', $deptId);
+                    $prevUtilQ->whereHas('project', fn($q) => $q->where('department_id', $deptId));
+                    $prevDipQ->where(function ($q) use ($deptId) {
+                        $q->whereHas('project', fn($pq) => $pq->where('department_id', $deptId))
+                          ->orWhereHas('researcher', fn($rq) => $rq->where('department_id', $deptId));
+                    });
                 }
                 if ($psId) {
                     $prevProQ->where('ps_id', $psId);
+                    $prevUtilQ->whereHas('project', fn($q) => $q->where('ps_id', $psId));
                 }
                 if ($masterPtId) {
                     $prevProQ->whereHas('type', fn($q) => $q->where('master_pt_id', $masterPtId));
+                    $prevUtilQ->whereHas('project.type', fn($q) => $q->where('master_pt_id', $masterPtId));
                 }
                 if ($ptId) {
                     $prevProQ->where('pt_id', $ptId);
+                    $prevUtilQ->whereHas('project', fn($q) => $q->where('pt_id', $ptId));
                 }
 
                 $prevTotalProjects = $prevProQ->count();
                 $prevTotalBudget = (float) $prevProQ->sum('pro_budget');
                 $prevTotalPublished = $prevPubQ->count();
+                $prevTotalUtilizations = $prevUtilQ->count();
+                $prevTotalDips = $prevDipQ->count();
+
+                // Prev Researchers
+                $prevResWorkQ = DB::table('rdb_project_work')
+                    ->join('rdb_project', 'rdb_project_work.pro_id', '=', 'rdb_project.pro_id')
+                    ->where('rdb_project.data_show', 1)
+                    ->where(function ($q) {
+                        $q->whereNull('rdb_project.ps_id')
+                          ->orWhere('rdb_project.ps_id', '<>', RdbProjectStatus::REFUNDED);
+                    })
+                    ->where('rdb_project.year_id', $prevYear->year_id)
+                    ->whereNotNull('rdb_project_work.researcher_id')
+                    ->where('rdb_project_work.researcher_id', '>', 0);
+                if ($deptId) {
+                    $prevResWorkQ->where('rdb_project.department_id', $deptId);
+                }
+                if ($psId) {
+                    $prevResWorkQ->where('rdb_project.ps_id', $psId);
+                }
+                $prevTotalResearchers = $prevResWorkQ->distinct()->count('rdb_project_work.researcher_id');
             }
         }
 
@@ -370,6 +410,15 @@ class DashboardController extends Controller
             'published_prev' => $prevTotalPublished,
             'published_diff' => $totalPublished - $prevTotalPublished,
             'published_pct' => $prevTotalPublished > 0 ? round((($totalPublished - $prevTotalPublished) / $prevTotalPublished) * 100, 1) : null,
+            'researcher_prev' => $prevTotalResearchers,
+            'researcher_diff' => $totalResearchers - $prevTotalResearchers,
+            'researcher_pct' => $prevTotalResearchers > 0 ? round((($totalResearchers - $prevTotalResearchers) / $prevTotalResearchers) * 100, 1) : null,
+            'dip_prev' => $prevTotalDips,
+            'dip_diff' => $totalDips - $prevTotalDips,
+            'dip_pct' => $prevTotalDips > 0 ? round((($totalDips - $prevTotalDips) / $prevTotalDips) * 100, 1) : null,
+            'utilize_prev' => $prevTotalUtilizations,
+            'utilize_diff' => $totalUtilizations - $prevTotalUtilizations,
+            'utilize_pct' => $prevTotalUtilizations > 0 ? round((($totalUtilizations - $prevTotalUtilizations) / $prevTotalUtilizations) * 100, 1) : null,
         ];
 
         // Ranked Status Breakdown for Share Bars
@@ -1201,10 +1250,20 @@ class DashboardController extends Controller
         $hasProjects = $request->filled('has_projects') && $request->has_projects !== 'all' ? $request->has_projects : null;
         $hasPublications = $request->filled('has_publications') && $request->has_publications !== 'all' ? $request->has_publications : null;
 
-        $activeFilterCount = count(array_filter([$deptId, $prefixId, $profileTier, $hasProjects, $hasPublications]));
+        $activeFilterCount = count(array_filter([$selectedYearId, $deptId, $prefixId, $profileTier, $hasProjects, $hasPublications]));
 
         $query = RdbResearcher::query();
 
+        if ($selectedYearId) {
+            $query->whereHas('rdbProjects', function ($q) use ($selectedYearId) {
+                $q->where('rdb_project.year_id', $selectedYearId)
+                  ->where('rdb_project.data_show', 1)
+                  ->where(function ($sq) {
+                      $sq->whereNull('rdb_project.ps_id')
+                        ->orWhere('rdb_project.ps_id', '<>', RdbProjectStatus::REFUNDED);
+                  });
+            });
+        }
         if ($deptId) {
             $query->where('rdb_researcher.department_id', $deptId);
         }
@@ -1253,6 +1312,12 @@ class DashboardController extends Controller
             ->join('rdb_researcher', 'rdb_project_work.researcher_id', '=', 'rdb_researcher.researcher_id')
             ->leftJoin('rdb_prefix', 'rdb_researcher.prefix_id', '=', 'rdb_prefix.prefix_id')
             ->leftJoin('rdb_department', 'rdb_researcher.department_id', '=', 'rdb_department.department_id');
+        if ($selectedYearId) {
+            $topByProjectsQuery->join('rdb_project', 'rdb_project_work.pro_id', '=', 'rdb_project.pro_id')
+                ->where('rdb_project.year_id', $selectedYearId)
+                ->where('rdb_project.data_show', 1)
+                ->where(fn($q) => $q->whereNull('rdb_project.ps_id')->orWhere('rdb_project.ps_id', '<>', RdbProjectStatus::REFUNDED));
+        }
         if ($deptId) $topByProjectsQuery->where('rdb_researcher.department_id', $deptId);
         if ($prefixId) $topByProjectsQuery->where('rdb_researcher.prefix_id', $prefixId);
 
@@ -1280,6 +1345,10 @@ class DashboardController extends Controller
             ->join('rdb_researcher', 'rdb_published_work.researcher_id', '=', 'rdb_researcher.researcher_id')
             ->leftJoin('rdb_prefix', 'rdb_researcher.prefix_id', '=', 'rdb_prefix.prefix_id')
             ->leftJoin('rdb_department', 'rdb_researcher.department_id', '=', 'rdb_department.department_id');
+        if ($selectedYearId) {
+            $topByPubsQuery->join('rdb_published', 'rdb_published_work.published_id', '=', 'rdb_published.id')
+                ->where(fn($q) => $q->where('rdb_published.year_id', $selectedYearId)->orWhere('rdb_published.year_bud', $selectedYearId));
+        }
         if ($deptId) $topByPubsQuery->where('rdb_researcher.department_id', $deptId);
         if ($prefixId) $topByPubsQuery->where('rdb_researcher.prefix_id', $prefixId);
 

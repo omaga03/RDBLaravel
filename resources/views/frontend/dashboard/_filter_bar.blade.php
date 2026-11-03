@@ -348,7 +348,20 @@
                 {{-- 6. Researchers & Faculty Matrix Filters                   --}}
                 {{-- ========================================================= --}}
                 @elseif(request()->routeIs('frontend.dashboard.researchers'))
-                    <!-- Filter 1: Faculty / Department -->
+                    <!-- Filter 1: Fiscal Year -->
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+                        <label class="form-label text-body-secondary small fw-medium mb-1"><i class="bi bi-calendar3 text-primary me-1"></i> ปีงบประมาณ</label>
+                        <select name="year_id" class="form-select form-select-sm fw-medium">
+                            <option value="all" {{ empty($selectedYearId) ? 'selected' : '' }}>-- ทุกปีงบประมาณ --</option>
+                            @foreach($years as $y)
+                                <option value="{{ $y->year_id }}" {{ (isset($selectedYearId) && $selectedYearId == $y->year_id) ? 'selected' : '' }}>
+                                    ปี {{ $y->year_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Filter 2: Faculty / Department -->
                     <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                         <label class="form-label text-body-secondary small fw-medium mb-1"><i class="bi bi-building text-primary me-1"></i> คณะ / หน่วยงาน</label>
                         <select name="department_id" class="form-select form-select-sm fw-medium">
@@ -361,7 +374,7 @@
                         </select>
                     </div>
 
-                    <!-- Filter 2: Academic Prefix / Title -->
+                    <!-- Filter 3: Academic Prefix / Title -->
                     <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                         <label class="form-label text-body-secondary small fw-medium mb-1"><i class="bi bi-mortarboard text-primary me-1"></i> ตำแหน่งทางวิชาการ</label>
                         <select name="prefix_id" class="form-select form-select-sm fw-medium">
@@ -374,7 +387,7 @@
                         </select>
                     </div>
 
-                    <!-- Filter 3: International Profiles (Scopus/ORCID) -->
+                    <!-- Filter 4: International Profiles (Scopus/ORCID) -->
                     <div class="col-12 col-sm-6 col-md-4 col-lg-2">
                         <label class="form-label text-body-secondary small fw-medium mb-1"><i class="bi bi-globe2 text-info me-1"></i> ฐานข้อมูลสากล</label>
                         <select name="profile_tier" class="form-select form-select-sm fw-medium">

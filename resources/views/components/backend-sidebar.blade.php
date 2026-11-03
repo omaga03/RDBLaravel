@@ -97,19 +97,17 @@
                 </li>
             </ul>
         @else
-            <!-- 1. หมวดภาพรวมและงานด่วน (Overview) -->
+            @php
+                $hasOverviewQueue = $isSuperAdmin || ($currentUser && ($currentUser->hasRole(['Admin Project', 'Admin Published', 'Admin Dip', 'Admin Utilize', 'Faculty Coordinator', 'Sub Admin']) || $currentUser->hasPermission(['Project', 'Published', 'Dip', 'Utilize'])));
+                $hasMyReviews = $myPendingReviewsCount > 0;
+            @endphp
+            @if($hasOverviewQueue || $hasMyReviews)
+            <!-- 1. หมวดงานด่วนและคิวตรวจรับ (Quick Actions & Queues) -->
             <div class="rdb-sidebar-section-title">
-                <span class="sidebar-text">ภาพรวม &amp; งานด่วน</span>
+                <span class="sidebar-text">งานด่วน &amp; คิวตรวจรับ</span>
             </div>
             <ul class="nav flex-column rdb-sidebar-nav mb-2">
-                <li class="nav-item">
-                    <a class="nav-link rdb-side-link {{ request()->routeIs('backend.site.index') || request()->is('backend') ? 'active' : '' }}" href="{{ route('backend.site.index') }}" title="แดชบอร์ดหลังบ้าน">
-                        <i class="bi bi-speedometer2 text-primary rdb-side-icon"></i>
-                        <span class="sidebar-text">แดชบอร์ดภาพรวม</span>
-                    </a>
-                </li>
-
-                @if($isSuperAdmin || ($currentUser && ($currentUser->hasRole(['Admin Project', 'Admin Published', 'Admin Dip', 'Admin Utilize', 'Faculty Coordinator', 'Sub Admin']) || $currentUser->hasPermission(['Project', 'Published', 'Dip', 'Utilize']))))
+                @if($hasOverviewQueue)
                 <li class="nav-item">
                     <a class="nav-link rdb-side-link {{ request()->is('backend/workflow*') || request()->routeIs('backend.workflow.*') ? 'active' : '' }}" href="{{ route('backend.workflow.queue') }}" title="คิวตรวจรับผลงาน">
                         <i class="bi bi-inbox-fill text-warning rdb-side-icon"></i>
@@ -118,7 +116,7 @@
                 </li>
                 @endif
 
-                @if($myPendingReviewsCount > 0)
+                @if($hasMyReviews)
                 <li class="nav-item">
                     <a class="nav-link rdb-side-link d-flex align-items-center justify-content-between {{ request()->routeIs('backend.project_review.my_reviews') ? 'active' : '' }}" href="{{ route('backend.project_review.my_reviews') }}" title="งานประเมินเล่มที่ได้รับมอบหมาย">
                         <span class="d-flex align-items-center overflow-hidden">
@@ -130,6 +128,7 @@
                 </li>
                 @endif
             </ul>
+            @endif
 
             <!-- 2. หมวดจัดการผลงานวิจัย (Academic Modules) -->
             <div class="rdb-sidebar-section-title">
@@ -561,13 +560,5 @@
             </ul>
             @endif
         @endif
-    </div>
-
-    <!-- Sidebar Sticky Bottom Footer -->
-    <div class="rdb-sidebar-footer border-top p-2.5 mt-auto">
-        <a href="{{ route('home') }}" target="_blank" class="nav-link rdb-side-link py-1.5 text-body-secondary mb-0" title="เปิดหน้าเว็บไซต์ส่วนสาธารณะ (แท็บใหม่)">
-            <i class="bi bi-box-arrow-up-right text-info rdb-side-icon"></i>
-            <span class="sidebar-text small">ไปหน้าบ้าน (Public Portal)</span>
-        </a>
     </div>
 </aside>

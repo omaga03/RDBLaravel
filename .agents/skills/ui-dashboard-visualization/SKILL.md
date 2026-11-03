@@ -16,15 +16,19 @@ Use this skill whenever designing, building, redesigning, or critiquing dashboar
    - หนึ่งหน้าจอต้องตอบคำถามหลักได้ทันทีโดยไม่ต้องเลื่อนเมาส์ (เช่น *"ปีงบประมาณนี้มีผลงานวิจัยและงบประมาณเท่าไร เติบโตจากปีก่อนหรือไม่ และมีงานใดรอตรวจอนุมัติ?"*)
    - ลำดับสายตา (Visual Hierarchy): `Header & Fiscal Year Filter` → `KPI Cards / Strip` → `Main Trend Chart` → `Ranked Breakdowns (คณะ/แหล่งทุน/วารสาร)` → `Actionable Queues`
 2. **Quiet & Colour Follows the Entity (สงบ สุขุม ใช้สีตามความหมายของข้อมูล)**:
-   - ข้อมูลปกติใช้พื้นผิวสงบ (`bg-body`, `bg-body-tertiary`, เส้นขอบ `1px border-subtle`)
-   - สีตามประเภทข้อมูล (Entity Hue):
-     - **โครงการวิจัย / บุคลากร**: Deep Academic Navy (`#1E3A5F`) / Royal Blue (`#2563EB`)
-     - **งบประมาณ / ทุนวิจัย**: Emerald (`#059669`) / Citation Amber (`#D97706`)
-     - **งานที่ต้องเร่งดำเนินการ / ค้างส่ง / รอตรวจ**: Warm Amber (`warning`) หรือ Red (`danger`) เฉพาะจุดที่ต้องคลิกจัดการ
+   - **การ์ดและกรอบต้องมีสีพื้นจาง ๆ (Subtle Tinted Surface)**: หากใช้สีขาวล้วนหรือดำเรียบเสมอกันทุกการ์ด การ์ดจะดูกลืนกันไปหมดและขาดมิติ (Visual Separation) ให้ผสมผสาน **เส้นขอบบน 3px Hairline** ควบคู่กับ **สีพื้นหลังจาง ๆ 4% ใน Light Mode (`rgba(..., 0.04)`) หรือ 8% ใน Dark Mode (`rgba(..., 0.08)`)** ตามเฉดสีประจำโมดูล:
+     - **โครงการวิจัย (Projects)**: Royal Blue `#2563EB` → `background-color: rgba(37, 99, 235, 0.04);`
+     - **งบประมาณ (Budget)**: Academic Emerald `#059669` → `background-color: rgba(5, 150, 105, 0.04);`
+     - **ผลงานตีพิมพ์ (Publications)**: Scholarly Teal `#0D9488` → `background-color: rgba(13, 148, 136, 0.04);`
+     - **นักวิจัยและกำลังคน (Researchers)**: Deep Indigo `#4F46E5` → `background-color: rgba(79, 70, 229, 0.04);`
+     - **ทรัพย์สินทางปัญญา (IP / DIP)**: Citation Amber `#D97706` → `background-color: rgba(217, 119, 6, 0.04);`
+     - **การใช้ประโยชน์ (Utilization)**: Crimson Coral `#DC2626` → `background-color: rgba(220, 38, 38, 0.04);`
+     - **ข่าวสารและการประชุม (News & Conf)**: Slate Grey `#64748B` → `background-color: rgba(100, 116, 139, 0.04);`
 3. **Wordless (กระชับ ไม่เขียนประโยคเยิ่นเย้อใต้ตัวเลข)**:
    - บนการ์ดแสดงเฉพาะ **ชื่อตัวชี้วัด**, **ตัวเลขหลัก (`tabular-nums`)**, **หน่วยนับ**, และ **ค่าเปรียบเทียบสั้นๆ (1–2 คำ)** เช่น `▲ +14.2% จากปี 2568`
    - คำอธิบายยาวๆ หรือสูตรคำนวณให้ใส่ไว้ใน `title` / Bootstrap Tooltip เท่านั้น
-4. **Honest Numbers (ตัวเลขซื่อสัตย์ ไม่หลอกตา)**:
+4. **Honest Numbers & Full YoY Delta Coverage (ครอบคลุมเปรียบเทียบทุกมิติวิชาการ)**:
+   - ระบบต้องคำนวณและแสดงค่าเปรียบเทียบกับปีก่อนหน้า (YoY Delta) ให้ครอบคลุมทุกมิติหลัก: **โครงการวิจัย**, **งบประมาณ**, **ผลงานตีพิมพ์**, **นักวิจัย**, **ทรัพย์สินทางปัญญา**, และ **การใช้ประโยชน์**
    - ตัวเลขเดียวกันต้องตรงกันทุกจุดบนหน้าจอ (KPI Card = กราฟ = ตารางรวม)
    - **กฎฐานข้อมูลขนาดเล็ก (Small Base Rule)**: หากค่าปีก่อนหน้ามีน้อยกว่า 5 รายการ (`< 5`) ห้ามแสดงเปอร์เซ็นต์สีแดง/เขียวที่ดูหวือหวาเกินจริง (เช่น `1 → 0` ห้ามแสดง `▼ -100%` สีแดง หรือ `1 → 3` ห้ามแสดง `+200%`) ให้แสดงเป็นป้ายสีเทาสุขุม เช่น `ปีก่อนหน้า 1 โครงการ` (`was 1`)
    - ช่องที่ไม่มีข้อมูลให้แสดง `—` (Em-dash) สีเทาจาง ห้ามแสดง `$0.00`, `NaN`, หรือ `0.0%` ปลอม
@@ -57,42 +61,46 @@ Use this skill whenever designing, building, redesigning, or critiquing dashboar
 </div>
 ```
 
-### 2.2 Analytical KPI Card with Honest YoY Delta (สำหรับหน้า Intelligence Dashboard)
-ใช้พื้นหลัง `bg-body` ขอบคมชัด `1px` พร้อมป้ายเปรียบเทียบปีงบประมาณก่อนหน้า (Delta Badge):
+### 2.2 Analytical KPI Card with Honest YoY Delta & Subtle Tint (สำหรับหน้า Intelligence Dashboard)
+ใช้เส้นขอบบน `3px` และสีพื้นหลังจาง ๆ `rgba(..., 0.04)` พร้อมป้ายเปรียบเทียบปีงบประมาณก่อนหน้า (Delta Badge) ครบทุกมิติ:
 
 ```blade
-<div class="card shadow-sm border h-100">
-    <div class="card-body p-3.5">
-        <div class="d-flex align-items-center justify-content-between mb-2">
-            <span class="text-body-secondary fw-medium small">โครงการวิจัยที่ได้รับทุน</span>
-            <span class="rounded-2 bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                <i class="bi bi-folder2-open"></i>
-            </span>
+<div class="card shadow-sm border h-100 position-relative overflow-hidden hover-card" 
+     style="border-top: 3px solid #2563EB !important; background-color: rgba(37, 99, 235, 0.04); border-radius: var(--rdb-radius-md) !important;">
+    <div class="card-body p-3.5 d-flex flex-column justify-content-between position-relative" style="z-index: 1;">
+        <div>
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                    <i class="bi bi-folder2-open me-1"></i> โครงการวิจัย
+                </span>
+                <div class="p-1.5 rounded-circle bg-primary bg-opacity-10 text-primary">
+                    <i class="bi bi-folder-check fs-6"></i>
+                </div>
+            </div>
+            <h3 class="fw-bold mb-0 text-primary" style="font-size: 1.45rem; font-variant-numeric: tabular-nums;">
+                {{ number_format($currentCount) }}
+            </h3>
+            <small class="text-body-secondary d-block mt-1">โครงการทั้งหมด</small>
         </div>
-        <div class="fs-2 fw-bold text-body mb-1" style="font-variant-numeric: tabular-nums; letter-spacing: -0.02em;">
-            {{ number_format($currentCount) }}
-        </div>
-        <div class="d-flex align-items-center gap-1.5 small" style="font-variant-numeric: tabular-nums;">
-            @if($prevCount < 5)
-                <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">
-                    ปีก่อนหน้า {{ number_format($prevCount) }}
-                </span>
-            @elseif($deltaPercent > 0)
-                <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle">
-                    <i class="bi bi-caret-up-fill me-0.5"></i>+{{ number_format($deltaPercent, 1) }}%
-                </span>
-                <span class="text-body-secondary">เทียบปี {{ $prevYearName }}</span>
-            @elseif($deltaPercent < 0)
-                <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle">
-                    <i class="bi bi-caret-down-fill me-0.5"></i>{{ number_format($deltaPercent, 1) }}%
-                </span>
-                <span class="text-body-secondary">เทียบปี {{ $prevYearName }}</span>
+
+        @if(!empty($prevYearName))
+            @if($prevCount >= 5 && $deltaPercent !== null)
+                <div class="mt-2 pt-2 border-top border-subtle d-flex align-items-center justify-content-between small">
+                    <span class="text-body-secondary" style="font-size: 0.72rem;">เทียบปี {{ $prevYearName }}</span>
+                    <span class="badge {{ $diff >= 0 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-danger-subtle text-danger border border-danger-subtle' }}" style="font-variant-numeric: tabular-nums; font-size: 0.7rem;">
+                        <i class="bi {{ $diff >= 0 ? 'bi-arrow-up-right' : 'bi-arrow-down-right' }}"></i>
+                        {{ $diff >= 0 ? '+' : '' }}{{ $deltaPercent }}%
+                    </span>
+                </div>
             @else
-                <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">±0%</span>
-                <span class="text-body-secondary">เท่ากับปี {{ $prevYearName }}</span>
+                <div class="mt-2 pt-2 border-top border-subtle d-flex align-items-center justify-content-between small">
+                    <span class="text-body-secondary" style="font-size: 0.72rem;">ปีก่อน ({{ $prevYearName }})</span>
+                    <span class="text-body-secondary fw-semibold" style="font-variant-numeric: tabular-nums; font-size: 0.72rem;">{{ number_format($prevCount) }} โครงการ</span>
+                </div>
             @endif
-        </div>
+        @endif
     </div>
+    <i class="bi bi-folder position-absolute end-0 bottom-0 text-primary" style="font-size: 3.5rem; opacity: 0.07; transform: translate(6px, 6px); pointer-events: none;"></i>
 </div>
 ```
 

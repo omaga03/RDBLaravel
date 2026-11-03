@@ -940,10 +940,30 @@
                         <i class="bi bi-layout-sidebar-inset fs-5"></i>
                     </button>
                 @endif
-                <a class="navbar-brand" href="{{ url('/') }}">
+                <a class="navbar-brand d-inline-flex align-items-center" href="{{ request()->is('backend*') ? route('backend.site.index') : url('/') }}">
                     <img src="https://research.pcru.ac.th/rdb/images/pcru.png" alt="PCRU Logo" style="height: 36px;" class="me-2">
                     <span class="brand-badge ms-1">PCRU RDB</span>
                 </a>
+                @if(request()->is('backend*'))
+                    <div class="d-none d-sm-inline-flex align-items-center gap-1.5 ms-2 ps-2 border-start border-white-50">
+                        <a href="{{ route('backend.site.index') }}"
+                           class="btn btn-sm {{ request()->routeIs('backend.site.index') || request()->is('backend') ? 'btn-light text-primary fw-bold shadow-sm' : 'btn-outline-light text-white' }} d-inline-flex align-items-center gap-1.5 py-1 px-2.5 rounded-pill"
+                           style="font-size: 0.82rem;"
+                           title="แดชบอร์ดภาพรวมระบบหลังบ้าน">
+                            <i class="bi bi-speedometer2"></i>
+                            <span>แดชบอร์ด</span>
+                        </a>
+                        <a href="{{ route('home') }}"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="btn btn-sm btn-outline-light text-white d-inline-flex align-items-center gap-1.5 py-1 px-2.5 rounded-pill"
+                           style="font-size: 0.82rem;"
+                           title="เปิดดูหน้าบ้าน (Public Portal) ในแท็บใหม่">
+                            <i class="bi bi-box-arrow-up-right"></i>
+                            <span>เปิดดูหน้าบ้าน</span>
+                        </a>
+                    </div>
+                @endif
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -951,6 +971,20 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar (Row 1) — Backend menus moved to Left Sidebar -->
                     <ul class="navbar-nav me-auto">
+                        @if(request()->is('backend*'))
+                            <li class="nav-item d-sm-none mt-2 mb-1">
+                                <a href="{{ route('backend.site.index') }}" class="nav-link text-white py-1.5 px-2 d-flex align-items-center gap-2 rounded {{ request()->routeIs('backend.site.index') ? 'bg-white bg-opacity-10 fw-bold' : '' }}">
+                                    <i class="bi bi-speedometer2 text-info"></i>
+                                    <span>แดชบอร์ด</span>
+                                </a>
+                            </li>
+                            <li class="nav-item d-sm-none mb-2">
+                                <a href="{{ route('home') }}" target="_blank" rel="noopener noreferrer" class="nav-link text-white py-1.5 px-2 d-flex align-items-center gap-2 rounded">
+                                    <i class="bi bi-box-arrow-up-right text-warning"></i>
+                                    <span>เปิดดูหน้าบ้าน</span>
+                                </a>
+                            </li>
+                        @endif
                     </ul>
 
                     <!-- Right Side Of Navbar (Row 1) -->
