@@ -18,6 +18,9 @@
             <p class="text-body-secondary mb-0">เครื่องมือควบคุมการประมวลผลไฟล์ PDF, การเรนเดอร์ภาพหน้าแรก (.webp), การนับหน้าเอกสาร และการล้างแคชเพิ่มประสิทธิภาพ</p>
         </div>
         <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1.5 shadow-sm" data-bs-toggle="modal" data-bs-target="#engineSetupModal">
+                <i class="bi bi-tools"></i> วิธีติดตั้งเอนจิน PDF &amp; ส่วนขยาย
+            </button>
             <a href="{{ route('backend.system_commands.index') }}" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1.5">
                 <i class="bi bi-arrow-clockwise"></i> รีเฟรชสถานะ
             </a>
@@ -61,8 +64,9 @@
                     <div class="small fw-bold text-body text-truncate mb-1" title="{{ $engineInfo['active_cover_engine'] }}">
                         {{ $engineInfo['active_cover_engine'] }}
                     </div>
-                    <div class="text-body-tertiary small" style="font-size: 0.78rem;">
-                        Python: <code class="text-body-secondary">{{ basename($engineInfo['python_executable']) }}</code>
+                    <div class="text-body-tertiary small d-flex justify-content-between align-items-center" style="font-size: 0.78rem;">
+                        <span>Python: <code class="text-body-secondary">{{ basename($engineInfo['python_executable']) }}</code></span>
+                        <a href="javascript:void(0)" class="text-primary text-decoration-none" onclick="openEngineModal('tab-mupdf-btn')"><i class="bi bi-question-circle me-1"></i>วิธีติดตั้ง</a>
                     </div>
                 </div>
             </div>
@@ -91,13 +95,16 @@
                             Pure PHP Parser (Smalot / FPDI)
                         @endif
                     </div>
-                    <div class="text-body-tertiary small" style="font-size: 0.78rem;">
-                        @if($engineInfo['pdftotext_available'])
-                            ไบนารี: <code class="text-body-secondary" title="{{ $engineInfo['pdftotext_binary'] }}">{{ basename($engineInfo['pdftotext_binary']) }}</code>
-                            <span class="text-success ms-1">({{ basename(dirname($engineInfo['pdftotext_binary'])) }})</span>
-                        @else
-                            Poppler: <span class="text-danger">ไม่พบ</span> (ใช้ Smalot {{ $engineInfo['smalot_available'] ? '✓' : '✗' }})
-                        @endif
+                    <div class="text-body-tertiary small d-flex justify-content-between align-items-center" style="font-size: 0.78rem;">
+                        <span>
+                            @if($engineInfo['pdftotext_available'])
+                                ไบนารี: <code class="text-body-secondary" title="{{ $engineInfo['pdftotext_binary'] }}">{{ basename($engineInfo['pdftotext_binary']) }}</code>
+                                <span class="text-success ms-1">({{ basename(dirname($engineInfo['pdftotext_binary'])) }})</span>
+                            @else
+                                Poppler: <span class="text-danger">ไม่พบ</span> (ใช้ Smalot {{ $engineInfo['smalot_available'] ? '✓' : '✗' }})
+                            @endif
+                        </span>
+                        <a href="javascript:void(0)" class="text-primary text-decoration-none" onclick="openEngineModal('tab-poppler-btn')"><i class="bi bi-question-circle me-1"></i>วิธีติดตั้ง</a>
                     </div>
                 </div>
             </div>
@@ -148,8 +155,9 @@
                     <div class="small fw-bold text-body mb-1">
                         PHP GD Extension &amp; FreeType TTF
                     </div>
-                    <div class="text-body-tertiary small" style="font-size: 0.78rem;">
-                        ฟอนต์: <code>Leelawadee UI Bold (ภาษาไทย)</code>
+                    <div class="text-body-tertiary small d-flex justify-content-between align-items-center" style="font-size: 0.78rem;">
+                        <span>ฟอนต์: <code>Leelawadee UI / Sarabun</code></span>
+                        <a href="javascript:void(0)" class="text-primary text-decoration-none" onclick="openEngineModal('tab-gd-btn')"><i class="bi bi-question-circle me-1"></i>วิธีติดตั้ง</a>
                     </div>
                 </div>
             </div>
@@ -469,4 +477,200 @@
         </div>
     </div>
 </div>
+
+<!-- Modal: Engine & Extension Setup Guide -->
+<div class="modal fade" id="engineSetupModal" tabindex="-1" aria-labelledby="engineSetupModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-body-tertiary border-bottom py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="p-2 rounded-2 bg-primary-subtle text-primary">
+                        <i class="bi bi-tools fs-5"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-body" id="engineSetupModalLabel">คู่มือการติดตั้งเอนจินประมวลผล PDF และส่วนขยาย (SysAdmin Setup Guide)</h5>
+                        <small class="text-body-secondary">คำสั่งและวิธีตั้งค่า MuPDF (PyMuPDF), Poppler CLI, PHP GD และ FreeType สำหรับผู้ดูแลระบบ</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <!-- Nav Tabs -->
+                <ul class="nav nav-pills nav-fill mb-4 p-1.5 bg-body-tertiary rounded-3 border" id="engineSetupTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-semibold small py-2" id="tab-mupdf-btn" data-bs-toggle="pill" data-bs-target="#tab-mupdf" type="button" role="tab">
+                            <i class="bi bi-cpu me-1"></i>1. MuPDF (PyMuPDF)
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-semibold small py-2" id="tab-poppler-btn" data-bs-toggle="pill" data-bs-target="#tab-poppler" type="button" role="tab">
+                            <i class="bi bi-file-earmark-binary me-1"></i>2. Poppler pdftotext
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-semibold small py-2" id="tab-gd-btn" data-bs-toggle="pill" data-bs-target="#tab-gd" type="button" role="tab">
+                            <i class="bi bi-image me-1"></i>3. PHP GD &amp; FreeType
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-semibold small py-2" id="tab-env-btn" data-bs-toggle="pill" data-bs-target="#tab-env" type="button" role="tab">
+                            <i class="bi bi-sliders me-1"></i>4. ตัวแปร .env &amp; ทดสอบ
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Contents -->
+                <div class="tab-content" id="engineSetupTabContent">
+                    <!-- Tab 1: MuPDF -->
+                    <div class="tab-pane fade show active" id="tab-mupdf" role="tabpanel">
+                        <div class="alert alert-info-subtle border border-info-subtle d-flex align-items-center mb-3 p-3 rounded-3">
+                            <i class="bi bi-info-circle-fill fs-5 text-info me-2.5"></i>
+                            <div class="small">
+                                <strong>หน้าที่ในระบบ:</strong> เรนเดอร์หน้าแรกของ PDF ฉบับเต็มทั้งหน้าออกมาเป็นภาพ WebP คุณภาพสูง คมชัดทุกภาษาและตัวอักษร ประหยัดเวลาและแรมสูงสุด (Tier 2 Full-Page Rasterizer)
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold text-body mb-2"><i class="bi bi-windows text-primary me-1"></i>บน Windows / Laragon:</h6>
+                        <ol class="small text-body-secondary ps-3 mb-3">
+                            <li>ตรวจสอบว่ามี Python ในเครื่องหรือไม่ โดยเปิด CMD แล้วพิมพ์: <code>python --version</code> (หากยังไม่มี ให้ดาวน์โหลดจาก <a href="https://www.python.org/downloads/" target="_blank">python.org</a> และอย่าลืมติ๊ก <strong>"Add python.exe to PATH"</strong>)</li>
+                            <li>เปิด Command Prompt หรือ PowerShell แล้วรันคำสั่งติดตั้งแพ็กเกจ:
+                                <pre class="p-2.5 bg-dark text-light rounded mt-1 mb-2 font-monospace" style="font-size: 0.8rem;">pip install --upgrade pymupdf pillow</pre>
+                            </li>
+                            <li>หาก Laragon ตรวจไม่พบอัตโนมัติ ให้ระบุพาธของ Python ในไฟล์ <code>.env</code>:
+                                <pre class="p-2 bg-dark text-warning rounded mt-1 mb-0 font-monospace" style="font-size: 0.78rem;">PYTHON_PATH="C:\Users\YourUser\AppData\Local\Programs\Python\Python312\python.exe"</pre>
+                            </li>
+                        </ol>
+
+                        <h6 class="fw-bold text-body mb-2"><i class="bi bi-ubuntu text-danger me-1"></i>บน Linux (Ubuntu / Debian Production):</h6>
+                        <pre class="p-2.5 bg-dark text-light rounded mb-3 font-monospace" style="font-size: 0.8rem;">sudo apt update && sudo apt install -y python3 python3-pip
+pip3 install --upgrade pymupdf pillow</pre>
+
+                        <h6 class="fw-bold text-body mb-2"><i class="bi bi-server text-success me-1"></i>บน Linux (CentOS / RHEL / AlmaLinux):</h6>
+                        <pre class="p-2.5 bg-dark text-light rounded mb-0 font-monospace" style="font-size: 0.8rem;">sudo dnf install -y python3 python3-pip
+pip3 install --upgrade pymupdf pillow</pre>
+                    </div>
+
+                    <!-- Tab 2: Poppler -->
+                    <div class="tab-pane fade" id="tab-poppler" role="tabpanel">
+                        <div class="alert alert-success-subtle border border-success-subtle d-flex align-items-center mb-3 p-3 rounded-3">
+                            <i class="bi bi-check-circle-fill fs-5 text-success me-2.5"></i>
+                            <div class="small">
+                                <strong>หน้าที่ในระบบ:</strong> นับจำนวนหน้าเอกสาร PDF จริงด้วย Form Feed <code>\x0c</code> ได้แม่นยำ 99.99% ไม่สะดุดแม้เป็นไฟล์เข้ารหัส (Secured/AES) หรือมีหลายร้อยหน้า และสกัดหน้าแรกด้วย <code>pdftoppm</code>
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold text-body mb-2"><i class="bi bi-windows text-primary me-1"></i>บน Windows / Laragon:</h6>
+                        <div class="p-3 bg-body-tertiary rounded border mb-3 small">
+                            <div class="fw-bold text-body mb-1"><i class="bi bi-check2-circle text-success me-1"></i>วิธีที่ 1 (ตรวจจับอัตโนมัติผ่าน Git):</div>
+                            หาก Laragon ได้ติดตั้ง Git for Windows ไบนารี <code>pdftotext.exe</code> จะอยู่ที่โฟลเดอร์ <code>laragon\bin\git\mingw64\bin\pdftotext.exe</code> ซึ่งระบบของมหาวิทยาลัยตรวจจับให้ใช้งานได้ทันทีโดยไม่ต้องตั้งค่าใดๆ
+                            <hr class="my-2">
+                            <div class="fw-bold text-body mb-1"><i class="bi bi-folder-plus text-primary me-1"></i>วิธีที่ 2 (ติดตั้งชุด Poppler Binary แยก):</div>
+                            1. ดาวน์โหลดแพ็กเกจ Poppler for Windows จาก <a href="https://github.com/oschwartz10612/poppler-windows/releases/" target="_blank">GitHub Release (oschwartz10612)</a><br>
+                            2. แตกไฟล์โฟลเดอร์ <code>bin/</code> นำไปวางไว้ที่ <code>C:\laragon\bin\poppler\bin</code><br>
+                            3. ระบุพาธในไฟล์ <code>.env</code>:
+                            <pre class="p-2 bg-dark text-warning rounded mt-1 mb-0 font-monospace" style="font-size: 0.78rem;">PDFTOTEXT_PATH="C:/laragon/bin/poppler/bin/pdftotext.exe"
+PDFTOPPM_PATH="C:/laragon/bin/poppler/bin/pdftoppm.exe"</pre>
+                        </div>
+
+                        <h6 class="fw-bold text-body mb-2"><i class="bi bi-ubuntu text-danger me-1"></i>บน Linux (Ubuntu / Debian Production):</h6>
+                        <pre class="p-2.5 bg-dark text-light rounded mb-3 font-monospace" style="font-size: 0.8rem;">sudo apt update && sudo apt install -y poppler-utils</pre>
+
+                        <h6 class="fw-bold text-body mb-2"><i class="bi bi-server text-success me-1"></i>บน Linux (CentOS / RHEL / AlmaLinux):</h6>
+                        <pre class="p-2.5 bg-dark text-light rounded mb-0 font-monospace" style="font-size: 0.8rem;">sudo dnf install -y poppler-utils</pre>
+                    </div>
+
+                    <!-- Tab 3: PHP GD & FreeType -->
+                    <div class="tab-pane fade" id="tab-gd" role="tabpanel">
+                        <div class="alert alert-warning-subtle border border-warning-subtle d-flex align-items-center mb-3 p-3 rounded-3">
+                            <i class="bi bi-lightbulb-fill fs-5 text-warning me-2.5"></i>
+                            <div class="small">
+                                <strong>หน้าที่ในระบบ:</strong> สังเคราะห์ภาพหน้าปกสำรองสไตล์วิชาการภาษาไทย (Academic GD Cover) เมื่อไฟล์ PDF ชำรุดหรือไม่พบไฟล์ และใช้แปลงไฟล์ภาพเป็นฟอร์แมต <code>.webp</code>
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold text-body mb-2"><i class="bi bi-windows text-primary me-1"></i>บน Windows / Laragon:</h6>
+                        <ol class="small text-body-secondary ps-3 mb-3">
+                            <li>คลิกขวาที่หน้าต่างโปรแกรม Laragon ➔ เลือกเมนู <strong>PHP</strong> ➔ <strong>Extensions</strong> ➔ ติ๊กเครื่องหมายถูกที่ <strong><code>gd</code></strong></li>
+                            <li>หรือเปิดไฟล์ <code>php.ini</code> (คลิกขวา Laragon ➔ PHP ➔ php.ini) ค้นหาบรรทัด:
+                                <pre class="p-2 bg-dark text-light rounded mt-1 mb-1 font-monospace" style="font-size: 0.78rem;">;extension=gd</pre>
+                                แล้วลบเครื่องหมาย <code>;</code> ด้านหน้าออกเป็น:
+                                <pre class="p-2 bg-dark text-success rounded mt-1 mb-1 font-monospace" style="font-size: 0.78rem;">extension=gd</pre>
+                            </li>
+                            <li>กดปุ่ม <strong>Stop</strong> แล้วกด <strong>Start All</strong> ใน Laragon เพื่อรีสตาร์ท Apache</li>
+                        </ol>
+
+                        <h6 class="fw-bold text-body mb-2"><i class="bi bi-ubuntu text-danger me-1"></i>บน Linux (Ubuntu / Debian Production):</h6>
+                        <pre class="p-2.5 bg-dark text-light rounded mb-3 font-monospace" style="font-size: 0.8rem;">sudo apt update
+sudo apt install -y php8.2-gd  # ปรับเวอร์ชันตาม PHP เช่น php8.3-gd
+sudo systemctl restart apache2 # หรือ sudo systemctl restart php8.2-fpm</pre>
+
+                        <h6 class="fw-bold text-body mb-2"><i class="bi bi-server text-success me-1"></i>บน Linux (CentOS / RHEL / AlmaLinux):</h6>
+                        <pre class="p-2.5 bg-dark text-light rounded mb-3 font-monospace" style="font-size: 0.8rem;">sudo dnf install -y php-gd
+sudo systemctl restart httpd   # หรือ sudo systemctl restart php-fpm</pre>
+
+                        <h6 class="fw-bold text-body mb-2"><i class="bi bi-fonts text-info me-1"></i>การติดตั้งฟอนต์ภาษาไทย (TrueType FreeType):</h6>
+                        <p class="small text-body-secondary mb-2">เพื่อให้การวาดข้อความภาษาไทยบนภาพหน้าปกสำรองไม่ตกหล่น:</p>
+                        <ul class="small text-body-secondary ps-3 mb-0">
+                            <li><strong>Windows</strong>: ระบบเรียกใช้ <code>C:/Windows/Fonts/leelawb.ttf</code> (Leelawadee UI Bold) อัตโนมัติ</li>
+                            <li><strong>Linux</strong>: ติดตั้งแพ็กเกจฟอนต์ไทย: <code>sudo apt install -y fonts-thai-tlwg fonts-noto-cjk</code> หรือคัดลอกไฟล์ฟอนต์ <code>.ttf</code> ไปใส่ไว้ที่โฟลเดอร์ <code>storage/fonts/</code> ในโปรเจกต์</li>
+                        </ul>
+                    </div>
+
+                    <!-- Tab 4: Environment & Verification -->
+                    <div class="tab-pane fade" id="tab-env" role="tabpanel">
+                        <div class="alert alert-secondary border d-flex align-items-center mb-3 p-3 rounded-3">
+                            <i class="bi bi-sliders fs-5 text-secondary me-2.5"></i>
+                            <div class="small">
+                                <strong>สรุปตัวแปรพาธในไฟล์ <code>.env</code>:</strong> ระบุเฉพาะในกรณีที่เซิร์ฟเวอร์ไม่ได้ติดตั้งเครื่องมือไว้ในโฟลเดอร์ System PATH มาตรฐาน
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold text-body mb-2">ตัวอย่างการตั้งค่าในไฟล์ <code>.env</code>:</h6>
+                        <pre class="p-3 bg-dark text-warning rounded mb-3 font-monospace" style="font-size: 0.8rem;"># กำหนดพาธ Python สำหรับ PyMuPDF (ถ้าไม่ได้อยู่ใน PATH)
+PYTHON_PATH="python"
+
+# กำหนดพาธ Poppler pdftotext สำหรับนับหน้า 99.99%
+PDFTOTEXT_PATH="/usr/bin/pdftotext"
+
+# กำหนดพาธ Poppler pdftoppm สำหรับเรนเดอร์ภาพ
+PDFTOPPM_PATH="/usr/bin/pdftoppm"</pre>
+
+                        <h6 class="fw-bold text-body mb-2">คำสั่งทดสอบสถานะผ่าน Terminal / Shell:</h6>
+                        <div class="mb-2">
+                            <small class="text-body-secondary fw-semibold d-block">1. ทดสอบ PyMuPDF (Python):</small>
+                            <pre class="p-2 bg-dark text-light rounded font-monospace small mb-2" style="font-size: 0.76rem;">python -c "import fitz, PIL; print('PyMuPDF Ready')"</pre>
+                        </div>
+                        <div class="mb-2">
+                            <small class="text-body-secondary fw-semibold d-block">2. ทดสอบ Poppler pdftotext:</small>
+                            <pre class="p-2 bg-dark text-light rounded font-monospace small mb-2" style="font-size: 0.76rem;">pdftotext -v</pre>
+                        </div>
+                        <div>
+                            <small class="text-body-secondary fw-semibold d-block">3. ทดสอบ PHP GD Extension &amp; WebP:</small>
+                            <pre class="p-2 bg-dark text-light rounded font-monospace small mb-0" style="font-size: 0.76rem;">php -r "echo extension_loaded('gd') && function_exists('imagewebp') ? 'GD WebP OK' : 'GD Missing';"</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-body-tertiary border-top py-2.5 d-flex justify-content-between">
+                <span class="small text-body-secondary"><i class="bi bi-info-circle me-1"></i>หลังติดตั้งเสร็จ ให้คลิกปุ่ม <strong>"รีเฟรชสถานะ"</strong> ที่มุมขวาบน</span>
+                <button type="button" class="btn btn-secondary btn-sm px-3" data-bs-dismiss="modal">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openEngineModal(tabBtnId) {
+    const btn = document.getElementById(tabBtnId);
+    if (btn) {
+        const tab = new bootstrap.Tab(btn);
+        tab.show();
+    }
+    const modalEl = document.getElementById('engineSetupModal');
+    if (modalEl) {
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+    }
+}
+</script>
 @endsection

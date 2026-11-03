@@ -1361,10 +1361,10 @@ php artisan rdb:generate-pdf-covers --module=all
 <td align="left"><code>sudo apt install php8.x-gd</code></td>
 </tr>
 <tr>
-<td align="left"><strong>ฟอนต์ Leelawadee UI / Tahoma</strong></td>
+<td align="left"><strong>ฟอนต์ Leelawadee UI / Sarabun</strong></td>
 <td align="left">ฟอนต์ TrueType สำหรับเรนเดอร์ภาษาไทย</td>
 <td align="left">จำเป็นบน GD</td>
-<td align="left">คัดลอกจาก Windows หรือใช้ Noto Sans Thai</td>
+<td align="left"><code>sudo apt install fonts-thai-tlwg</code></td>
 </tr>
 <tr>
 <td align="left"><strong>Storage Symlink</strong></td>
@@ -1374,6 +1374,94 @@ php artisan rdb:generate-pdf-covers --module=all
 </tr>
 </tbody>
 </table>
+<hr />
+<a id="116-%E0%B8%84%E0%B8%B9%E0%B9%88%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%82%E0%B8%B1%E0%B9%89%E0%B8%99%E0%B8%95%E0%B8%AD%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%B4%E0%B8%94%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B9%80%E0%B8%AD%E0%B8%99%E0%B8%88%E0%B8%B4%E0%B8%99%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%A1%E0%B8%A7%E0%B8%A5%E0%B8%9C%E0%B8%A5-pdf-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%9F%E0%B8%AD%E0%B8%99%E0%B8%95%E0%B9%8C%E0%B8%A0%E0%B8%B2%E0%B8%A9%E0%B8%B2%E0%B9%84%E0%B8%97%E0%B8%A2-sysadmin-engine-installation-guide" class="manual-anchor"></a><h3 id="116-คู่มือขั้นตอนการติดตั้งเอนจินประมวลผล-pdf-และฟอนต์ภาษาไทย-sysadmin-engine-installation-guide">11.6 คู่มือขั้นตอนการติดตั้งเอนจินประมวลผล PDF และฟอนต์ภาษาไทย (SysAdmin Engine Installation Guide)</h3>
+<p>กรณีที่ระบบแสดงสถานะว่าเครื่องมือใดเครื่องมือหนึ่งยังไม่พร้อมใช้งาน ผู้ดูแลระบบสามารถติดตั้งและกำหนดค่าได้ตามขั้นตอนดังนี้:</p>
+<a id="1-การติดตั้ง-mupdf-pymupdf-python-fitz-pillow" class="manual-anchor"></a><a id="1-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%B4%E0%B8%94%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87-mupdf-pymupdf---python-fitz--pillow" class="manual-anchor"></a><a id="1-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%B4%E0%B8%94%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87-mupdf-pymupdf-python-fitz-pillow" class="manual-anchor"></a><h4 id="1-การติดตั้ง-mupdf-pymupdf---python-fitz--pillow">1. การติดตั้ง MuPDF (PyMuPDF - Python <code>fitz</code> + <code>Pillow</code>)</h4>
+<ul>
+<li><strong>บน Windows / Laragon</strong>:
+<ol>
+<li>ตรวจสอบเวอร์ชันของ Python ในเครื่อง: <code>python --version</code> (แนะนำ Python 3.9 ขึ้นไป) หากยังไม่มีให้ติดตั้งจาก <a href="https://www.python.org/">python.org</a> โดยติ๊กเลือก <strong>&quot;Add python.exe to PATH&quot;</strong></li>
+<li>รันคำสั่งติดตั้งผ่าน Terminal:
+<pre><code class="language-cmd">pip install --upgrade pymupdf pillow
+</code></pre>
+</li>
+<li>หากระบบตรวจไม่พบ ให้กำหนดพาธตรงในไฟล์ <code>.env</code>:
+<pre><code class="language-env">PYTHON_PATH=&quot;C:\Users\YourUser\AppData\Local\Programs\Python\Python312\python.exe&quot;
+</code></pre>
+</li>
+</ol>
+</li>
+<li><strong>บน Linux (Ubuntu / Debian Production)</strong>:
+<pre><code class="language-bash">sudo apt update &amp;&amp; sudo apt install -y python3 python3-pip
+pip3 install --upgrade pymupdf pillow
+</code></pre>
+</li>
+<li><strong>บน Linux (CentOS / RHEL / AlmaLinux)</strong>:
+<pre><code class="language-bash">sudo dnf install -y python3 python3-pip
+pip3 install --upgrade pymupdf pillow
+</code></pre>
+</li>
+</ul>
+<a id="2-การติดตั้ง-poppler-cli-pdftotext-pdftoppm" class="manual-anchor"></a><a id="2-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%B4%E0%B8%94%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87-poppler-cli-pdftotext--pdftoppm" class="manual-anchor"></a><a id="2-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%B4%E0%B8%94%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87-poppler-cli-pdftotext-pdftoppm" class="manual-anchor"></a><h4 id="2-การติดตั้ง-poppler-cli-pdftotext--pdftoppm">2. การติดตั้ง Poppler CLI (<code>pdftotext</code> &amp; <code>pdftoppm</code>)</h4>
+<ul>
+<li><strong>บน Windows / Laragon</strong>:
+<ul>
+<li><strong>วิธีที่ 1 (ตรวจพบอัตโนมัติผ่าน Git)</strong>: หากติดตั้ง Git for Windows ใน Laragon ไบนารี <code>pdftotext.exe</code> จะอยู่ที่ <code>laragon\bin\git\mingw64\bin\pdftotext.exe</code> ซึ่งระบบตรวจจับให้อัตโนมัติ</li>
+<li><strong>วิธีที่ 2 (ติดตั้ง Poppler Windows แยก)</strong>: ดาวน์โหลดแพ็กเกจ Binary จาก <a href="https://github.com/oschwartz10612/poppler-windows/releases/">poppler-windows releases</a> แตกไฟล์ไว้ที่ <code>C:\laragon\bin\poppler\bin</code> แล้วระบุใน <code>.env</code>:
+<pre><code class="language-env">PDFTOTEXT_PATH=&quot;C:/laragon/bin/poppler/bin/pdftotext.exe&quot;
+PDFTOPPM_PATH=&quot;C:/laragon/bin/poppler/bin/pdftoppm.exe&quot;
+</code></pre>
+</li>
+</ul>
+</li>
+<li><strong>บน Linux (Ubuntu / Debian Production)</strong>:
+<pre><code class="language-bash">sudo apt update &amp;&amp; sudo apt install -y poppler-utils
+</code></pre>
+</li>
+<li><strong>บน Linux (CentOS / RHEL / AlmaLinux)</strong>:
+<pre><code class="language-bash">sudo dnf install -y poppler-utils
+</code></pre>
+</li>
+</ul>
+<a id="3-การเปิดใช้งาน-php-gd-extension-freetype" class="manual-anchor"></a><a id="3-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%80%E0%B8%9B%E0%B8%B4%E0%B8%94%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99-php-gd-extension--freetype" class="manual-anchor"></a><a id="3-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%80%E0%B8%9B%E0%B8%B4%E0%B8%94%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99-php-gd-extension-freetype" class="manual-anchor"></a><h4 id="3-การเปิดใช้งาน-php-gd-extension--freetype">3. การเปิดใช้งาน PHP GD Extension &amp; FreeType</h4>
+<ul>
+<li><strong>บน Windows / Laragon</strong>:
+<ol>
+<li>คลิกขวาที่หน้าต่าง Laragon ➔ เลือกเมนู <strong>PHP</strong> ➔ <strong>Extensions</strong> ➔ ติ๊กเลือก <strong><code>gd</code></strong></li>
+<li>หรือเปิดไฟล์ <code>php.ini</code> ลบเครื่องหมาย <code>;</code> หน้า <code>;extension=gd</code> เป็น <code>extension=gd</code></li>
+<li>กดปุ่ม <strong>Stop</strong> และกด <strong>Start All</strong> เพื่อรีสตาร์ท Apache</li>
+</ol>
+</li>
+<li><strong>บน Linux (Ubuntu / Debian Production)</strong>:
+<pre><code class="language-bash">sudo apt update &amp;&amp; sudo apt install -y php8.2-gd
+sudo systemctl restart apache2 # หรือ sudo systemctl restart php8.2-fpm
+</code></pre>
+</li>
+<li><strong>บน Linux (CentOS / RHEL / AlmaLinux)</strong>:
+<pre><code class="language-bash">sudo dnf install -y php-gd
+sudo systemctl restart httpd   # หรือ sudo systemctl restart php-fpm
+</code></pre>
+</li>
+</ul>
+<a id="4-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%B4%E0%B8%94%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%9F%E0%B8%AD%E0%B8%99%E0%B8%95%E0%B9%8C%E0%B8%A0%E0%B8%B2%E0%B8%A9%E0%B8%B2%E0%B9%84%E0%B8%97%E0%B8%A2%E0%B8%AA%E0%B8%B3%E0%B8%AB%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B8%AA%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%87%E0%B8%A0%E0%B8%B2%E0%B8%9E%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B8%9B%E0%B8%81%E0%B8%AA%E0%B8%B3%E0%B8%A3%E0%B8%AD%E0%B8%87-truetype-fonts" class="manual-anchor"></a><h4 id="4-การติดตั้งฟอนต์ภาษาไทยสำหรับสร้างภาพหน้าปกสำรอง-truetype-fonts">4. การติดตั้งฟอนต์ภาษาไทยสำหรับสร้างภาพหน้าปกสำรอง (TrueType Fonts)</h4>
+<ul>
+<li><strong>Windows</strong>: ระบบดึงฟอนต์ระบบภาษาไทย <code>C:/Windows/Fonts/leelawb.ttf</code> (Leelawadee UI Bold) อัตโนมัติ</li>
+<li><strong>Linux Server</strong>: ให้ติดตั้งแพ็กเกจฟอนต์ภาษาไทยของระบบ:
+<pre><code class="language-bash">sudo apt install -y fonts-thai-tlwg fonts-noto-cjk
+</code></pre>
+หรือคัดลอกไฟล์ฟอนต์ TrueType เช่น <code>Sarabun-Bold.ttf</code> ไปวางไว้ในโฟลเดอร์ <code>storage/fonts/</code> ภายในโปรเจกต์ Laravel</li>
+</ul>
+<a id="5-%E0%B8%84%E0%B8%B3%E0%B8%AA%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%97%E0%B8%94%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%9E%E0%B8%A3%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%AD%E0%B8%99%E0%B8%88%E0%B8%B4%E0%B8%99%E0%B8%97%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%AB%E0%B8%A1%E0%B8%94%E0%B8%9C%E0%B9%88%E0%B8%B2%E0%B8%99-shell" class="manual-anchor"></a><h4 id="5-คำสั่งทดสอบความพร้อมของเอนจินทั้งหมดผ่าน-shell">5. คำสั่งทดสอบความพร้อมของเอนจินทั้งหมดผ่าน Shell</h4>
+<pre><code class="language-bash"># 1. ทดสอบ PyMuPDF (MuPDF Python)
+python -c &quot;import fitz, PIL; print('PyMuPDF Ready')&quot;
+
+# 2. ทดสอบ Poppler pdftotext
+pdftotext -v
+
+# 3. ทดสอบ PHP GD Extension และการรองรับ WebP
+php -r &quot;echo extension_loaded('gd') &amp;&amp; function_exists('imagewebp') ? 'GD WebP OK' : 'GD Missing';&quot;
+</code></pre>
 
             </div>
             <footer>

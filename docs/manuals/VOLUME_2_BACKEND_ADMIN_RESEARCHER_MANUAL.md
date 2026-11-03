@@ -681,5 +681,86 @@ php artisan rdb:generate-pdf-covers --module=all
 | **Poppler pdftotext** | นับจำนวนหน้า PDF แม่นยำ 99.99% | แนะนำสูงสุด (Tier 1) | `sudo apt install poppler-utils` |
 | **Poppler pdftoppm** | สกัดภาพหน้าแรก PDF ความเร็วสูง | แนะนำ (Tier 1) | `sudo apt install poppler-utils` |
 | **PHP GD Extension** | วาดปกสำรองภาษาไทย & ประมวลผลภาพ WebP | จำเป็น (Mandatory) | `sudo apt install php8.x-gd` |
-| **ฟอนต์ Leelawadee UI / Tahoma** | ฟอนต์ TrueType สำหรับเรนเดอร์ภาษาไทย | จำเป็นบน GD | คัดลอกจาก Windows หรือใช้ Noto Sans Thai |
+| **ฟอนต์ Leelawadee UI / Sarabun** | ฟอนต์ TrueType สำหรับเรนเดอร์ภาษาไทย | จำเป็นบน GD | `sudo apt install fonts-thai-tlwg` |
 | **Storage Symlink** | เชื่อมต่อ URL สาธารณะกับพื้นที่จัดเก็บ | จำเป็น (Mandatory) | `php artisan storage:link` |
+
+---
+
+### 11.6 คู่มือขั้นตอนการติดตั้งเอนจินประมวลผล PDF และฟอนต์ภาษาไทย (SysAdmin Engine Installation Guide)
+
+กรณีที่ระบบแสดงสถานะว่าเครื่องมือใดเครื่องมือหนึ่งยังไม่พร้อมใช้งาน ผู้ดูแลระบบสามารถติดตั้งและกำหนดค่าได้ตามขั้นตอนดังนี้:
+
+#### 1. การติดตั้ง MuPDF (PyMuPDF - Python `fitz` + `Pillow`)
+* **บน Windows / Laragon**:
+  1. ตรวจสอบเวอร์ชันของ Python ในเครื่อง: `python --version` (แนะนำ Python 3.9 ขึ้นไป) หากยังไม่มีให้ติดตั้งจาก [python.org](https://www.python.org/) โดยติ๊กเลือก **"Add python.exe to PATH"**
+  2. รันคำสั่งติดตั้งผ่าน Terminal:
+     ```cmd
+     pip install --upgrade pymupdf pillow
+     ```
+  3. หากระบบตรวจไม่พบ ให้กำหนดพาธตรงในไฟล์ `.env`:
+     ```env
+     PYTHON_PATH="C:\Users\YourUser\AppData\Local\Programs\Python\Python312\python.exe"
+     ```
+* **บน Linux (Ubuntu / Debian Production)**:
+  ```bash
+  sudo apt update && sudo apt install -y python3 python3-pip
+  pip3 install --upgrade pymupdf pillow
+  ```
+* **บน Linux (CentOS / RHEL / AlmaLinux)**:
+  ```bash
+  sudo dnf install -y python3 python3-pip
+  pip3 install --upgrade pymupdf pillow
+  ```
+
+#### 2. การติดตั้ง Poppler CLI (`pdftotext` & `pdftoppm`)
+* **บน Windows / Laragon**:
+  * **วิธีที่ 1 (ตรวจพบอัตโนมัติผ่าน Git)**: หากติดตั้ง Git for Windows ใน Laragon ไบนารี `pdftotext.exe` จะอยู่ที่ `laragon\bin\git\mingw64\bin\pdftotext.exe` ซึ่งระบบตรวจจับให้อัตโนมัติ
+  * **วิธีที่ 2 (ติดตั้ง Poppler Windows แยก)**: ดาวน์โหลดแพ็กเกจ Binary จาก [poppler-windows releases](https://github.com/oschwartz10612/poppler-windows/releases/) แตกไฟล์ไว้ที่ `C:\laragon\bin\poppler\bin` แล้วระบุใน `.env`:
+    ```env
+    PDFTOTEXT_PATH="C:/laragon/bin/poppler/bin/pdftotext.exe"
+    PDFTOPPM_PATH="C:/laragon/bin/poppler/bin/pdftoppm.exe"
+    ```
+* **บน Linux (Ubuntu / Debian Production)**:
+  ```bash
+  sudo apt update && sudo apt install -y poppler-utils
+  ```
+* **บน Linux (CentOS / RHEL / AlmaLinux)**:
+  ```bash
+  sudo dnf install -y poppler-utils
+  ```
+
+#### 3. การเปิดใช้งาน PHP GD Extension & FreeType
+* **บน Windows / Laragon**:
+  1. คลิกขวาที่หน้าต่าง Laragon ➔ เลือกเมนู **PHP** ➔ **Extensions** ➔ ติ๊กเลือก **`gd`**
+  2. หรือเปิดไฟล์ `php.ini` ลบเครื่องหมาย `;` หน้า `;extension=gd` เป็น `extension=gd`
+  3. กดปุ่ม **Stop** และกด **Start All** เพื่อรีสตาร์ท Apache
+* **บน Linux (Ubuntu / Debian Production)**:
+  ```bash
+  sudo apt update && sudo apt install -y php8.2-gd
+  sudo systemctl restart apache2 # หรือ sudo systemctl restart php8.2-fpm
+  ```
+* **บน Linux (CentOS / RHEL / AlmaLinux)**:
+  ```bash
+  sudo dnf install -y php-gd
+  sudo systemctl restart httpd   # หรือ sudo systemctl restart php-fpm
+  ```
+
+#### 4. การติดตั้งฟอนต์ภาษาไทยสำหรับสร้างภาพหน้าปกสำรอง (TrueType Fonts)
+* **Windows**: ระบบดึงฟอนต์ระบบภาษาไทย `C:/Windows/Fonts/leelawb.ttf` (Leelawadee UI Bold) อัตโนมัติ
+* **Linux Server**: ให้ติดตั้งแพ็กเกจฟอนต์ภาษาไทยของระบบ:
+  ```bash
+  sudo apt install -y fonts-thai-tlwg fonts-noto-cjk
+  ```
+  หรือคัดลอกไฟล์ฟอนต์ TrueType เช่น `Sarabun-Bold.ttf` ไปวางไว้ในโฟลเดอร์ `storage/fonts/` ภายในโปรเจกต์ Laravel
+
+#### 5. คำสั่งทดสอบความพร้อมของเอนจินทั้งหมดผ่าน Shell
+```bash
+# 1. ทดสอบ PyMuPDF (MuPDF Python)
+python -c "import fitz, PIL; print('PyMuPDF Ready')"
+
+# 2. ทดสอบ Poppler pdftotext
+pdftotext -v
+
+# 3. ทดสอบ PHP GD Extension และการรองรับ WebP
+php -r "echo extension_loaded('gd') && function_exists('imagewebp') ? 'GD WebP OK' : 'GD Missing';"
+```
