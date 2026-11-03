@@ -970,6 +970,30 @@
 <td align="left">มี Log บันทึกชัดเจน: ผู้กระทำ, วันที่/เวลา, IP Address, ข้อมูลเดิม (Old Values) และข้อมูลใหม่ (New Values)</td>
 <td align="center">[x] ผ่าน (Pass)</td>
 </tr>
+<tr>
+<td align="left"><strong>ADM-SYS-01</strong></td>
+<td align="left"><strong>ศูนย์จัดการคำสั่งระบบและการบำรุงรักษา (<code>/backend/system-commands</code>)</strong></td>
+<td align="left">1. เข้าสู่ระบบด้วย Super Admin<br>2. เข้าเมนู &quot;คำสั่งและบำรุงรักษาระบบ&quot;<br>3. ทดสอบรันคำสั่งล้างแคช หรือสั่งสร้างภาพปก PDF แบบกำหนด Limit</td>
+<td align="left">บัญชี Super Admin</td>
+<td align="left">- แสดงสถานะเอนจิน MuPDF, Poppler, GD และดิสก์<br>- รันคำสั่งผ่านหน้าเว็บสำเร็จพร้อมแสดง Terminal Log Box และบันทึก Audit Log</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>ADM-SYS-02</strong></td>
+<td align="left"><strong>ปุ่มดึงภาพหน้าปกไฟล์ใหม่ อีกครั้ง (Regenerate PDF Cover)</strong></td>
+<td align="left">1. เข้าหน้ารายละเอียดโครงการวิจัย หรือผลงานตีพิมพ์<br>2. กดปุ่ม &quot;ดึงภาพหน้าปกไฟล์ใหม่ อีกครั้ง&quot;</td>
+<td align="left">โครงการ/ผลงานที่มีไฟล์</td>
+<td align="left">ระบบสกัดภาพหน้าปกใหม่และรีโหลดภาพด้วยพารามิเตอร์ <code>?v=</code> ทันทีโดยไม่ต้องอัปโหลดไฟล์ซ้ำ</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>PUB-SEO-01</strong></td>
+<td align="left"><strong>การทำดัชนีทางวิชาการและไดนามิกไซต์แมป (Academic SEO &amp; Sitemaps)</strong></td>
+<td align="left">1. ตรวจสอบแท็ก <code>&lt;meta name=&quot;citation_*&quot;&gt;</code> ในหน้ารายละเอียด<br>2. เรียกดู URL <code>/sitemap.xml</code></td>
+<td align="left">บทความตีพิมพ์ / โครงการวิจัย</td>
+<td align="left">- แสดงแท็ก Highwire Press, Dublin Core, Schema.org ครบถ้วน<br>- ไซต์แมปแยก 5 หมวด คัดกรองเฉพาะ <code>data_show = 1</code> เท่านั้น</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
 </tbody>
 </table>
 <hr />

@@ -184,6 +184,10 @@ Route::prefix('backend')->name('backend.')->middleware(['auth', \App\Http\Middle
     Route::get('/settings/access-control', [\App\Http\Controllers\Backend\AccessControlSettingsController::class, 'index'])->name('settings.access_control');
     Route::put('/settings/access-control', [\App\Http\Controllers\Backend\AccessControlSettingsController::class, 'update'])->name('settings.access_control.update');
 
+    // System Commands & Maintenance (คำสั่งระบบและการบำรุงรักษา)
+    Route::get('/system-commands', [\App\Http\Controllers\Backend\SystemCommandController::class, 'index'])->name('system_commands.index');
+    Route::post('/system-commands/run', [\App\Http\Controllers\Backend\SystemCommandController::class, 'run'])->name('system_commands.run');
+
     Route::resource('rdbyear', RdbyearController::class);
     Route::get('/rdb_published/search/researcher', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'searchResearcher'])->name('rdb_published.search_researcher');
     Route::get('/rdb_published/search/project', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'searchProject'])->name('rdb_published.search_project');

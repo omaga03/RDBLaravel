@@ -463,6 +463,16 @@
 <li>10.2 การตั้งค่านโยบายความปลอดภัยการดาวน์โหลดเอกสาร (Document Access Policy)</li>
 </ul>
 </li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-11-%E0%B8%A8%E0%B8%B9%E0%B8%99%E0%B8%A2%E0%B9%8C%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%84%E0%B8%B3%E0%B8%AA%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9A%E0%B8%B3%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B8%A3%E0%B8%B1%E0%B8%81%E0%B8%A9%E0%B8%B2-system-commands--maintenance-dashboard">บทที่ 11: ศูนย์จัดการคำสั่งระบบและการบำรุงรักษา (System Commands &amp; Maintenance Dashboard)</a>
+<ul>
+<li>11.1 ภาพรวมหน้าจอศูนย์คำสั่งระบบ (<code>/backend/system-commands</code>)</li>
+<li>11.2 คำสั่งสร้างภาพหน้าแรก PDF (.webp) ทั้งระบบด้วย MuPDF &amp; GD</li>
+<li>11.3 คำสั่งตรวจนับจำนวนหน้าไฟล์ PDF ย้อนหลัง (Page Count Engine)</li>
+<li>11.4 คำสั่งล้างแคชและรีเซ็ตระบบ (Clear Application, Route, View, Config Cache)</li>
+<li>11.5 การตรวจสอบความพร้อมของเซิร์ฟเวอร์และเอนจิน (Server Engine Health Check)</li>
+<li>11.6 ปุ่มดึงภาพหน้าปกไฟล์ใหม่ อีกครั้ง (Regenerate PDF Cover) ในหน้าดูรายละเอียด</li>
+</ul>
+</li>
 </ol>
 <hr />
 <a id="บทที่-1-การเข้าสู่ระบบ-ความปลอดภัย-และการยืนยันตัวตนนักวิจัย-authentication-onboarding" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-1-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%80%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B8%AA%E0%B8%B9%E0%B9%88%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A-%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%9B%E0%B8%A5%E0%B8%AD%E0%B8%94%E0%B8%A0%E0%B8%B1%E0%B8%A2-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A2%E0%B8%B7%E0%B8%99%E0%B8%A2%E0%B8%B1%E0%B8%99%E0%B8%95%E0%B8%B1%E0%B8%A7%E0%B8%95%E0%B8%99%E0%B8%99%E0%B8%B1%E0%B8%81%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-authentication--onboarding" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-1-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%80%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B8%AA%E0%B8%B9%E0%B9%88%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A-%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%9B%E0%B8%A5%E0%B8%AD%E0%B8%94%E0%B8%A0%E0%B8%B1%E0%B8%A2-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A2%E0%B8%B7%E0%B8%99%E0%B8%A2%E0%B8%B1%E0%B8%99%E0%B8%95%E0%B8%B1%E0%B8%A7%E0%B8%95%E0%B8%99%E0%B8%99%E0%B8%B1%E0%B8%81%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-authentication-onboarding" class="manual-anchor"></a><h2 id="บทที่-1-การเข้าสู่ระบบ-ความปลอดภัย-และการยืนยันตัวตนนักวิจัย-authentication--onboarding">บทที่ 1: การเข้าสู่ระบบ ความปลอดภัย และการยืนยันตัวตนนักวิจัย (Authentication &amp; Onboarding)</h2>
@@ -854,13 +864,17 @@ flowchart TD
     T3 --&gt;|สำรอง 3| T4["Tier 4: Fast Regex Stream Scan"]
     Counter --&gt; SavePage["บันทึกจำนวนหน้าลง pro_page_num อัตโนมัติ"]
 
-    Cover --&gt; C1["Tier 1: Spatie PDF-to-Image Imagick"]
-    C1 --&gt;|สำรอง 1| C2["Tier 2: Poppler pdftoppm Binary"]
-    C2 --&gt;|สำรอง 2| C3["Tier 3: Ghostscript gs Binary"]
-    C3 --&gt;|สำรอง 3| C4["Tier 4: Pure PHP WebP Fallback"]
-    Cover --&gt; SaveCover["สร้างภาพปก .webp ขนาดกะทัดรัด คมชัดสูง"]
+    Cover --&gt; C1["Tier 1: Poppler pdftoppm CLI"]
+    C1 --&gt;|สำรอง 1| C2["Tier 2: MuPDF PyMuPDF Full-Page Rasterizer"]
+    C2 --&gt;|สำรอง 2| C3["Tier 3: PHP Imagick"]
+    C3 --&gt;|สำรอง 3| C4["Tier 4: Ghostscript gs CLI"]
+    C4 --&gt;|สำรอง 4| C5["Tier 5: Academic GD Cover Fallback (ฟอนต์ Leelawadee UI)"]
+    Cover --&gt; SaveCover["สร้างภาพปก .webp คุณภาพสูง 85% กะทัดรัด คมชัด"]
 </pre></div>
 
+<div class="manual-callout callout-tip"><div class="callout-header"><i class="bi bi-lightbulb-fill"></i> เคล็ดลับการใช้งาน (TIP)</div><div class="callout-body"><p><strong>ปุ่มดึงภาพหน้าปกไฟล์ใหม่ อีกครั้ง (Regenerate PDF Cover)</strong>:
+ในกรณีที่ไฟล์เอกสาร PDF มีการเปลี่ยนแปลง หรือต้องการประมวลผลสกัดภาพหน้าปกใหม่โดยไม่ต้องอัปโหลดไฟล์ซ้ำ ผู้ใช้งานสามารถกดปุ่ม <strong>&quot;ดึงภาพหน้าปกไฟล์ใหม่ อีกครั้ง&quot;</strong> (<code>&lt;button class=&quot;btn btn-outline-secondary&quot;&gt;</code>) ในกล่องไฟล์เอกสารของหน้าดูรายละเอียดโครงการวิจัย (<code>/backend/rdb_project/{id}</code>) หรือผลงานตีพิมพ์ (<code>/backend/rdb_published/{id}</code>) ระบบจะรันการสกัดหน้าปกและส่งพารามิเตอร์ Cache-Busting <code>?v=</code> เพื่อให้เบราว์เซอร์แสดงภาพหน้าปกที่อัปเดตใหม่ทันที</p>
+</div></div>
 <hr />
 <a id="44-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%A5%E0%B8%B1%E0%B8%9A%E0%B8%A3%E0%B8%B0%E0%B8%94%E0%B8%B1%E0%B8%9A%E0%B8%AA%E0%B8%B4%E0%B8%97%E0%B8%98%E0%B8%B4%E0%B9%8C%E0%B9%80%E0%B8%9B%E0%B8%B4%E0%B8%94%E0%B9%80%E0%B8%9C%E0%B8%A2%E0%B9%80%E0%B8%A5%E0%B9%88%E0%B8%A1%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-3-%E0%B8%AA%E0%B8%96%E0%B8%B2%E0%B8%99%E0%B8%B0-profileshow-toggle" class="manual-anchor"></a><h3 id="44-การสลับระดับสิทธิ์เปิดเผยเล่มรายงานวิจัย-3-สถานะ-profileshow-toggle">4.4 การสลับระดับสิทธิ์เปิดเผยเล่มรายงานวิจัย 3 สถานะ (<code>pro_file_show</code> Toggle)</h3>
 <p>ในหน้ารายละเอียดโครงการวิจัย ผู้ดูแลระบบสามารถคลิกสลับสถานะการเปิดเผยไฟล์เล่มสมบูรณ์ได้ 3 สถานะ:</p>
@@ -1211,6 +1225,123 @@ php artisan rdb:generate-pdf-covers --module=all
 </li>
 <li>คลิกปุ่ม <strong>&quot;บันทึกการตั้งค่า&quot;</strong> นโยบายจะมีผลบังคับใช้ทั่วทั้งระบบทันที</li>
 </ol>
+<hr />
+<a id="บทที่-11-ศูนย์จัดการคำสั่งระบบและการบำรุงรักษา-system-commands-maintenance-dashboard" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-11-%E0%B8%A8%E0%B8%B9%E0%B8%99%E0%B8%A2%E0%B9%8C%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%84%E0%B8%B3%E0%B8%AA%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9A%E0%B8%B3%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B8%A3%E0%B8%B1%E0%B8%81%E0%B8%A9%E0%B8%B2-system-commands--maintenance-dashboard" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-11-%E0%B8%A8%E0%B8%B9%E0%B8%99%E0%B8%A2%E0%B9%8C%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%84%E0%B8%B3%E0%B8%AA%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9A%E0%B8%B3%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B8%A3%E0%B8%B1%E0%B8%81%E0%B8%A9%E0%B8%B2-system-commands-maintenance-dashboard" class="manual-anchor"></a><h2 id="บทที่-11-ศูนย์จัดการคำสั่งระบบและการบำรุงรักษา-system-commands--maintenance-dashboard">บทที่ 11: ศูนย์จัดการคำสั่งระบบและการบำรุงรักษา (System Commands &amp; Maintenance Dashboard)</h2>
+<div class="manual-callout callout-important"><div class="callout-header"><i class="bi bi-exclamation-diamond-fill"></i> ข้อสำคัญ (IMPORTANT)</div><div class="callout-body"><p><strong>การจำกัดสิทธิ์ระดับสูง (Super Admin Only)</strong>:
+หน้านี้สงวนสิทธิ์เฉพาะผู้ดูแลระบบที่มีบทบาท <code>The Creator</code>, <code>Admin</code>, หรือ <code>Admin Research</code> เท่านั้น การสั่งรันคำสั่งจะส่งผลกระทบต่อแคชและไฟล์ภาพพรีวิวของระบบทั้งมหาวิทยาลัย ทุกการดำเนินการจะถูกบันทึกประวัติลงใน Audit Trail โดยอัตโนมัติ</p>
+</div></div>
+<a id="111-%E0%B8%A0%E0%B8%B2%E0%B8%9E%E0%B8%A3%E0%B8%A7%E0%B8%A1%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B8%88%E0%B8%AD%E0%B8%A8%E0%B8%B9%E0%B8%99%E0%B8%A2%E0%B9%8C%E0%B8%84%E0%B8%B3%E0%B8%AA%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A-backendsystem-commands" class="manual-anchor"></a><h3 id="111-ภาพรวมหน้าจอศูนย์คำสั่งระบบ-backendsystem-commands">11.1 ภาพรวมหน้าจอศูนย์คำสั่งระบบ (<code>/backend/system-commands</code>)</h3>
+<p>เข้าใช้งานผ่านเมนูแถบซ้าย: <strong>การดูแลระบบ ➔ คำสั่งและบำรุงรักษาระบบ</strong> หรือพิมพ์ URL: <code>http://laravel_rdb.test/backend/system-commands</code></p>
+<p>หน้าจอประกอบด้วย 4 ส่วนสำคัญ:</p>
+<ol>
+<li><strong>แถบสถานะเอนจินและเซิร์ฟเวอร์ (System Health &amp; Engine Strip)</strong>: แสดงสถานะความพร้อมของเครื่องมือใน Laragon/เซิร์ฟเวอร์ ได้แก่ MuPDF (PyMuPDF), Poppler pdftotext/pdftoppm, PHP GD WebP, และพื้นที่ว่างบนดิสก์</li>
+<li><strong>การ์ดสถิติความครอบคลุม (Coverage Analytics)</strong>: แถบ Progress Bar แสดงร้อยละของโครงการวิจัยและผลงานตีพิมพ์ที่มีภาพหน้าปก <code>.webp</code> และที่มีการตรวจนับจำนวนหน้าแล้ว</li>
+<li><strong>กล่อง Terminal Output Log</strong>: แสดงผลลัพธ์คำสั่ง CLI ย้อนหลังพร้อมปุ่มคัดลอก Log</li>
+<li><strong>การ์ดสั่งรันคำสั่งระบบ (Interactive Command Runners)</strong>: 4 หมวดการทำงานหลัก</li>
+</ol>
+<hr />
+<a id="112-คำสั่งสร้างภาพหน้าแรก-pdf-webp-ทั้งระบบด้วย-mupdf-gd" class="manual-anchor"></a><a id="112-%E0%B8%84%E0%B8%B3%E0%B8%AA%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%AA%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%87%E0%B8%A0%E0%B8%B2%E0%B8%9E%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B9%81%E0%B8%A3%E0%B8%81-pdf-webp-%E0%B8%97%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%94%E0%B9%89%E0%B8%A7%E0%B8%A2-mupdf--gd" class="manual-anchor"></a><a id="112-%E0%B8%84%E0%B8%B3%E0%B8%AA%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%AA%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%87%E0%B8%A0%E0%B8%B2%E0%B8%9E%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B9%81%E0%B8%A3%E0%B8%81-pdf-webp-%E0%B8%97%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%94%E0%B9%89%E0%B8%A7%E0%B8%A2-mupdf-gd" class="manual-anchor"></a><h3 id="112-คำสั่งสร้างภาพหน้าแรก-pdf-webp-ทั้งระบบด้วย-mupdf--gd">11.2 คำสั่งสร้างภาพหน้าแรก PDF (.webp) ทั้งระบบด้วย MuPDF &amp; GD</h3>
+<ul>
+<li><strong>วัตถุประสงค์</strong>: เรนเดอร์หน้าแรกของไฟล์ PDF ฉบับเต็มทั้งหน้าออกมาเป็นภาพ <code>.webp</code> (ความกว้างสูงสุด 800px คุณภาพ 85%) แทนการใช้ไฟล์ PDF ขนาดใหญ่ในการแสดงผล ช่วยให้หน้าเว็บโหลดเร็วขึ้น 10 เท่า</li>
+<li><strong>ขั้นตอนการรันผ่านหน้าเว็บ</strong>:
+<ol>
+<li>เลือก <strong>โมดูล</strong>: ทั้งหมด (<code>all</code>), โครงการวิจัย (<code>project</code>), หรือผลงานตีพิมพ์ (<code>published</code>)</li>
+<li>เลือก <strong>จำนวนรายการ (Limit)</strong>: เช่น ทดสอบ 10 รายการแรก หรือทั้งหมดในระบบ</li>
+<li>สวิตช์ <strong>บังคับสร้างใหม่ทับของเดิม (<code>--force</code>)</strong>: เปิดใช้เมื่อต้องการอัปเดตภาพหน้าปกทั้งหมดใหม่</li>
+<li>คลิกปุ่ม <strong>&quot;รันคำสั่งสร้างภาพหน้าปก&quot;</strong> ➔ ระบบจะเริ่มประมวลผลและแสดงรายงานสรุปจำนวนที่สำเร็จและล้มเหลว</li>
+</ol>
+</li>
+<li><strong>คำสั่งเทียบเท่าผ่าน Terminal / Shell</strong>:
+<pre><code class="language-powershell">php artisan rdb:generate-pdf-covers --module=all --force
+</code></pre>
+</li>
+</ul>
+<hr />
+<a id="113-%E0%B8%84%E0%B8%B3%E0%B8%AA%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%99%E0%B8%B1%E0%B8%9A%E0%B8%88%E0%B8%B3%E0%B8%99%E0%B8%A7%E0%B8%99%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B9%84%E0%B8%9F%E0%B8%A5%E0%B9%8C-pdf-%E0%B8%A2%E0%B9%89%E0%B8%AD%E0%B8%99%E0%B8%AB%E0%B8%A5%E0%B8%B1%E0%B8%87-page-count-engine" class="manual-anchor"></a><h3 id="113-คำสั่งตรวจนับจำนวนหน้าไฟล์-pdf-ย้อนหลัง-page-count-engine">11.3 คำสั่งตรวจนับจำนวนหน้าไฟล์ PDF ย้อนหลัง (Page Count Engine)</h3>
+<ul>
+<li><strong>วัตถุประสงค์</strong>: สแกนจำนวนหน้าจริงของเล่มรายงานวิจัยและบทความตีพิมพ์ด้วยสถาปัตยกรรม 4-Tier Engine (Poppler pdftotext ➔ Smalot ➔ Fpdi ➔ Fast Regex) และบันทึกลงฟิลด์ <code>pro_page_num</code> และ <code>pub_numfile</code></li>
+<li><strong>ขั้นตอนการรันผ่านหน้าเว็บ</strong>:
+<ol>
+<li>เลือกโมดูลและจำนวนรายการที่ต้องการนับ</li>
+<li>สวิตช์บังคับนับใหม่ (<code>--force</code>): สแกนนับใหม่ทุกไฟล์แม้จะมีตัวเลขเดิมอยู่แล้ว</li>
+<li>คลิกปุ่ม <strong>&quot;รันคำสั่งนับจำนวนหน้า&quot;</strong></li>
+</ol>
+</li>
+<li><strong>คำสั่งเทียบเท่าผ่าน Terminal / Shell</strong>:
+<pre><code class="language-powershell">php artisan rdb:count-pdf-pages --module=all --force
+</code></pre>
+</li>
+</ul>
+<hr />
+<a id="114-%E0%B8%84%E0%B8%B3%E0%B8%AA%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%A5%E0%B9%89%E0%B8%B2%E0%B8%87%E0%B9%81%E0%B8%84%E0%B8%8A%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%A3%E0%B8%B5%E0%B9%80%E0%B8%8B%E0%B9%87%E0%B8%95%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A-clear-application-route-view-config-cache" class="manual-anchor"></a><h3 id="114-คำสั่งล้างแคชและรีเซ็ตระบบ-clear-application-route-view-config-cache">11.4 คำสั่งล้างแคชและรีเซ็ตระบบ (Clear Application, Route, View, Config Cache)</h3>
+<ul>
+<li><strong>วัตถุประสงค์</strong>: ล้างแคชการประมวลผลสถิติ, แคชเส้นทาง URL, แคชหน้าจอ Blade Template, และแคชการตั้งค่า เพื่อให้ระบบแสดงผลข้อมูลและโครงสร้างล่าสุดทันที</li>
+<li><strong>ขั้นตอนการรันผ่านหน้าเว็บ</strong>:
+<ol>
+<li>คลิกปุ่ม <strong>&quot;ล้างแคชระบบทันที&quot;</strong> (<code>&lt;button class=&quot;btn btn-warning&quot;&gt;</code>)</li>
+<li>ยืนยันในกล่องข้อความ Alert</li>
+<li>ระบบจะสั่งรันคำสั่ง 4 ชุดพร้อมกัน:
+<ul>
+<li><code>php artisan cache:clear</code> (ล้างแคชดาต้าเบสและสถิติ)</li>
+<li><code>php artisan view:clear</code> (ล้างแคชคอมไพล์ Blade Views)</li>
+<li><code>php artisan route:clear</code> (ล้างแคช Route)</li>
+<li><code>php artisan config:clear</code> (ล้างแคช Environment)</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+<hr />
+<a id="115-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%9E%E0%B8%A3%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%8B%E0%B8%B4%E0%B8%A3%E0%B9%8C%E0%B8%9F%E0%B9%80%E0%B8%A7%E0%B8%AD%E0%B8%A3%E0%B9%8C%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B9%80%E0%B8%AD%E0%B8%99%E0%B8%88%E0%B8%B4%E0%B8%99-server-engine-health-check" class="manual-anchor"></a><h3 id="115-การตรวจสอบความพร้อมของเซิร์ฟเวอร์และเอนจิน-server-engine-health-check">11.5 การตรวจสอบความพร้อมของเซิร์ฟเวอร์และเอนจิน (Server Engine Health Check)</h3>
+<p>ตารางความต้องการเครื่องมือของระบบ (SysAdmin Requirements):</p>
+<table>
+<thead>
+<tr>
+<th align="left">เครื่องมือ / ส่วนประกอบ</th>
+<th align="left">หน้าที่ในระบบ</th>
+<th align="left">สถานะที่ต้องการ</th>
+<th align="left">การติดตั้งบน Ubuntu Production</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>MuPDF (<code>fitz</code>) / PyMuPDF</strong></td>
+<td align="left">เรนเดอร์หน้าแรกของ PDF ทั้งหน้าเป็นภาพ WebP</td>
+<td align="left">แนะนำสูงสุด (Tier 2)</td>
+<td align="left"><code>pip install pymupdf Pillow</code></td>
+</tr>
+<tr>
+<td align="left"><strong>Poppler pdftotext</strong></td>
+<td align="left">นับจำนวนหน้า PDF แม่นยำ 99.99%</td>
+<td align="left">แนะนำสูงสุด (Tier 1)</td>
+<td align="left"><code>sudo apt install poppler-utils</code></td>
+</tr>
+<tr>
+<td align="left"><strong>Poppler pdftoppm</strong></td>
+<td align="left">สกัดภาพหน้าแรก PDF ความเร็วสูง</td>
+<td align="left">แนะนำ (Tier 1)</td>
+<td align="left"><code>sudo apt install poppler-utils</code></td>
+</tr>
+<tr>
+<td align="left"><strong>PHP GD Extension</strong></td>
+<td align="left">วาดปกสำรองภาษาไทย &amp; ประมวลผลภาพ WebP</td>
+<td align="left">จำเป็น (Mandatory)</td>
+<td align="left"><code>sudo apt install php8.x-gd</code></td>
+</tr>
+<tr>
+<td align="left"><strong>ฟอนต์ Leelawadee UI / Tahoma</strong></td>
+<td align="left">ฟอนต์ TrueType สำหรับเรนเดอร์ภาษาไทย</td>
+<td align="left">จำเป็นบน GD</td>
+<td align="left">คัดลอกจาก Windows หรือใช้ Noto Sans Thai</td>
+</tr>
+<tr>
+<td align="left"><strong>Storage Symlink</strong></td>
+<td align="left">เชื่อมต่อ URL สาธารณะกับพื้นที่จัดเก็บ</td>
+<td align="left">จำเป็น (Mandatory)</td>
+<td align="left"><code>php artisan storage:link</code></td>
+</tr>
+</tbody>
+</table>
 
             </div>
             <footer>

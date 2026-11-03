@@ -138,6 +138,30 @@ php artisan test --filter=BackendAuditTest
 
 ---
 
+## ⚙️ ศูนย์จัดการคำสั่งระบบและการบำรุงรักษา (System Commands & Maintenance Dashboard)
+
+สำหรับผู้ดูแลระบบ (Super Admin) สามารถเข้าใช้งานหน้าต่างควบคุมและสั่งรันคำสั่งบำรุงรักษาระบบผ่านหน้าเว็บได้โดยตรงที่:
+👉 **`http://laravel_rdb.test/backend/system-commands`** (เมนูแถบซ้าย: **การดูแลระบบ ➔ คำสั่งและบำรุงรักษาระบบ**)
+
+เครื่องมือที่พร้อมใช้งานผ่านหน้าเว็บ:
+1. **สร้างภาพหน้าแรกของ PDF เป็นภาพ (.webp)**: สั่งประมวลผลเรนเดอร์หน้าแรกของไฟล์ PDF ทั้งระบบ แยกตามโมดูล พร้อมตัวเลือกบังคับสร้างใหม่ (`--force`) และกำหนดขอบเขตจำนวนรายการ (Limit)
+2. **ตรวจนับจำนวนหน้าเอกสาร PDF ย้อนหลังทั้งระบบ**: คำนวณจำนวนหน้าด้วย 4-Tier Engine และบันทึกลงฐานข้อมูล `pro_page_num` และ `pub_numfile` อัตโนมัติ
+3. **ล้างแคชระบบและเพิ่มประสิทธิภาพ (Clear Cache)**: ล้าง Application, Route, Blade View, และ Config Cache เพื่อให้ระบบอ่านค่าล่าสุดทันที
+4. **ตรวจสอบความพร้อมของเซิร์ฟเวอร์ (Server Engine Status)**: ตรวจจับ MuPDF/PyMuPDF, Poppler pdftotext/pdftoppm, PHP GD WebP, และสถานะ Storage Symlink
+
+---
+
+## 🔍 ระบบสืบค้นและทำดัชนีทางวิชาการสากล (Academic SEO & Sitemaps)
+
+ระบบติดตั้งสถาปัตยกรรม Academic SEO อัตโนมัติเต็มรูปแบบ:
+* **Google Scholar & Highwire Press Tags**: ฝังเมทาดาทา `citation_title`, `citation_author`, `citation_publication_date`, `citation_pdf_url`, `citation_journal_title`
+* **Dublin Core Metadata**: ครบถ้วนตามมาตรฐานบรรณารักษศาสตร์ (`DC.title`, `DC.creator`, `DC.date`, `DC.publisher`, `DC.identifier`)
+* **Social Sharing & Open Graph**: ดึงภาพหน้าปก `.webp` จากหน้าแรกของ PDF มาเป็นภาพพรีวิวขนาดใหญ่ (`summary_large_image`) เมื่อแชร์บน Facebook, LINE, X
+* **Schema.org Structured Data (JSON-LD)**: รองรับสคีมา `ScholarlyArticle`, `ResearchProject`, `Person`
+* **Dynamic XML Sitemap Index**: เข้าถึงได้ที่ **`http://laravel_rdb.test/sitemap.xml`** (แยกย่อยเป็น 5 หมวด: โครงการ, ผลงานตีพิมพ์, ทรัพย์สินทางปัญญา, การใช้ประโยชน์ และนักวิจัย โดยคัดกรองเฉพาะ `data_show = 1`)
+
+---
+
 ## 📚 ศูนย์รวมคู่มือการใช้งานระบบ (User Manuals & SOP Portal)
 
 ระบบมาพร้อมชุดเอกสารคู่มือปฏิบัติงานมาตรฐาน (SOP) ฉบับสมบูรณ์ในโฟลเดอร์ `docs/manuals/` ทั้งรูปแบบ Markdown (`.md`) และเว็บเพจ HTML5 (`.html`) ที่รองรับการค้นหา สารบัญคลิกข้ามบท โหมดมืด/สว่าง และการสั่งพิมพ์:
@@ -158,18 +182,23 @@ php .agents/skills/documentation-and-manuals/scripts/build_html_manuals.php
 ## 📝 บันทึกการอัปเดตระบบล่าสุด (Changelog / Update Log)
 
 ### อัปเดตประจำวันที่ 3 พฤศจิกายน 2569 (Release 2026.11.03)
-1. **ระบบสร้างภาพหน้าปกจากหน้าแรกของไฟล์ PDF ทั้งหน้า (Full-Page PDF Cover Rasterization Engine):**
+1. **ศูนย์จัดการคำสั่งระบบและการบำรุงรักษา (System Commands & Maintenance Dashboard):**
+   * เพิ่มหน้าจอควบคุมคำสั่งระบบในหลังบ้านที่ `/backend/system-commands` ให้ Super Admin สั่งรันคำสั่งบำรุงรักษาได้โดยตรงผ่านหน้าเว็บ
+   * รองรับการรันสร้างภาพปก PDF, ตรวจนับจำนวนหน้าย้อนหลัง, ล้างแคชระบบ (Clear Cache), และตรวจเช็คสถานะเอนจินของเซิร์ฟเวอร์
+   * แสดงกล่อง Terminal Output Log สวยงาม พร้อมบันทึกประวัติการรันลงใน Audit Trail อัตโนมัติ
+2. **ระบบสร้างภาพหน้าปกจากหน้าแรกของไฟล์ PDF ทั้งหน้า (Full-Page PDF Cover Rasterization Engine):**
    * อัปเกรด `PdfCoverService` และคำสั่ง `php artisan rdb:generate-pdf-covers` ให้เรนเดอร์**หน้าแรกของไฟล์ PDF ทั้งหน้า (Full-Page Rasterization)** ด้วยเอนจิน **MuPDF (`PyMuPDF` + `Pillow`)** และ **Poppler `pdftoppm`** แทนการดึงเฉพาะรูปภาพย่อยที่ฝังในไฟล์
-   * รองรับการประมวลผลแบบ Batch ความเร็วสูง (`chunkById(100)`) โดยไม่เกิดปัญหาหน่วยความจำเต็ม (`Memory Exhausted`) พร้อมระบบสร้างปกสำรองภาษาไทย (TrueType Font) อัตโนมัติเมื่อไม่พบไฟล์ PDF ต้นฉบับ
-   * คำสั่งสร้าง/อัปเดตภาพหน้าปกทั้งระบบ:
-     ```bash
-     php artisan rdb:generate-pdf-covers --module=all --force
-     ```
-2. **ปรับผังการแสดงผลหน้ารายละเอียดฝั่งหน้าบ้าน (Frontend Show Layout Optimization):**
+   * รองรับการประมวลผลแบบ Batch ความเร็วสูง (`chunkById(100)`) โดยไม่เกิดปัญหาหน่วยความจำเต็ม (`Memory Exhausted`) พร้อมระบบสร้างปกสำรองภาษาไทย (TrueType Font `Leelawadee UI Bold`) แสดงรายชื่อนักวิจัยครบทุกคน ไม่ตัดทอนด้วย "และคณะ"
+   * เพิ่มปุ่ม **"ดึงภาพหน้าปกไฟล์ใหม่ อีกครั้ง"** ในหน้ารายละเอียดโครงการวิจัยและผลงานตีพิมพ์หลังบ้าน พร้อมระบบ Cache-Busting `?v=`
+   * ประมวลผลสร้างภาพหน้าปกใหม่สำเร็จครบ 100% ทั้งระบบ: โครงการวิจัย 1,864 โครงการ และผลงานตีพิมพ์ 1,601 รายการ (รวม 3,465 รายการ 0 failed)
+3. **สถาปัตยกรรม Academic SEO, Google Scholar Metadata & Dynamic XML Sitemaps:**
+   * ฝัง Highwire Press (`citation_*`), Dublin Core (`DC.*`), Open Graph พร้อมภาพปก PDF `.webp` และ Schema.org JSON-LD
+   * พัฒนาระบบไดนามิกไซต์แมปที่ `/sitemap.xml` แยก 5 ซับไซต์แมป พร้อมตัวกรอง `data_show = 1` เข้มงวด
+4. **ปรับผังการแสดงผลหน้ารายละเอียดฝั่งหน้าบ้าน (Frontend Show Layout Optimization):**
    * **โครงการวิจัย (`/rdbproject/{id}`)**: ย้ายการ์ด `ไฟล์เอกสาร (Files)` พร้อมภาพปกหน้าแรกรายงานวิจัยขึ้นมาแสดงเป็นลำดับที่ 1 ด้านขวาบนสุด ก่อนการ์ด `คณะผู้วิจัย (Researchers)`
    * **ผลงานตีพิมพ์ (`/rdbpublished/{id}`)**: ย้ายการ์ด `ไฟล์เอกสาร (Files)` ขึ้นไว้ด้านขวาบนสุดก่อน `ผู้เขียนบทความ (Authors)` และย้ายการ์ด `โครงการวิจัยที่เกี่ยวข้อง` ไปไว้ด้านซ้ายก่อน `บทคัดย่อ (Abstract)`
    * **การนำไปใช้ประโยชน์ (`/rdbprojectutilize/{id}`) และทรัพย์สินทางปัญญา (`/rdbdip/{id}`)**: ย้ายการ์ด `โครงการวิจัยที่เกี่ยวข้อง` ไปไว้ด้านซ้ายก่อนการ์ดรายละเอียด/บทสรุปการประดิษฐ์
-3. **ยกระดับมาตรฐาน Dashboard & Data Visualization (`ui-dashboard-visualization`):**
+5. **ยกระดับมาตรฐาน Dashboard & Data Visualization (`ui-dashboard-visualization`):**
    * เพิ่มมาตรฐาน KPI Cards พร้อม YoY Delta, ตารางจัดอันดับพร้อมเส้นสัดส่วน `3px` (Slim Share Bars), กฎ Small Base (`< 5`), และเกณฑ์ตรวจสอบ 3 ความกว้างหน้าจอ (`1920px`, `1440px`, `375px`)
 
 ### อัปเดตประจำวันที่ 2 พฤศจิกายน 2569 (Release 2026.11.02)

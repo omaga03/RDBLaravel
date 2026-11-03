@@ -41,6 +41,7 @@ class BackendAuditTest extends TestCase
             'backend.rdb_dip.index',
             'backend.rdbprojectutilize.index',
             'backend.settings.access_control',
+            'backend.system_commands.index',
         ];
 
         foreach ($routes as $route) {

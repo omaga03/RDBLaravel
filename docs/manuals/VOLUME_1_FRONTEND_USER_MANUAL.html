@@ -449,6 +449,19 @@
 <li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-8-%E0%B9%81%E0%B8%94%E0%B8%8A%E0%B8%9A%E0%B8%AD%E0%B8%A3%E0%B9%8C%E0%B8%94%E0%B8%AA%E0%B8%96%E0%B8%B4%E0%B8%95%E0%B8%B4%E0%B8%AA%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%99%E0%B9%80%E0%B8%97%E0%B8%A8%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%9F%E0%B8%B5%E0%B8%94%E0%B8%82%E0%B9%88%E0%B8%B2%E0%B8%A7%E0%B8%AA%E0%B8%B2%E0%B8%A3-dashboards--rss-feeds">บทที่ 8: แดชบอร์ดสถิติสารสนเทศและฟีดข่าวสาร (Dashboards &amp; RSS Feeds)</a>
 <ul>
 <li>8.1 การใช้งานศูนย์สารสนเทศงานวิจัย (Intelligence Dashboards: 6 มิติ)</li>
+<li>8.2 แถบตัวกรองแดชบอร์ดและการวิเคราะห์ข้อมูลเปรียบเทียบข้ามปี พ.ศ. (พร้อม YoY Deltas &amp; Small Base Rule)</li>
+<li>8.3 กราฟสถิติแบบโต้ตอบ (Chart.js) และตารางจัดอันดับพร้อมเส้นสัดส่วน 3px (Ranked Breakdown Lists)</li>
+<li>8.4 การสมัครรับฟีดข่าวสารผ่าน XML RSS Feeds</li>
+</ul>
+</li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-9-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%80%E0%B8%8A%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%A1%E0%B9%82%E0%B8%A2%E0%B8%87%E0%B8%AA%E0%B8%B2%E0%B8%81%E0%B8%A5%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%97%E0%B8%B3%E0%B8%94%E0%B8%B1%E0%B8%8A%E0%B8%99%E0%B8%B5%E0%B8%97%E0%B8%B2%E0%B8%87%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-academic-seo-google-scholar--dynamic-sitemaps">บทที่ 9: การเชื่อมโยงสากลและการจัดทำดัชนีทางวิชาการ (Academic SEO, Google Scholar &amp; Dynamic Sitemaps)</a>
+<ul>
+<li>9.1 การจัดทำดัชนีสำหรับ Google Scholar (Highwire Press Metadata)</li>
+<li>9.2 มาตรฐานคลังสารสนเทศสถาบัน Dublin Core (DC.*)</li>
+<li>9.3 การแสดงผลพรีวิวบนโซเชียลมีเดียด้วย Open Graph และภาพปก .webp</li>
+<li>9.4 ข้อมูลโครงสร้าง Schema.org JSON-LD สำหรับ Search Engine ยุคใหม่</li>
+<li>9.5 แผนผังเว็บไซต์ไดนามิก Dynamic XML Sitemaps (/sitemap.xml)</li>
+<li>8.1 การใช้งานศูนย์สารสนเทศงานวิจัย (Intelligence Dashboards: 6 มิติ)</li>
 <li>8.2 แถบตัวกรองแดชบอร์ดและการวิเคราะห์ข้อมูลเปรียบเทียบข้ามปี พ.ศ.</li>
 <li>8.3 กราฟสถิติแบบโต้ตอบ (Interactive Chart.js) และการตรวจสอบข้อมูล Tooltip</li>
 <li>8.4 การสมัครรับฟีดข่าวสารและงานประชุมวิชาการผ่าน XML RSS Feeds</li>
@@ -1087,17 +1100,35 @@ flowchart LR
 </li>
 </ul>
 <hr />
-<a id="82-%E0%B9%81%E0%B8%96%E0%B8%9A%E0%B8%95%E0%B8%B1%E0%B8%A7%E0%B8%81%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B9%81%E0%B8%94%E0%B8%8A%E0%B8%9A%E0%B8%AD%E0%B8%A3%E0%B9%8C%E0%B8%94%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A7%E0%B8%B4%E0%B9%80%E0%B8%84%E0%B8%A3%E0%B8%B2%E0%B8%B0%E0%B8%AB%E0%B9%8C%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B9%80%E0%B8%9B%E0%B8%A3%E0%B8%B5%E0%B8%A2%E0%B8%9A%E0%B9%80%E0%B8%97%E0%B8%B5%E0%B8%A2%E0%B8%9A%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B8%A1%E0%B8%9B%E0%B8%B5-%E0%B8%9E%E0%B8%A8" class="manual-anchor"></a><h3 id="82-แถบตัวกรองแดชบอร์ดและการวิเคราะห์ข้อมูลเปรียบเทียบข้ามปี-พศ">8.2 แถบตัวกรองแดชบอร์ดและการวิเคราะห์ข้อมูลเปรียบเทียบข้ามปี พ.ศ.</h3>
+<a id="82-แถบตัวกรองแดชบอร์ดและการวิเคราะห์ข้อมูลเปรียบเทียบข้ามปี-พศ-พร้อม-yoy-deltas-small-base-rule" class="manual-anchor"></a><a id="82-%E0%B9%81%E0%B8%96%E0%B8%9A%E0%B8%95%E0%B8%B1%E0%B8%A7%E0%B8%81%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B9%81%E0%B8%94%E0%B8%8A%E0%B8%9A%E0%B8%AD%E0%B8%A3%E0%B9%8C%E0%B8%94%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A7%E0%B8%B4%E0%B9%80%E0%B8%84%E0%B8%A3%E0%B8%B2%E0%B8%B0%E0%B8%AB%E0%B9%8C%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B9%80%E0%B8%9B%E0%B8%A3%E0%B8%B5%E0%B8%A2%E0%B8%9A%E0%B9%80%E0%B8%97%E0%B8%B5%E0%B8%A2%E0%B8%9A%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B8%A1%E0%B8%9B%E0%B8%B5-%E0%B8%9E%E0%B8%A8-%E0%B8%9E%E0%B8%A3%E0%B9%89%E0%B8%AD%E0%B8%A1-yoy-deltas--small-base-rule" class="manual-anchor"></a><a id="82-%E0%B9%81%E0%B8%96%E0%B8%9A%E0%B8%95%E0%B8%B1%E0%B8%A7%E0%B8%81%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B9%81%E0%B8%94%E0%B8%8A%E0%B8%9A%E0%B8%AD%E0%B8%A3%E0%B9%8C%E0%B8%94%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A7%E0%B8%B4%E0%B9%80%E0%B8%84%E0%B8%A3%E0%B8%B2%E0%B8%B0%E0%B8%AB%E0%B9%8C%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B9%80%E0%B8%9B%E0%B8%A3%E0%B8%B5%E0%B8%A2%E0%B8%9A%E0%B9%80%E0%B8%97%E0%B8%B5%E0%B8%A2%E0%B8%9A%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B8%A1%E0%B8%9B%E0%B8%B5-%E0%B8%9E%E0%B8%A8-%E0%B8%9E%E0%B8%A3%E0%B9%89%E0%B8%AD%E0%B8%A1-yoy-deltas-small-base-rule" class="manual-anchor"></a><h3 id="82-แถบตัวกรองแดชบอร์ดและการวิเคราะห์ข้อมูลเปรียบเทียบข้ามปี-พศ-พร้อม-yoy-deltas--small-base-rule">8.2 แถบตัวกรองแดชบอร์ดและการวิเคราะห์ข้อมูลเปรียบเทียบข้ามปี พ.ศ. (พร้อม YoY Deltas &amp; Small Base Rule)</h3>
 <ul>
 <li><strong>แผงตัวกรองสารสนเทศ (Intelligence Filters)</strong>: สามารถเลือกกรองเฉพาะปีงบประมาณ พ.ศ. หรือคณะที่สนใจ</li>
-<li>เมื่อกดกรอง ระบบจะคำนวณและเรนเดอร์กราฟใหม่ทันที โดยกล่องตัวกรองจะพับเก็บลงอัตโนมัติเพื่อให้เห็นกราฟสถิติได้เต็มหน้าจอ</li>
+<li><strong>ระบบเปรียบเทียบกับปีก่อนหน้า (Honest YoY Comparison)</strong>:
+<ul>
+<li>ทุกการ์ด KPI สถิติหลักจะแสดงป้ายส่วนต่างเทียบกับปีก่อนหน้า (YoY Delta Badge) อัตโนมัติ:
+<ul>
+<li>สีเขียว <code>↗ +N%</code>: ตัวเลขเพิ่มขึ้นจากปีก่อนหน้า</li>
+<li>สีแดง <code>↘ -N%</code>: ตัวเลขลดลงจากปีก่อนหน้า</li>
+<li>สีเทา <code>– 0%</code>: ตัวเลขเท่าเดิม</li>
+</ul>
+</li>
+<li><strong>กฎป้องกันตัวเลขก้าวกระโดด (Small Base Rule)</strong>: หากข้อมูลปีก่อนหน้าน้อยกว่า 5 รายการ ระบบจะไม่แสดงเปอร์เซ็นต์ที่อาจดูเกินจริง แต่จะแสดงข้อความเชิงซื่อตรง เช่น <code>ปีก่อนหน้า N</code> สีเทาแทน เพื่อความถูกต้องตามหลักสถิติวิชาการ</li>
+<li><strong>ตัวเลขแนวตรงกัน (Tabular Numbers)</strong>: ตัวเลขทั้งหมดจัดแสดงผลด้วย CSS <code>font-variant-numeric: tabular-nums</code> ทำให้หลักหน่วย สิบ ร้อย ตรงแนวกันเสมอแม้อ่านในมุมมองตัวเลขขนาดใหญ่</li>
+</ul>
+</li>
 </ul>
 <hr />
-<a id="83-%E0%B8%81%E0%B8%A3%E0%B8%B2%E0%B8%9F%E0%B8%AA%E0%B8%96%E0%B8%B4%E0%B8%95%E0%B8%B4%E0%B9%81%E0%B8%9A%E0%B8%9A%E0%B9%82%E0%B8%95%E0%B9%89%E0%B8%95%E0%B8%AD%E0%B8%9A-interactive-chartjs-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5-tooltip" class="manual-anchor"></a><h3 id="83-กราฟสถิติแบบโต้ตอบ-interactive-chartjs-และการตรวจสอบข้อมูล-tooltip">8.3 กราฟสถิติแบบโต้ตอบ (Interactive Chart.js) และการตรวจสอบข้อมูล Tooltip</h3>
+<a id="83-%E0%B8%81%E0%B8%A3%E0%B8%B2%E0%B8%9F%E0%B8%AA%E0%B8%96%E0%B8%B4%E0%B8%95%E0%B8%B4%E0%B9%81%E0%B8%9A%E0%B8%9A%E0%B9%82%E0%B8%95%E0%B9%89%E0%B8%95%E0%B8%AD%E0%B8%9A-chartjs-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%95%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%AD%E0%B8%B1%E0%B8%99%E0%B8%94%E0%B8%B1%E0%B8%9A%E0%B8%9E%E0%B8%A3%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B9%80%E0%B8%AA%E0%B9%89%E0%B8%99%E0%B8%AA%E0%B8%B1%E0%B8%94%E0%B8%AA%E0%B9%88%E0%B8%A7%E0%B8%99-3px-ranked-breakdown-lists" class="manual-anchor"></a><h3 id="83-กราฟสถิติแบบโต้ตอบ-chartjs-และตารางจัดอันดับพร้อมเส้นสัดส่วน-3px-ranked-breakdown-lists">8.3 กราฟสถิติแบบโต้ตอบ (Chart.js) และตารางจัดอันดับพร้อมเส้นสัดส่วน 3px (Ranked Breakdown Lists)</h3>
 <ul>
 <li>กราฟทั้งหมดสร้างด้วย <strong>Chart.js 4.x</strong> รองรับการโต้ตอบแบบอินเทอร์แอคทีฟ</li>
 <li><strong>Hover Inspection</strong>: เมื่อนำเมาส์ไปชี้ที่แท่งกราฟหรือเส้นข้อมูล จะมี Tooltip แสดงตัวเลขงบประมาณ, ร้อยละสัดส่วน และจำนวนโครงการอย่างแม่นยำ</li>
 <li><strong>Responsive Legend Toggle</strong>: สามารถคลิกที่ชื่อกลุ่มข้อมูลบนแถบคำอธิบาย (Legend) เพื่อเปิด/ปิดการแสดงผลของชุดข้อมูลนั้นๆ ได้อย่างอิสระ</li>
+<li><strong>ตารางจัดอันดับพร้อมแถบสัดส่วน 3px (Ranked Breakdown Lists with Slim Share Bars)</strong>:
+<ul>
+<li>ในหน้าหลักและหน้าภาพรวม จะมีตารางแสดง 5 อันดับคณะที่มีผลงานสูงสุดควบคู่กับกราฟโดนัท</li>
+<li>มีเส้นหลอดสี 3px ใต้ชื่อคณะแสดงสัดส่วนร้อยละ ทำให้ผู้บริหารและอาจารย์มองเห็นภาพรวมสัดส่วนได้ทันทีในแวบแรก (At a glance) โดยไม่ต้องเสียเวลานำเมาส์ไปชี้กราฟ</li>
+</ul>
+</li>
 </ul>
 <hr />
 <a id="84-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%A1%E0%B8%B1%E0%B8%84%E0%B8%A3%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B8%9F%E0%B8%B5%E0%B8%94%E0%B8%82%E0%B9%88%E0%B8%B2%E0%B8%A7%E0%B8%AA%E0%B8%B2%E0%B8%A3%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9C%E0%B9%88%E0%B8%B2%E0%B8%99-xml-rss-feeds" class="manual-anchor"></a><h3 id="84-การสมัครรับฟีดข่าวสารและงานประชุมวิชาการผ่าน-xml-rss-feeds">8.4 การสมัครรับฟีดข่าวสารและงานประชุมวิชาการผ่าน XML RSS Feeds</h3>
@@ -1105,6 +1136,52 @@ flowchart LR
 <ul>
 <li><strong>RSS ข่าวประชาสัมพันธ์และทุนวิจัย</strong>: <code>http://laravel_rdb.test/feeds/news</code></li>
 <li><strong>RSS งานประชุมวิชาการระดับชาติและนานาชาติ</strong>: <code>http://laravel_rdb.test/feeds/conferences</code></li>
+</ul>
+<hr />
+<a id="บทที่-9-การเชื่อมโยงสากลและการจัดทำดัชนีทางวิชาการ-academic-seo-google-scholar-dynamic-sitemaps" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-9-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%80%E0%B8%8A%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%A1%E0%B9%82%E0%B8%A2%E0%B8%87%E0%B8%AA%E0%B8%B2%E0%B8%81%E0%B8%A5%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%97%E0%B8%B3%E0%B8%94%E0%B8%B1%E0%B8%8A%E0%B8%99%E0%B8%B5%E0%B8%97%E0%B8%B2%E0%B8%87%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-academic-seo-google-scholar--dynamic-sitemaps" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-9-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%80%E0%B8%8A%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%A1%E0%B9%82%E0%B8%A2%E0%B8%87%E0%B8%AA%E0%B8%B2%E0%B8%81%E0%B8%A5%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%97%E0%B8%B3%E0%B8%94%E0%B8%B1%E0%B8%8A%E0%B8%99%E0%B8%B5%E0%B8%97%E0%B8%B2%E0%B8%87%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-academic-seo-google-scholar-dynamic-sitemaps" class="manual-anchor"></a><h2 id="บทที่-9-การเชื่อมโยงสากลและการจัดทำดัชนีทางวิชาการ-academic-seo-google-scholar--dynamic-sitemaps">บทที่ 9: การเชื่อมโยงสากลและการจัดทำดัชนีทางวิชาการ (Academic SEO, Google Scholar &amp; Dynamic Sitemaps)</h2>
+<div class="manual-callout callout-note"><div class="callout-header"><i class="bi bi-info-circle-fill"></i> ข้อมูลจำเพาะ / หมายเหตุ (NOTE)</div><div class="callout-body"><p>ระบบฐานข้อมูลงานวิจัย มรภ.เพชรบูรณ์ ติดตั้งสถาปัตยกรรม <strong>Academic SEO &amp; Universal Indexing</strong> ตามมาตรฐานสากลของ <strong>Google Scholar, Dublin Core, และ Schema.org</strong> ทำให้ผลงานวิจัยของคณาจารย์ถูกค้นพบ จัดทำดัชนี และนำไปอ้างอิงได้อย่างกว้างขวางทั่วโลก</p>
+</div></div>
+<a id="91-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%97%E0%B8%B3%E0%B8%94%E0%B8%B1%E0%B8%8A%E0%B8%99%E0%B8%B5%E0%B8%AA%E0%B8%B3%E0%B8%AB%E0%B8%A3%E0%B8%B1%E0%B8%9A-google-scholar-highwire-press-metadata" class="manual-anchor"></a><h3 id="91-การจัดทำดัชนีสำหรับ-google-scholar-highwire-press-metadata">9.1 การจัดทำดัชนีสำหรับ Google Scholar (Highwire Press Metadata)</h3>
+<p>ในหน้าบทความตีพิมพ์ (<code>/rdbpublished/{id}</code>) และหน้ารายงานโครงการวิจัย (<code>/rdbproject/{id}</code>) ระบบจะฝังแท็กเมทาดาทามาตรฐาน Highwire Press ในส่วน <code>&lt;head&gt;</code> ของ HTML โดยอัตโนมัติ:</p>
+<ul>
+<li><code>&lt;meta name=&quot;citation_title&quot; content=&quot;...&quot;&gt;</code>: ชื่อเรื่องบทความวิจัยภาษาไทยและอังกฤษ</li>
+<li><code>&lt;meta name=&quot;citation_author&quot; content=&quot;...&quot;&gt;</code>: รายชื่อผู้แต่งและนักวิจัยทุกคน (แยก 1 แท็กต่อ 1 ท่าน)</li>
+<li><code>&lt;meta name=&quot;citation_publication_date&quot; content=&quot;YYYY/MM/DD&quot;&gt;</code>: วันที่ตีพิมพ์ในรูปแบบ ค.ศ. สากล</li>
+<li><code>&lt;meta name=&quot;citation_journal_title&quot; content=&quot;...&quot;&gt;</code>: ชื่อวารสารวิชาการ</li>
+<li><code>&lt;meta name=&quot;citation_pdf_url&quot; content=&quot;...&quot;&gt;</code>: ลิงก์ตรงสำหรับหุ่นยนต์ Google Scholar ดาวน์โหลดเอกสาร PDF</li>
+</ul>
+<a id="92-%E0%B8%A1%E0%B8%B2%E0%B8%95%E0%B8%A3%E0%B8%90%E0%B8%B2%E0%B8%99%E0%B8%84%E0%B8%A5%E0%B8%B1%E0%B8%87%E0%B8%AA%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%99%E0%B9%80%E0%B8%97%E0%B8%A8%E0%B8%AA%E0%B8%96%E0%B8%B2%E0%B8%9A%E0%B8%B1%E0%B8%99-dublin-core-dc" class="manual-anchor"></a><h3 id="92-มาตรฐานคลังสารสนเทศสถาบัน-dublin-core-dc">9.2 มาตรฐานคลังสารสนเทศสถาบัน Dublin Core (<code>DC.*</code>)</h3>
+<p>รองรับการสืบค้นและแลกเปลี่ยนข้อมูลระหว่างคลังสารสนเทศสถาบัน (Institutional Repositories):</p>
+<ul>
+<li><code>DC.title</code>, <code>DC.creator</code>, <code>DC.date</code>, <code>DC.publisher</code>, <code>DC.identifier</code></li>
+</ul>
+<a id="93-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%81%E0%B8%AA%E0%B8%94%E0%B8%87%E0%B8%9C%E0%B8%A5%E0%B8%9E%E0%B8%A3%E0%B8%B5%E0%B8%A7%E0%B8%B4%E0%B8%A7%E0%B8%9A%E0%B8%99%E0%B9%82%E0%B8%8B%E0%B9%80%E0%B8%8A%E0%B8%B5%E0%B8%A2%E0%B8%A5%E0%B8%A1%E0%B8%B5%E0%B9%80%E0%B8%94%E0%B8%B5%E0%B8%A2%E0%B8%94%E0%B9%89%E0%B8%A7%E0%B8%A2-open-graph-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%A0%E0%B8%B2%E0%B8%9E%E0%B8%9B%E0%B8%81-webp" class="manual-anchor"></a><h3 id="93-การแสดงผลพรีวิวบนโซเชียลมีเดียด้วย-open-graph-และภาพปก-webp">9.3 การแสดงผลพรีวิวบนโซเชียลมีเดียด้วย Open Graph และภาพปก <code>.webp</code></h3>
+<p>เมื่อนำลิงก์บทความวิจัยหรือโครงการวิจัยไปแชร์บน Facebook, LINE, X (Twitter), หรือแอปพลิเคชันส่งข้อความ:</p>
+<ul>
+<li>ระบบส่งแท็ก <code>og:image</code> และ <code>twitter:image</code> เป็น<strong>ภาพหน้าปกหน้าแรกของ PDF ฉบับเต็ม (.webp)</strong></li>
+<li>แสดงภาพขนาดใหญ่ คมชัด มีตรามหาวิทยาลัยและชื่อเรื่องบทความภาษาไทยอย่างเป็นทางการ เพิ่มความน่าเชื่อถือและยอดการเข้าชม</li>
+</ul>
+<a id="94-%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B9%82%E0%B8%84%E0%B8%A3%E0%B8%87%E0%B8%AA%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%87-schemaorg-json-ld-%E0%B8%AA%E0%B8%B3%E0%B8%AB%E0%B8%A3%E0%B8%B1%E0%B8%9A-search-engine-%E0%B8%A2%E0%B8%B8%E0%B8%84%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88" class="manual-anchor"></a><h3 id="94-ข้อมูลโครงสร้าง-schemaorg-json-ld-สำหรับ-search-engine-ยุคใหม่">9.4 ข้อมูลโครงสร้าง Schema.org JSON-LD สำหรับ Search Engine ยุคใหม่</h3>
+<p>ฝังบล็อกสคริปต์ <code>&lt;script type=&quot;application/ld+json&quot;&gt;</code> ตามมาตรฐาน W3C:</p>
+<ul>
+<li><strong>บทความตีพิมพ์</strong>: สคีมา <code>@type: &quot;ScholarlyArticle&quot;</code></li>
+<li><strong>โครงการวิจัย</strong>: สคีมา <code>@type: &quot;ResearchProject&quot;</code></li>
+<li><strong>ทำเนียบนักวิจัย</strong>: สคีมา <code>@type: &quot;Person&quot;</code> พร้อมระบุลิงก์ <code>sameAs</code> ชี้ไปยังโปรไฟล์ Scopus Author ID และ ORCID iD</li>
+</ul>
+<a id="95-%E0%B9%81%E0%B8%9C%E0%B8%99%E0%B8%9C%E0%B8%B1%E0%B8%87%E0%B9%80%E0%B8%A7%E0%B9%87%E0%B8%9A%E0%B9%84%E0%B8%8B%E0%B8%95%E0%B9%8C%E0%B9%84%E0%B8%94%E0%B8%99%E0%B8%B2%E0%B8%A1%E0%B8%B4%E0%B8%81-dynamic-xml-sitemaps-sitemapxml" class="manual-anchor"></a><h3 id="95-แผนผังเว็บไซต์ไดนามิก-dynamic-xml-sitemaps-sitemapxml">9.5 แผนผังเว็บไซต์ไดนามิก Dynamic XML Sitemaps (<code>/sitemap.xml</code>)</h3>
+<p>สำหรับหุ่นยนต์ Search Engine ของ Google, Bing, และ Google Scholar เข้ามาสำรวจข้อมูล:</p>
+<ul>
+<li><strong>Sitemap Index หลัก</strong>: <code>http://laravel_rdb.test/sitemap.xml</code></li>
+<li><strong>ระบบจัดกลุ่มออกเป็น 5 ซับไซต์แมป</strong>:
+<ol>
+<li><code>sitemap-projects.xml</code>: โครงการวิจัยทั้งหมด</li>
+<li><code>sitemap-publications.xml</code>: ผลงานตีพิมพ์และบทความวิจัย</li>
+<li><code>sitemap-ip.xml</code>: ทรัพย์สินทางปัญญา</li>
+<li><code>sitemap-utilizations.xml</code>: การนำไปใช้ประโยชน์</li>
+<li><code>sitemap-researchers.xml</code>: ข้อมูลอาจารย์และนักวิจัย</li>
+</ol>
+</li>
+<li><strong>ความถูกต้อง 100%</strong>: ทุกรายการใน Sitemap กรองเฉพาะข้อมูลที่ได้รับอนุมัติให้เปิดเผยต่อสาธารณะ (<code>data_show = 1</code>) เท่านั้น ข้อมูลฉบับร่างหรือที่ถูกลบจะไม่ปรากฏใน Sitemap โดยเด็ดขาด</li>
 </ul>
 
             </div>
