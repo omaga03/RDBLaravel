@@ -504,9 +504,10 @@
             border: 1px solid var(--bs-border-color, #CBD5E1) !important;
             background-color: rgba(15, 23, 42, 0.04) !important;
             transition: all 0.2s ease-in-out !important;
+            font-weight: 500;
         }
         .rdb-nav-portal-btn i {
-            color: var(--bs-secondary-color, #64748B) !important;
+            color: var(--bs-secondary-color, #475569) !important;
             transition: color 0.2s ease-in-out !important;
         }
         .rdb-nav-portal-btn:hover {
@@ -531,44 +532,67 @@
 
         /* Dark Mode Overrides for Backend Topbar Quick Nav Buttons */
         [data-bs-theme="dark"] .rdb-nav-portal-btn {
-            color: #FFFFFF !important;
-            border: 1px solid rgba(255, 255, 255, 0.35) !important;
-            background-color: rgba(255, 255, 255, 0.1) !important;
+            color: #F8FAFC !important;
+            border: 1px solid rgba(255, 255, 255, 0.25) !important;
+            background-color: rgba(255, 255, 255, 0.08) !important;
         }
         [data-bs-theme="dark"] .rdb-nav-portal-btn i {
-            color: #FFFFFF !important;
+            color: #94A3B8 !important;
         }
         [data-bs-theme="dark"] .rdb-nav-portal-btn:hover {
-            color: #0F172A !important;
-            background-color: #FFFFFF !important;
-            border-color: #FFFFFF !important;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+            color: #FFFFFF !important;
+            background-color: rgba(255, 255, 255, 0.16) !important;
+            border-color: rgba(255, 255, 255, 0.45) !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
         }
         [data-bs-theme="dark"] .rdb-nav-portal-btn:hover i {
-            color: #0F172A !important;
+            color: #FFFFFF !important;
         }
         [data-bs-theme="dark"] .rdb-nav-btn-active {
-            color: #0F172A !important;
-            background-color: #FFFFFF !important;
-            border: 1px solid #FFFFFF !important;
-            font-weight: 700 !important;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+            color: #FFFFFF !important;
+            background-color: #2563EB !important;
+            border: 1px solid #3B82F6 !important;
+            font-weight: 600 !important;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35) !important;
         }
         [data-bs-theme="dark"] .rdb-nav-btn-active i {
-            color: #2563EB !important;
+            color: #FBBF24 !important;
         }
 
         /* Backend Sidebar Trigger Icons */
         #rdbDesktopSidebarTrigger,
         #rdbMobileSidebarTrigger {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--rdb-radius-sm);
+            border: 1px solid var(--bs-border-color);
+            background: rgba(15, 23, 42, 0.04);
             color: var(--bs-body-color) !important;
-            opacity: 0.75;
-            transition: opacity 0.15s ease, transform 0.15s ease;
+            transition: all 0.2s ease;
+            text-decoration: none;
         }
         #rdbDesktopSidebarTrigger:hover,
         #rdbMobileSidebarTrigger:hover {
-            opacity: 1;
-            transform: scale(1.05);
+            border-color: #1E3A5F;
+            color: #1E3A5F !important;
+            background: rgba(30, 58, 95, 0.08);
+            transform: scale(1.02);
+        }
+        [data-bs-theme="dark"] #rdbDesktopSidebarTrigger,
+        [data-bs-theme="dark"] #rdbMobileSidebarTrigger {
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.06);
+            color: #FFFFFF !important;
+        }
+        [data-bs-theme="dark"] #rdbDesktopSidebarTrigger:hover,
+        [data-bs-theme="dark"] #rdbMobileSidebarTrigger:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+            color: #FFFFFF !important;
         }
 
         /* ==========================================================================
@@ -1128,11 +1152,11 @@
             <div class="{{ request()->is('backend*') ? 'container-fluid px-4' : 'container' }}">
                 @if($useBackendSidebar)
                     <!-- Mobile Offcanvas Sidebar Trigger (< 992px) -->
-                    <button type="button" class="btn btn-sm btn-link text-body p-1.5 me-2 d-lg-none" id="rdbMobileSidebarTrigger" aria-label="เปิดเมนูจัดการระบบ" title="เปิดเมนูจัดการระบบ">
-                        <i class="bi bi-list fs-4"></i>
+                    <button type="button" class="btn btn-sm me-2 d-lg-none align-items-center justify-content-center" id="rdbMobileSidebarTrigger" aria-label="เปิดเมนูจัดการระบบ" title="เปิดเมนูจัดการระบบ">
+                        <i class="bi bi-list fs-5"></i>
                     </button>
                     <!-- Desktop Mini/Expanded Sidebar Trigger (>= 992px) -->
-                    <button type="button" class="btn btn-sm btn-link text-body p-1.5 me-2 d-none d-lg-inline-flex align-items-center" id="rdbDesktopSidebarTrigger" title="ย่อ/ขยายแถบเมนูด้านข้าง">
+                    <button type="button" class="btn btn-sm me-2 d-none d-lg-inline-flex align-items-center justify-content-center" id="rdbDesktopSidebarTrigger" title="ย่อ/ขยายแถบเมนูด้านข้าง">
                         <i class="bi bi-layout-sidebar-inset fs-5"></i>
                     </button>
                 @endif

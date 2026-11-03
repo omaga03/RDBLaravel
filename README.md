@@ -145,9 +145,22 @@ php artisan test --filter=BackendAuditTest
 
 เครื่องมือที่พร้อมใช้งานผ่านหน้าเว็บ:
 1. **สร้างภาพหน้าแรกของ PDF เป็นภาพ (.webp)**: สั่งประมวลผลเรนเดอร์หน้าแรกของไฟล์ PDF ทั้งระบบ แยกตามโมดูล พร้อมตัวเลือกบังคับสร้างใหม่ (`--force`) และกำหนดขอบเขตจำนวนรายการ (Limit)
-2. **ตรวจนับจำนวนหน้าเอกสาร PDF ย้อนหลังทั้งระบบ**: คำนวณจำนวนหน้าด้วย 4-Tier Engine และบันทึกลงฐานข้อมูล `pro_page_num` และ `pub_numfile` อัตโนมัติ
+2. **ตรวจนับจำนวนหน้าเอกสาร PDF ย้อนหลังทั้งระบบ**: คำนวณจำนวนหน้าด้วย 4-Tier Engine (Poppler pdftotext แม่นยำ 99.99%) และบันทึกลงฐานข้อมูล `pro_page_num` และ `pub_numfile` อัตโนมัติ
 3. **ล้างแคชระบบและเพิ่มประสิทธิภาพ (Clear Cache)**: ล้าง Application, Route, Blade View, และ Config Cache เพื่อให้ระบบอ่านค่าล่าสุดทันที
-4. **ตรวจสอบความพร้อมของเซิร์ฟเวอร์ (Server Engine Status)**: ตรวจจับ MuPDF/PyMuPDF, Poppler pdftotext/pdftoppm, PHP GD WebP, และสถานะ Storage Symlink
+4. **ตรวจสอบความพร้อมของเซิร์ฟเวอร์ (Server Engine Status)**: ตรวจจับ MuPDF/PyMuPDF, Poppler pdftotext/pdftoppm, PHP GD WebP, และสถานะ Storage Symlink พร้อมปุ่มคู่มือติดตั้ง
+5. **ศูนย์สำรองและกู้คืนข้อมูลระบบ (System Backup & Safe Restore Hub — The Creator Only)**: 
+   * สำรองข้อมูล 3 รูปแบบ: เฉพาะฐานข้อมูล MariaDB (`.sql.gz`), เฉพาะไฟล์เอกสาร Storage (`.zip`), และสำรองทั้งระบบ (Full Archive)
+   * ระบบกู้คืนฐานข้อมูลผ่านหน้าเว็บที่ปลอดภัยสูงสุด ด้วยการยืนยันรหัส OTP 6 หลักส่งตรงเข้า Email ของ The Creator พร้อมสร้าง Safety Snapshot ให้อัตโนมัติก่อนเริ่มกู้คืน
+   * ดาวน์โหลดไฟล์สำรองลงเครื่องแอดมินโดยตรง และคู่มือซิงค์ขึ้น Google Drive อัตโนมัติผ่าน Rclone
+
+```bash
+# คำสั่งสำรองข้อมูลผ่าน Terminal
+php artisan rdb:backup --type=all   # หรือ --type=db, --type=files
+php artisan rdb:backup --type=all --clean-older-than-days=30
+
+# คำสั่งกู้คืนระบบฉุกเฉินผ่าน Shell
+php artisan rdb:restore backup_db_xxxx.sql.gz --force
+```
 
 ---
 
@@ -182,23 +195,32 @@ php .agents/skills/documentation-and-manuals/scripts/build_html_manuals.php
 ## 📝 บันทึกการอัปเดตระบบล่าสุด (Changelog / Update Log)
 
 ### อัปเดตประจำวันที่ 3 พฤศจิกายน 2569 (Release 2026.11.03)
-1. **ศูนย์จัดการคำสั่งระบบและการบำรุงรักษา (System Commands & Maintenance Dashboard):**
+1. **ศูนย์สำรองและกู้คืนข้อมูลระบบ (Full System Backup & Safe Restore Hub — The Creator Only):**
+   * พัฒนาระบบสำรองข้อมูล 3 รูปแบบ: เฉพาะฐานข้อมูล MariaDB (`.sql.gz`), เฉพาะไฟล์เอกสาร Storage (`.zip`), และสำรองทั้งระบบแบบเต็ม (Full Archive)
+   * ระบบกู้คืนฐานข้อมูลผ่านหน้าเว็บที่ปลอดภัยสูงสุด (Military-Grade Safety): จำกัดสิทธิ์เฉพาะ **The Creator** เท่านั้น พร้อมระบบยืนยันรหัสความปลอดภัย OTP 6 หลักส่งตรงเข้า Email และสร้าง Safety Snapshot สำรองฐานข้อมูลปัจจุบันให้อัตโนมัติก่อนเริ่มกู้คืนเสมอ
+   * คำสั่ง Artisan CLI: `php artisan rdb:backup` และ `php artisan rdb:restore` พร้อมคู่มือการตั้งเวลาซิงค์ขึ้น Google Drive อัตโนมัติด้วย Rclone
+2. **การตั้งค่าระบบการส่งอีเมลของมหาวิทยาลัย (Mail & SMTP Configuration):**
+   * จัดทำคู่มือและโครงสร้างการตั้งค่าระบบ Mail ใน `.env` รองรับทั้ง Google Workspace/Gmail (App Password 16 หลัก), Mail Server มหาวิทยาลัย และโหมด Local Log พร้อมคำสั่งทดสอบการส่งเมลผ่าน Terminal
+3. **ปรับปรุงคอนทราสต์โหมดสว่าง (Light Theme Contrast Calibration):**
+   * **แถบนำทางระบบหลังบ้าน (Backend Topbar Navbar)**: แก้ไขปุ่ม `[แดชบอร์ด]`, `[เปิดดูหน้าบ้าน]`, ไอคอนย่อ/ขยายเมนูด้านซ้าย และเส้นคั่น ให้แสดงสีคมชัด 100% ไม่กลืนหายเป็นสีขาวบนพื้นขาวในธีมสว่าง
+   * **เล่มคู่มือการใช้งาน (Manuals Portal)**: แก้ไขไวยากรณ์ CSS และล็อกสีแถบด้านบนด้วย Academic Navy (`#1E3A5F`) พร้อมปุ่มสลับธีมสีแสดงไอคอนเรียลไทม์
+4. **ศูนย์จัดการคำสั่งระบบและการบำรุงรักษา (System Commands & Maintenance Dashboard):**
    * เพิ่มหน้าจอควบคุมคำสั่งระบบในหลังบ้านที่ `/backend/system-commands` ให้ Super Admin สั่งรันคำสั่งบำรุงรักษาได้โดยตรงผ่านหน้าเว็บ
    * รองรับการรันสร้างภาพปก PDF, ตรวจนับจำนวนหน้าย้อนหลัง, ล้างแคชระบบ (Clear Cache), และตรวจเช็คสถานะเอนจินของเซิร์ฟเวอร์
    * แสดงกล่อง Terminal Output Log สวยงาม พร้อมบันทึกประวัติการรันลงใน Audit Trail อัตโนมัติ
-2. **ระบบสร้างภาพหน้าปกจากหน้าแรกของไฟล์ PDF ทั้งหน้า (Full-Page PDF Cover Rasterization Engine):**
+5. **ระบบสร้างภาพหน้าปกจากหน้าแรกของไฟล์ PDF ทั้งหน้า (Full-Page PDF Cover Rasterization Engine):**
    * อัปเกรด `PdfCoverService` และคำสั่ง `php artisan rdb:generate-pdf-covers` ให้เรนเดอร์**หน้าแรกของไฟล์ PDF ทั้งหน้า (Full-Page Rasterization)** ด้วยเอนจิน **MuPDF (`PyMuPDF` + `Pillow`)** และ **Poppler `pdftoppm`** แทนการดึงเฉพาะรูปภาพย่อยที่ฝังในไฟล์
    * รองรับการประมวลผลแบบ Batch ความเร็วสูง (`chunkById(100)`) โดยไม่เกิดปัญหาหน่วยความจำเต็ม (`Memory Exhausted`) พร้อมระบบสร้างปกสำรองภาษาไทย (TrueType Font `Leelawadee UI Bold`) แสดงรายชื่อนักวิจัยครบทุกคน ไม่ตัดทอนด้วย "และคณะ"
    * เพิ่มปุ่ม **"ดึงภาพหน้าปกไฟล์ใหม่ อีกครั้ง"** ในหน้ารายละเอียดโครงการวิจัยและผลงานตีพิมพ์หลังบ้าน พร้อมระบบ Cache-Busting `?v=`
    * ประมวลผลสร้างภาพหน้าปกใหม่สำเร็จครบ 100% ทั้งระบบ: โครงการวิจัย 1,864 โครงการ และผลงานตีพิมพ์ 1,601 รายการ (รวม 3,465 รายการ 0 failed)
-3. **สถาปัตยกรรม Academic SEO, Google Scholar Metadata & Dynamic XML Sitemaps:**
+6. **สถาปัตยกรรม Academic SEO, Google Scholar Metadata & Dynamic XML Sitemaps:**
    * ฝัง Highwire Press (`citation_*`), Dublin Core (`DC.*`), Open Graph พร้อมภาพปก PDF `.webp` และ Schema.org JSON-LD
    * พัฒนาระบบไดนามิกไซต์แมปที่ `/sitemap.xml` แยก 5 ซับไซต์แมป พร้อมตัวกรอง `data_show = 1` เข้มงวด
-4. **ปรับผังการแสดงผลหน้ารายละเอียดฝั่งหน้าบ้าน (Frontend Show Layout Optimization):**
+7. **ปรับผังการแสดงผลหน้ารายละเอียดฝั่งหน้าบ้าน (Frontend Show Layout Optimization):**
    * **โครงการวิจัย (`/rdbproject/{id}`)**: ย้ายการ์ด `ไฟล์เอกสาร (Files)` พร้อมภาพปกหน้าแรกรายงานวิจัยขึ้นมาแสดงเป็นลำดับที่ 1 ด้านขวาบนสุด ก่อนการ์ด `คณะผู้วิจัย (Researchers)`
    * **ผลงานตีพิมพ์ (`/rdbpublished/{id}`)**: ย้ายการ์ด `ไฟล์เอกสาร (Files)` ขึ้นไว้ด้านขวาบนสุดก่อน `ผู้เขียนบทความ (Authors)` และย้ายการ์ด `โครงการวิจัยที่เกี่ยวข้อง` ไปไว้ด้านซ้ายก่อน `บทคัดย่อ (Abstract)`
    * **การนำไปใช้ประโยชน์ (`/rdbprojectutilize/{id}`) และทรัพย์สินทางปัญญา (`/rdbdip/{id}`)**: ย้ายการ์ด `โครงการวิจัยที่เกี่ยวข้อง` ไปไว้ด้านซ้ายก่อนการ์ดรายละเอียด/บทสรุปการประดิษฐ์
-5. **ยกระดับมาตรฐาน Dashboard & Data Visualization (`ui-dashboard-visualization`):**
+8. **ยกระดับมาตรฐาน Dashboard & Data Visualization (`ui-dashboard-visualization`):**
    * เพิ่มมาตรฐาน KPI Cards พร้อม YoY Delta, ตารางจัดอันดับพร้อมเส้นสัดส่วน `3px` (Slim Share Bars), กฎ Small Base (`< 5`), และเกณฑ์ตรวจสอบ 3 ความกว้างหน้าจอ (`1920px`, `1440px`, `375px`)
 
 ### อัปเดตประจำวันที่ 2 พฤศจิกายน 2569 (Release 2026.11.02)

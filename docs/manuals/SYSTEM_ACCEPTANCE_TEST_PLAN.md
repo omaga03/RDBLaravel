@@ -3,11 +3,13 @@
 
 > [!NOTE]
 > **สถานะการทดสอบระบบจริง (Test Execution Summary)**:
-> - **วันและเวลาที่ดำเนินการทดสอบล่าสุด**: 2 พฤศจิกายน 2569 เวลา 22:48:11 น.
-> - **ผลการรันชุดทดสอบอัตโนมัติ (Automated Test Suite)**: **ผ่านทั้งหมด 64 รายการ (506 Assertions) 100%**
+> - **วันและเวลาที่ดำเนินการทดสอบล่าสุด**: 3 พฤศจิกายน 2569 เวลา 22:36:47 น.
+> - **ผลการรันชุดทดสอบอัตโนมัติ (Automated Test Suite)**: **ผ่านทั้งหมด 72 รายการ (529 Assertions) 100%**
 >   - `Tests\Feature\BackendAuditTest`: ผ่าน 47 รายการ (421 Assertions)
->   - `Tests\Feature\PdfCoverGenerationTest`: ผ่าน 4 รายการ (16 Assertions)
 >   - `Tests\Feature\SystemAcceptancePlanExecutionTest`: ผ่าน 13 รายการ (69 Assertions)
+>   - `Tests\Feature\SystemBackupTest`: ผ่าน 5 รายการ (12 Assertions)
+>   - `Tests\Feature\PdfCoverGenerationTest`: ผ่าน 4 รายการ (16 Assertions)
+>   - `Tests\Feature\SystemCommandBackendTest`: ผ่าน 3 รายการ (11 Assertions)
 > - **สถานะความพร้อมสู่ Production**: **พร้อมใช้งานจริง 100% (Ready for Production)**
 
 ---
