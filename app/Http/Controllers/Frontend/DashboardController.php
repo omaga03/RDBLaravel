@@ -69,6 +69,20 @@ class DashboardController extends Controller
     }
 
     /**
+     * Compute YoY Delta metrics (prev, diff, pct) with small base support
+     */
+    protected function computeMetricYoY($current, $prev)
+    {
+        $diff = $current - $prev;
+        $pct = $prev > 0 ? round(($diff / $prev) * 100, 1) : null;
+        return [
+            'prev' => $prev,
+            'diff' => $diff,
+            'pct'  => $pct,
+        ];
+    }
+
+    /**
      * 1. Executive Overview Dashboard (ภาพรวมยุทธศาสตร์)
      * Filters: year_id, department_id, ps_id, pt_id, has_report
      */
@@ -640,6 +654,42 @@ class DashboardController extends Controller
 
         $qaProjectTable = collect();
 
+        // YoY Delta Calculation
+        $prevYear = null;
+        $prevTotalProjects = 0;
+        $prevTotalBudget = 0.0;
+        if ($selectedYear) {
+            $prevYear = $years->first(fn($y) => (int)$y->year_name < (int)$selectedYear->year_name);
+            if ($prevYear) {
+                $prevQ = RdbProject::where('year_id', $prevYear->year_id);
+                if ($deptId) $prevQ->where('department_id', $deptId);
+                if ($psId) $prevQ->where('ps_id', $psId);
+                if ($masterPtId) $prevQ->whereHas('type', fn($q) => $q->where('master_pt_id', $masterPtId));
+                if ($ptId) $prevQ->where('pt_id', $ptId);
+                if ($budgetRange) {
+                    if ($budgetRange === '0-50k') $prevQ->where('pro_budget', '<', 50000);
+                    elseif ($budgetRange === '50k-100k') $prevQ->whereBetween('pro_budget', [50000, 100000]);
+                    elseif ($budgetRange === '100k-500k') $prevQ->whereBetween('pro_budget', [100000, 500000]);
+                    elseif ($budgetRange === '500k+') $prevQ->where('pro_budget', '>=', 500000);
+                }
+                if ($hasReport !== null) {
+                    if ($hasReport === '1') {
+                        $prevQ->where(fn($q) => $q->whereNotNull('pro_file_path')->where('pro_file_path', '!=', '')->orWhere(fn($sq) => $sq->whereNotNull('pro_file')->where('pro_file', '!=', '')));
+                    } elseif ($hasReport === '0') {
+                        $prevQ->where(fn($q) => $q->where(fn($sq) => $sq->whereNull('pro_file_path')->orWhere('pro_file_path', ''))->where(fn($sq) => $sq->whereNull('pro_file')->orWhere('pro_file', '')));
+                    }
+                }
+                $prevTotalProjects = (clone $prevQ)->count();
+                $prevTotalBudget = (float)(clone $prevQ)->sum('pro_budget');
+            }
+        }
+
+        $yoyDelta = [
+            'prev_year_name' => $prevYear?->year_name,
+            'budget' => $this->computeMetricYoY($totalBudget, $prevTotalBudget),
+            'projects' => $this->computeMetricYoY($totalProjects, $prevTotalProjects),
+        ];
+
         return view('frontend.dashboard.projects', array_merge($lookups, [
             'years' => $years,
             'selectedYearId' => $selectedYearId,
@@ -666,6 +716,7 @@ class DashboardController extends Controller
             'yearlyBudgetTrend' => $yearlyBudgetTrend,
             'topProjects' => $topProjects,
             'qaProjectTable' => $qaProjectTable,
+            'yoyDelta' => $yoyDelta,
         ]));
     }
 
@@ -848,6 +899,85 @@ class DashboardController extends Controller
 
         $qaPubTable = collect();
 
+        // YoY Delta Calculation
+        $prevYear = null;
+        $prevTotalPublished = 0;
+        $prevIntlCount = 0;
+        $prevTci1Count = 0;
+        $prevTci2Count = 0;
+        $prevConfCount = 0;
+        $prevLinkedProjectCount = 0;
+
+        if ($selectedYear) {
+            $prevYear = $years->first(fn($y) => (int)$y->year_name < (int)$selectedYear->year_name);
+            if ($prevYear) {
+                $prevPubQ = RdbPublished::where(fn($q) => $q->where('year_id', $prevYear->year_id)->orWhere('year_bud', $prevYear->year_id));
+                if ($deptId) $prevPubQ->where('rdb_published.department_id', $deptId);
+                if ($hasProject !== null) {
+                    if ($hasProject === '1') $prevPubQ->whereNotNull('pro_id')->where('pro_id', '>', 0);
+                    elseif ($hasProject === '0') $prevPubQ->where(fn($q) => $q->whereNull('pro_id')->orWhere('pro_id', 0));
+                }
+                if ($hasFile !== null) {
+                    if ($hasFile === '1') $prevPubQ->where(fn($q) => $q->whereNotNull('pub_file')->where('pub_file', '!=', ''));
+                    elseif ($hasFile === '0') $prevPubQ->where(fn($q) => $q->whereNull('pub_file')->orWhere('pub_file', ''));
+                }
+
+                $prevTotalPublished = (clone $prevPubQ)->count();
+                $prevScopus = (clone $prevPubQ)->where(function($q) {
+                    $q->whereHas('pubtype', fn($sq) => $sq->where('pubtype_subgroup', 'like', '%Scopus%'))
+                      ->orWhere(function($sq) {
+                          $sq->where(fn($ssq) => $ssq->whereNull('pubtype_id')->orWhere('pubtype_id', ''))
+                             ->where(fn($ssq) => $ssq->where('pub_name_journal', 'like', '%Scopus%')->orWhere('pub_note', 'like', '%Scopus%')->orWhere(fn($x) => $x->where('pub_score', '>=', 1.0)->where('pub_name_journal', 'not like', '%Web of Science%')));
+                      });
+                })->count();
+                $prevWos = (clone $prevPubQ)->where(function($q) {
+                    $q->whereHas('pubtype', fn($sq) => $sq->where('pubtype_subgroup', 'like', '%Web of Science%'))
+                      ->orWhere(function($sq) {
+                          $sq->where(fn($ssq) => $ssq->whereNull('pubtype_id')->orWhere('pubtype_id', ''))
+                             ->where(fn($ssq) => $ssq->where('pub_name_journal', 'like', '%Web of Science%')->orWhere('pub_name_journal', 'like', '%WoS%')->orWhere('pub_note', 'like', '%Web of Science%'));
+                      });
+                })->count();
+                $prevIntlCount = $prevScopus + $prevWos;
+
+                $prevTci1Count = (clone $prevPubQ)->where(function($q) {
+                    $q->whereHas('pubtype', fn($sq) => $sq->where('pubtype_subgroup', 'like', '%TCI %1%'))
+                      ->orWhere(function($sq) {
+                          $sq->where(fn($ssq) => $ssq->whereNull('pubtype_id')->orWhere('pubtype_id', ''))
+                             ->where(fn($ssq) => $ssq->where('pub_name_journal', 'like', '%TCI%1%')->orWhere('pub_note', 'like', '%TCI%1%')->orWhere('pub_score', '0.80'));
+                      });
+                })->count();
+
+                $prevTci2Count = (clone $prevPubQ)->where(function($q) {
+                    $q->whereHas('pubtype', fn($sq) => $sq->where('pubtype_subgroup', 'like', '%TCI %2%'))
+                      ->orWhere(function($sq) {
+                          $sq->where(fn($ssq) => $ssq->whereNull('pubtype_id')->orWhere('pubtype_id', ''))
+                             ->where(fn($ssq) => $ssq->where('pub_name_journal', 'like', '%TCI%2%')->orWhere('pub_note', 'like', '%TCI%2%')->orWhere('pub_score', '0.60'));
+                      });
+                })->count();
+
+                $prevConfCount = (clone $prevPubQ)->where(function($q) {
+                    $q->whereHas('pubtype', fn($sq) => $sq->where('pubtype_group', 'like', '%ประชุม%'))
+                      ->orWhere(function($sq) {
+                          $sq->where(fn($ssq) => $ssq->whereNull('pubtype_id')->orWhere('pubtype_id', ''))
+                             ->where(fn($ssq) => $ssq->whereIn('pub_score', ['0.20', '0.25', '0.40'])->orWhere('pub_name_journal', 'like', '%ประชุม%'));
+                      });
+                })->count();
+
+                $prevLinkedProjectCount = (clone $prevPubQ)->whereNotNull('pro_id')->where('pro_id', '>', 0)->count();
+            }
+        }
+
+        $currentIntl = $scopusCount + $wosCount;
+        $yoyDelta = [
+            'prev_year_name' => $prevYear?->year_name,
+            'published' => $this->computeMetricYoY($totalPublished, $prevTotalPublished),
+            'intl' => $this->computeMetricYoY($currentIntl, $prevIntlCount),
+            'tci1' => $this->computeMetricYoY($tci1Count, $prevTci1Count),
+            'tci2' => $this->computeMetricYoY($tci2Count, $prevTci2Count),
+            'conf' => $this->computeMetricYoY($confCount, $prevConfCount),
+            'linked' => $this->computeMetricYoY($linkedProjectCount, $prevLinkedProjectCount),
+        ];
+
         return view('frontend.dashboard.publications', array_merge($lookups, [
             'years' => $years,
             'selectedYearId' => $selectedYearId,
@@ -869,6 +999,7 @@ class DashboardController extends Controller
             'linkedProjectCount' => $linkedProjectCount,
             'publicationsList' => $publicationsList,
             'qaPubTable' => $qaPubTable,
+            'yoyDelta' => $yoyDelta,
         ]));
     }
 
@@ -1098,6 +1229,49 @@ class DashboardController extends Controller
             ->take(20)
             ->get();
 
+        // YoY Delta Calculation
+        $prevYear = null;
+        $prevTotalUtilizations = 0;
+        $prevDistrictsCount = 0;
+        $prevPartnerCount = 0;
+        $prevQaCount = 0;
+        $prevTotalBudget = 0.0;
+
+        if ($selectedYear) {
+            $prevYear = $years->first(fn($y) => (int)$y->year_name < (int)$selectedYear->year_name);
+            if ($prevYear) {
+                $prevUtilQ = RdbProjectUtilize::where(fn($q) => $q->where('utz_year_id', $prevYear->year_id)->orWhere('utz_year_bud', $prevYear->year_id));
+                if ($deptId) $prevUtilQ->whereHas('project', fn($q) => $q->where('department_id', $deptId));
+                if (!empty($selectedChangwats)) {
+                    $prevUtilQ->whereHas('changwat', function ($q) use ($selectedChangwats, $selectedAmphoes) {
+                        $q->whereIn('changwat_t', $selectedChangwats);
+                        if (!empty($selectedAmphoes)) {
+                            $q->whereIn('amphoe_t', $selectedAmphoes);
+                        }
+                    });
+                }
+                if ($qaStatus !== null) {
+                    if ($qaStatus === '1') $prevUtilQ->where('utz_group_qa', '1');
+                    elseif ($qaStatus === '0') $prevUtilQ->where(fn($q) => $q->whereNull('utz_group_qa')->orWhere('utz_group_qa', '!=', '1'));
+                }
+
+                $prevTotalUtilizations = (clone $prevUtilQ)->count();
+                $prevTotalBudget = (float)(clone $prevUtilQ)->sum('utz_budget');
+                $prevQaCount = (clone $prevUtilQ)->where('utz_group_qa', '1')->count();
+                $prevPartnerCount = (clone $prevUtilQ)->whereNotNull('utz_department_name')->distinct('utz_department_name')->count('utz_department_name');
+                $prevDistrictsCount = (clone $prevUtilQ)->join('rdb_changwat', 'rdb_project_utilize.chw_id', '=', 'rdb_changwat.id')->distinct()->count('rdb_changwat.amphoe_t');
+            }
+        }
+
+        $yoyDelta = [
+            'prev_year_name' => $prevYear?->year_name,
+            'utilizations' => $this->computeMetricYoY($totalUtilizations, $prevTotalUtilizations),
+            'districts' => $this->computeMetricYoY($districtsRanking->count(), $prevDistrictsCount),
+            'partner' => $this->computeMetricYoY($partnerCount, $prevPartnerCount),
+            'qa' => $this->computeMetricYoY($qaCount, $prevQaCount),
+            'budget' => $this->computeMetricYoY($totalBudget, $prevTotalBudget),
+        ];
+
         return view('frontend.dashboard.utilizations', array_merge($lookups, [
             'years' => $years,
             'selectedYearId' => $selectedYearId,
@@ -1121,6 +1295,7 @@ class DashboardController extends Controller
             'topAgencies' => $topAgencies,
             'mapMarkers' => $mapMarkers,
             'utilizationsList' => $utilizationsList,
+            'yoyDelta' => $yoyDelta,
         ]));
     }
 
@@ -1214,6 +1389,61 @@ class DashboardController extends Controller
             ->take(30)
             ->get();
 
+        // YoY Delta Calculation
+        $prevYear = null;
+        $prevTotalDips = 0;
+        $prevPatentsCount = 0;
+        $prevPettyPatentsCount = 0;
+        $prevCopyrightsCount = 0;
+        $prevRegisteredCount = 0;
+        $prevPendingCount = 0;
+
+        if ($selectedYear) {
+            $prevYear = $years->first(fn($y) => (int)$y->year_name < (int)$selectedYear->year_name);
+            if ($prevYear) {
+                $prevCeYear = (int)$prevYear->year_name - 543;
+                $prevDipQ = RdbDip::where(function ($q) use ($prevYear, $prevCeYear) {
+                    $q->whereHas('project', fn($pq) => $pq->where('year_id', $prevYear->year_id))
+                      ->orWhereYear('dip_request_date', $prevCeYear);
+                });
+                if ($deptId) {
+                    $prevDipQ->where(function ($q) use ($deptId) {
+                        $q->whereHas('project', fn($pq) => $pq->where('department_id', $deptId))
+                          ->orWhereHas('researcher', fn($rq) => $rq->where('department_id', $deptId));
+                    });
+                }
+                if ($diptId) $prevDipQ->where('rdb_dip.dipt_id', $diptId);
+                if ($regStatus) {
+                    if ($regStatus === 'registered') $prevDipQ->whereNotNull('dip_patent_number')->where('dip_patent_number', '!=', '');
+                    elseif ($regStatus === 'pending') $prevDipQ->where(fn($q) => $q->whereNull('dip_patent_number')->orWhere('dip_patent_number', ''));
+                }
+                if ($hasFile !== null) {
+                    if ($hasFile === '1') {
+                        $prevDipQ->where(fn($q) => $q->whereNotNull('dip_path')->where('dip_path', '!=', '')->orWhere(fn($sq) => $sq->whereNotNull('dip_files')->where('dip_files', '!=', '')));
+                    } elseif ($hasFile === '0') {
+                        $prevDipQ->where(fn($q) => $q->where(fn($sq) => $sq->whereNull('dip_path')->orWhere('dip_path', ''))->where(fn($sq) => $sq->whereNull('dip_files')->orWhere('dip_files', '')));
+                    }
+                }
+
+                $prevTotalDips = (clone $prevDipQ)->count();
+                $prevPatentsCount = (clone $prevDipQ)->where('rdb_dip.dipt_id', 1)->count();
+                $prevPettyPatentsCount = (clone $prevDipQ)->where('rdb_dip.dipt_id', 2)->count();
+                $prevCopyrightsCount = (clone $prevDipQ)->where('rdb_dip.dipt_id', 3)->count();
+                $prevRegisteredCount = (clone $prevDipQ)->whereNotNull('dip_patent_number')->where('dip_patent_number', '!=', '')->count();
+                $prevPendingCount = $prevTotalDips - $prevRegisteredCount;
+            }
+        }
+
+        $yoyDelta = [
+            'prev_year_name' => $prevYear?->year_name,
+            'total' => $this->computeMetricYoY($totalDips, $prevTotalDips),
+            'patents' => $this->computeMetricYoY($patentsCount, $prevPatentsCount),
+            'petty' => $this->computeMetricYoY($pettyPatentsCount, $prevPettyPatentsCount),
+            'copyrights' => $this->computeMetricYoY($copyrightsCount, $prevCopyrightsCount),
+            'registered' => $this->computeMetricYoY($registeredCount, $prevRegisteredCount),
+            'pending' => $this->computeMetricYoY($pendingCount, $prevPendingCount),
+        ];
+
         return view('frontend.dashboard.ip', array_merge($lookups, [
             'years' => $years,
             'selectedYearId' => $selectedYearId,
@@ -1232,6 +1462,7 @@ class DashboardController extends Controller
             'byType' => $byType,
             'byFaculty' => $byFaculty,
             'ipList' => $ipList,
+            'yoyDelta' => $yoyDelta,
         ]));
     }
 
@@ -1442,6 +1673,43 @@ class DashboardController extends Controller
             ->limit(15)
             ->get();
 
+        // YoY Delta Calculation
+        $prevYear = null;
+        $prevTotalResearchers = 0;
+        $prevScopusProfileCount = 0;
+        $prevOrcidProfileCount = 0;
+        $prevFacultyCount = 0;
+
+        if ($selectedYear) {
+            $prevYear = $years->first(fn($y) => (int)$y->year_name < (int)$selectedYear->year_name);
+            if ($prevYear) {
+                $prevResQ = RdbResearcher::query();
+                $prevResQ->whereHas('rdbProjects', function ($q) use ($prevYear) {
+                    $q->where('rdb_project.year_id', $prevYear->year_id)
+                      ->where('rdb_project.data_show', 1)
+                      ->where(function ($sq) {
+                          $sq->whereNull('rdb_project.ps_id')
+                            ->orWhere('rdb_project.ps_id', '<>', RdbProjectStatus::REFUNDED);
+                      });
+                });
+                if ($deptId) $prevResQ->where('rdb_researcher.department_id', $deptId);
+                if ($prefixId) $prevResQ->where('rdb_researcher.prefix_id', $prefixId);
+
+                $prevTotalResearchers = (clone $prevResQ)->count();
+                $prevScopusProfileCount = (clone $prevResQ)->whereNotNull('scopus_authorId')->where('scopus_authorId', '!=', '')->count();
+                $prevOrcidProfileCount = (clone $prevResQ)->whereNotNull('orcid')->where('orcid', '!=', '')->count();
+                $prevFacultyCount = (clone $prevResQ)->join('rdb_department', 'rdb_researcher.department_id', '=', 'rdb_department.department_id')->distinct('rdb_department.department_nameTH')->count('rdb_department.department_nameTH');
+            }
+        }
+
+        $yoyDelta = [
+            'prev_year_name' => $prevYear?->year_name,
+            'researchers' => $this->computeMetricYoY($totalResearchers, $prevTotalResearchers),
+            'scopus' => $this->computeMetricYoY($scopusProfileCount, $prevScopusProfileCount),
+            'orcid' => $this->computeMetricYoY($orcidProfileCount, $prevOrcidProfileCount),
+            'faculties' => $this->computeMetricYoY($researchersByFaculty->count(), $prevFacultyCount),
+        ];
+
         return view('frontend.dashboard.researchers', array_merge($lookups, [
             'years' => $years,
             'selectedYearId' => $selectedYearId,
@@ -1462,6 +1730,7 @@ class DashboardController extends Controller
             'researchersList' => $researchersList,
             'firstProjectByFaculty' => $firstProjectByFaculty,
             'firstProjectList' => $firstProjectList,
+            'yoyDelta' => $yoyDelta,
         ]));
     }
 
@@ -1988,6 +2257,85 @@ class DashboardController extends Controller
         $totalUtil = $qaUtilTable->sum('total_util');
         $totalFirstResearchers = $firstProjectByFaculty->sum('new_researcher_count');
 
+        // YoY Delta Calculation
+        $prevYear = null;
+        $prevTotalWeightedPubScore = 0.0;
+        $prevAvgBudgetPerPersonnel = 0.0;
+        $prevTotalUtilCertified = 0;
+        $prevTotalFirstResearchers = 0;
+
+        if ($selectedYear) {
+            $prevYear = $years->first(fn($y) => (int)$y->year_name < (int)$selectedYear->year_name);
+            if ($prevYear) {
+                // Prev weighted pubs
+                $prevPubs = DB::table('rdb_published')
+                    ->where('data_show', 1)
+                    ->where(fn($q) => $q->where('year_id', $prevYear->year_id)->orWhere('year_bud', $prevYear->year_id));
+                if ($scope === 'faculty') $prevPubs->whereIn('department_id', $facultyIds);
+                if ($deptId) $prevPubs->where('department_id', $deptId);
+
+                $p020 = (clone $prevPubs)->whereIn('pub_score', ['0.20', '0.25'])->count();
+                $p040 = (clone $prevPubs)->where('pub_score', '0.40')->count();
+                $p060 = (clone $prevPubs)->where('pub_score', '0.60')->count();
+                $p080 = (clone $prevPubs)->where('pub_score', '0.80')->count();
+                $p100 = (clone $prevPubs)->where('pub_score', '1.00')->count();
+                $prevTotalWeightedPubScore = round(($p020 * 0.20) + ($p040 * 0.40) + ($p060 * 0.60) + ($p080 * 0.80) + ($p100 * 1.00), 2);
+
+                // Prev budget per personnel
+                $prevProjQ = RdbProject::where('data_show', 1)
+                    ->where(fn($q) => $q->whereNull('ps_id')->orWhere('ps_id', '<>', RdbProjectStatus::REFUNDED))
+                    ->where('year_id', $prevYear->year_id);
+                if ($scope === 'faculty') $prevProjQ->whereIn('department_id', $facultyIds);
+                if ($deptId) $prevProjQ->where('department_id', $deptId);
+                $prevBudget = (float) $prevProjQ->sum('pro_budget');
+
+                $prevPerQuery = DB::table('rdb_project_personnel')
+                    ->where('year_id', $prevYear->year_id);
+                if ($scope === 'faculty') $prevPerQuery->whereIn('department_id', $facultyIds);
+                if ($deptId) $prevPerQuery->where('department_id', $deptId);
+                $prevPerNum = (int) $prevPerQuery->sum('pp_num');
+                $prevAvgBudgetPerPersonnel = $prevPerNum > 0 ? round($prevBudget / $prevPerNum, 2) : 0.0;
+
+                // Prev QA util certified
+                $prevUtilQ = DB::table('rdb_project_utilize')
+                    ->join('rdb_project', 'rdb_project_utilize.pro_id', '=', 'rdb_project.pro_id')
+                    ->where('rdb_project_utilize.data_show', '1')
+                    ->where('rdb_project.data_show', '1')
+                    ->where('rdb_project_utilize.utz_group_qa', '1')
+                    ->where(fn($q) => $q->where('rdb_project_utilize.utz_year_id', $prevYear->year_id)->orWhere('rdb_project_utilize.utz_year_bud', $prevYear->year_id));
+                if ($scope === 'faculty') $prevUtilQ->whereIn('rdb_project.department_id', $facultyIds);
+                if ($deptId) $prevUtilQ->where('rdb_project.department_id', $deptId);
+                $prevTotalUtilCertified = $prevUtilQ->count();
+
+                // Prev First Researchers
+                $prevFirstQ = DB::table('rdb_researcher')
+                    ->joinSub(
+                        DB::table('rdb_project_work as pw')
+                            ->join('rdb_project as p', 'pw.pro_id', '=', 'p.pro_id')
+                            ->where('p.data_show', 1)
+                            ->where(fn($q) => $q->whereNull('p.ps_id')->orWhere('p.ps_id', '<>', RdbProjectStatus::REFUNDED))
+                            ->select('pw.researcher_id', DB::raw('MIN(p.year_id) as first_year_id'))
+                            ->groupBy('pw.researcher_id'),
+                        'fp_prev',
+                        'rdb_researcher.researcher_id',
+                        '=',
+                        'fp_prev.researcher_id'
+                    )
+                    ->where('fp_prev.first_year_id', $prevYear->year_id);
+                if ($scope === 'faculty') $prevFirstQ->whereIn('rdb_researcher.department_id', $facultyIds);
+                if ($deptId) $prevFirstQ->where('rdb_researcher.department_id', $deptId);
+                $prevTotalFirstResearchers = $prevFirstQ->count();
+            }
+        }
+
+        $yoyDelta = [
+            'prev_year_name' => $prevYear?->year_name,
+            'weighted_score' => $this->computeMetricYoY($totalWeightedPubScore, $prevTotalWeightedPubScore),
+            'budget_per_person' => $this->computeMetricYoY($avgBudgetPerPersonnel, $prevAvgBudgetPerPersonnel),
+            'util_certified' => $this->computeMetricYoY($totalUtilCertified, $prevTotalUtilCertified),
+            'first_researchers' => $this->computeMetricYoY($totalFirstResearchers, $prevTotalFirstResearchers),
+        ];
+
         return view('frontend.dashboard.qa', array_merge($lookups, [
             'years' => $years,
             'selectedYearId' => $selectedYearId,
@@ -2020,6 +2368,7 @@ class DashboardController extends Controller
             'totalUtilCertified' => $totalUtilCertified,
             'totalUtil' => $totalUtil,
             'totalFirstResearchers' => $totalFirstResearchers,
+            'yoyDelta' => $yoyDelta,
         ]));
     }
 }

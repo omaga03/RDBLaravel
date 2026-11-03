@@ -28,6 +28,7 @@
                         <h3 class="fw-bold mb-1 text-warning text-nowrap" style="font-variant-numeric: tabular-nums;">{{ number_format($totalDips) }}</h3>
                         <small class="text-body-secondary d-block">ผลงานที่ได้รับการคุ้มครองสิทธิ</small>
                     </div>
+                    @include('frontend.dashboard._yoy_badge', ['delta' => $yoyDelta['total'] ?? null, 'unit' => 'รายการ'])
                 </div>
             </div>
         </div>
@@ -35,12 +36,15 @@
         <!-- Patents (สิทธิบัตรการประดิษฐ์) -->
         <div class="col-xl-2 col-md-4 col-sm-6">
             <div class="card h-100 border shadow-sm rdb-card-tint-red" style="border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3.5">
-                    <span class="text-danger small fw-bold text-uppercase d-block mb-1">
-                        <i class="bi bi-patch-check-fill me-1"></i> สิทธิบัตร
-                    </span>
-                    <h3 class="fw-bold mb-0 text-danger" style="font-variant-numeric: tabular-nums;">{{ number_format($patentsCount) }}</h3>
-                    <small class="text-body-secondary">สิทธิบัตรการประดิษฐ์</small>
+                <div class="card-body p-3.5 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="text-danger small fw-bold text-uppercase d-block mb-1">
+                            <i class="bi bi-patch-check-fill me-1"></i> สิทธิบัตร
+                        </span>
+                        <h3 class="fw-bold mb-0 text-danger" style="font-variant-numeric: tabular-nums;">{{ number_format($patentsCount) }}</h3>
+                        <small class="text-body-secondary">สิทธิบัตรการประดิษฐ์</small>
+                    </div>
+                    @include('frontend.dashboard._yoy_badge', ['delta' => $yoyDelta['patents'] ?? null, 'unit' => 'รายการ'])
                 </div>
             </div>
         </div>
@@ -48,12 +52,15 @@
         <!-- Petty Patents (อนุสิทธิบัตร) -->
         <div class="col-xl-2 col-md-4 col-sm-6">
             <div class="card h-100 border shadow-sm rdb-card-tint-blue" style="border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3.5">
-                    <span class="text-primary small fw-bold text-uppercase d-block mb-1">
-                        <i class="bi bi-gear-wide-connected me-1"></i> อนุสิทธิบัตร
-                    </span>
-                    <h3 class="fw-bold mb-0 text-primary" style="font-variant-numeric: tabular-nums;">{{ number_format($pettyPatentsCount) }}</h3>
-                    <small class="text-body-secondary">สิ่งประดิษฐ์และนวัตกรรม</small>
+                <div class="card-body p-3.5 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="text-primary small fw-bold text-uppercase d-block mb-1">
+                            <i class="bi bi-gear-wide-connected me-1"></i> อนุสิทธิบัตร
+                        </span>
+                        <h3 class="fw-bold mb-0 text-primary" style="font-variant-numeric: tabular-nums;">{{ number_format($pettyPatentsCount) }}</h3>
+                        <small class="text-body-secondary">สิ่งประดิษฐ์และนวัตกรรม</small>
+                    </div>
+                    @include('frontend.dashboard._yoy_badge', ['delta' => $yoyDelta['petty'] ?? null, 'unit' => 'รายการ'])
                 </div>
             </div>
         </div>
@@ -61,12 +68,15 @@
         <!-- Copyrights (ลิขสิทธิ์) -->
         <div class="col-xl-2 col-md-4 col-sm-6">
             <div class="card h-100 border shadow-sm rdb-card-tint-teal" style="border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3.5">
-                    <span class="text-info small fw-bold text-uppercase d-block mb-1">
-                        <i class="bi bi-c-circle-fill me-1"></i> ลิขสิทธิ์
-                    </span>
-                    <h3 class="fw-bold mb-0 text-info" style="font-variant-numeric: tabular-nums;">{{ number_format($copyrightsCount) }}</h3>
-                    <small class="text-body-secondary">วรรณกรรมและงานสร้างสรรค์</small>
+                <div class="card-body p-3.5 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="text-info small fw-bold text-uppercase d-block mb-1">
+                            <i class="bi bi-c-circle-fill me-1"></i> ลิขสิทธิ์
+                        </span>
+                        <h3 class="fw-bold mb-0 text-info" style="font-variant-numeric: tabular-nums;">{{ number_format($copyrightsCount) }}</h3>
+                        <small class="text-body-secondary">วรรณกรรมและงานสร้างสรรค์</small>
+                    </div>
+                    @include('frontend.dashboard._yoy_badge', ['delta' => $yoyDelta['copyrights'] ?? null, 'unit' => 'รายการ'])
                 </div>
             </div>
         </div>
@@ -74,11 +84,14 @@
         <!-- Registered -->
         <div class="col-xl-1 col-md-3 col-sm-6">
             <div class="card h-100 border shadow-sm border-success-subtle rdb-card-tint-emerald" style="border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3 text-center">
-                    <span class="text-success small fw-bold d-block mb-1">
-                        <i class="bi bi-check-circle-fill me-1.5"></i> จดทะเบียน
-                    </span>
-                    <h4 class="fw-bold mb-0 text-success" style="font-variant-numeric: tabular-nums;">{{ number_format($registeredCount) }}</h4>
+                <div class="card-body p-3 text-center d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="text-success small fw-bold d-block mb-1">
+                            <i class="bi bi-check-circle-fill me-1.5"></i> จดทะเบียน
+                        </span>
+                        <h4 class="fw-bold mb-0 text-success" style="font-variant-numeric: tabular-nums;">{{ number_format($registeredCount) }}</h4>
+                    </div>
+                    @include('frontend.dashboard._yoy_badge', ['delta' => $yoyDelta['registered'] ?? null, 'unit' => 'รายการ'])
                 </div>
             </div>
         </div>
@@ -86,11 +99,14 @@
         <!-- Pending -->
         <div class="col-xl-2 col-md-3 col-sm-6">
             <div class="card h-100 border shadow-sm rdb-card-tint-slate" style="border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3 text-center">
-                    <span class="text-body-secondary small fw-bold d-block mb-1">
-                        <i class="bi bi-hourglass-top me-1.5"></i> รอจดทะเบียน
-                    </span>
-                    <h4 class="fw-bold mb-0 text-body" style="font-variant-numeric: tabular-nums;">{{ number_format($pendingCount) }}</h4>
+                <div class="card-body p-3 text-center d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="text-body-secondary small fw-bold d-block mb-1">
+                            <i class="bi bi-hourglass-top me-1.5"></i> รอจดทะเบียน
+                        </span>
+                        <h4 class="fw-bold mb-0 text-body" style="font-variant-numeric: tabular-nums;">{{ number_format($pendingCount) }}</h4>
+                    </div>
+                    @include('frontend.dashboard._yoy_badge', ['delta' => $yoyDelta['pending'] ?? null, 'unit' => 'รายการ'])
                 </div>
             </div>
         </div>

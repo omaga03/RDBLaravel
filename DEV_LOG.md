@@ -62,7 +62,25 @@
 - เพิ่ม CSS Fractional Spacing Utilities (`.me-1.5`, `.gap-1.5`, ฯลฯ) และแก้ไขระยะห่างไอคอนคู่ข้อความทั่วทั้งระบบ 67 ไฟล์ Blade
 - ปรับปรุงหน้ารายละเอียดโครงการหลังบ้าน (`/backend/rdb_project/{id}`): ลบป้าย `หลักฐานการเงิน: ไม่ครบถ้วน` และปรับป้ายชื่อทุนย่อย (`pts_name`) ให้ตัดบรรทัดอัตโนมัติบนหน้าจอเล็ก
 
-#### 5. ผลการทดสอบอัตโนมัติ (Automated Test Assurance)
+#### 5. เพิ่มการเปรียบเทียบกับปีก่อนหน้า (Year-over-Year Delta) ครบทุกการ์ดในแดชบอร์ดสารสนเทศหน้าบ้าน (Complete YoY Comparison)
+- **สร้าง Reusable Blade Partial ([`resources/views/frontend/dashboard/_yoy_badge.blade.php`](resources/views/frontend/dashboard/_yoy_badge.blade.php))**:
+  - รองรับการคำนวณและแสดงผลค่าส่วนต่าง YoY อัตโนมัติ (ขึ้น/ลง/คงที่) พร้อมไอคอนทิศทาง `bi-arrow-up-right`, `bi-arrow-down-right`, `bi-dash`
+  - ปฏิบัติตาม **Small Base Rule (`< 5`)**: หากปีก่อนหน้าน้อยกว่า 5 จะแสดง `ปีก่อนหน้า N` สีเทาเพื่อป้องกันตัวเลขเปอร์เซ็นต์ที่ก้าวกระโดดเกินจริง
+  - บังคับใช้ `font-variant-numeric: tabular-nums` และ Semantic Subtles ที่รองรับทั้ง Light / Dark Mode
+  - รองรับทั้งค่าจำนวนเต็ม, ค่าตัวเลขทศนิยม (คะแนน QA), และค่างบประมาณ (`isCurrency => true`)
+- **อัปเกรด Controller ([`app/Http/Controllers/Frontend/DashboardController.php`](app/Http/Controllers/Frontend/DashboardController.php))**:
+  - เพิ่มเมธอด `computeMetricYoY($current, $prev)` สำหรับดึงข้อมูลปีก่อนหน้าและคำนวณค่าส่วนต่างและเปอร์เซ็นต์
+  - เพิ่มการคำนวณ `$yoyDelta` ครบทุกเมธอดและส่งไปยังทุก Blade Views:
+    1. **โครงการวิจัย (`projects`)**: งบประมาณรวม และ โครงการทั้งหมด
+    2. **ผลงานตีพิมพ์ (`publications`)**: ผลงานทั้งหมด, Scopus/WoS, TCI 1, TCI 2, ประชุมวิชาการ, ต่อยอดจากทุนวิจัย (ครบ 6 การ์ด)
+    3. **การใช้ประโยชน์ (`utilizations`)**: การใช้ประโยชน์รวม, ครอบคลุมพื้นที่, หน่วยงานผู้รับประโยชน์, ผ่านรับรอง QA, มูลค่าผลกระทบ/งบสนับสนุน (ครบ 5 การ์ด) พร้อมแก้ไขปัญหากรอบซ้ำ
+    4. **ทรัพย์สินทางปัญญา (`ip`)**: ทรัพย์สินทางปัญญาทั้งหมด, สิทธิบัตร, อนุสิทธิบัตร, ลิขสิทธิ์, จดทะเบียน, รอจดทะเบียน (ครบ 6 การ์ด)
+    5. **ศักยภาพนักวิจัย (`researchers`)**: นักวิจัยทั้งหมด, Scopus Author ID, ORCID ID, หน่วยงานวิชาการ (ครบ 4 การ์ด)
+    6. **การประกันคุณภาพ (`qa`)**: ถ่วงน้ำหนักผลงานตีพิมพ์, งบวิจัยเฉลี่ย/บุคลากร, ใช้ประโยชน์ผ่านเกณฑ์ QA, นักวิจัยรับทุนครั้งแรก (ครบ 4 การ์ด)
+- **ปรับปรุง Blade Templates ให้จัดวางกล่องตัวเลขสถิติและการ์ดได้สวยงาม**:
+  - ใช้ `d-flex flex-column justify-content-between` ภายใน `card-body` ตรึงป้าย YoY Delta ให้อยู่ด้านล่างสุดของแต่ละการ์ดอย่างเป็นระเบียบแนวเดียวกันทุกจอ
+
+#### 6. ผลการทดสอบอัตโนมัติ (Automated Test Assurance)
 - `php artisan test --filter=PdfCoverGenerationTest`: **PASSED (4 tests, 16 assertions)**
 - `php artisan test --filter=BackendAuditTest`: **PASSED (47 tests, 421 assertions)**
 

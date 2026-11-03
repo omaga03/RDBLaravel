@@ -77,6 +77,7 @@
                         <h3 class="fw-bold mb-1 text-primary text-nowrap" style="font-variant-numeric: tabular-nums;">{{ number_format($totalWeightedPubScore, 2) }}</h3>
                         <small class="text-body-secondary d-block" style="font-variant-numeric: tabular-nums;">จากผลงานตีพิมพ์ทั้งหมด {{ number_format($totalPubItems) }} เรื่อง (เทียบเกณฑ์กลุ่มสาขา)</small>
                     </div>
+                    @include('frontend.dashboard._yoy_badge', ['delta' => $yoyDelta['weighted_score'] ?? null, 'unit' => 'คะแนน'])
                 </div>
             </div>
         </div>
@@ -97,6 +98,7 @@
                         <h3 class="fw-bold mb-1 text-success" style="font-variant-numeric: tabular-nums;">฿{{ number_format($avgBudgetPerPersonnel, 0) }}</h3>
                         <small class="text-body-secondary d-block" style="font-variant-numeric: tabular-nums;">งบรวม ฿{{ number_format($totalBudget, 0) }} (บุคลากร {{ number_format($totalPersonnel) }} คน)</small>
                     </div>
+                    @include('frontend.dashboard._yoy_badge', ['delta' => $yoyDelta['budget_per_person'] ?? null, 'isCurrency' => true, 'minBase' => 1000])
                 </div>
             </div>
         </div>
@@ -104,12 +106,15 @@
         <!-- 3. QA Certified Utilizations -->
         <div class="col-xl-3 col-md-6">
             <div class="card h-100 border shadow-sm rdb-card-tint-red" style="border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3.5">
-                    <span class="text-danger small fw-bold text-uppercase d-block mb-1">
-                        <i class="bi bi-patch-check-fill text-danger me-1"></i> ใช้ประโยชน์ผ่านเกณฑ์ QA
-                    </span>
-                    <h3 class="fw-bold mb-0 text-danger" style="font-variant-numeric: tabular-nums;">{{ number_format($totalUtilCertified) }}</h3>
-                    <small class="text-body-secondary" style="font-variant-numeric: tabular-nums;">คิดเป็น {{ $totalUtil > 0 ? number_format(($totalUtilCertified / $totalUtil) * 100, 1) : 0 }}% ของการใช้ประโยชน์ทั้งหมด</small>
+                <div class="card-body p-3.5 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="text-danger small fw-bold text-uppercase d-block mb-1">
+                            <i class="bi bi-patch-check-fill text-danger me-1"></i> ใช้ประโยชน์ผ่านเกณฑ์ QA
+                        </span>
+                        <h3 class="fw-bold mb-0 text-danger" style="font-variant-numeric: tabular-nums;">{{ number_format($totalUtilCertified) }}</h3>
+                        <small class="text-body-secondary" style="font-variant-numeric: tabular-nums;">คิดเป็น {{ $totalUtil > 0 ? number_format(($totalUtilCertified / $totalUtil) * 100, 1) : 0 }}% ของการใช้ประโยชน์ทั้งหมด</small>
+                    </div>
+                    @include('frontend.dashboard._yoy_badge', ['delta' => $yoyDelta['util_certified'] ?? null, 'unit' => 'ผลงาน'])
                 </div>
             </div>
         </div>
@@ -117,16 +122,18 @@
         <!-- 4. First-time Grantee Researchers -->
         <div class="col-xl-3 col-md-6">
             <div class="card h-100 border shadow-sm rdb-card-tint-indigo" style="border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3.5">
-                    <span class="text-primary small fw-bold text-uppercase d-block mb-1">
-                        <i class="bi bi-person-plus-fill text-primary me-1"></i> นักวิจัยรับทุนครั้งแรก
-                    </span>
-                    <h3 class="fw-bold mb-0 text-primary" style="font-variant-numeric: tabular-nums;">{{ number_format($totalFirstResearchers) }} ท่าน</h3>
-                    <small class="text-body-secondary">อาจารย์และนักวิจัยรุ่นใหม่ในระบบ</small>
+                <div class="card-body p-3.5 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="text-primary small fw-bold text-uppercase d-block mb-1">
+                            <i class="bi bi-person-plus-fill text-primary me-1"></i> นักวิจัยรับทุนครั้งแรก
+                        </span>
+                        <h3 class="fw-bold mb-0 text-primary" style="font-variant-numeric: tabular-nums;">{{ number_format($totalFirstResearchers) }} ท่าน</h3>
+                        <small class="text-body-secondary">อาจารย์และนักวิจัยรุ่นใหม่ในระบบ</small>
+                    </div>
+                    @include('frontend.dashboard._yoy_badge', ['delta' => $yoyDelta['first_researchers'] ?? null, 'unit' => 'ท่าน'])
                 </div>
             </div>
         </div>
-    </div>
     </div>
 
     <!-- Navigation Tabs for QA Dimensions -->

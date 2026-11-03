@@ -28,6 +28,7 @@
                         <h3 class="fw-bold mb-1 text-body text-nowrap" style="font-variant-numeric: tabular-nums;">฿{{ number_format($totalBudget, 0) }}</h3>
                         <small class="text-body-secondary d-block" style="font-variant-numeric: tabular-nums;">เฉลี่ย ฿{{ number_format($avgBudget, 0) }} ต่อโครงการ</small>
                     </div>
+                    @include('frontend.dashboard._yoy_badge', ['delta' => $yoyDelta['budget'] ?? null, 'isCurrency' => true, 'minBase' => 10000])
                 </div>
             </div>
         </div>
@@ -35,12 +36,15 @@
         <!-- Total Projects -->
         <div class="col-xl-2 col-md-4 col-sm-6">
             <div class="card h-100 border shadow-sm rdb-card-tint-blue" style="border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3.5">
-                    <span class="text-body-secondary small fw-bold text-uppercase d-block mb-1">
-                        <i class="bi bi-folder2 text-primary me-1"></i> โครงการทั้งหมด
-                    </span>
-                    <h3 class="fw-bold mb-0 text-primary" style="font-variant-numeric: tabular-nums;">{{ number_format($totalProjects) }}</h3>
-                    <small class="text-body-secondary">โครงการวิจัย</small>
+                <div class="card-body p-3.5 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="text-body-secondary small fw-bold text-uppercase d-block mb-1">
+                            <i class="bi bi-folder2 text-primary me-1"></i> โครงการทั้งหมด
+                        </span>
+                        <h3 class="fw-bold mb-0 text-primary" style="font-variant-numeric: tabular-nums;">{{ number_format($totalProjects) }}</h3>
+                        <small class="text-body-secondary">โครงการวิจัย</small>
+                    </div>
+                    @include('frontend.dashboard._yoy_badge', ['delta' => $yoyDelta['projects'] ?? null, 'unit' => 'โครงการ'])
                 </div>
             </div>
         </div>

@@ -67,6 +67,7 @@
                         <h3 class="fw-bold mb-1 text-danger text-nowrap" style="font-variant-numeric: tabular-nums;">{{ number_format($totalUtilizations) }}</h3>
                         <small class="text-body-secondary d-block">บันทึกการนำไปใช้ประโยชน์เชิงประจักษ์</small>
                     </div>
+                    @include('frontend.dashboard._yoy_badge', ['delta' => $yoyDelta['utilizations'] ?? null, 'unit' => 'ผลงาน'])
                 </div>
             </div>
         </div>
@@ -74,12 +75,15 @@
         <!-- Districts Covered -->
         <div class="col-xl-2 col-md-4 col-sm-6">
             <div class="card h-100 border shadow-sm rdb-card-tint-red" style="border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3.5">
-                    <span class="text-danger small fw-bold text-uppercase d-block mb-1">
-                        <i class="bi bi-geo-fill me-1"></i> ครอบคลุมพื้นที่
-                    </span>
-                    <h3 class="fw-bold mb-0 text-danger" style="font-variant-numeric: tabular-nums;">{{ number_format($districtsRanking->count()) }}</h3>
-                    <small class="text-body-secondary">อำเภอ/เขตพื้นที่</small>
+                <div class="card-body p-3.5 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="text-danger small fw-bold text-uppercase d-block mb-1">
+                            <i class="bi bi-geo-fill me-1"></i> ครอบคลุมพื้นที่
+                        </span>
+                        <h3 class="fw-bold mb-0 text-danger" style="font-variant-numeric: tabular-nums;">{{ number_format($districtsRanking->count()) }}</h3>
+                        <small class="text-body-secondary">อำเภอ/เขตพื้นที่</small>
+                    </div>
+                    @include('frontend.dashboard._yoy_badge', ['delta' => $yoyDelta['districts'] ?? null, 'unit' => 'อำเภอ'])
                 </div>
             </div>
         </div>
@@ -87,12 +91,15 @@
         <!-- Partner Agencies -->
         <div class="col-xl-2 col-md-4 col-sm-6">
             <div class="card h-100 border shadow-sm rdb-card-tint-blue" style="border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3.5">
-                    <span class="text-primary small fw-bold text-uppercase d-block mb-1">
-                        <i class="bi bi-building me-1"></i> หน่วยงานผู้รับประโยชน์
-                    </span>
-                    <h3 class="fw-bold mb-0 text-primary" style="font-variant-numeric: tabular-nums;">{{ number_format($partnerCount) }}</h3>
-                    <small class="text-body-secondary">อปท. / วิสาหกิจ / กลุ่มอาชีพ</small>
+                <div class="card-body p-3.5 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="text-primary small fw-bold text-uppercase d-block mb-1">
+                            <i class="bi bi-building me-1"></i> หน่วยงานผู้รับประโยชน์
+                        </span>
+                        <h3 class="fw-bold mb-0 text-primary" style="font-variant-numeric: tabular-nums;">{{ number_format($partnerCount) }}</h3>
+                        <small class="text-body-secondary">อปท. / วิสาหกิจ / กลุ่มอาชีพ</small>
+                    </div>
+                    @include('frontend.dashboard._yoy_badge', ['delta' => $yoyDelta['partner'] ?? null, 'unit' => 'หน่วยงาน'])
                 </div>
             </div>
         </div>
@@ -100,12 +107,15 @@
         <!-- QA Certified -->
         <div class="col-xl-2 col-md-4 col-sm-6">
             <div class="card h-100 border shadow-sm rdb-card-tint-emerald" style="border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3.5">
-                    <span class="text-success small fw-bold text-uppercase d-block mb-1">
-                        <i class="bi bi-check2-all me-1"></i> ผ่านการรับรอง QA
-                    </span>
-                    <h3 class="fw-bold mb-0 text-success" style="font-variant-numeric: tabular-nums;">{{ number_format($qaCount) }}</h3>
-                    <small class="text-body-secondary">มีหลักฐานรับรองคุณภาพ</small>
+                <div class="card-body p-3.5 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="text-success small fw-bold text-uppercase d-block mb-1">
+                            <i class="bi bi-check2-all me-1"></i> ผ่านการรับรอง QA
+                        </span>
+                        <h3 class="fw-bold mb-0 text-success" style="font-variant-numeric: tabular-nums;">{{ number_format($qaCount) }}</h3>
+                        <small class="text-body-secondary">มีหลักฐานรับรองคุณภาพ</small>
+                    </div>
+                    @include('frontend.dashboard._yoy_badge', ['delta' => $yoyDelta['qa'] ?? null, 'unit' => 'ผลงาน'])
                 </div>
             </div>
         </div>
@@ -113,12 +123,15 @@
         <!-- Total Budget / Value -->
         <div class="col-xl-3 col-md-8 col-sm-12">
             <div class="card h-100 border shadow-sm rdb-card-tint-green" style="border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3.5">
-                    <span class="text-body-secondary small fw-bold text-uppercase d-block mb-1">
-                        <i class="bi bi-cash me-1 text-success"></i> มูลค่าผลกระทบ / งบสนับสนุน
-                    </span>
-                    <h3 class="fw-bold mb-0 text-body" style="font-variant-numeric: tabular-nums;">฿{{ number_format($totalBudget, 0) }}</h3>
-                    <small class="text-body-secondary">มูลค่าการพัฒนาและต่อยอดเศรษฐกิจ</small>
+                <div class="card-body p-3.5 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="text-body-secondary small fw-bold text-uppercase d-block mb-1">
+                            <i class="bi bi-cash me-1 text-success"></i> มูลค่าผลกระทบ / งบสนับสนุน
+                        </span>
+                        <h3 class="fw-bold mb-0 text-body" style="font-variant-numeric: tabular-nums;">฿{{ number_format($totalBudget, 0) }}</h3>
+                        <small class="text-body-secondary">มูลค่าการพัฒนาและต่อยอดเศรษฐกิจ</small>
+                    </div>
+                    @include('frontend.dashboard._yoy_badge', ['delta' => $yoyDelta['budget'] ?? null, 'isCurrency' => true, 'minBase' => 10000])
                 </div>
             </div>
         </div>

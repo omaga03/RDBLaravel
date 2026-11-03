@@ -28,6 +28,7 @@
                         <h3 class="fw-bold mb-1 text-primary text-nowrap" style="font-variant-numeric: tabular-nums;">{{ number_format($totalResearchers) }} ท่าน</h3>
                         <small class="text-body-secondary d-block">ครอบคลุม 13 คณะและหน่วยงาน</small>
                     </div>
+                    @include('frontend.dashboard._yoy_badge', ['delta' => $yoyDelta['researchers'] ?? null, 'unit' => 'ท่าน'])
                 </div>
             </div>
         </div>
@@ -35,12 +36,15 @@
         <!-- Scopus Author ID Profiles -->
         <div class="col-xl-3 col-md-6">
             <div class="card h-100 border shadow-sm rdb-card-tint-amber" style="border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3.5">
-                    <span class="text-warning-emphasis small fw-bold text-uppercase d-block mb-1">
-                        <i class="bi bi-journal-text me-1 text-warning"></i> Scopus Author ID
-                    </span>
-                    <h3 class="fw-bold mb-0 text-warning" style="font-variant-numeric: tabular-nums;">{{ number_format($scopusProfileCount) }}</h3>
-                    <small class="text-body-secondary">นักวิจัยที่มีรหัสฐานข้อมูลสากล Scopus</small>
+                <div class="card-body p-3.5 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="text-warning-emphasis small fw-bold text-uppercase d-block mb-1">
+                            <i class="bi bi-journal-text me-1 text-warning"></i> Scopus Author ID
+                        </span>
+                        <h3 class="fw-bold mb-0 text-warning" style="font-variant-numeric: tabular-nums;">{{ number_format($scopusProfileCount) }}</h3>
+                        <small class="text-body-secondary">นักวิจัยที่มีรหัสฐานข้อมูลสากล Scopus</small>
+                    </div>
+                    @include('frontend.dashboard._yoy_badge', ['delta' => $yoyDelta['scopus'] ?? null, 'unit' => 'ท่าน'])
                 </div>
             </div>
         </div>
@@ -48,12 +52,15 @@
         <!-- ORCID ID Profiles -->
         <div class="col-xl-3 col-md-6">
             <div class="card h-100 border shadow-sm rdb-card-tint-emerald" style="border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3.5">
-                    <span class="text-success small fw-bold text-uppercase d-block mb-1">
-                        <i class="bi bi-person-badge me-1"></i> ORCID ID
-                    </span>
-                    <h3 class="fw-bold mb-0 text-success" style="font-variant-numeric: tabular-nums;">{{ number_format($orcidProfileCount) }}</h3>
-                    <small class="text-body-secondary">รหัสนักวิจัยมาตรฐานสากล Open Researcher</small>
+                <div class="card-body p-3.5 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="text-success small fw-bold text-uppercase d-block mb-1">
+                            <i class="bi bi-person-badge me-1"></i> ORCID ID
+                        </span>
+                        <h3 class="fw-bold mb-0 text-success" style="font-variant-numeric: tabular-nums;">{{ number_format($orcidProfileCount) }}</h3>
+                        <small class="text-body-secondary">รหัสนักวิจัยมาตรฐานสากล Open Researcher</small>
+                    </div>
+                    @include('frontend.dashboard._yoy_badge', ['delta' => $yoyDelta['orcid'] ?? null, 'unit' => 'ท่าน'])
                 </div>
             </div>
         </div>
@@ -61,12 +68,15 @@
         <!-- Faculty Count -->
         <div class="col-xl-3 col-md-6">
             <div class="card h-100 border shadow-sm rdb-card-tint-blue" style="border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3.5">
-                    <span class="text-primary small fw-bold text-uppercase d-block mb-1">
-                        <i class="bi bi-building me-1"></i> หน่วยงานวิชาการ
-                    </span>
-                    <h3 class="fw-bold mb-0 text-body" style="font-variant-numeric: tabular-nums;">{{ number_format($researchersByFaculty->count()) }}</h3>
-                    <small class="text-body-secondary">คณะและสถาบันในสังกัด</small>
+                <div class="card-body p-3.5 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="text-primary small fw-bold text-uppercase d-block mb-1">
+                            <i class="bi bi-building me-1"></i> หน่วยงานวิชาการ
+                        </span>
+                        <h3 class="fw-bold mb-0 text-body" style="font-variant-numeric: tabular-nums;">{{ number_format($researchersByFaculty->count()) }}</h3>
+                        <small class="text-body-secondary">คณะและสถาบันในสังกัด</small>
+                    </div>
+                    @include('frontend.dashboard._yoy_badge', ['delta' => $yoyDelta['faculties'] ?? null, 'unit' => 'หน่วยงาน'])
                 </div>
             </div>
         </div>
