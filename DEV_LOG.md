@@ -89,7 +89,29 @@
   - ลบการ์ดกราฟ **"10 อันดับวารสารวิชาการที่นักวิจัยได้รับการตีพิมพ์มากที่สุด"** (`#topJournalsChart`) และ Script Chart.js ที่เกี่ยวข้องออก
   - ปรับปรุง `DashboardController::publications()` ให้ใช้ `collect()` ลดการรันคิวรีจัดกลุ่มที่ไม่จำเป็น
 
-#### 7. ผลการทดสอบอัตโนมัติ (Automated Test Assurance)
+#### 7. สถาปัตยกรรม Academic SEO, Google Scholar Metadata & Dynamic XML Sitemaps
+- **สร้างทักษะควบคุมมาตรฐาน ([`.agents/skills/academic-seo-and-indexing/SKILL.md`](.agents/skills/academic-seo-and-indexing/SKILL.md))**:
+  - กำหนดกฎบัตรและข้อกำหนดของ Google Scholar, Highwire Press, Dublin Core, Schema.org JSON-LD, Open Graph และ Dynamic XML Sitemaps สำหรับระบบวิจัยระดับมหาวิทยาลัย
+  - อัปเดตผัง Subagents ใน [`AGENTS.md`](AGENTS.md) มอบหมายให้ Backend Core Architect ควบคุมดูแล
+- **อัปเกรดเครื่องยนต์เมทาดาทา ([`resources/views/layouts/partials/scholar-meta.blade.php`](resources/views/layouts/partials/scholar-meta.blade.php))**:
+  - **Google Scholar (Highwire Press)**: บังคับแยก 1 Author ต่อ 1 Tag (`citation_author`), วันที่แบบ ค.ศ. (`citation_publication_date`), ชี้ตรงลิงก์อ่านเล่ม PDF (`citation_pdf_url`), ชื่อวารสาร, สำนักพิมพ์ และบทคัดย่อ
+  - **Dublin Core (`DC.*`)**: ครบถ้วนตามมาตรฐานบรรณารักษศาสตร์และคลังสารสนเทศสถาบัน (`DC.title`, `DC.creator`, `DC.date`, `DC.publisher`, `DC.identifier`)
+  - **Social Sharing & Open Graph**: ดึงภาพหน้าปก `.webp` (`cover_url`) ที่เรนเดอร์จาก PDF ทั้งหน้ามาใช้เป็น `og:image` และ `twitter:image` (`summary_large_image`) ทำให้เวลาแชร์บทความวิจัยหรือโครงการวิจัยบน Facebook, LINE, X/Twitter จะแสดงภาพหน้าแรกของเล่มรายงานวิจัยภาษาไทยคมชัดขนาดใหญ่
+  - **Schema.org Structured Data (JSON-LD)**: ฝัง `<script type="application/ld+json">` อัตโนมัติ:
+    - `/rdbpublished/{id}`: `@type: "ScholarlyArticle"` พร้อมข้อมูลบทความ วารสาร ผู้เขียน และไฟล์ PDF
+    - `/rdbproject/{id}`: `@type: "ResearchProject"` พร้อมแหล่งทุนและหัวหน้าโครงการ
+    - `/rdbresearcher/{id}`: `@type: "Person"` พร้อมหน่วยงานวิชาการและลิงก์ `sameAs` ชี้ไปยัง ORCID และ Scopus Author Profiles
+- **ระบบ Dynamic XML Sitemap Engine ([`SitemapController.php`](app/Http/Controllers/Frontend/SitemapController.php))**:
+  - สร้างโครงสร้าง Sitemap Index ที่ `/sitemap.xml` แยกออกเป็น 5 ซับไซต์แมป:
+    1. `/sitemap-projects.xml`: โครงการวิจัยที่เปิดเผยสถานะ (`data_show = 1`)
+    2. `/sitemap-publications.xml`: ผลงานตีพิมพ์และบทความวิชาการทั้งหมด
+    3. `/sitemap-researchers.xml`: หน้าทำเนียบและประวัตินักวิจัย
+    4. `/sitemap-utilizations.xml`: ผลงานการนำไปใช้ประโยชน์เชิงพื้นที่
+    5. `/sitemap-ip.xml`: ผลงานทรัพย์สินทางปัญญา
+  - ปรับปรุง [`public/robots.txt`](public/robots.txt) กำหนดสิทธิ์ให้ Bot เข้าถึงหน้างานวิจัยสาธารณะและชี้ตำแหน่ง Sitemap อัตโนมัติ
+
+#### 8. ผลการทดสอบอัตโนมัติ (Automated Test Assurance)
+- `php artisan test --filter=AcademicSeoAndSitemapTest`: **PASSED (5 tests, 52 assertions)**
 - `php artisan test --filter=PdfCoverGenerationTest`: **PASSED (4 tests, 16 assertions)**
 - `php artisan test --filter=BackendAuditTest`: **PASSED (47 tests, 421 assertions)**
 

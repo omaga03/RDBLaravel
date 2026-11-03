@@ -1,2 +1,9 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /backend/
+Disallow: /auth/
+Disallow: /login
+Disallow: /register
+Disallow: /password/
+
+Sitemap: http://laravel_rdb.test/sitemap.xml

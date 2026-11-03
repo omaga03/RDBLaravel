@@ -104,8 +104,8 @@
 ```
 
 1. **Backend Core Architect** (สถาปัตยกรรมหลังบ้านและฐานข้อมูล)
-   - **Skills ที่กำกับ**: `laravel-php`, `legacy-data-migration`, `scopus-orcid-integration`, `shared-search-and-date-controls`
-   - **หน้าที่**: ออกแบบ Thin Controllers/FormRequest/Services, ป้องกัน N+1 Queries (`with()`), จัดการ Schema/Fallback ดึงไฟล์เดิม, คุมตรรกะค้นหาและแปลงวันที่ พ.ศ. ↔ ค.ศ.
+   - **Skills ที่กำกับ**: `laravel-php`, `legacy-data-migration`, `scopus-orcid-integration`, `shared-search-and-date-controls`, `academic-seo-and-indexing`
+   - **หน้าที่**: ออกแบบ Thin Controllers/FormRequest/Services, ป้องกัน N+1 Queries (`with()`), จัดการ Schema/Fallback ดึงไฟล์เดิม, คุมตรรกะค้นหาและแปลงวันที่ พ.ศ. ↔ ค.ศ., และควบคุม Academic SEO (Google Scholar, Dublin Core, JSON-LD, Dynamic XML Sitemaps)
 2. **Academic UI Craftsman** (ส่วนติดต่อผู้ใช้สไตล์วิชาการ)
    - **Skills ที่กำกับ**: `ui-standard-components`, `ui-dark-mode-and-responsive`, `ui-form-controls-and-plugins`, `ui-dashboard-visualization`, `ui-ux-pro-max`
    - **หน้าที่**: สร้าง/แต่ง Blade Views ด้วย Semantic Tokens (Light/Dark Mode), ป้องกัน AI-Slop (คุมโทนสีวิชาการ Deep Navy / Amber), จัดการ `<x-card>`, Status Badges, `tabular-nums`, TomSelect และ Wizard UI

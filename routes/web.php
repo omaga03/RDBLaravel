@@ -75,11 +75,20 @@ use App\Http\Controllers\Frontend\ResearchcoferenceinthaiController;
 use App\Http\Controllers\Frontend\ResearchnewsController;
 use App\Http\Controllers\Frontend\SiteController as FrontendSiteController;
 use App\Http\Controllers\Frontend\DashboardController;
+use App\Http\Controllers\Frontend\SitemapController;
 
 Route::get('/', [FrontendSiteController::class, 'index'])->name('home');
 Route::get('/site/index', [FrontendSiteController::class, 'index'])->name('site.index');
 Route::view('/privacy-policy', 'pages.privacy')->name('privacy');
 Route::view('/cookie-policy', 'pages.cookies')->name('cookies');
+
+// Dynamic XML Sitemaps for Academic Search Engines & Google Scholar
+Route::get('sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
+Route::get('sitemap-projects.xml', [SitemapController::class, 'projects'])->name('sitemap.projects');
+Route::get('sitemap-publications.xml', [SitemapController::class, 'publications'])->name('sitemap.publications');
+Route::get('sitemap-researchers.xml', [SitemapController::class, 'researchers'])->name('sitemap.researchers');
+Route::get('sitemap-utilizations.xml', [SitemapController::class, 'utilizations'])->name('sitemap.utilizations');
+Route::get('sitemap-ip.xml', [SitemapController::class, 'ip'])->name('sitemap.ip');
 
 
 // Backend Routes (Protected)
