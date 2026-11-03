@@ -314,12 +314,24 @@ class PdfCoverService
             }
         }
 
-        if (!empty($authorsList)) {
-            if (count($authorsList) <= 2) {
-                $authorName = implode(', ', $authorsList);
-            } else {
-                $authorName = $authorsList[0] . ' และคณะ';
+        // Also check researchers relation directly if empty
+        if (empty($authorsList)) {
+            $researchers = $project->relationLoaded('researchers')
+                ? $project->researchers
+                : $project->researchers()->with('prefix')->get();
+            if ($researchers && $researchers->isNotEmpty()) {
+                foreach ($researchers as $r) {
+                    $prefix = trim(optional($r->prefix)->prefix_nameTH ?? '');
+                    $name = trim(($prefix !== '' ? $prefix . ' ' : '') . $r->researcher_fname . ' ' . $r->researcher_lname);
+                    if ($name !== '' && !in_array($name, $authorsList)) {
+                        $authorsList[] = $name;
+                    }
+                }
             }
+        }
+
+        if (!empty($authorsList)) {
+            $authorName = implode(', ', $authorsList);
         }
 
         return [
@@ -327,6 +339,7 @@ class PdfCoverService
             'title' => strip_tags((string) ($project->pro_nameTH ?: $project->pro_nameEN ?: 'โครงการวิจัย')),
             'code' => $project->pro_code ? ('รหัสโครงการ: ' . $project->pro_code) : ('PCRU-PRO-' . $project->pro_id),
             'author' => $authorName,
+            'authors_list' => $authorsList,
             'year' => optional($project->year)->year_name ? ('ปีงบประมาณ พ.ศ. ' . $project->year->year_name) : '',
             'department' => optional($project->department)->department_nameTH ?: 'มหาวิทยาลัยราชภัฏเพชรบูรณ์',
         ];
@@ -383,12 +396,27 @@ class PdfCoverService
             }
         }
 
-        if (!empty($authorsList)) {
-            if (count($authorsList) <= 2) {
-                $authorName = implode(', ', $authorsList);
-            } else {
-                $authorName = $authorsList[0] . ' และคณะ';
+        // 4. Check parent project researchers if still empty
+        if (empty($authorsList) && $published->pro_id) {
+            $project = $published->relationLoaded('project') ? $published->project : $published->project()->first();
+            if ($project) {
+                $projResearchers = $project->relationLoaded('researchers')
+                    ? $project->researchers
+                    : $project->researchers()->with('prefix')->get();
+                if ($projResearchers && $projResearchers->isNotEmpty()) {
+                    foreach ($projResearchers as $r) {
+                        $prefix = trim(optional($r->prefix)->prefix_nameTH ?? '');
+                        $name = trim(($prefix !== '' ? $prefix . ' ' : '') . $r->researcher_fname . ' ' . $r->researcher_lname);
+                        if ($name !== '' && !in_array($name, $authorsList)) {
+                            $authorsList[] = $name;
+                        }
+                    }
+                }
             }
+        }
+
+        if (!empty($authorsList)) {
+            $authorName = implode(', ', $authorsList);
         }
 
         return [
@@ -396,6 +424,7 @@ class PdfCoverService
             'title' => strip_tags((string) ($published->pub_name ?: 'ผลงานตีพิมพ์ทางวิชาการ')),
             'code' => optional($published->pubtype)->pubtype_name ?: 'งานตีพิมพ์เผยแพร่',
             'author' => $authorName,
+            'authors_list' => $authorsList,
             'year' => optional($published->year)->year_name ? ('ปีงบประมาณ พ.ศ. ' . $published->year->year_name) : '',
             'department' => optional($published->department)->department_nameTH ?: 'มหาวิทยาลัยราชภัฏเพชรบูรณ์',
         ];
@@ -725,9 +754,52 @@ PYTHON;
         $typeLabel = $metadata['type'] ?? 'เอกสารงานวิจัย';
         $codeLabel = $metadata['code'] ?? 'PCRU-RDB';
         $rawTitle = $metadata['title'] ?? 'Research Report / Published Article';
-        $author = $metadata['author'] ?? 'นักวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์';
         $dept = $metadata['department'] ?? 'มหาวิทยาลัยราชภัฏเพชรบูรณ์';
         $year = $metadata['year'] ?? ('ปีงบประมาณ พ.ศ. ' . (date('Y') + 543));
+
+        $authorsList = $metadata['authors_list'] ?? [];
+        if (empty($authorsList) && !empty($metadata['author'])) {
+            $authorsList = [$metadata['author']];
+        }
+        if (empty($authorsList)) {
+            $authorsList = ['นักวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์'];
+        }
+
+        // Pack authors into clean lines (max ~460px width per line to avoid clipping)
+        $authorLines = [];
+        $curAuthorLine = '';
+        foreach ($authorsList as $aName) {
+            $candidate = $curAuthorLine === '' ? $aName : $curAuthorLine . ', ' . $aName;
+            if ($ttfFont && function_exists('imagettfbbox')) {
+                $box = imagettfbbox(12, 0, $ttfFont, $candidate);
+                $w = abs($box[2] - $box[0]);
+                if ($w <= 460) {
+                    $curAuthorLine = $candidate;
+                } else {
+                    if ($curAuthorLine !== '') {
+                        $authorLines[] = $curAuthorLine;
+                    }
+                    $curAuthorLine = $aName;
+                }
+            } else {
+                if (mb_strlen($candidate, 'UTF-8') <= 36) {
+                    $curAuthorLine = $candidate;
+                } else {
+                    if ($curAuthorLine !== '') {
+                        $authorLines[] = $curAuthorLine;
+                    }
+                    $curAuthorLine = $aName;
+                }
+            }
+        }
+        if ($curAuthorLine !== '') {
+            $authorLines[] = $curAuthorLine;
+        }
+
+        if (count($authorLines) > 4) {
+            $authorLines = array_slice($authorLines, 0, 3);
+            $authorLines[] = 'และคณะ (' . count($authorsList) . ' ท่าน)';
+        }
 
         if ($ttfFont && function_exists('imagettftext')) {
             @imagettftext($im, 11, 0, 42, 55, $white, $ttfFont, $typeLabel);
@@ -738,10 +810,10 @@ PYTHON;
             @imagettftext($im, 10, 0, 60, 155, $amber, $ttfFont, 'ชื่อผลงานวิจัย / บทความวิชาการ (Research Title):');
             $wrappedLines = $this->wrapUtf8Text($rawTitle, 34);
             $titleStartY = 192;
-            $lineHeight = 30;
+            $lineHeight = 28;
             $renderedLinesCount = 0;
             foreach (array_slice($wrappedLines, 0, 6) as $idx => $line) {
-                @imagettftext($im, 13.5, 0, 60, $titleStartY + ($idx * $lineHeight), $dark, $ttfFont, $line);
+                @imagettftext($im, 13, 0, 60, $titleStartY + ($idx * $lineHeight), $dark, $ttfFont, $line);
                 $renderedLinesCount++;
             }
             if (count($wrappedLines) > 6) {
@@ -750,19 +822,24 @@ PYTHON;
             }
 
             // คำนวณตำแหน่ง Y สำหรับส่วนผู้วิจัยและหน่วยงานให้ปรับตามความยาวชื่อเรื่องโดยอัตโนมัติ
-            $authorStartY = max(420, $titleStartY + ($renderedLinesCount * $lineHeight) + 30);
+            $authorStartY = max(390, $titleStartY + ($renderedLinesCount * $lineHeight) + 25);
             
             // เส้นคั่นบางๆ 1px
-            imageline($im, 60, $authorStartY - 15, $width - 60, $authorStartY - 15, $lightBorder);
+            imageline($im, 60, $authorStartY - 14, $width - 60, $authorStartY - 14, $lightBorder);
 
-            @imagettftext($im, 10, 0, 60, $authorStartY + 6, $gray, $ttfFont, 'ผู้วิจัย / เจ้าของผลงาน (Author / Researcher):');
-            @imagettftext($im, 13, 0, 60, $authorStartY + 32, $navy, $ttfFont, $author);
+            @imagettftext($im, 10, 0, 60, $authorStartY + 4, $gray, $ttfFont, 'ผู้วิจัย / เจ้าของผลงาน (Author / Researcher):');
+            $authorLineHeight = 25;
+            $authorBaseY = $authorStartY + 30;
+            foreach ($authorLines as $idx => $line) {
+                @imagettftext($im, 12, 0, 60, $authorBaseY + ($idx * $authorLineHeight), $navy, $ttfFont, $line);
+            }
 
-            $deptStartY = $authorStartY + 70;
-            @imagettftext($im, 10, 0, 60, $deptStartY, $gray, $ttfFont, 'หน่วยงานและปีงบประมาณ (Affiliation & Fiscal Year):');
-            @imagettftext($im, 11.5, 0, 60, $deptStartY + 25, $dark, $ttfFont, $dept);
+            $deptStartY = $authorBaseY + (count($authorLines) * $authorLineHeight) + 16;
+            imageline($im, 60, $deptStartY - 12, $width - 60, $deptStartY - 12, $lightBorder);
+            @imagettftext($im, 10, 0, 60, $deptStartY + 4, $gray, $ttfFont, 'หน่วยงานและปีงบประมาณ (Affiliation & Fiscal Year):');
+            @imagettftext($im, 11, 0, 60, $deptStartY + 26, $dark, $ttfFont, $dept);
             if (!empty($year)) {
-                @imagettftext($im, 11.5, 0, 60, $deptStartY + 50, $amber, $ttfFont, $year);
+                @imagettftext($im, 11, 0, 60, $deptStartY + 48, $amber, $ttfFont, $year);
             }
         } else {
             imagestring($im, 4, 45, 42, $this->sanitizeAscii($typeLabel, 'RESEARCH'), $white);
@@ -776,12 +853,15 @@ PYTHON;
                 imagestring($im, 5, 65, $startY + ($idx * 26), $line, $dark);
             }
 
-            imagestring($im, 3, 65, 400, 'AUTHOR / RESEARCHER:', $gray);
-            imagestring($im, 4, 65, 422, $this->sanitizeAscii($author, 'Researcher PCRU'), $navy);
+            imagestring($im, 3, 65, 390, 'AUTHOR / RESEARCHER:', $gray);
+            foreach ($authorLines as $idx => $line) {
+                imagestring($im, 4, 65, 412 + ($idx * 22), $this->sanitizeAscii($line, 'Researcher PCRU'), $navy);
+            }
 
-            imagestring($im, 3, 65, 480, 'INSTITUTION & FISCAL YEAR:', $gray);
-            imagestring($im, 4, 65, 502, $this->sanitizeAscii($dept, 'Phetchabun Rajabhat University'), $dark);
-            imagestring($im, 3, 65, 525, $this->sanitizeAscii($year, 'Fiscal Year ' . (date('Y') + 543)), $amber);
+            $deptStartY = 412 + (count($authorLines) * 22) + 20;
+            imagestring($im, 3, 65, $deptStartY, 'INSTITUTION & FISCAL YEAR:', $gray);
+            imagestring($im, 4, 65, $deptStartY + 20, $this->sanitizeAscii($dept, 'Phetchabun Rajabhat University'), $dark);
+            imagestring($im, 3, 65, $deptStartY + 40, $this->sanitizeAscii($year, 'Fiscal Year ' . (date('Y') + 543)), $amber);
         }
 
         // ป้ายสัญลักษณ์แถบล่าง (Scholarly Footer Bar)
