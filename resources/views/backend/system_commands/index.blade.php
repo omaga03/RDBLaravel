@@ -75,20 +75,29 @@
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <span class="small fw-semibold text-body-secondary"><i class="bi bi-file-earmark-binary me-1 text-info"></i>เครื่องมือนับหน้า PDF</span>
                         @if($engineInfo['pdftotext_available'])
-                            <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle">
-                                <i class="bi bi-check-circle me-1"></i>Poppler OK
+                            <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle" title="Poppler pdftotext พร้อมใช้งาน แม่นยำ 99.99%">
+                                <i class="bi bi-check-circle-fill me-1"></i>Poppler Ready
                             </span>
                         @else
-                            <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle">
-                                Pure PHP Fallback
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" title="ไม่พบ Poppler pdftotext สลับไปใช้ Pure PHP แทน">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i>Pure PHP (Tier 2-4)
                             </span>
                         @endif
                     </div>
                     <div class="small fw-bold text-body mb-1">
-                        {{ $engineInfo['pdftotext_available'] ? 'Poppler pdftotext (Tier 1 แม่นยำ 99.99%)' : 'Pure PHP Parser (Tier 2-4)' }}
+                        @if($engineInfo['pdftotext_available'])
+                            Poppler pdftotext (Tier 1 แม่นยำ 99.99%)
+                        @else
+                            Pure PHP Parser (Smalot / FPDI)
+                        @endif
                     </div>
                     <div class="text-body-tertiary small" style="font-size: 0.78rem;">
-                        pdftoppm: {{ $engineInfo['pdftoppm_available'] ? 'พร้อมใช้งาน' : 'ไม่พบ' }}
+                        @if($engineInfo['pdftotext_available'])
+                            ไบนารี: <code class="text-body-secondary" title="{{ $engineInfo['pdftotext_binary'] }}">{{ basename($engineInfo['pdftotext_binary']) }}</code>
+                            <span class="text-success ms-1">({{ basename(dirname($engineInfo['pdftotext_binary'])) }})</span>
+                        @else
+                            Poppler: <span class="text-danger">ไม่พบ</span> (ใช้ Smalot {{ $engineInfo['smalot_available'] ? '✓' : '✗' }})
+                        @endif
                     </div>
                 </div>
             </div>

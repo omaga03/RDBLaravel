@@ -60,12 +60,19 @@ class SystemCommandController extends Controller
             ->count();
 
         // 3. Engine & Environment Status Check
+        $pdftotextBin = $dspaceService->getPdftotextBinary();
+        $pdftoppmBin = $coverService->getPdftoppmBinary();
+
         $engineInfo = [
             'active_cover_engine' => $coverService->getActiveEngineDescription(),
             'python_executable' => $this->detectPythonPath(),
             'pymupdf_available' => $this->checkPyMuPdfAvailable(),
-            'pdftotext_available' => $this->checkPopplerAvailable('pdftotext'),
-            'pdftoppm_available' => $this->checkPopplerAvailable('pdftoppm'),
+            'pdftotext_binary' => $pdftotextBin,
+            'pdftotext_available' => !empty($pdftotextBin),
+            'pdftoppm_binary' => $pdftoppmBin,
+            'pdftoppm_available' => !empty($pdftoppmBin),
+            'smalot_available' => class_exists(\Smalot\PdfParser\Parser::class),
+            'fpdi_available' => class_exists('\setasign\Fpdi\Fpdi'),
             'gd_loaded' => extension_loaded('gd'),
             'gd_webp' => function_exists('imagewebp'),
             'storage_symlink_ok' => is_dir(public_path('storage')),
@@ -237,24 +244,6 @@ class SystemCommandController extends Controller
         $cmd = escapeshellarg($python) . ' -c "import fitz, PIL; print(\'OK\')" 2>&1';
         $out = @shell_exec($cmd);
         return is_string($out) && str_contains($out, 'OK');
-    }
-
-    /**
-     * Check if a Poppler CLI tool is available
-     */
-    protected function checkPopplerAvailable(string $tool): bool
-    {
-        $envPath = env(strtoupper($tool) . '_PATH');
-        if ($envPath && file_exists($envPath)) {
-            return true;
-        }
-
-        $cmd = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN')
-            ? "where {$tool} 2>NUL"
-            : "which {$tool} 2>/dev/null";
-
-        $output = @shell_exec($cmd);
-        return !empty(trim((string)$output));
     }
 
     /**
