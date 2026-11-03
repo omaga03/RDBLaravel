@@ -113,9 +113,15 @@ class GeneratePdfCoversCommand extends Command
                     continue;
                 }
 
-                $pdfPath = $dspaceService->resolveProjectFileOnDisk($project, 'report');
+                $pdfPath = $dspaceService->resolveProjectFileOnDisk($project, 'report')
+                    ?: $dspaceService->resolveProjectFileOnDisk($project, 'abstract');
                 if (!$pdfPath || !file_exists($pdfPath)) {
-                    $failed++;
+                    $fallbackPath = $coverService->generateProjectCover($project, $force);
+                    if ($fallbackPath) {
+                        $success++;
+                    } else {
+                        $failed++;
+                    }
                     $bar->advance();
                     continue;
                 }
@@ -221,7 +227,12 @@ class GeneratePdfCoversCommand extends Command
 
                 $pdfPath = $dspaceService->resolvePublishedFileOnDisk($item);
                 if (!$pdfPath || !file_exists($pdfPath)) {
-                    $failed++;
+                    $fallbackPath = $coverService->generatePublishedCover($item, $force);
+                    if ($fallbackPath) {
+                        $success++;
+                    } else {
+                        $failed++;
+                    }
                     $bar->advance();
                     continue;
                 }

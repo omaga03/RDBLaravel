@@ -210,14 +210,13 @@ class PdfCoverService
             return $project->pro_cover_path;
         }
 
-        // ค้นหาพาธไฟล์ PDF บนดิสก์
-        $pdfPath = $this->dspaceService->resolveProjectFileOnDisk($project, 'report');
-        if (!$pdfPath || !file_exists($pdfPath)) {
-            return null;
-        }
+        // ค้นหาพาธไฟล์ PDF บนดิสก์ (เล่มรายงาน -> หากไม่มีให้ลองใช้ไฟล์บทคัดย่อ)
+        $pdfPath = $this->dspaceService->resolveProjectFileOnDisk($project, 'report')
+            ?: $this->dspaceService->resolveProjectFileOnDisk($project, 'abstract');
 
         $folder = 'project/covers';
-        $filename = 'project_' . $project->pro_id . '_' . substr(md5($project->pro_id . '_' . filemtime($pdfPath)), 0, 8) . '.webp';
+        $hashSeed = ($pdfPath && file_exists($pdfPath)) ? filemtime($pdfPath) : ($project->pro_file ?: $project->pro_id);
+        $filename = 'project_' . $project->pro_id . '_' . substr(md5($project->pro_id . '_' . $hashSeed), 0, 8) . '.webp';
         $relativeStoragePath = $folder . '/' . $filename;
         $absoluteTargetPath = Storage::disk('public')->path($relativeStoragePath);
 
@@ -228,7 +227,11 @@ class PdfCoverService
 
         $metadata = $this->buildProjectMetadata($project);
 
-        $success = $this->extractFirstPageToWebp($pdfPath, $absoluteTargetPath, $metadata);
+        if ($pdfPath && file_exists($pdfPath)) {
+            $success = $this->extractFirstPageToWebp($pdfPath, $absoluteTargetPath, $metadata);
+        } else {
+            $success = $this->generateAcademicGdCover($absoluteTargetPath, $metadata);
+        }
 
         if ($success && file_exists($absoluteTargetPath) && filesize($absoluteTargetPath) > 0) {
             $project->pro_cover_path = $relativeStoragePath;
@@ -253,12 +256,10 @@ class PdfCoverService
         }
 
         $pdfPath = $this->dspaceService->resolvePublishedFileOnDisk($published);
-        if (!$pdfPath || !file_exists($pdfPath)) {
-            return null;
-        }
 
         $folder = 'published/covers';
-        $filename = 'published_' . $published->id . '_' . substr(md5($published->id . '_' . filemtime($pdfPath)), 0, 8) . '.webp';
+        $hashSeed = ($pdfPath && file_exists($pdfPath)) ? filemtime($pdfPath) : ($published->pub_file ?: $published->id);
+        $filename = 'published_' . $published->id . '_' . substr(md5($published->id . '_' . $hashSeed), 0, 8) . '.webp';
         $relativeStoragePath = $folder . '/' . $filename;
         $absoluteTargetPath = Storage::disk('public')->path($relativeStoragePath);
 
@@ -269,7 +270,11 @@ class PdfCoverService
 
         $metadata = $this->buildPublishedMetadata($published);
 
-        $success = $this->extractFirstPageToWebp($pdfPath, $absoluteTargetPath, $metadata);
+        if ($pdfPath && file_exists($pdfPath)) {
+            $success = $this->extractFirstPageToWebp($pdfPath, $absoluteTargetPath, $metadata);
+        } else {
+            $success = $this->generateAcademicGdCover($absoluteTargetPath, $metadata);
+        }
 
         if ($success && file_exists($absoluteTargetPath) && filesize($absoluteTargetPath) > 0) {
             $published->pub_cover_path = $relativeStoragePath;
@@ -285,11 +290,25 @@ class PdfCoverService
      */
     public function buildProjectMetadata(RdbProject $project): array
     {
+        $authorName = 'นักวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์';
+        if ($project->relationLoaded('rdbProjectWorks') || $project->rdbProjectWorks) {
+            $works = $project->rdbProjectWorks ? $project->rdbProjectWorks->filter(fn($w) => !empty($w->researcher)) : collect();
+            $headWork = $works->firstWhere('position_id', 2) ?? $works->firstWhere('position_id', 1) ?? $works->first();
+            if ($headWork && $headWork->researcher) {
+                $r = $headWork->researcher;
+                $prefix = optional($r->prefix)->prefix_nameTH ?? '';
+                $full = trim($prefix . $r->researcher_fname . ' ' . $r->researcher_lname);
+                if ($full !== '') {
+                    $authorName = $full;
+                }
+            }
+        }
+
         return [
             'type' => 'รายงานวิจัยฉบับสมบูรณ์',
-            'title' => $project->pro_nameTH ?: $project->pro_nameEN ?: 'โครงการวิจัย',
-            'code' => $project->pro_code ?: ('PCRU-PRO-' . $project->pro_id),
-            'author' => 'นักวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์',
+            'title' => strip_tags((string) ($project->pro_nameTH ?: $project->pro_nameEN ?: 'โครงการวิจัย')),
+            'code' => $project->pro_code ? ('รหัสโครงการ: ' . $project->pro_code) : ('PCRU-PRO-' . $project->pro_id),
+            'author' => $authorName,
             'year' => optional($project->year)->year_name ? ('ปีงบประมาณ พ.ศ. ' . $project->year->year_name) : '',
             'department' => optional($project->department)->department_nameTH ?: 'มหาวิทยาลัยราชภัฏเพชรบูรณ์',
         ];

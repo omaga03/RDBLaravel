@@ -107,6 +107,84 @@
             </div>
             @endif
 
+            {{-- Related Project Card (Moved to Left Column before Abstract) --}}
+            @if($item->project)
+            <div class="card shadow-sm border mb-4">
+                <div class="card-header bg-body-tertiary d-flex align-items-center justify-content-between py-2.5 px-3">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-folder-fill text-success me-2 fs-5"></i>
+                        <h6 class="mb-0 fw-semibold text-success">โครงการวิจัยที่เกี่ยวข้อง</h6>
+                    </div>
+                    @if($item->project->pro_code)
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-0.5" style="font-size: 0.72rem; font-variant-numeric: tabular-nums;">
+                            <i class="bi bi-hash me-0.5"></i>{{ $item->project->pro_code }}
+                        </span>
+                    @endif
+                </div>
+                <div class="card-body">
+                    <h6 class="fw-semibold mb-2" style="font-size: 0.98rem; line-height: 1.5;">
+                        <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body hover-primary text-break">
+                            {{ strip_tags((string) $item->project->pro_nameTH) }}
+                        </a>
+                    </h6>
+
+                    @if($item->project->type || $item->project->typeSub)
+                    <div class="text-body-secondary small mb-1">
+                        {{ $item->project->type->pt_name ?? '' }}
+                        @if($item->project->type && $item->project->typeSub) • @endif
+                        {{ $item->project->typeSub->pts_name ?? '' }}
+                    </div>
+                    @endif
+
+                    @if($item->project->department)
+                    <div class="text-body-secondary small mb-2">
+                        <i class="bi bi-building me-1"></i>{{ $item->project->department->department_nameTH }}
+                    </div>
+                    @endif
+
+                    @php
+                        $allWorks = $item->project->rdbProjectWorks ? $item->project->rdbProjectWorks->filter(fn($w) => !empty($w->researcher)) : collect();
+                        $headWork = $allWorks->firstWhere('position_id', 2) 
+                                 ?? $allWorks->firstWhere('position_id', 1) 
+                                 ?? $allWorks->first();
+                        $headResearcher = $headWork?->researcher;
+                        $remainingWorks = $headResearcher ? $allWorks->reject(fn($w) => $w->researcher_id === $headResearcher->researcher_id)->unique('researcher_id') : collect();
+                        $remainingCount = $remainingWorks->count();
+                        $remainingNames = $remainingWorks->map(function($work) {
+                            $prefix = $work->researcher->prefix->prefix_nameTH ?? '';
+                            return e($prefix . $work->researcher->researcher_fname . ' ' . $work->researcher->researcher_lname);
+                        })->filter()->implode('<br>• ');
+                    @endphp
+                    <hr class="my-2.5 border-secondary-subtle">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        @if($headResearcher)
+                        <div class="d-flex align-items-center flex-wrap">
+                            <span class="small fw-semibold text-body me-2" style="font-size: 0.78rem;">หัวหน้าโครงการ:</span>
+                            <i class="bi bi-person-circle text-primary me-1.5 fs-6"></i>
+                            <a href="{{ route('frontend.rdbresearcher.show', $headResearcher->researcher_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body hover-primary fw-medium small">
+                                {{ $headResearcher->prefix->prefix_nameTH ?? '' }}{{ $headResearcher->researcher_fname }} {{ $headResearcher->researcher_lname }}
+                            </a>
+                            @if($remainingCount > 0)
+                                <span class="text-body-secondary small ms-1" 
+                                      data-bs-toggle="tooltip" 
+                                      data-bs-placement="top" 
+                                      data-bs-html="true"
+                                      title="<strong>นักวิจัยร่วม:</strong><br>• {!! strip_tags($remainingNames, '<br>') !!}"
+                                      style="cursor: pointer;">(+{{ $remainingCount }})</span>
+                            @endif
+                        </div>
+                        @else
+                        <div></div>
+                        @endif
+
+                        <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-box-arrow-up-right me-1"></i> ดูรายละเอียดโครงการ
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             <!-- Abstract Card -->
             <div class="card shadow-sm border mb-4">
                 <div class="card-header bg-body-tertiary d-flex align-items-center py-2.5 px-3">
@@ -176,74 +254,63 @@
 
         <!-- Sidebar / Right Column -->
         <div class="col-lg-4">
-            {{-- 1. Related Project Card (If exists, shown at the top) --}}
-            @if($item->project)
+            {{-- 1. Files Card (High-Impact CTA Card - Moved to Top) --}}
             <div class="card shadow-sm border mb-4">
                 <div class="card-header bg-body-tertiary d-flex align-items-center py-2.5 px-3">
-                    <i class="bi bi-folder-fill text-success me-2 fs-5"></i>
-                    <h6 class="mb-0 fw-semibold text-success">โครงการวิจัยที่เกี่ยวข้อง</h6>
+                    <i class="bi bi-file-earmark-arrow-down-fill text-primary me-2"></i>
+                    <h6 class="mb-0 fw-semibold text-body">ไฟล์เอกสาร (Files)</h6>
                 </div>
-                <div class="card-body">
-                    <h6 class="fw-semibold mb-2" style="font-size: 0.95rem; line-height: 1.5;">
-                        <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body hover-primary text-break">
-                            {{ strip_tags((string) $item->project->pro_nameTH) }}
-                        </a>
-                    </h6>
-
-                    @if($item->project->type || $item->project->typeSub)
-                    <div class="text-body-secondary small mb-1">
-                        {{ $item->project->type->pt_name ?? '' }}
-                        @if($item->project->type && $item->project->typeSub) • @endif
-                        {{ $item->project->typeSub->pts_name ?? '' }}
-                    </div>
-                    @endif
-
-                    @if($item->project->department)
-                    <div class="text-body-secondary small mb-2">
-                        <i class="bi bi-building me-1"></i>{{ $item->project->department->department_nameTH }}
-                    </div>
-                    @endif
-
+                <div class="card-body p-3">
                     @php
-                        $allWorks = $item->project->rdbProjectWorks ? $item->project->rdbProjectWorks->filter(fn($w) => !empty($w->researcher)) : collect();
-                        $headWork = $allWorks->firstWhere('position_id', 2) 
-                                 ?? $allWorks->firstWhere('position_id', 1) 
-                                 ?? $allWorks->first();
-                        $headResearcher = $headWork?->researcher;
-                        $remainingWorks = $headResearcher ? $allWorks->reject(fn($w) => $w->researcher_id === $headResearcher->researcher_id)->unique('researcher_id') : collect();
-                        $remainingCount = $remainingWorks->count();
-                        $remainingNames = $remainingWorks->map(function($work) {
-                            $prefix = $work->researcher->prefix->prefix_nameTH ?? '';
-                            return e($prefix . $work->researcher->researcher_fname . ' ' . $work->researcher->researcher_lname);
-                        })->filter()->implode('<br>• ');
+                        $filePath = $item->getPublishedFilePath();
                     @endphp
-                    @if($headResearcher)
-                    <hr class="my-2 border-secondary-subtle">
-                    <div class="small fw-semibold text-body mb-1" style="font-size: 0.78rem;">หัวหน้าโครงการ:</div>
-                    <div class="d-flex align-items-center flex-wrap">
-                        <i class="bi bi-person-circle text-primary me-2 fs-6"></i>
-                        <a href="{{ route('frontend.rdbresearcher.show', $headResearcher->researcher_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body hover-primary fw-medium small">
-                            {{ $headResearcher->prefix->prefix_nameTH ?? '' }}{{ $headResearcher->researcher_fname }} {{ $headResearcher->researcher_lname }}
-                        </a>
-                        @if($remainingCount > 0)
-                            <span class="text-body-secondary small ms-1" 
-                                  data-bs-toggle="tooltip" 
-                                  data-bs-placement="top" 
-                                  data-bs-html="true"
-                                  title="<strong>นักวิจัยร่วม:</strong><br>• {!! strip_tags($remainingNames, '<br>') !!}"
-                                  style="cursor: pointer;">(+{{ $remainingCount }})</span>
+                    @if($filePath)
+                        @if($item->cover_url)
+                            <div class="text-center mb-3">
+                                <a href="{{ route('frontend.rdbpublished.view_file', $item->id) }}" target="_blank">
+                                    <img src="{{ $item->cover_url }}" alt="ปกบทความวิจัย" class="img-fluid rounded border shadow-sm" style="max-height: 260px; object-fit: contain;">
+                                </a>
+                            </div>
                         @endif
-                    </div>
-                    @endif
-
-                    <div class="mt-3">
-                        <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary w-100">
-                            <i class="bi bi-box-arrow-up-right me-1"></i> ดูรายละเอียดโครงการ
+                        <a href="{{ route('frontend.rdbpublished.view_file', $item->id) }}" 
+                           target="_blank" 
+                           class="file-cta-card card border border-success-subtle text-decoration-none shadow-sm"
+                           style="background: rgba(16, 185, 129, 0.04);">
+                            <div class="card-body p-3">
+                                <div class="d-flex align-items-center justify-content-between mb-2.5">
+                                    <div class="d-flex align-items-center min-w-0 me-2">
+                                        <div class="file-icon-box bg-success-subtle text-success rounded-3 d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 48px; height: 48px;">
+                                            <i class="bi bi-file-earmark-pdf-fill fs-2"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <h6 class="fw-bold text-success mb-0 text-truncate" style="font-size: 0.98rem;">บทความฉบับเต็ม</h6>
+                                            <small class="text-body-secondary d-block" style="font-size: 0.78rem;">Full Paper / Publication (PDF)</small>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex flex-column align-items-end gap-1 flex-shrink-0">
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" title="ดาวน์โหลด: {{ number_format($item->pub_download ?? 0) }} ครั้ง" style="font-size: 0.76rem;">
+                                            <i class="bi bi-download me-1"></i>{{ number_format($item->pub_download ?? 0) }}
+                                        </span>
+                                        @if(!empty($item->pub_numfile))
+                                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-1.5 py-0.5" style="font-size: 0.7rem; font-variant-numeric: tabular-nums;">
+                                                <i class="bi bi-file-earmark-text me-1"></i>{{ $item->pub_numfile }} หน้า
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="btn btn-sm btn-success w-100 rounded-2 fw-medium d-flex align-items-center justify-content-center gap-1.5 py-1.5 text-white shadow-sm">
+                                    <i class="bi bi-cloud-arrow-down-fill me-1.5"></i> ดาวน์โหลดบทความฉบับเต็ม
+                                </div>
+                            </div>
                         </a>
-                    </div>
+                    @else
+                        <div class="p-2.5 border border-dashed rounded bg-body-tertiary mb-0 text-body-secondary small d-flex align-items-center justify-content-center">
+                            <i class="bi bi-file-earmark text-muted fs-5 me-2"></i>
+                            <span>ไม่มีไฟล์เอกสารแนบ</span>
+                        </div>
+                    @endif
                 </div>
             </div>
-            @endif
 
             {{-- 2. Authors Card --}}
             <div class="card shadow-sm border mb-4">
@@ -314,64 +381,6 @@
                         </div>
                     @else
                         <div class="p-3 text-body-secondary text-center">ไม่มีข้อมูลผู้เขียน</div>
-                    @endif
-                </div>
-            </div>
-
-            {{-- 2. Files Card (High-Impact CTA Card) --}}
-            <div class="card shadow-sm border mb-4">
-                <div class="card-header bg-body-tertiary d-flex align-items-center py-2.5 px-3">
-                    <i class="bi bi-file-earmark-arrow-down-fill text-primary me-2"></i>
-                    <h6 class="mb-0 fw-semibold text-body">ไฟล์เอกสาร (Files)</h6>
-                </div>
-                <div class="card-body p-3">
-                    @php
-                        $filePath = $item->getPublishedFilePath();
-                    @endphp
-                    @if($filePath)
-                        @if($item->cover_url)
-                            <div class="text-center mb-3">
-                                <a href="{{ route('frontend.rdbpublished.view_file', $item->id) }}" target="_blank">
-                                    <img src="{{ $item->cover_url }}" alt="ปกบทความวิจัย" class="img-fluid rounded border shadow-sm" style="max-height: 220px; object-fit: contain;">
-                                </a>
-                            </div>
-                        @endif
-                        <a href="{{ route('frontend.rdbpublished.view_file', $item->id) }}" 
-                           target="_blank" 
-                           class="file-cta-card card border border-success-subtle text-decoration-none shadow-sm"
-                           style="background: rgba(16, 185, 129, 0.04);">
-                            <div class="card-body p-3">
-                                <div class="d-flex align-items-center justify-content-between mb-2.5">
-                                    <div class="d-flex align-items-center min-w-0 me-2">
-                                        <div class="file-icon-box bg-success-subtle text-success rounded-3 d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 48px; height: 48px;">
-                                            <i class="bi bi-file-earmark-pdf-fill fs-2"></i>
-                                        </div>
-                                        <div class="min-w-0">
-                                            <h6 class="fw-bold text-success mb-0 text-truncate" style="font-size: 0.98rem;">บทความฉบับเต็ม</h6>
-                                            <small class="text-body-secondary d-block" style="font-size: 0.78rem;">Full Paper / Publication (PDF)</small>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex flex-column align-items-end gap-1 flex-shrink-0">
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" title="ดาวน์โหลด: {{ number_format($item->pub_download ?? 0) }} ครั้ง" style="font-size: 0.76rem;">
-                                            <i class="bi bi-download me-1"></i>{{ number_format($item->pub_download ?? 0) }}
-                                        </span>
-                                        @if(!empty($item->pub_numfile))
-                                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-1.5 py-0.5" style="font-size: 0.7rem; font-variant-numeric: tabular-nums;">
-                                                <i class="bi bi-file-earmark-text me-1"></i>{{ $item->pub_numfile }} หน้า
-                                            </span>
-                                        @endif
-                                    </div>
-                                </div>
-                                <div class="btn btn-sm btn-success w-100 rounded-2 fw-medium d-flex align-items-center justify-content-center gap-1.5 py-1.5 text-white shadow-sm">
-                                    <i class="bi bi-cloud-arrow-down-fill me-1.5"></i> ดาวน์โหลดบทความฉบับเต็ม
-                                </div>
-                            </div>
-                        </a>
-                    @else
-                        <div class="p-2.5 border border-dashed rounded bg-body-tertiary mb-0 text-body-secondary small d-flex align-items-center justify-content-center">
-                            <i class="bi bi-file-earmark text-muted fs-5 me-2"></i>
-                            <span>ไม่มีไฟล์เอกสารแนบ</span>
-                        </div>
                     @endif
                 </div>
             </div>

@@ -325,67 +325,27 @@
 
         <!-- Sidebar / Right Column (col-lg-4) -->
         <div class="col-lg-4">
-            {{-- 1. Researchers Card --}}
-            <div class="card shadow-sm border mb-4">
-                <div class="card-header bg-body-tertiary d-flex align-items-center py-2.5 px-3">
-                    <i class="bi bi-people-fill text-primary me-2"></i>
-                    <h6 class="mb-0 fw-semibold text-body">คณะผู้วิจัย (Researchers)</h6>
-                    <span class="badge bg-primary-subtle text-primary ms-auto">{{ $item->rdbProjectWorks->count() }}</span>
-                </div>
-                <div class="card-body p-0">
-                    @if($item->rdbProjectWorks && $item->rdbProjectWorks->count() > 0)
-                        <div class="list-group list-group-flush">
-                            @foreach($item->rdbProjectWorks as $work)
-                                <div class="list-group-item bg-transparent py-2.5 px-3">
-                                    <div class="d-flex align-items-start">
-                                        <div class="me-2 text-primary fs-5 mt-0.5">
-                                            <i class="bi bi-person-circle"></i>
-                                        </div>
-                                        <div class="flex-grow-1 min-w-0">
-                                            @if($work->researcher)
-                                                <div class="d-flex flex-wrap align-items-center gap-1.5 mb-0.5">
-                                                    <a href="{{ route('frontend.rdbresearcher.show', $work->researcher->researcher_id) }}" 
-                                                       target="_blank" rel="noopener noreferrer"
-                                                       class="text-decoration-none fw-bold text-body hover-primary">
-                                                        {{ $work->researcher->prefix->prefix_nameTH ?? '' }}{{ $work->researcher->researcher_fname }} {{ $work->researcher->researcher_lname }}
-                                                    </a>
-                                                    @if($work->position)
-                                                        <span class="badge {{ $work->position_id == 2 ? 'bg-primary-subtle text-primary border border-primary-subtle' : 'bg-secondary-subtle text-secondary-emphasis' }}" 
-                                                              style="font-size: 0.7rem; font-weight: 500; padding: 0.16rem 0.45rem;">
-                                                            {{ $work->position->position_nameTH }}
-                                                        </span>
-                                                    @endif
-                                                </div>
-                                                @if($work->researcher->department)
-                                                    <small class="text-body-secondary d-block" style="font-size: 0.78rem;">
-                                                        <i class="bi bi-building me-1"></i>{{ $work->researcher->department->department_nameTH }}
-                                                    </small>
-                                                @elseif($work->researcher->researcher_note)
-                                                    <small class="text-body-secondary d-block" style="font-size: 0.78rem;">
-                                                        {{ $work->researcher->researcher_note }}
-                                                    </small>
-                                                @endif
-                                            @else
-                                                <span class="text-body-secondary">-</span>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <div class="p-3 text-body-secondary text-center">ไม่มีข้อมูลนักวิจัย</div>
-                    @endif
-                </div>
-            </div>
-
-            {{-- 2. Files Card --}}
+            {{-- 1. Files Card (with Cover / First-Page Preview) --}}
             <div class="card shadow-sm border mb-4">
                 <div class="card-header bg-body-tertiary d-flex align-items-center py-2.5 px-3">
                     <i class="bi bi-file-earmark-arrow-down-fill text-primary me-2"></i>
                     <h6 class="mb-0 fw-semibold text-body">ไฟล์เอกสาร (Files)</h6>
                 </div>
                 <div class="card-body p-3">
+                    {{-- Cover / First-Page Preview (.webp) --}}
+                    @if((int) $item->pro_file_show === 0 && $item->cover_url)
+                        @php
+                            $coverReportPolicy = \App\Models\SystemSetting::get('download_policy_full_report', 'members_only');
+                            $coverNeedsLogin = ($coverReportPolicy === 'members_only' || $coverReportPolicy === 'admin_only') && !auth()->check();
+                            $coverHref = $coverNeedsLogin ? route('login') : route('frontend.rdbproject.view_report', $item->pro_id);
+                        @endphp
+                        <div class="text-center mb-3">
+                            <a href="{{ $coverHref }}" @if(!$coverNeedsLogin) target="_blank" @endif title="{{ $coverNeedsLogin ? 'เข้าสู่ระบบเพื่อดาวน์โหลดรายงานฉบับสมบูรณ์' : 'คลิกเพื่อเปิดรายงานวิจัยฉบับสมบูรณ์' }}">
+                                <img src="{{ $item->cover_url }}" alt="ปกหน้าแรกรายงานวิจัย" class="img-fluid rounded border shadow-sm" style="max-height: 260px; object-fit: contain;">
+                            </a>
+                        </div>
+                    @endif
+
                     {{-- Abstract File --}}
                     @if(!empty($item->pro_abstract_file) || !empty($item->pro_abstract_file_path))
                         <a href="{{ route('frontend.rdbproject.view_abstract', $item->pro_id) }}" 
@@ -500,6 +460,60 @@
                             <i class="bi bi-file-earmark text-muted fs-5 me-2"></i>
                             <span>ไม่มีไฟล์เล่มรายงาน</span>
                         </div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- 2. Researchers Card --}}
+            <div class="card shadow-sm border mb-4">
+                <div class="card-header bg-body-tertiary d-flex align-items-center py-2.5 px-3">
+                    <i class="bi bi-people-fill text-primary me-2"></i>
+                    <h6 class="mb-0 fw-semibold text-body">คณะผู้วิจัย (Researchers)</h6>
+                    <span class="badge bg-primary-subtle text-primary ms-auto">{{ $item->rdbProjectWorks->count() }}</span>
+                </div>
+                <div class="card-body p-0">
+                    @if($item->rdbProjectWorks && $item->rdbProjectWorks->count() > 0)
+                        <div class="list-group list-group-flush">
+                            @foreach($item->rdbProjectWorks as $work)
+                                <div class="list-group-item bg-transparent py-2.5 px-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="me-2 text-primary fs-5 mt-0.5">
+                                            <i class="bi bi-person-circle"></i>
+                                        </div>
+                                        <div class="flex-grow-1 min-w-0">
+                                            @if($work->researcher)
+                                                <div class="d-flex flex-wrap align-items-center gap-1.5 mb-0.5">
+                                                    <a href="{{ route('frontend.rdbresearcher.show', $work->researcher->researcher_id) }}" 
+                                                       target="_blank" rel="noopener noreferrer"
+                                                       class="text-decoration-none fw-bold text-body hover-primary">
+                                                        {{ $work->researcher->prefix->prefix_nameTH ?? '' }}{{ $work->researcher->researcher_fname }} {{ $work->researcher->researcher_lname }}
+                                                    </a>
+                                                    @if($work->position)
+                                                        <span class="badge {{ $work->position_id == 2 ? 'bg-primary-subtle text-primary border border-primary-subtle' : 'bg-secondary-subtle text-secondary-emphasis' }}" 
+                                                              style="font-size: 0.7rem; font-weight: 500; padding: 0.16rem 0.45rem;">
+                                                            {{ $work->position->position_nameTH }}
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                                @if($work->researcher->department)
+                                                    <small class="text-body-secondary d-block" style="font-size: 0.78rem;">
+                                                        <i class="bi bi-building me-1"></i>{{ $work->researcher->department->department_nameTH }}
+                                                    </small>
+                                                @elseif($work->researcher->researcher_note)
+                                                    <small class="text-body-secondary d-block" style="font-size: 0.78rem;">
+                                                        {{ $work->researcher->researcher_note }}
+                                                    </small>
+                                                @endif
+                                            @else
+                                                <span class="text-body-secondary">-</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="p-3 text-body-secondary text-center">ไม่มีข้อมูลนักวิจัย</div>
                     @endif
                 </div>
             </div>

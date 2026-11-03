@@ -143,6 +143,82 @@
                 </div>
             </div>
 
+            {{-- Related Project Card (Moved to Left Column before Utilization Details) --}}
+            @if($item->project)
+            <div class="card shadow-sm border mb-4">
+                <div class="card-header bg-body-tertiary d-flex align-items-center justify-content-between py-2.5 px-3">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-folder-symlink-fill text-primary me-2"></i>
+                        <h6 class="mb-0 fw-semibold text-body">โครงการวิจัยที่เกี่ยวข้อง</h6>
+                    </div>
+                    @if($item->project->pro_code)
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-0.5" style="font-size: 0.72rem; font-variant-numeric: tabular-nums;">
+                            <i class="bi bi-hash me-0.5"></i>{{ $item->project->pro_code }}
+                        </span>
+                    @endif
+                </div>
+                <div class="card-body">
+                    <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none fw-bold text-body hover-primary d-block mb-1.5 text-break" style="font-size: 0.96rem; line-height: 1.5;">
+                        {{ strip_tags((string) $item->project->pro_nameTH) }}
+                    </a>
+
+                    @if($item->project->type || $item->project->typeSub)
+                    <div class="text-body-secondary small mb-1" style="font-size: 0.78rem;">
+                        {{ $item->project->type->pt_name ?? '' }}
+                        @if($item->project->type && $item->project->typeSub) • @endif
+                        {{ $item->project->typeSub->pts_name ?? '' }}
+                    </div>
+                    @endif
+
+                    @if($item->project->department)
+                    <div class="text-body-secondary small mb-2" style="font-size: 0.78rem;">
+                        <i class="bi bi-building me-1"></i>{{ $item->project->department->department_nameTH }}
+                    </div>
+                    @endif
+
+                    @php
+                        $allWorks = $item->project->rdbProjectWorks ? $item->project->rdbProjectWorks->filter(fn($w) => !empty($w->researcher)) : collect();
+                        $headWork = $allWorks->firstWhere('position_id', 2) 
+                                 ?? $allWorks->firstWhere('position_id', 1) 
+                                 ?? $allWorks->first();
+                        $headResearcher = $headWork?->researcher;
+                        $remainingWorks = $headResearcher ? $allWorks->reject(fn($w) => $w->researcher_id === $headResearcher->researcher_id)->unique('researcher_id') : collect();
+                        $remainingCount = $remainingWorks->count();
+                        $remainingNames = $remainingWorks->map(function($work) {
+                            $prefix = $work->researcher->prefix->prefix_nameTH ?? '';
+                            return e($prefix . $work->researcher->researcher_fname . ' ' . $work->researcher->researcher_lname);
+                        })->filter()->implode('<br>• ');
+                    @endphp
+                    <hr class="my-2.5 border-secondary-subtle">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        @if($headResearcher)
+                        <div class="d-flex align-items-center flex-wrap">
+                            <span class="small fw-semibold text-body me-2" style="font-size: 0.78rem;">หัวหน้าโครงการ:</span>
+                            <i class="bi bi-person-circle text-primary me-1.5 fs-6"></i>
+                            <a href="{{ route('frontend.rdbresearcher.show', $headResearcher->researcher_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body hover-primary fw-medium small">
+                                {{ $headResearcher->prefix->prefix_nameTH ?? '' }}{{ $headResearcher->researcher_fname }} {{ $headResearcher->researcher_lname }}
+                            </a>
+                            @if($remainingCount > 0)
+                                <span class="text-body-secondary small ms-1" 
+                                      data-bs-toggle="tooltip" 
+                                      data-bs-placement="top" 
+                                      data-bs-html="true"
+                                      title="<strong>นักวิจัยร่วม:</strong><br>• {!! strip_tags($remainingNames, '<br>') !!}"
+                                      style="cursor: pointer;">(+{{ $remainingCount }})</span>
+                            @endif
+                        </div>
+                        @else
+                        <div></div>
+                        @endif
+
+                        <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-box-arrow-up-right me-1"></i> ดูรายละเอียดโครงการ
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             <!-- Detail Card -->
             <div class="card shadow-sm border mb-4">
                 <div class="card-header bg-body-tertiary d-flex align-items-center py-2.5 px-3">
@@ -176,79 +252,7 @@
 
         <!-- Sidebar / Right Column (col-lg-4) -->
         <div class="col-lg-4">
-            {{-- 1. Related Project Card --}}
-            @if($item->project)
-            <div class="card shadow-sm border mb-4">
-                <div class="card-header bg-body-tertiary d-flex align-items-center py-2.5 px-3">
-                    <i class="bi bi-folder-symlink-fill text-primary me-2"></i>
-                    <h6 class="mb-0 fw-semibold text-body">โครงการวิจัยที่เกี่ยวข้อง</h6>
-                </div>
-                <div class="card-body">
-                    @if($item->project->pro_code)
-                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-0.5 mb-1.5" style="font-size: 0.72rem;">
-                            {{ $item->project->pro_code }}
-                        </span>
-                    @endif
-                    <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none fw-bold text-body hover-primary d-block mb-1.5" style="font-size: 0.92rem; line-height: 1.5;">
-                        {{ strip_tags((string) $item->project->pro_nameTH) }}
-                    </a>
-
-                    @if($item->project->type || $item->project->typeSub)
-                    <div class="text-body-secondary small mb-1" style="font-size: 0.78rem;">
-                        {{ $item->project->type->pt_name ?? '' }}
-                        @if($item->project->type && $item->project->typeSub) • @endif
-                        {{ $item->project->typeSub->pts_name ?? '' }}
-                    </div>
-                    @endif
-
-                    @if($item->project->department)
-                    <div class="text-body-secondary small mb-2" style="font-size: 0.78rem;">
-                        <i class="bi bi-building me-1"></i>{{ $item->project->department->department_nameTH }}
-                    </div>
-                    @endif
-
-                    @php
-                        $allWorks = $item->project->rdbProjectWorks ? $item->project->rdbProjectWorks->filter(fn($w) => !empty($w->researcher)) : collect();
-                        $headWork = $allWorks->firstWhere('position_id', 2) 
-                                 ?? $allWorks->firstWhere('position_id', 1) 
-                                 ?? $allWorks->first();
-                        $headResearcher = $headWork?->researcher;
-                        $remainingWorks = $headResearcher ? $allWorks->reject(fn($w) => $w->researcher_id === $headResearcher->researcher_id)->unique('researcher_id') : collect();
-                        $remainingCount = $remainingWorks->count();
-                        $remainingNames = $remainingWorks->map(function($work) {
-                            $prefix = $work->researcher->prefix->prefix_nameTH ?? '';
-                            return e($prefix . $work->researcher->researcher_fname . ' ' . $work->researcher->researcher_lname);
-                        })->filter()->implode('<br>• ');
-                    @endphp
-                    @if($headResearcher)
-                    <hr class="my-2 border-secondary-subtle">
-                    <div class="small fw-semibold text-body mb-1" style="font-size: 0.78rem;">หัวหน้าโครงการ:</div>
-                    <div class="d-flex align-items-center flex-wrap">
-                        <i class="bi bi-person-circle text-primary me-2 fs-6"></i>
-                        <a href="{{ route('frontend.rdbresearcher.show', $headResearcher->researcher_id) }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none text-body hover-primary fw-medium small">
-                            {{ $headResearcher->prefix->prefix_nameTH ?? '' }}{{ $headResearcher->researcher_fname }} {{ $headResearcher->researcher_lname }}
-                        </a>
-                        @if($remainingCount > 0)
-                            <span class="text-body-secondary small ms-1" 
-                                  data-bs-toggle="tooltip" 
-                                  data-bs-placement="top" 
-                                  data-bs-html="true"
-                                  title="<strong>นักวิจัยร่วม:</strong><br>• {!! strip_tags($remainingNames, '<br>') !!}"
-                                  style="cursor: pointer;">(+{{ $remainingCount }})</span>
-                        @endif
-                    </div>
-                    @endif
-
-                    <div class="mt-3">
-                        <a href="{{ route('frontend.rdbproject.show', $item->project->pro_id) }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary w-100">
-                            <i class="bi bi-box-arrow-up-right me-1"></i> ดูรายละเอียดโครงการ
-                        </a>
-                    </div>
-                </div>
-            </div>
-            @endif
-
-            {{-- 2. Utilization Focus / Types Card (ประเด็นการนำไปใช้ประโยชน์) --}}
+            {{-- 1. Utilization Focus / Types Card (ประเด็นการนำไปใช้ประโยชน์) --}}
             @php
                 $utzGroupIds = !empty($item->utz_group) ? array_filter(array_map('trim', explode(',', $item->utz_group))) : [];
                 $utzTypes = !empty($utzGroupIds) ? \App\Models\RdbProjectUtilizeType::whereIn('utz_type_id', $utzGroupIds)->get() : collect();
