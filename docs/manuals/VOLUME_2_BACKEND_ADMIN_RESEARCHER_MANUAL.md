@@ -61,7 +61,9 @@
     * 11.3 คำสั่งตรวจนับจำนวนหน้าไฟล์ PDF ย้อนหลัง (Page Count Engine)
     * 11.4 คำสั่งล้างแคชและรีเซ็ตระบบ (Clear Application, Route, View, Config Cache)
     * 11.5 การตรวจสอบความพร้อมของเซิร์ฟเวอร์และเอนจิน (Server Engine Health Check)
-    * 11.6 ปุ่มดึงภาพหน้าปกไฟล์ใหม่ อีกครั้ง (Regenerate PDF Cover) ในหน้าดูรายละเอียด
+    * 11.6 คู่มือขั้นตอนการติดตั้งเอนจินประมวลผล PDF และฟอนต์ภาษาไทย (SysAdmin Engine Installation Guide)
+    * 11.7 ศูนย์สำรองและกู้คืนข้อมูลระบบ (System Backup, Restore with Email OTP & Cloud Sync)
+    * 11.8 การตั้งค่าระบบการส่งอีเมลของมหาวิทยาลัย (Mail & SMTP Configuration)
 ---
 
 ## บทที่ 1: การเข้าสู่ระบบ ความปลอดภัย และการยืนยันตัวตนนักวิจัย (Authentication & Onboarding)
@@ -812,3 +814,88 @@ rclone config
 # 2. คำสั่งซิงค์ขึ้น Google Drive
 rclone sync storage/app/backups/ gdrive:PCRU_Research_Backups/ -v
 ```
+
+---
+
+### 11.8 การตั้งค่าระบบการส่งอีเมลของมหาวิทยาลัย (Mail & SMTP Configuration)
+
+> [!NOTE]
+> **ความสำคัญของระบบ Mail ในระบบฐานข้อมูลงานวิจัย**:
+> 1. **ความปลอดภัย**: จัดส่งรหัสความปลอดภัย OTP 6 หลักสำหรับยืนยันการกู้คืนฐานข้อมูล (Restore Verification) ไปยังอีเมลของ The Creator
+> 2. **วงจรงานวิจัย (Workflow Notifications)**: แจ้งเตือนนักวิจัยเมื่อโครงการวิจัยหรือผลงานตีพิมพ์ได้รับการอนุมัติ หรือมีข้อเสนอแนะให้แก้ไข
+> 3. **ระบบผู้ทรงคุณวุฒิ (Peer Review)**: แจ้งเตือนผู้ทรงคุณวุฒิเมื่อได้รับมอบหมายให้เข้าตรวจประเมินเล่มรายงานวิจัยฉบับสมบูรณ์
+
+#### 1. ตำแหน่งไฟล์การตั้งค่า
+การตั้งค่าระบบ Mail ของ Laravel ทั้งหมดจะถูกเก็บไว้ที่ **ไฟล์ `.env`** บริเวณโฟลเดอร์หลักของโปรเจกต์ (`/laravel_rdb/.env`) โดยสามารถเปิดแก้ไขด้วย Text Editor หรือ VS Code
+
+#### 2. ตารางพารามิเตอร์การตั้งค่าในไฟล์ `.env`
+
+| ตัวแปรใน `.env` | หน้าที่และความหมาย | ค่าตัวอย่างที่แนะนำ |
+| :--- | :--- | :--- |
+| `MAIL_MAILER` | ไดรเวอร์การส่งอีเมล | `smtp` (ใช้งานจริง) หรือ `log` (ทดสอบในเครื่อง) |
+| `MAIL_HOST` | ที่อยู่โฮสต์ของ Mail Server | `smtp.gmail.com` หรือ `mail.pcru.ac.th` |
+| `MAIL_PORT` | พอร์ตเชื่อมต่อ SMTP | `587` (TLS), `465` (SSL) หรือ `25` (Internal) |
+| `MAIL_USERNAME` | บัญชีผู้ใช้อีเมลผู้ส่ง | `research_admin@pcru.ac.th` |
+| `MAIL_PASSWORD` | รหัสผ่าน หรือ App Password 16 หลัก | รหัสผ่านแอปที่สร้างจาก Google Account |
+| `MAIL_ENCRYPTION` | โปรโตคอลเข้ารหัสความปลอดภัย | `tls` หรือ `ssl` |
+| `MAIL_FROM_ADDRESS` | ที่อยู่อีเมลที่จะแสดงในช่องผู้ส่ง | `research@pcru.ac.th` |
+| `MAIL_FROM_NAME` | ชื่อหน่วยงานที่จะแสดงเป็นผู้ส่ง | `สถาบันวิจัยและพัฒนา มรภ.เพชรบูรณ์` |
+
+---
+
+#### 3. รูปแบบการตั้งค่าตามสภาวะแวดล้อม (Configuration Presets)
+
+##### แบบที่ 1: การใช้ Google Workspace / Gmail ของมหาวิทยาลัย (@pcru.ac.th)
+เป็นแนวทางที่แนะนำสูงสุดสำหรับความเสถียรและอีเมลไม่ตกไปอยู่ในโฟลเดอร์ขยะ (Spam):
+1. เข้าสู่ระบบบัญชี Google ของมหาวิทยาลัย ➔ ไปที่ **จัดการบัญชี Google (Google Account)** ➔ เมนู **ความปลอดภัย (Security)**
+2. เปิดใช้งาน **การยืนยันแบบ 2 ขั้นตอน (2-Step Verification)**
+3. ค้นหาเมนู **รหัสผ่านสำหรับแอป (App Passwords)** ➔ ตั้งชื่อแอป เช่น `PCRU-RDB-System` ➔ คลิก **สร้าง (Create)**
+4. ระบบจะแสดงรหัสผ่าน 16 ตัวอักษร (เช่น `abcd efgh ijkl mnop`) นำมากรอกลงในไฟล์ `.env`:
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=research_admin@pcru.ac.th
+MAIL_PASSWORD=abcdefghijklmnop
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS="research_admin@pcru.ac.th"
+MAIL_FROM_NAME="สถาบันวิจัยและพัฒนา มรภ.เพชรบูรณ์"
+```
+
+##### แบบที่ 2: การใช้ Mail Gateway / SMTP ภายในมหาวิทยาลัย
+กรณีใช้ Mail Server ภายในเครือข่ายของมหาวิทยาลัยราชภัฏเพชรบูรณ์:
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=mail.pcru.ac.th
+MAIL_PORT=25
+MAIL_USERNAME=your_username
+MAIL_PASSWORD=your_password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS="no-reply@pcru.ac.th"
+MAIL_FROM_NAME="PCRU Research Database"
+```
+
+##### แบบที่ 3: โหมดพัฒนาและทดสอบบนเครื่อง Local (Local Log Mode)
+กรณีที่ยังไม่มีการต่ออินเทอร์เน็ตหรือต้องการทดสอบโดยไม่ส่งอีเมลออกจริง:
+```env
+MAIL_MAILER=log
+```
+* ในโหมดนี้ เนื้อหาอีเมลทั้งหมดรวมถึงรหัส OTP 6 หลัก จะถูกบันทึกลงในไฟล์ `storage/logs/laravel.log` โดยอัตโนมัติ
+
+---
+
+#### 4. ขั้นตอนการล้างแคชหลังแก้ไขไฟล์ `.env`
+ทุกครั้งที่มีการแก้ไขค่าตัวแปรในไฟล์ `.env` ผู้ดูแลระบบต้องรันคำสั่งล้างแคชการตั้งค่า เพื่อให้ระบบอ่านค่าใหม่ทันที:
+```bash
+php artisan config:clear
+```
+
+---
+
+#### 5. คำสั่งทดสอบการส่งอีเมลจริงผ่าน Terminal
+สามารถทดสอบส่งอีเมล 1 ฉบับผ่านคำสั่ง Artisan Tinker เพื่อตรวจสอบว่าเชื่อมต่อสำเร็จหรือไม่:
+```bash
+php artisan tinker --execute="Mail::raw('ทดสอบการเชื่อมต่อระบบอีเมล PCRU Research Database', function(\$m) { \$m->to('อีเมลของผู้ดูแลระบบ@pcru.ac.th')->subject('ทดสอบระบบส่งอีเมล'); }); echo 'ส่งอีเมลสำเร็จ!';"
+```
+* **หากสำเร็จ**: จะแสดงข้อความ `ส่งอีเมลสำเร็จ!` และมีอีเมลเข้า Inbox
+* **หากล้มเหลว**: ระบบจะแสดงข้อความแจ้งเตือนข้อผิดพลาดทันที (เช่น รหัสผ่าน App Password ผิดพลาด หรือพอร์ต SMTP 587 ถูกบล็อกโดยไฟร์วอลล์)

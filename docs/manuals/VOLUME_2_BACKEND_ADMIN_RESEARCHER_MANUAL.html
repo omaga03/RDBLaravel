@@ -502,7 +502,9 @@
 <li>11.3 คำสั่งตรวจนับจำนวนหน้าไฟล์ PDF ย้อนหลัง (Page Count Engine)</li>
 <li>11.4 คำสั่งล้างแคชและรีเซ็ตระบบ (Clear Application, Route, View, Config Cache)</li>
 <li>11.5 การตรวจสอบความพร้อมของเซิร์ฟเวอร์และเอนจิน (Server Engine Health Check)</li>
-<li>11.6 ปุ่มดึงภาพหน้าปกไฟล์ใหม่ อีกครั้ง (Regenerate PDF Cover) ในหน้าดูรายละเอียด</li>
+<li>11.6 คู่มือขั้นตอนการติดตั้งเอนจินประมวลผล PDF และฟอนต์ภาษาไทย (SysAdmin Engine Installation Guide)</li>
+<li>11.7 ศูนย์สำรองและกู้คืนข้อมูลระบบ (System Backup, Restore with Email OTP &amp; Cloud Sync)</li>
+<li>11.8 การตั้งค่าระบบการส่งอีเมลของมหาวิทยาลัย (Mail &amp; SMTP Configuration)</li>
 </ul>
 </li>
 </ol>
@@ -1508,6 +1510,120 @@ rclone config
 # 2. คำสั่งซิงค์ขึ้น Google Drive
 rclone sync storage/app/backups/ gdrive:PCRU_Research_Backups/ -v
 </code></pre>
+<hr />
+<a id="118-การตั้งค่าระบบการส่งอีเมลของมหาวิทยาลัย-mail-smtp-configuration" class="manual-anchor"></a><a id="118-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%84%E0%B9%88%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B9%88%E0%B8%87%E0%B8%AD%E0%B8%B5%E0%B9%80%E0%B8%A1%E0%B8%A5%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B8%A1%E0%B8%AB%E0%B8%B2%E0%B8%A7%E0%B8%B4%E0%B8%97%E0%B8%A2%E0%B8%B2%E0%B8%A5%E0%B8%B1%E0%B8%A2-mail--smtp-configuration" class="manual-anchor"></a><a id="118-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%84%E0%B9%88%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B9%88%E0%B8%87%E0%B8%AD%E0%B8%B5%E0%B9%80%E0%B8%A1%E0%B8%A5%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B8%A1%E0%B8%AB%E0%B8%B2%E0%B8%A7%E0%B8%B4%E0%B8%97%E0%B8%A2%E0%B8%B2%E0%B8%A5%E0%B8%B1%E0%B8%A2-mail-smtp-configuration" class="manual-anchor"></a><h3 id="118-การตั้งค่าระบบการส่งอีเมลของมหาวิทยาลัย-mail--smtp-configuration">11.8 การตั้งค่าระบบการส่งอีเมลของมหาวิทยาลัย (Mail &amp; SMTP Configuration)</h3>
+<div class="manual-callout callout-note"><div class="callout-header"><i class="bi bi-info-circle-fill"></i> ข้อมูลจำเพาะ / หมายเหตุ (NOTE)</div><div class="callout-body"><p><strong>ความสำคัญของระบบ Mail ในระบบฐานข้อมูลงานวิจัย</strong>:</p>
+<ol>
+<li><strong>ความปลอดภัย</strong>: จัดส่งรหัสความปลอดภัย OTP 6 หลักสำหรับยืนยันการกู้คืนฐานข้อมูล (Restore Verification) ไปยังอีเมลของ The Creator</li>
+<li><strong>วงจรงานวิจัย (Workflow Notifications)</strong>: แจ้งเตือนนักวิจัยเมื่อโครงการวิจัยหรือผลงานตีพิมพ์ได้รับการอนุมัติ หรือมีข้อเสนอแนะให้แก้ไข</li>
+<li><strong>ระบบผู้ทรงคุณวุฒิ (Peer Review)</strong>: แจ้งเตือนผู้ทรงคุณวุฒิเมื่อได้รับมอบหมายให้เข้าตรวจประเมินเล่มรายงานวิจัยฉบับสมบูรณ์</li>
+</ol>
+</div></div>
+<a id="1-%E0%B8%95%E0%B8%B3%E0%B9%81%E0%B8%AB%E0%B8%99%E0%B9%88%E0%B8%87%E0%B9%84%E0%B8%9F%E0%B8%A5%E0%B9%8C%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%84%E0%B9%88%E0%B8%B2" class="manual-anchor"></a><h4 id="1-ตำแหน่งไฟล์การตั้งค่า">1. ตำแหน่งไฟล์การตั้งค่า</h4>
+<p>การตั้งค่าระบบ Mail ของ Laravel ทั้งหมดจะถูกเก็บไว้ที่ <strong>ไฟล์ <code>.env</code></strong> บริเวณโฟลเดอร์หลักของโปรเจกต์ (<code>/laravel_rdb/.env</code>) โดยสามารถเปิดแก้ไขด้วย Text Editor หรือ VS Code</p>
+<a id="2-%E0%B8%95%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B8%9E%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%A1%E0%B8%B4%E0%B9%80%E0%B8%95%E0%B8%AD%E0%B8%A3%E0%B9%8C%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%84%E0%B9%88%E0%B8%B2%E0%B9%83%E0%B8%99%E0%B9%84%E0%B8%9F%E0%B8%A5%E0%B9%8C-env" class="manual-anchor"></a><h4 id="2-ตารางพารามิเตอร์การตั้งค่าในไฟล์-env">2. ตารางพารามิเตอร์การตั้งค่าในไฟล์ <code>.env</code></h4>
+<table>
+<thead>
+<tr>
+<th align="left">ตัวแปรใน <code>.env</code></th>
+<th align="left">หน้าที่และความหมาย</th>
+<th align="left">ค่าตัวอย่างที่แนะนำ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>MAIL_MAILER</code></td>
+<td align="left">ไดรเวอร์การส่งอีเมล</td>
+<td align="left"><code>smtp</code> (ใช้งานจริง) หรือ <code>log</code> (ทดสอบในเครื่อง)</td>
+</tr>
+<tr>
+<td align="left"><code>MAIL_HOST</code></td>
+<td align="left">ที่อยู่โฮสต์ของ Mail Server</td>
+<td align="left"><code>smtp.gmail.com</code> หรือ <code>mail.pcru.ac.th</code></td>
+</tr>
+<tr>
+<td align="left"><code>MAIL_PORT</code></td>
+<td align="left">พอร์ตเชื่อมต่อ SMTP</td>
+<td align="left"><code>587</code> (TLS), <code>465</code> (SSL) หรือ <code>25</code> (Internal)</td>
+</tr>
+<tr>
+<td align="left"><code>MAIL_USERNAME</code></td>
+<td align="left">บัญชีผู้ใช้อีเมลผู้ส่ง</td>
+<td align="left"><code>research_admin@pcru.ac.th</code></td>
+</tr>
+<tr>
+<td align="left"><code>MAIL_PASSWORD</code></td>
+<td align="left">รหัสผ่าน หรือ App Password 16 หลัก</td>
+<td align="left">รหัสผ่านแอปที่สร้างจาก Google Account</td>
+</tr>
+<tr>
+<td align="left"><code>MAIL_ENCRYPTION</code></td>
+<td align="left">โปรโตคอลเข้ารหัสความปลอดภัย</td>
+<td align="left"><code>tls</code> หรือ <code>ssl</code></td>
+</tr>
+<tr>
+<td align="left"><code>MAIL_FROM_ADDRESS</code></td>
+<td align="left">ที่อยู่อีเมลที่จะแสดงในช่องผู้ส่ง</td>
+<td align="left"><code>research@pcru.ac.th</code></td>
+</tr>
+<tr>
+<td align="left"><code>MAIL_FROM_NAME</code></td>
+<td align="left">ชื่อหน่วยงานที่จะแสดงเป็นผู้ส่ง</td>
+<td align="left"><code>สถาบันวิจัยและพัฒนา มรภ.เพชรบูรณ์</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<a id="3-%E0%B8%A3%E0%B8%B9%E0%B8%9B%E0%B9%81%E0%B8%9A%E0%B8%9A%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%84%E0%B9%88%E0%B8%B2%E0%B8%95%E0%B8%B2%E0%B8%A1%E0%B8%AA%E0%B8%A0%E0%B8%B2%E0%B8%A7%E0%B8%B0%E0%B9%81%E0%B8%A7%E0%B8%94%E0%B8%A5%E0%B9%89%E0%B8%AD%E0%B8%A1-configuration-presets" class="manual-anchor"></a><h4 id="3-รูปแบบการตั้งค่าตามสภาวะแวดล้อม-configuration-presets">3. รูปแบบการตั้งค่าตามสภาวะแวดล้อม (Configuration Presets)</h4>
+<h5>แบบที่ 1: การใช้ Google Workspace / Gmail ของมหาวิทยาลัย (@pcru.ac.th)</h5>
+<p>เป็นแนวทางที่แนะนำสูงสุดสำหรับความเสถียรและอีเมลไม่ตกไปอยู่ในโฟลเดอร์ขยะ (Spam):</p>
+<ol>
+<li>เข้าสู่ระบบบัญชี Google ของมหาวิทยาลัย ➔ ไปที่ <strong>จัดการบัญชี Google (Google Account)</strong> ➔ เมนู <strong>ความปลอดภัย (Security)</strong></li>
+<li>เปิดใช้งาน <strong>การยืนยันแบบ 2 ขั้นตอน (2-Step Verification)</strong></li>
+<li>ค้นหาเมนู <strong>รหัสผ่านสำหรับแอป (App Passwords)</strong> ➔ ตั้งชื่อแอป เช่น <code>PCRU-RDB-System</code> ➔ คลิก <strong>สร้าง (Create)</strong></li>
+<li>ระบบจะแสดงรหัสผ่าน 16 ตัวอักษร (เช่น <code>abcd efgh ijkl mnop</code>) นำมากรอกลงในไฟล์ <code>.env</code>:</li>
+</ol>
+<pre><code class="language-env">MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=research_admin@pcru.ac.th
+MAIL_PASSWORD=abcdefghijklmnop
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=&quot;research_admin@pcru.ac.th&quot;
+MAIL_FROM_NAME=&quot;สถาบันวิจัยและพัฒนา มรภ.เพชรบูรณ์&quot;
+</code></pre>
+<h5>แบบที่ 2: การใช้ Mail Gateway / SMTP ภายในมหาวิทยาลัย</h5>
+<p>กรณีใช้ Mail Server ภายในเครือข่ายของมหาวิทยาลัยราชภัฏเพชรบูรณ์:</p>
+<pre><code class="language-env">MAIL_MAILER=smtp
+MAIL_HOST=mail.pcru.ac.th
+MAIL_PORT=25
+MAIL_USERNAME=your_username
+MAIL_PASSWORD=your_password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=&quot;no-reply@pcru.ac.th&quot;
+MAIL_FROM_NAME=&quot;PCRU Research Database&quot;
+</code></pre>
+<h5>แบบที่ 3: โหมดพัฒนาและทดสอบบนเครื่อง Local (Local Log Mode)</h5>
+<p>กรณีที่ยังไม่มีการต่ออินเทอร์เน็ตหรือต้องการทดสอบโดยไม่ส่งอีเมลออกจริง:</p>
+<pre><code class="language-env">MAIL_MAILER=log
+</code></pre>
+<ul>
+<li>ในโหมดนี้ เนื้อหาอีเมลทั้งหมดรวมถึงรหัส OTP 6 หลัก จะถูกบันทึกลงในไฟล์ <code>storage/logs/laravel.log</code> โดยอัตโนมัติ</li>
+</ul>
+<hr />
+<a id="4-%E0%B8%82%E0%B8%B1%E0%B9%89%E0%B8%99%E0%B8%95%E0%B8%AD%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A5%E0%B9%89%E0%B8%B2%E0%B8%87%E0%B9%81%E0%B8%84%E0%B8%8A%E0%B8%AB%E0%B8%A5%E0%B8%B1%E0%B8%87%E0%B9%81%E0%B8%81%E0%B9%89%E0%B9%84%E0%B8%82%E0%B9%84%E0%B8%9F%E0%B8%A5%E0%B9%8C-env" class="manual-anchor"></a><h4 id="4-ขั้นตอนการล้างแคชหลังแก้ไขไฟล์-env">4. ขั้นตอนการล้างแคชหลังแก้ไขไฟล์ <code>.env</code></h4>
+<p>ทุกครั้งที่มีการแก้ไขค่าตัวแปรในไฟล์ <code>.env</code> ผู้ดูแลระบบต้องรันคำสั่งล้างแคชการตั้งค่า เพื่อให้ระบบอ่านค่าใหม่ทันที:</p>
+<pre><code class="language-bash">php artisan config:clear
+</code></pre>
+<hr />
+<a id="5-%E0%B8%84%E0%B8%B3%E0%B8%AA%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%97%E0%B8%94%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B9%88%E0%B8%87%E0%B8%AD%E0%B8%B5%E0%B9%80%E0%B8%A1%E0%B8%A5%E0%B8%88%E0%B8%A3%E0%B8%B4%E0%B8%87%E0%B8%9C%E0%B9%88%E0%B8%B2%E0%B8%99-terminal" class="manual-anchor"></a><h4 id="5-คำสั่งทดสอบการส่งอีเมลจริงผ่าน-terminal">5. คำสั่งทดสอบการส่งอีเมลจริงผ่าน Terminal</h4>
+<p>สามารถทดสอบส่งอีเมล 1 ฉบับผ่านคำสั่ง Artisan Tinker เพื่อตรวจสอบว่าเชื่อมต่อสำเร็จหรือไม่:</p>
+<pre><code class="language-bash">php artisan tinker --execute=&quot;Mail::raw('ทดสอบการเชื่อมต่อระบบอีเมล PCRU Research Database', function(\$m) { \$m-&gt;to('อีเมลของผู้ดูแลระบบ@pcru.ac.th')-&gt;subject('ทดสอบระบบส่งอีเมล'); }); echo 'ส่งอีเมลสำเร็จ!';&quot;
+</code></pre>
+<ul>
+<li><strong>หากสำเร็จ</strong>: จะแสดงข้อความ <code>ส่งอีเมลสำเร็จ!</code> และมีอีเมลเข้า Inbox</li>
+<li><strong>หากล้มเหลว</strong>: ระบบจะแสดงข้อความแจ้งเตือนข้อผิดพลาดทันที (เช่น รหัสผ่าน App Password ผิดพลาด หรือพอร์ต SMTP 587 ถูกบล็อกโดยไฟร์วอลล์)</li>
+</ul>
 
             </div>
             <footer>
