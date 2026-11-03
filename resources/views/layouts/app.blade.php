@@ -498,35 +498,77 @@
             box-shadow: 0 4px 14px rgba(37, 99, 235, 0.5);
         }
 
-        /* Backend Topbar Quick Nav Buttons */
+        /* Backend Topbar Quick Nav Buttons (Light & Dark Theme Calibrated) */
         .rdb-nav-portal-btn {
-            color: #ffffff !important;
-            border: 1px solid rgba(255, 255, 255, 0.45) !important;
-            background-color: rgba(255, 255, 255, 0.1) !important;
+            color: var(--bs-body-color, #0F172A) !important;
+            border: 1px solid var(--bs-border-color, #CBD5E1) !important;
+            background-color: rgba(15, 23, 42, 0.04) !important;
             transition: all 0.2s ease-in-out !important;
         }
         .rdb-nav-portal-btn i {
-            color: #ffffff !important;
+            color: var(--bs-secondary-color, #64748B) !important;
             transition: color 0.2s ease-in-out !important;
         }
         .rdb-nav-portal-btn:hover {
-            color: #0F172A !important;
-            background-color: #ffffff !important;
-            border-color: #ffffff !important;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+            color: #1E3A5F !important;
+            background-color: rgba(30, 58, 95, 0.08) !important;
+            border-color: #1E3A5F !important;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
         }
         .rdb-nav-portal-btn:hover i {
-            color: #0F172A !important;
+            color: #1E3A5F !important;
         }
         .rdb-nav-btn-active {
+            color: #FFFFFF !important;
+            background-color: #1E3A5F !important;
+            border: 1px solid #1E3A5F !important;
+            font-weight: 600 !important;
+            box-shadow: 0 2px 6px rgba(30, 58, 95, 0.25) !important;
+        }
+        .rdb-nav-btn-active i {
+            color: #FBBF24 !important;
+        }
+
+        /* Dark Mode Overrides for Backend Topbar Quick Nav Buttons */
+        [data-bs-theme="dark"] .rdb-nav-portal-btn {
+            color: #FFFFFF !important;
+            border: 1px solid rgba(255, 255, 255, 0.35) !important;
+            background-color: rgba(255, 255, 255, 0.1) !important;
+        }
+        [data-bs-theme="dark"] .rdb-nav-portal-btn i {
+            color: #FFFFFF !important;
+        }
+        [data-bs-theme="dark"] .rdb-nav-portal-btn:hover {
             color: #0F172A !important;
-            background-color: #ffffff !important;
-            border: 1px solid #ffffff !important;
+            background-color: #FFFFFF !important;
+            border-color: #FFFFFF !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+        }
+        [data-bs-theme="dark"] .rdb-nav-portal-btn:hover i {
+            color: #0F172A !important;
+        }
+        [data-bs-theme="dark"] .rdb-nav-btn-active {
+            color: #0F172A !important;
+            background-color: #FFFFFF !important;
+            border: 1px solid #FFFFFF !important;
             font-weight: 700 !important;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
         }
-        .rdb-nav-btn-active i {
+        [data-bs-theme="dark"] .rdb-nav-btn-active i {
             color: #2563EB !important;
+        }
+
+        /* Backend Sidebar Trigger Icons */
+        #rdbDesktopSidebarTrigger,
+        #rdbMobileSidebarTrigger {
+            color: var(--bs-body-color) !important;
+            opacity: 0.75;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+        }
+        #rdbDesktopSidebarTrigger:hover,
+        #rdbMobileSidebarTrigger:hover {
+            opacity: 1;
+            transform: scale(1.05);
         }
 
         /* ==========================================================================
@@ -1086,11 +1128,11 @@
             <div class="{{ request()->is('backend*') ? 'container-fluid px-4' : 'container' }}">
                 @if($useBackendSidebar)
                     <!-- Mobile Offcanvas Sidebar Trigger (< 992px) -->
-                    <button type="button" class="btn btn-sm btn-link text-white p-1.5 me-2 d-lg-none" id="rdbMobileSidebarTrigger" aria-label="เปิดเมนูจัดการระบบ" title="เปิดเมนูจัดการระบบ">
+                    <button type="button" class="btn btn-sm btn-link text-body p-1.5 me-2 d-lg-none" id="rdbMobileSidebarTrigger" aria-label="เปิดเมนูจัดการระบบ" title="เปิดเมนูจัดการระบบ">
                         <i class="bi bi-list fs-4"></i>
                     </button>
                     <!-- Desktop Mini/Expanded Sidebar Trigger (>= 992px) -->
-                    <button type="button" class="btn btn-sm btn-link text-white-50 p-1.5 me-2 d-none d-lg-inline-flex align-items-center" id="rdbDesktopSidebarTrigger" title="ย่อ/ขยายแถบเมนูด้านข้าง">
+                    <button type="button" class="btn btn-sm btn-link text-body p-1.5 me-2 d-none d-lg-inline-flex align-items-center" id="rdbDesktopSidebarTrigger" title="ย่อ/ขยายแถบเมนูด้านข้าง">
                         <i class="bi bi-layout-sidebar-inset fs-5"></i>
                     </button>
                 @endif
@@ -1099,7 +1141,7 @@
                     <span class="brand-badge ms-1">PCRU RDB</span>
                 </a>
                 @if(request()->is('backend*'))
-                    <div class="d-none d-sm-inline-flex align-items-center gap-1.5 ms-2 ps-2 border-start border-white-50">
+                    <div class="d-none d-sm-inline-flex align-items-center gap-1.5 ms-2 ps-2 border-start border-secondary-subtle">
                         <a href="{{ route('backend.site.index') }}"
                            class="btn btn-sm {{ request()->routeIs('backend.site.index') || request()->is('backend') ? 'rdb-nav-btn-active' : 'rdb-nav-portal-btn' }} d-inline-flex align-items-center gap-1.5 py-1 px-2.5 rounded-pill"
                            style="font-size: 0.82rem;"
@@ -1127,13 +1169,13 @@
                     <ul class="navbar-nav me-auto">
                         @if(request()->is('backend*'))
                             <li class="nav-item d-sm-none mt-2 mb-1">
-                                <a href="{{ route('backend.site.index') }}" class="nav-link text-white py-1.5 px-2 d-flex align-items-center gap-2 rounded {{ request()->routeIs('backend.site.index') ? 'bg-white bg-opacity-10 fw-bold' : '' }}">
+                                <a href="{{ route('backend.site.index') }}" class="nav-link text-body py-1.5 px-2 d-flex align-items-center gap-2 rounded {{ request()->routeIs('backend.site.index') ? 'bg-body-secondary fw-bold' : '' }}">
                                     <i class="bi bi-speedometer2 text-info"></i>
                                     <span>แดชบอร์ด</span>
                                 </a>
                             </li>
                             <li class="nav-item d-sm-none mb-2">
-                                <a href="{{ route('home') }}" target="_blank" rel="noopener noreferrer" class="nav-link text-white py-1.5 px-2 d-flex align-items-center gap-2 rounded">
+                                <a href="{{ route('home') }}" target="_blank" rel="noopener noreferrer" class="nav-link text-body py-1.5 px-2 d-flex align-items-center gap-2 rounded">
                                     <i class="bi bi-box-arrow-up-right text-warning"></i>
                                     <span>เปิดดูหน้าบ้าน</span>
                                 </a>
