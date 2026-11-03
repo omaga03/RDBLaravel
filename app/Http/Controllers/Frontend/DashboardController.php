@@ -327,6 +327,64 @@ class DashboardController extends Controller
             ->take(6)
             ->get();
 
+        // YoY Delta calculation
+        $prevYear = null;
+        $prevTotalProjects = 0;
+        $prevTotalBudget = 0.0;
+        $prevTotalPublished = 0;
+
+        if ($selectedYear) {
+            $prevYear = $years->first(fn($y) => (int)$y->year_name < (int)$selectedYear->year_name);
+            if ($prevYear) {
+                $prevProQ = RdbProject::where('year_id', $prevYear->year_id);
+                $prevPubQ = RdbPublished::where(fn($q) => $q->where('year_id', $prevYear->year_id)->orWhere('year_bud', $prevYear->year_id));
+
+                if ($deptId) {
+                    $prevProQ->where('department_id', $deptId);
+                    $prevPubQ->where('department_id', $deptId);
+                }
+                if ($psId) {
+                    $prevProQ->where('ps_id', $psId);
+                }
+                if ($masterPtId) {
+                    $prevProQ->whereHas('type', fn($q) => $q->where('master_pt_id', $masterPtId));
+                }
+                if ($ptId) {
+                    $prevProQ->where('pt_id', $ptId);
+                }
+
+                $prevTotalProjects = $prevProQ->count();
+                $prevTotalBudget = (float) $prevProQ->sum('pro_budget');
+                $prevTotalPublished = $prevPubQ->count();
+            }
+        }
+
+        $yoyDelta = [
+            'prev_year_name' => $prevYear?->year_name,
+            'project_prev' => $prevTotalProjects,
+            'project_diff' => $totalProjects - $prevTotalProjects,
+            'project_pct' => $prevTotalProjects > 0 ? round((($totalProjects - $prevTotalProjects) / $prevTotalProjects) * 100, 1) : null,
+            'budget_prev' => $prevTotalBudget,
+            'budget_diff' => $totalBudget - $prevTotalBudget,
+            'budget_pct' => $prevTotalBudget > 0 ? round((($totalBudget - $prevTotalBudget) / $prevTotalBudget) * 100, 1) : null,
+            'published_prev' => $prevTotalPublished,
+            'published_diff' => $totalPublished - $prevTotalPublished,
+            'published_pct' => $prevTotalPublished > 0 ? round((($totalPublished - $prevTotalPublished) / $prevTotalPublished) * 100, 1) : null,
+        ];
+
+        // Ranked Status Breakdown for Share Bars
+        $statusRankings = [];
+        foreach ($projectsByStatus as $st) {
+            if ($st->status) {
+                $statusRankings[] = [
+                    'name' => $st->status->ps_name,
+                    'color' => $st->status->ps_color ?? '#2563EB',
+                    'count' => (int) $st->total,
+                ];
+            }
+        }
+        usort($statusRankings, fn($a, $b) => $b['count'] <=> $a['count']);
+
         return view('frontend.dashboard.index', array_merge($lookups, [
             'years' => $years,
             'selectedYearId' => $selectedYearId,
@@ -345,6 +403,8 @@ class DashboardController extends Controller
             'totalDips' => $totalDips,
             'totalResearchers' => $totalResearchers,
             'projectsByStatus' => $projectsByStatus,
+            'statusRankings' => $statusRankings,
+            'yoyDelta' => $yoyDelta,
             'yearlyTrend' => $yearlyTrend,
             'facultyStats' => $facultyStats,
             'recentProjects' => $recentProjects,

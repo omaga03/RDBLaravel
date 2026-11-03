@@ -160,7 +160,7 @@ class SiteController extends Controller
                                 })
                                 ->count();
 
-        $sumBudget = RdbProject::where('year_id', $max_year->year_id)
+        $sumBudget = (float) RdbProject::where('year_id', $max_year->year_id)
                                ->where('data_show', 1)
                                ->where(function ($q) {
                                    $q->whereNull('ps_id')
@@ -180,7 +180,80 @@ class SiteController extends Controller
             ->whereNotNull('rdb_project_work.researcher_id')
             ->where('rdb_project_work.researcher_id', '>', 0)
             ->distinct()
-            ->count('rdb_project_work.researcher_id'); 
+            ->count('rdb_project_work.researcher_id');
+
+        // 7.1 Previous Year YoY Delta Stats
+        $prevYear = RdbYear::where('year_name', '<', $max_year->year_name)
+                           ->orderBy('year_name', 'desc')
+                           ->first();
+        $prevProjectCount = 0;
+        $prevBudget = 0.0;
+        $prevResearcherCount = 0;
+
+        if ($prevYear) {
+            $prevProjectCount = RdbProject::where('year_id', $prevYear->year_id)
+                ->where('data_show', 1)
+                ->where(function ($q) {
+                    $q->whereNull('ps_id')
+                      ->orWhere('ps_id', '<>', RdbProjectStatus::REFUNDED);
+                })
+                ->count();
+
+            $prevBudget = (float) RdbProject::where('year_id', $prevYear->year_id)
+                ->where('data_show', 1)
+                ->where(function ($q) {
+                    $q->whereNull('ps_id')
+                      ->orWhere('ps_id', '<>', RdbProjectStatus::REFUNDED);
+                })
+                ->sum('pro_budget');
+
+            $prevResearcherCount = DB::table('rdb_project_work')
+                ->join('rdb_project', 'rdb_project_work.pro_id', '=', 'rdb_project.pro_id')
+                ->where('rdb_project.year_id', $prevYear->year_id)
+                ->where('rdb_project.data_show', 1)
+                ->where(function ($q) {
+                    $q->whereNull('rdb_project.ps_id')
+                      ->orWhere('rdb_project.ps_id', '<>', RdbProjectStatus::REFUNDED);
+                })
+                ->whereNotNull('rdb_project_work.researcher_id')
+                ->where('rdb_project_work.researcher_id', '>', 0)
+                ->distinct()
+                ->count('rdb_project_work.researcher_id');
+        }
+
+        $yoyDelta = [
+            'prev_year_name' => $prevYear?->year_name,
+            'project_prev' => $prevProjectCount,
+            'project_diff' => $sumProject - $prevProjectCount,
+            'project_pct' => $prevProjectCount > 0 ? round((($sumProject - $prevProjectCount) / $prevProjectCount) * 100, 1) : null,
+            'budget_prev' => $prevBudget,
+            'budget_diff' => $sumBudget - $prevBudget,
+            'budget_pct' => $prevBudget > 0 ? round((($sumBudget - $prevBudget) / $prevBudget) * 100, 1) : null,
+            'researcher_prev' => $prevResearcherCount,
+            'researcher_diff' => $countResearcher - $prevResearcherCount,
+            'researcher_pct' => $prevResearcherCount > 0 ? round((($countResearcher - $prevResearcherCount) / $prevResearcherCount) * 100, 1) : null,
+        ];
+
+        // 7.2 Ranked Breakdown by Department (with Share Bar data)
+        $deptRankings = [];
+        $maxDeptProjectCount = 0;
+        foreach ($departments as $dId => $dName) {
+            $c = $matrix[$max_year->year_id][$dId] ?? 0;
+            $b = $budgetPoints[$dId] ?? 0.0;
+            if ($c > 0 || $b > 0) {
+                $deptRankings[] = [
+                    'id' => $dId,
+                    'name' => $dName,
+                    'count' => $c,
+                    'budget' => $b,
+                ];
+                if ($c > $maxDeptProjectCount) {
+                    $maxDeptProjectCount = $c;
+                }
+            }
+        }
+        usort($deptRankings, fn($a, $b) => $b['count'] <=> $a['count'] ?: $b['budget'] <=> $a['budget']);
+        $deptRankings = array_slice($deptRankings, 0, 7); 
 
         // 6. Latest Publications
         $latestPublications = \App\Models\RdbPublished::with(['project', 'pubtype', 'authors' => function($q) {
@@ -248,7 +321,10 @@ class SiteController extends Controller
             'sumProject',
             'sumBudget',
             'countResearcher',
-            'years_list'
+            'years_list',
+            'yoyDelta',
+            'deptRankings',
+            'maxDeptProjectCount'
         ));
     }
 }

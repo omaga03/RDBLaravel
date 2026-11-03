@@ -13,26 +13,33 @@
     <div class="row g-3 mb-4">
         <!-- Total Budget -->
         <div class="col-xl-3 col-md-6">
-            <div class="card h-100 border-0 shadow-sm text-white" 
-                 style="background: var(--rdb-gradient-primary); border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3.5">
-                    <span class="badge bg-light-subtle bg-opacity-25 text-white border-0 mb-2">
-                        <i class="bi bi-cash-stack me-1"></i> งบประมาณรวม
-                    </span>
-                    <h3 class="fw-bold mb-1 text-white text-nowrap">฿{{ number_format($totalBudget, 0) }}</h3>
-                    <small class="text-white-50 d-block">เฉลี่ย ฿{{ number_format($avgBudget, 0) }} ต่อโครงการ</small>
+            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card" 
+                 style="border-top: 3px solid #059669 !important; border-radius: var(--rdb-radius-md) !important;">
+                <div class="card-body p-3.5 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                <i class="bi bi-cash-stack me-1"></i> งบประมาณรวม
+                            </span>
+                            <div class="p-1.5 rounded-circle bg-success bg-opacity-10 text-success">
+                                <i class="bi bi-graph-up fs-6"></i>
+                            </div>
+                        </div>
+                        <h3 class="fw-bold mb-1 text-body text-nowrap" style="font-variant-numeric: tabular-nums;">฿{{ number_format($totalBudget, 0) }}</h3>
+                        <small class="text-body-secondary d-block" style="font-variant-numeric: tabular-nums;">เฉลี่ย ฿{{ number_format($avgBudget, 0) }} ต่อโครงการ</small>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Total Projects -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #2563EB !important; border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-body-secondary small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-folder2 text-primary me-1"></i> โครงการทั้งหมด
                     </span>
-                    <h3 class="fw-bold mb-0 text-body">{{ number_format($totalProjects) }}</h3>
+                    <h3 class="fw-bold mb-0 text-primary" style="font-variant-numeric: tabular-nums;">{{ number_format($totalProjects) }}</h3>
                     <small class="text-body-secondary">โครงการวิจัย</small>
                 </div>
             </div>
@@ -40,51 +47,51 @@
 
         <!-- Completed -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #10B981 !important; border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-success small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-check-circle-fill me-1"></i> เสร็จสิ้นแล้ว
                     </span>
-                    <h3 class="fw-bold mb-0 text-success">{{ number_format($completedCount) }}</h3>
-                    <small class="text-body-secondary">{{ $totalProjects > 0 ? number_format(($completedCount / $totalProjects) * 100, 1) : 0 }}% ของทั้งหมด</small>
+                    <h3 class="fw-bold mb-0 text-success" style="font-variant-numeric: tabular-nums;">{{ number_format($completedCount) }}</h3>
+                    <small class="text-body-secondary" style="font-variant-numeric: tabular-nums;">{{ $totalProjects > 0 ? number_format(($completedCount / $totalProjects) * 100, 1) : 0 }}% ของทั้งหมด</small>
                 </div>
             </div>
         </div>
 
         <!-- Ongoing & Extended -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #3B82F6 !important; border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-primary small fw-bold text-uppercase d-block mb-1">
-                        <i class="bi bi-hourglass-split me-1"></i> กำลังดำเนินการ / ขยายเวลา
+                        <i class="bi bi-hourglass-split me-1"></i> กำลังดำเนินงาน
                     </span>
-                    <h3 class="fw-bold mb-0 text-primary">{{ number_format($ongoingCount + $extendedCount) }}</h3>
-                    <small class="text-body-secondary">ขยายเวลา {{ number_format($extendedCount) }} โครงการ</small>
+                    <h3 class="fw-bold mb-0 text-primary" style="font-variant-numeric: tabular-nums;">{{ number_format($ongoingCount + $extendedCount) }}</h3>
+                    <small class="text-body-secondary" style="font-variant-numeric: tabular-nums;">ขยายเวลา {{ number_format($extendedCount) }} โครงการ</small>
                 </div>
             </div>
         </div>
 
         <!-- Overdue Alert -->
         <div class="col-xl-1 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm {{ $overdueCount > 0 ? 'border-danger-subtle bg-danger-subtle bg-opacity-10' : '' }}">
+            <div class="card h-100 border shadow-sm {{ $overdueCount > 0 ? 'border-danger-subtle bg-danger-subtle bg-opacity-10' : '' }}" style="border-top: 3px solid #EF4444 !important; border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3 text-center">
                     <span class="text-danger small fw-bold d-block mb-1">
                         <i class="bi bi-exclamation-triangle-fill me-1.5"></i> ค้างส่ง
                     </span>
-                    <h4 class="fw-bold mb-0 text-danger">{{ number_format($overdueCount) }}</h4>
+                    <h4 class="fw-bold mb-0 text-danger" style="font-variant-numeric: tabular-nums;">{{ number_format($overdueCount) }}</h4>
                 </div>
             </div>
         </div>
 
         <!-- Reports Available -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #6366F1 !important; border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-info-emphasis small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> เล่มรายงานสมบูรณ์
                     </span>
-                    <h3 class="fw-bold mb-0 text-body">{{ number_format($fullReportCount) }}</h3>
-                    <small class="text-body-secondary">ดาวน์โหลด {{ number_format($totalDownloads) }} ครั้ง</small>
+                    <h3 class="fw-bold mb-0 text-body" style="font-variant-numeric: tabular-nums;">{{ number_format($fullReportCount) }}</h3>
+                    <small class="text-body-secondary" style="font-variant-numeric: tabular-nums;">ดาวน์โหลด {{ number_format($totalDownloads) }} ครั้ง</small>
                 </div>
             </div>
         </div>

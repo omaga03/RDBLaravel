@@ -13,102 +13,200 @@
     <div class="row g-3 mb-4">
         <!-- 1. Total Budget -->
         <div class="col-xxl-2 col-xl-4 col-md-6 col-sm-12">
-            <div class="card h-100 border-0 shadow-sm text-white overflow-hidden position-relative" 
-                 style="background: var(--rdb-gradient-primary); border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3.5 position-relative" style="z-index: 1;">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="badge bg-light-subtle bg-opacity-25 text-white border-0">
-                            <i class="bi bi-cash-stack me-1"></i> งบประมาณวิจัย
-                        </span>
-                        <i class="bi bi-graph-up text-white-50"></i>
+            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card" style="border-top: 3px solid #059669 !important; border-radius: var(--rdb-radius-md) !important;">
+                <div class="card-body p-3.5 position-relative d-flex flex-column justify-content-between" style="z-index: 1;">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                <i class="bi bi-cash-stack me-1"></i> งบประมาณวิจัย
+                            </span>
+                            <div class="p-1.5 rounded-circle bg-success bg-opacity-10 text-success">
+                                <i class="bi bi-graph-up fs-6"></i>
+                            </div>
+                        </div>
+                        <h3 class="fw-bold mb-0 text-body text-nowrap" style="font-size: 1.45rem; font-variant-numeric: tabular-nums;">
+                            @if($totalBudget >= 1000000)
+                                ฿{{ number_format($totalBudget / 1000000, 2) }}M
+                            @else
+                                ฿{{ number_format($totalBudget, 0) }}
+                            @endif
+                        </h3>
+                        <small class="text-body-secondary d-block mt-1 text-truncate" title="งบประมาณรวม ฿{{ number_format($totalBudget, 2) }} บาท">
+                            งบจัดสรรรวม {{ number_format($totalBudget, 0) }} ฿
+                        </small>
                     </div>
-                    <h3 class="fw-bold mb-1 text-white text-nowrap" style="font-size: 1.55rem;">
-                        ฿{{ number_format($totalBudget, 0) }}
-                    </h3>
-                    <div class="small text-white-50 mt-1 d-flex align-items-center text-truncate" title="งบประมาณที่ได้รับการสนับสนุนจัดสรร">
-                        <i class="bi bi-info-circle me-1"></i> งบประมาณจัดสรร
-                    </div>
+
+                    @if(!empty($yoyDelta['prev_year_name']))
+                        @if($yoyDelta['budget_prev'] >= 10000 && $yoyDelta['budget_pct'] !== null)
+                            <div class="mt-2 pt-2 border-top border-subtle d-flex align-items-center justify-content-between small">
+                                <span class="text-body-secondary" style="font-size: 0.72rem;">เทียบปี {{ $yoyDelta['prev_year_name'] }}</span>
+                                <span class="badge {{ $yoyDelta['budget_diff'] >= 0 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-danger-subtle text-danger border border-danger-subtle' }}" style="font-variant-numeric: tabular-nums; font-size: 0.7rem;">
+                                    <i class="bi {{ $yoyDelta['budget_diff'] >= 0 ? 'bi-arrow-up-right' : 'bi-arrow-down-right' }}"></i>
+                                    {{ $yoyDelta['budget_diff'] >= 0 ? '+' : '' }}{{ $yoyDelta['budget_pct'] }}%
+                                </span>
+                            </div>
+                        @else
+                            <div class="mt-2 pt-2 border-top border-subtle d-flex align-items-center justify-content-between small">
+                                <span class="text-body-secondary" style="font-size: 0.72rem;">ปีก่อน ({{ $yoyDelta['prev_year_name'] }})</span>
+                                <span class="text-body-secondary fw-semibold" style="font-variant-numeric: tabular-nums; font-size: 0.72rem;">฿{{ number_format($yoyDelta['budget_prev'] / 1000000, 1) }}M</span>
+                            </div>
+                        @endif
+                    @endif
                 </div>
-                <i class="bi bi-cash-coin position-absolute end-0 bottom-0 text-white" style="font-size: 4rem; opacity: 0.12; transform: translate(10px, 10px);"></i>
+                <i class="bi bi-cash-coin position-absolute end-0 bottom-0 text-success" style="font-size: 3.5rem; opacity: 0.07; transform: translate(6px, 6px); pointer-events: none;"></i>
             </div>
         </div>
 
         <!-- 2. Projects -->
         <div class="col-xxl-2 col-xl-4 col-md-6 col-sm-6">
-            <div class="card h-100 border-0 shadow-sm text-white overflow-hidden position-relative" 
-                 style="background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3.5 position-relative" style="z-index: 1;">
-                    <span class="badge bg-light-subtle bg-opacity-25 text-white border-0 mb-2">
-                        <i class="bi bi-folder2-open me-1"></i> โครงการวิจัย
-                    </span>
-                    <h2 class="fw-bold mb-1 text-white">{{ number_format($totalProjects) }}</h2>
-                    <small class="text-white-50 d-block">โครงการทั้งหมด</small>
+            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card" style="border-top: 3px solid #2563EB !important; border-radius: var(--rdb-radius-md) !important;">
+                <div class="card-body p-3.5 position-relative d-flex flex-column justify-content-between" style="z-index: 1;">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                                <i class="bi bi-folder2-open me-1"></i> โครงการวิจัย
+                            </span>
+                            <div class="p-1.5 rounded-circle bg-primary bg-opacity-10 text-primary">
+                                <i class="bi bi-folder-check fs-6"></i>
+                            </div>
+                        </div>
+                        <h3 class="fw-bold mb-0 text-primary" style="font-size: 1.45rem; font-variant-numeric: tabular-nums;">
+                            {{ number_format($totalProjects) }}
+                        </h3>
+                        <small class="text-body-secondary d-block mt-1">โครงการทั้งหมด</small>
+                    </div>
+
+                    @if(!empty($yoyDelta['prev_year_name']))
+                        @if($yoyDelta['project_prev'] >= 5 && $yoyDelta['project_pct'] !== null)
+                            <div class="mt-2 pt-2 border-top border-subtle d-flex align-items-center justify-content-between small">
+                                <span class="text-body-secondary" style="font-size: 0.72rem;">เทียบปี {{ $yoyDelta['prev_year_name'] }}</span>
+                                <span class="badge {{ $yoyDelta['project_diff'] >= 0 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-danger-subtle text-danger border border-danger-subtle' }}" style="font-variant-numeric: tabular-nums; font-size: 0.7rem;">
+                                    <i class="bi {{ $yoyDelta['project_diff'] >= 0 ? 'bi-arrow-up-right' : 'bi-arrow-down-right' }}"></i>
+                                    {{ $yoyDelta['project_diff'] >= 0 ? '+' : '' }}{{ $yoyDelta['project_pct'] }}%
+                                </span>
+                            </div>
+                        @else
+                            <div class="mt-2 pt-2 border-top border-subtle d-flex align-items-center justify-content-between small">
+                                <span class="text-body-secondary" style="font-size: 0.72rem;">ปีก่อน ({{ $yoyDelta['prev_year_name'] }})</span>
+                                <span class="text-body-secondary fw-semibold" style="font-variant-numeric: tabular-nums; font-size: 0.72rem;">{{ number_format($yoyDelta['project_prev']) }} โครงการ</span>
+                            </div>
+                        @endif
+                    @endif
                 </div>
-                <i class="bi bi-folder-check position-absolute end-0 bottom-0 text-white" style="font-size: 4rem; opacity: 0.15; transform: translate(10px, 10px);"></i>
+                <i class="bi bi-folder position-absolute end-0 bottom-0 text-primary" style="font-size: 3.5rem; opacity: 0.07; transform: translate(6px, 6px); pointer-events: none;"></i>
             </div>
         </div>
 
         <!-- 3. Publications -->
         <div class="col-xxl-2 col-xl-4 col-md-6 col-sm-6">
-            <div class="card h-100 border-0 shadow-sm text-white overflow-hidden position-relative" 
-                 style="background: linear-gradient(135deg, #065F46 0%, #10B981 100%); border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3.5 position-relative" style="z-index: 1;">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="badge bg-light-subtle bg-opacity-25 text-white border-0">
-                            <i class="bi bi-journal-richtext me-1"></i> ผลงานตีพิมพ์
-                        </span>
+            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card" style="border-top: 3px solid #0D9488 !important; border-radius: var(--rdb-radius-md) !important;">
+                <div class="card-body p-3.5 position-relative d-flex flex-column justify-content-between" style="z-index: 1;">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-info-subtle text-info border border-info-subtle">
+                                <i class="bi bi-journal-richtext me-1"></i> ผลงานตีพิมพ์
+                            </span>
+                            <div class="p-1.5 rounded-circle bg-info bg-opacity-10 text-info">
+                                <i class="bi bi-award fs-6"></i>
+                            </div>
+                        </div>
+                        <h3 class="fw-bold mb-0 text-info" style="font-size: 1.45rem; font-variant-numeric: tabular-nums;">
+                            {{ number_format($totalPublished) }}
+                        </h3>
+                        <div class="mt-1">
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-1.5 py-0.5 rounded-pill" style="font-size: 0.7rem; font-variant-numeric: tabular-nums;">
+                                <i class="bi bi-globe me-0.5"></i> Scopus/WoS: {{ number_format($internationalPubsCount) }}
+                            </span>
+                        </div>
                     </div>
-                    <h2 class="fw-bold mb-1 text-white">{{ number_format($totalPublished) }}</h2>
-                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-1.5 py-0.5 rounded-pill" style="font-size: 0.72rem;">
-                        <i class="bi bi-globe me-0.5"></i> Scopus/WoS: {{ number_format($internationalPubsCount) }}
-                    </span>
+
+                    @if(!empty($yoyDelta['prev_year_name']))
+                        @if($yoyDelta['published_prev'] >= 5 && $yoyDelta['published_pct'] !== null)
+                            <div class="mt-2 pt-2 border-top border-subtle d-flex align-items-center justify-content-between small">
+                                <span class="text-body-secondary" style="font-size: 0.72rem;">เทียบปี {{ $yoyDelta['prev_year_name'] }}</span>
+                                <span class="badge {{ $yoyDelta['published_diff'] >= 0 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-danger-subtle text-danger border border-danger-subtle' }}" style="font-variant-numeric: tabular-nums; font-size: 0.7rem;">
+                                    <i class="bi {{ $yoyDelta['published_diff'] >= 0 ? 'bi-arrow-up-right' : 'bi-arrow-down-right' }}"></i>
+                                    {{ $yoyDelta['published_diff'] >= 0 ? '+' : '' }}{{ $yoyDelta['published_pct'] }}%
+                                </span>
+                            </div>
+                        @else
+                            <div class="mt-2 pt-2 border-top border-subtle d-flex align-items-center justify-content-between small">
+                                <span class="text-body-secondary" style="font-size: 0.72rem;">ปีก่อน ({{ $yoyDelta['prev_year_name'] }})</span>
+                                <span class="text-body-secondary fw-semibold" style="font-variant-numeric: tabular-nums; font-size: 0.72rem;">{{ number_format($yoyDelta['published_prev']) }} เรื่อง</span>
+                            </div>
+                        @endif
+                    @endif
                 </div>
-                <i class="bi bi-award position-absolute end-0 bottom-0 text-white" style="font-size: 4rem; opacity: 0.15; transform: translate(10px, 10px);"></i>
+                <i class="bi bi-journal-text position-absolute end-0 bottom-0 text-info" style="font-size: 3.5rem; opacity: 0.07; transform: translate(6px, 6px); pointer-events: none;"></i>
             </div>
         </div>
 
         <!-- 4. Utilizations -->
         <div class="col-xxl-2 col-xl-4 col-md-6 col-sm-6">
-            <div class="card h-100 border-0 shadow-sm text-white overflow-hidden position-relative" 
-                 style="background: linear-gradient(135deg, #991B1B 0%, #EF4444 100%); border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3.5 position-relative" style="z-index: 1;">
-                    <span class="badge bg-light-subtle bg-opacity-25 text-white border-0 mb-2">
-                        <i class="bi bi-geo-alt me-1"></i> การใช้ประโยชน์
-                    </span>
-                    <h2 class="fw-bold mb-1 text-white">{{ number_format($totalUtilizations) }}</h2>
-                    <small class="text-white-50 d-block">ชุมชนและพื้นที่รับประโยชน์</small>
+            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card" style="border-top: 3px solid #DC2626 !important; border-radius: var(--rdb-radius-md) !important;">
+                <div class="card-body p-3.5 position-relative d-flex flex-column justify-content-between" style="z-index: 1;">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                <i class="bi bi-geo-alt me-1"></i> การใช้ประโยชน์
+                            </span>
+                            <div class="p-1.5 rounded-circle bg-danger bg-opacity-10 text-danger">
+                                <i class="bi bi-pin-map fs-6"></i>
+                            </div>
+                        </div>
+                        <h3 class="fw-bold mb-0 text-danger" style="font-size: 1.45rem; font-variant-numeric: tabular-nums;">
+                            {{ number_format($totalUtilizations) }}
+                        </h3>
+                        <small class="text-body-secondary d-block mt-1">ชุมชน/พื้นที่รับประโยชน์</small>
+                    </div>
                 </div>
-                <i class="bi bi-pin-map-fill position-absolute end-0 bottom-0 text-white" style="font-size: 4rem; opacity: 0.15; transform: translate(10px, 10px);"></i>
+                <i class="bi bi-pin-map-fill position-absolute end-0 bottom-0 text-danger" style="font-size: 3.5rem; opacity: 0.07; transform: translate(6px, 6px); pointer-events: none;"></i>
             </div>
         </div>
 
         <!-- 5. Intellectual Property (IP) -->
         <div class="col-xxl-2 col-xl-4 col-md-6 col-sm-6">
-            <div class="card h-100 border-0 shadow-sm text-white overflow-hidden position-relative" 
-                 style="background: linear-gradient(135deg, #7C2D12 0%, #F59E0B 100%); border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3.5 position-relative" style="z-index: 1;">
-                    <span class="badge bg-light-subtle bg-opacity-25 text-white border-0 mb-2">
-                        <i class="bi bi-lightbulb me-1"></i> ทรัพย์สินทางปัญญา
-                    </span>
-                    <h2 class="fw-bold mb-1 text-white">{{ number_format($totalDips) }}</h2>
-                    <small class="text-white-50 d-block">สิทธิบัตร/อนุฯ/ลิขสิทธิ์</small>
+            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card" style="border-top: 3px solid #D97706 !important; border-radius: var(--rdb-radius-md) !important;">
+                <div class="card-body p-3.5 position-relative d-flex flex-column justify-content-between" style="z-index: 1;">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                                <i class="bi bi-lightbulb me-1"></i> ทรัพย์สินทางปัญญา
+                            </span>
+                            <div class="p-1.5 rounded-circle bg-warning bg-opacity-10 text-warning">
+                                <i class="bi bi-patch-check fs-6"></i>
+                            </div>
+                        </div>
+                        <h3 class="fw-bold mb-0 text-warning" style="font-size: 1.45rem; font-variant-numeric: tabular-nums;">
+                            {{ number_format($totalDips) }}
+                        </h3>
+                        <small class="text-body-secondary d-block mt-1">สิทธิบัตร/อนุฯ/ลิขสิทธิ์</small>
+                    </div>
                 </div>
-                <i class="bi bi-patch-check position-absolute end-0 bottom-0 text-white" style="font-size: 4rem; opacity: 0.15; transform: translate(10px, 10px);"></i>
+                <i class="bi bi-award position-absolute end-0 bottom-0 text-warning" style="font-size: 3.5rem; opacity: 0.07; transform: translate(6px, 6px); pointer-events: none;"></i>
             </div>
         </div>
 
         <!-- 6. Researchers -->
         <div class="col-xxl-2 col-xl-4 col-md-6 col-sm-6">
-            <div class="card h-100 border-0 shadow-sm text-white overflow-hidden position-relative" 
-                 style="background: linear-gradient(135deg, #4338CA 0%, #6366F1 100%); border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3.5 position-relative" style="z-index: 1;">
-                    <span class="badge bg-light-subtle bg-opacity-25 text-white border-0 mb-2">
-                        <i class="bi bi-people-fill me-1"></i> นักวิจัย
-                    </span>
-                    <h2 class="fw-bold mb-1 text-white">{{ number_format($totalResearchers) }}</h2>
-                    <small class="text-white-50 d-block">นักวิจัยทั้งหมด (ไม่นับซ้ำ)</small>
+            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card" style="border-top: 3px solid #4F46E5 !important; border-radius: var(--rdb-radius-md) !important;">
+                <div class="card-body p-3.5 position-relative d-flex flex-column justify-content-between" style="z-index: 1;">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                                <i class="bi bi-people-fill me-1"></i> นักวิจัย
+                            </span>
+                            <div class="p-1.5 rounded-circle bg-primary bg-opacity-10 text-primary">
+                                <i class="bi bi-people fs-6"></i>
+                            </div>
+                        </div>
+                        <h3 class="fw-bold mb-0 text-primary" style="font-size: 1.45rem; font-variant-numeric: tabular-nums;">
+                            {{ number_format($totalResearchers) }}
+                        </h3>
+                        <small class="text-body-secondary d-block mt-1">นักวิจัยทั้งหมด (ไม่นับซ้ำ)</small>
+                    </div>
                 </div>
-                <i class="bi bi-people position-absolute end-0 bottom-0 text-white" style="font-size: 4rem; opacity: 0.15; transform: translate(10px, 10px);"></i>
+                <i class="bi bi-person-lines-fill position-absolute end-0 bottom-0 text-primary" style="font-size: 3.5rem; opacity: 0.07; transform: translate(6px, 6px); pointer-events: none;"></i>
             </div>
         </div>
     </div>
@@ -134,33 +232,53 @@
             </div>
         </div>
 
-        <!-- Project Status Distribution (Direct from DB ps_color) -->
+        <!-- Project Status Distribution with Slim 3px Share Bars -->
         <div class="col-lg-4">
             <div class="card border shadow-sm h-100">
-                <div class="card-header bg-transparent py-3">
+                <div class="card-header bg-transparent py-3 d-flex align-items-center justify-content-between">
                     <h5 class="mb-0 fw-bold text-body">
                         <i class="bi bi-pie-chart-fill text-info me-2"></i> สถานะการดำเนินงานโครงการ
                     </h5>
+                    @if(!empty($selectedYear))
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle small">
+                            ปี {{ $selectedYear->year_name }}
+                        </span>
+                    @endif
                 </div>
                 <div class="card-body p-3 p-md-4 d-flex flex-column justify-content-between">
-                    <div style="height: 230px; width: 100%; position: relative;">
+                    <div style="height: 180px; width: 100%; position: relative;">
                         <canvas id="statusDonutChart"></canvas>
                     </div>
-                    <div class="mt-3 pt-2 border-top">
-                        <div class="row g-2">
-                            @foreach($projectsByStatus as $st)
-                                @if($st->status)
-                                    <div class="col-6">
-                                        <div class="d-flex align-items-center gap-1.5 small">
-                                            <span class="d-inline-block rounded-circle" style="width: 10px; height: 10px; background-color: {{ $st->status->ps_color ?? '#6c757d' }};"></span>
-                                            <span class="text-truncate" title="{{ $st->status->ps_name }}">{{ $st->status->ps_name }}</span>
-                                            <strong class="ms-auto">{{ number_format($st->total) }}</strong>
+
+                    @if(!empty($statusRankings))
+                        <div class="mt-3 pt-3 border-top border-subtle">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="small fw-bold text-body-secondary text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">สัดส่วนสถานะโครงการ</span>
+                                <span class="text-body-secondary small" style="font-size: 0.72rem; font-variant-numeric: tabular-nums;">รวม {{ number_format($totalProjects) }}</span>
+                            </div>
+                            <div class="d-flex flex-column gap-2">
+                                @foreach($statusRankings as $stItem)
+                                    @php
+                                        $stPct = $totalProjects > 0 ? round(($stItem['count'] / $totalProjects) * 100, 1) : 0;
+                                    @endphp
+                                    <div>
+                                        <div class="d-flex justify-content-between align-items-center small mb-1">
+                                            <span class="text-truncate text-body-secondary" style="max-width: 65%; font-size: 0.8rem;" title="{{ $stItem['name'] }}">
+                                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem; color: {{ $stItem['color'] }};"></i>
+                                                {{ $stItem['name'] }}
+                                            </span>
+                                            <span class="text-body fw-semibold" style="font-size: 0.8rem; font-variant-numeric: tabular-nums;">
+                                                {{ number_format($stItem['count']) }} <span class="text-body-secondary fw-normal">({{ $stPct }}%)</span>
+                                            </span>
+                                        </div>
+                                        <div class="progress" style="height: 3px; background-color: var(--bs-border-color-subtle, rgba(0,0,0,0.06));">
+                                            <div class="progress-bar" role="progressbar" style="width: {{ $stPct }}%; background-color: {{ $stItem['color'] }};" aria-valuenow="{{ $stPct }}" aria-valuemin="0" aria-valuemax="100"></div>
                                         </div>
                                     </div>
-                                @endif
-                            @endforeach
+                                @endforeach
+                            </div>
                         </div>
-                    </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -361,16 +479,18 @@ document.addEventListener('DOMContentLoaded', function () {
                     type: 'linear',
                     display: true,
                     position: 'left',
+                    beginAtZero: true,
                     title: { display: true, text: 'จำนวนโครงการ', color: textColor },
-                    ticks: { color: textColor },
+                    ticks: { color: textColor, precision: 0, maxTicksLimit: 5 },
                     grid: { color: gridColor }
                 },
                 y1: {
                     type: 'linear',
                     display: true,
                     position: 'right',
+                    beginAtZero: true,
                     title: { display: true, text: 'ล้านบาท (MB)', color: textColor },
-                    ticks: { color: textColor },
+                    ticks: { color: textColor, maxTicksLimit: 5 },
                     grid: { drawOnChartArea: false }
                 }
             }
@@ -401,7 +521,7 @@ document.addEventListener('DOMContentLoaded', function () {
             plugins: {
                 legend: { display: false }
             },
-            cutout: '65%'
+            cutout: '72%'
         }
     });
 
@@ -446,7 +566,11 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             scales: {
                 x: { ticks: { color: textColor, font: { size: 11 } }, grid: { display: false } },
-                y: { ticks: { color: textColor }, grid: { color: gridColor } }
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: textColor, precision: 0, maxTicksLimit: 5 },
+                    grid: { color: gridColor }
+                }
             }
         }
     });

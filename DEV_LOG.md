@@ -36,7 +36,27 @@
   - แม่แบบ **Ranked Breakdown Lists with Slim `3px` Share Bars** สำหรับจัดอันดับคณะ/หน่วยงานและประเภททุน
   - ตารางข้อห้าม (**Dashboard Smell Table**) และเกณฑ์ตรวจรับ 3 ความกว้างหน้าจอ (`1920px`, `1440px`, `375px`)
 
-#### 4. การปรับปรุงระบบนำทางหลังบ้านและระยะห่างไอคอน (2 พฤศจิกายน 2569)
+#### 4. ปรับปรุง Dashboard ทั้งหมดทั้งหน้าบ้านและหลังบ้านตามมาตรฐานใหม่ (Complete Dashboard Modernization)
+- **หน้าหลักหน้าบ้าน (Frontend Home Dashboard: `/` & `/site/index`)**:
+  - อัปเกรด Bento Stat Cards: เพิ่มป้าย Honest YoY Delta Badge (`$yoyDelta`) เปรียบเทียบปีงบประมาณที่เลือกกับปีก่อนหน้า พร้อมปฏิบัติตาม **Small Base Rule** (หากปีก่อนหน้าน้อยกว่า 5 ให้แสดง `ปีก่อนหน้า N` สีเทาแทนการแสดง `%` ที่ก้าวกระโดด) และจัดเรียงตัวเลขด้วย `font-variant-numeric: tabular-nums`
+  - ปรับสัดส่วนเลย์เอาต์กราฟหลัก (8 คอลัมน์) ควบคู่กับ **Ranked Faculty Breakdown** (4 คอลัมน์) แสดงอันดับคณะที่มีโครงการวิจัยสูงสุด พร้อมเส้น Slim `3px` Share Bar ช่วยให้อ่านข้อมูลสัดส่วนได้ทันทีโดยไม่ต้อง hover กราฟ
+- **แดชบอร์ดหลังบ้านผู้ดูแลระบบ (Backend Admin Dashboard: `/backend`)**:
+  - อัปเกรดการ์ด Quick Stats ทั้ง 6 โมดูล: โครงการวิจัย, นักวิจัย, ผลงานตีพิมพ์, ทรัพย์สินทางปัญญา, การใช้ประโยชน์, ข่าวสาร&การประชุม พร้อมแสดง YoY Delta เทียบปีก่อนหน้า
+  - เพิ่ม **Ranked Status Breakdown List** คู่กับ Doughnut Chart (Cutout 72%) แสดงสัดส่วนสถานะโครงการวิจัยทุกขั้นตอนด้วยแถบสีจริงจากฐานข้อมูลและแถบส่วนแบ่ง `3px`
+  - ปรับปรุง Combo Chart แนวโน้ม 5 ปี (`#yearChart`): ตั้งค่า `beginAtZero: true`, `maxTicksLimit: 5` และแปลงตัวเลขงบประมาณเป็นหน่วยล้านบาท (`1.5M ฿`) ให้อ่านง่าย
+- **ระบบแดชบอร์ดสารสนเทศงานวิจัยเชิงลึกฝั่งหน้าบ้าน (Frontend Research Intelligence Dashboards: `/dashboard`)**:
+  - **ภาพรวมยุทธศาสตร์ (`/dashboard/overview`)**:
+    - แปลง Bento KPI Cards จากสีไล่เฉดนีออนเต็มแผ่น (Heavy Gradients) เป็น **Quiet Scholarly Cards** พื้นผิวเรียบหรูระดับวิชาการ มีเส้นไฮไลต์ด้านบน 3px ตามหมวดหมู่ พร้อม Honest YoY Deltas และ `tabular-nums`
+    - ยกระดับ Status Distribution เป็น Doughnut Chart ควบคู่กับ Ranked Status Breakdown และ 3px Share Bars
+    - ปรับปรุงสเกลกราฟแนวโน้มงบประมาณ 6 ปี และกราฟเปรียบเทียบผลผลิตรายคณะให้มี `maxTicksLimit: 5`, `precision: 0` และ `beginAtZero: true`
+  - **โครงการวิจัยและงบประมาณ (`/dashboard/projects`)**: ปรับแต่งการ์ด KPI ให้เป็น Quiet Surface พร้อมเส้นขอบนำสายตาและ `tabular-nums`
+  - **ผลงานตีพิมพ์ (`/dashboard/publications`)**: ยกระดับการ์ดสถิติผลงานตีพิมพ์ระดับสากล Scopus/WoS, TCI 1 และ TCI 2 ด้วยสัญลักษณ์และตัวเลข `tabular-nums`
+  - **การใช้ประโยชน์เชิงพื้นที่ & แผนที่ GIS (`/dashboard/utilizations`)**: ปรับแต่ง KPI การใช้ประโยชน์และหน่วยงานรับประโยชน์ให้เป็นระเบียบตามมาตรฐานวิชาการ
+  - **ทรัพย์สินทางปัญญา (`/dashboard/ip`)**: แก้ไข Grid Layout และสไตล์การ์ดสิทธิบัตร/อนุสิทธิบัตร/ลิขสิทธิ์
+  - **ศักยภาพนักวิจัย (`/dashboard/researchers`)**: อัปเกรดการ์ดโปรไฟล์ Scopus Author ID และ ORCID ID
+  - **การประกันคุณภาพ (`/dashboard/qa`)**: ปรับปรุงการ์ดถ่วงน้ำหนักคะแนนประกันคุณภาพและงบวิจัยเฉลี่ยต่อบุคลากร
+
+#### 5. การปรับปรุงระบบนำทางหลังบ้านและระยะห่างไอคอน (2 พฤศจิกายน 2569)
 - ย้ายเมนูจัดการระบบหลังบ้านทั้งหมดมาไว้ที่แถบด้านซ้าย ([`resources/views/components/backend-sidebar.blade.php`](resources/views/components/backend-sidebar.blade.php)) พร้อมตัดเมนูแถบบนแบบเดิมออก
 - จัดกลุ่มเมนูย่อยพร้อมสัญลักษณ์ `-` นำหน้า, ยุบรวมเมนูตั้งค่าข้อมูลพื้นฐาน (Master Data), และบังคับพฤติกรรม **Single-Open Accordion** (`data-bs-parent="#rdbSidebarAccordion"`)
 - เพิ่ม CSS Fractional Spacing Utilities (`.me-1.5`, `.gap-1.5`, ฯลฯ) และแก้ไขระยะห่างไอคอนคู่ข้อความทั่วทั้งระบบ 67 ไฟล์ Blade

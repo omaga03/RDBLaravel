@@ -13,39 +13,46 @@
     <div class="row g-3 mb-4">
         <!-- Total Publications -->
         <div class="col-xl-3 col-md-6">
-            <div class="card h-100 border-0 shadow-sm text-white" 
-                 style="background: linear-gradient(135deg, #065F46 0%, #10B981 100%); border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3.5">
-                    <span class="badge bg-light-subtle bg-opacity-25 text-white border-0 mb-2">
-                        <i class="bi bi-journal-check me-1"></i> ผลงานตีพิมพ์รวม
-                    </span>
-                    <h3 class="fw-bold mb-1 text-white text-nowrap">{{ number_format($totalPublished) }}</h3>
-                    <small class="text-white-50 d-block">วารสารวิชาการและการประชุมวิชาการ</small>
+            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card" 
+                 style="border-top: 3px solid #0D9488 !important; border-radius: var(--rdb-radius-md) !important;">
+                <div class="card-body p-3.5 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-info-subtle text-info border border-info-subtle">
+                                <i class="bi bi-journal-check me-1"></i> ผลงานตีพิมพ์รวม
+                            </span>
+                            <div class="p-1.5 rounded-circle bg-info bg-opacity-10 text-info">
+                                <i class="bi bi-award fs-6"></i>
+                            </div>
+                        </div>
+                        <h3 class="fw-bold mb-1 text-info text-nowrap" style="font-variant-numeric: tabular-nums;">{{ number_format($totalPublished) }}</h3>
+                        <small class="text-body-secondary d-block">วารสารวิชาการและการประชุมวิชาการ</small>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Scopus / WoS (International) -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm border-warning-subtle">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #D97706 !important; border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-warning-emphasis small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-globe-americas me-1 text-warning"></i> Scopus & WoS
                     </span>
-                    <h3 class="fw-bold mb-0 text-warning">{{ number_format($scopusCount + $wosCount) }}</h3>
-                    <small class="text-body-secondary">Scopus {{ number_format($scopusCount) }} | WoS {{ number_format($wosCount) }}</small>
+                    <h3 class="fw-bold mb-0 text-warning" style="font-variant-numeric: tabular-nums;">{{ number_format($scopusCount + $wosCount) }}</h3>
+                    <small class="text-body-secondary" style="font-variant-numeric: tabular-nums;">Scopus {{ number_format($scopusCount) }} | WoS {{ number_format($wosCount) }}</small>
                 </div>
             </div>
         </div>
 
         <!-- TCI 1 -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm border-success-subtle">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #10B981 !important; border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-success small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-patch-check-fill me-1"></i> TCI กลุ่ม 1
                     </span>
-                    <h3 class="fw-bold mb-0 text-success">{{ number_format($tci1Count) }}</h3>
+                    <h3 class="fw-bold mb-0 text-success" style="font-variant-numeric: tabular-nums;">{{ number_format($tci1Count) }}</h3>
                     <small class="text-body-secondary">วารสารระดับชาติกลุ่มที่ 1</small>
                 </div>
             </div>
@@ -53,12 +60,12 @@
 
         <!-- TCI 2 -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm border-info-subtle">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #3B82F6 !important; border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-info small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-award-fill me-1"></i> TCI กลุ่ม 2
                     </span>
-                    <h3 class="fw-bold mb-0 text-info">{{ number_format($tci2Count) }}</h3>
+                    <h3 class="fw-bold mb-0 text-info" style="font-variant-numeric: tabular-nums;">{{ number_format($tci2Count) }}</h3>
                     <small class="text-body-secondary">วารสารระดับชาติกลุ่มที่ 2</small>
                 </div>
             </div>
@@ -66,25 +73,25 @@
 
         <!-- Proceedings -->
         <div class="col-xl-1 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #64748B !important; border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3 text-center">
                     <span class="text-secondary small fw-bold d-block mb-1">
                         <i class="bi bi-megaphone me-1.5"></i> ประชุม
                     </span>
-                    <h4 class="fw-bold mb-0 text-body">{{ number_format($confCount) }}</h4>
+                    <h4 class="fw-bold mb-0 text-body" style="font-variant-numeric: tabular-nums;">{{ number_format($confCount) }}</h4>
                 </div>
             </div>
         </div>
 
         <!-- Linked with Grants -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #6366F1 !important; border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-primary small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-link-45deg me-1"></i> ต่อยอดจากทุนวิจัย
                     </span>
-                    <h3 class="fw-bold mb-0 text-primary">{{ number_format($linkedProjectCount) }}</h3>
-                    <small class="text-body-secondary">{{ $totalPublished > 0 ? number_format(($linkedProjectCount / $totalPublished) * 100, 1) : 0 }}% มีโครงการรองรับ</small>
+                    <h3 class="fw-bold mb-0 text-primary" style="font-variant-numeric: tabular-nums;">{{ number_format($linkedProjectCount) }}</h3>
+                    <small class="text-body-secondary" style="font-variant-numeric: tabular-nums;">{{ $totalPublished > 0 ? number_format(($linkedProjectCount / $totalPublished) * 100, 1) : 0 }}% มีโครงการรองรับ</small>
                 </div>
             </div>
         </div>

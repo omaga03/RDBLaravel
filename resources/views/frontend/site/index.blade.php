@@ -96,15 +96,35 @@
                 <div class="card-body position-relative p-4">
                     <i class="bi bi-folder2-open stats-icon"></i>
                     <div class="position-relative" style="z-index: 1;">
-                        <div class="d-flex align-items-center gap-2 mb-2">
+                        <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
                             <span class="badge bg-light-subtle bg-opacity-25 text-white border-0">
-                                <i class="bi bi-calendar-check me-1"></i>ปี {{ $max_year->year_name }}
+                                <i class="bi bi-calendar-check me-1"></i>ปีงบประมาณ {{ $max_year->year_name }}
                             </span>
+                            @if(isset($yoyDelta['prev_year_name']))
+                                @if($yoyDelta['project_prev'] < 5)
+                                    <span class="badge bg-light bg-opacity-25 text-white" style="font-variant-numeric: tabular-nums;" title="ปีก่อนหน้ามีน้อยกว่า 5 โครงการ">
+                                        ปีก่อน {{ number_format($yoyDelta['project_prev']) }}
+                                    </span>
+                                @elseif($yoyDelta['project_pct'] > 0)
+                                    <span class="badge bg-success text-white" style="font-variant-numeric: tabular-nums;">
+                                        <i class="bi bi-caret-up-fill me-0.5"></i>+{{ number_format($yoyDelta['project_pct'], 1) }}%
+                                    </span>
+                                @elseif($yoyDelta['project_pct'] < 0)
+                                    <span class="badge bg-danger text-white" style="font-variant-numeric: tabular-nums;">
+                                        <i class="bi bi-caret-down-fill me-0.5"></i>{{ number_format($yoyDelta['project_pct'], 1) }}%
+                                    </span>
+                                @else
+                                    <span class="badge bg-light bg-opacity-25 text-white" style="font-variant-numeric: tabular-nums;">±0%</span>
+                                @endif
+                            @endif
                         </div>
                         <h6 class="text-white-50 text-uppercase fw-bold mb-1" style="font-size: 0.8rem; letter-spacing: 0.04em;">จำนวนโครงการวิจัย</h6>
-                        <div class="display-5 fw-bold my-1">{{ number_format($sumProject) }}</div>
+                        <div class="display-5 fw-bold my-1" style="font-variant-numeric: tabular-nums;">{{ number_format($sumProject) }}</div>
                         <div class="small text-white-50 mt-1 d-flex align-items-center">
                             <i class="bi bi-check2-circle me-1"></i> โครงการที่เปิดเผยข้อมูล
+                            @if(isset($yoyDelta['prev_year_name']))
+                                <span class="ms-auto" style="font-size: 0.76rem;">vs {{ $yoyDelta['prev_year_name'] }}</span>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -118,15 +138,33 @@
                 <div class="card-body position-relative p-4">
                     <i class="bi bi-cash-stack stats-icon"></i>
                     <div class="position-relative" style="z-index: 1;">
-                        <div class="d-flex align-items-center gap-2 mb-2">
+                        <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
                             <span class="badge bg-light-subtle bg-opacity-25 text-white border-0">
                                 <i class="bi bi-award me-1"></i>งบประมาณสนับสนุน
                             </span>
+                            @if(isset($yoyDelta['prev_year_name']))
+                                @if($yoyDelta['budget_prev'] <= 0)
+                                    <span class="badge bg-light bg-opacity-25 text-white">ปีก่อน —</span>
+                                @elseif($yoyDelta['budget_pct'] > 0)
+                                    <span class="badge bg-success text-white" style="font-variant-numeric: tabular-nums;">
+                                        <i class="bi bi-caret-up-fill me-0.5"></i>+{{ number_format($yoyDelta['budget_pct'], 1) }}%
+                                    </span>
+                                @elseif($yoyDelta['budget_pct'] < 0)
+                                    <span class="badge bg-danger text-white" style="font-variant-numeric: tabular-nums;">
+                                        <i class="bi bi-caret-down-fill me-0.5"></i>{{ number_format($yoyDelta['budget_pct'], 1) }}%
+                                    </span>
+                                @else
+                                    <span class="badge bg-light bg-opacity-25 text-white" style="font-variant-numeric: tabular-nums;">±0%</span>
+                                @endif
+                            @endif
                         </div>
                         <h6 class="text-white-50 text-uppercase fw-bold mb-1" style="font-size: 0.8rem; letter-spacing: 0.04em;">รวมเป็นเงินทั้งสิ้น</h6>
-                        <div class="display-5 fw-bold my-1">{{ number_format($sumBudget) }}</div>
+                        <div class="display-5 fw-bold my-1" style="font-variant-numeric: tabular-nums;">{{ number_format($sumBudget) }}</div>
                         <div class="small text-white-50 mt-1 d-flex align-items-center">
                             <i class="bi bi-currency-exchange me-1"></i> บาท (ทุกแหล่งทุนรวมกัน)
+                            @if(isset($yoyDelta['prev_year_name']))
+                                <span class="ms-auto" style="font-size: 0.76rem;">vs {{ $yoyDelta['prev_year_name'] }}</span>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -140,15 +178,35 @@
                 <div class="card-body position-relative p-4">
                     <i class="bi bi-people-fill stats-icon"></i>
                     <div class="position-relative" style="z-index: 1;">
-                        <div class="d-flex align-items-center gap-2 mb-2">
+                        <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
                             <span class="badge bg-light-subtle bg-opacity-25 text-white border-0">
                                 <i class="bi bi-person-badge me-1"></i>กำลังคนด้านวิจัย
                             </span>
+                            @if(isset($yoyDelta['prev_year_name']))
+                                @if($yoyDelta['researcher_prev'] < 5)
+                                    <span class="badge bg-light bg-opacity-25 text-white" style="font-variant-numeric: tabular-nums;">
+                                        ปีก่อน {{ number_format($yoyDelta['researcher_prev']) }}
+                                    </span>
+                                @elseif($yoyDelta['researcher_pct'] > 0)
+                                    <span class="badge bg-success text-white" style="font-variant-numeric: tabular-nums;">
+                                        <i class="bi bi-caret-up-fill me-0.5"></i>+{{ number_format($yoyDelta['researcher_pct'], 1) }}%
+                                    </span>
+                                @elseif($yoyDelta['researcher_pct'] < 0)
+                                    <span class="badge bg-danger text-white" style="font-variant-numeric: tabular-nums;">
+                                        <i class="bi bi-caret-down-fill me-0.5"></i>{{ number_format($yoyDelta['researcher_pct'], 1) }}%
+                                    </span>
+                                @else
+                                    <span class="badge bg-light bg-opacity-25 text-white" style="font-variant-numeric: tabular-nums;">±0%</span>
+                                @endif
+                            @endif
                         </div>
                         <h6 class="text-white-50 text-uppercase fw-bold mb-1" style="font-size: 0.8rem; letter-spacing: 0.04em;">นักวิจัยในโครงการ (ทุกสถานะ)</h6>
-                        <div class="display-5 fw-bold my-1">{{ number_format($countResearcher) }}</div>
+                        <div class="display-5 fw-bold my-1" style="font-variant-numeric: tabular-nums;">{{ number_format($countResearcher) }}</div>
                         <div class="small text-white-50 mt-1 d-flex align-items-center">
-                            <i class="bi bi-mortarboard me-1"></i> คณาจารย์และบุคลากรวิจัยในปี {{ $max_year->year_name }}
+                            <i class="bi bi-mortarboard me-1"></i> คณาจารย์และบุคลากรในปี {{ $max_year->year_name }}
+                            @if(isset($yoyDelta['prev_year_name']))
+                                <span class="ms-auto" style="font-size: 0.76rem;">vs {{ $yoyDelta['prev_year_name'] }}</span>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -156,22 +214,78 @@
         </div>
     </div>
 
-    <!-- Chart Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card shadow-sm border">
+    <!-- Chart & Ranked Breakdowns Section -->
+    <div class="row g-4 mb-4">
+        <!-- Main Trend & Department Chart (col-lg-8) -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm border h-100">
                 <div class="card-header bg-body-tertiary py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <h5 class="mb-0 fw-bold text-body">
+                    <h5 class="mb-0 fw-bold text-body" style="font-size: 1rem;">
                         <i class="bi bi-bar-chart-fill text-primary me-2"></i> สถิติโครงการวิจัยและงบประมาณ แยกตามหน่วยงาน
                     </h5>
-                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.75rem;">
                         <i class="bi bi-graph-up me-1"></i> กราฟแท่งและเส้นงบประมาณ
                     </span>
                 </div>
-                <div class="card-body p-4">
+                <div class="card-body p-3 p-md-4">
                     <div style="height: 380px; width: 100%;">
                         <canvas id="projectChart"></canvas>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ranked Breakdown by Faculty with Slim 3px Share Bars (col-lg-4) -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border h-100">
+                <div class="card-header bg-body-tertiary py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 fw-bold text-body">
+                        <i class="bi bi-trophy-fill text-warning me-2"></i>อันดับคณะปี {{ $max_year->year_name }}
+                    </h6>
+                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle" style="font-size: 0.7rem;">
+                        Share Bars
+                    </span>
+                </div>
+                <div class="card-body p-0">
+                    @if(!empty($deptRankings) && count($deptRankings) > 0)
+                        <div class="list-group list-group-flush">
+                            @foreach($deptRankings as $rankIdx => $dRank)
+                                @php
+                                    $pct = $maxDeptProjectCount > 0 ? round(($dRank['count'] / $maxDeptProjectCount) * 100, 1) : 0;
+                                    $shareOfTotal = $sumProject > 0 ? round(($dRank['count'] / $sumProject) * 100, 1) : 0;
+                                @endphp
+                                <div class="list-group-item bg-transparent px-3 py-2.5 border-bottom">
+                                    <div class="d-flex align-items-center justify-content-between mb-1 gap-2">
+                                        <div class="d-flex align-items-center min-w-0">
+                                            <span class="badge {{ $rankIdx < 3 ? 'bg-primary' : 'bg-secondary-subtle text-secondary' }} rounded-circle me-2 d-inline-flex align-items-center justify-content-center" style="width: 20px; height: 20px; font-size: 0.68rem;">
+                                                {{ $rankIdx + 1 }}
+                                            </span>
+                                            <span class="text-body fw-medium text-truncate small" title="{{ $dRank['name'] }}">
+                                                {{ $dRank['name'] }}
+                                            </span>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2 flex-shrink-0" style="font-variant-numeric: tabular-nums;">
+                                            <span class="fw-bold text-body small">{{ $dRank['count'] > 0 ? number_format($dRank['count']) . ' โครงการ' : '—' }}</span>
+                                            <small class="text-body-secondary" style="min-width: 2.8rem; text-align: right; font-size: 0.74rem;">
+                                                {{ $shareOfTotal > 0 ? $shareOfTotal . '%' : '—' }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="w-100 rounded-pill bg-body-tertiary overflow-hidden" style="height: 3px;">
+                                        <div class="h-100 rounded-pill {{ $rankIdx === 0 ? 'bg-primary' : ($rankIdx === 1 ? 'bg-info' : 'bg-secondary') }}" style="width: {{ $pct }}%;"></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mt-1 text-body-secondary" style="font-size: 0.7rem; font-variant-numeric: tabular-nums;">
+                                        <span>งบประมาณ</span>
+                                        <span class="text-success fw-medium">{{ $dRank['budget'] > 0 ? '฿' . number_format($dRank['budget']) : '—' }}</span>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="p-4 text-center text-body-secondary small">
+                            <i class="bi bi-info-circle me-1"></i>ไม่พบข้อมูลสถิติจำแนกรายคณะในปีงบประมาณนี้
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

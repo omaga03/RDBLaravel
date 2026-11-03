@@ -68,23 +68,40 @@
         <!-- 1. Projects -->
         <div class="col-xl-2 col-md-4 col-sm-6">
             <div class="card shadow-sm border h-100 position-relative overflow-hidden hover-card">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-body-secondary small fw-bold text-uppercase d-block mb-1">โครงการวิจัย</span>
-                            <h3 class="fw-bold mb-0 text-primary">{{ number_format($totalProjects) }}</h3>
-                            <small class="text-success fw-semibold text-truncate d-block mt-1" title="งบประมาณรวม ฿{{ number_format($totalProjectBudget) }}">
-                                @if($totalProjectBudget >= 1000000)
-                                    ฿{{ number_format($totalProjectBudget / 1000000, 2) }}M บาท
-                                @else
-                                    ฿{{ number_format($totalProjectBudget) }} บาท
-                                @endif
-                            </small>
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <span class="text-body-secondary small fw-bold text-uppercase">โครงการวิจัย</span>
+                            <div class="p-2 rounded-circle bg-primary bg-opacity-10 text-primary">
+                                <i class="bi bi-folder2-open fs-5"></i>
+                            </div>
                         </div>
-                        <div class="p-3 rounded-circle bg-primary bg-opacity-10 text-primary">
-                            <i class="bi bi-folder2-open fs-4"></i>
-                        </div>
+                        <h3 class="fw-bold mb-0 text-primary" style="font-variant-numeric: tabular-nums;">{{ number_format($totalProjects) }}</h3>
+                        <small class="text-success fw-semibold text-truncate d-block mt-1" style="font-variant-numeric: tabular-nums;" title="งบประมาณรวม ฿{{ number_format($totalProjectBudget) }}">
+                            @if($totalProjectBudget >= 1000000)
+                                ฿{{ number_format($totalProjectBudget / 1000000, 2) }}M บาท
+                            @else
+                                ฿{{ number_format($totalProjectBudget) }} บาท
+                            @endif
+                        </small>
                     </div>
+
+                    @if(!empty($yoyDelta['prev_year_name']))
+                        @if($yoyDelta['project_prev'] >= 5 && $yoyDelta['project_pct'] !== null)
+                            <div class="mt-2 pt-2 border-top border-subtle d-flex align-items-center justify-content-between small">
+                                <span class="text-body-secondary" style="font-size: 0.72rem;">เทียบปี {{ $yoyDelta['prev_year_name'] }}</span>
+                                <span class="badge {{ $yoyDelta['project_diff'] >= 0 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-danger-subtle text-danger border border-danger-subtle' }}" style="font-variant-numeric: tabular-nums; font-size: 0.7rem;">
+                                    <i class="bi {{ $yoyDelta['project_diff'] >= 0 ? 'bi-arrow-up-right' : 'bi-arrow-down-right' }}"></i>
+                                    {{ $yoyDelta['project_diff'] >= 0 ? '+' : '' }}{{ $yoyDelta['project_pct'] }}%
+                                </span>
+                            </div>
+                        @else
+                            <div class="mt-2 pt-2 border-top border-subtle d-flex align-items-center justify-content-between small">
+                                <span class="text-body-secondary" style="font-size: 0.72rem;">ปีก่อน ({{ $yoyDelta['prev_year_name'] }})</span>
+                                <span class="text-body-secondary fw-semibold" style="font-variant-numeric: tabular-nums; font-size: 0.72rem;">{{ number_format($yoyDelta['project_prev']) }} โครงการ</span>
+                            </div>
+                        @endif
+                    @endif
                 </div>
                 <a href="{{ route('backend.rdb_project.index', $selectedYearId ? ['pro_year' => $selectedYearId] : []) }}" class="card-footer bg-transparent border-top py-2 px-3 text-decoration-none small text-primary d-flex justify-content-between align-items-center">
                     <span>จัดการโครงการ</span>
@@ -96,18 +113,18 @@
         <!-- 2. Researchers -->
         <div class="col-xl-2 col-md-4 col-sm-6">
             <div class="card shadow-sm border h-100 position-relative overflow-hidden hover-card">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-body-secondary small fw-bold text-uppercase d-block mb-1">นักวิจัย</span>
-                            <h3 class="fw-bold mb-0 text-success">{{ number_format($totalResearchers) }}</h3>
-                            <small class="text-body-secondary d-block mt-1">
-                                {{ $selectedYearId ? 'ร่วมโครงการในปีนี้' : 'นักวิจัยทั้งหมด' }}
-                            </small>
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <span class="text-body-secondary small fw-bold text-uppercase">นักวิจัย</span>
+                            <div class="p-2 rounded-circle bg-success bg-opacity-10 text-success">
+                                <i class="bi bi-people-fill fs-5"></i>
+                            </div>
                         </div>
-                        <div class="p-3 rounded-circle bg-success bg-opacity-10 text-success">
-                            <i class="bi bi-people-fill fs-4"></i>
-                        </div>
+                        <h3 class="fw-bold mb-0 text-success" style="font-variant-numeric: tabular-nums;">{{ number_format($totalResearchers) }}</h3>
+                        <small class="text-body-secondary d-block mt-1">
+                            {{ $selectedYearId ? 'ร่วมโครงการในปีนี้' : 'นักวิจัยทั้งหมด' }}
+                        </small>
                     </div>
                 </div>
                 <a href="{{ route('backend.rdb_researcher.index') }}" class="card-footer bg-transparent border-top py-2 px-3 text-decoration-none small text-success d-flex justify-content-between align-items-center">
@@ -120,19 +137,36 @@
         <!-- 3. Publications -->
         <div class="col-xl-2 col-md-4 col-sm-6">
             <div class="card shadow-sm border h-100 position-relative overflow-hidden hover-card">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-body-secondary small fw-bold text-uppercase d-block mb-1">ผลงานตีพิมพ์</span>
-                            <h3 class="fw-bold mb-0 text-info">{{ number_format($totalPublished) }}</h3>
-                            <small class="text-body-secondary d-block mt-1">
-                                {{ $selectedYearId ? 'ตีพิมพ์ปีนี้' : 'ผลงานทั้งหมด' }}
-                            </small>
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <span class="text-body-secondary small fw-bold text-uppercase">ผลงานตีพิมพ์</span>
+                            <div class="p-2 rounded-circle bg-info bg-opacity-10 text-info">
+                                <i class="bi bi-file-earmark-text-fill fs-5"></i>
+                            </div>
                         </div>
-                        <div class="p-3 rounded-circle bg-info bg-opacity-10 text-info">
-                            <i class="bi bi-file-earmark-text-fill fs-4"></i>
-                        </div>
+                        <h3 class="fw-bold mb-0 text-info" style="font-variant-numeric: tabular-nums;">{{ number_format($totalPublished) }}</h3>
+                        <small class="text-body-secondary d-block mt-1">
+                            {{ $selectedYearId ? 'ตีพิมพ์ปีนี้' : 'ผลงานทั้งหมด' }}
+                        </small>
                     </div>
+
+                    @if(!empty($yoyDelta['prev_year_name']))
+                        @if($yoyDelta['published_prev'] >= 5 && $yoyDelta['published_pct'] !== null)
+                            <div class="mt-2 pt-2 border-top border-subtle d-flex align-items-center justify-content-between small">
+                                <span class="text-body-secondary" style="font-size: 0.72rem;">เทียบปี {{ $yoyDelta['prev_year_name'] }}</span>
+                                <span class="badge {{ $yoyDelta['published_diff'] >= 0 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-danger-subtle text-danger border border-danger-subtle' }}" style="font-variant-numeric: tabular-nums; font-size: 0.7rem;">
+                                    <i class="bi {{ $yoyDelta['published_diff'] >= 0 ? 'bi-arrow-up-right' : 'bi-arrow-down-right' }}"></i>
+                                    {{ $yoyDelta['published_diff'] >= 0 ? '+' : '' }}{{ $yoyDelta['published_pct'] }}%
+                                </span>
+                            </div>
+                        @else
+                            <div class="mt-2 pt-2 border-top border-subtle d-flex align-items-center justify-content-between small">
+                                <span class="text-body-secondary" style="font-size: 0.72rem;">ปีก่อน ({{ $yoyDelta['prev_year_name'] }})</span>
+                                <span class="text-body-secondary fw-semibold" style="font-variant-numeric: tabular-nums; font-size: 0.72rem;">{{ number_format($yoyDelta['published_prev']) }} เรื่อง</span>
+                            </div>
+                        @endif
+                    @endif
                 </div>
                 <a href="{{ route('backend.rdb_published.index', $selectedYearId ? ['year_id' => $selectedYearId] : []) }}" class="card-footer bg-transparent border-top py-2 px-3 text-decoration-none small text-info d-flex justify-content-between align-items-center">
                     <span>จัดการงานตีพิมพ์</span>
@@ -144,18 +178,18 @@
         <!-- 4. Intellectual Property -->
         <div class="col-xl-2 col-md-4 col-sm-6">
             <div class="card shadow-sm border h-100 position-relative overflow-hidden hover-card">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-body-secondary small fw-bold text-uppercase d-block mb-1">ทรัพย์สินทางปัญญา</span>
-                            <h3 class="fw-bold mb-0 text-warning">{{ number_format($totalDip) }}</h3>
-                            <small class="text-body-secondary d-block mt-1">
-                                {{ $selectedYearId ? 'ยื่นคำขอปีนี้' : 'ทรัพย์สินฯ ทั้งหมด' }}
-                            </small>
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <span class="text-body-secondary small fw-bold text-uppercase">ทรัพย์สินทางปัญญา</span>
+                            <div class="p-2 rounded-circle bg-warning bg-opacity-10 text-warning">
+                                <i class="bi bi-award-fill fs-5"></i>
+                            </div>
                         </div>
-                        <div class="p-3 rounded-circle bg-warning bg-opacity-10 text-warning">
-                            <i class="bi bi-award-fill fs-4"></i>
-                        </div>
+                        <h3 class="fw-bold mb-0 text-warning" style="font-variant-numeric: tabular-nums;">{{ number_format($totalDip) }}</h3>
+                        <small class="text-body-secondary d-block mt-1">
+                            {{ $selectedYearId ? 'ยื่นคำขอปีนี้' : 'ทรัพย์สินฯ ทั้งหมด' }}
+                        </small>
                     </div>
                 </div>
                 <a href="{{ route('backend.rdb_dip.index', $selectedYearId ? ['year_id' => $selectedYearId] : []) }}" class="card-footer bg-transparent border-top py-2 px-3 text-decoration-none small text-warning d-flex justify-content-between align-items-center">
@@ -168,18 +202,18 @@
         <!-- 5. Utilization -->
         <div class="col-xl-2 col-md-4 col-sm-6">
             <div class="card shadow-sm border h-100 position-relative overflow-hidden hover-card">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-body-secondary small fw-bold text-uppercase d-block mb-1">การใช้ประโยชน์</span>
-                            <h3 class="fw-bold mb-0 text-danger">{{ number_format($totalUtilize) }}</h3>
-                            <small class="text-body-secondary d-block mt-1">
-                                {{ $selectedYearId ? 'นำไปใช้ปีนี้' : 'ผลงานทั้งหมด' }}
-                            </small>
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <span class="text-body-secondary small fw-bold text-uppercase">การใช้ประโยชน์</span>
+                            <div class="p-2 rounded-circle bg-danger bg-opacity-10 text-danger">
+                                <i class="bi bi-rocket-takeoff-fill fs-5"></i>
+                            </div>
                         </div>
-                        <div class="p-3 rounded-circle bg-danger bg-opacity-10 text-danger">
-                            <i class="bi bi-rocket-takeoff-fill fs-4"></i>
-                        </div>
+                        <h3 class="fw-bold mb-0 text-danger" style="font-variant-numeric: tabular-nums;">{{ number_format($totalUtilize) }}</h3>
+                        <small class="text-body-secondary d-block mt-1">
+                            {{ $selectedYearId ? 'นำไปใช้ปีนี้' : 'ผลงานทั้งหมด' }}
+                        </small>
                     </div>
                 </div>
                 <a href="{{ route('backend.rdbprojectutilize.index', $selectedYearId ? ['year_id' => $selectedYearId] : []) }}" class="card-footer bg-transparent border-top py-2 px-3 text-decoration-none small text-danger d-flex justify-content-between align-items-center">
@@ -192,18 +226,18 @@
         <!-- 6. News & Conferences -->
         <div class="col-xl-2 col-md-4 col-sm-6">
             <div class="card shadow-sm border h-100 position-relative overflow-hidden hover-card">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-body-secondary small fw-bold text-uppercase d-block mb-1">ข่าว & ประชุม</span>
-                            <h3 class="fw-bold mb-0 text-secondary">{{ number_format($totalNews + $totalConference) }}</h3>
-                            <small class="text-body-secondary d-block mt-1">
-                                {{ $selectedYearId ? 'กิจกรรมปีนี้' : 'รายการทั้งหมด' }}
-                            </small>
+                <div class="card-body p-3 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <span class="text-body-secondary small fw-bold text-uppercase">ข่าว & ประชุม</span>
+                            <div class="p-2 rounded-circle bg-secondary bg-opacity-10 text-secondary">
+                                <i class="bi bi-newspaper fs-5"></i>
+                            </div>
                         </div>
-                        <div class="p-3 rounded-circle bg-secondary bg-opacity-10 text-secondary">
-                            <i class="bi bi-newspaper fs-4"></i>
-                        </div>
+                        <h3 class="fw-bold mb-0 text-secondary" style="font-variant-numeric: tabular-nums;">{{ number_format($totalNews + $totalConference) }}</h3>
+                        <small class="text-body-secondary d-block mt-1">
+                            {{ $selectedYearId ? 'กิจกรรมปีนี้' : 'รายการทั้งหมด' }}
+                        </small>
                     </div>
                 </div>
                 <a href="{{ route('backend.research_news.index') }}" class="card-footer bg-transparent border-top py-2 px-3 text-decoration-none small text-secondary d-flex justify-content-between align-items-center">
@@ -216,7 +250,7 @@
 
     <!-- Charts Section -->
     <div class="row g-4 mb-4">
-        <!-- Status Chart -->
+        <!-- Status Chart & Ranked Breakdown -->
         <div class="col-lg-5">
             <div class="card shadow-sm border h-100">
                 <div class="card-header bg-body-tertiary d-flex align-items-center justify-content-between">
@@ -230,10 +264,40 @@
                         </span>
                     @endif
                 </div>
-                <div class="card-body d-flex align-items-center justify-content-center p-3">
-                    <div style="max-height: 280px; width: 100%;">
+                <div class="card-body p-3">
+                    <div style="height: 180px; width: 100%;" class="mb-3">
                         <canvas id="statusChart"></canvas>
                     </div>
+
+                    @if(!empty($statusRankings))
+                        <div class="border-top border-subtle pt-3">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="small fw-bold text-body-secondary text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">สรุปสถานะการดำเนินงาน</span>
+                                <span class="text-body-secondary small" style="font-size: 0.72rem; font-variant-numeric: tabular-nums;">รวม {{ number_format($totalProjects) }} โครงการ</span>
+                            </div>
+                            <div class="d-flex flex-column gap-2">
+                                @foreach($statusRankings as $stItem)
+                                    @php
+                                        $stPct = $totalProjects > 0 ? round(($stItem['count'] / $totalProjects) * 100, 1) : 0;
+                                    @endphp
+                                    <div>
+                                        <div class="d-flex justify-content-between align-items-center small mb-1">
+                                            <span class="text-truncate text-body-secondary" style="max-width: 65%; font-size: 0.8rem;" title="{{ $stItem['name'] }}">
+                                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem; color: {{ $stItem['color'] }};"></i>
+                                                {{ $stItem['name'] }}
+                                            </span>
+                                            <span class="text-body fw-semibold" style="font-size: 0.8rem; font-variant-numeric: tabular-nums;">
+                                                {{ number_format($stItem['count']) }} <span class="text-body-secondary fw-normal">({{ $stPct }}%)</span>
+                                            </span>
+                                        </div>
+                                        <div class="progress" style="height: 3px; background-color: var(--bs-border-color-subtle, rgba(0,0,0,0.06));">
+                                            <div class="progress-bar" role="progressbar" style="width: {{ $stPct }}%; background-color: {{ $stItem['color'] }};" aria-valuenow="{{ $stPct }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -251,7 +315,7 @@
                     </span>
                 </div>
                 <div class="card-body p-3">
-                    <div style="height: 280px; width: 100%;">
+                    <div style="height: 300px; width: 100%;">
                         <canvas id="yearChart"></canvas>
                     </div>
                 </div>
@@ -442,14 +506,10 @@ document.addEventListener('DOMContentLoaded', function () {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            cutout: '72%',
             plugins: {
                 legend: {
-                    position: 'bottom',
-                    labels: {
-                        boxWidth: 12,
-                        color: textColor,
-                        font: { family: 'Plus Jakarta Sans, Prompt', size: 11 }
-                    }
+                    display: false
                 }
             }
         }
@@ -520,7 +580,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     },
                     ticks: {
                         color: textColor,
-                        precision: 0
+                        precision: 0,
+                        maxTicksLimit: 5
                     },
                     grid: { color: gridColor }
                 },
@@ -540,6 +601,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     },
                     ticks: {
                         color: textColor,
+                        maxTicksLimit: 5,
                         callback: function (value) {
                             if (value >= 1000000) {
                                 return (value / 1000000).toFixed(1) + 'M ฿';

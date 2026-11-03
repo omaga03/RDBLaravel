@@ -13,26 +13,33 @@
     <div class="row g-3 mb-4">
         <!-- Total IP -->
         <div class="col-xl-3 col-md-6">
-            <div class="card h-100 border-0 shadow-sm text-white" 
-                 style="background: linear-gradient(135deg, #7C2D12 0%, #F59E0B 100%); border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3.5">
-                    <span class="badge bg-light-subtle bg-opacity-25 text-white border-0 mb-2">
-                        <i class="bi bi-shield-check me-1"></i> ทรัพย์สินทางปัญญาทั้งหมด
-                    </span>
-                    <h3 class="fw-bold mb-1 text-white text-nowrap">{{ number_format($totalDips) }}</h3>
-                    <small class="text-white-50 d-block">ผลงานที่ได้รับการคุ้มครองสิทธิ</small>
+            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card" 
+                 style="border-top: 3px solid #D97706 !important; border-radius: var(--rdb-radius-md) !important;">
+                <div class="card-body p-3.5 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                                <i class="bi bi-shield-check me-1"></i> ทรัพย์สินทางปัญญาทั้งหมด
+                            </span>
+                            <div class="p-1.5 rounded-circle bg-warning bg-opacity-10 text-warning">
+                                <i class="bi bi-award fs-6"></i>
+                            </div>
+                        </div>
+                        <h3 class="fw-bold mb-1 text-warning text-nowrap" style="font-variant-numeric: tabular-nums;">{{ number_format($totalDips) }}</h3>
+                        <small class="text-body-secondary d-block">ผลงานที่ได้รับการคุ้มครองสิทธิ</small>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Patents (สิทธิบัตรการประดิษฐ์) -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm border-danger-subtle">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #EF4444 !important; border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-danger small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-patch-check-fill me-1"></i> สิทธิบัตร
                     </span>
-                    <h3 class="fw-bold mb-0 text-danger">{{ number_format($patentsCount) }}</h3>
+                    <h3 class="fw-bold mb-0 text-danger" style="font-variant-numeric: tabular-nums;">{{ number_format($patentsCount) }}</h3>
                     <small class="text-body-secondary">สิทธิบัตรการประดิษฐ์</small>
                 </div>
             </div>
@@ -40,12 +47,12 @@
 
         <!-- Petty Patents (อนุสิทธิบัตร) -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm border-primary-subtle">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #2563EB !important; border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-primary small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-gear-wide-connected me-1"></i> อนุสิทธิบัตร
                     </span>
-                    <h3 class="fw-bold mb-0 text-primary">{{ number_format($pettyPatentsCount) }}</h3>
+                    <h3 class="fw-bold mb-0 text-primary" style="font-variant-numeric: tabular-nums;">{{ number_format($pettyPatentsCount) }}</h3>
                     <small class="text-body-secondary">สิ่งประดิษฐ์และนวัตกรรม</small>
                 </div>
             </div>
@@ -53,40 +60,41 @@
 
         <!-- Copyrights (ลิขสิทธิ์) -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm border-info-subtle">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #0D9488 !important; border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-info small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-c-circle-fill me-1"></i> ลิขสิทธิ์
                     </span>
-                    <h3 class="fw-bold mb-0 text-info">{{ number_format($copyrightsCount) }}</h3>
+                    <h3 class="fw-bold mb-0 text-info" style="font-variant-numeric: tabular-nums;">{{ number_format($copyrightsCount) }}</h3>
                     <small class="text-body-secondary">วรรณกรรมและงานสร้างสรรค์</small>
                 </div>
             </div>
         </div>
 
         <!-- Registered -->
-        <div class="col-xl-1.5 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm border-success-subtle bg-success-subtle bg-opacity-10">
+        <div class="col-xl-1 col-md-3 col-sm-6">
+            <div class="card h-100 border shadow-sm border-success-subtle bg-success-subtle bg-opacity-10" style="border-top: 3px solid #10B981 !important; border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3 text-center">
                     <span class="text-success small fw-bold d-block mb-1">
-                        <i class="bi bi-check-circle-fill me-1.5"></i> ทะเบียนแล้ว
+                        <i class="bi bi-check-circle-fill me-1.5"></i> จดทะเบียน
                     </span>
-                    <h4 class="fw-bold mb-0 text-success">{{ number_format($registeredCount) }}</h4>
+                    <h4 class="fw-bold mb-0 text-success" style="font-variant-numeric: tabular-nums;">{{ number_format($registeredCount) }}</h4>
                 </div>
             </div>
         </div>
 
         <!-- Pending -->
-        <div class="col-xl-1.5 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm">
+        <div class="col-xl-2 col-md-3 col-sm-6">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #64748B !important; border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3 text-center">
                     <span class="text-body-secondary small fw-bold d-block mb-1">
-                        <i class="bi bi-hourglass-top me-1.5"></i> ยื่นคำขอ
+                        <i class="bi bi-hourglass-top me-1.5"></i> รอจดทะเบียน
                     </span>
-                    <h4 class="fw-bold mb-0 text-body">{{ number_format($pendingCount) }}</h4>
+                    <h4 class="fw-bold mb-0 text-body" style="font-variant-numeric: tabular-nums;">{{ number_format($pendingCount) }}</h4>
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
     <!-- Charts Row: IP Types & Faculty Distribution -->

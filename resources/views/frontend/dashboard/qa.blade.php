@@ -62,66 +62,71 @@
     <div class="row g-3 mb-4">
         <!-- 1. QA Publications Weighted Score & Score 5 -->
         <div class="col-xl-3 col-md-6">
-            <div class="card h-100 border-0 shadow-sm text-white" 
-                 style="background: var(--rdb-gradient-primary); border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3.5">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="badge bg-light-subtle bg-opacity-25 text-white border-0">
-                            <i class="bi bi-award-fill me-1"></i> คะแนนถ่วงน้ำหนักผลงานตีพิมพ์
-                        </span>
-                        <span class="badge bg-warning text-dark fw-bold px-2 py-1 shadow-xs" title="คะแนนประเมินตัวบ่งชี้ 2.3 สกอ./อว. (เต็ม 5.00)">
-                            ประเมิน: {{ number_format($avgPubQaScore5, 2) }} / 5.00
-                        </span>
+            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card" 
+                 style="border-top: 3px solid #2563EB !important; border-radius: var(--rdb-radius-md) !important;">
+                <div class="card-body p-3.5 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                                <i class="bi bi-award-fill me-1"></i> ถ่วงน้ำหนักผลงานตีพิมพ์
+                            </span>
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle fw-bold px-2 py-0.5" style="font-variant-numeric: tabular-nums;" title="คะแนนประเมินตัวบ่งชี้ 2.3 สกอ./อว. (เต็ม 5.00)">
+                                ประเมิน: {{ number_format($avgPubQaScore5, 2) }} / 5.00
+                            </span>
+                        </div>
+                        <h3 class="fw-bold mb-1 text-primary text-nowrap" style="font-variant-numeric: tabular-nums;">{{ number_format($totalWeightedPubScore, 2) }}</h3>
+                        <small class="text-body-secondary d-block" style="font-variant-numeric: tabular-nums;">จากผลงานตีพิมพ์ทั้งหมด {{ number_format($totalPubItems) }} เรื่อง (เทียบเกณฑ์กลุ่มสาขา)</small>
                     </div>
-                    <h3 class="fw-bold mb-1 text-white text-nowrap">{{ number_format($totalWeightedPubScore, 2) }}</h3>
-                    <small class="text-white-50 d-block">จากผลงานตีพิมพ์ทั้งหมด {{ number_format($totalPubItems) }} เรื่อง (เทียบเกณฑ์กลุ่มสาขา)</small>
                 </div>
             </div>
         </div>
 
         <!-- 2. Avg Research Budget per Personnel & Score 5 -->
         <div class="col-xl-3 col-md-6">
-            <div class="card h-100 border shadow-sm">
-                <div class="card-body p-3.5">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <span class="text-body-secondary small fw-bold text-uppercase">
-                            <i class="bi bi-cash-stack text-success me-1"></i> งบวิจัยเฉลี่ย / บุคลากร
-                        </span>
-                        <span class="badge bg-success-subtle text-success border border-success-subtle fw-bold px-2 py-0.5" title="คะแนนประเมินตัวบ่งชี้ 2.2 สกอ./อว. (เต็ม 5.00)">
-                            ประเมิน: {{ number_format($avgProjectQaScore5, 2) }} / 5.00
-                        </span>
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #059669 !important; border-radius: var(--rdb-radius-md) !important;">
+                <div class="card-body p-3.5 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                <i class="bi bi-cash-stack me-1"></i> งบวิจัยเฉลี่ย / บุคลากร
+                            </span>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle fw-bold px-2 py-0.5" style="font-variant-numeric: tabular-nums;" title="คะแนนประเมินตัวบ่งชี้ 2.2 สกอ./อว. (เต็ม 5.00)">
+                                ประเมิน: {{ number_format($avgProjectQaScore5, 2) }} / 5.00
+                            </span>
+                        </div>
+                        <h3 class="fw-bold mb-1 text-success" style="font-variant-numeric: tabular-nums;">฿{{ number_format($avgBudgetPerPersonnel, 0) }}</h3>
+                        <small class="text-body-secondary d-block" style="font-variant-numeric: tabular-nums;">งบรวม ฿{{ number_format($totalBudget, 0) }} (บุคลากร {{ number_format($totalPersonnel) }} คน)</small>
                     </div>
-                    <h3 class="fw-bold mb-0 text-success">฿{{ number_format($avgBudgetPerPersonnel, 0) }}</h3>
-                    <small class="text-body-secondary">งบรวม ฿{{ number_format($totalBudget, 0) }} (บุคลากร {{ number_format($totalPersonnel) }} คน)</small>
                 </div>
             </div>
         </div>
 
         <!-- 3. QA Certified Utilizations -->
         <div class="col-xl-3 col-md-6">
-            <div class="card h-100 border shadow-sm">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #DC2626 !important; border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-danger small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-patch-check-fill text-danger me-1"></i> ใช้ประโยชน์ผ่านเกณฑ์ QA
                     </span>
-                    <h3 class="fw-bold mb-0 text-danger">{{ number_format($totalUtilCertified) }}</h3>
-                    <small class="text-body-secondary">คิดเป็น {{ $totalUtil > 0 ? number_format(($totalUtilCertified / $totalUtil) * 100, 1) : 0 }}% ของการใช้ประโยชน์ทั้งหมด</small>
+                    <h3 class="fw-bold mb-0 text-danger" style="font-variant-numeric: tabular-nums;">{{ number_format($totalUtilCertified) }}</h3>
+                    <small class="text-body-secondary" style="font-variant-numeric: tabular-nums;">คิดเป็น {{ $totalUtil > 0 ? number_format(($totalUtilCertified / $totalUtil) * 100, 1) : 0 }}% ของการใช้ประโยชน์ทั้งหมด</small>
                 </div>
             </div>
         </div>
 
         <!-- 4. First-time Grantee Researchers -->
         <div class="col-xl-3 col-md-6">
-            <div class="card h-100 border shadow-sm">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #4F46E5 !important; border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-primary small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-person-plus-fill text-primary me-1"></i> นักวิจัยรับทุนครั้งแรก
                     </span>
-                    <h3 class="fw-bold mb-0 text-primary">{{ number_format($totalFirstResearchers) }} ท่าน</h3>
+                    <h3 class="fw-bold mb-0 text-primary" style="font-variant-numeric: tabular-nums;">{{ number_format($totalFirstResearchers) }} ท่าน</h3>
                     <small class="text-body-secondary">อาจารย์และนักวิจัยรุ่นใหม่ในระบบ</small>
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
     <!-- Navigation Tabs for QA Dimensions -->

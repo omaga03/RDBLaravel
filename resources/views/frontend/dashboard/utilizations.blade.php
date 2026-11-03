@@ -52,26 +52,33 @@
     <div class="row g-3 mb-4">
         <!-- Total Utilizations -->
         <div class="col-xl-3 col-md-6">
-            <div class="card h-100 border-0 shadow-sm text-white" 
-                 style="background: linear-gradient(135deg, #991B1B 0%, #EF4444 100%); border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3.5">
-                    <span class="badge bg-light-subtle bg-opacity-25 text-white border-0 mb-2">
-                        <i class="bi bi-pin-map-fill me-1"></i> การนำไปใช้ประโยชน์รวม
-                    </span>
-                    <h3 class="fw-bold mb-1 text-white text-nowrap">{{ number_format($totalUtilizations) }}</h3>
-                    <small class="text-white-50 d-block">บันทึกการนำไปใช้ประโยชน์เชิงประจักษ์</small>
+            <div class="card h-100 border shadow-sm position-relative overflow-hidden hover-card" 
+                 style="border-top: 3px solid #DC2626 !important; border-radius: var(--rdb-radius-md) !important;">
+                <div class="card-body p-3.5 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                <i class="bi bi-pin-map-fill me-1"></i> การนำไปใช้ประโยชน์รวม
+                            </span>
+                            <div class="p-1.5 rounded-circle bg-danger bg-opacity-10 text-danger">
+                                <i class="bi bi-geo-alt fs-6"></i>
+                            </div>
+                        </div>
+                        <h3 class="fw-bold mb-1 text-danger text-nowrap" style="font-variant-numeric: tabular-nums;">{{ number_format($totalUtilizations) }}</h3>
+                        <small class="text-body-secondary d-block">บันทึกการนำไปใช้ประโยชน์เชิงประจักษ์</small>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Districts Covered -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm border-danger-subtle">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #EF4444 !important; border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-danger small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-geo-fill me-1"></i> ครอบคลุมพื้นที่
                     </span>
-                    <h3 class="fw-bold mb-0 text-danger">{{ number_format($districtsRanking->count()) }}</h3>
+                    <h3 class="fw-bold mb-0 text-danger" style="font-variant-numeric: tabular-nums;">{{ number_format($districtsRanking->count()) }}</h3>
                     <small class="text-body-secondary">อำเภอ/เขตพื้นที่</small>
                 </div>
             </div>
@@ -79,12 +86,12 @@
 
         <!-- Partner Agencies -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #2563EB !important; border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-primary small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-building me-1"></i> หน่วยงานผู้รับประโยชน์
                     </span>
-                    <h3 class="fw-bold mb-0 text-primary">{{ number_format($partnerCount) }}</h3>
+                    <h3 class="fw-bold mb-0 text-primary" style="font-variant-numeric: tabular-nums;">{{ number_format($partnerCount) }}</h3>
                     <small class="text-body-secondary">อปท. / วิสาหกิจ / กลุ่มอาชีพ</small>
                 </div>
             </div>
@@ -92,12 +99,12 @@
 
         <!-- QA Certified -->
         <div class="col-xl-2 col-md-4 col-sm-6">
-            <div class="card h-100 border shadow-sm border-success-subtle">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #10B981 !important; border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-success small fw-bold text-uppercase d-block mb-1">
                         <i class="bi bi-check2-all me-1"></i> ผ่านการรับรอง QA
                     </span>
-                    <h3 class="fw-bold mb-0 text-success">{{ number_format($qaCount) }}</h3>
+                    <h3 class="fw-bold mb-0 text-success" style="font-variant-numeric: tabular-nums;">{{ number_format($qaCount) }}</h3>
                     <small class="text-body-secondary">มีหลักฐานรับรองคุณภาพ</small>
                 </div>
             </div>
@@ -105,9 +112,17 @@
 
         <!-- Total Budget / Value -->
         <div class="col-xl-3 col-md-8 col-sm-12">
-            <div class="card h-100 border shadow-sm">
+            <div class="card h-100 border shadow-sm" style="border-top: 3px solid #059669 !important; border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5">
                     <span class="text-body-secondary small fw-bold text-uppercase d-block mb-1">
+                        <i class="bi bi-cash me-1 text-success"></i> มูลค่าผลกระทบ / งบสนับสนุน
+                    </span>
+                    <h3 class="fw-bold mb-0 text-body" style="font-variant-numeric: tabular-nums;">฿{{ number_format($totalBudget, 0) }}</h3>
+                    <small class="text-body-secondary">มูลค่าการพัฒนาและต่อยอดเศรษฐกิจ</small>
+                </div>
+            </div>
+        </div>
+    </div>
                         <i class="bi bi-cash me-1 text-success"></i> มูลค่าผลกระทบ / งบสนับสนุน
                     </span>
                     <h3 class="fw-bold mb-0 text-body">฿{{ number_format($totalBudget, 0) }}</h3>

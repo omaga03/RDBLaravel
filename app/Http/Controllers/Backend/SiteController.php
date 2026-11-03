@@ -202,6 +202,68 @@ class SiteController extends Controller
             ->take(5)
             ->get();
 
+        // 10. YoY Delta calculation for Backend KPI
+        $prevYear = null;
+        $prevTotalProjects = 0;
+        $prevTotalBudget = 0.0;
+        $prevTotalPublished = 0;
+
+        if ($selectedYear) {
+            $prevYear = $availableYears->first(fn($y) => (int)$y->year_name < (int)$selectedYear->year_name);
+            if ($prevYear) {
+                $prevProjQ = RdbProject::where('year_id', $prevYear->year_id);
+                $scopeProject($prevProjQ);
+                $prevTotalProjects = $prevProjQ->count();
+                $prevTotalBudget = (float) $prevProjQ->sum('pro_budget');
+
+                $prevPubQ = RdbPublished::where(function ($q) use ($prevYear) {
+                    $q->where('year_id', $prevYear->year_id)
+                      ->orWhere('year_bud', $prevYear->year_id);
+                });
+                if ($isFacultyCoord && $facultyDeptId) {
+                    $prevPubQ->where('department_id', $facultyDeptId);
+                } elseif ($isResearcher) {
+                    $prevPubQ->where(function ($q) use ($researcherId, $user) {
+                        $q->where('user_created', $user->id);
+                        if ($researcherId) {
+                            $q->orWhere('researcher_id', $researcherId);
+                        }
+                    });
+                }
+                $prevTotalPublished = $prevPubQ->count();
+            }
+        }
+
+        $yoyDelta = [
+            'prev_year_name' => $prevYear?->year_name,
+            'project_prev' => $prevTotalProjects,
+            'project_diff' => $totalProjects - $prevTotalProjects,
+            'project_pct' => $prevTotalProjects > 0 ? round((($totalProjects - $prevTotalProjects) / $prevTotalProjects) * 100, 1) : null,
+            'budget_prev' => $prevTotalBudget,
+            'budget_diff' => $totalProjectBudget - $prevTotalBudget,
+            'budget_pct' => $prevTotalBudget > 0 ? round((($totalProjectBudget - $prevTotalBudget) / $prevTotalBudget) * 100, 1) : null,
+            'published_prev' => $prevTotalPublished,
+            'published_diff' => $totalPublished - $prevTotalPublished,
+            'published_pct' => $prevTotalPublished > 0 ? round((($totalPublished - $prevTotalPublished) / $prevTotalPublished) * 100, 1) : null,
+        ];
+
+        // 11. Ranked Breakdown by Status with Share Bars
+        $statusRankings = [];
+        $maxStatusCount = 0;
+        foreach ($projectsByStatus as $st) {
+            if ($st->status) {
+                $statusRankings[] = [
+                    'name' => $st->status->ps_name,
+                    'color' => $st->status->ps_color ?? '#2563EB',
+                    'count' => (int) $st->total,
+                ];
+                if ((int)$st->total > $maxStatusCount) {
+                    $maxStatusCount = (int)$st->total;
+                }
+            }
+        }
+        usort($statusRankings, fn($a, $b) => $b['count'] <=> $a['count']);
+
         return view('backend.site.index', compact(
             'availableYears',
             'selectedYear',
@@ -219,7 +281,10 @@ class SiteController extends Controller
             'totalUsers',
             'projectsByStatus',
             'projectsByYear',
-            'recentProjects'
+            'recentProjects',
+            'yoyDelta',
+            'statusRankings',
+            'maxStatusCount'
         ));
     }
 }
