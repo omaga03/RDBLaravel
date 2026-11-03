@@ -1,5 +1,53 @@
 # บันทึกการพัฒนาประจำวัน (Development Log)
 
+## วันที่: 3 พฤศจิกายน 2569 (2026-11-03)
+
+### 📌 สรุปงานสำคัญที่ดำเนินการเสร็จสิ้นในวันนี้
+
+#### 1. สถาปัตยกรรมสร้างภาพหน้าปกจากหน้าแรกของไฟล์ PDF ทั้งหน้า (Full-Page PDF Cover Rasterization Engine)
+- **แก้ไขปัญหา Memory Exhausted ใน `rdb:generate-pdf-covers`**:
+  - ถอดการเรียกใช้ `Smalot\PdfParser\Parser` ออกจาก `PdfCoverService` (ซึ่งเดิมคลายบีบอัด Stream และสร้างตาราง Font CMap ขนาดใหญ่ใน RAM จนเกิด `Allowed memory size exhausted` บนไฟล์ PDF รายงานวิจัยขนาดใหญ่)
+  - เปลี่ยนการดึงข้อมูลใน `GeneratePdfCoversCommand` จาก `chunk()` เป็น `chunkById(100, ..., 'pro_id')` และ `chunkById(100, ..., 'id')` พร้อมคืนหน่วยความจำด้วย `gc_collect_cycles()`
+- **เปลี่ยนจากการดึงภาพย่อย (Embedded Image) เป็นการเรนเดอร์หน้าแรกของ PDF ทั้งหน้า (Full-Page Rasterization 100%)**:
+  - ยกเลิก `extractViaPdfParserEmbeddedImage()` ที่เดิมดึงเฉพาะไฟล์รูปภาพชิ้นแรกที่ฝังอยู่ในหน้าแรก (เช่น ตรามหาวิทยาลัยขนาดเล็ก) ออกถาวร
+  - ติดตั้งและเชื่อมต่อ **MuPDF (`PyMuPDF` + `Pillow`)** ในสภาพแวดล้อม Python ของ Laragon (`F:\laragon\bin\python\python-3.10\python.exe`) เข้ากับ [`PdfCoverService.php`](app/Services/PdfCoverService.php)
+  - รองรับการเรนเดอร์หน้าแรกของไฟล์ PDF ทั้งหน้า (`doc[0]`) ทั้งแบบเดี่ยว (`extractViaPyMuPdf`) และแบบกลุ่มความเร็วสูง (`renderBatchFirstPageToWebp`) ออกมาเป็นไฟล์ `.webp` (`max-width: 800px`, `quality: 85`) ที่แสดงครบทั้งตราสัญลักษณ์ ชื่อเรื่องภาษาไทย/อังกฤษ ชื่อผู้วิจัย ตาราง และกราฟ
+  - อัปเกรด `generateAcademicGdCover()` ให้รองรับฟอนต์ภาษาไทย TrueType (`Tahoma` / `Leelawadee UI` ผ่าน `imagettftext()`) สำหรับเป็นปกสำรองในกรณีที่ไฟล์ PDF ต้นฉบับไม่ได้อยู่ในเครื่องทดสอบหรือไฟล์ชำรุด
+- **รันสร้างภาพหน้าปก `.webp` ใหม่ครบ 100% ทั้งระบบ (`php artisan rdb:generate-pdf-covers --module=all --force`)**:
+  - **โครงการวิจัย (`rdb_project`)**: สร้างปกสำเร็จครบ **1,864 โครงการ** (เรนเดอร์จาก PDF จริง 1,811 โครงการ + ปกสำรองภาษาไทย 53 โครงการ)
+  - **ผลงานตีพิมพ์ (`rdb_published`)**: สร้างปกสำเร็จครบ **1,601 รายการ** (เรนเดอร์จาก PDF จริง 1,503 รายการ + ปกสำรองภาษาไทย 98 รายการ)
+
+#### 2. ปรับปรุงโครงสร้างการจัดวางการ์ดหน้ารายละเอียดฝั่งหน้าบ้าน (Frontend Show Layout Optimization)
+- **หน้ารายละเอียดโครงการวิจัย ([`resources/views/frontend/rdbproject/show.blade.php`](resources/views/frontend/rdbproject/show.blade.php))**:
+  - ย้ายการ์ด **`ไฟล์เอกสาร (Files)`** ขึ้นมาไว้ด้านบนสุดของคอลัมน์ขวา (`col-lg-4`) **ก่อน** การ์ด `คณะผู้วิจัย (Researchers)`
+  - เพิ่มการแสดงภาพปกหน้าแรกของรายงานวิจัย (`$item->cover_url`) ไว้ด้านบนสุดของการ์ดไฟล์เอกสาร พร้อมลิงก์เปิดดูเล่มรายงาน
+- **หน้ารายละเอียดผลงานตีพิมพ์ ([`resources/views/frontend/rdbpublished/show.blade.php`](resources/views/frontend/rdbpublished/show.blade.php))**:
+  - คอลัมน์ขวา (`col-lg-4`): ย้ายการ์ด **`ไฟล์เอกสาร (Files)`** (พร้อมภาพปกหน้าแรก) ขึ้นมาเป็นลำดับที่ 1 **ก่อน** การ์ด `ผู้เขียนบทความ (Authors)`
+  - คอลัมน์ซ้าย (`col-lg-8`): ย้ายการ์ด **`โครงการวิจัยที่เกี่ยวข้อง`** มาไว้ทางด้านซ้าย **ก่อน** การ์ด `บทคัดย่อ (Abstract)`
+- **หน้ารายละเอียดการนำไปใช้ประโยชน์ ([`resources/views/frontend/rdbprojectutilize/show.blade.php`](resources/views/frontend/rdbprojectutilize/show.blade.php))**:
+  - คอลัมน์ซ้าย (`col-lg-8`): ย้ายการ์ด **`โครงการวิจัยที่เกี่ยวข้อง`** มาไว้ทางด้านซ้าย **ก่อน** การ์ด `รายละเอียดการนำไปใช้ประโยชน์ (Utilization Details)`
+- **หน้ารายละเอียดทรัพย์สินทางปัญญา ([`resources/views/frontend/rdbdip/show.blade.php`](resources/views/frontend/rdbdip/show.blade.php))**:
+  - คอลัมน์ซ้าย (`col-lg-8`): ย้ายการ์ด **`โครงการวิจัยที่เกี่ยวข้อง`** มาไว้ทางด้านซ้าย **ก่อน** การ์ด `บทสรุปการประดิษฐ์และรายละเอียด (Invention Summary & Details)`
+
+#### 3. ยกระดับมาตรฐานทักษะการออกแบบ Dashboard ([`.agents/skills/ui-dashboard-visualization/SKILL.md`](.agents/skills/ui-dashboard-visualization/SKILL.md))
+- ผสานหลักการออกแบบจาก `dashboard-design-skill` (กลั่นจาก 127 Dashboards จริง) เข้ากับมาตรฐาน Bootstrap 5.3 + Chart.js ของระบบ:
+  - กฎ **First Glance, Quiet, Wordless & Honest** และ **Small Base Rule (`< 5`)**
+  - แม่แบบ **Analytical KPI Card with Honest YoY Delta**
+  - แม่แบบ **Ranked Breakdown Lists with Slim `3px` Share Bars** สำหรับจัดอันดับคณะ/หน่วยงานและประเภททุน
+  - ตารางข้อห้าม (**Dashboard Smell Table**) และเกณฑ์ตรวจรับ 3 ความกว้างหน้าจอ (`1920px`, `1440px`, `375px`)
+
+#### 4. การปรับปรุงระบบนำทางหลังบ้านและระยะห่างไอคอน (2 พฤศจิกายน 2569)
+- ย้ายเมนูจัดการระบบหลังบ้านทั้งหมดมาไว้ที่แถบด้านซ้าย ([`resources/views/components/backend-sidebar.blade.php`](resources/views/components/backend-sidebar.blade.php)) พร้อมตัดเมนูแถบบนแบบเดิมออก
+- จัดกลุ่มเมนูย่อยพร้อมสัญลักษณ์ `-` นำหน้า, ยุบรวมเมนูตั้งค่าข้อมูลพื้นฐาน (Master Data), และบังคับพฤติกรรม **Single-Open Accordion** (`data-bs-parent="#rdbSidebarAccordion"`)
+- เพิ่ม CSS Fractional Spacing Utilities (`.me-1.5`, `.gap-1.5`, ฯลฯ) และแก้ไขระยะห่างไอคอนคู่ข้อความทั่วทั้งระบบ 67 ไฟล์ Blade
+- ปรับปรุงหน้ารายละเอียดโครงการหลังบ้าน (`/backend/rdb_project/{id}`): ลบป้าย `หลักฐานการเงิน: ไม่ครบถ้วน` และปรับป้ายชื่อทุนย่อย (`pts_name`) ให้ตัดบรรทัดอัตโนมัติบนหน้าจอเล็ก
+
+#### 5. ผลการทดสอบอัตโนมัติ (Automated Test Assurance)
+- `php artisan test --filter=PdfCoverGenerationTest`: **PASSED (4 tests, 16 assertions)**
+- `php artisan test --filter=BackendAuditTest`: **PASSED (47 tests, 421 assertions)**
+
+---
+
 ## วันที่: 29 ตุลาคม 2569 (2026-10-29)
 
 ### 📌 สรุปงานสำคัญที่ดำเนินการเสร็จสิ้นในวันนี้

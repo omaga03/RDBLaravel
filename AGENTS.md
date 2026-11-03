@@ -55,6 +55,14 @@
     - ทุกครั้งที่มีการอัปโหลดไฟล์ PDF รายงานฉบับสมบูรณ์ของโครงการวิจัย (`pro_file`) ระบบจะนับและบันทึกจำนวนหน้าลง `rdb_project.pro_page_num` อัตโนมัติ
     - ทุกครั้งที่มีการอัปโหลดไฟล์ PDF ผลงานตีพิมพ์ (`pub_file`) ระบบจะนับและบันทึกจำนวนหน้าลง `rdb_published.pub_numfile` อัตโนมัติ
     - คำสั่งรันนับหน้าและบันทึกย้อนหลังทั้งระบบ: `php artisan rdb:count-pdf-pages` (ตัวเลือก `--module=all|project|published`, `--force`, `--limit=`)
+- **Full-Page PDF Cover Rasterization Engine (`PdfCoverService`)**:
+  - สร้างภาพหน้าปก `.webp` (`max-width: 800px`, `quality: 85`) โดย**เรนเดอร์จากหน้าแรกของไฟล์ PDF ทั้งหน้า (`doc[0]`) เท่านั้น** (ห้ามดึงเฉพาะภาพย่อย/โลโก้ที่ฝังในหน้าแรกเด็ดขาด):
+    1. **Tier 1 (`pdftoppm`)**: Poppler CLI Full-Page Rasterizer
+    2. **Tier 2 (`MuPDF / PyMuPDF`)**: Python `pymupdf` + `Pillow` Full-Page Rasterizer (รองรับ Batch Mode ความเร็วสูงและประหยัด RAM)
+    3. **Tier 3 (`Imagick`)**: PHP Imagick `readImage($pdfPath . '[0]')`
+    4. **Tier 4 (`Ghostscript`)**: Ghostscript CLI `-dFirstPage=1 -dLastPage=1`
+    5. **Tier 5 (`Academic GD Cover`)**: สร้างปกสำรองสไตล์วิชาการด้วย PHP GD พร้อมฟอนต์ภาษาไทย TrueType (`imagettftext`) กรณีไฟล์ PDF ต้นฉบับชำรุดหรือไม่พบไฟล์บนดิสก์
+  - คำสั่งสร้างภาพหน้าปกทั้งระบบ: `php artisan rdb:generate-pdf-covers --module=all --force`
 - รายละเอียด: `.agents/skills/legacy-data-migration/SKILL.md`
 
 ## 5. Security, Hardening & Academic Sync (security-and-hardening, thai-reporting-export & scopus-orcid-integration)
