@@ -109,9 +109,13 @@
     4. `/sitemap-utilizations.xml`: ผลงานการนำไปใช้ประโยชน์เชิงพื้นที่
     5. `/sitemap-ip.xml`: ผลงานทรัพย์สินทางปัญญา
   - ปรับปรุง [`public/robots.txt`](public/robots.txt) กำหนดสิทธิ์ให้ Bot เข้าถึงหน้างานวิจัยสาธารณะและชี้ตำแหน่ง Sitemap อัตโนมัติ
+  - **บังคับใช้ตัวกรอง `data_show = 1` ครบทุกส่วนของ Sitemap 100%**:
+    - เพิ่มคอลัมน์ `data_show` ให้กับตารางนักวิจัย `rdb_researcher` ผ่าน Migration `2026_11_03_141000_add_data_show_to_rdb_researcher_table.php` เพื่อให้ทุกโมดูลในระบบมีมาตรฐานสถานะเปิดเผยข้อมูลเหมือนกันทั้งหมด
+    - เชื่อมต่อ `HasDataShowScope` เข้ากับโมเดล `RdbResearcher` พร้อมปรับปรุง Trait ให้ใส่ชื่อตารางนำหน้า (`$table . '.data_show'`) ป้องกันข้อผิดพลาด Ambiguous Column เมื่อเกิดการ JOIN ข้ามตาราง
+    - อัปเกรด `SitemapController` ให้กรองเฉพาะเรคคอร์ดที่ `data_show = 1` อย่างเข้มงวด ทั้ง 5 โมดูล (โครงการวิจัย, ตีพิมพ์, นักวิจัย, การใช้ประโยชน์, ทรัพย์สินทางปัญญา)
 
 #### 8. ผลการทดสอบอัตโนมัติ (Automated Test Assurance)
-- `php artisan test --filter=AcademicSeoAndSitemapTest`: **PASSED (5 tests, 52 assertions)**
+- `php artisan test --filter=AcademicSeoAndSitemapTest`: **PASSED (6 tests, 54 assertions)**
 - `php artisan test --filter=PdfCoverGenerationTest`: **PASSED (4 tests, 16 assertions)**
 - `php artisan test --filter=BackendAuditTest`: **PASSED (47 tests, 421 assertions)**
 

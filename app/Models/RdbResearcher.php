@@ -9,7 +9,7 @@ use App\Services\FileUploadService;
 
 class RdbResearcher extends Model
 {
-    use HasDualFilePath;
+    use HasDualFilePath, \App\Traits\HasDataShowScope;
 
     protected $table = 'rdb_researcher';
     protected $primaryKey = 'researcher_id';
@@ -46,6 +46,7 @@ class RdbResearcher extends Model
         'scopus_synced_at',
         'orcid',
         'researcher_note',
+        'data_show',
         'user_created',
         'user_updated',
     ];

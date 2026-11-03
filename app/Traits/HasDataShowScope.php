@@ -12,7 +12,8 @@ trait HasDataShowScope
     protected static function booted(): void
     {
         static::addGlobalScope('active', function (Builder $builder) {
-            $builder->where('data_show', 1);
+            $table = $builder->getModel()->getTable();
+            $builder->where($table . '.data_show', 1);
         });
     }
 }

@@ -88,7 +88,7 @@ class AcademicSeoAndSitemapTest extends TestCase
 
     public function test_researcher_show_page_contains_person_schema()
     {
-        $researcher = RdbResearcher::first();
+        $researcher = RdbResearcher::where('data_show', 1)->first();
         if (!$researcher) {
             $this->markTestSkipped('No researcher found.');
         }
@@ -98,5 +98,29 @@ class AcademicSeoAndSitemapTest extends TestCase
         $response->assertSee('property="og:title"', false);
         $response->assertSee('application/ld+json', false);
         $response->assertSee('"@type": "Person"', false);
+    }
+
+    public function test_sitemaps_strictly_filter_by_data_show_one()
+    {
+        // 1. Projects with data_show = 0 are excluded
+        $hiddenProject = RdbProject::withoutGlobalScope('active')->where('data_show', 0)->first();
+        if ($hiddenProject) {
+            $res = $this->get('/sitemap-projects.xml');
+            $res->assertDontSee(route('frontend.rdbproject.show', $hiddenProject->pro_id), false);
+        }
+
+        // 2. Publications with data_show = 0 are excluded
+        $hiddenPub = RdbPublished::withoutGlobalScope('active')->where('data_show', 0)->first();
+        if ($hiddenPub) {
+            $res = $this->get('/sitemap-publications.xml');
+            $res->assertDontSee(route('frontend.rdbpublished.show', $hiddenPub->id), false);
+        }
+
+        // 3. Researchers with data_show = 0 are excluded
+        $hiddenResearcher = RdbResearcher::withoutGlobalScope('active')->where('data_show', 0)->first();
+        if ($hiddenResearcher) {
+            $res = $this->get('/sitemap-researchers.xml');
+            $res->assertDontSee(route('frontend.rdbresearcher.show', $hiddenResearcher->researcher_id), false);
+        }
     }
 }

@@ -34,19 +34,19 @@ class SitemapController extends Controller
             ],
             [
                 'loc' => url('/sitemap-publications.xml'),
-                'lastmod' => $formatDate(RdbPublished::max('updated_at')),
+                'lastmod' => $formatDate(RdbPublished::where('data_show', 1)->max('updated_at')),
             ],
             [
                 'loc' => url('/sitemap-researchers.xml'),
-                'lastmod' => $formatDate(RdbResearcher::max('updated_at')),
+                'lastmod' => $formatDate(RdbResearcher::where('data_show', 1)->max('updated_at')),
             ],
             [
                 'loc' => url('/sitemap-utilizations.xml'),
-                'lastmod' => $formatDate(RdbProjectUtilize::max('updated_at')),
+                'lastmod' => $formatDate(RdbProjectUtilize::where('data_show', 1)->max('updated_at')),
             ],
             [
                 'loc' => url('/sitemap-ip.xml'),
-                'lastmod' => $formatDate(RdbDip::max('updated_at')),
+                'lastmod' => $formatDate(RdbDip::where('data_show', 1)->max('updated_at')),
             ],
         ];
 
@@ -84,7 +84,8 @@ class SitemapController extends Controller
      */
     public function publications(): Response
     {
-        $publications = RdbPublished::select('id', 'updated_at', 'created_at', 'pub_date')
+        $publications = RdbPublished::where('data_show', 1)
+            ->select('id', 'updated_at', 'created_at', 'pub_date')
             ->orderBy('id', 'desc')
             ->get();
 
@@ -107,7 +108,8 @@ class SitemapController extends Controller
      */
     public function researchers(): Response
     {
-        $researchers = RdbResearcher::select('researcher_id', 'updated_at', 'created_at')
+        $researchers = RdbResearcher::where('data_show', 1)
+            ->select('researcher_id', 'updated_at', 'created_at')
             ->orderBy('researcher_id', 'desc')
             ->get();
 
@@ -130,7 +132,8 @@ class SitemapController extends Controller
      */
     public function utilizations(): Response
     {
-        $utilizations = RdbProjectUtilize::select('utz_id', 'updated_at', 'created_at', 'utz_date')
+        $utilizations = RdbProjectUtilize::where('data_show', 1)
+            ->select('utz_id', 'updated_at', 'created_at', 'utz_date')
             ->orderBy('utz_id', 'desc')
             ->get();
 
@@ -153,7 +156,8 @@ class SitemapController extends Controller
      */
     public function ip(): Response
     {
-        $dips = RdbDip::select('dip_id', 'updated_at', 'created_at', 'dip_request_date')
+        $dips = RdbDip::where('data_show', 1)
+            ->select('dip_id', 'updated_at', 'created_at', 'dip_request_date')
             ->orderBy('dip_id', 'desc')
             ->get();
 
