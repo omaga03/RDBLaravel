@@ -195,7 +195,7 @@ function wrapInEditorialTemplate(string $title, string $subtitle, string $badge,
             color: var(--text-primary);
             font-variant-numeric: tabular-nums;
         }
-        h1, h2, h3, h4, .font-heading, .manual-anchor {
+        h1, h2, h3, h4, .font-heading {
             font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
             line-height: 1.35;
             scroll-margin-top: 85px;
@@ -206,34 +206,47 @@ function wrapInEditorialTemplate(string $title, string $subtitle, string $badge,
             visibility: hidden;
             height: 0;
             width: 0;
-        }
-            font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
-            line-height: 1.35;
+            scroll-margin-top: 85px;
         }
         .topbar {
             position: sticky;
             top: 0;
-            z-index: 100;
-            background: rgba(30, 58, 95, 0.97);
-            backdrop-filter: blur(8px);
-            color: #fff;
-            border-bottom: 1px solid rgba(255,255,255,0.12);
+            z-index: 1000;
+            background: #1E3A5F !important;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: #FFFFFF !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
             padding: 0.65rem 1.5rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 0.75rem;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.15);
         }
+        [data-theme="dark"] .topbar {
+            background: #0F172A !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .topbar a,
         .topbar-brand {
             font-family: 'Prompt', sans-serif;
             font-weight: 600;
             font-size: 1rem;
-            color: #fff;
+            color: #FFFFFF !important;
             text-decoration: none;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 0.5rem;
+        }
+        .topbar-brand i {
+            color: #FBBF24;
+            font-size: 1.15rem;
+        }
+        .topbar-brand:hover {
+            color: #F8FAFC !important;
+            opacity: 0.95;
         }
         .topbar-nav {
             display: flex;
@@ -242,21 +255,35 @@ function wrapInEditorialTemplate(string $title, string $subtitle, string $badge,
             flex-wrap: wrap;
         }
         .nav-pill {
-            color: rgba(255,255,255,0.82);
+            color: rgba(255, 255, 255, 0.88) !important;
             text-decoration: none;
             font-family: 'Prompt', sans-serif;
             font-size: 0.85rem;
             padding: 0.38rem 0.8rem;
             border-radius: 6px;
             transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
         }
-        .nav-pill:hover { background: rgba(255,255,255,0.12); color: #fff; }
-        .nav-pill.active { background: #D97706; color: #fff; font-weight: 500; }
-        .topbar-actions { display: flex; gap: 0.5rem; }
+        .nav-pill:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #FFFFFF !important;
+        }
+        .nav-pill.active {
+            background: #D97706 !important;
+            color: #FFFFFF !important;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
         .btn-action {
-            background: rgba(255,255,255,0.12);
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.12) !important;
+            color: #FFFFFF !important;
+            border: 1px solid rgba(255, 255, 255, 0.25) !important;
             padding: 0.35rem 0.75rem;
             border-radius: 6px;
             cursor: pointer;
@@ -265,8 +292,13 @@ function wrapInEditorialTemplate(string $title, string $subtitle, string $badge,
             display: inline-flex;
             align-items: center;
             gap: 0.35rem;
+            transition: all 0.15s;
         }
-        .btn-action:hover { background: rgba(255,255,255,0.22); }
+        .btn-action:hover {
+            background: rgba(255, 255, 255, 0.22) !important;
+            color: #FFFFFF !important;
+            border-color: rgba(255, 255, 255, 0.45) !important;
+        }
         .container {
             max-width: 1120px;
             margin: 2rem auto 4rem;
@@ -535,15 +567,28 @@ function wrapInEditorialTemplate(string $title, string $subtitle, string $badge,
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
     <script>
         mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('theme-icon');
+            if (!icon) return;
+            if (theme === 'dark') {
+                icon.className = 'bi bi-sun';
+            } else {
+                icon.className = 'bi bi-moon-stars';
+            }
+        }
         function toggleTheme() {
             const html = document.documentElement;
             const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
             html.setAttribute('data-theme', next);
             localStorage.setItem('pcru_manual_theme', next);
+            updateThemeIcon(next);
         }
         (function() {
             const saved = localStorage.getItem('pcru_manual_theme');
-            if (saved) document.documentElement.setAttribute('data-theme', saved);
+            if (saved) {
+                document.documentElement.setAttribute('data-theme', saved);
+                updateThemeIcon(saved);
+            }
 
             // Smooth scrolling on hash links with Unicode support
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -592,9 +637,9 @@ $indexBody = <<<'HTML'
 
     <div style="border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; background: var(--bg-subtle); display: flex; flex-direction: column; justify-content: space-between;">
         <div>
-            <span class="hero-badge">VOLUME 2 • 10 บทเรียน</span>
+            <span class="hero-badge">VOLUME 2 • 11 บทเรียน</span>
             <h3 style="margin-top: 0.25rem; border: none; padding: 0;">เล่มที่ 2: คู่มือการใช้งานระบบหลังบ้าน (Admin & Researcher)</h3>
-            <p style="color: var(--text-secondary); font-size: 0.95rem;">สำหรับนักวิจัย ผู้ทรงคุณวุฒิ และผู้ดูแลระบบ ครอบคลุม Google SSO, สิทธิ์ RBAC & Impersonation, วงจรการส่งร่างและอนุมัติผลงาน (WF-01 ถึง WF-07), ระบบตรวจนับหน้า PDF & ปก .webp, ระบบ Peer Review, ส่งออก Excel UTF-8 BOM และคลังปัญญา DSpace SAF</p>
+            <p style="color: var(--text-secondary); font-size: 0.95rem;">สำหรับนักวิจัย ผู้ทรงคุณวุฒิ และผู้ดูแลระบบ ครอบคลุม Google SSO, สิทธิ์ RBAC & Impersonation, วงจรการส่งร่างและอนุมัติผลงาน (WF-01 ถึง WF-07), ระบบตรวจนับหน้า PDF & ปก .webp, ระบบ Peer Review, ส่งออก Excel UTF-8 BOM, คลังปัญญา DSpace SAF และศูนย์จัดการคำสั่งระบบบำรุงรักษา</p>
         </div>
         <a href="VOLUME_2_BACKEND_ADMIN_RESEARCHER_MANUAL.html" style="display: inline-block; text-align: center; background: #1E3A5F; color: #fff; padding: 0.65rem 1rem; border-radius: 6px; font-family: 'Prompt', sans-serif; font-weight: 500; margin-top: 1rem;">เปิดอ่านเล่มที่ 2 <i class="bi bi-arrow-right ms-1"></i></a>
     </div>

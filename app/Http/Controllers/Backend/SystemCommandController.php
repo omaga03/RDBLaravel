@@ -11,13 +11,14 @@ use App\Models\RdbPublished;
 use App\Models\AuditLog;
 use App\Services\PdfCoverService;
 use App\Services\DSpaceExportService;
+use App\Services\SystemBackupService;
 
 class SystemCommandController extends Controller
 {
     /**
      * Display the System Commands & Maintenance Dashboard
      */
-    public function index(PdfCoverService $coverService, DSpaceExportService $dspaceService)
+    public function index(PdfCoverService $coverService, DSpaceExportService $dspaceService, SystemBackupService $backupService)
     {
         $this->ensureAuthorized();
 
@@ -79,6 +80,14 @@ class SystemCommandController extends Controller
             'free_disk_space' => $this->getFormattedDiskSpace(),
         ];
 
+        // 4. System Backup & Restore Information (Strictly The Creator Only)
+        $isCreator = auth()->user()?->hasRole('The Creator') || auth()->user()?->id === 129;
+        $backupList = $isCreator ? $backupService->getBackupList() : [];
+        $dbSizeFormatted = $backupService->formatBytes($backupService->getDatabaseSize());
+        $storageSizeFormatted = $backupService->formatBytes($backupService->getStorageSize());
+        $mysqldumpAvailable = !empty($backupService->getMysqldumpBinary());
+        $mysqlAvailable = !empty($backupService->getMysqlBinary());
+
         return view('backend.system_commands.index', compact(
             'projectTotalWithFile',
             'projectWithCover',
@@ -86,7 +95,13 @@ class SystemCommandController extends Controller
             'publishedWithCover',
             'projectWithPageNum',
             'publishedWithPageNum',
-            'engineInfo'
+            'engineInfo',
+            'isCreator',
+            'backupList',
+            'dbSizeFormatted',
+            'storageSizeFormatted',
+            'mysqldumpAvailable',
+            'mysqlAvailable'
         ));
     }
 

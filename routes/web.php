@@ -188,6 +188,13 @@ Route::prefix('backend')->name('backend.')->middleware(['auth', \App\Http\Middle
     Route::get('/system-commands', [\App\Http\Controllers\Backend\SystemCommandController::class, 'index'])->name('system_commands.index');
     Route::post('/system-commands/run', [\App\Http\Controllers\Backend\SystemCommandController::class, 'run'])->name('system_commands.run');
 
+    // System Backup & Disaster Recovery (The Creator Only)
+    Route::post('/system-commands/backup/create', [\App\Http\Controllers\Backend\SystemBackupController::class, 'create'])->name('system_commands.backup.create');
+    Route::get('/system-commands/backup/download/{filename}', [\App\Http\Controllers\Backend\SystemBackupController::class, 'download'])->name('system_commands.backup.download');
+    Route::delete('/system-commands/backup/{filename}', [\App\Http\Controllers\Backend\SystemBackupController::class, 'destroy'])->name('system_commands.backup.destroy');
+    Route::post('/system-commands/backup/restore-otp', [\App\Http\Controllers\Backend\SystemBackupController::class, 'requestRestoreOtp'])->name('system_commands.backup.request_otp');
+    Route::post('/system-commands/backup/confirm-restore', [\App\Http\Controllers\Backend\SystemBackupController::class, 'confirmRestore'])->name('system_commands.backup.confirm_restore');
+
     Route::resource('rdbyear', RdbyearController::class);
     Route::get('/rdb_published/search/researcher', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'searchResearcher'])->name('rdb_published.search_researcher');
     Route::get('/rdb_published/search/project', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'searchProject'])->name('rdb_published.search_project');

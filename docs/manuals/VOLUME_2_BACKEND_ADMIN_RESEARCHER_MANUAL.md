@@ -764,3 +764,51 @@ pdftotext -v
 # 3. ทดสอบ PHP GD Extension และการรองรับ WebP
 php -r "echo extension_loaded('gd') && function_exists('imagewebp') ? 'GD WebP OK' : 'GD Missing';"
 ```
+
+---
+
+### 11.7 ศูนย์สำรองและกู้คืนข้อมูลระบบ (System Backup, Restore with Email OTP & Cloud Sync)
+
+> [!CAUTION]
+> **การสงวนสิทธิ์ขั้นเด็ดขาด (The Creator Only)**:
+> ฟังก์ชันการสำรอง กู้คืน และดาวน์โหลดไฟล์สำรองฐานข้อมูลระบบ **สงวนสิทธิ์เฉพาะผู้ใช้บทบาท The Creator (ผู้ดูแลระบบสูงสุด) เพียงผู้เดียวเท่านั้น** โดยระบบจะทำการปฏิเสธการเข้าถึง (HTTP 403 Forbidden) โดยอัตโนมัติหากเป็นผู้ใช้บทบาทอื่น
+
+#### 1. รูปแบบการสำรองข้อมูล 3 ระดับ
+1. **สำรองเฉพาะฐานข้อมูล (Database Only: `.sql.gz`)**: ส่งออกข้อมูลทั้งหมดของ MariaDB พร้อมบีบอัด Gzip ระดับ 9 (ลดขนาดลง ~80%) ใช้เวลาประมวลผล ~5–10 วินาที
+2. **สำรองเฉพาะไฟล์ Storage (`.zip`)**: รวบรวมไฟล์เล่มรายงาน PDF, ปก WebP, ภาพนักวิจัย และไฟล์แนบทั้งหมดใน `storage/app/public/`
+3. **สำรองข้อมูลทั้งระบบ (Full System Archive: `.zip`)**: รวมไฟล์ฐานข้อมูล SQL.gz + ไฟล์ Storage + ไฟล์การตั้งค่า `.env` และ Manifest สรุประบบไว้ในแพ็กเกจเดียว
+
+#### 2. ขั้นตอนการกู้คืนระบบแบบปลอดภัยสูงสุด (Safe Web Restore with Email OTP)
+เพื่อป้องกันข้อผิดพลาดจากการเขียนทับฐานข้อมูลจริง ระบบบังคับใช้กระบวนการยืนยัน 4 ชั้น:
+1. คลิกปุ่ม **"กู้คืน (Restore)"** ที่ไฟล์สำรองเป้าหมายในตาราง
+2. คลิกปุ่ม **"กดส่งรหัส OTP ไปยังอีเมลของฉัน"** ➔ ระบบจะสร้างรหัสความปลอดภัย OTP 6 หลัก และส่งเข้าอีเมลของ The Creator ทันที (อายุ 10 นาที)
+3. กรอกรหัส OTP 6 หลัก พร้อมพิมพ์ข้อความยืนยัน: `CONFIRM RESTORE`
+4. เมื่อกดยืนยัน:
+   * **ระบบจะสร้าง Safety Snapshot** สำรองฐานข้อมูลปัจจุบันไว้ให้อัตโนมัติก่อนเริ่มกู้คืนเสมอ (ชื่อไฟล์ `backup_pre_restore_safety_snapshot_*.sql.gz`)
+   * ระบบทำการคลายบีบอัดและกู้คืนข้อมูลเข้า MariaDB
+   * ระบบทำการล้างแคชระบบอัตโนมัติ (`cache:clear`, `route:clear`, `view:clear`)
+
+#### 3. คำสั่งผ่าน Terminal / Shell (Artisan CLI & Cron Schedule)
+```bash
+# สำรองเฉพาะฐานข้อมูล
+php artisan rdb:backup --type=db
+
+# สำรองเฉพาะไฟล์เอกสาร
+php artisan rdb:backup --type=files
+
+# สำรองทั้งระบบ พร้อมลบไฟล์สำรองเก่ากว่า 30 วันอัตโนมัติ
+php artisan rdb:backup --type=all --clean-older-than-days=30
+
+# คำสั่งกู้คืนฉุกเฉินผ่าน Shell
+php artisan rdb:restore backup_db_20261103_151323.sql.gz --force
+```
+
+#### 4. การเชื่อมต่อสำรองข้อมูลขึ้น Google Drive อัตโนมัติด้วย Rclone
+แนะนำให้ตั้งเวลาซิงค์โฟลเดอร์สำรองไปยัง Google Drive อัตโนมัติผ่าน Rclone:
+```bash
+# 1. เชื่อมต่อ Google Drive (ฟรี ไม่จำกัดอายุ Token)
+rclone config
+
+# 2. คำสั่งซิงค์ขึ้น Google Drive
+rclone sync storage/app/backups/ gdrive:PCRU_Research_Backups/ -v
+```

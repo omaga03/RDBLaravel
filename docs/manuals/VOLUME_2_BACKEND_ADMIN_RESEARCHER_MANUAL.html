@@ -1462,6 +1462,52 @@ pdftotext -v
 # 3. ทดสอบ PHP GD Extension และการรองรับ WebP
 php -r &quot;echo extension_loaded('gd') &amp;&amp; function_exists('imagewebp') ? 'GD WebP OK' : 'GD Missing';&quot;
 </code></pre>
+<hr />
+<a id="117-ศูนย์สำรองและกู้คืนข้อมูลระบบ-system-backup-restore-with-email-otp-cloud-sync" class="manual-anchor"></a><a id="117-%E0%B8%A8%E0%B8%B9%E0%B8%99%E0%B8%A2%E0%B9%8C%E0%B8%AA%E0%B8%B3%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B9%E0%B9%89%E0%B8%84%E0%B8%B7%E0%B8%99%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A-system-backup-restore-with-email-otp--cloud-sync" class="manual-anchor"></a><a id="117-%E0%B8%A8%E0%B8%B9%E0%B8%99%E0%B8%A2%E0%B9%8C%E0%B8%AA%E0%B8%B3%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B9%E0%B9%89%E0%B8%84%E0%B8%B7%E0%B8%99%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A-system-backup-restore-with-email-otp-cloud-sync" class="manual-anchor"></a><h3 id="117-ศูนย์สำรองและกู้คืนข้อมูลระบบ-system-backup-restore-with-email-otp--cloud-sync">11.7 ศูนย์สำรองและกู้คืนข้อมูลระบบ (System Backup, Restore with Email OTP &amp; Cloud Sync)</h3>
+<div class="manual-callout callout-caution"><div class="callout-header"><i class="bi bi-shield-exclamation"></i> คำเตือนความปลอดภัย (CAUTION)</div><div class="callout-body"><p><strong>การสงวนสิทธิ์ขั้นเด็ดขาด (The Creator Only)</strong>:
+ฟังก์ชันการสำรอง กู้คืน และดาวน์โหลดไฟล์สำรองฐานข้อมูลระบบ <strong>สงวนสิทธิ์เฉพาะผู้ใช้บทบาท The Creator (ผู้ดูแลระบบสูงสุด) เพียงผู้เดียวเท่านั้น</strong> โดยระบบจะทำการปฏิเสธการเข้าถึง (HTTP 403 Forbidden) โดยอัตโนมัติหากเป็นผู้ใช้บทบาทอื่น</p>
+</div></div>
+<a id="1-%E0%B8%A3%E0%B8%B9%E0%B8%9B%E0%B9%81%E0%B8%9A%E0%B8%9A%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%B3%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5-3-%E0%B8%A3%E0%B8%B0%E0%B8%94%E0%B8%B1%E0%B8%9A" class="manual-anchor"></a><h4 id="1-รูปแบบการสำรองข้อมูล-3-ระดับ">1. รูปแบบการสำรองข้อมูล 3 ระดับ</h4>
+<ol>
+<li><strong>สำรองเฉพาะฐานข้อมูล (Database Only: <code>.sql.gz</code>)</strong>: ส่งออกข้อมูลทั้งหมดของ MariaDB พร้อมบีบอัด Gzip ระดับ 9 (ลดขนาดลง ~80%) ใช้เวลาประมวลผล ~5–10 วินาที</li>
+<li><strong>สำรองเฉพาะไฟล์ Storage (<code>.zip</code>)</strong>: รวบรวมไฟล์เล่มรายงาน PDF, ปก WebP, ภาพนักวิจัย และไฟล์แนบทั้งหมดใน <code>storage/app/public/</code></li>
+<li><strong>สำรองข้อมูลทั้งระบบ (Full System Archive: <code>.zip</code>)</strong>: รวมไฟล์ฐานข้อมูล SQL.gz + ไฟล์ Storage + ไฟล์การตั้งค่า <code>.env</code> และ Manifest สรุประบบไว้ในแพ็กเกจเดียว</li>
+</ol>
+<a id="2-%E0%B8%82%E0%B8%B1%E0%B9%89%E0%B8%99%E0%B8%95%E0%B8%AD%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%81%E0%B8%B9%E0%B9%89%E0%B8%84%E0%B8%B7%E0%B8%99%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%9A%E0%B8%9A%E0%B8%9B%E0%B8%A5%E0%B8%AD%E0%B8%94%E0%B8%A0%E0%B8%B1%E0%B8%A2%E0%B8%AA%E0%B8%B9%E0%B8%87%E0%B8%AA%E0%B8%B8%E0%B8%94-safe-web-restore-with-email-otp" class="manual-anchor"></a><h4 id="2-ขั้นตอนการกู้คืนระบบแบบปลอดภัยสูงสุด-safe-web-restore-with-email-otp">2. ขั้นตอนการกู้คืนระบบแบบปลอดภัยสูงสุด (Safe Web Restore with Email OTP)</h4>
+<p>เพื่อป้องกันข้อผิดพลาดจากการเขียนทับฐานข้อมูลจริง ระบบบังคับใช้กระบวนการยืนยัน 4 ชั้น:</p>
+<ol>
+<li>คลิกปุ่ม <strong>&quot;กู้คืน (Restore)&quot;</strong> ที่ไฟล์สำรองเป้าหมายในตาราง</li>
+<li>คลิกปุ่ม <strong>&quot;กดส่งรหัส OTP ไปยังอีเมลของฉัน&quot;</strong> ➔ ระบบจะสร้างรหัสความปลอดภัย OTP 6 หลัก และส่งเข้าอีเมลของ The Creator ทันที (อายุ 10 นาที)</li>
+<li>กรอกรหัส OTP 6 หลัก พร้อมพิมพ์ข้อความยืนยัน: <code>CONFIRM RESTORE</code></li>
+<li>เมื่อกดยืนยัน:
+<ul>
+<li><strong>ระบบจะสร้าง Safety Snapshot</strong> สำรองฐานข้อมูลปัจจุบันไว้ให้อัตโนมัติก่อนเริ่มกู้คืนเสมอ (ชื่อไฟล์ <code>backup_pre_restore_safety_snapshot_*.sql.gz</code>)</li>
+<li>ระบบทำการคลายบีบอัดและกู้คืนข้อมูลเข้า MariaDB</li>
+<li>ระบบทำการล้างแคชระบบอัตโนมัติ (<code>cache:clear</code>, <code>route:clear</code>, <code>view:clear</code>)</li>
+</ul>
+</li>
+</ol>
+<a id="3-คำสั่งผ่าน-terminal-shell-artisan-cli-cron-schedule" class="manual-anchor"></a><a id="3-%E0%B8%84%E0%B8%B3%E0%B8%AA%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%9C%E0%B9%88%E0%B8%B2%E0%B8%99-terminal--shell-artisan-cli--cron-schedule" class="manual-anchor"></a><a id="3-%E0%B8%84%E0%B8%B3%E0%B8%AA%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%9C%E0%B9%88%E0%B8%B2%E0%B8%99-terminal-shell-artisan-cli-cron-schedule" class="manual-anchor"></a><h4 id="3-คำสั่งผ่าน-terminal--shell-artisan-cli--cron-schedule">3. คำสั่งผ่าน Terminal / Shell (Artisan CLI &amp; Cron Schedule)</h4>
+<pre><code class="language-bash"># สำรองเฉพาะฐานข้อมูล
+php artisan rdb:backup --type=db
+
+# สำรองเฉพาะไฟล์เอกสาร
+php artisan rdb:backup --type=files
+
+# สำรองทั้งระบบ พร้อมลบไฟล์สำรองเก่ากว่า 30 วันอัตโนมัติ
+php artisan rdb:backup --type=all --clean-older-than-days=30
+
+# คำสั่งกู้คืนฉุกเฉินผ่าน Shell
+php artisan rdb:restore backup_db_20261103_151323.sql.gz --force
+</code></pre>
+<a id="4-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%80%E0%B8%8A%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%A1%E0%B8%95%E0%B9%88%E0%B8%AD%E0%B8%AA%E0%B8%B3%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%82%E0%B8%B6%E0%B9%89%E0%B8%99-google-drive-%E0%B8%AD%E0%B8%B1%E0%B8%95%E0%B9%82%E0%B8%99%E0%B8%A1%E0%B8%B1%E0%B8%95%E0%B8%B4%E0%B8%94%E0%B9%89%E0%B8%A7%E0%B8%A2-rclone" class="manual-anchor"></a><h4 id="4-การเชื่อมต่อสำรองข้อมูลขึ้น-google-drive-อัตโนมัติด้วย-rclone">4. การเชื่อมต่อสำรองข้อมูลขึ้น Google Drive อัตโนมัติด้วย Rclone</h4>
+<p>แนะนำให้ตั้งเวลาซิงค์โฟลเดอร์สำรองไปยัง Google Drive อัตโนมัติผ่าน Rclone:</p>
+<pre><code class="language-bash"># 1. เชื่อมต่อ Google Drive (ฟรี ไม่จำกัดอายุ Token)
+rclone config
+
+# 2. คำสั่งซิงค์ขึ้น Google Drive
+rclone sync storage/app/backups/ gdrive:PCRU_Research_Backups/ -v
+</code></pre>
 
             </div>
             <footer>

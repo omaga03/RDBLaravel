@@ -1,0 +1,198 @@
+<?php
+
+namespace App\Http\Controllers\Backend;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Services\SystemBackupService;
+use App\Models\AuditLog;
+use Illuminate\Support\Facades\Artisan;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+
+class SystemBackupController extends Controller
+{
+    protected SystemBackupService $backupService;
+
+    public function __construct(SystemBackupService $backupService)
+    {
+        $this->backupService = $backupService;
+    }
+
+    /**
+     * Enforce strict authorization: The Creator only
+     */
+    protected function ensureTheCreatorOnly(): void
+    {
+        $user = auth()->user();
+        if (!$user || (!$user->hasRole('The Creator') && $user->id !== 129)) {
+            abort(403, 'สงวนสิทธิ์การเข้าถึงและสั่งการเฉพาะ The Creator (ผู้ดูแลระบบสูงสุด) เท่านั้น');
+        }
+    }
+
+    /**
+     * Trigger backup creation
+     */
+    public function create(Request $request)
+    {
+        $this->ensureTheCreatorOnly();
+
+        $request->validate([
+            'type' => 'required|string|in:all,db,files',
+        ]);
+
+        $type = $request->input('type');
+
+        try {
+            if ($type === 'db') {
+                $res = $this->backupService->createDatabaseBackup();
+                $msg = "สำรองฐานข้อมูลสำเร็จ: {$res['filename']} ({$res['size_formatted']})";
+            } elseif ($type === 'files') {
+                $res = $this->backupService->createFilesBackup();
+                $msg = "สำรองไฟล์ Storage สำเร็จ: {$res['filename']} ({$res['size_formatted']}, " . number_format($res['file_count']) . " ไฟล์)";
+            } else {
+                $res = $this->backupService->createFullBackup();
+                $msg = "สำรองข้อมูลทั้งระบบ (Full Archive) สำเร็จ: {$res['filename']} ({$res['size_formatted']})";
+            }
+
+            return redirect()->route('backend.system_commands.index', ['#backup-section'])
+                             ->with('success', $msg);
+        } catch (\Throwable $e) {
+            return redirect()->route('backend.system_commands.index', ['#backup-section'])
+                             ->with('error', 'การสำรองข้อมูลล้มเหลว: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download backup archive securely
+     */
+    public function download(string $filename): BinaryFileResponse
+    {
+        $this->ensureTheCreatorOnly();
+
+        $path = $this->backupService->getBackupFilePath($filename);
+        if (!$path) {
+            abort(404, 'ไม่พบไฟล์สำรองที่ต้องการดาวน์โหลด');
+        }
+
+        try {
+            AuditLog::create([
+                'user_id' => auth()->id(),
+                'action' => 'backup_downloaded',
+                'model_type' => 'SystemBackup',
+                'model_id' => 0,
+                'ip_address' => request()->ip() ?? '127.0.0.1',
+                'user_agent' => request()->userAgent() ?? 'N/A',
+                'details' => json_encode(['filename' => basename($filename), 'size' => filesize($path)], JSON_UNESCAPED_UNICODE),
+            ]);
+        } catch (\Throwable $e) {
+            // ignore audit log error
+        }
+
+        return response()->download($path, basename($filename), [
+            'Content-Type' => str_ends_with($filename, '.gz') ? 'application/gzip' : 'application/zip',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate',
+        ]);
+    }
+
+    /**
+     * Delete backup archive
+     */
+    public function destroy(string $filename)
+    {
+        $this->ensureTheCreatorOnly();
+
+        $deleted = $this->backupService->deleteBackup($filename);
+        if ($deleted) {
+            return redirect()->route('backend.system_commands.index', ['#backup-section'])
+                             ->with('success', "ลบไฟล์สำรอง {$filename} เรียบร้อยแล้ว");
+        }
+
+        return redirect()->route('backend.system_commands.index', ['#backup-section'])
+                         ->with('error', "ไม่สามารถลบไฟล์ {$filename} ได้ หรือไม่พบไฟล์");
+    }
+
+    /**
+     * Request Restore OTP via AJAX/Form
+     */
+    public function requestRestoreOtp(Request $request)
+    {
+        $this->ensureTheCreatorOnly();
+
+        $request->validate([
+            'filename' => 'required|string',
+        ]);
+
+        $filename = $request->input('filename');
+
+        try {
+            $creator = auth()->user();
+            $res = $this->backupService->sendRestoreOtp($creator, $filename, $request->ip(), $request->userAgent());
+
+            $msg = $res['mail_sent'] 
+                ? "ระบบได้จัดส่งรหัสความปลอดภัย OTP 6 หลักไปยังอีเมล {$creator->email} แล้ว กรุณานำรหัสมากรอกยืนยันภายใน 10 นาที"
+                : "สร้างรหัสความปลอดภัย OTP สำเร็จแล้ว (บันทึกลงในระบบ Log สำหรับทดสอบ)";
+
+            return response()->json([
+                'success' => true,
+                'message' => $msg,
+                'recipient' => $creator->email,
+                'dev_otp' => $res['dev_otp'] ?? null,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'ไม่สามารถส่ง OTP ได้: ' . $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Confirm Restore with OTP and Confirmation Phrase
+     */
+    public function confirmRestore(Request $request)
+    {
+        $this->ensureTheCreatorOnly();
+
+        $request->validate([
+            'filename' => 'required|string',
+            'otp' => 'required|string|size:6',
+            'confirm_text' => 'required|string',
+        ]);
+
+        $filename = $request->input('filename');
+        $otp = $request->input('otp');
+        $confirmText = trim($request->input('confirm_text'));
+
+        if (strtoupper($confirmText) !== 'CONFIRM RESTORE') {
+            return redirect()->route('backend.system_commands.index', ['#backup-section'])
+                             ->with('error', 'ข้อความยืนยันไม่ถูกต้อง กรุณาพิมพ์ CONFIRM RESTORE ให้ตรงตามที่ระบบระบุ');
+        }
+
+        $validOtp = $this->backupService->verifyRestoreOtp($filename, $otp);
+        if (!$validOtp) {
+            return redirect()->route('backend.system_commands.index', ['#backup-section'])
+                             ->with('error', 'รหัสความปลอดภัย OTP ไม่ถูกต้องหรือหมดอายุแล้ว (กรุณากดขอ OTP ใหม่)');
+        }
+
+        try {
+            $res = $this->backupService->restoreBackup($filename);
+
+            // Clear system caches after restore
+            try {
+                Artisan::call('cache:clear');
+                Artisan::call('route:clear');
+                Artisan::call('view:clear');
+            } catch (\Throwable $e) {
+                // ignore
+            }
+
+            $successMsg = "กู้คืนระบบจากไฟล์ {$res['restored_file']} สำเร็จสมบูรณ์! (ระบบได้สร้าง Safety Snapshot ไว้ที่ {$res['safety_snapshot']} โดยอัตโนมัติก่อนเริ่มกู้คืน)";
+
+            return redirect()->route('backend.system_commands.index', ['#backup-section'])
+                             ->with('success', $successMsg);
+        } catch (\Throwable $e) {
+            return redirect()->route('backend.system_commands.index', ['#backup-section'])
+                             ->with('error', 'การกู้คืนระบบล้มเหลว: ' . $e->getMessage());
+        }
+    }
+}
