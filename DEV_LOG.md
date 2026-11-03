@@ -89,6 +89,21 @@
   - ลบการ์ดกราฟ **"10 อันดับวารสารวิชาการที่นักวิจัยได้รับการตีพิมพ์มากที่สุด"** (`#topJournalsChart`) และ Script Chart.js ที่เกี่ยวข้องออก
   - ปรับปรุง `DashboardController::publications()` ให้ใช้ `collect()` ลดการรันคิวรีจัดกลุ่มที่ไม่จำเป็น
 
+#### 8. ปุ่มดึงภาพหน้าปกไฟล์ใหม่และการปรับปรุงปกสำรองภาษาไทย (Academic GD Cover & Reload Feature)
+- **เพิ่มปุ่ม "ดึงภาพหน้าปกไฟล์ใหม่ อีกครั้ง" ในระบบหลังบ้าน**:
+  - หน้ารายละเอียดโครงการวิจัย ([`resources/views/backend/rdb_project/show.blade.php`](resources/views/backend/rdb_project/show.blade.php)): ในการ์ดรายงานฉบับสมบูรณ์ เพิ่มปุ่มดึงภาพหน้าปกไฟล์ใหม่สำหรับกรณีที่ยังไม่ได้อัปโหลดไฟล์ใหม่แต่อยากรีโหลดหรือสร้างภาพหน้าปกใหม่
+  - หน้ารายละเอียดผลงานตีพิมพ์ ([`resources/views/backend/rdb_published/show.blade.php`](resources/views/backend/rdb_published/show.blade.php)): ในการ์ดไฟล์แนบ เพิ่มปุ่มดึงภาพหน้าปกไฟล์ใหม่
+  - เพิ่ม Route และ Controller Actions:
+    - `POST /backend/rdb_project/{id}/regenerate-cover` -> `RdbProjectController@regenerateCover`
+    - `POST /backend/rdb_published/{id}/regenerate-cover` -> `RdbPublishedController@regenerateCover`
+    - พร้อมการตรวจสอบสิทธิ์ `authorize('update', ...)` รัดกุมตามนโยบายความปลอดภัย
+- **ปรับปรุงระบบสร้างหน้าปกสำรองภาษาไทย (Academic GD Cover Fallback) ใน [`PdfCoverService.php`](app/Services/PdfCoverService.php)**:
+  - แก้ไขการดึงชื่อผู้วิจัยของผลงานตีพิมพ์ (`buildPublishedMetadata`): ดึงจากความสัมพันธ์ `authors` (Many-to-Many via `rdb_published_work`), `publishedWorks` และ `researcher` พร้อมคำนำหน้าชื่อ (`prefix`) เช่น `ผู้ช่วยศาสตราจารย์ ปรมะ แก้วพวง` แทนการฮาร์ดโค้ดข้อความทั่วไป
+  - จัดการตัดคำภาษาไทย (Thai Semantic Phrase Wrapping) ใน `wrapUtf8Text`: วิเคราะห์จุดแบ่งประโยคและคำสำคัญวิชาการ ป้องกันปัญหาวรรณยุกต์และสระตกหล่นหรือขาดออกจากพยัญชนะ
+  - เลือกลำดับฟอนต์ภาษาไทย TrueType คมชัดสูง (`Leelawadee UI Bold` / `C:\Windows\Fonts\LeelaUIb.ttf`)
+  - อัปเกรดดีไซน์ปกสำรองสไตล์วิชาการ (Academic Navy `#0f172a` + Gold `#b45309`) พร้อมคำนวณตำแหน่งแนวตั้งไดนามิกไม่ให้ข้อความชื่อเรื่องยาวทับซ้อนกับชื่อผู้แต่งและคณะ
+  - เพิ่มพารามิเตอร์ Cache-busting `?v=` ใน Accessor `cover_url` ของ `RdbProject` และ `RdbPublished` ช่วยให้เบราว์เซอร์แสดงภาพหน้าปกที่สร้างใหม่ได้ทันทีโดยไม่ต้องกดรีเฟรชแคช
+
 #### 7. สถาปัตยกรรม Academic SEO, Google Scholar Metadata & Dynamic XML Sitemaps
 - **สร้างทักษะควบคุมมาตรฐาน ([`.agents/skills/academic-seo-and-indexing/SKILL.md`](.agents/skills/academic-seo-and-indexing/SKILL.md))**:
   - กำหนดกฎบัตรและข้อกำหนดของ Google Scholar, Highwire Press, Dublin Core, Schema.org JSON-LD, Open Graph และ Dynamic XML Sitemaps สำหรับระบบวิจัยระดับมหาวิทยาลัย

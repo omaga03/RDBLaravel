@@ -549,9 +549,19 @@
                                                             <strong class="text-warning"><i class="bi bi-pencil me-1"></i>ฉบับร่าง (ร่าง)</strong>
                                                         @endif
                                                     </div>
-                                                    <a href="{{ route('backend.rdb_project.view_report', $project->pro_id) }}" target="_blank" class="btn btn-outline-success btn-sm w-100">
-                                                        <i class="bi bi-eye me-1"></i> เปิดดูรายงานฉบับสมบูรณ์
-                                                    </a>
+                                                    <div class="d-flex flex-column gap-2">
+                                                        <a href="{{ route('backend.rdb_project.view_report', $project->pro_id) }}" target="_blank" class="btn btn-outline-success btn-sm w-100">
+                                                            <i class="bi bi-eye me-1"></i> เปิดดูรายงานฉบับสมบูรณ์
+                                                        </a>
+                                                        @can('update', $project)
+                                                            <form action="{{ route('backend.rdb_project.regenerate_cover', $project->pro_id) }}" method="POST" class="w-100">
+                                                                @csrf
+                                                                <button type="submit" class="btn btn-outline-secondary btn-sm w-100" title="ดึงภาพหน้าปกไฟล์ใหม่ อีกครั้ง เพื่อรีโหลดหน้าปกใหม่ ในกรณีที่ยังไม่ได้อัพไฟล์ใหม่">
+                                                                    <i class="bi bi-arrow-repeat me-1"></i> ดึงภาพหน้าปกไฟล์ใหม่ อีกครั้ง
+                                                                </button>
+                                                            </form>
+                                                        @endcan
+                                                    </div>
                                                 @else
                                                     <p class="small text-body-secondary mb-0">ยังไม่มีการอัปโหลดรายงานฉบับสมบูรณ์</p>
                                                 @endif

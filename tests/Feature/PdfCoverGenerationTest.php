@@ -119,4 +119,26 @@ class PdfCoverGenerationTest extends TestCase
             '--limit' => 2,
         ])->assertExitCode(0);
     }
+
+    public function test_backend_regenerate_cover_routes()
+    {
+        $admin = \App\Models\User::whereHas('roles', fn($q) => $q->whereIn('item_name', ['The Creator', 'Admin']))->first();
+        if (!$admin) {
+            $this->markTestSkipped('No admin user found');
+        }
+
+        $project = RdbProject::first();
+        if ($project) {
+            $response = $this->actingAs($admin)->post(route('backend.rdb_project.regenerate_cover', $project->pro_id));
+            $response->assertSessionHas('success');
+            $response->assertRedirect();
+        }
+
+        $published = RdbPublished::first();
+        if ($published) {
+            $response = $this->actingAs($admin)->post(route('backend.rdb_published.regenerate_cover', $published->id));
+            $response->assertSessionHas('success');
+            $response->assertRedirect();
+        }
+    }
 }

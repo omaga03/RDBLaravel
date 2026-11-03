@@ -1280,4 +1280,20 @@ class RdbPublishedController extends Controller
 
         return response()->json(['success' => false, 'message' => 'บันทึกไม่สำเร็จ'], 500);
     }
+
+    /**
+     * Regenerate PDF cover image for published article file
+     */
+    public function regenerateCover($id, \App\Services\PdfCoverService $coverService)
+    {
+        $item = RdbPublished::findOrFail($id);
+        $this->authorize('update', $item);
+
+        $path = $coverService->generatePublishedCover($item, true);
+        if ($path) {
+            return back()->with('success', 'ดึงภาพหน้าปกไฟล์ใหม่เรียบร้อยแล้ว');
+        }
+
+        return back()->with('warning', 'ไม่สามารถสร้างภาพหน้าปกได้ หรือไม่พบไฟล์เอกสารบนเซิร์ฟเวอร์');
+    }
 }

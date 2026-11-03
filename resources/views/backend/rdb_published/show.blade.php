@@ -328,6 +328,12 @@
                                 <i class="bi bi-eye me-1"></i> เปิดดูไฟล์
                             </a>
                             @if(auth()->user()->can('update', $item))
+                            <form action="{{ route('backend.rdb_published.regenerate_cover', $item->id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-outline-secondary w-100" title="ดึงภาพหน้าปกไฟล์ใหม่ อีกครั้ง เพื่อรีโหลดหน้าปกใหม่ ในกรณีที่ยังไม่ได้อัพไฟล์ใหม่">
+                                    <i class="bi bi-arrow-repeat me-1"></i> ดึงภาพหน้าปกไฟล์ใหม่ อีกครั้ง
+                                </button>
+                            </form>
                             <form action="{{ route('backend.rdb_published.delete_file', $item->id) }}" method="POST" onsubmit="return confirm('ยืนยันการลบไฟล์?');">
                                 @csrf
                                 <button type="submit" class="btn btn-outline-danger w-100">

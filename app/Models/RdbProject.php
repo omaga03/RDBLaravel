@@ -388,7 +388,9 @@ class RdbProject extends Model
     public function getCoverUrl(): ?string
     {
         if (!empty($this->pro_cover_path) && \Illuminate\Support\Facades\Storage::disk('public')->exists($this->pro_cover_path)) {
-            return asset('storage/' . $this->pro_cover_path);
+            $fullPath = \Illuminate\Support\Facades\Storage::disk('public')->path($this->pro_cover_path);
+            $v = file_exists($fullPath) ? filemtime($fullPath) : time();
+            return asset('storage/' . $this->pro_cover_path) . '?v=' . $v;
         }
         return null;
     }

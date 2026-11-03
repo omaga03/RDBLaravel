@@ -1764,4 +1764,20 @@ class RdbProjectController extends Controller
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
+
+    /**
+     * Regenerate PDF cover image for project report file
+     */
+    public function regenerateCover($id, \App\Services\PdfCoverService $coverService)
+    {
+        $project = RdbProject::findOrFail($id);
+        $this->authorize('update', $project);
+
+        $path = $coverService->generateProjectCover($project, true);
+        if ($path) {
+            return back()->with('success', 'ดึงภาพหน้าปกไฟล์ใหม่เรียบร้อยแล้ว');
+        }
+
+        return back()->with('warning', 'ไม่สามารถสร้างภาพหน้าปกได้ หรือไม่พบไฟล์เอกสารรายงานบนเซิร์ฟเวอร์');
+    }
 }

@@ -291,16 +291,34 @@ class PdfCoverService
     public function buildProjectMetadata(RdbProject $project): array
     {
         $authorName = 'นักวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์';
+        $authorsList = [];
+
         if ($project->relationLoaded('rdbProjectWorks') || $project->rdbProjectWorks) {
             $works = $project->rdbProjectWorks ? $project->rdbProjectWorks->filter(fn($w) => !empty($w->researcher)) : collect();
-            $headWork = $works->firstWhere('position_id', 2) ?? $works->firstWhere('position_id', 1) ?? $works->first();
-            if ($headWork && $headWork->researcher) {
-                $r = $headWork->researcher;
-                $prefix = optional($r->prefix)->prefix_nameTH ?? '';
-                $full = trim($prefix . $r->researcher_fname . ' ' . $r->researcher_lname);
-                if ($full !== '') {
-                    $authorName = $full;
+            // Sort by head/leader first
+            $sortedWorks = $works->sortBy(function($w) {
+                if ($w->position_id == 2) return 1;
+                if ($w->position_id == 1) return 2;
+                return 3;
+            });
+
+            foreach ($sortedWorks as $w) {
+                if ($w->researcher) {
+                    $r = $w->researcher;
+                    $prefix = trim(optional($r->prefix)->prefix_nameTH ?? '');
+                    $name = trim(($prefix !== '' ? $prefix . ' ' : '') . $r->researcher_fname . ' ' . $r->researcher_lname);
+                    if ($name !== '' && !in_array($name, $authorsList)) {
+                        $authorsList[] = $name;
+                    }
                 }
+            }
+        }
+
+        if (!empty($authorsList)) {
+            if (count($authorsList) <= 2) {
+                $authorName = implode(', ', $authorsList);
+            } else {
+                $authorName = $authorsList[0] . ' และคณะ';
             }
         }
 
@@ -319,11 +337,65 @@ class PdfCoverService
      */
     public function buildPublishedMetadata(RdbPublished $published): array
     {
+        $authorName = 'นักวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์';
+        $authorsList = [];
+
+        // 1. Check authors relation (Many-to-Many via rdb_published_work)
+        $authors = $published->relationLoaded('authors')
+            ? $published->authors
+            : $published->authors()->with('prefix')->get();
+
+        if ($authors && $authors->isNotEmpty()) {
+            foreach ($authors as $a) {
+                $prefix = trim(optional($a->prefix)->prefix_nameTH ?? '');
+                $name = trim(($prefix !== '' ? $prefix . ' ' : '') . $a->researcher_fname . ' ' . $a->researcher_lname);
+                if ($name !== '' && !in_array($name, $authorsList)) {
+                    $authorsList[] = $name;
+                }
+            }
+        }
+
+        // 2. Check publishedWorks relation if authors was empty
+        if (empty($authorsList)) {
+            $works = $published->relationLoaded('publishedWorks')
+                ? $published->publishedWorks
+                : $published->publishedWorks()->with(['researcher.prefix'])->get();
+
+            foreach ($works as $w) {
+                if ($w->researcher) {
+                    $r = $w->researcher;
+                    $prefix = trim(optional($r->prefix)->prefix_nameTH ?? '');
+                    $name = trim(($prefix !== '' ? $prefix . ' ' : '') . $r->researcher_fname . ' ' . $r->researcher_lname);
+                    if ($name !== '' && !in_array($name, $authorsList)) {
+                        $authorsList[] = $name;
+                    }
+                }
+            }
+        }
+
+        // 3. Check direct researcher relation
+        if (empty($authorsList) && $published->researcher) {
+            $r = $published->researcher;
+            $prefix = trim(optional($r->prefix)->prefix_nameTH ?? '');
+            $name = trim(($prefix !== '' ? $prefix . ' ' : '') . $r->researcher_fname . ' ' . $r->researcher_lname);
+            if ($name !== '') {
+                $authorsList[] = $name;
+            }
+        }
+
+        if (!empty($authorsList)) {
+            if (count($authorsList) <= 2) {
+                $authorName = implode(', ', $authorsList);
+            } else {
+                $authorName = $authorsList[0] . ' และคณะ';
+            }
+        }
+
         return [
             'type' => 'บทความวิจัยตีพิมพ์',
-            'title' => $published->pub_name ?: 'ผลงานตีพิมพ์ทางวิชาการ',
+            'title' => strip_tags((string) ($published->pub_name ?: 'ผลงานตีพิมพ์ทางวิชาการ')),
             'code' => optional($published->pubtype)->pubtype_name ?: 'งานตีพิมพ์เผยแพร่',
-            'author' => 'นักวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์',
+            'author' => $authorName,
             'year' => optional($published->year)->year_name ? ('ปีงบประมาณ พ.ศ. ' . $published->year->year_name) : '',
             'department' => optional($published->department)->department_nameTH ?: 'มหาวิทยาลัยราชภัฏเพชรบูรณ์',
         ];
@@ -600,7 +672,7 @@ PYTHON;
     }
 
     /**
-     * Tier 5: สร้างปกวิชาการด้วย PHP GD สไตล์ Scholarly Minimalist พร้อมรองรับฟอนต์ภาษาไทย TTF
+     * Tier 5: สร้างปกวิชาการด้วย PHP GD สไตล์ Scholarly Minimalist พร้อมรองรับฟอนต์ภาษาไทย TTF และตัดคำอัจฉริยะ
      */
     protected function generateAcademicGdCover(string $targetWebpPath, array $metadata = []): bool
     {
@@ -615,6 +687,7 @@ PYTHON;
 
         // สีธีมสไตล์วิชาการ (Academic Navy & Citations)
         $navy = imagecolorallocate($im, 30, 58, 95);          // Deep Navy #1E3A5F
+        $navyLight = imagecolorallocate($im, 45, 85, 140);     // Lighter Navy
         $amber = imagecolorallocate($im, 217, 119, 6);        // Amber #D97706
         $dark = imagecolorallocate($im, 15, 23, 42);          // Slate 900
         $gray = imagecolorallocate($im, 100, 116, 139);       // Slate 500
@@ -631,18 +704,22 @@ PYTHON;
             imageline($im, 0, $y, $width, $y, $c);
         }
 
-        // กรอบนอกระดับ Hairline 1px
-        imagerectangle($im, 15, 15, $width - 16, $height - 16, $lightBorder);
-        imagerectangle($im, 20, 20, $width - 21, $height - 21, $lightBorder);
+        // กรอบนอกระดับ Hairline 1px สองชั้น
+        imagerectangle($im, 12, 12, $width - 13, $height - 13, $lightBorder);
+        imagerectangle($im, 16, 16, $width - 17, $height - 17, $lightBorder);
 
         // แถบสี Deep Academic Navy ด้านบน
-        imagefilledrectangle($im, 20, 20, $width - 21, 95, $navy);
-        imagefilledrectangle($im, 35, 35, 215, 68, $amber);
+        imagefilledrectangle($im, 16, 16, $width - 17, 95, $navy);
+        // แถบสีทองไฮไลต์ด้านล่างของแถบน้ำเงิน
+        imagefilledrectangle($im, 16, 92, $width - 17, 95, $amber);
+        // กล่องป้ายกำกับประเภทผลงาน
+        imagefilledrectangle($im, 32, 32, 230, 68, $amber);
 
         // วาดการ์ดเนื้อหาตรงกลาง
-        imagefilledrectangle($im, 40, 130, $width - 41, $height - 120, $white);
-        imagerectangle($im, 40, 130, $width - 41, $height - 120, $lightBorder);
-        imagefilledrectangle($im, 40, 130, 48, $height - 120, $navy);
+        imagefilledrectangle($im, 35, 118, $width - 36, $height - 105, $white);
+        imagerectangle($im, 35, 118, $width - 36, $height - 105, $lightBorder);
+        // เส้นแถบสีน้ำเงินวิชาการด้านซ้ายของการ์ด (Stripe)
+        imagefilledrectangle($im, 35, 118, 43, $height - 105, $navy);
 
         $ttfFont = $this->resolveThaiTtfFont();
         $typeLabel = $metadata['type'] ?? 'เอกสารงานวิจัย';
@@ -653,22 +730,40 @@ PYTHON;
         $year = $metadata['year'] ?? ('ปีงบประมาณ พ.ศ. ' . (date('Y') + 543));
 
         if ($ttfFont && function_exists('imagettftext')) {
-            @imagettftext($im, 11, 0, 45, 57, $white, $ttfFont, $typeLabel);
-            @imagettftext($im, 12, 0, 230, 50, $white, $ttfFont, 'PCRU RESEARCH DATABASE');
-            @imagettftext($im, 10, 0, 230, 72, $lightBorder, $ttfFont, $codeLabel);
+            @imagettftext($im, 11, 0, 42, 55, $white, $ttfFont, $typeLabel);
+            @imagettftext($im, 12, 0, 245, 48, $white, $ttfFont, 'PCRU RESEARCH DATABASE');
+            @imagettftext($im, 9.5, 0, 245, 70, $lightBorder, $ttfFont, $codeLabel);
 
-            @imagettftext($im, 11, 0, 65, 165, $amber, $ttfFont, 'ชื่อผลงานวิจัย / บทความวิชาการ:');
-            $wrappedLines = $this->wrapUtf8Text($rawTitle, 38);
-            foreach (array_slice($wrappedLines, 0, 7) as $idx => $line) {
-                @imagettftext($im, 14, 0, 65, 200 + ($idx * 30), $dark, $ttfFont, $line);
+            // ส่วนชื่อผลงาน (Dynamic Line Wrapping & Line Height)
+            @imagettftext($im, 10, 0, 60, 155, $amber, $ttfFont, 'ชื่อผลงานวิจัย / บทความวิชาการ (Research Title):');
+            $wrappedLines = $this->wrapUtf8Text($rawTitle, 34);
+            $titleStartY = 192;
+            $lineHeight = 30;
+            $renderedLinesCount = 0;
+            foreach (array_slice($wrappedLines, 0, 6) as $idx => $line) {
+                @imagettftext($im, 13.5, 0, 60, $titleStartY + ($idx * $lineHeight), $dark, $ttfFont, $line);
+                $renderedLinesCount++;
+            }
+            if (count($wrappedLines) > 6) {
+                @imagettftext($im, 11, 0, 60, $titleStartY + (6 * $lineHeight), $gray, $ttfFont, '...');
+                $renderedLinesCount++;
             }
 
-            @imagettftext($im, 10, 0, 65, 440, $gray, $ttfFont, 'ผู้วิจัย / เจ้าของผลงาน:');
-            @imagettftext($im, 13, 0, 65, 466, $navy, $ttfFont, $author);
+            // คำนวณตำแหน่ง Y สำหรับส่วนผู้วิจัยและหน่วยงานให้ปรับตามความยาวชื่อเรื่องโดยอัตโนมัติ
+            $authorStartY = max(420, $titleStartY + ($renderedLinesCount * $lineHeight) + 30);
+            
+            // เส้นคั่นบางๆ 1px
+            imageline($im, 60, $authorStartY - 15, $width - 60, $authorStartY - 15, $lightBorder);
 
-            @imagettftext($im, 10, 0, 65, 520, $gray, $ttfFont, 'หน่วยงานและปีงบประมาณ:');
-            @imagettftext($im, 12, 0, 65, 546, $dark, $ttfFont, $dept);
-            @imagettftext($im, 12, 0, 65, 574, $amber, $ttfFont, $year);
+            @imagettftext($im, 10, 0, 60, $authorStartY + 6, $gray, $ttfFont, 'ผู้วิจัย / เจ้าของผลงาน (Author / Researcher):');
+            @imagettftext($im, 13, 0, 60, $authorStartY + 32, $navy, $ttfFont, $author);
+
+            $deptStartY = $authorStartY + 70;
+            @imagettftext($im, 10, 0, 60, $deptStartY, $gray, $ttfFont, 'หน่วยงานและปีงบประมาณ (Affiliation & Fiscal Year):');
+            @imagettftext($im, 11.5, 0, 60, $deptStartY + 25, $dark, $ttfFont, $dept);
+            if (!empty($year)) {
+                @imagettftext($im, 11.5, 0, 60, $deptStartY + 50, $amber, $ttfFont, $year);
+            }
         } else {
             imagestring($im, 4, 45, 42, $this->sanitizeAscii($typeLabel, 'RESEARCH'), $white);
             imagestring($im, 3, 225, 44, 'PCRU RESEARCH DATABASE', $white);
@@ -677,7 +772,7 @@ PYTHON;
             $lines = explode("\n", wordwrap($this->sanitizeAscii($rawTitle, 'RESEARCH DOCUMENT'), 36, "\n", true));
             $startY = 170;
             imagestring($im, 3, 65, $startY - 25, 'DOCUMENT TITLE:', $amber);
-            foreach (array_slice($lines, 0, 7) as $idx => $line) {
+            foreach (array_slice($lines, 0, 6) as $idx => $line) {
                 imagestring($im, 5, 65, $startY + ($idx * 26), $line, $dark);
             }
 
@@ -689,10 +784,17 @@ PYTHON;
             imagestring($im, 3, 65, 525, $this->sanitizeAscii($year, 'Fiscal Year ' . (date('Y') + 543)), $amber);
         }
 
-        // ป้ายสัญลักษณ์ด้านล่าง
-        imagefilledrectangle($im, 20, $height - 80, $width - 21, $height - 21, $navy);
-        imagestring($im, 3, 45, $height - 58, 'PHETCHABUN RAJABHAT UNIVERSITY - RDB SYSTEM', $white);
-        imagestring($im, 2, 45, $height - 40, 'Official Research Publication & Report Document (1st Page Preview)', $gray);
+        // ป้ายสัญลักษณ์แถบล่าง (Scholarly Footer Bar)
+        imagefilledrectangle($im, 16, $height - 85, $width - 17, $height - 17, $navy);
+        imagefilledrectangle($im, 16, $height - 85, $width - 17, $height - 82, $amber);
+
+        if ($ttfFont && function_exists('imagettftext')) {
+            @imagettftext($im, 10.5, 0, 40, $height - 52, $white, $ttfFont, 'มหาวิทยาลัยราชภัฏเพชรบูรณ์ (Phetchabun Rajabhat University)');
+            @imagettftext($im, 9, 0, 40, $height - 30, $lightBorder, $ttfFont, 'ระบบฐานข้อมูลงานวิจัยและบริการวิชาการ (Official Research Repository Cover Preview)');
+        } else {
+            imagestring($im, 3, 40, $height - 60, 'PHETCHABUN RAJABHAT UNIVERSITY - RDB SYSTEM', $white);
+            imagestring($im, 2, 40, $height - 40, 'Official Research Publication & Report Document (Cover Preview)', $gray);
+        }
 
         $saved = imagewebp($im, $targetWebpPath, 85);
         imagedestroy($im);
@@ -701,17 +803,22 @@ PYTHON;
     }
 
     /**
-     * ค้นหาไฟล์ฟอนต์ภาษาไทย (.ttf) บนระบบสำหรับ GD Fallback
+     * ค้นหาไฟล์ฟอนต์ภาษาไทย (.ttf) บนระบบสำหรับ GD Fallback (จัดลำดับฟอนต์คมชัดสูงสุดก่อน)
      */
     protected function resolveThaiTtfFont(): ?string
     {
         $candidates = [
+            'C:\Windows\Fonts\LeelaUIb.ttf',
+            'C:\Windows\Fonts\LeelawUI.ttf',
+            'C:\Windows\Fonts\LEELAWDB.TTF',
+            'C:\Windows\Fonts\LEELAWAD.TTF',
+            'C:\Windows\Fonts\tahomabd.ttf',
             'C:\Windows\Fonts\tahoma.ttf',
-            'C:\Windows\Fonts\leelawui.ttf',
             'C:\Windows\Fonts\angsana.ttc',
+            '/usr/share/fonts/truetype/noto/NotoSansThai-Bold.ttf',
+            '/usr/share/fonts/truetype/noto/NotoSansThai-Regular.ttf',
             '/usr/share/fonts/truetype/tlwg/Garuda.ttf',
             '/usr/share/fonts/truetype/tlwg/Loma.ttf',
-            '/usr/share/fonts/truetype/noto/NotoSansThai-Regular.ttf',
             '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
         ];
         foreach ($candidates as $font) {
@@ -723,19 +830,36 @@ PYTHON;
     }
 
     /**
-     * ตัดบรรทัดข้อความภาษาไทย/อังกฤษแบบ UTF-8
+     * ตัดบรรทัดข้อความภาษาไทย/อังกฤษแบบ UTF-8 ด้วยการวิเคราะห์กลุ่มคำ (Thai Semantic Phrase Wrapping)
+     * ป้องกันการตัดวรรณยุกต์หรือสระขาดออกจากพยัญชนะ
      */
-    protected function wrapUtf8Text(string $text, int $maxCharsPerLine = 38): array
+    protected function wrapUtf8Text(string $text, int $maxCharsPerLine = 34): array
     {
         $text = trim(preg_replace('/\s+/u', ' ', $text));
         if ($text === '') {
             return ['เอกสารงานวิจัย'];
         }
-        $words = preg_split('/(\s+)/u', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+
+        if (mb_strlen($text, 'UTF-8') <= $maxCharsPerLine) {
+            return [$text];
+        }
+
+        // คำสำคัญและจุดแบ่งวลีธรรมชาติของงานวิจัยภาษาไทย
+        $delims = [
+            'ด้านการ', 'ด้าน', 'สำหรับ', 'เพื่อการ', 'เพื่อ', 'ในการ', 'ใน', 'ของ', 'และ', 'โดย',
+            'กรณีศึกษา', 'จังหวัด', 'อำเภอ', 'ตำบล', 'เครือข่าย', 'เสริมสร้าง', 'การพัฒนา', 'การวิจัย',
+            'การศึกษา', 'การประเมิน', 'การออกแบบ', 'การสร้าง', 'การจัดการ', 'การวิเคราะห์', 'การเปรียบเทียบ',
+            'ความสามารถ', 'ความพึงพอใจ', 'ความสัมพันธ์', 'ผลิตภัณฑ์', 'หลักสูตร', 'ภูมิปัญญา', 'ชุมชน',
+            'มหาวิทยาลัย', 'ท้องถิ่น', 'พื้นถิ่น'
+        ];
+
+        $pattern = '/(' . implode('|', array_map('preg_quote', $delims)) . ')/u';
+        $parts = preg_split($pattern, $text, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+
         $lines = [];
         $current = '';
 
-        foreach ($words as $part) {
+        foreach ($parts as $part) {
             if (mb_strlen($current . $part, 'UTF-8') <= $maxCharsPerLine) {
                 $current .= $part;
             } else {
@@ -743,13 +867,20 @@ PYTHON;
                     $lines[] = trim($current);
                     $current = '';
                 }
+
                 while (mb_strlen($part, 'UTF-8') > $maxCharsPerLine) {
-                    $lines[] = mb_substr($part, 0, $maxCharsPerLine, 'UTF-8');
-                    $part = mb_substr($part, $maxCharsPerLine, null, 'UTF-8');
+                    // หาจุดตัดที่ไม่ผ่ากลางสระบน/ล่าง หรือวรรณยุกต์ไทย
+                    $slice = $maxCharsPerLine;
+                    while ($slice > 10 && preg_match('/[\x{0E31}\x{0E34}-\x{0E3A}\x{0E47}-\x{0E4E}\x{0E38}\x{0E39}]/u', mb_substr($part, $slice, 1, 'UTF-8'))) {
+                        $slice--;
+                    }
+                    $lines[] = mb_substr($part, 0, $slice, 'UTF-8');
+                    $part = mb_substr($part, $slice, null, 'UTF-8');
                 }
-                $current = ltrim($part);
+                $current = $part;
             }
         }
+
         if (trim($current) !== '') {
             $lines[] = trim($current);
         }

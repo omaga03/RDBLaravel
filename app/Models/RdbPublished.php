@@ -151,7 +151,9 @@ class RdbPublished extends Model
     public function getCoverUrl(): ?string
     {
         if (!empty($this->pub_cover_path) && \Illuminate\Support\Facades\Storage::disk('public')->exists($this->pub_cover_path)) {
-            return asset('storage/' . $this->pub_cover_path);
+            $fullPath = \Illuminate\Support\Facades\Storage::disk('public')->path($this->pub_cover_path);
+            $v = file_exists($fullPath) ? filemtime($fullPath) : time();
+            return asset('storage/' . $this->pub_cover_path) . '?v=' . $v;
         }
         return null;
     }

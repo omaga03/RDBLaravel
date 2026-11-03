@@ -197,6 +197,7 @@ Route::prefix('backend')->name('backend.')->middleware(['auth', \App\Http\Middle
     Route::post('/rdb_published/{id}/upload-file', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'uploadFile'])->name('rdb_published.upload_file');
     Route::post('/rdb_published/{id}/delete-file', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'deleteFile'])->name('rdb_published.delete_file');
     Route::get('/rdb_published/{id}/view-file', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'viewFile'])->name('rdb_published.view_file');
+    Route::post('/rdb_published/{id}/regenerate-cover', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'regenerateCover'])->name('rdb_published.regenerate_cover');
 
     Route::post('/rdb_published/{id}/restore', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'restore'])->name('rdb_published.restore');
     
@@ -265,6 +266,7 @@ Route::prefix('backend')->name('backend.')->middleware(['auth', \App\Http\Middle
     Route::delete('/rdb_project/{id}/delete-report', [RdbProjectController::class, 'deleteReport'])->name('rdb_project.delete_report');
     Route::get('/rdb_project/{id}/view-abstract', [RdbProjectController::class, 'viewAbstract'])->name('rdb_project.view_abstract');
     Route::get('/rdb_project/{id}/view-report', [RdbProjectController::class, 'viewReport'])->name('rdb_project.view_report');
+    Route::post('/rdb_project/{id}/regenerate-cover', [RdbProjectController::class, 'regenerateCover'])->name('rdb_project.regenerate_cover');
 
     // AJAX Search endpoints for Project Form
     Route::get('/rdb_project/search/project-type', [RdbProjectController::class, 'searchProjectType'])->name('rdb_project.search_project_type');
