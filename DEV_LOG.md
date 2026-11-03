@@ -80,7 +80,16 @@
 - **ปรับปรุง Blade Templates ให้จัดวางกล่องตัวเลขสถิติและการ์ดได้สวยงาม**:
   - ใช้ `d-flex flex-column justify-content-between` ภายใน `card-body` ตรึงป้าย YoY Delta ให้อยู่ด้านล่างสุดของแต่ละการ์ดอย่างเป็นระเบียบแนวเดียวกันทุกจอ
 
-#### 6. ผลการทดสอบอัตโนมัติ (Automated Test Assurance)
+#### 6. ปรับแต่งและลดทอนองค์ประกอบแดชบอร์ดตามข้อเสนอแนะ (Dashboard Refinement & Simplification)
+- **แดชบอร์ดการใช้ประโยชน์ (`/dashboard/utilizations`)**:
+  - ลบการ์ด **"มูลค่าผลกระทบ / งบสนับสนุน"** ออกจาก KPI Metric Cards ตามความต้องการ
+  - ปรับสัดส่วน 4 การ์ดที่เหลือ (การนำไปใช้ประโยชน์รวม, ครอบคลุมพื้นที่, หน่วยงานผู้รับประโยชน์, ผ่านรับรอง QA) ให้เป็น `col-xl-3 col-md-6` สมดุลเต็มแถว 12 คอลัมน์อย่างลงตัว
+  - ลบปุ่ม **"เปิดดูแผนที่จังหวัดเพชรบูรณ์บน Google Maps"** ออกจากส่วนหัวของการ์ดแผนที่สารสนเทศภูมิศาสตร์ (GIS Interactive Map) เพื่อลดความซ้ำซ้อน
+- **แดชบอร์ดผลงานตีพิมพ์ (`/dashboard/publications`)**:
+  - ลบการ์ดกราฟ **"10 อันดับวารสารวิชาการที่นักวิจัยได้รับการตีพิมพ์มากที่สุด"** (`#topJournalsChart`) และ Script Chart.js ที่เกี่ยวข้องออก
+  - ปรับปรุง `DashboardController::publications()` ให้ใช้ `collect()` ลดการรันคิวรีจัดกลุ่มที่ไม่จำเป็น
+
+#### 7. ผลการทดสอบอัตโนมัติ (Automated Test Assurance)
 - `php artisan test --filter=PdfCoverGenerationTest`: **PASSED (4 tests, 16 assertions)**
 - `php artisan test --filter=BackendAuditTest`: **PASSED (47 tests, 421 assertions)**
 

@@ -879,14 +879,7 @@ class DashboardController extends Controller
             ->get();
 
         // Top Journals
-        $topJournals = (clone $query)
-            ->whereNotNull('pub_name_journal')
-            ->where('pub_name_journal', '!=', '')
-            ->select('pub_name_journal', DB::raw('count(*) as count'))
-            ->groupBy('pub_name_journal')
-            ->orderByDesc('count')
-            ->limit(10)
-            ->get();
+        $topJournals = collect();
 
         // Linkage
         $linkedProjectCount = (clone $query)->whereNotNull('pro_id')->where('pro_id', '>', 0)->count();

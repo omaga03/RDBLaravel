@@ -73,7 +73,7 @@
         </div>
 
         <!-- Districts Covered -->
-        <div class="col-xl-2 col-md-4 col-sm-6">
+        <div class="col-xl-3 col-md-6">
             <div class="card h-100 border shadow-sm rdb-card-tint-red" style="border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5 d-flex flex-column justify-content-between">
                     <div>
@@ -89,7 +89,7 @@
         </div>
 
         <!-- Partner Agencies -->
-        <div class="col-xl-2 col-md-4 col-sm-6">
+        <div class="col-xl-3 col-md-6">
             <div class="card h-100 border shadow-sm rdb-card-tint-blue" style="border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5 d-flex flex-column justify-content-between">
                     <div>
@@ -105,7 +105,7 @@
         </div>
 
         <!-- QA Certified -->
-        <div class="col-xl-2 col-md-4 col-sm-6">
+        <div class="col-xl-3 col-md-6">
             <div class="card h-100 border shadow-sm rdb-card-tint-emerald" style="border-radius: var(--rdb-radius-md) !important;">
                 <div class="card-body p-3.5 d-flex flex-column justify-content-between">
                     <div>
@@ -116,22 +116,6 @@
                         <small class="text-body-secondary">มีหลักฐานรับรองคุณภาพ</small>
                     </div>
                     @include('frontend.dashboard._yoy_badge', ['delta' => $yoyDelta['qa'] ?? null, 'unit' => 'ผลงาน'])
-                </div>
-            </div>
-        </div>
-
-        <!-- Total Budget / Value -->
-        <div class="col-xl-3 col-md-8 col-sm-12">
-            <div class="card h-100 border shadow-sm rdb-card-tint-green" style="border-radius: var(--rdb-radius-md) !important;">
-                <div class="card-body p-3.5 d-flex flex-column justify-content-between">
-                    <div>
-                        <span class="text-body-secondary small fw-bold text-uppercase d-block mb-1">
-                            <i class="bi bi-cash me-1 text-success"></i> มูลค่าผลกระทบ / งบสนับสนุน
-                        </span>
-                        <h3 class="fw-bold mb-0 text-body" style="font-variant-numeric: tabular-nums;">฿{{ number_format($totalBudget, 0) }}</h3>
-                        <small class="text-body-secondary">มูลค่าการพัฒนาและต่อยอดเศรษฐกิจ</small>
-                    </div>
-                    @include('frontend.dashboard._yoy_badge', ['delta' => $yoyDelta['budget'] ?? null, 'isCurrency' => true, 'minBase' => 10000])
                 </div>
             </div>
         </div>
@@ -152,9 +136,6 @@
                         <button type="button" class="btn btn-sm btn-outline-secondary" id="btnResetMapView" title="รีเซ็ตมุมมองและซูมครอบคลุมทุกจุด">
                             <i class="bi bi-arrows-fullscreen me-1"></i> จัดมุมมองภาพรวม
                         </button>
-                        <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode('จังหวัดเพชรบูรณ์') }}" target="_blank" class="btn btn-sm btn-outline-danger" title="เปิดดูแผนที่จังหวัดเพชรบูรณ์บน Google Maps">
-                            <i class="bi bi-box-arrow-up-right me-1"></i> Google Maps
-                        </a>
                         <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1.5">
                             <i class="bi bi-geo-alt-fill me-1"></i> {{ number_format($mapMarkers->count()) }} จุดพิกัดในแผนที่
                         </span>

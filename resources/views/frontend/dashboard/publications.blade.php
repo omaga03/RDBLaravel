@@ -149,24 +149,6 @@
         </div>
     </div>
 
-    <!-- Charts Row 2: Top Journals Ranking -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border shadow-sm">
-                <div class="card-header bg-transparent py-3">
-                    <h5 class="mb-0 fw-bold text-body">
-                        <i class="bi bi-book-half text-info me-2"></i> 10 อันดับวารสารวิชาการที่นักวิจัยได้รับการตีพิมพ์มากที่สุด
-                    </h5>
-                </div>
-                <div class="card-body p-3 p-md-4">
-                    <div style="height: 320px; width: 100%;">
-                        <canvas id="topJournalsChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Deep-Dive Table: Publications List -->
     <div class="row mb-4">
         <div class="col-12">
@@ -305,35 +287,6 @@ document.addEventListener('DOMContentLoaded', function () {
             scales: {
                 x: { ticks: { color: textColor, font: { size: 10 } }, grid: { display: false } },
                 y: { ticks: { color: textColor }, grid: { color: gridColor }, title: { display: true, text: 'จำนวนผลงาน', color: textColor } }
-            }
-        }
-    });
-
-    // 3. Top Journals Horizontal Bar Chart
-    const journalData = @json($topJournals);
-    const journalLabels = journalData.map(d => d.pub_name_journal.length > 35 ? d.pub_name_journal.substring(0, 35) + '...' : d.pub_name_journal);
-    const journalCounts = journalData.map(d => d.count);
-
-    const ctxJournal = document.getElementById('topJournalsChart').getContext('2d');
-    new Chart(ctxJournal, {
-        type: 'bar',
-        data: {
-            labels: journalLabels,
-            datasets: [{
-                label: 'จำนวนบทความที่ตีพิมพ์',
-                data: journalCounts,
-                backgroundColor: '#3B82F6',
-                borderRadius: 4
-            }]
-        },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: { ticks: { color: textColor }, grid: { color: gridColor }, title: { display: true, text: 'จำนวนบทความ', color: textColor } },
-                y: { ticks: { color: textColor, font: { size: 11 } }, grid: { display: false } }
             }
         }
     });
