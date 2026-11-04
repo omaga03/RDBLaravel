@@ -960,6 +960,15 @@ class RdbPublishedController extends Controller
                 return redirect()->back()->with('error', 'ไม่สามารถสร้างแพ็กเกจ DSpace สำหรับผลงานนี้ได้');
             }
 
+            \App\Models\AuditLog::record(
+                event: 'export',
+                auditable: $published,
+                oldValues: null,
+                newValues: ['dspace_package' => basename($zipPath)],
+                remarks: 'ส่งออกแพ็กเกจ DSpace สำหรับนำเข้าคลังสารสนเทศ',
+                diffSummary: 'ส่งออกไฟล์ ZIP แพ็กเกจ DSpace'
+            );
+
             return response()->download($zipPath, basename($zipPath))->deleteFileAfterSend(true);
         } catch (\Throwable $e) {
             return redirect()->back()->with('error', 'เกิดข้อผิดพลาดในการส่งออก DSpace: ' . $e->getMessage());
@@ -1084,11 +1093,17 @@ class RdbPublishedController extends Controller
         }
 
         try {
-            $count = RdbPublished::whereIn('id', $ids)->update(['todspace' => 1]);
+            $items = RdbPublished::whereIn('id', $ids)->get();
+            foreach ($items as $item) {
+                $item->todspace = 1;
+                $item->user_updated = auth()->id();
+                $item->save();
+            }
+
             return response()->json([
                 'success' => true,
-                'message' => "อัปเดตสถานะสำเร็จ จำนวน {$count} รายการ",
-                'updated_count' => $count
+                'message' => "อัปเดตสถานะสำเร็จ จำนวน {$items->count()} รายการ",
+                'updated_count' => $items->count()
             ]);
         } catch (\Throwable $e) {
             return response()->json(['success' => false, 'message' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()], 500);

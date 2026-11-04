@@ -1641,6 +1641,15 @@ class RdbProjectController extends Controller
                 return redirect()->back()->with('error', 'ไม่สามารถสร้างแพ็กเกจ DSpace สำหรับโครงการนี้ได้');
             }
 
+            \App\Models\AuditLog::record(
+                event: 'export',
+                auditable: $project,
+                oldValues: null,
+                newValues: ['dspace_package' => basename($zipPath)],
+                remarks: 'ส่งออกแพ็กเกจ DSpace สำหรับนำเข้าคลังสารสนเทศ',
+                diffSummary: 'ส่งออกไฟล์ ZIP แพ็กเกจ DSpace'
+            );
+
             return response()->download($zipPath, basename($zipPath))->deleteFileAfterSend(true);
         } catch (\Throwable $e) {
             return redirect()->back()->with('error', 'เกิดข้อผิดพลาดในการส่งออก DSpace: ' . $e->getMessage());
@@ -1750,14 +1759,18 @@ class RdbProjectController extends Controller
         $ids = array_values(array_filter(array_map('intval', $ids)));
 
         try {
-            RdbProject::whereIn('pro_id', $ids)->update([
-                'todspace' => 1,
-                'dspace_uuid' => date('Y-m-d H:i:s'),
-            ]);
+            $projects = RdbProject::whereIn('pro_id', $ids)->get();
+            $dspaceTime = date('Y-m-d H:i:s');
+            foreach ($projects as $proj) {
+                $proj->todspace = 1;
+                $proj->dspace_uuid = $dspaceTime;
+                $proj->user_updated = auth()->id();
+                $proj->save();
+            }
 
             return response()->json([
                 'success' => true,
-                'updated_count' => count($ids),
+                'updated_count' => $projects->count(),
                 'message' => 'ปรับปรุงสถานะส่งออกเรียบร้อยแล้ว'
             ]);
         } catch (\Throwable $e) {
