@@ -23,6 +23,7 @@ class User extends Authenticatable
         'username',
         'email',
         'telegram_chat_id',
+        'notification_preferences',
         'status',
         'onboarding_status',
         'onboarding_department_id',
@@ -55,6 +56,10 @@ class User extends Authenticatable
     protected $hidden = [
         'password_hash',
         'auth_key',
+    ];
+
+    protected $casts = [
+        'notification_preferences' => 'array',
     ];
 
     protected static function booted(): void
@@ -319,5 +324,58 @@ class User extends Authenticatable
     public function routeNotificationForTelegram(): ?string
     {
         return $this->telegram_chat_id;
+    }
+
+    /**
+     * Get user's notification preferences with sensible defaults
+     */
+    public function getNotificationPreferences(): array
+    {
+        $defaults = [
+            'mail_enabled' => true,
+            'telegram_enabled' => true,
+            'topics' => [
+                'research_approved' => true,
+                'research_rejected' => true,
+                'review_assigned' => true,
+                'review_final_approved' => true,
+            ],
+        ];
+
+        return array_replace_recursive($defaults, $this->notification_preferences ?? []);
+    }
+
+    /**
+     * Check if user wants to receive Mail for a specific topic
+     */
+    public function wantsMailFor(string $topic): bool
+    {
+        if (empty($this->email) || !filter_var($this->email, FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+
+        $prefs = $this->getNotificationPreferences();
+        if (empty($prefs['mail_enabled'])) {
+            return false;
+        }
+
+        return !isset($prefs['topics'][$topic]) || (bool) $prefs['topics'][$topic];
+    }
+
+    /**
+     * Check if user wants to receive Telegram notification for a specific topic
+     */
+    public function wantsTelegramFor(string $topic): bool
+    {
+        if (empty($this->telegram_chat_id)) {
+            return false;
+        }
+
+        $prefs = $this->getNotificationPreferences();
+        if (empty($prefs['telegram_enabled'])) {
+            return false;
+        }
+
+        return !isset($prefs['topics'][$topic]) || (bool) $prefs['topics'][$topic];
     }
 }

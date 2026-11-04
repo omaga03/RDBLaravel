@@ -118,12 +118,33 @@ class UserController extends Controller
 
         $currentUser = auth()->user();
         $canManageRoles = $currentUser && ($currentUser->hasRole('The Creator') || $currentUser->hasRole('Admin') || $currentUser->hasPermission('User Manager'));
+        $isSuperAdmin = $currentUser && ($currentUser->hasRole('The Creator') || $currentUser->hasRole('Admin') || $currentUser->hasRole('Admin Research'));
 
         $roles = $canManageRoles ? AuthItem::where('type', 1)->orderBy('name')->get() : collect();
         $researchers = $canManageRoles ? RdbResearcher::with(['prefix', 'department'])->orderBy('researcher_fname')->get() : collect();
         $userRole = $user->roles()->first()?->item_name ?? ($user->researcher_id ? 'Researcher' : 'General User');
+        $userPrefs = $user->getNotificationPreferences();
 
-        return view('backend.user.edit', compact('user', 'roles', 'researchers', 'userRole', 'canManageRoles'));
+        $globalSettings = [];
+        if ($isSuperAdmin) {
+            $globalSettings = [
+                'bot_token' => \App\Models\SystemSetting::get('telegram_bot_token', config('services.telegram.bot_token', '')),
+                'admin_chat_id' => \App\Models\SystemSetting::get('telegram_admin_chat_id', config('services.telegram.admin_chat_id', '')),
+                'notify_telegram' => \App\Models\SystemSetting::get('admin_notify_telegram', '1') === '1',
+                'notify_mail' => \App\Models\SystemSetting::get('admin_notify_mail', '0') === '1',
+                'notify_create' => \App\Models\SystemSetting::get('admin_notify_create', '1') === '1',
+                'notify_update' => \App\Models\SystemSetting::get('admin_notify_update', '1') === '1',
+                'notify_delete' => \App\Models\SystemSetting::get('admin_notify_delete', '1') === '1',
+                'notify_upload' => \App\Models\SystemSetting::get('admin_notify_upload', '1') === '1',
+                'notify_backup' => \App\Models\SystemSetting::get('admin_notify_backup', '1') === '1',
+                'notify_auth' => \App\Models\SystemSetting::get('admin_notify_auth', '0') === '1',
+                'notify_scheduler' => \App\Models\SystemSetting::get('admin_notify_scheduler', '1') === '1',
+            ];
+        }
+
+        return view('backend.user.edit', compact(
+            'user', 'roles', 'researchers', 'userRole', 'canManageRoles', 'isSuperAdmin', 'userPrefs', 'globalSettings'
+        ));
     }
 
     public function update(UpdateUserRequest $request, User $user)
@@ -132,6 +153,7 @@ class UserController extends Controller
 
         $currentUser = auth()->user();
         $canManageRoles = $currentUser && ($currentUser->hasRole('The Creator') || $currentUser->hasRole('Admin') || $currentUser->hasPermission('User Manager'));
+        $isSuperAdmin = $currentUser && ($currentUser->hasRole('The Creator') || $currentUser->hasRole('Admin') || $currentUser->hasRole('Admin Research'));
 
         $validated = $request->validated();
 
@@ -140,6 +162,38 @@ class UserController extends Controller
         if (array_key_exists('telegram_chat_id', $validated)) {
             $user->telegram_chat_id = !empty($validated['telegram_chat_id']) ? trim($validated['telegram_chat_id']) : null;
         }
+
+        // Save personal notification preferences
+        $user->notification_preferences = [
+            'mail_enabled' => $request->has('pref_mail_enabled'),
+            'telegram_enabled' => $request->has('pref_telegram_enabled'),
+            'topics' => [
+                'research_approved' => $request->has('pref_topic_research_approved'),
+                'research_rejected' => $request->has('pref_topic_research_rejected'),
+                'review_assigned' => $request->has('pref_topic_review_assigned'),
+                'review_final_approved' => $request->has('pref_topic_review_final_approved'),
+            ],
+        ];
+
+        // Save global admin notification subscriptions if submitted by Super Admin
+        if ($isSuperAdmin && $request->has('admin_notification_settings_submitted')) {
+            if ($request->has('global_telegram_bot_token')) {
+                \App\Models\SystemSetting::set('telegram_bot_token', trim($request->global_telegram_bot_token), 'telegram', 'Telegram Bot Token');
+            }
+            if ($request->has('global_telegram_admin_chat_id')) {
+                \App\Models\SystemSetting::set('telegram_admin_chat_id', trim($request->global_telegram_admin_chat_id), 'telegram', 'Telegram Admin Chat ID');
+            }
+            \App\Models\SystemSetting::set('admin_notify_telegram', $request->has('admin_notify_telegram') ? '1' : '0', 'notification', 'ส่งแจ้งเตือนแอดมินทาง Telegram');
+            \App\Models\SystemSetting::set('admin_notify_mail', $request->has('admin_notify_mail') ? '1' : '0', 'notification', 'ส่งแจ้งเตือนแอดมินทาง Mail');
+            \App\Models\SystemSetting::set('admin_notify_create', $request->has('admin_notify_create') ? '1' : '0', 'notification', 'แจ้งเตือนเมื่อสร้างข้อมูล');
+            \App\Models\SystemSetting::set('admin_notify_update', $request->has('admin_notify_update') ? '1' : '0', 'notification', 'แจ้งเตือนเมื่อแก้ไขข้อมูล');
+            \App\Models\SystemSetting::set('admin_notify_delete', $request->has('admin_notify_delete') ? '1' : '0', 'notification', 'แจ้งเตือนเมื่อลบข้อมูล');
+            \App\Models\SystemSetting::set('admin_notify_upload', $request->has('admin_notify_upload') ? '1' : '0', 'notification', 'แจ้งเตือนเมื่ออัปโหลดไฟล์');
+            \App\Models\SystemSetting::set('admin_notify_backup', $request->has('admin_notify_backup') ? '1' : '0', 'notification', 'แจ้งเตือนเมื่อสำรอง/กู้คืน');
+            \App\Models\SystemSetting::set('admin_notify_auth', $request->has('admin_notify_auth') ? '1' : '0', 'notification', 'แจ้งเตือนเมื่อล็อกอิน');
+            \App\Models\SystemSetting::set('admin_notify_scheduler', $request->has('admin_notify_scheduler') ? '1' : '0', 'notification', 'แจ้งเตือนเมื่อรันงานระบบ');
+        }
+
         if (!empty($validated['password'])) {
             $user->password_hash = Hash::make($validated['password']);
         }
@@ -165,13 +219,13 @@ class UserController extends Controller
             ]);
         }
 
-        if ($canManageRoles) {
+        if ($canManageRoles && $user->id !== auth()->id()) {
             return redirect()->route('backend.user.index')
                 ->with('success', 'ปรับปรุงข้อมูลผู้ใช้งานเรียบร้อยแล้ว');
         }
 
         return redirect()->back()
-            ->with('success', 'ปรับปรุงข้อมูลส่วนตัวเรียบร้อยแล้ว');
+            ->with('success', 'ปรับปรุงข้อมูลส่วนตัวและการตั้งค่าการแจ้งเตือนเรียบร้อยแล้ว');
     }
 
     public function destroy(User $user)
@@ -353,5 +407,56 @@ class UserController extends Controller
 
         return redirect()->back()
             ->with('warning', "ปฏิเสธคำขอยืนยันตัวตนของผู้ใช้ {$user->username} แล้ว (ผู้ใช้สามารถแก้ไขและส่งคำขอใหม่ได้)");
+    }
+
+    /**
+     * Send test notification to user's own Telegram chat
+     */
+    public function testMyTelegram(Request $request)
+    {
+        $user = auth()->user();
+        $chatId = $request->input('chat_id') ?: $user->telegram_chat_id;
+
+        if (empty($chatId)) {
+            return redirect()->back()->with('error', 'กรุณาระบุ Telegram Chat ID ของท่านก่อนกดทดสอบ');
+        }
+
+        $nowThai = \App\Services\TelegramNotificationService::formatThaiDateTime(now());
+        $name = htmlspecialchars($user->name ?: $user->username);
+        $message = "🏛️ <b>[PCRU RDB] ทดสอบการแจ้งเตือนส่วนบุคคล</b>\n\n"
+                 . "สวัสดีคุณ <b>{$name}</b>\n"
+                 . "✅ ระบบฐานข้อมูลงานวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์ สามารถส่งข้อความมายัง Telegram ส่วนตัวของคุณได้สมบูรณ์เรียบร้อยแล้ว 100%\n\n"
+                 . "📱 <b>Chat ID ของคุณ:</b> <code>{$chatId}</code>\n"
+                 . "⏱️ <b>เวลาทดสอบ:</b> {$nowThai}\n\n"
+                 . "<i>ท่านจะได้รับแจ้งเตือนเมื่อผลงานวิจัยได้รับการอนุมัติ หรือมีงานมอบหมายประเมินผ่านช่องทางนี้</i>";
+
+        $result = \App\Services\TelegramNotificationService::sendMessage($chatId, $message, 'HTML');
+
+        if ($result['success']) {
+            return redirect()->back()->with('success', 'ส่งข้อความทดสอบไปยัง Telegram ส่วนตัวของท่านเรียบร้อยแล้ว!');
+        }
+
+        return redirect()->back()->with('error', 'ส่งข้อความไม่สำเร็จ: ' . ($result['error'] ?? 'กรุณาตรวจสอบว่าท่านได้กด /start ในแชทบอทแล้วหรือไม่'));
+    }
+
+    /**
+     * Send test notification to user's own Email
+     */
+    public function testMyMail(Request $request)
+    {
+        $user = auth()->user();
+        if (empty($user->email)) {
+            return redirect()->back()->with('error', 'ไม่พบที่อยู่อีเมลในบัญชีของคุณ');
+        }
+
+        try {
+            $name = $user->name ?: $user->username;
+            \Illuminate\Support\Facades\Mail::raw("เรียน {$name},\n\nนี่คืออีเมลทดสอบการแจ้งเตือนจากระบบฐานข้อมูลงานวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์ (PCRU RDB)\nระบบสามารถจัดส่งการแจ้งเตือนถึงอีเมลของคุณเรียบร้อยแล้ว 100%\n\nสถาบันวิจัยและพัฒนา มหาวิทยาลัยราชภัฏเพชรบูรณ์", function ($m) use ($user) {
+                $m->to($user->email)->subject('[PCRU RDB] ทดสอบระบบแจ้งเตือนผ่านอีเมลส่วนบุคคล');
+            });
+            return redirect()->back()->with('success', "ส่งอีเมลทดสอบไปยัง {$user->email} เรียบร้อยแล้ว!");
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', 'ส่งอีเมลไม่สำเร็จ: ' . $e->getMessage());
+        }
     }
 }

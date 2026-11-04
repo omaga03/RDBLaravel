@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\SystemSetting;
 use App\Services\TelegramNotificationService;
 use Cron\CronExpression;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 
 class SystemSchedulerController extends Controller
 {
@@ -20,8 +22,11 @@ class SystemSchedulerController extends Controller
             'id' => 'backup-db',
             'name' => 'สำรองฐานข้อมูลระบบประจำวัน (Daily Database Backup)',
             'command' => 'rdb:backup --type=db',
-            'expression' => '0 2 * * *',
-            'schedule_text' => 'ทุกวัน เวลา 02:00 น.',
+            'default_expression' => '0 2 * * *',
+            'default_time' => '02:00',
+            'default_day' => '0',
+            'default_freq_type' => 'daily',
+            'default_schedule_text' => 'ทุกวัน เวลา 02:00 น.',
             'category' => 'ความปลอดภัย & กู้คืนระบบ',
             'badge_class' => 'bg-primary-subtle text-primary border border-primary-subtle',
             'icon' => 'bi-database-fill-gear',
@@ -31,41 +36,25 @@ class SystemSchedulerController extends Controller
             'id' => 'backup-all',
             'name' => 'สำรองระบบเต็มรูปแบบประจำสัปดาห์ (Weekly Full Backup)',
             'command' => 'rdb:backup --type=all',
-            'expression' => '0 3 * * 0',
-            'schedule_text' => 'ทุกวันอาทิตย์ เวลา 03:00 น.',
+            'default_expression' => '0 3 * * 0',
+            'default_time' => '03:00',
+            'default_day' => '0',
+            'default_freq_type' => 'weekly',
+            'default_schedule_text' => 'ทุกวันอาทิตย์ เวลา 03:00 น.',
             'category' => 'ความปลอดภัย & กู้คืนระบบ',
             'badge_class' => 'bg-danger-subtle text-danger border border-danger-subtle',
             'icon' => 'bi-archive-fill',
             'description' => 'สำรองฐานข้อมูลพร้อมบีบอัดเอกสารงานวิจัย ไฟล์แนบ และภาพหน้าปกทั้งหมดลงคลัง Archives',
         ],
         [
-            'id' => 'count-pdf-pages',
-            'name' => 'นับจำนวนหน้าเอกสาร PDF อัตโนมัติ (PDF Page Counter)',
-            'command' => 'rdb:count-pdf-pages --module=all --limit=100',
-            'expression' => '0 4 * * *',
-            'schedule_text' => 'ทุกวัน เวลา 04:00 น.',
-            'category' => 'เอกสาร & คลังดิจิทัล',
-            'badge_class' => 'bg-info-subtle text-info border border-info-subtle',
-            'icon' => 'bi-file-earmark-pdf-fill',
-            'description' => 'ตรวจสอบไฟล์ PDF โครงการวิจัยและผลงานตีพิมพ์ที่ตกค้าง พร้อมนับหน้าด้วย 4-Tier Engine แม่นยำ 99.99%',
-        ],
-        [
-            'id' => 'generate-pdf-covers',
-            'name' => 'เรนเดอร์ภาพหน้าปก WebP อัตโนมัติ (PDF Cover Rasterizer)',
-            'command' => 'rdb:generate-pdf-covers --module=all --limit=50',
-            'expression' => '30 4 * * *',
-            'schedule_text' => 'ทุกวัน เวลา 04:30 น.',
-            'category' => 'เอกสาร & คลังดิจิทัล',
-            'badge_class' => 'bg-warning-subtle text-warning border border-warning-subtle',
-            'icon' => 'bi-image-fill',
-            'description' => 'สร้างภาพหน้าปก .webp ความละเอียดสูงจากหน้าแรกของเล่มรายงานวิจัย สำหรับหน้าการ์ดและ DSpace',
-        ],
-        [
             'id' => 'sync-nriis-news',
             'name' => 'ซิงค์ข่าวประกาศทุนวิจัยจากระบบ NRIIS (Funding Sync)',
             'command' => 'rdb:sync-nriis-news',
-            'expression' => '0 6 * * *',
-            'schedule_text' => 'ทุกวัน เวลา 06:00 น.',
+            'default_expression' => '0 6 * * *',
+            'default_time' => '06:00',
+            'default_day' => '0',
+            'default_freq_type' => 'daily',
+            'default_schedule_text' => 'ทุกวัน เวลา 06:00 น.',
             'category' => 'บูรณาการ & ข้อมูลภายนอก',
             'badge_class' => 'bg-success-subtle text-success border border-success-subtle',
             'icon' => 'bi-megaphone-fill',
@@ -75,8 +64,11 @@ class SystemSchedulerController extends Controller
             'id' => 'sync-facebook-conferences',
             'name' => 'ซิงค์งานประชุมวิชาการจากเพจสถาบันวิจัยฯ (Event Sync)',
             'command' => 'rdb:sync-facebook-conferences',
-            'expression' => '30 6 * * *',
-            'schedule_text' => 'ทุกวัน เวลา 06:30 น.',
+            'default_expression' => '30 6 * * *',
+            'default_time' => '06:30',
+            'default_day' => '0',
+            'default_freq_type' => 'daily',
+            'default_schedule_text' => 'ทุกวัน เวลา 06:30 น.',
             'category' => 'บูรณาการ & ข้อมูลภายนอก',
             'badge_class' => 'bg-secondary-subtle text-secondary border border-secondary-subtle',
             'icon' => 'bi-calendar-event-fill',
@@ -92,21 +84,42 @@ class SystemSchedulerController extends Controller
         $this->ensureAuthorized();
 
         $tasksWithRunInfo = array_map(function ($task) {
-            try {
-                $cron = new CronExpression($task['expression']);
-                $nextRun = Carbon::instance($cron->getNextRunDate());
-                $nextRunThai = TelegramNotificationService::formatThaiDateTime($nextRun);
-                $diffForHumans = $nextRun->diffForHumans([
-                    'parts' => 2,
-                    'syntax' => Carbon::DIFF_RELATIVE_TO_NOW,
-                ]);
+            $key = str_replace('-', '_', $task['id']);
+            $enabled = SystemSetting::get("scheduler_{$key}_enabled", '1') === '1';
+            $expression = SystemSetting::get("scheduler_{$key}_expression", $task['default_expression']);
+            $time = SystemSetting::get("scheduler_{$key}_time", $task['default_time']);
+            $dayOfWeek = SystemSetting::get("scheduler_{$key}_day_of_week", $task['default_day']);
+            $freqType = SystemSetting::get("scheduler_{$key}_frequency_type", $task['default_freq_type']);
+            $scheduleText = SystemSetting::get("scheduler_{$key}_schedule_text", $task['default_schedule_text']);
 
-                $task['next_run_carbon'] = $nextRun;
-                $task['next_run_thai'] = $nextRunThai;
-                $task['next_run_diff'] = $diffForHumans;
-            } catch (\Throwable $e) {
-                $task['next_run_thai'] = 'ไม่สามารถคำนวณได้';
-                $task['next_run_diff'] = '-';
+            $task['enabled'] = $enabled;
+            $task['expression'] = $expression;
+            $task['time'] = $time;
+            $task['day_of_week'] = $dayOfWeek;
+            $task['frequency_type'] = $freqType;
+            $task['schedule_text'] = $scheduleText;
+
+            if ($enabled) {
+                try {
+                    $cron = new CronExpression($expression);
+                    $nextRun = Carbon::instance($cron->getNextRunDate());
+                    $nextRunThai = TelegramNotificationService::formatThaiDateTime($nextRun);
+                    $diffForHumans = $nextRun->diffForHumans([
+                        'parts' => 2,
+                        'syntax' => Carbon::DIFF_RELATIVE_TO_NOW,
+                    ]);
+
+                    $task['next_run_carbon'] = $nextRun;
+                    $task['next_run_thai'] = $nextRunThai;
+                    $task['next_run_diff'] = $diffForHumans;
+                } catch (\Throwable $e) {
+                    $task['next_run_thai'] = 'รูปแบบเวลาไม่ถูกต้อง';
+                    $task['next_run_diff'] = '-';
+                }
+            } else {
+                $task['next_run_carbon'] = null;
+                $task['next_run_thai'] = 'ปิดการทำงานอัตโนมัติ';
+                $task['next_run_diff'] = 'ระงับชั่วคราว';
             }
 
             return $task;
@@ -115,7 +128,7 @@ class SystemSchedulerController extends Controller
         $nowThai = TelegramNotificationService::formatThaiDateTime(now());
         $telegramConfigured = TelegramNotificationService::isConfigured();
         $telegramAdminConfigured = TelegramNotificationService::isAdminConfigured();
-        $adminChatId = config('services.telegram.admin_chat_id');
+        $adminChatId = TelegramNotificationService::getAdminChatId();
 
         return view('backend.system_scheduler.index', compact(
             'tasksWithRunInfo',
@@ -124,6 +137,104 @@ class SystemSchedulerController extends Controller
             'telegramAdminConfigured',
             'adminChatId'
         ));
+    }
+
+    /**
+     * Update schedule for a specific task
+     */
+    public function updateSchedule(Request $request)
+    {
+        $this->ensureAuthorized();
+
+        $validated = $request->validate([
+            'task_id' => 'required|string',
+            'enabled' => 'nullable',
+            'frequency_type' => 'required|in:daily,weekly,custom',
+            'time' => 'nullable|string',
+            'day_of_week' => 'nullable|integer|between:0,6',
+            'custom_expression' => 'nullable|string',
+        ]);
+
+        $task = collect($this->tasks)->firstWhere('id', $validated['task_id']);
+        if (!$task) {
+            return redirect()->route('backend.system_scheduler.index')
+                ->with('error', 'ไม่พบงานที่ต้องการแก้ไขการตั้งเวลา');
+        }
+
+        $key = str_replace('-', '_', $task['id']);
+        $isEnabled = !empty($validated['enabled']) ? '1' : '0';
+        $freqType = $validated['frequency_type'];
+
+        $expression = $task['default_expression'];
+        $scheduleText = $task['default_schedule_text'];
+        $time = $validated['time'] ?: $task['default_time'];
+        $dayOfWeek = isset($validated['day_of_week']) ? (string) $validated['day_of_week'] : $task['default_day'];
+
+        $thaiDays = [
+            0 => 'วันอาทิตย์',
+            1 => 'วันจันทร์',
+            2 => 'วันอังคาร',
+            3 => 'วันพุธ',
+            4 => 'วันพฤหัสบดี',
+            5 => 'วันศุกร์',
+            6 => 'วันเสาร์',
+        ];
+
+        if ($freqType === 'daily') {
+            $parts = explode(':', $time);
+            $hour = (int) ($parts[0] ?? 2);
+            $minute = (int) ($parts[1] ?? 0);
+            $expression = "{$minute} {$hour} * * *";
+            $scheduleText = "ทุกวัน เวลา {$time} น.";
+        } elseif ($freqType === 'weekly') {
+            $parts = explode(':', $time);
+            $hour = (int) ($parts[0] ?? 3);
+            $minute = (int) ($parts[1] ?? 0);
+            $expression = "{$minute} {$hour} * * {$dayOfWeek}";
+            $dayName = $thaiDays[(int) $dayOfWeek] ?? 'วันอาทิตย์';
+            $scheduleText = "ทุก{$dayName} เวลา {$time} น.";
+        } elseif ($freqType === 'custom') {
+            $custom = trim($validated['custom_expression'] ?? '');
+            if (!CronExpression::isValidExpression($custom)) {
+                return redirect()->route('backend.system_scheduler.index')
+                    ->with('error', "Cron Expression '{$custom}' ไม่ถูกต้องตามมาตรฐาน (ต้องประกอบด้วย 5 ส่วน เช่น 0 2 * * *)");
+            }
+            $expression = $custom;
+            $scheduleText = "กำหนดเอง ({$custom})";
+        }
+
+        // Save into SystemSetting
+        SystemSetting::set("scheduler_{$key}_enabled", $isEnabled, 'scheduler', "เปิด/ปิดงาน {$task['name']}");
+        SystemSetting::set("scheduler_{$key}_expression", $expression, 'scheduler', "Cron Expression สำหรับ {$task['name']}");
+        SystemSetting::set("scheduler_{$key}_time", $time, 'scheduler', "เวลาที่รันสำหรับ {$task['name']}");
+        SystemSetting::set("scheduler_{$key}_day_of_week", $dayOfWeek, 'scheduler', "วันในสัปดาห์สำหรับ {$task['name']}");
+        SystemSetting::set("scheduler_{$key}_frequency_type", $freqType, 'scheduler', "ประเภทความถี่สำหรับ {$task['name']}");
+        SystemSetting::set("scheduler_{$key}_schedule_text", $scheduleText, 'scheduler', "ข้อความความถี่สำหรับ {$task['name']}");
+
+        Cache::forget("sys_setting_scheduler_{$key}_enabled");
+        Cache::forget("sys_setting_scheduler_{$key}_expression");
+        Cache::forget("sys_setting_scheduler_{$key}_time");
+        Cache::forget("sys_setting_scheduler_{$key}_day_of_week");
+        Cache::forget("sys_setting_scheduler_{$key}_frequency_type");
+        Cache::forget("sys_setting_scheduler_{$key}_schedule_text");
+
+        // Record Audit Log
+        AuditLog::record(
+            event: 'update',
+            auditable: 'SystemScheduler',
+            oldValues: null,
+            newValues: [
+                'task_id' => $task['id'],
+                'enabled' => $isEnabled,
+                'expression' => $expression,
+                'schedule_text' => $scheduleText,
+            ],
+            remarks: "ปรับปรุงช่วงเวลาตั้งรันงานอัตโนมัติ: {$task['name']}",
+            diffSummary: "แก้ไขช่วงเวลาเป็น: {$scheduleText} (Cron: {$expression}, สถานะ: " . ($isEnabled === '1' ? 'เปิด' : 'ปิด') . ")"
+        );
+
+        return redirect()->route('backend.system_scheduler.index')
+            ->with('success', "บันทึกการตั้งค่าช่วงเวลาสำหรับ '{$task['name']}' เรียบร้อยแล้ว ({$scheduleText})");
     }
 
     /**
@@ -157,7 +268,7 @@ class SystemSchedulerController extends Controller
             }
 
             // Record Audit Log
-            $log = AuditLog::record(
+            AuditLog::record(
                 event: 'system_scheduler.manual_run',
                 auditable: 'SystemScheduler',
                 oldValues: null,

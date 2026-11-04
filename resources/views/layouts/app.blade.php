@@ -1349,8 +1349,8 @@
                                     <a class="dropdown-item d-flex align-items-center {{ request()->routeIs('backend.user.show') && request()->route('id') == Auth::id() ? 'active' : '' }}" href="{{ route('backend.user.show', Auth::id()) }}">
                                         <i class="bi bi-person-circle me-2 text-primary"></i> บัญชีของฉัน
                                     </a>
-                                    <a class="dropdown-item d-flex align-items-center {{ request()->routeIs('backend.user.edit') && request()->route('id') == Auth::id() ? 'active' : '' }}" href="{{ route('backend.user.edit', Auth::id()) }}">
-                                        <i class="bi bi-key me-2 text-warning"></i> เปลี่ยนรหัสผ่าน
+                                    <a class="dropdown-item d-flex align-items-center {{ (request()->routeIs('backend.user.edit') && (request()->route('user')?->id ?? request()->route('user')) == Auth::id()) ? 'active' : '' }}" href="{{ route('backend.user.edit', Auth::id()) }}">
+                                        <i class="bi bi-gear-wide-connected me-2 text-warning"></i> จัดการข้อมูลส่วนตัว &amp; แจ้งเตือน
                                     </a>
                                     <div class="dropdown-divider"></div>
                                     <a class="dropdown-item text-danger d-flex align-items-center" href="{{ route('logout') }}"

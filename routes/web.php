@@ -164,6 +164,8 @@ Route::prefix('backend')->name('backend.')->middleware(['auth', \App\Http\Middle
     Route::post('/rbac/switch-scope', [\App\Http\Controllers\Backend\RbacController::class, 'switchScope'])->name('rbac.switch_scope');
     Route::post('/user/{user}/impersonate', [\App\Http\Controllers\Backend\UserController::class, 'impersonate'])->name('user.impersonate');
     Route::match(['get', 'post'], '/user/stop-impersonate', [\App\Http\Controllers\Backend\UserController::class, 'stopImpersonate'])->name('user.stop_impersonate');
+    Route::post('/user/test-my-telegram', [\App\Http\Controllers\Backend\UserController::class, 'testMyTelegram'])->name('user.test_my_telegram');
+    Route::post('/user/test-my-mail', [\App\Http\Controllers\Backend\UserController::class, 'testMyMail'])->name('user.test_my_mail');
     Route::resource('rbac', RbacController::class);
     Route::resource('user', UserController::class);
 
@@ -191,6 +193,7 @@ Route::prefix('backend')->name('backend.')->middleware(['auth', \App\Http\Middle
     // System Automated Task Scheduler Hub (ศูนย์ตั้งเวลาและรันงานอัตโนมัติ)
     Route::get('/system-scheduler', [\App\Http\Controllers\Backend\SystemSchedulerController::class, 'index'])->name('system_scheduler.index');
     Route::post('/system-scheduler/run', [\App\Http\Controllers\Backend\SystemSchedulerController::class, 'run'])->name('system_scheduler.run');
+    Route::post('/system-scheduler/update-schedule', [\App\Http\Controllers\Backend\SystemSchedulerController::class, 'updateSchedule'])->name('system_scheduler.update_schedule');
     Route::post('/system-scheduler/test-telegram', [\App\Http\Controllers\Backend\SystemSchedulerController::class, 'testTelegram'])->name('system_scheduler.test_telegram');
 
     // System Backup & Disaster Recovery Hub (ศูนย์สำรองและกู้คืนข้อมูลระบบ - The Creator Only)

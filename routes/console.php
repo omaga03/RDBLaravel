@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\SystemSetting;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -16,44 +17,59 @@ Artisan::command('inspire', function () {
 | * * * * * cd /path/to/project && php artisan schedule:run >> /dev/null 2>&1
 */
 
-// 1. สำรองฐานข้อมูลระบบอัตโนมัติ (Database Backup) ทุกวัน เวลา 02:00 น.
-Schedule::command('rdb:backup --type=db')
-    ->dailyAt('02:00')
-    ->name('rdb-daily-database-backup')
-    ->withoutOverlapping()
-    ->runInBackground();
+// Helper to safely get schedule settings from database or fallback
+$getScheduleExpr = function (string $key, string $default) {
+    try {
+        return SystemSetting::get($key, $default);
+    } catch (\Throwable $e) {
+        return $default;
+    }
+};
 
-// 2. สำรองระบบเต็มรูปแบบ (Database + Storage Archives) สัปดาห์ละ 1 ครั้ง ทุกคืนวันอาทิตย์ เวลา 03:00 น.
-Schedule::command('rdb:backup --type=all')
-    ->weeklyOn(0, '03:00')
-    ->name('rdb-weekly-full-backup')
-    ->withoutOverlapping()
-    ->runInBackground();
+$isTaskEnabled = function (string $key, string $default = '1') {
+    try {
+        return SystemSetting::get($key, $default) === '1';
+    } catch (\Throwable $e) {
+        return $default === '1';
+    }
+};
 
-// 3. ตรวจสอบและนับจำนวนหน้าเอกสาร PDF ที่ตกค้างอัตโนมัติ ทุกวัน เวลา 04:00 น.
-Schedule::command('rdb:count-pdf-pages --module=all --limit=100')
-    ->dailyAt('04:00')
-    ->name('rdb-batch-count-pdf-pages')
-    ->withoutOverlapping()
-    ->runInBackground();
+// 1. สำรองฐานข้อมูลระบบอัตโนมัติ (Database Backup)
+if ($isTaskEnabled('scheduler_backup_db_enabled', '1')) {
+    $dbExpr = $getScheduleExpr('scheduler_backup_db_expression', '0 2 * * *');
+    Schedule::command('rdb:backup --type=db')
+        ->cron($dbExpr)
+        ->name('rdb-daily-database-backup')
+        ->withoutOverlapping()
+        ->runInBackground();
+}
 
-// 4. ตรวจสอบและเรนเดอร์ภาพหน้าปก WebP จากหน้าแรกของไฟล์ PDF อัตโนมัติ ทุกวัน เวลา 04:30 น.
-Schedule::command('rdb:generate-pdf-covers --module=all --limit=50')
-    ->dailyAt('04:30')
-    ->name('rdb-batch-generate-pdf-covers')
-    ->withoutOverlapping()
-    ->runInBackground();
+// 2. สำรองระบบเต็มรูปแบบ (Database + Storage Archives)
+if ($isTaskEnabled('scheduler_backup_all_enabled', '1')) {
+    $allExpr = $getScheduleExpr('scheduler_backup_all_expression', '0 3 * * 0');
+    Schedule::command('rdb:backup --type=all')
+        ->cron($allExpr)
+        ->name('rdb-weekly-full-backup')
+        ->withoutOverlapping()
+        ->runInBackground();
+}
 
-// 5. ซิงค์ข่าวทุนวิจัยจากระบบ NRIIS อัตโนมัติ ทุกเช้า เวลา 06:00 น.
-Schedule::command('rdb:sync-nriis-news')
-    ->dailyAt('06:00')
-    ->name('rdb-sync-nriis-funding-news')
-    ->withoutOverlapping()
-    ->runInBackground();
+// 3. ซิงค์ข่าวทุนวิจัยจากระบบ NRIIS อัตโนมัติ
+if ($isTaskEnabled('scheduler_sync_nriis_news_enabled', '1')) {
+    $nriisExpr = $getScheduleExpr('scheduler_sync_nriis_news_expression', '0 6 * * *');
+    Schedule::command('rdb:sync-nriis-news')
+        ->cron($nriisExpr)
+        ->name('rdb-sync-nriis-funding-news')
+        ->withoutOverlapping()
+        ->runInBackground();
+}
 
-// 6. ซิงค์ข่าวงานประชุมวิชาการจากเพจ Facebook สถาบันวิจัยฯ อัตโนมัติ ทุกเช้า เวลา 06:30 น.
-Schedule::command('rdb:sync-facebook-conferences')
-    ->dailyAt('06:30')
-    ->name('rdb-sync-facebook-conferences')
-    ->withoutOverlapping()
-    ->runInBackground();
+// 4. ซิงค์ข่าวงานประชุมวิชาการจากเพจ Facebook สถาบันวิจัยฯ อัตโนมัติ
+if ($isTaskEnabled('scheduler_sync_facebook_conferences_enabled', '1')) {
+    $fbExpr = $getScheduleExpr('scheduler_sync_facebook_conferences_expression', '30 6 * * *');
+    Schedule::command('rdb:sync-facebook-conferences')
+        ->cron($fbExpr)
+        ->name('rdb-sync-facebook-conferences')
+        ->withoutOverlapping()
+        ->runInBackground();
+}

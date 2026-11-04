@@ -18,11 +18,13 @@ class ResearchItemApprovedNotification extends Notification
     public function via($notifiable): array
     {
         $channels = ['database'];
-        if (!empty($notifiable->email) && filter_var($notifiable->email, FILTER_VALIDATE_EMAIL)) {
+        if (method_exists($notifiable, 'wantsMailFor') ? $notifiable->wantsMailFor('research_approved') : (!empty($notifiable->email) && filter_var($notifiable->email, FILTER_VALIDATE_EMAIL))) {
             $channels[] = 'mail';
         }
-        if (!empty($notifiable->telegram_chat_id) && \App\Services\TelegramNotificationService::isConfigured()) {
-            $channels[] = \App\Notifications\Channels\TelegramChannel::class;
+        if (method_exists($notifiable, 'wantsTelegramFor') ? $notifiable->wantsTelegramFor('research_approved') : !empty($notifiable->telegram_chat_id)) {
+            if (\App\Services\TelegramNotificationService::isConfigured()) {
+                $channels[] = \App\Notifications\Channels\TelegramChannel::class;
+            }
         }
         return $channels;
     }

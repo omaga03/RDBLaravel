@@ -9,12 +9,42 @@ use Illuminate\Support\Facades\Log;
 class TelegramNotificationService
 {
     /**
+     * Get active Telegram Bot Token (from SystemSetting or .env fallback)
+     */
+    public static function getBotToken(): ?string
+    {
+        try {
+            $token = \App\Models\SystemSetting::get('telegram_bot_token');
+            if (!empty($token)) {
+                return trim($token);
+            }
+        } catch (\Throwable $e) {}
+
+        return config('services.telegram.bot_token');
+    }
+
+    /**
+     * Get active Super Admin Chat ID (from SystemSetting or .env fallback)
+     */
+    public static function getAdminChatId(): ?string
+    {
+        try {
+            $chatId = \App\Models\SystemSetting::get('telegram_admin_chat_id');
+            if (!empty($chatId)) {
+                return trim($chatId);
+            }
+        } catch (\Throwable $e) {}
+
+        return config('services.telegram.admin_chat_id');
+    }
+
+    /**
      * Check if Telegram bot token and admin chat ID are configured.
      */
     public static function isConfigured(): bool
     {
         $enabled = config('services.telegram.enabled', true);
-        $token = config('services.telegram.bot_token');
+        $token = self::getBotToken();
 
         return $enabled && !empty($token);
     }
@@ -24,7 +54,7 @@ class TelegramNotificationService
      */
     public static function isAdminConfigured(): bool
     {
-        $adminChatId = config('services.telegram.admin_chat_id');
+        $adminChatId = self::getAdminChatId();
         return self::isConfigured() && !empty($adminChatId);
     }
 
@@ -33,7 +63,7 @@ class TelegramNotificationService
      */
     public static function sendMessage(string $chatId, string $message, string $parseMode = 'HTML'): array
     {
-        $token = config('services.telegram.bot_token');
+        $token = self::getBotToken();
         $enabled = config('services.telegram.enabled', true);
         $timeout = (int) config('services.telegram.timeout', 4);
 
@@ -78,7 +108,7 @@ class TelegramNotificationService
      */
     public static function notifyAdmin(string $title, string $body, array $meta = []): bool
     {
-        $adminChatId = config('services.telegram.admin_chat_id');
+        $adminChatId = self::getAdminChatId();
         if (!self::isAdminConfigured() || empty($adminChatId)) {
             return false;
         }
@@ -199,8 +229,46 @@ class TelegramNotificationService
         $lines[] = "";
         $lines[] = "⏱️ <i>" . $nowThai . "</i>";
 
-        $result = self::sendMessage($adminChatId, implode("\n", $lines), 'HTML');
-        return $result['success'];
+        // Check Admin preferences
+        $telegramEnabled = \App\Models\SystemSetting::get('admin_notify_telegram', '1') === '1';
+        $mailEnabled = \App\Models\SystemSetting::get('admin_notify_mail', '0') === '1';
+
+        // Check if event is enabled in admin subscriptions
+        $shouldNotify = match ($event) {
+            'create' => \App\Models\SystemSetting::get('admin_notify_create', '1') === '1',
+            'update' => $hasFileUpload ? (\App\Models\SystemSetting::get('admin_notify_upload', '1') === '1') : (\App\Models\SystemSetting::get('admin_notify_update', '1') === '1'),
+            'delete' => \App\Models\SystemSetting::get('admin_notify_delete', '1') === '1',
+            'approve', 'reject' => \App\Models\SystemSetting::get('admin_notify_update', '1') === '1',
+            'backup', 'restore' => \App\Models\SystemSetting::get('admin_notify_backup', '1') === '1',
+            'login', 'impersonate' => \App\Models\SystemSetting::get('admin_notify_auth', '0') === '1',
+            'system_scheduler.manual_run' => \App\Models\SystemSetting::get('admin_notify_scheduler', '1') === '1',
+            default => true,
+        };
+
+        if (!$shouldNotify) {
+            return false;
+        }
+
+        $sentTelegram = false;
+        if ($telegramEnabled && self::isAdminConfigured()) {
+            $result = self::sendMessage(self::getAdminChatId(), implode("\n", $lines), 'HTML');
+            $sentTelegram = $result['success'];
+        }
+
+        if ($mailEnabled) {
+            try {
+                $adminEmail = config('mail.admin_address') ?: \App\Models\User::where('id', 129)->value('email');
+                if (!empty($adminEmail)) {
+                    \Illuminate\Support\Facades\Mail::raw(strip_tags(str_replace(['<br>', '<b>', '</b>'], ["\n", '', ''], implode("\n", $lines))), function ($m) use ($adminEmail, $eventHeader, $moduleName) {
+                        $m->to($adminEmail)->subject("[PCRU RDB Admin Alert] {$eventHeader} - {$moduleName}");
+                    });
+                }
+            } catch (\Throwable $me) {
+                Log::warning('Admin email audit alert skipped: ' . $me->getMessage());
+            }
+        }
+
+        return $sentTelegram;
     }
 
     /**

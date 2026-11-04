@@ -1656,16 +1656,6 @@ crontab -e
 <td align="left">สำรองระบบเต็มรูปแบบ (ฐานข้อมูล + ไฟล์เอกสารงานวิจัยทั้งหมดใน Storage)</td>
 </tr>
 <tr>
-<td align="left"><strong>04:00 น. ทุกวัน</strong></td>
-<td align="left"><code>php artisan rdb:count-pdf-pages --module=all --limit=100</code></td>
-<td align="left">ตรวจสอบและนับจำนวนหน้าเอกสาร PDF ที่ตกค้างด้วยเอนจิน Poppler แม่นยำ 99.99%</td>
-</tr>
-<tr>
-<td align="left"><strong>04:30 น. ทุกวัน</strong></td>
-<td align="left"><code>php artisan rdb:generate-pdf-covers --module=all --limit=50</code></td>
-<td align="left">ตรวจสอบและเรนเดอร์ภาพหน้าแรกของไฟล์ PDF เป็นภาพปก <code>.webp</code> ความเร็วสูง</td>
-</tr>
-<tr>
 <td align="left"><strong>06:00 น. ทุกวัน</strong></td>
 <td align="left"><code>php artisan rdb:sync-nriis-news</code></td>
 <td align="left">ซิงค์ข่าวประกาศทุนวิจัยใหม่จากระบบ NRIIS เข้าสู่ฐานข้อมูลอัตโนมัติ</td>
@@ -1677,6 +1667,8 @@ crontab -e
 </tr>
 </tbody>
 </table>
+<div class="manual-callout callout-note"><div class="callout-header"><i class="bi bi-info-circle-fill"></i> ข้อมูลจำเพาะ / หมายเหตุ (NOTE)</div><div class="callout-body"><p><em>งานนับจำนวนหน้า PDF และสร้างภาพปก WebP ไม่จำเป็นต้องตั้งเวลาอัตโนมัติ เนื่องจากระบบทำงานแบบเรียลไทม์ทันทีทุกครั้งที่มีการอัปโหลดหรือแก้ไขไฟล์ PDF ในแต่ละโมดูลอยู่แล้ว</em></p>
+</div></div>
 <a id="3-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%95%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B9%80%E0%B8%A7%E0%B8%A5%E0%B8%B2%E0%B8%97%E0%B8%B3%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%94%E0%B9%89%E0%B8%A7%E0%B8%A2-artisan-cli" class="manual-anchor"></a><h4 id="3-การตรวจสอบตารางเวลาทำงานด้วย-artisan-cli">3. การตรวจสอบตารางเวลาทำงานด้วย Artisan CLI</h4>
 <p>ผู้ดูแลระบบสามารถตรวจสอบตารางเวลาและรอบการรันครั้งถัดไปได้ทันทีผ่าน Terminal:</p>
 <pre><code class="language-bash">php artisan schedule:list
@@ -1686,53 +1678,84 @@ crontab -e
 <ol>
 <li><strong>ระบบฐานข้อมูล (Database)</strong>: แสดงสถานะการเชื่อมต่อ ชื่อฐานข้อมูล เวอร์ชันของเอนจิน (MariaDB/MySQL) และการเข้ารหัส UTF-8</li>
 <li><strong>คิวงานประมวลผล (Queue)</strong>: แสดงไดรเวอร์คิวงาน จำนวนงานที่กำลังรอดำเนินการ และจำนวนงานที่ผิดพลาด (<code>failed_jobs</code>)</li>
-<li><strong>ระบบตั้งเวลา (Scheduler)</strong>: แสดงจำนวนงานตั้งเวลาที่พร้อมรัน (6 งาน) และรอบเวลาการสำรองข้อมูลอัตโนมัติ</li>
+<li><strong>ระบบตั้งเวลา (Scheduler)</strong>: แสดงจำนวนงานตั้งเวลาที่พร้อมรัน (4 งาน) และรอบเวลาการสำรองข้อมูลอัตโนมัติ</li>
 <li><strong>ความพร้อมใช้งานจริง (Production Readiness)</strong>: แสดงเวอร์ชัน PHP, ขีดจำกัดหน่วยความจำ RAM, สภาพแวดล้อม (<code>APP_ENV</code>) และป้ายเตือนความปลอดภัยของโหมด Debug (<code>APP_DEBUG=false</code>)</li>
 </ol>
 <hr />
-<a id="1110-%E0%B8%A8%E0%B8%B9%E0%B8%99%E0%B8%A2%E0%B9%8C%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B9%80%E0%B8%A7%E0%B8%A5%E0%B8%B2%E0%B8%97%E0%B8%B3%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%AD%E0%B8%B1%E0%B8%95%E0%B9%82%E0%B8%99%E0%B8%A1%E0%B8%B1%E0%B8%95%E0%B8%B4-automated-task-scheduler-hub-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%81%E0%B8%88%E0%B9%89%E0%B8%87%E0%B9%80%E0%B8%95%E0%B8%B7%E0%B8%AD%E0%B8%99-telegram" class="manual-anchor"></a><h3 id="1110-ศูนย์จัดการระบบตั้งเวลาทำงานอัตโนมัติ-automated-task-scheduler-hub-และการแจ้งเตือน-telegram">11.10 ศูนย์จัดการระบบตั้งเวลาทำงานอัตโนมัติ (Automated Task Scheduler Hub) และการแจ้งเตือน Telegram</h3>
+<a id="1110-%E0%B8%A8%E0%B8%B9%E0%B8%99%E0%B8%A2%E0%B9%8C%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B9%80%E0%B8%A7%E0%B8%A5%E0%B8%B2%E0%B8%97%E0%B8%B3%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%AD%E0%B8%B1%E0%B8%95%E0%B9%82%E0%B8%99%E0%B8%A1%E0%B8%B1%E0%B8%95%E0%B8%B4-automated-task-scheduler-hub-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9B%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B9%80%E0%B8%9B%E0%B8%A5%E0%B8%B5%E0%B9%88%E0%B8%A2%E0%B8%99%E0%B8%8A%E0%B9%88%E0%B8%A7%E0%B8%87%E0%B9%80%E0%B8%A7%E0%B8%A5%E0%B8%B2" class="manual-anchor"></a><h3 id="1110-ศูนย์จัดการระบบตั้งเวลาทำงานอัตโนมัติ-automated-task-scheduler-hub-และการปรับเปลี่ยนช่วงเวลา">11.10 ศูนย์จัดการระบบตั้งเวลาทำงานอัตโนมัติ (Automated Task Scheduler Hub) และการปรับเปลี่ยนช่วงเวลา</h3>
 <div class="manual-callout callout-note"><div class="callout-header"><i class="bi bi-info-circle-fill"></i> ข้อมูลจำเพาะ / หมายเหตุ (NOTE)</div><div class="callout-body"><p><strong>การเข้าใช้งานหน้าจอ</strong>:
 เข้าใช้งานผ่านเมนูแถบซ้าย: <strong>การดูแลระบบ ➔ ระบบตั้งเวลาอัตโนมัติ (Scheduler)</strong> หรือ URL: <code>http://laravel_rdb.test/backend/system-scheduler</code> สงวนสิทธิ์สำหรับ Super Admin</p>
 </div></div>
 <a id="1-%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B2%E0%B8%A3%E0%B8%96%E0%B8%AB%E0%B8%A5%E0%B8%B1%E0%B8%81%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B8%88%E0%B8%AD-task-scheduler-hub" class="manual-anchor"></a><h4 id="1-ความสามารถหลักของหน้าจอ-task-scheduler-hub">1. ความสามารถหลักของหน้าจอ Task Scheduler Hub</h4>
 <ol>
-<li><strong>ตรวจสอบรอบการรันงานอัตโนมัติล่วงหน้า (Next Due Calculation)</strong>: แสดงเวลาที่งานแต่ละตัวจะทำงานครั้งถัดไปในรูปแบบ พ.ศ. พร้อมระยะเวลาคงเหลือ (เช่น &quot;อีก 14 ชม.&quot;)</li>
-<li><strong>สั่งรันงานทันทีแบบ On-Demand (Run Now)</strong>: ผู้ดูแลระบบสามารถกดปุ่ม <strong>&quot;⚡ รันทันที&quot;</strong> เพื่อสั่งให้ระบบประมวลผลงานนั้น ๆ ทันทีโดยไม่ต้องรอเวลากลางคืน พร้อมหน้าต่าง <strong>Terminal Console Output</strong> แสดงผลลัพธ์การรันจริง</li>
-<li><strong>การ์ดตรวจเช็คระบบ 4 ด้าน</strong>: งานอัตโนมัติที่พร้อมทำงาน, รอบงานถัดไปที่ใกล้ที่สุด, เวลาเซิร์ฟเวอร์ (ICT), และสถานะการเชื่อมต่อบอท Telegram</li>
-</ol>
-<a id="2-%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%88%E0%B9%89%E0%B8%87%E0%B9%80%E0%B8%95%E0%B8%B7%E0%B8%AD%E0%B8%99%E0%B8%9C%E0%B9%88%E0%B8%B2%E0%B8%99-telegram-bot-%E0%B8%AD%E0%B8%B1%E0%B8%95%E0%B9%82%E0%B8%99%E0%B8%A1%E0%B8%B1%E0%B8%95%E0%B8%B4-telegram-notifications" class="manual-anchor"></a><h4 id="2-ระบบแจ้งเตือนผ่าน-telegram-bot-อัตโนมัติ-telegram-notifications">2. ระบบแจ้งเตือนผ่าน Telegram Bot อัตโนมัติ (Telegram Notifications)</h4>
-<p>ระบบมีกลไกแจ้งเตือน 2 ระดับ:</p>
-<h5>ระดับที่ 1: แจ้งเตือนผู้ดูแลระบบสูงสุด (Super Admin Instant Audit Alerts)</h5>
-<p>เชื่อมโยงเข้ากับระบบ <code>AuditLog</code> โดยตรง ทุกครั้งที่มีกิจกรรมสำคัญในทุกระบบงาน ระบบจะส่งการแจ้งเตือนเข้า Telegram ของ Admin ทันที ได้แก่:</p>
+<li><strong>จัดการช่วงเวลาการทำงานแบบไดนามิก (Interactive Schedule Timing Modal)</strong>:
 <ul>
-<li>🟢 <strong>การสร้างข้อมูลใหม่ (Create)</strong>: โครงการวิจัย, ผลงานตีพิมพ์, ทรัพย์สินทางปัญญา, การนำไปใช้ประโยชน์</li>
-<li>🟡 <strong>การแก้ไขข้อมูล (Update)</strong>: การปรับปรุงรายละเอียด, การเปลี่ยนสถานะงานวิจัย</li>
-<li>🔴 <strong>การลบข้อมูล (Delete)</strong>: การลบรายการข้อมูล หรือการย้ายเข้าถังขยะ</li>
-<li>📎 <strong>การอัปโหลดไฟล์ (File Upload)</strong>: ตรวจจับไฟล์แนบเล่มรายงาน, ปกวิจัย, เอกสารประกอบ</li>
-<li>💾 <strong>การสำรองและกู้คืน (Backup &amp; Restore)</strong>: แจ้งเตือนเมื่อมีการสำรองฐานข้อมูล หรือมีคำขอกู้คืนระบบผ่าน OTP</li>
-<li>⚡ <strong>การสั่งรันงานระบบ (Scheduler Manual Run)</strong>: แจ้งเตือนเมื่อมีการกดสั่งรันคำสั่งระบบ</li>
-</ul>
-<h5>ระดับที่ 2: แจ้งเตือนส่วนบุคคลของนักวิจัย / ผู้ทรงคุณวุฒิ (Individual Notifications)</h5>
-<p>ทำงานควบคู่กับการส่งอีเมล (Dual-Channel: <code>mail</code> + <code>telegram</code>) สำหรับผู้ใช้ที่มีการกรอก <strong>Telegram Chat ID</strong>:</p>
+<li>ผู้ดูแลระบบสามารถคลิกปุ่ม <strong>&quot;⚙️ แก้ไขเวลา&quot;</strong> ในแถวของงานแต่ละงาน เพื่อเปิดหน้าต่างปรับเปลี่ยนช่วงเวลาได้ทันทีโดยไม่ต้องแก้โค้ด:
 <ul>
-<li>แจ้งเตือนเมื่อผลงานวิจัยได้รับการอนุมัติเผยแพร่ หรือส่งกลับแก้ไข</li>
-<li>แจ้งเตือนผู้ทรงคุณวุฒิเมื่อได้รับมอบหมายให้ประเมินเล่มรายงานวิจัย</li>
-<li>แจ้งเตือนนักวิจัยเมื่อรายงานวิจัยฉบับสมบูรณ์ผ่านการอนุมัติขั้นสุดท้าย</li>
+<li><strong>สวิตช์เปิด/ปิด</strong>: เลือกระงับหรือเปิดใช้งานการรันอัตโนมัติของงานแต่ละตัวได้อิสระ</li>
+<li><strong>ทุกวัน (Daily)</strong>: กำหนดเวลาที่ต้องการให้รัน (เช่น <code>02:00</code>, <code>04:15</code> น.)</li>
+<li><strong>ทุกสัปดาห์ (Weekly)</strong>: เลือกวันในสัปดาห์ (อาทิตย์ - เสาร์) พร้อมเวลา</li>
+<li><strong>กำหนดเอง (Custom Cron Expression)</strong>: รองรับการกรอกไวยากรณ์ Cron 5 ส่วน (เช่น <code>*/30 * * * *</code>, <code>0 2,14 * * *</code>)</li>
 </ul>
-<a id="3-%E0%B8%82%E0%B8%B1%E0%B9%89%E0%B8%99%E0%B8%95%E0%B8%AD%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%84%E0%B9%88%E0%B8%B2-telegram-bot-%E0%B9%83%E0%B8%99%E0%B9%84%E0%B8%9F%E0%B8%A5%E0%B9%8C-env" class="manual-anchor"></a><h4 id="3-ขั้นตอนการตั้งค่า-telegram-bot-ในไฟล์-env">3. ขั้นตอนการตั้งค่า Telegram Bot ในไฟล์ <code>.env</code></h4>
-<ol>
-<li>สร้างบอทผ่าน Telegram โดยคุยกับ <strong>@BotFather</strong> ➔ พิมพ์ <code>/newbot</code> ➔ นำ HTTP API Token ที่ได้มาระบุใน <code>TELEGRAM_BOT_TOKEN</code></li>
-<li>หา Chat ID ของตนเอง โดยคุยกับ <strong>@userinfobot</strong> ➔ นำหมายเลข ID มาระบุใน <code>TELEGRAM_ADMIN_CHAT_ID</code></li>
-<li>ทักแชทบอทที่สร้างไว้ แล้วกดปุ่ม <strong>/start</strong> เพื่อเปิดรับข้อความ</li>
-<li>บันทึกค่าลงในไฟล์ <code>.env</code>:
-<pre><code class="language-env">TELEGRAM_BOT_TOKEN=&quot;123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ&quot;
-TELEGRAM_ADMIN_CHAT_ID=&quot;123456789&quot;
-TELEGRAM_NOTIFICATIONS_ENABLED=true
-TELEGRAM_TIMEOUT=4
-</code></pre>
 </li>
-<li>คลิกปุ่ม <strong>&quot;ทดสอบส่งแจ้งเตือน Telegram&quot;</strong> บนหน้าจอระบบตั้งเวลาอัตโนมัติ เพื่อยืนยันว่าการเชื่อมต่อสมบูรณ์ 100%</li>
+</ul>
+</li>
+<li><strong>คำนวณรอบการรันงานอัตโนมัติล่วงหน้า (Next Due Calculation)</strong>: แสดงเวลาที่จะรันครั้งถัดไปในรูปแบบ พ.ศ. พร้อมระยะเวลาคงเหลือ (เช่น &quot;อีก 13 ชม.&quot;)</li>
+<li><strong>สั่งรันงานทันทีแบบ On-Demand (Run Now)</strong>: กดปุ่ม <strong>&quot;⚡ รันทันที&quot;</strong> เพื่อประมวลผลงานนั้น ๆ ทันที พร้อมหน้าต่าง <strong>Terminal Console Output</strong> แสดงผลลัพธ์การรันจริง และบันทึกประวัติลง Audit Trail</li>
 </ol>
+<hr />
+<a id="1111-ระบบการจัดการการแจ้งเตือนส่วนบุคคลและ-telegram-bot-personal-admin-notification-center" class="manual-anchor"></a><a id="1111-%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%81%E0%B8%88%E0%B9%89%E0%B8%87%E0%B9%80%E0%B8%95%E0%B8%B7%E0%B8%AD%E0%B8%99%E0%B8%AA%E0%B9%88%E0%B8%A7%E0%B8%99%E0%B8%9A%E0%B8%B8%E0%B8%84%E0%B8%84%E0%B8%A5%E0%B9%81%E0%B8%A5%E0%B8%B0-telegram-bot-personal--admin-notification-center" class="manual-anchor"></a><a id="1111-%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%81%E0%B8%88%E0%B9%89%E0%B8%87%E0%B9%80%E0%B8%95%E0%B8%B7%E0%B8%AD%E0%B8%99%E0%B8%AA%E0%B9%88%E0%B8%A7%E0%B8%99%E0%B8%9A%E0%B8%B8%E0%B8%84%E0%B8%84%E0%B8%A5%E0%B9%81%E0%B8%A5%E0%B8%B0-telegram-bot-personal-admin-notification-center" class="manual-anchor"></a><h3 id="1111-ระบบการจัดการการแจ้งเตือนส่วนบุคคลและ-telegram-bot-personal--admin-notification-center">11.11 ระบบการจัดการการแจ้งเตือนส่วนบุคคลและ Telegram Bot (Personal &amp; Admin Notification Center)</h3>
+<p>ระบบแจ้งเตือนถูกรวมศูนย์ไว้ที่หน้า <strong>จัดการข้อมูลส่วนตัว &amp; การแจ้งเตือน</strong> ของผู้ใช้งานทุกคน (เข้าใช้งานผ่านเมนูโปรไฟล์มุมขวาบน ➔ <strong>จัดการข้อมูลส่วนตัว &amp; แจ้งเตือน</strong> หรือ URL: <code>/backend/user/{id}/edit#notification-settings</code>):</p>
+<a id="1-%E0%B8%AA%E0%B8%B3%E0%B8%AB%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%99%E0%B8%B1%E0%B8%81%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B8%97%E0%B8%B8%E0%B8%81%E0%B8%84%E0%B8%99-all-logged-in-users" class="manual-anchor"></a><h4 id="1-สำหรับผู้ใช้งานและนักวิจัยทุกคน-all-logged-in-users">1. สำหรับผู้ใช้งานและนักวิจัยทุกคน (All Logged-in Users)</h4>
+<ul>
+<li><strong>การเชื่อมต่อ Telegram Chat ID ส่วนตัว</strong>:
+<ul>
+<li>กรอก Chat ID เพื่อรับการแจ้งเตือนผลงานวิจัยส่วนตัว</li>
+<li>วิธีหา ID: เปิด Telegram ค้นหาบอท <strong>@userinfobot</strong> แล้วกด Start บอทจะแจ้งหมายเลข ID</li>
+<li><strong>ปุ่ม &quot;⚡ ทดสอบส่ง Telegram&quot;</strong>: สามารถกดส่งข้อความทดสอบเข้า Telegram ส่วนตัวได้ทันที</li>
+</ul>
+</li>
+<li><strong>การเปิด/ปิดช่องทางแจ้งเตือน (Channel Controls)</strong>:
+<ul>
+<li>สวิตช์: <strong>เปิดรับการแจ้งเตือนทาง Email</strong></li>
+<li>สวิตช์: <strong>เปิดรับการแจ้งเตือนทาง Telegram</strong></li>
+</ul>
+</li>
+<li><strong>เลือกหัวข้อการแจ้งเตือนที่ต้องการรับ (Topic Subscriptions)</strong>:
+<ul>
+<li>🎉 แจ้งเตือนเมื่อผลงานวิจัยได้รับการอนุมัติเผยแพร่</li>
+<li>⚠️ แจ้งเตือนเมื่อผลงานวิจัยมีข้อเสนอแนะให้ปรับปรุงแก้ไข</li>
+<li>📋 แจ้งเตือนเมื่อได้รับมอบหมายงานประเมินเล่มรายงานวิจัย (ผู้ทรงคุณวุฒิ)</li>
+<li>✅ แจ้งเตือนเมื่อเล่มรายงานวิจัยฉบับสมบูรณ์ผ่านการอนุมัติ</li>
+</ul>
+</li>
+</ul>
+<a id="2-%E0%B8%AA%E0%B8%B3%E0%B8%AB%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%94%E0%B8%B9%E0%B9%81%E0%B8%A5%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%AA%E0%B8%B9%E0%B8%87%E0%B8%AA%E0%B8%B8%E0%B8%94-super-admin-system-audit-subscriptions" class="manual-anchor"></a><h4 id="2-สำหรับผู้ดูแลระบบสูงสุด-super-admin-system-audit-subscriptions">2. สำหรับผู้ดูแลระบบสูงสุด (Super Admin System Audit Subscriptions)</h4>
+<p>เฉพาะผู้ดูแลระบบบทบาท <code>The Creator</code>, <code>Admin</code>, หรือ <code>Admin Research</code> จะมีกล่องการตั้งค่าเพิ่มเติม:</p>
+<ul>
+<li><strong>การตั้งค่า Telegram Bot ของระบบ</strong>:
+<ul>
+<li>สามารถระบุหรือเปลี่ยน <strong>Telegram Bot Token</strong> และ <strong>Admin Chat ID</strong> ผ่านหน้าเว็บได้ทันทีโดยไม่ต้องแก้ไขไฟล์ <code>.env</code></li>
+</ul>
+</li>
+<li><strong>เลือกช่องทางส่งแจ้งเตือน Admin</strong>:
+<ul>
+<li>สวิตช์เปิด/ปิด: ส่งเข้า <strong>Telegram Admin</strong></li>
+<li>สวิตช์เปิด/ปิด: ส่งเข้า <strong>Email Admin</strong></li>
+</ul>
+</li>
+<li><strong>เลือกประเภทเหตุการณ์ที่ต้องการให้แจ้งเตือน (Event Subscriptions)</strong>:
+<ul>
+<li>🟢 เพิ่มข้อมูลใหม่ (Create): โครงการ, ผลงานตีพิมพ์, ทรัพย์สินทางปัญญา, การใช้ประโยชน์</li>
+<li>🟡 แก้ไขข้อมูล (Update): การเปลี่ยนแปลงรายละเอียดหรือสถานะ</li>
+<li>🔴 ลบข้อมูล (Delete): การลบรายการข้อมูล</li>
+<li>📎 อัปโหลดไฟล์ (File Upload): การแนบไฟล์ PDF เล่มรายงานหรือภาพปกใหม่</li>
+<li>💾 สำรอง &amp; กู้คืนระบบ (Backup/Restore): การสร้างแพ็กเกจหรือคำขอกู้คืนฐานข้อมูล</li>
+<li>🔐 เข้าสู่ระบบ/สวมสิทธิ์ (Auth Login): การล็อกอินหรือสลับสิทธิ์การใช้งาน</li>
+<li>⚡ รันคำสั่งบำรุงรักษา / Scheduler Manual Run</li>
+</ul>
+</li>
+</ul>
 
             </div>
             <footer>
