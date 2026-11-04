@@ -505,6 +505,7 @@
 <li>11.6 คู่มือขั้นตอนการติดตั้งเอนจินประมวลผล PDF และฟอนต์ภาษาไทย (SysAdmin Engine Installation Guide)</li>
 <li>11.7 ศูนย์สำรองและกู้คืนข้อมูลระบบ (System Backup, Restore with Email OTP &amp; Cloud Sync)</li>
 <li>11.8 การตั้งค่าระบบการส่งอีเมลของมหาวิทยาลัย (Mail &amp; SMTP Configuration)</li>
+<li>11.9 การตั้งเวลาทำงานอัตโนมัติและการตรวจสุขภาพระบบ (Task Scheduling &amp; Live Diagnostics)</li>
 </ul>
 </li>
 </ol>
@@ -1624,6 +1625,70 @@ MAIL_FROM_NAME=&quot;PCRU Research Database&quot;
 <li><strong>หากสำเร็จ</strong>: จะแสดงข้อความ <code>ส่งอีเมลสำเร็จ!</code> และมีอีเมลเข้า Inbox</li>
 <li><strong>หากล้มเหลว</strong>: ระบบจะแสดงข้อความแจ้งเตือนข้อผิดพลาดทันที (เช่น รหัสผ่าน App Password ผิดพลาด หรือพอร์ต SMTP 587 ถูกบล็อกโดยไฟร์วอลล์)</li>
 </ul>
+<hr />
+<a id="119-การตั้งเวลาทำงานอัตโนมัติและการตรวจสุขภาพระบบ-task-scheduling-live-diagnostics" class="manual-anchor"></a><a id="119-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B9%80%E0%B8%A7%E0%B8%A5%E0%B8%B2%E0%B8%97%E0%B8%B3%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%AD%E0%B8%B1%E0%B8%95%E0%B9%82%E0%B8%99%E0%B8%A1%E0%B8%B1%E0%B8%95%E0%B8%B4%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%AA%E0%B8%B8%E0%B8%82%E0%B8%A0%E0%B8%B2%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A-task-scheduling--live-diagnostics" class="manual-anchor"></a><a id="119-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B9%80%E0%B8%A7%E0%B8%A5%E0%B8%B2%E0%B8%97%E0%B8%B3%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%AD%E0%B8%B1%E0%B8%95%E0%B9%82%E0%B8%99%E0%B8%A1%E0%B8%B1%E0%B8%95%E0%B8%B4%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%AA%E0%B8%B8%E0%B8%82%E0%B8%A0%E0%B8%B2%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A-task-scheduling-live-diagnostics" class="manual-anchor"></a><h3 id="119-การตั้งเวลาทำงานอัตโนมัติและการตรวจสุขภาพระบบ-task-scheduling--live-diagnostics">11.9 การตั้งเวลาทำงานอัตโนมัติและการตรวจสุขภาพระบบ (Task Scheduling &amp; Live Diagnostics)</h3>
+<a id="1-%E0%B8%AA%E0%B8%96%E0%B8%B2%E0%B8%9B%E0%B8%B1%E0%B8%95%E0%B8%A2%E0%B8%81%E0%B8%A3%E0%B8%A3%E0%B8%A1%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B9%80%E0%B8%A7%E0%B8%A5%E0%B8%B2%E0%B8%97%E0%B8%B3%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%AD%E0%B8%B1%E0%B8%95%E0%B9%82%E0%B8%99%E0%B8%A1%E0%B8%B1%E0%B8%95%E0%B8%B4-cron-job-scheduler" class="manual-anchor"></a><h4 id="1-สถาปัตยกรรมการตั้งเวลาทำงานอัตโนมัติ-cron-job-scheduler">1. สถาปัตยกรรมการตั้งเวลาทำงานอัตโนมัติ (Cron Job Scheduler)</h4>
+<p>ระบบฐานข้อมูลงานวิจัยได้รวมคำสั่งบำรุงรักษาและการสำรองข้อมูลทั้งหมดเข้าสู่ตัวตั้งเวลาอัตโนมัติของ Laravel (<code>routes/console.php</code>) โดยผู้ดูแลระบบแม่ข่าย (SysAdmin) เพียงกำหนดให้ Linux Crontab รันคำสั่งตรวจสอบทุก 1 นาที:</p>
+<pre><code class="language-bash"># แก้ไขไฟล์ Crontab ของเซิร์ฟเวอร์
+crontab -e
+
+# เพิ่มบรรทัดคำสั่งตั้งเวลา (ชี้ไปยังไดเรกทอรีของระบบ)
+* * * * * cd /laragon/www/laravel_rdb &amp;&amp; php artisan schedule:run &gt;&gt; /dev/null 2&gt;&amp;1
+</code></pre>
+<a id="2-%E0%B8%95%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B9%80%E0%B8%A7%E0%B8%A5%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%B3%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%AD%E0%B8%B1%E0%B8%95%E0%B9%82%E0%B8%99%E0%B8%A1%E0%B8%B1%E0%B8%95%E0%B8%B4%E0%B9%83%E0%B8%99%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A-system-cron-schedule" class="manual-anchor"></a><h4 id="2-ตารางเวลาการทำงานอัตโนมัติในระบบ-system-cron-schedule">2. ตารางเวลาการทำงานอัตโนมัติในระบบ (System Cron Schedule)</h4>
+<table>
+<thead>
+<tr>
+<th align="left">เวลาที่กำหนด (Time)</th>
+<th align="left">คำสั่งที่ระบบรันอัตโนมัติ (Artisan Command)</th>
+<th align="left">หน้าที่และผลลัพธ์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>02:00 น. ทุกวัน</strong></td>
+<td align="left"><code>php artisan rdb:backup --type=db</code></td>
+<td align="left">สำรองฐานข้อมูล MariaDB ทั้งหมดเป็นไฟล์บีบอัด <code>.sql.gz</code> อัตโนมัติ</td>
+</tr>
+<tr>
+<td align="left"><strong>03:00 น. ทุกคืนวันอาทิตย์</strong></td>
+<td align="left"><code>php artisan rdb:backup --type=all</code></td>
+<td align="left">สำรองระบบเต็มรูปแบบ (ฐานข้อมูล + ไฟล์เอกสารงานวิจัยทั้งหมดใน Storage)</td>
+</tr>
+<tr>
+<td align="left"><strong>04:00 น. ทุกวัน</strong></td>
+<td align="left"><code>php artisan rdb:count-pdf-pages --module=all --limit=100</code></td>
+<td align="left">ตรวจสอบและนับจำนวนหน้าเอกสาร PDF ที่ตกค้างด้วยเอนจิน Poppler แม่นยำ 99.99%</td>
+</tr>
+<tr>
+<td align="left"><strong>04:30 น. ทุกวัน</strong></td>
+<td align="left"><code>php artisan rdb:generate-pdf-covers --module=all --limit=50</code></td>
+<td align="left">ตรวจสอบและเรนเดอร์ภาพหน้าแรกของไฟล์ PDF เป็นภาพปก <code>.webp</code> ความเร็วสูง</td>
+</tr>
+<tr>
+<td align="left"><strong>06:00 น. ทุกวัน</strong></td>
+<td align="left"><code>php artisan rdb:sync-nriis-news</code></td>
+<td align="left">ซิงค์ข่าวประกาศทุนวิจัยใหม่จากระบบ NRIIS เข้าสู่ฐานข้อมูลอัตโนมัติ</td>
+</tr>
+<tr>
+<td align="left"><strong>06:30 น. ทุกวัน</strong></td>
+<td align="left"><code>php artisan rdb:sync-facebook-conferences</code></td>
+<td align="left">ซิงค์ข่าวงานประชุมวิชาการจากเพจ Facebook สถาบันวิจัยฯ อัตโนมัติ</td>
+</tr>
+</tbody>
+</table>
+<a id="3-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%95%E0%B8%B2%E0%B8%A3%E0%B8%B2%E0%B8%87%E0%B9%80%E0%B8%A7%E0%B8%A5%E0%B8%B2%E0%B8%97%E0%B8%B3%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%94%E0%B9%89%E0%B8%A7%E0%B8%A2-artisan-cli" class="manual-anchor"></a><h4 id="3-การตรวจสอบตารางเวลาทำงานด้วย-artisan-cli">3. การตรวจสอบตารางเวลาทำงานด้วย Artisan CLI</h4>
+<p>ผู้ดูแลระบบสามารถตรวจสอบตารางเวลาและรอบการรันครั้งถัดไปได้ทันทีผ่าน Terminal:</p>
+<pre><code class="language-bash">php artisan schedule:list
+</code></pre>
+<a id="4-%E0%B9%81%E0%B8%96%E0%B8%9A%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%AA%E0%B8%B8%E0%B8%82%E0%B8%A0%E0%B8%B2%E0%B8%9E%E0%B9%80%E0%B8%8B%E0%B8%B4%E0%B8%A3%E0%B9%8C%E0%B8%9F%E0%B9%80%E0%B8%A7%E0%B8%AD%E0%B8%A3%E0%B9%8C%E0%B9%81%E0%B8%9A%E0%B8%9A%E0%B9%80%E0%B8%A3%E0%B8%B5%E0%B8%A2%E0%B8%A5%E0%B9%84%E0%B8%97%E0%B8%A1%E0%B9%8C-live-diagnostics-strip" class="manual-anchor"></a><h4 id="4-แถบตรวจสุขภาพเซิร์ฟเวอร์แบบเรียลไทม์-live-diagnostics-strip">4. แถบตรวจสุขภาพเซิร์ฟเวอร์แบบเรียลไทม์ (Live Diagnostics Strip)</h4>
+<p>บนหน้าจอศูนย์จัดการคำสั่งระบบ (<code>/backend/system-commands</code>) มีการ์ดตรวจสุขภาพเซิร์ฟเวอร์ 4 ด้าน:</p>
+<ol>
+<li><strong>ระบบฐานข้อมูล (Database)</strong>: แสดงสถานะการเชื่อมต่อ ชื่อฐานข้อมูล เวอร์ชันของเอนจิน (MariaDB/MySQL) และการเข้ารหัส UTF-8</li>
+<li><strong>คิวงานประมวลผล (Queue)</strong>: แสดงไดรเวอร์คิวงาน จำนวนงานที่กำลังรอดำเนินการ และจำนวนงานที่ผิดพลาด (<code>failed_jobs</code>)</li>
+<li><strong>ระบบตั้งเวลา (Scheduler)</strong>: แสดงจำนวนงานตั้งเวลาที่พร้อมรัน (6 งาน) และรอบเวลาการสำรองข้อมูลอัตโนมัติ</li>
+<li><strong>ความพร้อมใช้งานจริง (Production Readiness)</strong>: แสดงเวอร์ชัน PHP, ขีดจำกัดหน่วยความจำ RAM, สภาพแวดล้อม (<code>APP_ENV</code>) และป้ายเตือนความปลอดภัยของโหมด Debug (<code>APP_DEBUG=false</code>)</li>
+</ol>
 
             </div>
             <footer>

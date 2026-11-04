@@ -194,6 +194,33 @@ php .agents/skills/documentation-and-manuals/scripts/build_html_manuals.php
 
 ## 📝 บันทึกการอัปเดตระบบล่าสุด (Changelog / Update Log)
 
+### อัปเดตประจำวันที่ 4 พฤศจิกายน 2569 (Release 2026.11.04)
+1. **ระบบตั้งเวลาทำงานอัตโนมัติ (Automated Task Scheduling & Crontab Integration):**
+   * กำหนด Schedule ใน `routes/console.php` รองรับการทำงานเบื้องหลังอัตโนมัติ 6 งานหลัก:
+     - สำรองฐานข้อมูลระบบอัตโนมัติทุกวัน เวลา 02:00 น. (`rdb:backup --type=db`)
+     - สำรองข้อมูลเต็มระบบ (ฐานข้อมูล + ไฟล์ Storage) ทุกคืนวันอาทิตย์ เวลา 03:00 น. (`rdb:backup --type=all`)
+     - ตรวจสอบและนับจำนวนหน้าเอกสาร PDF ตกค้างทุกวัน เวลา 04:00 น. (`rdb:count-pdf-pages`)
+     - เรนเดอร์ภาพหน้าปก WebP ความเร็วสูงทุกวัน เวลา 04:30 น. (`rdb:generate-pdf-covers`)
+     - ซิงค์ข่าวทุนวิจัย NRIIS ทุกเช้า เวลา 06:00 น. (`rdb:sync-nriis-news`)
+     - ซิงค์ข่าวงานประชุมวิชาการจากเพจ Facebook ทุกเช้า เวลา 06:30 น. (`rdb:sync-facebook-conferences`)
+   * ตั้งเวลาบนเซิร์ฟเวอร์บรรทัดเดียว: `* * * * * cd /path/to/laravel_rdb && php artisan schedule:run >> /dev/null 2>&1`
+2. **ระบบส่งอีเมลแจ้งเตือนงานวิจัยตามกระบวนการทำงาน (Workflow Email Notifications via SMTP):**
+   * ขยายขีดความสามารถของระบบแจ้งเตือนให้ส่งอีเมลคู่กับการแจ้งเตือนในระบบ (Dual Channel: `database` + `mail`):
+     - ส่งอีเมลแจ้ง**นักวิจัย**ทันทีเมื่อผลงานวิจัยได้รับการอนุมัติเผยแพร่ (`ResearchItemApprovedNotification`) พร้อมปุ่มลิงก์เปิดดูหน้าบ้าน
+     - ส่งอีเมลแจ้ง**นักวิจัย**พร้อมระบุข้อคิดเห็น/เหตุผลเมื่อผลงานถูกส่งกลับแก้ไข (`ResearchItemRejectedNotification`)
+     - ส่งอีเมลแจ้ง**ผู้ทรงคุณวุฒิ (Reviewer)** ทันทีเมื่อได้รับมอบหมายให้ประเมินเล่มรายงานวิจัยฉบับสมบูรณ์ (`ReviewAssignedNotification`) พร้อมลิงก์เข้าสู่แบบฟอร์มประเมิน
+     - ส่งอีเมลแจ้ง**นักวิจัย**เมื่อเล่มรายงานวิจัยผ่านการประเมินรอบสุดท้าย (`ReviewFinalApprovedNotification`)
+   * ปลอดภัยด้วยสถาปัตยกรรม Non-blocking Exception Guard ไม่กระทบต่อการบันทึกข้อมูลหลักหากระบบเครือข่าย SMTP ติดขัด
+3. **การ์ดวิเคราะห์สุขภาพเซิร์ฟเวอร์แบบเรียลไทม์ (Live Server Health & Diagnostics Strip):**
+   * เพิ่มแถบตรวจสุขภาพระบบ 4 การ์ดในศูนย์คำสั่งระบบ (`/backend/system-commands`):
+     - ตรวจสอบสถานะการเชื่อมต่อฐานข้อมูล MariaDB/MySQL และเวอร์ชันเอนจินแบบเรียลไทม์
+     - ตรวจสอบคิวงานประมวลผลเบื้องหลัง (Queue Worker Driver, งานที่รอดำเนินการ, งานที่ผิดพลาด `failed_jobs`)
+     - ตรวจสอบสถานะระบบตั้งเวลาอัตโนมัติ (6 Scheduled Tasks)
+     - ตรวจสอบความพร้อมสำหรับการใช้งานจริง (PHP Version, Memory Limit, Environment และแจ้งเตือนสถานะ `APP_DEBUG`)
+4. **แนวทางและข้อปฏิบัติสำหรับการนำระบบขึ้นใช้งานจริง (Production Deployment Readiness):**
+   * เอกสารและคำแนะนำสำหรับการปรับแต่ง `.env` ในสภาวะ Production (`APP_DEBUG=false`, `QUEUE_CONNECTION=database`)
+   * คำสั่งรัน Worker ในโหมด Daemon (`php artisan queue:work --tries=3 --timeout=90`) และการแคชระดับสูง (`php artisan optimize`)
+
 ### อัปเดตประจำวันที่ 3 พฤศจิกายน 2569 (Release 2026.11.03)
 1. **ศูนย์สำรองและกู้คืนข้อมูลระบบ (Full System Backup & Safe Restore Hub — The Creator Only):**
    * พัฒนาระบบสำรองข้อมูล 3 รูปแบบ: เฉพาะฐานข้อมูล MariaDB (`.sql.gz`), เฉพาะไฟล์เอกสาร Storage (`.zip`), และสำรองทั้งระบบแบบเต็ม (Full Archive)

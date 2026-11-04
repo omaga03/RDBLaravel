@@ -639,7 +639,7 @@ $indexBody = <<<'HTML'
         <div>
             <span class="hero-badge">VOLUME 2 • 11 บทเรียน</span>
             <h3 style="margin-top: 0.25rem; border: none; padding: 0;">เล่มที่ 2: คู่มือการใช้งานระบบหลังบ้าน (Admin & Researcher)</h3>
-            <p style="color: var(--text-secondary); font-size: 0.95rem;">สำหรับนักวิจัย ผู้ทรงคุณวุฒิ และผู้ดูแลระบบ ครอบคลุม Google SSO, สิทธิ์ RBAC & Impersonation, วงจรการส่งร่างและอนุมัติผลงาน (WF-01 ถึง WF-07), ระบบตรวจนับหน้า PDF & ปก .webp, ระบบ Peer Review, ส่งออก Excel UTF-8 BOM, คลังปัญญา DSpace SAF, ศูนย์คำสั่งบำรุงรักษา, ระบบสำรองและกู้คืนฐานข้อมูลด้วย Email OTP (The Creator Only) และการตั้งค่าระบบ Mail</p>
+            <p style="color: var(--text-secondary); font-size: 0.95rem;">สำหรับนักวิจัย ผู้ทรงคุณวุฒิ และผู้ดูแลระบบ ครอบคลุม Google SSO, สิทธิ์ RBAC & Impersonation, วงจรการส่งร่างและอนุมัติผลงาน (WF-01 ถึง WF-07), ระบบตรวจนับหน้า PDF & ปก .webp, ระบบ Peer Review, ส่งออก Excel UTF-8 BOM, คลังปัญญา DSpace SAF, ศูนย์คำสั่งบำรุงรักษา, ระบบสำรองและกู้คืนฐานข้อมูลด้วย Email OTP (The Creator Only), การตั้งค่าระบบ Mail และการตั้งเวลาทำงานอัตโนมัติ Cron Tasks พร้อมแถบตรวจสุขภาพเซิร์ฟเวอร์แบบเรียลไทม์</p>
         </div>
         <a href="VOLUME_2_BACKEND_ADMIN_RESEARCHER_MANUAL.html" style="display: inline-block; text-align: center; background: #1E3A5F; color: #fff; padding: 0.65rem 1rem; border-radius: 6px; font-family: 'Prompt', sans-serif; font-weight: 500; margin-top: 1rem;">เปิดอ่านเล่มที่ 2 <i class="bi bi-arrow-right ms-1"></i></a>
     </div>

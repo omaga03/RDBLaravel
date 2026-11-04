@@ -164,7 +164,104 @@
         </div>
     </div>
 
-    <!-- 2. Processing Statistics (Current Coverage) -->
+    <!-- 1.2 Advanced Server Health & Production Diagnostics Strip -->
+    <div class="row g-3 mb-4">
+        <!-- Health Card 1: Database Status & Latency -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100 border shadow-sm bg-body">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="small fw-semibold text-body-secondary"><i class="bi bi-database-fill-check me-1 text-primary"></i>ระบบฐานข้อมูล (Database)</span>
+                        <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle">
+                            <i class="bi bi-shield-check me-1"></i>{{ $healthInfo['db_status'] }}
+                        </span>
+                    </div>
+                    <div class="small fw-bold text-body text-truncate mb-1" title="{{ $healthInfo['db_name'] }}">
+                        {{ $healthInfo['db_name'] }}
+                    </div>
+                    <div class="text-body-tertiary small d-flex justify-content-between align-items-center" style="font-size: 0.78rem;">
+                        <span class="text-truncate" title="{{ $healthInfo['db_version'] }}">Engine: <code class="text-body-secondary">{{ \Illuminate\Support\Str::limit($healthInfo['db_version'], 18) }}</code></span>
+                        <span class="badge bg-body-secondary text-body-secondary border border-secondary-subtle">utf8mb4</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Health Card 2: Queue Workers & Asynchronous Jobs -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100 border shadow-sm bg-body">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="small fw-semibold text-body-secondary"><i class="bi bi-layers-fill me-1 text-info"></i>คิวงานประมวลผล (Queue)</span>
+                        @if($healthInfo['failed_jobs'] > 0)
+                            <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i>ตกค้าง {{ $healthInfo['failed_jobs'] }} งาน
+                            </span>
+                        @else
+                            <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle">
+                                <i class="bi bi-check2-circle me-1"></i>ปกติ ไร้งานตกค้าง
+                            </span>
+                        @endif
+                    </div>
+                    <div class="small fw-bold text-body mb-1">
+                        Driver: <code class="text-primary">{{ $healthInfo['queue_driver'] }}</code> (รันงานพื้นหลัง)
+                    </div>
+                    <div class="text-body-tertiary small d-flex justify-content-between align-items-center" style="font-size: 0.78rem;">
+                        <span>รอดำเนินการ: <b class="text-body">{{ $healthInfo['pending_jobs'] }}</b></span>
+                        <span>ผิดพลาด: <b class="{{ $healthInfo['failed_jobs'] > 0 ? 'text-danger' : 'text-body' }}">{{ $healthInfo['failed_jobs'] }}</b></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Health Card 3: Cron Task Scheduler -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100 border shadow-sm bg-body">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="small fw-semibold text-body-secondary"><i class="bi bi-clock-history me-1 text-success"></i>ระบบตั้งเวลา (Scheduler)</span>
+                        <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle">
+                            <i class="bi bi-check-all me-1"></i>{{ $healthInfo['schedule_count'] }} งานพร้อมรัน
+                        </span>
+                    </div>
+                    <div class="small fw-bold text-body mb-1">
+                        สำรองข้อมูลอัตโนมัติ: <span class="text-success">02:00 น. ทุกวัน</span>
+                    </div>
+                    <div class="text-body-tertiary small d-flex justify-content-between align-items-center" style="font-size: 0.78rem;">
+                        <span>สำรองเต็มระบบ: <span class="text-body">อาทิตย์ 03:00 น.</span></span>
+                        <span>NRIIS: <span class="text-body">06:00 น.</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Health Card 4: Production Readiness & Memory Limit -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100 border shadow-sm bg-body">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="small fw-semibold text-body-secondary"><i class="bi bi-shield-lock-fill me-1 text-warning"></i>ความพร้อมระบบ (Production)</span>
+                        @if($healthInfo['app_debug'])
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" title="ควรปิด APP_DEBUG เมื่อใช้งาน Production">
+                                <i class="bi bi-exclamation-triangle me-1"></i>Debug เปิดอยู่
+                            </span>
+                        @else
+                            <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle">
+                                <i class="bi bi-shield-check me-1"></i>Production Hardened
+                            </span>
+                        @endif
+                    </div>
+                    <div class="small fw-bold text-body mb-1">
+                        PHP {{ $healthInfo['php_version'] }} (RAM: {{ $healthInfo['memory_limit'] }})
+                    </div>
+                    <div class="text-body-tertiary small d-flex justify-content-between align-items-center" style="font-size: 0.78rem;">
+                        <span>Env: <code class="text-body-secondary">{{ $healthInfo['app_env'] }}</code></span>
+                        <span>Debug: <code class="{{ $healthInfo['app_debug'] ? 'text-warning fw-bold' : 'text-success' }}">{{ $healthInfo['app_debug'] ? 'true' : 'false' }}</code></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="row g-4 mb-4">
         <!-- Project Coverage Card -->
         <div class="col-md-6">

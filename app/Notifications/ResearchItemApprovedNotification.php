@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class ResearchItemApprovedNotification extends Notification
@@ -16,7 +17,39 @@ class ResearchItemApprovedNotification extends Notification
 
     public function via($notifiable): array
     {
-        return ['database'];
+        $channels = ['database'];
+        if (!empty($notifiable->email) && filter_var($notifiable->email, FILTER_VALIDATE_EMAIL)) {
+            $channels[] = 'mail';
+        }
+        return $channels;
+    }
+
+    public function toMail($notifiable): MailMessage
+    {
+        $titleName = match ($this->type) {
+            'project' => $this->item->pro_nameTH,
+            'published' => $this->item->pub_name,
+            'dip' => $this->item->dip_data2_name ?? $this->item->dip_name,
+            'utilize' => 'การนำโครงการวิจัยไปใช้ประโยชน์ #' . $this->item->pro_id,
+            default => 'ผลงานวิชาการ',
+        };
+
+        $routeName = match ($this->type) {
+            'utilize' => 'frontend.rdbprojectutilize.show',
+            default => 'frontend.rdb' . $this->type . '.show',
+        };
+
+        $url = \Illuminate\Support\Facades\Route::has($routeName)
+            ? route($routeName, $this->item->getKey())
+            : url('/');
+
+        return (new MailMessage)
+            ->subject('🎉 [PCRU RDB] ผลงานวิจัยของท่านได้รับการอนุมัติเผยแพร่แล้ว')
+            ->greeting('เรียน ' . ($notifiable->name ?? 'ท่านนักวิจัย'))
+            ->line("ผลงานวิจัยรายการ '{$titleName}' ได้รับการตรวจสอบและอนุมัติให้เผยแพร่สู่ระบบฐานข้อมูลงานวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์ (PCRU RDB) เรียบร้อยแล้ว")
+            ->action('เปิดดูผลงานบนระบบหน้าบ้าน', $url)
+            ->line('ขอบพระคุณที่ร่วมสร้างสรรค์ผลงานวิจัยและนวัตกรรมเพื่อการพัฒนาทางวิชาการและสังคมอย่างยั่งยืน')
+            ->salutation("ด้วยความเคารพอย่างสูง,\nสถาบันวิจัยและพัฒนา มหาวิทยาลัยราชภัฏเพชรบูรณ์");
     }
 
     public function toArray($notifiable): array
@@ -29,7 +62,6 @@ class ResearchItemApprovedNotification extends Notification
             default => 'ผลงานวิชาการ',
         };
 
-        // Map workflow type → public route (utilize module is named "rdbprojectutilize")
         $routeName = match ($this->type) {
             'utilize' => 'frontend.rdbprojectutilize.show',
             default => 'frontend.rdb' . $this->type . '.show',

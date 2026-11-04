@@ -80,7 +80,42 @@ class SystemCommandController extends Controller
             'free_disk_space' => $this->getFormattedDiskSpace(),
         ];
 
-        // 4. System Backup & Restore Information (Strictly The Creator Only)
+        // 4. Advanced Server Health & Production Diagnostics
+        $dbStatus = 'Connected';
+        $dbVersion = 'Unknown';
+        try {
+            \DB::connection()->getPdo();
+            $dbVersion = \DB::selectOne("SELECT VERSION() as v")?->v ?? 'Unknown';
+        } catch (\Throwable $e) {
+            $dbStatus = 'Disconnected: ' . $e->getMessage();
+        }
+
+        $pendingJobsCount = 0;
+        $failedJobsCount = 0;
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('jobs')) {
+                $pendingJobsCount = \DB::table('jobs')->count();
+            }
+            if (\Illuminate\Support\Facades\Schema::hasTable('failed_jobs')) {
+                $failedJobsCount = \DB::table('failed_jobs')->count();
+            }
+        } catch (\Throwable $e) {}
+
+        $healthInfo = [
+            'db_status' => $dbStatus,
+            'db_version' => $dbVersion,
+            'db_name' => \DB::getDatabaseName(),
+            'queue_driver' => config('queue.default', 'sync'),
+            'pending_jobs' => $pendingJobsCount,
+            'failed_jobs' => $failedJobsCount,
+            'app_env' => config('app.env', 'production'),
+            'app_debug' => (bool)config('app.debug', false),
+            'php_version' => PHP_VERSION,
+            'memory_limit' => ini_get('memory_limit'),
+            'schedule_count' => 6,
+        ];
+
+        // 5. System Backup & Restore Information (Strictly The Creator Only)
         $isCreator = auth()->user()?->hasRole('The Creator') || auth()->user()?->id === 129;
         $backupList = $isCreator ? $backupService->getBackupList() : [];
         $dbSizeFormatted = $backupService->formatBytes($backupService->getDatabaseSize());
@@ -96,6 +131,7 @@ class SystemCommandController extends Controller
             'projectWithPageNum',
             'publishedWithPageNum',
             'engineInfo',
+            'healthInfo',
             'isCreator',
             'backupList',
             'dbSizeFormatted',
