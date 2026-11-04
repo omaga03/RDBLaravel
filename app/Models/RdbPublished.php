@@ -162,4 +162,27 @@ class RdbPublished extends Model
     {
         return $this->getCoverUrl();
     }
+
+    /**
+     * Smart Accessors to prevent silent null on legacy Yii2 / Laravel naming conventions
+     */
+    public function getPubNameThAttribute(): ?string
+    {
+        return $this->pub_name;
+    }
+
+    public function getTitleAttribute(): ?string
+    {
+        return $this->pub_name;
+    }
+
+    public function getPublishedNameAttribute(): ?string
+    {
+        return $this->pub_name;
+    }
+
+    public function getPubFilePathAttribute(): ?string
+    {
+        return $this->pf_path;
+    }
 }

@@ -17,4 +17,22 @@ class RdbResearcherStatus extends Model
         'created_at',
         'updated_at',
     ];
+
+    /**
+     * Smart Accessors to prevent silent null on legacy Yii2 / Laravel naming conventions
+     */
+    public function getRstNameAttribute(): ?string
+    {
+        return $this->restatus_name;
+    }
+
+    public function getNameAttribute(): ?string
+    {
+        return $this->restatus_name;
+    }
+
+    public function getStatusNameAttribute(): ?string
+    {
+        return $this->restatus_name;
+    }
 }

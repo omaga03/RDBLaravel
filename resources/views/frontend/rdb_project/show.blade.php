@@ -14,17 +14,17 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <strong>รายละเอียด:</strong>
-                        <p>{{ $project->pro_detail }}</p>
+                        <p>{{ $project->pro_abstract ?? $project->pro_detail }}</p>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6">
-                            <strong>วันเริ่มต้น:</strong> {{ $project->pro_start }}<br>
-                            <strong>วันสิ้นสุด:</strong> {{ $project->pro_end }}<br>
+                            <strong>วันเริ่มต้น:</strong> {{ $project->pro_date_start ?? $project->pro_start }}<br>
+                            <strong>วันสิ้นสุด:</strong> {{ $project->pro_date_end ?? $project->pro_end }}<br>
                         </div>
                         <div class="col-md-6">
                             <strong>งบประมาณ:</strong> {{ number_format($project->pro_budget, 2) }}<br>
-                            <strong>สถานะ:</strong> {{ $project->projectStatus->ps_nameTH ?? '-' }}
+                            <strong>สถานะ:</strong> {{ $project->status->ps_name ?? $project->projectStatus->ps_nameTH ?? '-' }}
                         </div>
                     </div>
                 </div>

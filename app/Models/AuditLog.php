@@ -57,7 +57,7 @@ class AuditLog extends Model
                 'user_id' => $user?->id,
                 'user_name' => $user ? ($user->researcher ? $user->researcher->full_name : $user->username) : 'Guest / System',
                 'user_role' => $scope ? $scope->role_name : ($user ? ($user->roles->first()?->item_name ?? 'User') : 'Guest'),
-                'scope_info' => $scope ? ($scope->department ? "Dept: {$scope->department->department_name}" : ($scope->domain_key ? "Domain: {$scope->domain_key}" : 'Central')) : null,
+                'scope_info' => $scope ? ($scope->department ? "Dept: " . ($scope->department->department_nameTH ?? $scope->department->department_name) : ($scope->domain_key ? "Domain: {$scope->domain_key}" : 'Central')) : null,
                 'event' => $event,
                 'auditable_type' => is_object($auditable) ? class_basename($auditable) : (string) $auditable,
                 'auditable_id' => is_object($auditable) ? ($auditable->getKey() ?? 0) : 0,

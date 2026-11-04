@@ -34,4 +34,14 @@ class RdbProjectUtilizeType extends Model
     {
         return $this->utz_typr_name;
     }
+
+    public function getNameAttribute(): ?string
+    {
+        return $this->utz_typr_name;
+    }
+
+    public function getTypeNameAttribute(): ?string
+    {
+        return $this->utz_typr_name;
+    }
 }

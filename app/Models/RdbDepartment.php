@@ -87,4 +87,22 @@ class RdbDepartment extends Model
     public function updater() {
         return $this->belongsTo(User::class, 'user_updated');
     }
+
+    /**
+     * Smart Accessors to prevent silent null on legacy Yii2 / Laravel naming conventions
+     */
+    public function getDepartmentNameAttribute(): ?string
+    {
+        return $this->attributes['department_nameTH'] ?? null;
+    }
+
+    public function getNameAttribute(): ?string
+    {
+        return $this->attributes['department_nameTH'] ?? null;
+    }
+
+    public function getDepartmentNameEnAttribute(): ?string
+    {
+        return $this->attributes['department_nameEN'] ?? null;
+    }
 }

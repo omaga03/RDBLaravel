@@ -54,7 +54,7 @@
 
         <!-- ✅ Additional Files - Read Only (แสดงเฉพาะ rf_files_show = 1) -->
         @php
-            $publicFiles = $project->projectFiles()
+            $publicFiles = $project->files()
                 ->where('rf_files_show', 1)
                 ->orderBy('id', 'desc')
                 ->get();

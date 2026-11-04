@@ -36,4 +36,22 @@ class RdbPrefix extends Model
     {
         return $this->researchers()->doesntExist();
     }
+
+    /**
+     * Smart Accessors to prevent silent null on legacy Yii2 / Laravel naming conventions
+     */
+    public function getPrefixNameAttribute(): ?string
+    {
+        return $this->prefix_nameTH;
+    }
+
+    public function getNameAttribute(): ?string
+    {
+        return $this->prefix_nameTH;
+    }
+
+    public function getAbbreviationAttribute(): ?string
+    {
+        return $this->prefix_abbreviationTH;
+    }
 }

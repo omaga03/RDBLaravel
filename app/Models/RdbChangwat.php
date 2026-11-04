@@ -27,4 +27,32 @@ class RdbChangwat extends Model
         'created_at',
         'updated_at',
     ];
+
+    /**
+     * Smart Accessors to prevent silent null on legacy Yii2 / Laravel naming conventions
+     */
+    public function getChangwatNameAttribute(): ?string
+    {
+        return $this->changwat_t;
+    }
+
+    public function getProvinceNameAttribute(): ?string
+    {
+        return $this->changwat_t;
+    }
+
+    public function getNameAttribute(): ?string
+    {
+        return $this->changwat_t;
+    }
+
+    public function getAmphoeNameAttribute(): ?string
+    {
+        return $this->amphoe_t;
+    }
+
+    public function getTambonNameAttribute(): ?string
+    {
+        return $this->tambon_t;
+    }
 }

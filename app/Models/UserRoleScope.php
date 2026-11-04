@@ -36,7 +36,7 @@ class UserRoleScope extends Model
      */
     public function getLabelAttribute(): string
     {
-        $deptName = $this->department ? $this->department->department_name : null;
+        $deptName = $this->department ? ($this->department->department_nameTH ?? $this->department->department_name) : null;
 
         return match ($this->role_name) {
             'The Creator' => '👑 ผู้ดูแลระบบสูงสุด (Super Admin)',

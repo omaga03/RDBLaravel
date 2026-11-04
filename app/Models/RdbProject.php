@@ -85,6 +85,14 @@ class RdbProject extends Model
         return $this->belongsTo(RdbProjectStatus::class, 'ps_id', 'ps_id');
     }
 
+    /**
+     * Alias for status relation
+     */
+    public function projectStatus()
+    {
+        return $this->status();
+    }
+
     public function group()
     {
         return $this->belongsTo(RdbGroupproject::class, 'pgroup_id', 'pgroup_id');
@@ -168,6 +176,14 @@ class RdbProject extends Model
     public function files()
     {
         return $this->hasMany(RdbProjectFiles::class, 'pro_id', 'pro_id');
+    }
+
+    /**
+     * Alias for files relation
+     */
+    public function projectFiles()
+    {
+        return $this->files();
     }
 
     public function createdBy()
@@ -398,5 +414,48 @@ class RdbProject extends Model
     public function getCoverUrlAttribute(): ?string
     {
         return $this->getCoverUrl();
+    }
+
+    /**
+     * Smart Accessors to prevent silent null on legacy Yii2 / Laravel naming conventions
+     */
+    public function getProNameThAttribute(): ?string
+    {
+        return $this->attributes['pro_nameTH'] ?? null;
+    }
+
+    public function getProNameEnAttribute(): ?string
+    {
+        return $this->attributes['pro_nameEN'] ?? null;
+    }
+
+    public function getTitleAttribute(): ?string
+    {
+        return ($this->attributes['pro_nameTH'] ?? null) ?: ($this->attributes['pro_nameEN'] ?? null);
+    }
+
+    public function getProjectNameAttribute(): ?string
+    {
+        return $this->attributes['pro_nameTH'] ?? null;
+    }
+
+    public function getProDetailAttribute(): ?string
+    {
+        return $this->attributes['pro_abstract'] ?? null;
+    }
+
+    public function setProDetailAttribute($value): void
+    {
+        $this->attributes['pro_abstract'] = $value;
+    }
+
+    public function getProStartAttribute()
+    {
+        return $this->attributes['pro_date_start'] ?? null;
+    }
+
+    public function getProEndAttribute()
+    {
+        return $this->attributes['pro_date_end'] ?? null;
     }
 }

@@ -74,4 +74,23 @@ class RdbProjectFiles extends Model
     public function usingNewPath(): bool
     {
         return $this->usingNewPath('prf_path');
-    }}
+    }
+
+    /**
+     * Smart Accessors to prevent silent null on legacy Yii2 / Laravel naming conventions
+     */
+    public function getFileNameAttribute(): ?string
+    {
+        return $this->rf_filesname;
+    }
+
+    public function getRfFilenameAttribute(): ?string
+    {
+        return $this->rf_filesname;
+    }
+
+    public function getNameAttribute(): ?string
+    {
+        return $this->rf_filesname;
+    }
+}

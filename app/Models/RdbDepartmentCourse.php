@@ -28,4 +28,17 @@ class RdbDepartmentCourse extends Model
         'user_created',
         'user_updated',
     ];
+
+    /**
+     * Smart Accessors to prevent silent null on legacy Yii2 / Laravel naming conventions
+     */
+    public function getCouNameTHAttribute(): ?string
+    {
+        return $this->cou_name;
+    }
+
+    public function getNameAttribute(): ?string
+    {
+        return $this->cou_name;
+    }
 }

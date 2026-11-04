@@ -35,4 +35,17 @@ class RdbYear extends Model
     {
         return $this->belongsTo(User::class, 'user_updated');
     }
+
+    /**
+     * Smart Accessors to prevent silent null on legacy Yii2 / Laravel naming conventions
+     */
+    public function getYearNameTHAttribute(): ?string
+    {
+        return $this->year_name;
+    }
+
+    public function getNameAttribute(): ?string
+    {
+        return $this->year_name;
+    }
 }

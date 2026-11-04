@@ -17,4 +17,27 @@ class RdbPublishedTypeAuthor extends Model
         'created_at',
         'updated_at',
     ];
+
+    /**
+     * Smart Accessors to prevent silent null on legacy Yii2 / Laravel naming conventions
+     */
+    public function getAuthorTypeAttribute(): ?string
+    {
+        return $this->pubta_nameTH;
+    }
+
+    public function getAuthorTypeNameAttribute(): ?string
+    {
+        return $this->pubta_nameTH;
+    }
+
+    public function getPubtaNameAttribute(): ?string
+    {
+        return $this->pubta_nameTH;
+    }
+
+    public function getNameAttribute(): ?string
+    {
+        return $this->pubta_nameTH;
+    }
 }

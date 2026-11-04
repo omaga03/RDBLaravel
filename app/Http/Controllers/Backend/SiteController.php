@@ -36,7 +36,8 @@ class SiteController extends Controller
         if ($isFacultyCoord) {
             $facultyDeptId = $activeScope?->department_id ?? $user->researcher?->department_id;
             if ($facultyDeptId) {
-                $facultyDeptName = \App\Models\RdbDepartment::find($facultyDeptId)?->department_name;
+                $deptModel = \App\Models\RdbDepartment::find($facultyDeptId);
+                $facultyDeptName = $deptModel?->department_nameTH ?? $deptModel?->department_name;
             }
         }
 

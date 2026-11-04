@@ -134,4 +134,32 @@ class RdbDip extends Model
 
         return null;
     }
+
+    /**
+     * Smart Accessors to prevent silent null on legacy Yii2 / Laravel naming conventions
+     */
+    public function getDipNameAttribute(): ?string
+    {
+        return $this->dip_data2_name;
+    }
+
+    public function getDipNameTHAttribute(): ?string
+    {
+        return $this->dip_data2_name;
+    }
+
+    public function getTitleAttribute(): ?string
+    {
+        return $this->dip_data2_name;
+    }
+
+    public function getNameAttribute(): ?string
+    {
+        return $this->dip_data2_name;
+    }
+
+    public function getDipDetailAttribute(): ?string
+    {
+        return $this->dip_data2_conclusion ?: $this->dip_note;
+    }
 }

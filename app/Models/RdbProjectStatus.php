@@ -30,4 +30,22 @@ class RdbProjectStatus extends Model
     const STATUS_CANCELLED = 6;   // Alias for REFUNDED (used in RdbProject sql)
     const DRAFT_SUBMITTED = 7;    // ส่งร่างรายงานวิจัย
     const TERMINATED = 8;         // ยุติโครงการ
+
+    /**
+     * Smart Accessors to prevent silent null on legacy Yii2 / Laravel naming conventions
+     */
+    public function getPsNameTHAttribute(): ?string
+    {
+        return $this->ps_name;
+    }
+
+    public function getStatusNameAttribute(): ?string
+    {
+        return $this->ps_name;
+    }
+
+    public function getNameAttribute(): ?string
+    {
+        return $this->ps_name;
+    }
 }

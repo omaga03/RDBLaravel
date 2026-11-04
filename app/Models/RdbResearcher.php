@@ -83,6 +83,29 @@ class RdbResearcher extends Model
     }
 
     /**
+     * Smart Accessors to prevent silent null on legacy Yii2 / Laravel naming conventions
+     */
+    public function getNameAttribute(): string
+    {
+        return $this->full_name;
+    }
+
+    public function getResearcherNameAttribute(): string
+    {
+        return $this->full_name;
+    }
+
+    public function getPositionAcademicAttribute(): string
+    {
+        return 'อาจารย์ / นักวิจัย';
+    }
+
+    public function getFullNameEnAttribute(): string
+    {
+        return trim(($this->researcher_fnameEN ?? '') . ' ' . ($this->researcher_lnameEN ?? ''));
+    }
+
+    /**
      * Check profile file integrity
      */
     public function checkProfileFileIntegrity(): array

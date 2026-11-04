@@ -1,0 +1,7342 @@
+{
+    "archived_purged_researchers_3300": {
+        "researcher_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "researcher_codeid": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "tea_code": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "depcat_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "depcou_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "maj_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_gender": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "prefix_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_fname": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "researcher_lname": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "researcher_fnameEN": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_lnameEN": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "restatus_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_birthdate": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_address": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_workaddress": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_email": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_tel": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_mobile": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_fax": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_picture": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "scopus_authorId": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "orcid": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_note": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "rf_safe_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "rf_path": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "rf_size": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "rf_mime_type": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_hindex": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "scopus_synced_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "archived_purged_users_3300": {
+        "id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "researcher_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "username": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "email": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "status": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "password_hash": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "remember_token": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "auth_key": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "password_reset_token": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "account_activation_token": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "confirmed_at": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "unconfirmed_email": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "blocked_at": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "registration_ip": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "flags": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        }
+    },
+    "audit_logs": {
+        "id": {
+            "type": "bigint",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "user_id": {
+            "type": "bigint",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "user_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "user_role": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "scope_info": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "event": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "MUL"
+        },
+        "auditable_type": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "MUL"
+        },
+        "auditable_id": {
+            "type": "bigint",
+            "nullable": false,
+            "key": "MUL"
+        },
+        "old_values": {
+            "type": "longtext",
+            "nullable": true,
+            "key": ""
+        },
+        "new_values": {
+            "type": "longtext",
+            "nullable": true,
+            "key": ""
+        },
+        "diff_summary": {
+            "type": "text",
+            "nullable": true,
+            "key": ""
+        },
+        "url": {
+            "type": "text",
+            "nullable": true,
+            "key": ""
+        },
+        "ip_address": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "user_agent": {
+            "type": "text",
+            "nullable": true,
+            "key": ""
+        },
+        "remarks": {
+            "type": "text",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": false,
+            "key": "MUL"
+        }
+    },
+    "auth_assignment": {
+        "item_name": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "user_id": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "created_at": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "auth_item": {
+        "name": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "type": {
+            "type": "int",
+            "nullable": false,
+            "key": "MUL"
+        },
+        "description": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "rule_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "data": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "auth_item_child": {
+        "parent": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "child": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "PRI"
+        }
+    },
+    "auth_rule": {
+        "name": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "data": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "cache": {
+        "key": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "value": {
+            "type": "mediumtext",
+            "nullable": false,
+            "key": ""
+        },
+        "expiration": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        }
+    },
+    "cache_locks": {
+        "key": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "owner": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "expiration": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        }
+    },
+    "failed_jobs": {
+        "id": {
+            "type": "bigint",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "uuid": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "UNI"
+        },
+        "connection": {
+            "type": "text",
+            "nullable": false,
+            "key": ""
+        },
+        "queue": {
+            "type": "text",
+            "nullable": false,
+            "key": ""
+        },
+        "payload": {
+            "type": "longtext",
+            "nullable": false,
+            "key": ""
+        },
+        "exception": {
+            "type": "longtext",
+            "nullable": false,
+            "key": ""
+        },
+        "failed_at": {
+            "type": "timestamp",
+            "nullable": false,
+            "key": ""
+        }
+    },
+    "jobs": {
+        "id": {
+            "type": "bigint",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "queue": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "MUL"
+        },
+        "payload": {
+            "type": "longtext",
+            "nullable": false,
+            "key": ""
+        },
+        "attempts": {
+            "type": "tinyint",
+            "nullable": false,
+            "key": ""
+        },
+        "reserved_at": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "available_at": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "created_at": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        }
+    },
+    "job_batches": {
+        "id": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "name": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "total_jobs": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "pending_jobs": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "failed_jobs": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "failed_job_ids": {
+            "type": "longtext",
+            "nullable": false,
+            "key": ""
+        },
+        "options": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "cancelled_at": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "finished_at": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "journalotherpage": {
+        "id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "article_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "submission_file_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "file_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "setting_value": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "authorsall": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "issues_setting_value": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "credated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "jop_path": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "jop_size": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "jop_mime_type": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "journal_status": {
+        "id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "jou_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "jou_respon": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "jou_email": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "jou_files": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "jou_filesname": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "jou_status": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "jou_note": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "data_show": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "js_path": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "js_size": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "js_mime_type": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "menu": {
+        "id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "name": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "parent": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "route": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "order": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "data": {
+            "type": "blob",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "migration": {
+        "version": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "apply_time": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "migrations": {
+        "id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "migration": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "batch": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        }
+    },
+    "notifications": {
+        "id": {
+            "type": "char",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "type": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "notifiable_type": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "MUL"
+        },
+        "notifiable_id": {
+            "type": "bigint",
+            "nullable": false,
+            "key": ""
+        },
+        "data": {
+            "type": "text",
+            "nullable": false,
+            "key": ""
+        },
+        "read_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "password_reset_tokens": {
+        "email": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "token": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "personal_access_tokens": {
+        "id": {
+            "type": "bigint",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "tokenable_type": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "MUL"
+        },
+        "tokenable_id": {
+            "type": "bigint",
+            "nullable": false,
+            "key": ""
+        },
+        "name": {
+            "type": "text",
+            "nullable": false,
+            "key": ""
+        },
+        "token": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "UNI"
+        },
+        "abilities": {
+            "type": "text",
+            "nullable": true,
+            "key": ""
+        },
+        "last_used_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "expires_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "profile": {
+        "user_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "prefix_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "gender": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "branch_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "birthdate": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "address": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "workaddress": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "tel": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "mobile": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "fax": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "picture": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "public_email": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "gravatar_email": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "gravatar_id": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "location": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "website": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "bio": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "project_chart": [],
+    "project_chart_budget": [],
+    "project_query_chart": {
+        "pro_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "pro_nameTH": {
+            "type": "mediumtext",
+            "nullable": false,
+            "key": ""
+        },
+        "respon_name": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "pgroup_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pgroup_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "year_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "year_name": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "department_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "major_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "maj_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_budget": {
+            "type": "double",
+            "nullable": true,
+            "key": ""
+        },
+        "ps_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "project_query_chart_2": {
+        "pro_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "pro_nameTH": {
+            "type": "mediumtext",
+            "nullable": false,
+            "key": ""
+        },
+        "respon_name": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "pgroup_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pgroup_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "year_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "year_name": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "department_nameTH": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "maj_nameTH": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_budget": {
+            "type": "float",
+            "nullable": false,
+            "key": ""
+        },
+        "ps_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "ps_rank": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_changwat": {
+        "id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "ta_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "tambon_t": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "tambon_e": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "am_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "amphoe_t": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "amphoe_e": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "ch_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "changwat_t": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "changwat_e": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "lat": {
+            "type": "float",
+            "nullable": true,
+            "key": ""
+        },
+        "long": {
+            "type": "float",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_dateevent": {
+        "ev_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "evt_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "ev_title": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "ev_detail": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "ev_datestart": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "ev_timestart": {
+            "type": "time",
+            "nullable": true,
+            "key": ""
+        },
+        "ev_dateend": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "ev_timeend": {
+            "type": "time",
+            "nullable": true,
+            "key": ""
+        },
+        "ev_url": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "ev_status": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_dateevent_type": {
+        "evt_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "evt_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "evt_color": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_department": {
+        "department_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "tdepartment_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "department_code": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "department_nameTH": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "department_nameEN": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "department_color": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "dspace_org_unit": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "dspace_org_col_research": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_department_category": {
+        "depcat_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "depcat_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_department_course": {
+        "depcou_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "depcat_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "cou_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "cou_name_sh": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_department_type": {
+        "tdepartment_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "tdepartment_nameTH": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "tdepartment_nameEN": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_dep_major": {
+        "maj_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "depcou_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "maj_code": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "maj_nameTH": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "maj_nameEN": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_dip": {
+        "dip_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "dip_type": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "dipt_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "dip_files": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_startdate": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_enddate": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "dip_request_number": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_request_date": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_request_dateget": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_number": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_publication_date": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_publication_no": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_patent_number": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_data1_datestart": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_data1_files": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_data2_patent": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "dip_data2_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_data2_agent": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_data2_status": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_data2_dateend": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_data2_conclusion": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_data2_files_con": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_data2_assertion": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_data2_tag": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_data3_allassertion": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_data3_filesass1": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_data3_filesass2": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_data3_filesass3": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_data3_drawing_picture": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_data_forms_request": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_url": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_note": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "data_show": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_safe_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_path": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_size": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_mime_type": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "workflow_status": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "submitted_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "reviewed_by": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "reviewed_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "rejection_remarks": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "unlock_reason": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "unlock_requested_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "deleted_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_dip_type": {
+        "dipt_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "dipt_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_groupproject": {
+        "pgroup_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "pgroup_nameTH": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "pgroup_nameEN": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_nacc": {
+        "nacc_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "pro_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "MUL"
+        },
+        "nacc_files": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "nacc_note": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "nacc_download": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "data_show": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "nacc_path": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "nacc_size": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "nacc_mime_type": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_prefix": {
+        "prefix_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "prefix_nameTH": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "prefix_abbreviationTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_project": {
+        "pro_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "pro_code": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pgroup_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "pt_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "pts_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_nameTH": {
+            "type": "mediumtext",
+            "nullable": false,
+            "key": ""
+        },
+        "pro_nameEN": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "depcat_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "depcou_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "major_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "year_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "pro_abstract": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_reference": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_date_start": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_date_end": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "strategic_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "pro_budget": {
+            "type": "float",
+            "nullable": false,
+            "key": ""
+        },
+        "pro_keyword": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_abstract_file": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_file": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_file_show": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "ps_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "pro_page_num": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_finish": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_group": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_count_page": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_count_abs": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_count_full": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "data_show": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "pro_note": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "library_in": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "todspace": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "dspace_uuid": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_file_path": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_file_size": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_file_mime": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_cover_path": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_abstract_file_path": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_abstract_size": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_abstract_mime": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "workflow_status": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "submitted_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "reviewed_by": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "reviewed_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "rejection_remarks": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "unlock_reason": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "unlock_requested_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "deleted_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_project_budget": {
+        "ckb_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "pro_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "ckb_annuity": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "ckb_note": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "ckb_status": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_project_chart": {
+        "year_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "year_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "department_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "department_color": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "count_group": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "count_project": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "sum_budget_group": {
+            "type": "float",
+            "nullable": true,
+            "key": ""
+        },
+        "sum_budget_project": {
+            "type": "float",
+            "nullable": true,
+            "key": ""
+        },
+        "count_ps": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "show_chart": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_project_chart_2": {
+        "year_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "year_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "department_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "department_color": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "count_group": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "count_project": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "sum_budget_group": {
+            "type": "float",
+            "nullable": true,
+            "key": ""
+        },
+        "sum_budget_project": {
+            "type": "float",
+            "nullable": true,
+            "key": ""
+        },
+        "count_ps": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "show_chart": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_project_chart_budget": {
+        "year_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "year_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "department_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "department_color": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "sumallbudget": {
+            "type": "float",
+            "nullable": true,
+            "key": ""
+        },
+        "pp_num": {
+            "type": "float",
+            "nullable": true,
+            "key": ""
+        },
+        "pp_standard": {
+            "type": "float",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "datetime",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at1": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_project_chart_budget_2": {
+        "year_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "year_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "department_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "department_color": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "sumallbudget": {
+            "type": "float",
+            "nullable": true,
+            "key": ""
+        },
+        "pp_num": {
+            "type": "float",
+            "nullable": true,
+            "key": ""
+        },
+        "pp_standard": {
+            "type": "float",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "datetime",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at1": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_project_download": {
+        "pjdo_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "pro_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "researcher_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "uti_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "pjdo_date": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "pjdo_ip": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_project_files": {
+        "id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "pro_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "MUL"
+        },
+        "rf_files": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "rf_filesname": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "rf_download": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "rf_note": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "rf_files_show": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "prf_safe_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "prf_path": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "prf_size": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "prf_mime_type": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_project_personnel": {
+        "pp_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "year_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "depcat_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "pp_num": {
+            "type": "float",
+            "nullable": true,
+            "key": ""
+        },
+        "pp_standard": {
+            "type": "float",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_project_personnel_dep": {
+        "ppd_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "year_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "depcou_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "major_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "depcat_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "pp_num": {
+            "type": "float",
+            "nullable": true,
+            "key": ""
+        },
+        "pp_standard": {
+            "type": "float",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_project_position": {
+        "position_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "position_nameTH": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "position_desc": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_project_status": {
+        "ps_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "ps_icon": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "ps_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "ps_color": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "ps_rank": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_project_type----": {
+        "pt_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "pt_name": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "pt_for": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_project_types": {
+        "pt_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "year_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "pt_name": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "pt_for": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_created": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_type": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_utz": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_note": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pttg_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "MUL"
+        },
+        "master_pt_id": {
+            "type": "bigint",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_project_types_group": {
+        "pttg_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "pttg_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pttg_group": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_project_types_master": {
+        "master_pt_id": {
+            "type": "bigint",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "master_pt_name": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "pttg_id": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "order_index": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "color_code": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_project_types_sub": {
+        "pts_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "pt_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "pts_name": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "pts_file": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "pts_safe_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pts_path": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pts_size": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "pts_mime_type": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_project_utilization": {
+        "uti_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "uti_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_project_utilize": {
+        "utz_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "pro_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "utz_year_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "utz_year_bud": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "utz_year_edu": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "utz_date": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "utz_leading": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "utz_leading_position": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "utz_department_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "chw_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "utz_group": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "utz_group_qa": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "utz_detail": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "utz_budget": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "utz_count": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "utz_countfile": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "utz_files": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "data_show": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "uf_safe_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "uf_path": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "uf_size": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "uf_mime_type": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "utz_department_address": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "workflow_status": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "submitted_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "reviewed_by": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "reviewed_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "rejection_remarks": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "unlock_reason": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "unlock_requested_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "deleted_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_project_utilize_type": {
+        "utz_type_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "utz_typr_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "utz_type_index": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_project_work": {
+        "researcher_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "pro_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "ratio": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "position_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_published": {
+        "id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "year_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "year_edu": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "year_bud": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "branch_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "pubtype_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pub_name": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "pro_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "researcher_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "depcou_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "major_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "pub_abstract": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "pub_keyword": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "pub_name_journal": {
+            "type": "mediumtext",
+            "nullable": false,
+            "key": ""
+        },
+        "pub_date": {
+            "type": "date",
+            "nullable": false,
+            "key": ""
+        },
+        "pub_date_end": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "pub_file": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pub_numfile": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pub_score": {
+            "type": "decimal",
+            "nullable": false,
+            "key": ""
+        },
+        "pub_budget": {
+            "type": "decimal",
+            "nullable": false,
+            "key": ""
+        },
+        "pub_note": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "pub_download": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "data_show": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "todspace": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "dspace_uuid": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "pf_safe_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pf_path": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pf_size": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "pf_mime_type": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pub_cover_path": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "workflow_status": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "submitted_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "reviewed_by": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "reviewed_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "rejection_remarks": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "unlock_reason": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "unlock_requested_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "deleted_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "pub_view_file": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_published_branch": {
+        "branch_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "branch_name": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_published_branchper": {
+        "branchper_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "year_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "branch_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "branchper_percent": {
+            "type": "float",
+            "nullable": false,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_published_checkyear": {
+        "id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "year_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "rdbyearedu_start": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "rdbyearedu_end": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "rdbyearbud_start": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "rdbyearbud_end": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_published_personnel": {
+        "personnel_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "year_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "depcat_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "personnel_num": {
+            "type": "float",
+            "nullable": false,
+            "key": ""
+        },
+        "personnel_numedu": {
+            "type": "float",
+            "nullable": false,
+            "key": ""
+        },
+        "personnel_numbud": {
+            "type": "float",
+            "nullable": false,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_published_personnel_dep": {
+        "perpd_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "year_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "depcou_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "major_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "depcat_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "personnel_num": {
+            "type": "float",
+            "nullable": false,
+            "key": ""
+        },
+        "personnel_numedu": {
+            "type": "float",
+            "nullable": false,
+            "key": ""
+        },
+        "personnel_numbud": {
+            "type": "float",
+            "nullable": false,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_published_type": {
+        "pubtype_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "pubtype_group": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pubtype_grouptype": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pubtype_subgroup": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pubtype_score": {
+            "type": "decimal",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_published_type_author": {
+        "pubta_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "pubta_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pubta_nameEN": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pubta_score": {
+            "type": "decimal",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_published_work": {
+        "researcher_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "published_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "pubta_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "pubw_main": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pubw_bud": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_researcher": {
+        "researcher_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "researcher_codeid": {
+            "type": "varchar",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "tea_code": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "depcat_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "depcou_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "maj_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "researcher_gender": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "prefix_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "researcher_fname": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "researcher_lname": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "researcher_fnameEN": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_lnameEN": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "restatus_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "researcher_birthdate": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_address": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_workaddress": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_email": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_tel": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_mobile": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_fax": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_picture": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "scopus_authorId": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "orcid": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_note": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "rf_safe_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "rf_path": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "rf_size": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "rf_mime_type": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_hindex": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "scopus_synced_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "data_show": {
+            "type": "tinyint",
+            "nullable": false,
+            "key": "MUL"
+        }
+    },
+    "rdb_researcher_education": {
+        "reedu_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "researcher_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "reedu_status": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "reedu_year": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "reedu_type": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "reedu_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "reedu_department": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "reedu_major": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "reedu_cational": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_researcher_status": {
+        "restatus_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "restatus_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_review_assignment": {
+        "id": {
+            "type": "bigint",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "submission_id": {
+            "type": "bigint",
+            "nullable": false,
+            "key": "MUL"
+        },
+        "reviewer_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "MUL"
+        },
+        "researcher_id": {
+            "type": "varchar",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "template_id": {
+            "type": "bigint",
+            "nullable": false,
+            "key": "MUL"
+        },
+        "assigned_by": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "assigned_at": {
+            "type": "datetime",
+            "nullable": true,
+            "key": ""
+        },
+        "due_date": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "status": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "MUL"
+        },
+        "decline_reason": {
+            "type": "text",
+            "nullable": true,
+            "key": ""
+        },
+        "responded_at": {
+            "type": "datetime",
+            "nullable": true,
+            "key": ""
+        },
+        "result_decision": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "total_score": {
+            "type": "decimal",
+            "nullable": true,
+            "key": ""
+        },
+        "max_possible_score": {
+            "type": "decimal",
+            "nullable": true,
+            "key": ""
+        },
+        "score_percentage": {
+            "type": "decimal",
+            "nullable": true,
+            "key": ""
+        },
+        "general_comment": {
+            "type": "longtext",
+            "nullable": true,
+            "key": ""
+        },
+        "annotated_file_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "annotated_file_path": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "submitted_at": {
+            "type": "datetime",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_review_clarification": {
+        "id": {
+            "type": "bigint",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "submission_id": {
+            "type": "bigint",
+            "nullable": false,
+            "key": "MUL"
+        },
+        "user_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "MUL"
+        },
+        "sender_role": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "action_type": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "message": {
+            "type": "text",
+            "nullable": false,
+            "key": ""
+        },
+        "attachment_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "attachment_path": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_review_criteria": {
+        "id": {
+            "type": "bigint",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "template_id": {
+            "type": "bigint",
+            "nullable": false,
+            "key": "MUL"
+        },
+        "category": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "name": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "description": {
+            "type": "text",
+            "nullable": true,
+            "key": ""
+        },
+        "item_type": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "scale_max": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "scale_step": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "weight": {
+            "type": "decimal",
+            "nullable": false,
+            "key": ""
+        },
+        "is_required": {
+            "type": "tinyint",
+            "nullable": false,
+            "key": ""
+        },
+        "order_seq": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_review_score": {
+        "id": {
+            "type": "bigint",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "assignment_id": {
+            "type": "bigint",
+            "nullable": false,
+            "key": "MUL"
+        },
+        "criteria_id": {
+            "type": "bigint",
+            "nullable": false,
+            "key": "MUL"
+        },
+        "score": {
+            "type": "decimal",
+            "nullable": true,
+            "key": ""
+        },
+        "pass_status": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "comment": {
+            "type": "text",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_review_submission": {
+        "id": {
+            "type": "bigint",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "pro_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "MUL"
+        },
+        "round_number": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "submission_type": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "submission_title": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "file_name": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "file_path": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "file_size": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "file_mime": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "page_count": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "note": {
+            "type": "text",
+            "nullable": true,
+            "key": ""
+        },
+        "submitted_by": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "submitted_at": {
+            "type": "datetime",
+            "nullable": true,
+            "key": ""
+        },
+        "status": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "MUL"
+        },
+        "admin_summary": {
+            "type": "text",
+            "nullable": true,
+            "key": ""
+        },
+        "closed_by": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "closed_at": {
+            "type": "datetime",
+            "nullable": true,
+            "key": ""
+        },
+        "approved_by": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "approved_at": {
+            "type": "datetime",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_review_template": {
+        "id": {
+            "type": "bigint",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "title": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "description": {
+            "type": "text",
+            "nullable": true,
+            "key": ""
+        },
+        "evaluation_mode": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "scale_max": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "pass_threshold": {
+            "type": "decimal",
+            "nullable": false,
+            "key": ""
+        },
+        "is_active": {
+            "type": "tinyint",
+            "nullable": false,
+            "key": ""
+        },
+        "is_default": {
+            "type": "tinyint",
+            "nullable": false,
+            "key": ""
+        },
+        "created_by": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_strategic": {
+        "strategic_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "year_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "strategic_nameTH": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "strategic_nameEN": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_strategic---": {
+        "strategic_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "year_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "strategic_nameTH": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "strategic_nameEN": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_training": {
+        "tra_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "tra_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "tra_description": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "tra_property": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "tra_fee": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "tra_datetimestart": {
+            "type": "datetime",
+            "nullable": true,
+            "key": ""
+        },
+        "tra_datetimeend": {
+            "type": "datetime",
+            "nullable": true,
+            "key": ""
+        },
+        "tra_place": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "tra_applicant": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "tra_note": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "tra_url": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_training_register": {
+        "treg_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "tra_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "treg_perfix": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "treg_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "treg_department": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "treg_position": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "treg_address": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "treg_tel": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "treg_email": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "treg_session": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "rdb_year": {
+        "year_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "year_name": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "research_coferenceinthai": {
+        "id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "con_id": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "con_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "con_detail": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "con_even_date": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "con_sub_deadline": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "con_venue": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "con_website": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "con_img": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "con_site_img": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "con_count": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "con_safe_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "con_path": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "con_size": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "con_mime_type": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "data_show": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "file_path": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "file_size": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "file_mime_type": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "research_frist_project": [],
+    "research_news": {
+        "id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "news_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "news_type": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "news_name": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "news_img": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "news_date": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "news_event_start": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "news_event_end": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "news_event_guarantee": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "news_detail": {
+            "type": "longtext",
+            "nullable": true,
+            "key": ""
+        },
+        "news_reference": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "news_link": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "news_count": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "news_safe_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "news_path": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "news_size": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "news_mime_type": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "data_show": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        }
+    },
+    "session": {
+        "id": {
+            "type": "char",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "expire": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "data": {
+            "type": "longblob",
+            "nullable": false,
+            "key": ""
+        }
+    },
+    "sessions": {
+        "id": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "user_id": {
+            "type": "bigint",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "ip_address": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "user_agent": {
+            "type": "text",
+            "nullable": true,
+            "key": ""
+        },
+        "payload": {
+            "type": "longtext",
+            "nullable": false,
+            "key": ""
+        },
+        "last_activity": {
+            "type": "int",
+            "nullable": false,
+            "key": "MUL"
+        }
+    },
+    "social_account": {
+        "id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "user_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "provider": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "MUL"
+        },
+        "client_id": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "data": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "code": {
+            "type": "varchar",
+            "nullable": true,
+            "key": "UNI"
+        },
+        "created_at": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "email": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "username": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "system_settings": {
+        "id": {
+            "type": "bigint",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "key": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "UNI"
+        },
+        "value": {
+            "type": "longtext",
+            "nullable": true,
+            "key": ""
+        },
+        "group": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "MUL"
+        },
+        "description": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "testpublishjsondep": [],
+    "test_viewprojectalldata": {
+        "pro_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "year_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "year_name": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_code": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pgroup_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pgroup_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pts_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pts_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_nameTH": {
+            "type": "mediumtext",
+            "nullable": false,
+            "key": ""
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "department_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "depcou_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "cou_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "major_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "maj_nameEN": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_abstract": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_keyword": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_budget": {
+            "type": "float",
+            "nullable": false,
+            "key": ""
+        },
+        "pro_file": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "ps_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "ps_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_group": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "data_show": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "token": {
+        "user_id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "code": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "created_at": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "type": {
+            "type": "smallint",
+            "nullable": false,
+            "key": "PRI"
+        }
+    },
+    "user": {
+        "id": {
+            "type": "int",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "researcher_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "username": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "email": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "telegram_chat_id": {
+            "type": "varchar",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "notification_preferences": {
+            "type": "longtext",
+            "nullable": true,
+            "key": ""
+        },
+        "status": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "onboarding_status": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "onboarding_department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "onboarding_prefix_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "onboarding_fname": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "onboarding_lname": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "onboarding_fname_en": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "onboarding_lname_en": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "onboarding_tel": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "onboarding_position": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "onboarding_submitted_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "onboarding_approved_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "onboarding_approved_by": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "onboarding_reject_reason": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "password_hash": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "remember_token": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "auth_key": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "password_reset_token": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "account_activation_token": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "confirmed_at": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "unconfirmed_email": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "blocked_at": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "registration_ip": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "flags": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        }
+    },
+    "user_role_scopes": {
+        "id": {
+            "type": "bigint",
+            "nullable": false,
+            "key": "PRI"
+        },
+        "user_id": {
+            "type": "bigint",
+            "nullable": false,
+            "key": "MUL"
+        },
+        "role_name": {
+            "type": "varchar",
+            "nullable": false,
+            "key": "MUL"
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "domain_key": {
+            "type": "varchar",
+            "nullable": true,
+            "key": "MUL"
+        },
+        "is_active": {
+            "type": "tinyint",
+            "nullable": false,
+            "key": ""
+        },
+        "notes": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        },
+        "updated_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "viewutzeduqadata": {
+        "utz_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "department_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "year_name": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_nameTH": {
+            "type": "mediumtext",
+            "nullable": false,
+            "key": ""
+        },
+        "pgroup_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "prefixnameTH": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "respon_name": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "data_show": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "utz_department_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "utz_detail": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "utz_leading": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "utz_leading_position": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "utz_date": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "utz_year_edu": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "utz_group_qa": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "chw_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "tambon_t": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "amphoe_t": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "changwat_t": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "view_changwat": {
+        "id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "ADM3_PCODE": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "ADM3_TH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "tambon_e": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "am_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "ADM2_TH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "amphoe_e": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "ch_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "changwat_t": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "changwat_e": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "lat": {
+            "type": "float",
+            "nullable": true,
+            "key": ""
+        },
+        "long": {
+            "type": "float",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "view_dateevent": {
+        "ev_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "evt_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "ev_title": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "ev_detail": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "ev_datestart": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "ev_timestart": {
+            "type": "time",
+            "nullable": true,
+            "key": ""
+        },
+        "ev_dateend": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "ev_timeend": {
+            "type": "time",
+            "nullable": true,
+            "key": ""
+        },
+        "ev_url": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "ev_status": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "dateevents": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "ctodate": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "created_at": {
+            "type": "timestamp",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "view_dip_all": {
+        "dip_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "dip_data1_datestart": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "dipt_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_fullname": {
+            "type": "text",
+            "nullable": true,
+            "key": ""
+        },
+        "department_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "dip_data2_status": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "view_project_all": {
+        "pro_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "year_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "year_name": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pgroup_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pgroup_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pts_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pts_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_nameTH": {
+            "type": "mediumtext",
+            "nullable": false,
+            "key": ""
+        },
+        "pro_nameEN": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "department_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "major_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "maj_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_abstract": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_reference": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_date_start": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_date_end": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "strategic_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "strategic_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_budget": {
+            "type": "float",
+            "nullable": false,
+            "key": ""
+        },
+        "pro_keyword": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_abstract_file": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_file": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_file_show": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_page_num": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_finish": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_group": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "researcherid": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "teacode": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "prefixnameTH": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "respon_name": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "majnameTH": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "departmentnameTH": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "ratio": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "positionnameTH": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "ps_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "ps_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "ps_rank": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_code": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "user_updated": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "user_created": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "data_show": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "sumgroup": {
+            "type": "double",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_count_page": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_note": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_for": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_created": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_type": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_utz": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        },
+        "pttg_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pttg_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "view_project_all_ex_researcher": {
+        "pro_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "year_name": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pgroup_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pttg_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pts_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_nameTH": {
+            "type": "mediumtext",
+            "nullable": false,
+            "key": ""
+        },
+        "pro_nameEN": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "department_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_date_start": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_date_end": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_budget": {
+            "type": "float",
+            "nullable": false,
+            "key": ""
+        },
+        "pro_keyword": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "ps_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_for": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_created": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_type": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_utz": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "position_nameTH": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "researcher_fname": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "researcher_lname": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "researcher_department": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        }
+    },
+    "view_project_checkdata": {
+        "pro_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "pgroup_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_group": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "year_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "major_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "ps_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "ck_files": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "ck_utilize": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "ck_published": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "ck_budget": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "view_project_group_all": {
+        "pro_group": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "sumgroup": {
+            "type": "double",
+            "nullable": true,
+            "key": ""
+        },
+        "group_id": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "view_project_published": [],
+    "view_project_published_dep": {
+        "year_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "year_name": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "depcou_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "cou_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "maj_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "maj_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "personnel_num": {
+            "type": "double",
+            "nullable": false,
+            "key": ""
+        },
+        "personnel_numedu": {
+            "type": "double",
+            "nullable": false,
+            "key": ""
+        },
+        "personnel_numbud": {
+            "type": "double",
+            "nullable": false,
+            "key": ""
+        },
+        "personnel_numall": {
+            "type": "double",
+            "nullable": true,
+            "key": ""
+        },
+        "personnel_numalledu": {
+            "type": "double",
+            "nullable": true,
+            "key": ""
+        },
+        "personnel_numallbud": {
+            "type": "double",
+            "nullable": true,
+            "key": ""
+        },
+        "branch_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "branch_name": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "branchper_percent": {
+            "type": "float",
+            "nullable": true,
+            "key": ""
+        },
+        "countpub_score": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "countpub_scoreedu": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "countpub_scorebud": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "sumpub_score": {
+            "type": "decimal",
+            "nullable": false,
+            "key": ""
+        },
+        "sumpub_scoreedu": {
+            "type": "decimal",
+            "nullable": false,
+            "key": ""
+        },
+        "sumpub_scorebud": {
+            "type": "decimal",
+            "nullable": false,
+            "key": ""
+        },
+        "sumpub_budget": {
+            "type": "decimal",
+            "nullable": false,
+            "key": ""
+        },
+        "sumpub_budgetedu": {
+            "type": "decimal",
+            "nullable": false,
+            "key": ""
+        },
+        "sumpub_budgetbud": {
+            "type": "decimal",
+            "nullable": false,
+            "key": ""
+        }
+    },
+    "view_project_work_all": {
+        "pro_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "researcherid": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "teacode": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "researchercodeid": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "prefixnameTH": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "respon_name": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "majnameTH": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "departmentnameTH": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "ratio": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "positionnameTH": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "view_published_all": {
+        "id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "pro_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "year_name": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "year_edu": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "year_bud": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pubtypesubgroup": {
+            "type": "text",
+            "nullable": true,
+            "key": ""
+        },
+        "pub_name": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "researcher_id": {
+            "type": "longtext",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_code": {
+            "type": "longtext",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_name": {
+            "type": "longtext",
+            "nullable": true,
+            "key": ""
+        },
+        "pubtaname": {
+            "type": "longtext",
+            "nullable": true,
+            "key": ""
+        },
+        "pubwmain": {
+            "type": "longtext",
+            "nullable": true,
+            "key": ""
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "department_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pub_name_journal": {
+            "type": "mediumtext",
+            "nullable": false,
+            "key": ""
+        },
+        "pub_date": {
+            "type": "date",
+            "nullable": false,
+            "key": ""
+        },
+        "pub_date_end": {
+            "type": "date",
+            "nullable": true,
+            "key": ""
+        },
+        "pub_score": {
+            "type": "decimal",
+            "nullable": false,
+            "key": ""
+        },
+        "pub_note": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "pub_budget": {
+            "type": "decimal",
+            "nullable": false,
+            "key": ""
+        },
+        "data_show": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pub_abstract": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "pub_keyword": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "view_published_work_all": {
+        "pub_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "researcherid": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "researchercodeid": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "prefixnameTH": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "respon_name": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "majnameTH": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "departmentnameTH": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "pubtaname": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "pubwmain": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "pubwbud": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "view_researcher": {
+        "year_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "year_name": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "pgroup_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "researcher_fname": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "researcher_lname": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "position_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "department_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "depcou_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "cou_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "maj_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "maj_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "view_researcher_all": [],
+    "view_researcher_count": [],
+    "view_researcher_frist_project": {
+        "year_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "year_name": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "pt_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_name": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "researcher_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "department_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "maj_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "maj_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "depcou_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "cou_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pt_for": {
+            "type": "char",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "view_respon_group": [],
+    "view_tnrr": {
+        "pro_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "newid": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "year_name": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_nameTH": {
+            "type": "mediumtext",
+            "nullable": false,
+            "key": ""
+        },
+        "pro_nameEN": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "department_nameTH": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_abstract": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "pro_budget": {
+            "type": "float",
+            "nullable": false,
+            "key": ""
+        },
+        "pro_keyword": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "prefixnameTH": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "respon_name": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "departmentnameTH": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        },
+        "positionnameTH": {
+            "type": "mediumtext",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "view_utilize": {
+        "utz_year_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "year_name": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "utz_type_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "utz_typr_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "depcou_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "maj_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "countutzpro": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "countutz": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "view_utilize_all": [],
+    "view_utilize_all_latlong": [],
+    "view_utilize_bud": {
+        "utz_year_bud": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "year_name": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "utz_type_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "utz_typr_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "countutzpro": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "countutz": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "view_utilize_edu": {
+        "utz_year_edu": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "year_name": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "utz_type_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "utz_typr_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "countutzpro": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "countutz": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "view_utilize_edu_qa": {
+        "utz_year_edu": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "year_name": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "utz_type_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "utz_typr_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "countutzpro": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "countutz": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "countdep": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "view_utilize_groupall": [],
+    "view_utilize_pro_year": {
+        "year_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "year_name": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "department_nameTH": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "pt_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "pt_name": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "utz_type_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "utz_typr_name": {
+            "type": "varchar",
+            "nullable": true,
+            "key": ""
+        },
+        "countutzpro": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "countutz": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "view_utilize_report": [],
+    "view_utilize_year": {
+        "utz_year_id": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "view_utz": {
+        "year_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "year_name": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "department_nameTH": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "cou_utz": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "cou_pro": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "view_utz_bud_plan": [],
+    "view_utz_edu": {
+        "year_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "year_name": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "department_nameTH": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "cou_utzall": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "cou_utz": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "cou_pro": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "view_utz_edu_qa": {
+        "year_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "year_name": {
+            "type": "int",
+            "nullable": true,
+            "key": ""
+        },
+        "department_id": {
+            "type": "int",
+            "nullable": false,
+            "key": ""
+        },
+        "department_nameTH": {
+            "type": "varchar",
+            "nullable": false,
+            "key": ""
+        },
+        "cou_utzall": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "cou_utz": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "cou_pro": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        },
+        "cou_dep": {
+            "type": "bigint",
+            "nullable": true,
+            "key": ""
+        }
+    },
+    "view_year": [],
+    "view_zcount_coferenceinthai": [],
+    "view_zcount_news": [],
+    "view_zcount_rdbdownloas": []
+}

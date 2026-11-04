@@ -12,7 +12,12 @@ class RdbProjectPosition extends Model
 
     public function getPositionNameAttribute(): string
     {
-        return $this->position_nameTH ?? '';
+        return $this->attributes['position_nameTH'] ?? '';
+    }
+
+    public function getNameAttribute(): string
+    {
+        return $this->attributes['position_nameTH'] ?? '';
     }
 
     public function projectWorks()

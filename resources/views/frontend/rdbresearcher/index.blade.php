@@ -130,7 +130,7 @@
                         <td class="text-center text-nowrap">
                             @if($item->status)
                                 <span class="badge bg-{{ $item->status->restatus_id == 1 ? 'success-subtle text-success-emphasis border border-success-subtle' : 'secondary-subtle text-secondary-emphasis border border-secondary-subtle' }}">
-                                    {{ $item->status->rst_name }}
+                                    {{ $item->status->restatus_name ?? $item->status->rst_name }}
                                 </span>
                             @endif
                         </td>
