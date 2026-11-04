@@ -346,4 +346,68 @@ class RecordLevelAuditLogTest extends TestCase
             $project->delete();
         }
     }
+
+    public function test_managing_published_authors_records_audit_trail_on_publication(): void
+    {
+        $admin = User::find(129) ?? User::whereHas('roles', fn($q) => $q->where('item_name', 'The Creator'))->first();
+        $published = \App\Models\RdbPublished::create([
+            'pub_name' => 'บทความวิจัยทดสอบผู้แต่ง ' . time(),
+            'pub_name_journal' => 'วารสารวิจัย มรภ.เพชรบูรณ์',
+            'pub_date' => '2026-01-15',
+            'pubtype_id' => 1,
+            'year_id' => 19,
+            'data_show' => 1,
+        ]);
+        $researcher = RdbResearcher::first();
+
+        if (!$published || !$researcher) {
+            $this->markTestSkipped('Published or Researcher not available for test');
+        }
+
+        try {
+            $this->withoutExceptionHandling();
+            // 1. Add author
+            $response = $this->actingAs($admin)->post(route('backend.rdb_published.store_author', $published->id), [
+                'researcher_id' => $researcher->researcher_id,
+                'pubta_id' => 2, // Co-author
+                'pubw_main' => 0,
+                'pubw_bud' => 0,
+            ]);
+            $response->assertSessionHasNoErrors();
+
+            $addLog = AuditLog::where('auditable_type', 'RdbPublished')
+                ->where('auditable_id', $published->id)
+                ->where('remarks', 'like', "%เพิ่มผู้แต่งผลงาน%")
+                ->first();
+            $this->assertNotNull($addLog, 'Adding author must record audit log on publication');
+
+            // 2. Update author
+            $response = $this->actingAs($admin)->put(route('backend.rdb_published.update_author', [$published->id, $researcher->researcher_id]), [
+                'pubta_id' => 3, // Corresponding
+                'pubw_main' => 0,
+                'pubw_bud' => 0,
+            ]);
+            $response->assertSessionHasNoErrors();
+
+            $updateLog = AuditLog::where('auditable_type', 'RdbPublished')
+                ->where('auditable_id', $published->id)
+                ->where('remarks', 'like', "%ปรับปรุงข้อมูลผู้แต่ง%")
+                ->first();
+            $this->assertNotNull($updateLog, 'Updating author must record audit log on publication');
+
+            // 3. Delete author
+            $response = $this->actingAs($admin)->delete(route('backend.rdb_published.destroy_author', [$published->id, $researcher->researcher_id]));
+            $response->assertSessionHasNoErrors();
+
+            $deleteLog = AuditLog::where('auditable_type', 'RdbPublished')
+                ->where('auditable_id', $published->id)
+                ->where('remarks', 'like', "%ลบผู้แต่งออกจากผลงานตีพิมพ์%")
+                ->first();
+            $this->assertNotNull($deleteLog, 'Deleting author must record audit log on publication');
+        } finally {
+            \App\Models\RdbPublishedWork::where('published_id', $published->id)->delete();
+            AuditLog::where('auditable_type', 'RdbPublished')->where('auditable_id', $published->id)->delete();
+            $published->delete();
+        }
+    }
 }

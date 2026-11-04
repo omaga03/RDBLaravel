@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
 use App\Models\RdbPublished;
+use App\Models\RdbResearcher;
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use App\Http\Requests\Backend\StorePublishedRequest;
 use App\Http\Requests\Backend\UpdatePublishedRequest;
@@ -706,6 +708,26 @@ class RdbPublishedController extends Controller
 
         $this->updateDepartmentFromMainOffice($item);
 
+        $researcher = RdbResearcher::with('prefix')->find($validated['researcher_id']);
+        $authorType = \App\Models\RdbPublishedTypeAuthor::find($validated['pubta_id']);
+        $researcherName = $researcher ? trim(($researcher->prefix->prefix_nameTH ?? '') . $researcher->researcher_fname . ' ' . $researcher->researcher_lname) : "ID: {$validated['researcher_id']}";
+        $typeName = $authorType ? $authorType->pubta_nameTH : "ประเภท ID: {$validated['pubta_id']}";
+
+        \App\Models\AuditLog::record(
+            event: 'update',
+            auditable: $item,
+            oldValues: null,
+            newValues: [
+                'researcher_id' => $validated['researcher_id'],
+                'researcher_name' => $researcherName,
+                'author_type' => $typeName,
+                'is_main_office' => !empty($validated['pubw_main']) ? 'ใช่' : 'ไม่ใช่',
+                'is_budget_support' => !empty($validated['pubw_bud']) ? 'ใช่' : 'ไม่ใช่',
+            ],
+            remarks: "เพิ่มผู้แต่งผลงาน: {$researcherName} ({$typeName})",
+            diffSummary: "เพิ่มผู้แต่ง: {$researcherName} ({$typeName})"
+        );
+
         return back()->with('success', 'เพิ่มผู้แต่งเรียบร้อยแล้ว');
     }
 
@@ -746,6 +768,13 @@ class RdbPublishedController extends Controller
             }
         }
 
+        $oldAuthor = $item->authors()->where('rdb_published_work.researcher_id', $researcher_id)->first();
+        $oldWork = $oldAuthor?->pivot;
+        $oldType = $oldWork ? \App\Models\RdbPublishedTypeAuthor::find($oldWork->pubta_id) : null;
+        $newType = \App\Models\RdbPublishedTypeAuthor::find($validated['pubta_id']);
+        $researcher = RdbResearcher::with('prefix')->find($researcher_id);
+        $researcherName = $researcher ? trim(($researcher->prefix->prefix_nameTH ?? '') . $researcher->researcher_fname . ' ' . $researcher->researcher_lname) : "ID: {$researcher_id}";
+
         $item->authors()->updateExistingPivot($researcher_id, [
             'pubta_id' => $validated['pubta_id'],
             'pubw_main' => $request->input('pubw_main', 0),
@@ -755,6 +784,23 @@ class RdbPublishedController extends Controller
 
         $this->updateDepartmentFromMainOffice($item);
 
+        \App\Models\AuditLog::record(
+            event: 'update',
+            auditable: $item,
+            oldValues: [
+                'author_type' => $oldType?->pubta_nameTH ?? ($oldWork?->pubta_id ?? '-'),
+                'is_main_office' => !empty($oldWork?->pubw_main) ? 'ใช่' : 'ไม่ใช่',
+                'is_budget_support' => !empty($oldWork?->pubw_bud) ? 'ใช่' : 'ไม่ใช่',
+            ],
+            newValues: [
+                'author_type' => $newType?->pubta_nameTH ?? $validated['pubta_id'],
+                'is_main_office' => !empty($validated['pubw_main']) ? 'ใช่' : 'ไม่ใช่',
+                'is_budget_support' => !empty($validated['pubw_bud']) ? 'ใช่' : 'ไม่ใช่',
+            ],
+            remarks: "ปรับปรุงข้อมูลผู้แต่ง: {$researcherName}",
+            diffSummary: "แก้ไขข้อมูลผู้แต่ง: {$researcherName} (เป็น " . ($newType?->pubta_nameTH ?? '') . ")"
+        );
+
         return back()->with('success', 'ปรับปรุงข้อมูลผู้แต่งเรียบร้อยแล้ว');
     }
 
@@ -762,7 +808,28 @@ class RdbPublishedController extends Controller
     {
         $item = RdbPublished::findOrFail($id);
         $this->authorize('update', $item);
+
+        $oldAuthor = $item->authors()->where('rdb_published_work.researcher_id', $researcher_id)->first();
+        $oldWork = $oldAuthor?->pivot;
+        $oldType = $oldWork ? \App\Models\RdbPublishedTypeAuthor::find($oldWork->pubta_id) : null;
+        $researcher = RdbResearcher::with('prefix')->find($researcher_id);
+        $researcherName = $researcher ? trim(($researcher->prefix->prefix_nameTH ?? '') . $researcher->researcher_fname . ' ' . $researcher->researcher_lname) : "ID: {$researcher_id}";
+
         $item->authors()->detach($researcher_id);
+
+        \App\Models\AuditLog::record(
+            event: 'update',
+            auditable: $item,
+            oldValues: [
+                'researcher_id' => $researcher_id,
+                'researcher_name' => $researcherName,
+                'author_type' => $oldType?->pubta_nameTH ?? ($oldWork?->pubta_id ?? '-'),
+            ],
+            newValues: null,
+            remarks: "ลบผู้แต่งออกจากผลงานตีพิมพ์: {$researcherName}",
+            diffSummary: "ลบผู้แต่ง: {$researcherName}"
+        );
+
         return back()->with('success', 'ลบผู้แต่งออกจากรายการเรียบร้อยแล้ว');
     }
 

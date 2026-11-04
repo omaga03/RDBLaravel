@@ -1003,6 +1003,15 @@ class RdbProjectController extends Controller
         $file->rf_files_show = $file->rf_files_show == 1 ? 0 : 1;
         $file->user_updated = auth()->id();
         $file->save();
+
+        \App\Models\AuditLog::record(
+            event: 'update',
+            auditable: $project,
+            oldValues: ['rf_files_show' => $file->rf_files_show == 1 ? 0 : 1],
+            newValues: ['rf_files_show' => (int) $file->rf_files_show],
+            remarks: ($file->rf_files_show == 1 ? 'เปิดแสดงผล' : 'ซ่อน') . "ไฟล์เอกสารแนบ: {$file->rf_filesname}",
+            diffSummary: ($file->rf_files_show == 1 ? 'เปิดแสดง' : 'ซ่อน') . "ไฟล์: {$file->rf_filesname}"
+        );
         
         return response()->json([
             'success' => true,
@@ -1505,6 +1514,18 @@ class RdbProjectController extends Controller
                 'user_updated' => auth()->id(),
             ]);
 
+            \App\Models\AuditLog::record(
+                event: 'update',
+                auditable: $project,
+                oldValues: null,
+                newValues: [
+                    'file_name' => $request->rf_filesname,
+                    'file_size' => $fileInfo['size'],
+                ],
+                remarks: "เพิ่มไฟล์เอกสารแนบโครงการ: {$request->rf_filesname}",
+                diffSummary: "เพิ่มไฟล์แนบ: {$request->rf_filesname}"
+            );
+
             return redirect()->back()->with('success', 'เพิ่มไฟล์เรียบร้อยแล้ว');
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['error' => $e->getMessage()]);
@@ -1538,6 +1559,7 @@ class RdbProjectController extends Controller
                 $file->prf_mime_type = $fileInfo['mime_type']; // Corrected field name
             }
 
+            $oldFileName = $file->getOriginal('rf_filesname');
             $file->rf_filesname = $request->rf_filesname;
             $file->rf_note = $request->rf_note;
             if ($request->has('rf_files_show')) {
@@ -1545,6 +1567,15 @@ class RdbProjectController extends Controller
             }
             $file->user_updated = auth()->id();
             $file->save();
+
+            \App\Models\AuditLog::record(
+                event: 'update',
+                auditable: $project,
+                oldValues: ['file_name' => $oldFileName],
+                newValues: ['file_name' => $file->rf_filesname],
+                remarks: "แก้ไขไฟล์เอกสารแนบโครงการ: {$file->rf_filesname}",
+                diffSummary: "แก้ไขไฟล์แนบ: {$file->rf_filesname}"
+            );
 
             return redirect()->back()->with('success', 'แก้ไขไฟล์เรียบร้อยแล้ว');
         } catch (\Exception $e) {
@@ -1568,7 +1599,17 @@ class RdbProjectController extends Controller
             Storage::disk('public')->delete($existingFilePath);
         }
 
+        $deletedFileName = $file->rf_filesname;
         $file->delete();
+
+        \App\Models\AuditLog::record(
+            event: 'update',
+            auditable: $project,
+            oldValues: ['file_name' => $deletedFileName],
+            newValues: null,
+            remarks: "ลบไฟล์เอกสารแนบโครงการ: {$deletedFileName}",
+            diffSummary: "ลบไฟล์แนบ: {$deletedFileName}"
+        );
 
         return redirect()->back()->with('success', 'ลบไฟล์เรียบร้อยแล้ว');
     }
