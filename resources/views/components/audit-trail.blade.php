@@ -1,8 +1,8 @@
 @props([
     'auditable' => null,
     'title' => 'ประวัติกิจกรรมและการแก้ไข (Activity & Audit Trail)',
-    'limit' => 50,
-    'initialCount' => 5,
+    'limit' => 100,
+    'perPage' => 10,
 ])
 
 @php
@@ -16,15 +16,20 @@
 
     $allLogs = $auditable->auditLogs()->take($limit)->get();
     $totalCount = $allLogs->count();
-    $recentLogs = $allLogs->take($initialCount);
-    $remainingLogs = $allLogs->slice($initialCount);
+    $pages = $allLogs->chunk($perPage);
+    $totalPages = $pages->count();
 
     $isPrivileged = auth()->user()->hasRole(['The Creator', 'Admin', 'Admin Research', 'Admin Project']) || (int)auth()->id() === 129;
     $auditableType = class_basename($auditable);
     $auditableId = $auditable->getKey();
 @endphp
 
-<div class="card shadow-none border border-subtle rounded-3 mt-3 mb-4" id="recordAuditTrailCard" style="font-size: 0.82rem;">
+<div class="card shadow-none border border-subtle rounded-3 mt-3 mb-4" 
+     id="recordAuditTrailCard_{{ $auditableId }}" 
+     data-current-page="1"
+     data-total-count="{{ $totalCount }}"
+     data-per-page="{{ $perPage }}"
+     style="font-size: 0.82rem;">
     <!-- Compact Header (Subtle & Unobtrusive) -->
     <div class="card-header bg-body-tertiary py-2 px-3 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
         <div class="d-flex align-items-center gap-2">
@@ -37,6 +42,9 @@
         <div class="d-flex align-items-center gap-2">
             <span class="text-body-secondary" style="font-size: 0.74rem;">
                 ทั้งหมด <span class="fw-bold tabular-nums text-body">{{ $totalCount }}</span> รายการ
+                @if($totalPages > 1)
+                    <span class="text-body-tertiary">({{ $totalPages }} หน้า)</span>
+                @endif
             </span>
             @if($isPrivileged && Route::has('backend.audit_log.index'))
                 <a href="{{ route('backend.audit_log.index', ['auditable_type' => $auditableType, 'search' => $auditableId]) }}" 
@@ -59,190 +67,265 @@
                 <small class="text-body-tertiary" style="font-size: 0.72rem;">ระบบจะบันทึกอัตโนมัติเมื่อมีการสร้าง แก้ไข หรือเปลี่ยนสถานะ</small>
             </div>
         @else
-            <!-- Editorial Timeline List -->
+            <!-- Editorial Timeline List with 10 Items per Page -->
             <div class="audit-timeline position-relative ps-3 ps-md-3.5">
                 <div class="position-absolute top-0 bottom-0 start-0 border-start border-secondary-subtle" style="left: 10px !important;"></div>
 
-                @foreach($allLogs as $index => $log)
-                    @if($index === $initialCount)
-                        <div class="collapse" id="auditTrailMoreCollapse_{{ $auditableId }}">
-                    @endif
+                @foreach($pages as $pageIndex => $pageLogs)
+                    <div class="audit-page-block {{ $pageIndex > 0 ? 'd-none' : '' }}" data-page="{{ $pageIndex + 1 }}">
+                        @foreach($pageLogs as $index => $log)
+                            @php
+                                $globalIndex = ($pageIndex * $perPage) + $index;
+                                $eventColor = match($log->event) {
+                                    'create' => ['badge' => 'bg-success-subtle text-success-emphasis border-success-subtle', 'icon' => 'bi-plus-circle-fill text-success'],
+                                    'update' => ['badge' => 'bg-primary-subtle text-primary-emphasis border-primary-subtle', 'icon' => 'bi-pencil-square text-primary'],
+                                    'delete' => ['badge' => 'bg-danger-subtle text-danger-emphasis border-danger-subtle', 'icon' => 'bi-trash3-fill text-danger'],
+                                    default => ['badge' => 'bg-info-subtle text-info-emphasis border-info-subtle', 'icon' => 'bi-arrow-repeat text-info']
+                                };
 
-                    @php
-                        $eventColor = match($log->event) {
-                            'create' => ['badge' => 'bg-success-subtle text-success-emphasis border-success-subtle', 'icon' => 'bi-plus-circle-fill text-success'],
-                            'update' => ['badge' => 'bg-primary-subtle text-primary-emphasis border-primary-subtle', 'icon' => 'bi-pencil-square text-primary'],
-                            'delete' => ['badge' => 'bg-danger-subtle text-danger-emphasis border-danger-subtle', 'icon' => 'bi-trash3-fill text-danger'],
-                            default => ['badge' => 'bg-info-subtle text-info-emphasis border-info-subtle', 'icon' => 'bi-arrow-repeat text-info']
-                        };
+                                $old = $log->old_values ?? [];
+                                $new = $log->new_values ?? [];
+                                $changedKeys = array_unique(array_merge(array_keys($old), array_keys($new)));
+                                $collapseId = 'auditDiff_' . $log->id . '_' . $globalIndex;
 
-                        $old = $log->old_values ?? [];
-                        $new = $log->new_values ?? [];
-                        $changedKeys = array_unique(array_merge(array_keys($old), array_keys($new)));
-                        $collapseId = 'auditDiff_' . $log->id . '_' . $index;
+                                $formatVal = function($v) {
+                                    if (is_null($v)) return '<span class="text-body-tertiary fst-italic">null</span>';
+                                    if (is_bool($v)) return $v ? 'true' : 'false';
+                                    if (is_array($v)) return '<pre class="mb-0 text-wrap font-monospace" style="font-size: 0.7rem;">' . htmlspecialchars(json_encode($v, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)) . '</pre>';
+                                    $str = (string) $v;
+                                    if (strlen($str) > 160) {
+                                        return htmlspecialchars(mb_substr($str, 0, 160)) . '... <small class="text-body-secondary">(' . strlen($str) . ' chars)</small>';
+                                    }
+                                    return htmlspecialchars($str);
+                                };
+                            @endphp
 
-                        $formatVal = function($v) {
-                            if (is_null($v)) return '<span class="text-body-tertiary fst-italic">null</span>';
-                            if (is_bool($v)) return $v ? 'true' : 'false';
-                            if (is_array($v)) return '<pre class="mb-0 text-wrap font-monospace" style="font-size: 0.7rem;">' . htmlspecialchars(json_encode($v, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)) . '</pre>';
-                            $str = (string) $v;
-                            if (strlen($str) > 160) {
-                                return htmlspecialchars(mb_substr($str, 0, 160)) . '... <small class="text-body-secondary">(' . strlen($str) . ' chars)</small>';
-                            }
-                            return htmlspecialchars($str);
-                        };
-                    @endphp
-
-                    <div class="audit-item position-relative pb-2.5 mb-2.5 border-bottom border-light-subtle">
-                        <!-- Bullet Icon on Timeline -->
-                        <div class="position-absolute bg-body rounded-circle d-flex align-items-center justify-content-center" 
-                             style="left: -19px; top: 2px; width: 18px; height: 18px; z-index: 2;">
-                            <i class="bi {{ $eventColor['icon'] }}" style="font-size: 0.72rem;"></i>
-                        </div>
-
-                        <div class="d-flex align-items-start justify-content-between flex-wrap gap-1.5 mb-1">
-                            <div class="d-flex align-items-center gap-1.5 flex-wrap">
-                                <span class="badge {{ $eventColor['badge'] }} border text-uppercase" style="font-size: 0.65rem; padding: 0.2rem 0.4rem;">
-                                    {{ $log->event }}
-                                </span>
-                                <span class="fw-semibold text-body" style="font-size: 0.82rem;">
-                                    {{ $log->user_name ?? 'ระบบอัตโนมัติ' }}
-                                </span>
-                                @if($log->user_role)
-                                    <span class="badge bg-body-secondary text-body-secondary border" style="font-size: 0.62rem; padding: 0.15rem 0.35rem;">
-                                        {{ $log->user_role }}
-                                    </span>
-                                @endif
-                                @if($log->scope_info)
-                                    <span class="text-body-tertiary" style="font-size: 0.7rem;">
-                                        ({{ $log->scope_info }})
-                                    </span>
-                                @endif
-                            </div>
-
-                            <div class="text-body-secondary d-flex align-items-center gap-1.5" style="font-size: 0.74rem;">
-                                <span class="tabular-nums" title="{{ $log->created_at }}">
-                                    <i class="bi bi-calendar3 me-1"></i>{{ \App\Helpers\ThaiDateHelper::formatDateTime($log->created_at) }}
-                                </span>
-                                <span class="badge bg-body-tertiary text-body-tertiary border" style="font-size: 0.64rem;">
-                                    {{ $log->created_at?->diffForHumans() }}
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Summary & Remarks -->
-                        <div class="ps-1">
-                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-1.5">
-                                <div class="text-body" style="font-size: 0.78rem;">
-                                    <span class="fw-medium text-body-emphasis">{{ $log->remarks ?: 'บันทึกการทำงาน' }}</span>
-                                    @if($log->diff_summary)
-                                        <span class="text-body-secondary ms-1">— {{ $log->diff_summary }}</span>
-                                    @endif
+                            <div class="audit-item position-relative pb-2.5 mb-2.5 border-bottom border-light-subtle">
+                                <!-- Bullet Icon on Timeline -->
+                                <div class="position-absolute bg-body rounded-circle d-flex align-items-center justify-content-center" 
+                                     style="left: -19px; top: 2px; width: 18px; height: 18px; z-index: 2;">
+                                    <i class="bi {{ $eventColor['icon'] }}" style="font-size: 0.72rem;"></i>
                                 </div>
 
-                                @if(!empty($changedKeys))
-                                    <button type="button" 
-                                            class="btn btn-xs btn-outline-secondary py-0 px-1.5 rounded-pill d-inline-flex align-items-center gap-1 shadow-none" 
-                                            style="font-size: 0.7rem; border-color: var(--bs-border-color);"
-                                            data-bs-toggle="collapse" 
-                                            data-bs-target="#{{ $collapseId }}" 
-                                            aria-expanded="false" 
-                                            aria-controls="{{ $collapseId }}">
-                                        <i class="bi bi-file-diff"></i>
-                                        <span>ดูที่เปลี่ยน ({{ count($changedKeys) }})</span>
-                                    </button>
-                                @endif
-                            </div>
+                                <div class="d-flex align-items-start justify-content-between flex-wrap gap-1.5 mb-1">
+                                    <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                                        <span class="badge {{ $eventColor['badge'] }} border text-uppercase" style="font-size: 0.65rem; padding: 0.2rem 0.4rem;">
+                                            {{ $log->event }}
+                                        </span>
+                                        <span class="fw-semibold text-body" style="font-size: 0.82rem;">
+                                            {{ $log->user_name ?? 'ระบบอัตโนมัติ' }}
+                                        </span>
+                                        @if($log->user_role)
+                                            <span class="badge bg-body-secondary text-body-secondary border" style="font-size: 0.62rem; padding: 0.15rem 0.35rem;">
+                                                {{ $log->user_role }}
+                                            </span>
+                                        @endif
+                                        @if($log->scope_info)
+                                            <span class="text-body-tertiary" style="font-size: 0.7rem;">
+                                                ({{ $log->scope_info }})
+                                            </span>
+                                        @endif
+                                    </div>
 
-                            <!-- Admin Technical Metadata Pills (Privileged View Only) -->
-                            @if($isPrivileged && ($log->ip_address || $log->user_agent))
-                                <div class="mt-1 d-flex align-items-center gap-1.5 flex-wrap" style="font-size: 0.68rem;">
-                                    @if($log->ip_address)
-                                        <span class="badge bg-body-tertiary text-body-secondary border font-monospace">
-                                            IP: {{ $log->ip_address }}
+                                    <div class="text-body-secondary d-flex align-items-center gap-1.5" style="font-size: 0.74rem;">
+                                        <span class="tabular-nums" title="{{ $log->created_at }}">
+                                            <i class="bi bi-calendar3 me-1"></i>{{ \App\Helpers\ThaiDateHelper::formatDateTime($log->created_at) }}
                                         </span>
-                                    @endif
-                                    @if($log->user_agent)
-                                        <span class="badge bg-body-tertiary text-body-secondary border font-monospace text-truncate" style="max-width: 280px;" title="{{ $log->user_agent }}">
-                                            UA: {{ Str::limit($log->user_agent, 35) }}
+                                        <span class="badge bg-body-tertiary text-body-tertiary border" style="font-size: 0.64rem;">
+                                            {{ $log->created_at?->diffForHumans() }}
                                         </span>
-                                    @endif
-                                    @if($log->url)
-                                        <span class="badge bg-body-tertiary text-body-secondary border font-monospace text-truncate" style="max-width: 200px;" title="{{ $log->url }}">
-                                            URI: {{ parse_url($log->url, PHP_URL_PATH) }}
-                                        </span>
-                                    @endif
-                                </div>
-                            @endif
-
-                            <!-- Inline Diff Accordion -->
-                            @if(!empty($changedKeys))
-                                <div class="collapse mt-2" id="{{ $collapseId }}">
-                                    <div class="card card-body p-2 bg-body-tertiary border rounded-2 shadow-none">
-                                        <div class="table-responsive">
-                                            <table class="table table-sm table-bordered bg-body mb-0" style="font-size: 0.74rem;">
-                                                <thead class="table-light">
-                                                    <tr>
-                                                        <th style="width: 25%;">ฟิลด์</th>
-                                                        <th style="width: 37.5%;" class="text-danger-emphasis">ค่าเดิม</th>
-                                                        <th style="width: 37.5%;" class="text-success-emphasis">ค่าใหม่</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach($changedKeys as $fieldKey)
-                                                        @php
-                                                            $oldVal = $old[$fieldKey] ?? null;
-                                                            $newVal = $new[$fieldKey] ?? null;
-                                                        @endphp
-                                                        <tr>
-                                                            <td class="font-monospace fw-semibold text-body">
-                                                                {{ $fieldKey }}
-                                                            </td>
-                                                            <td class="text-break bg-danger-subtle bg-opacity-25">
-                                                                {!! $formatVal($oldVal) !!}
-                                                            </td>
-                                                            <td class="text-break bg-success-subtle bg-opacity-25">
-                                                                {!! $formatVal($newVal) !!}
-                                                            </td>
-                                                        </tr>
-                                                    @endforeach
-                                                </tbody>
-                                            </table>
-                                        </div>
                                     </div>
                                 </div>
-                            @endif
-                        </div>
+
+                                <!-- Summary & Remarks -->
+                                <div class="ps-1">
+                                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-1.5">
+                                        <div class="text-body" style="font-size: 0.78rem;">
+                                            <span class="fw-medium text-body-emphasis">{{ $log->remarks ?: 'บันทึกการทำงาน' }}</span>
+                                            @if($log->diff_summary)
+                                                <span class="text-body-secondary ms-1">— {{ $log->diff_summary }}</span>
+                                            @endif
+                                        </div>
+
+                                        @if(!empty($changedKeys))
+                                            <button type="button" 
+                                                    class="btn btn-xs btn-outline-secondary py-0 px-1.5 rounded-pill d-inline-flex align-items-center gap-1 shadow-none" 
+                                                    style="font-size: 0.7rem; border-color: var(--bs-border-color);"
+                                                    data-bs-toggle="collapse" 
+                                                    data-bs-target="#{{ $collapseId }}" 
+                                                    aria-expanded="false" 
+                                                    aria-controls="{{ $collapseId }}">
+                                                <i class="bi bi-file-diff"></i>
+                                                <span>ดูที่เปลี่ยน ({{ count($changedKeys) }})</span>
+                                            </button>
+                                        @endif
+                                    </div>
+
+                                    <!-- Admin Technical Metadata Pills (Privileged View Only) -->
+                                    @if($isPrivileged && ($log->ip_address || $log->user_agent))
+                                        <div class="mt-1 d-flex align-items-center gap-1.5 flex-wrap" style="font-size: 0.68rem;">
+                                            @if($log->ip_address)
+                                                <span class="badge bg-body-tertiary text-body-secondary border font-monospace">
+                                                    IP: {{ $log->ip_address }}
+                                                </span>
+                                            @endif
+                                            @if($log->user_agent)
+                                                <span class="badge bg-body-tertiary text-body-secondary border font-monospace text-truncate" style="max-width: 280px;" title="{{ $log->user_agent }}">
+                                                    UA: {{ Str::limit($log->user_agent, 35) }}
+                                                </span>
+                                            @endif
+                                            @if($log->url)
+                                                <span class="badge bg-body-tertiary text-body-secondary border font-monospace text-truncate" style="max-width: 200px;" title="{{ $log->url }}">
+                                                    URI: {{ parse_url($log->url, PHP_URL_PATH) }}
+                                                </span>
+                                            @endif
+                                        </div>
+                                    @endif
+
+                                    <!-- Inline Diff Accordion -->
+                                    @if(!empty($changedKeys))
+                                        <div class="collapse mt-2" id="{{ $collapseId }}">
+                                            <div class="card card-body p-2 bg-body-tertiary border rounded-2 shadow-none">
+                                                <div class="table-responsive">
+                                                    <table class="table table-sm table-bordered bg-body mb-0" style="font-size: 0.74rem;">
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th style="width: 25%;">ฟิลด์</th>
+                                                                <th style="width: 37.5%;" class="text-danger-emphasis">ค่าเดิม</th>
+                                                                <th style="width: 37.5%;" class="text-success-emphasis">ค่าใหม่</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach($changedKeys as $fieldKey)
+                                                                @php
+                                                                    $oldVal = $old[$fieldKey] ?? null;
+                                                                    $newVal = $new[$fieldKey] ?? null;
+                                                                @endphp
+                                                                <tr>
+                                                                    <td class="font-monospace fw-semibold text-body">
+                                                                        {{ $fieldKey }}
+                                                                    </td>
+                                                                    <td class="text-break bg-danger-subtle bg-opacity-25">
+                                                                        {!! $formatVal($oldVal) !!}
+                                                                    </td>
+                                                                    <td class="text-break bg-success-subtle bg-opacity-25">
+                                                                        {!! $formatVal($newVal) !!}
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 @endforeach
-
-                @if($totalCount > $initialCount)
-                    </div>
-                @endif
             </div>
 
-            <!-- Expand / Collapse All Logs Button -->
-            @if($totalCount > $initialCount)
-                <div class="text-center pt-2">
-                    <button type="button" 
-                            class="btn btn-outline-secondary btn-xs py-1 px-3 rounded-pill d-inline-flex align-items-center gap-1.5 shadow-none"
-                            style="font-size: 0.76rem;"
-                            data-bs-toggle="collapse" 
-                            data-bs-target="#auditTrailMoreCollapse_{{ $auditableId }}"
-                            aria-expanded="false"
-                            aria-controls="auditTrailMoreCollapse_{{ $auditableId }}"
-                            id="btnToggleAuditMore_{{ $auditableId }}"
-                            onclick="
-                                const isExp = this.getAttribute('aria-expanded') === 'true';
-                                this.querySelector('.audit-toggle-label').innerText = isExp ? 'ย่อเหลือ {{ $initialCount }} รายการล่าสุด' : 'ดูประวัติทั้งหมด (อีก {{ $totalCount - $initialCount }} รายการ)';
-                                const icon = this.querySelector('i');
-                                icon.className = isExp ? 'bi bi-chevron-up me-0.5' : 'bi bi-chevron-down me-0.5';
-                            ">
-                        <i class="bi bi-chevron-down me-0.5"></i>
-                        <span class="audit-toggle-label">ดูประวัติทั้งหมด (อีก {{ $totalCount - $initialCount }} รายการ)</span>
-                    </button>
+            <!-- Pagination Bar (10 Items per Page) -->
+            @if($totalPages > 1)
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 pt-2.5 border-top mt-2">
+                    <small class="text-body-secondary tabular-nums" style="font-size: 0.74rem;">
+                        แสดงรายการที่ <span class="fw-bold text-body" id="auditTrailRangeText_{{ $auditableId }}">1 - {{ min($perPage, $totalCount) }}</span> จากทั้งหมด <span class="fw-bold text-body">{{ $totalCount }}</span> รายการ (หน้า <span class="fw-bold text-body" id="auditTrailCurrentPage_{{ $auditableId }}">1</span>/{{ $totalPages }})
+                    </small>
+                    <nav aria-label="Audit trail pagination">
+                        <ul class="pagination pagination-sm mb-0" style="font-size: 0.74rem;">
+                            <li class="page-item disabled" id="auditPrev_{{ $auditableId }}">
+                                <a class="page-link py-0.5 px-2 text-body" href="javascript:void(0)" onclick="switchAuditPage('{{ $auditableId }}', 'prev')">
+                                    <i class="bi bi-chevron-left me-0.5"></i>ก่อนหน้า
+                                </a>
+                            </li>
+                            @for($p = 1; $p <= $totalPages; $p++)
+                                <li class="page-item audit-page-num-{{ $auditableId }} {{ $p === 1 ? 'active' : '' }}" data-page="{{ $p }}">
+                                    <a class="page-link py-0.5 px-2 tabular-nums" href="javascript:void(0)" onclick="switchAuditPage('{{ $auditableId }}', {{ $p }})">
+                                        {{ $p }}
+                                    </a>
+                                </li>
+                            @endfor
+                            <li class="page-item {{ $totalPages <= 1 ? 'disabled' : '' }}" id="auditNext_{{ $auditableId }}">
+                                <a class="page-link py-0.5 px-2 text-body" href="javascript:void(0)" onclick="switchAuditPage('{{ $auditableId }}', 'next')">
+                                    ถัดไป<i class="bi bi-chevron-right ms-0.5"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
             @endif
         @endif
     </div>
 </div>
+
+@once
+<script>
+function switchAuditPage(auditableId, target) {
+    const container = document.getElementById('recordAuditTrailCard_' + auditableId);
+    if (!container) return;
+
+    const pages = container.querySelectorAll('.audit-page-block');
+    const totalPages = pages.length;
+    let current = parseInt(container.getAttribute('data-current-page') || '1', 10);
+
+    if (target === 'prev') {
+        if (current > 1) current--;
+    } else if (target === 'next') {
+        if (current < totalPages) current++;
+    } else {
+        current = parseInt(target, 10);
+    }
+
+    container.setAttribute('data-current-page', current);
+
+    // Toggle pages
+    pages.forEach(p => {
+        if (parseInt(p.getAttribute('data-page'), 10) === current) {
+            p.classList.remove('d-none');
+        } else {
+            p.classList.add('d-none');
+        }
+    });
+
+    // Update pagination numeric buttons
+    const pageNums = container.querySelectorAll('.audit-page-num-' + auditableId);
+    pageNums.forEach(btn => {
+        if (parseInt(btn.getAttribute('data-page'), 10) === current) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    // Update prev/next buttons
+    const prevBtn = document.getElementById('auditPrev_' + auditableId);
+    const nextBtn = document.getElementById('auditNext_' + auditableId);
+    if (prevBtn) {
+        if (current <= 1) {
+            prevBtn.classList.add('disabled');
+        } else {
+            prevBtn.classList.remove('disabled');
+        }
+    }
+    if (nextBtn) {
+        if (current >= totalPages) {
+            nextBtn.classList.add('disabled');
+        } else {
+            nextBtn.classList.remove('disabled');
+        }
+    }
+
+    // Update text summary
+    const totalCount = parseInt(container.getAttribute('data-total-count') || '0', 10);
+    const perPage = parseInt(container.getAttribute('data-per-page') || '10', 10);
+    const start = ((current - 1) * perPage) + 1;
+    const end = Math.min(current * perPage, totalCount);
+
+    const rangeEl = document.getElementById('auditTrailRangeText_' + auditableId);
+    const pageEl = document.getElementById('auditTrailCurrentPage_' + auditableId);
+    if (rangeEl) rangeEl.innerText = `${start} - ${end}`;
+    if (pageEl) pageEl.innerText = current;
+}
+</script>
+@endonce

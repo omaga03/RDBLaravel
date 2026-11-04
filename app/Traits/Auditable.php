@@ -10,17 +10,13 @@ trait Auditable
     public static function bootAuditable(): void
     {
         static::created(function ($model) {
-            $hidden = array_merge($model->getHidden() ?? [], [
-                'password',
-                'password_hash',
-                'auth_key',
-                'remember_token',
-                'password_reset_token',
-                'account_activation_token',
-            ]);
-
-            $newValues = array_diff_key($model->getAttributes(), array_flip($hidden));
-            $newValues = static::sanitizeAuditAttributes($newValues);
+            $ignoredKeys = static::getIgnoredAuditKeys($model);
+            $attributes = array_filter(
+                $model->getAttributes(),
+                fn($val, $key) => !static::shouldIgnoreAuditKey($key, $ignoredKeys),
+                ARRAY_FILTER_USE_BOTH
+            );
+            $newValues = static::sanitizeAuditAttributes($attributes);
 
             AuditLog::record(
                 event: 'create',
@@ -34,18 +30,14 @@ trait Auditable
 
         static::updated(function ($model) {
             $dirty = $model->getDirty();
-            $hidden = array_merge($model->getHidden() ?? [], [
-                'password',
-                'password_hash',
-                'auth_key',
-                'remember_token',
-                'password_reset_token',
-                'account_activation_token',
-                'updated_at',
-                'user_updated',
-            ]);
+            $ignoredKeys = static::getIgnoredAuditKeys($model);
 
-            $filteredDirty = array_diff_key($dirty, array_flip($hidden));
+            $filteredDirty = array_filter(
+                $dirty,
+                fn($val, $key) => !static::shouldIgnoreAuditKey($key, $ignoredKeys),
+                ARRAY_FILTER_USE_BOTH
+            );
+
             if (empty($filteredDirty)) {
                 return;
             }
@@ -71,17 +63,13 @@ trait Auditable
         });
 
         static::deleted(function ($model) {
-            $hidden = array_merge($model->getHidden() ?? [], [
-                'password',
-                'password_hash',
-                'auth_key',
-                'remember_token',
-                'password_reset_token',
-                'account_activation_token',
-            ]);
-
-            $oldValues = array_diff_key($model->getAttributes(), array_flip($hidden));
-            $oldValues = static::sanitizeAuditAttributes($oldValues);
+            $ignoredKeys = static::getIgnoredAuditKeys($model);
+            $attributes = array_filter(
+                $model->getAttributes(),
+                fn($val, $key) => !static::shouldIgnoreAuditKey($key, $ignoredKeys),
+                ARRAY_FILTER_USE_BOTH
+            );
+            $oldValues = static::sanitizeAuditAttributes($attributes);
 
             AuditLog::record(
                 event: 'delete',
@@ -92,6 +80,67 @@ trait Auditable
                 diffSummary: 'ลบออกจากระบบ'
             );
         });
+    }
+
+    /**
+     * Get keys that should never be recorded in audit logs
+     */
+    protected static function getIgnoredAuditKeys($model): array
+    {
+        $base = [
+            // Passwords & Auth Tokens
+            'password',
+            'password_hash',
+            'auth_key',
+            'remember_token',
+            'password_reset_token',
+            'account_activation_token',
+            'verification_token',
+            'access_token',
+
+            // Internal Timestamps & Audit Actors
+            'created_at',
+            'updated_at',
+            'user_created',
+            'user_updated',
+
+            // Hit Counters & File Download Metrics across modules
+            'pro_count_page',
+            'pro_count_abs',
+            'pro_count_full',
+            'pub_download',
+            'rf_download',
+            'utz_count',
+            'utz_countfile',
+            'news_count',
+            'con_count',
+            'tr_count',
+        ];
+
+        $hidden = $model->getHidden() ?? [];
+        $custom = property_exists($model, 'ignoreAudit') ? (array) $model->ignoreAudit : [];
+
+        return array_unique(array_merge($base, $hidden, $custom));
+    }
+
+    /**
+     * Determine if a specific attribute key should be ignored from audit trail
+     */
+    protected static function shouldIgnoreAuditKey(string $key, array $ignoredKeys): bool
+    {
+        if (in_array($key, $ignoredKeys, true)) {
+            return true;
+        }
+
+        // Pattern matching for hit counters, page views, and download counts
+        if (str_ends_with($key, '_count') || 
+            str_ends_with($key, '_download') || 
+            str_starts_with($key, 'pro_count_') ||
+            str_starts_with($key, 'count_')) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

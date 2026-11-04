@@ -236,7 +236,30 @@ class RecordLevelAuditLogTest extends TestCase
         $response->assertDontSee('Activity & Audit Trail');
     }
 
-    public function test_audit_trail_limits_initial_display_to_five_items_with_collapse(): void
+    public function test_hit_and_download_counters_are_ignored_from_audit_logs(): void
+    {
+        $project = RdbProject::first();
+        if (!$project) {
+            $this->markTestSkipped('No project found');
+        }
+
+        $initialLogsCount = AuditLog::where('auditable_type', 'RdbProject')
+            ->where('auditable_id', $project->pro_id)
+            ->count();
+
+        // Simulate page view counter increment
+        $project->increment('pro_count_page');
+        $project->increment('pro_count_abs');
+        $project->increment('pro_count_full');
+
+        $afterLogsCount = AuditLog::where('auditable_type', 'RdbProject')
+            ->where('auditable_id', $project->pro_id)
+            ->count();
+
+        $this->assertEquals($initialLogsCount, $afterLogsCount, 'Counter increments must not create audit log entries');
+    }
+
+    public function test_audit_trail_paginates_ten_items_per_page_with_page_controls(): void
     {
         $admin = User::find(129) ?? User::whereHas('roles', fn($q) => $q->where('item_name', 'The Creator'))->first();
         $project = RdbProject::first();
@@ -244,20 +267,24 @@ class RecordLevelAuditLogTest extends TestCase
             $this->markTestSkipped('No project found');
         }
 
-        // Create 7 audit logs for this project
-        for ($i = 1; $i <= 7; $i++) {
+        // Create 15 audit logs to trigger 2 pages
+        for ($i = 1; $i <= 15; $i++) {
             AuditLog::record(
                 event: 'update',
                 auditable: $project,
                 oldValues: ['test_field' => "old_{$i}"],
                 newValues: ['test_field' => "new_{$i}"],
-                remarks: "ทดสอบรายการที่ {$i}"
+                remarks: "ทดสอบหน้าเพจรายการที่ {$i}"
             );
         }
 
         $response = $this->actingAs($admin)->get(route('backend.rdb_project.show', $project->pro_id));
         $response->assertStatus(200);
-        $response->assertSee("auditTrailMoreCollapse_{$project->pro_id}");
-        $response->assertSee('ดูประวัติทั้งหมด');
+        $response->assertSee("recordAuditTrailCard_{$project->pro_id}");
+        $response->assertSee('switchAuditPage');
+        $response->assertSee('ถัดไป');
+        $response->assertSee('ก่อนหน้า');
+        $response->assertSee('data-page="1"', false);
+        $response->assertSee('data-page="2"', false);
     }
 }
