@@ -1,5 +1,71 @@
 # บันทึกการพัฒนาประจำวัน (Development Log)
 
+## วันที่: 4 พฤศจิกายน 2569 (2026-11-04)
+
+### 📌 สรุปงานสำคัญที่ดำเนินการเสร็จสิ้นในวันนี้
+
+#### 1. ศูนย์บันทึกประวัติกิจกรรมและการแก้ไขระดับเรคคอร์ด (Record-Level Activity & Audit Trail Hub)
+- **ปรับปรุงคอมโพเนนต์ `<x-audit-trail>` ในหน้ารายละเอียดของทุกโมดูล**:
+  - ปรับขนาดตัวอักษรเป็น **Compact Typography** (`0.8125rem` / `0.75rem`) ให้ดูกลมกลืน ไม่เด่นแย่งสายตาจากเนื้อหาหลักของโครงการ
+  - พัฒนาระบบแบ่งหน้า **Instant Client-Side Pagination หน้าละ 10 รายการ** รวดเร็วแบบเรียลไทม์ พร้อมปุ่มกด ก่อนหน้า/ถัดไป และหมายเลขหน้า ช่วยให้หน้าจอไม่ยาวเกินไป
+  - เพิ่มปุ่ม "โหลดประวัติทั้งหมด" สำหรับผู้ดูแลระบบที่ต้องการดูข้อมูลครบทุกรายการในคราวเดียว
+- **เพิ่มการบันทึกประวัติของความสัมพันธ์ย่อย (Sub-Resource Audit Tracking)**:
+  - **นักวิจัยร่วมโครงการ (`rdb_project_work`)**: บันทึกการเพิ่ม/แก้ไขสัดส่วน (%)/ลบนักวิจัยร่วม พร้อมระบุชื่อนักวิจัย ตำแหน่ง และสัดส่วนที่เปลี่ยนแปลงลงในการ์ด Audit Trail ของโครงการวิจัยนั้น ๆ ทันที
+  - **ผู้เขียนผลงานตีพิมพ์ (`rdb_published_work`)**: บันทึกการเพิ่ม/แก้ไขประเภทผู้แต่ง/ลบผู้ประพันธ์บทความ
+  - **ไฟล์แนบเพิ่มเติม (`rdb_project_files`)**: บันทึกการอัปโหลดไฟล์ การแก้ไขชื่อไฟล์ และการลบไฟล์แนบ
+- **นโยบายการคัดแยก Log ขยะ (Log Hygiene & Noise Reduction Policy)**:
+  - กำหนดนโยบายแยกการนับสถิติการเข้าดู (View Hits: `pro_count_page`, `pub_download`) ออกจาก Event Audit Logs เด็ดขาด
+  - พัฒนาสคริปต์กวาดล้างข้อมูล Log ขยะเดิมที่เกิดจากการนับวิวสะสม 2,369 รายการ คืนพื้นที่ฐานข้อมูลและเพิ่มความเร็วในการสืบค้น
+- **ระบบสิทธิ์และความเป็นส่วนตัวเข้มงวด (Strict Privacy Scoping)**:
+  - ผู้ดูแลระบบส่วนกลาง (The Creator / Admin) มองเห็นข้อมูลครบถ้วนพร้อมข้อมูลเชิงเทคนิค (IP Address, User Agent, URL)
+  - นักวิจัยมองเห็นเฉพาะประวัติผลงานของตนเองและประวัติบัญชีตนเอง โดยระบบซ่อนข้อมูลเชิงเทคนิคอัตโนมัติ
+  - หน้าบ้าน (Public Portal) ปิดกั้นการมองเห็นประวัติ 100%
+
+#### 2. การตรวจสอบและติดตั้งเกราะป้องกันความเข้ากันได้ของชื่อฟิลด์ฐานข้อมูล (Schema Integrity Defense Layer & Smart Accessors)
+- **สกัดพจนานุกรมฟิลด์ 131 ตาราง**: บันทึกโครงสร้างคอลัมน์ ชนิดข้อมูล และ Primary Key ทั้งระบบไว้ที่ [`storage/framework/schema_dict.json`](storage/framework/schema_dict.json)
+- **ตรวจสอบและแก้ไขปัญหาข้อมูลเงียบ (Silent Null Vulnerability)**:
+  - แก้ไขป้ายสถานะนักวิจัยใน [`resources/views/frontend/rdbresearcher/index.blade.php`](resources/views/frontend/rdbresearcher/index.blade.php) จาก `rst_name` เป็น `restatus_name`
+  - แก้ไขคำนำหน้าชื่อใน `User::$name` จาก `prefix_name` เป็น `prefix_nameTH`
+  - แก้ไขชื่อคณะสังกัดใน `SiteController`, `AuditLog`, และ `UserRoleScope` จาก `department_name` เป็น `department_nameTH`
+- **ติดตั้ง Smart Accessors & Aliases บน 16 โมเดลหลัก**:
+  - `RdbDepartment`: `department_name`, `name`, `department_name_en`
+  - `RdbPrefix`: `prefix_name`, `name`, `abbreviation`
+  - `RdbProjectStatus`: `ps_nameTH`, `status_name`, `name`
+  - `RdbProjectPosition`: `position_name`, `name`
+  - `RdbPublishedTypeAuthor`: `author_type`, `author_type_name`, `pubta_name`, `name`
+  - `RdbDipType`: `dipt_nameTH`, `name`, `type_name`
+  - `RdbProjectUtilizeType`: `utz_type_name`, `name`, `type_name`
+  - `RdbChangwat`: `changwat_name`, `province_name`, `name`, `amphoe_name`, `tambon_name`
+  - `RdbDepartmentCategory`: `depcat_nameTH`, `name`
+  - `RdbDepartmentCourse`: `cou_nameTH`, `name`
+  - `RdbYear`: `year_nameTH`, `name`
+  - `RdbProjectFiles`: `file_name`, `rf_filename`, `name`
+  - `RdbResearcherStatus`: `rst_name`, `name`, `status_name`
+  - `RdbProject`: `pro_name_th`, `pro_name_en`, `title`, `project_name`, `pro_detail`, `pro_start`, `pro_end`, `projectStatus()`, `projectFiles()`
+  - `RdbPublished`: `pub_nameTH`, `pub_name_th`, `title`, `published_name`, `pub_file_path`
+  - `RdbDip`: `dip_name`, `dip_nameTH`, `title`, `name`, `dip_detail`
+  - `RdbResearcher`: `full_name`, `name`, `researcher_name`, `position_academic`, `full_name_en`
+
+#### 3. อัปเดตชุดคู่มือการใช้งานและรายงานการตรวจรับระบบ (Manuals, README & Acceptance Test Plan)
+- **ปรับปรุง [`README.md`](README.md)**: เพิ่มบันทึก Changelog รายละเอียดการอัปเดตประจำวันที่ 4 พ.ย. 2569
+- **ปรับปรุงคู่มือเล่ม 2 ([`docs/manuals/VOLUME_2_BACKEND_ADMIN_RESEARCHER_MANUAL.md`](docs/manuals/VOLUME_2_BACKEND_ADMIN_RESEARCHER_MANUAL.md) และ `.html`)**:
+  - ขยายหัวข้อ 10.3 บันทึกขั้นตอนการใช้ Client-side Pagination (10 รายการต่อหน้า), Sub-Resources, และ Log Hygiene Policy
+  - เพิ่มหัวข้อ 11.12 อธิบายเกราะป้องกัน Schema Integrity Defense Layer และตารางเปรียบเทียบฟิลด์ 16 โมเดล
+- **ปรับปรุงแผนตรวจรับระบบ ([`docs/manuals/SYSTEM_ACCEPTANCE_TEST_PLAN.md`](docs/manuals/SYSTEM_ACCEPTANCE_TEST_PLAN.md) และ `.html`)**:
+  - อัปเดตสถิติผลการตรวจรับผ่าน 100% (101 รายการ 652 Assertions)
+  - เพิ่มเคสทดสอบ `ADM-LOG-02` และ `ADM-DATA-01`
+- คอมไพล์เอกสาร HTML5 Portal ทั้ง 5 เล่ม และ `index.html` สมบูรณ์
+
+#### 4. ทำความสะอาด Repository และสร้าง Safety Backup Branch
+- **สร้างกิ่งสำรองความปลอดภัย**: สร้างและ Push กิ่ง `backup-before-clean-20261104` ขึ้น GitHub เป็นจุดเซฟสำรอง
+- **ลบไฟล์ที่ไม่ใช้งาน 15 ไฟล์ออกจาก `main`**:
+  - สคริปต์ชั่วคราวใน Root: `clean_definers.py`, `count_divs.py`, `sort_tables.py`, `generate_ordered_backups.ps1`
+  - View ซ้ำซ้อน/ไม่ได้ใช้: โฟลเดอร์ `frontend/rdb_project/` (มี `show.blade.php` และ `files-section.blade.php`), Partials เก่าหลังบ้าน (`_files_card.blade.php`, `backend/.../files-section.blade.php`, `search_form.blade.php`), หน้าเริ่มต้น `welcome.blade.php`, `navigation.blade.php`, `sidebar.blade.php`
+  - โมเดลที่ไม่มีตารางจริง/ซ้ำซ้อน: `RdbProjectGroup.php`, `RdbProjectChart2.php`, `RdbProjectChartBudget2.php`
+- **ผลการทดสอบยืนยันความถูกต้องหลังการลบ**: ชุดทดสอบ `SchemaIntegrityDefenseTest` (17 เคส), `RecordLevelAuditLogTest` (12 เคส), และ `BackendAuditTest` (47 เคส) ผ่าน 100%
+
+---
+
 ## วันที่: 3 พฤศจิกายน 2569 (2026-11-03)
 
 ### 📌 สรุปงานสำคัญที่ดำเนินการเสร็จสิ้นในวันนี้
