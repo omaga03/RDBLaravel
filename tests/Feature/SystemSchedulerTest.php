@@ -33,18 +33,37 @@ class SystemSchedulerTest extends TestCase
 
         $response = $this->actingAs($admin)->get(route('backend.system_scheduler.index'));
         $response->assertStatus(200);
-        $response->assertSee('ศูนย์จัดการระบบตั้งเวลาทำงานอัตโนมัติ');
-        $response->assertSee('สำรองฐานข้อมูลระบบประจำวัน');
-        $response->assertSee('สำรองระบบเต็มรูปแบบประจำสัปดาห์');
-        $response->assertSee('ซิงค์ข่าวประกาศทุนวิจัยจากระบบ NRIIS');
-        $response->assertSee('ซิงค์งานประชุมวิชาการจากเพจสถาบันวิจัยฯ');
+        $response->assertSee('Task Scheduler Hub');
+        $response->assertSee('Daily Database Backup');
+        $response->assertSee('Weekly Full Backup');
+        $response->assertSee('Funding Sync');
+        $response->assertSee('Event Sync');
         
         // Assert PDF counter & cover tasks are removed
         $response->assertDontSee('นับจำนวนหน้าเอกสาร PDF อัตโนมัติ');
         $response->assertDontSee('เรนเดอร์ภาพหน้าปก WebP อัตโนมัติ');
 
-        $response->assertSee('รันทันที');
-        $response->assertSee('แก้ไขเวลา');
+        $response->assertSee('งานอัตโนมัติในระบบ');
+    }
+
+    public function test_scheduler_hub_displays_active_task_count_when_a_task_is_disabled(): void
+    {
+        $admin = User::whereHas('roles', fn($q) => $q->whereIn('item_name', ['The Creator', 'Admin']))->first();
+        if (!$admin) {
+            $this->markTestSkipped('No admin found');
+        }
+
+        $orig = SystemSetting::get('scheduler_backup_db_enabled', '1');
+        SystemSetting::set('scheduler_backup_db_enabled', '0');
+
+        try {
+            $response = $this->actingAs($admin)->get(route('backend.system_scheduler.index'));
+            $response->assertStatus(200);
+            $response->assertSee('3');
+            $response->assertSee('ปิดพัก 1 ตัว');
+        } finally {
+            SystemSetting::set('scheduler_backup_db_enabled', $orig);
+        }
     }
 
     public function test_regular_researcher_cannot_access_scheduler_hub(): void

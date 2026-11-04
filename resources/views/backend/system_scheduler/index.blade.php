@@ -65,19 +65,37 @@
     @endif
 
     <!-- 4 Diagnostics / Stat Cards -->
+    @php
+        $totalTasksCount = count($tasksWithRunInfo);
+        $activeTasksCount = collect($tasksWithRunInfo)->where('enabled', true)->count();
+        $disabledTasksCount = $totalTasksCount - $activeTasksCount;
+    @endphp
     <div class="row g-3 mb-4">
         <!-- 1. Active Tasks -->
         <div class="col-12 col-sm-6 col-xl-3">
             <div class="card h-100 border shadow-sm bg-body">
                 <div class="card-body p-3.5 d-flex align-items-center gap-3">
-                    <div class="p-3 rounded-3 bg-primary-subtle text-primary border border-primary-subtle flex-shrink-0">
+                    <div class="p-3 rounded-3 {{ $activeTasksCount > 0 ? 'bg-primary-subtle text-primary border border-primary-subtle' : 'bg-secondary-subtle text-secondary border border-secondary-subtle' }} flex-shrink-0">
                         <i class="bi bi-list-check fs-4"></i>
                     </div>
                     <div class="overflow-hidden">
                         <span class="text-body-secondary small fw-medium d-block text-truncate">งานอัตโนมัติในระบบ</span>
-                        <div class="d-flex align-items-baseline gap-2">
-                            <span class="fs-4 fw-bold text-body tabular-nums">{{ count($tasksWithRunInfo) }}</span>
-                            <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.7rem;">พร้อมทำงาน</span>
+                        <div class="d-flex align-items-baseline gap-1.5 flex-wrap">
+                            <span class="fs-4 fw-bold text-body tabular-nums">{{ $activeTasksCount }}</span>
+                            @if($disabledTasksCount > 0 && $activeTasksCount > 0)
+                                <span class="text-body-secondary small tabular-nums">/ {{ $totalTasksCount }} งาน</span>
+                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" style="font-size: 0.7rem;">
+                                    พร้อมทำงาน (ปิดพัก {{ $disabledTasksCount }} ตัว)
+                                </span>
+                            @elseif($activeTasksCount === 0)
+                                <span class="badge bg-secondary-subtle text-body-secondary border border-secondary-subtle" style="font-size: 0.7rem;">
+                                    ปิดพักทั้งหมด ({{ $totalTasksCount }} งาน)
+                                </span>
+                            @else
+                                <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.7rem;">
+                                    พร้อมทำงาน
+                                </span>
+                            @endif
                         </div>
                     </div>
                 </div>
