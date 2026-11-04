@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\SystemSetting;
 use Tests\TestCase;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
@@ -35,6 +36,28 @@ class SystemCommandBackendTest extends TestCase
         $response->assertSee('ระบบตั้งเวลา (Scheduler)');
         $response->assertSee('งานพร้อมรัน');
         $response->assertSee(route('backend.system_scheduler.index'));
+        // Verify it reflects 4 active tasks by default
+        $response->assertSee('4 งานพร้อมรัน');
+    }
+
+    public function test_system_commands_reflects_active_schedule_count_dynamically()
+    {
+        $admin = User::whereHas('roles', fn($q) => $q->whereIn('item_name', ['The Creator', 'Admin']))->first();
+        if (!$admin) {
+            $this->markTestSkipped('No admin user found');
+        }
+
+        // Temporarily disable one task
+        $orig = SystemSetting::get('scheduler_sync_facebook_conferences_enabled', '1');
+        SystemSetting::set('scheduler_sync_facebook_conferences_enabled', '0');
+
+        try {
+            $response = $this->actingAs($admin)->get(route('backend.system_commands.index'));
+            $response->assertStatus(200);
+            $response->assertSee('3 งานพร้อมรัน');
+        } finally {
+            SystemSetting::set('scheduler_sync_facebook_conferences_enabled', $orig);
+        }
     }
 
     public function test_regular_researcher_cannot_access_system_commands()

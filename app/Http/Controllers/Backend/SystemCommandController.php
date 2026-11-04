@@ -101,11 +101,18 @@ class SystemCommandController extends Controller
             }
         } catch (\Throwable $e) {}
 
-        // 4. Resolve Active Scheduler Events Dynamically
-        $activeScheduleEvents = [];
-        try {
-            $activeScheduleEvents = app()->make(\Illuminate\Console\Scheduling\Schedule::class)->events();
-        } catch (\Throwable $e) {}
+        // 4. Resolve Active Scheduler Tasks Dynamically (Aligned with routes/console.php & SystemSchedulerController)
+        $schedulerTaskKeys = ['backup_db', 'backup_all', 'sync_nriis_news', 'sync_facebook_conferences'];
+        $activeTaskCount = 0;
+        foreach ($schedulerTaskKeys as $tKey) {
+            try {
+                if (\App\Models\SystemSetting::get("scheduler_{$tKey}_enabled", '1') === '1') {
+                    $activeTaskCount++;
+                }
+            } catch (\Throwable $e) {
+                $activeTaskCount++;
+            }
+        }
 
         $healthInfo = [
             'db_status' => $dbStatus,
@@ -118,7 +125,7 @@ class SystemCommandController extends Controller
             'app_debug' => (bool)config('app.debug', false),
             'php_version' => PHP_VERSION,
             'memory_limit' => ini_get('memory_limit'),
-            'schedule_count' => count($activeScheduleEvents),
+            'schedule_count' => $activeTaskCount,
             'db_backup_time' => \App\Models\SystemSetting::get('scheduler_backup_db_schedule_text', '02:00 น. ทุกวัน'),
             'full_backup_time' => \App\Models\SystemSetting::get('scheduler_backup_all_schedule_text', 'อาทิตย์ 03:00 น.'),
             'nriis_time' => \App\Models\SystemSetting::get('scheduler_sync_nriis_news_schedule_text', '06:00 น.'),
