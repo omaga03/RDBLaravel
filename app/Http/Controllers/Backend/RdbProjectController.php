@@ -875,8 +875,12 @@ class RdbProjectController extends Controller
         $work->created_at = now(); // Manually set (assuming RdbProjectWork has timestamps=false)
         $work->save();
 
+        $researcher = RdbResearcher::with('prefix')->find($validated['researcher_id']);
+        $position = RdbProjectPosition::find($validated['position_id']);
+        $researcherName = $researcher ? trim(($researcher->prefix->prefix_nameTH ?? '') . $researcher->researcher_fname . ' ' . $researcher->researcher_lname) : "ID: {$validated['researcher_id']}";
+        $positionName = $position ? $position->position_name : "ตำแหน่ง ID: {$validated['position_id']}";
+
         if (in_array($validated['position_id'], [RdbProjectPosition::DIRECTOR, RdbProjectPosition::HEAD])) {
-            $researcher = RdbResearcher::find($validated['researcher_id']);
             if ($researcher) {
                 $project->department_id = $researcher->department_id;
                 $project->depcat_id = $researcher->depcat_id;
@@ -884,6 +888,20 @@ class RdbProjectController extends Controller
                 $project->save();
             }
         }
+
+        \App\Models\AuditLog::record(
+            event: 'update',
+            auditable: $project,
+            oldValues: null,
+            newValues: [
+                'researcher_id' => $validated['researcher_id'],
+                'researcher_name' => $researcherName,
+                'position' => $positionName,
+                'ratio' => $validated['ratio'] . '%',
+            ],
+            remarks: "เพิ่มนักวิจัยร่วมโครงการ: {$researcherName} ({$positionName})",
+            diffSummary: "เพิ่มนักวิจัยร่วม: {$researcherName} ({$positionName}, {$validated['ratio']}%)"
+        );
 
         return redirect()->back()->with('success', 'Researcher added successfully.');
     }
@@ -902,13 +920,17 @@ class RdbProjectController extends Controller
             return redirect()->back()->with('error', "Total ratio exceeds 100%. Current total (others): {$currentTotalRatio}%");
         }
 
+        $oldWork = RdbProjectWork::where('pro_id', $id)->where('researcher_id', $rid)->first();
+        $oldPosition = $oldWork ? RdbProjectPosition::find($oldWork->position_id) : null;
+        $newPosition = RdbProjectPosition::find($validated['position_id']);
+        $researcher = RdbResearcher::with('prefix')->find($rid);
+        $researcherName = $researcher ? trim(($researcher->prefix->prefix_nameTH ?? '') . $researcher->researcher_fname . ' ' . $researcher->researcher_lname) : "ID: {$rid}";
+
         RdbProjectWork::where('pro_id', $id)
                       ->where('researcher_id', $rid)
                       ->update(array_merge($validated, ['user_updated' => auth()->id(), 'updated_at' => now()])); // Manually set updated_at
 
         if (in_array($validated['position_id'], [RdbProjectPosition::DIRECTOR, RdbProjectPosition::HEAD])) {
-             $researcher = RdbResearcher::find($rid);
-             $project = RdbProject::find($id);
              if ($researcher && $project) {
                  $project->department_id = $researcher->department_id;
                  $project->depcat_id = $researcher->depcat_id;
@@ -916,6 +938,21 @@ class RdbProjectController extends Controller
                  $project->save();
              }
         }
+
+        \App\Models\AuditLog::record(
+            event: 'update',
+            auditable: $project,
+            oldValues: [
+                'position' => $oldPosition?->position_name ?? ($oldWork?->position_id ?? '-'),
+                'ratio' => ($oldWork?->ratio ?? '-') . '%',
+            ],
+            newValues: [
+                'position' => $newPosition?->position_name ?? $validated['position_id'],
+                'ratio' => $validated['ratio'] . '%',
+            ],
+            remarks: "ปรับปรุงข้อมูลนักวิจัยร่วม: {$researcherName}",
+            diffSummary: "แก้ไขนักวิจัยร่วม: {$researcherName} (เป็น " . ($newPosition?->position_name ?? '') . ", {$validated['ratio']}%)"
+        );
 
         return redirect()->back()->with('success', 'Researcher updated successfully.');
     }
@@ -925,9 +962,28 @@ class RdbProjectController extends Controller
         $project = RdbProject::findOrFail($id);
         $this->authorize('update', $project); // Authorize to update project via deleting researcher
 
+        $oldWork = RdbProjectWork::where('pro_id', $id)->where('researcher_id', $rid)->first();
+        $researcher = RdbResearcher::with('prefix')->find($rid);
+        $researcherName = $researcher ? trim(($researcher->prefix->prefix_nameTH ?? '') . $researcher->researcher_fname . ' ' . $researcher->researcher_lname) : "ID: {$rid}";
+        $position = $oldWork ? RdbProjectPosition::find($oldWork->position_id) : null;
+
         RdbProjectWork::where('pro_id', $id)
             ->where('researcher_id', $rid)
             ->delete();
+
+        \App\Models\AuditLog::record(
+            event: 'update',
+            auditable: $project,
+            oldValues: [
+                'researcher_id' => $rid,
+                'researcher_name' => $researcherName,
+                'position' => $position?->position_name ?? ($oldWork?->position_id ?? '-'),
+                'ratio' => ($oldWork?->ratio ?? '-') . '%',
+            ],
+            newValues: null,
+            remarks: "ลบนักวิจัยออกจากโครงการ: {$researcherName}",
+            diffSummary: "ลบนักวิจัยร่วม: {$researcherName}"
+        );
 
         return redirect()->back()->with('success', 'ลบนักวิจัยเรียบร้อยแล้ว');
     }

@@ -287,4 +287,63 @@ class RecordLevelAuditLogTest extends TestCase
         $response->assertSee('data-page="1"', false);
         $response->assertSee('data-page="2"', false);
     }
+
+    public function test_managing_project_researchers_records_audit_trail_on_project(): void
+    {
+        $admin = User::find(129) ?? User::whereHas('roles', fn($q) => $q->where('item_name', 'The Creator'))->first();
+        $project = RdbProject::create([
+            'pro_nameTH' => 'โครงการทดสอบสิทธิ์นักวิจัย ' . time(),
+            'pro_budget' => 50000,
+            'year_id' => 19,
+            'data_show' => 1,
+        ]);
+        $researcher = RdbResearcher::first();
+
+        if (!$project || !$researcher) {
+            $this->markTestSkipped('Project or Researcher not available for test');
+        }
+
+        try {
+            // 1. Add researcher
+            $response = $this->actingAs($admin)->post(route('backend.rdb_project.researcher.store', $project->pro_id), [
+                'researcher_id' => $researcher->researcher_id,
+                'position_id' => 3, // Researcher
+                'ratio' => 20,
+            ]);
+            $response->assertSessionHasNoErrors();
+
+            $addLog = AuditLog::where('auditable_type', 'RdbProject')
+                ->where('auditable_id', $project->pro_id)
+                ->where('remarks', 'like', "%เพิ่มนักวิจัยร่วมโครงการ%")
+                ->first();
+            $this->assertNotNull($addLog, 'Adding a researcher must record audit log on project');
+
+            // 2. Update researcher
+            $response = $this->actingAs($admin)->put(route('backend.rdb_project.researcher.update', [$project->pro_id, $researcher->researcher_id]), [
+                'position_id' => 3,
+                'ratio' => 25,
+            ]);
+            $response->assertSessionHasNoErrors();
+
+            $updateLog = AuditLog::where('auditable_type', 'RdbProject')
+                ->where('auditable_id', $project->pro_id)
+                ->where('remarks', 'like', "%ปรับปรุงข้อมูลนักวิจัยร่วม%")
+                ->first();
+            $this->assertNotNull($updateLog, 'Updating a researcher must record audit log on project');
+
+            // 3. Delete researcher
+            $response = $this->actingAs($admin)->delete(route('backend.rdb_project.researcher.destroy', [$project->pro_id, $researcher->researcher_id]));
+            $response->assertSessionHasNoErrors();
+
+            $deleteLog = AuditLog::where('auditable_type', 'RdbProject')
+                ->where('auditable_id', $project->pro_id)
+                ->where('remarks', 'like', "%ลบนักวิจัยออกจากโครงการ%")
+                ->first();
+            $this->assertNotNull($deleteLog, 'Deleting a researcher must record audit log on project');
+        } finally {
+            \App\Models\RdbProjectWork::where('pro_id', $project->pro_id)->delete();
+            AuditLog::where('auditable_type', 'RdbProject')->where('auditable_id', $project->pro_id)->delete();
+            $project->delete();
+        }
+    }
 }
