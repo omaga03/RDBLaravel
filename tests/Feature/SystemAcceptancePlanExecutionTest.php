@@ -44,7 +44,7 @@ class SystemAcceptancePlanExecutionTest extends TestCase
         $this->assertTrue(DB::connection()->getPdo() !== null);
 
         // ตรวจสอบ View หลัก 5 รายการจากทั้งหมด 46 รายการ
-        $sampleViews = ['view_year', 'rdb_project_type', 'rdb_strategic', 'rdb_department', 'rdb_dip_type'];
+        $sampleViews = ['view_year', 'rdb_project_types', 'rdb_strategic', 'rdb_department', 'rdb_dip_type'];
         foreach ($sampleViews as $view) {
             $exists = DB::select("SHOW TABLES LIKE '{$view}'");
             $this->assertNotEmpty($exists, "View or table '{$view}' does not exist in rdbpcru.");
