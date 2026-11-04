@@ -52,7 +52,7 @@
    * 9.2 การส่งออกแพ็กเกจคลังปัญญา DSpace SAF แบบกลุ่ม (Batch Mode)
    * 9.3 เครื่องมือตรวจสอบความสมบูรณ์ของไฟล์ PDF ก่อนส่งออก (DSpace Check Mode)
    * 9.4 คำสั่งดูแลรักษาระบบผ่าน Artisan CLI
-5. [บทที่ 10: ประวัติการใช้งาน (Audit Logs) และการตั้งค่านโยบายความปลอดภัย](#บทที่-10-ประวัติการใช้งาน-audit-logs-และการตั้งค่านโยบายความปลอดภัย)
+10. [บทที่ 10: ประวัติการใช้งาน (Audit Logs) และการตั้งค่านโยบายความปลอดภัย](#บทที่-10-ประวัติการใช้งาน-audit-logs-และการตั้งค่านโยบายความปลอดภัย)
     * 10.1 การตรวจสอบประวัติการทำรายการ (Audit Trail) และเครื่องมือเปรียบเทียบค่าเดิม-ใหม่ (Diff Viewer)
     * 10.2 การตั้งค่านโยบายความปลอดภัยการดาวน์โหลดเอกสาร (Document Access Policy)
     * 10.3 การตรวจสอบประวัติกิจกรรมและการแก้ไขรายรายการ (Record-Level Audit Trail)
@@ -66,6 +66,9 @@
     * 11.7 ศูนย์สำรองและกู้คืนข้อมูลระบบ (System Backup, Restore with Email OTP & Cloud Sync)
     * 11.8 การตั้งค่าระบบการส่งอีเมลของมหาวิทยาลัย (Mail & SMTP Configuration)
     * 11.9 การตั้งเวลาทำงานอัตโนมัติและการตรวจสุขภาพระบบ (Task Scheduling & Live Diagnostics)
+    * 11.10 ศูนย์สำรองและกู้คืนข้อมูลระบบแบบแยกเฉพาะ (Dedicated Disaster Recovery Hub)
+    * 11.11 ระบบการจัดการการแจ้งเตือนส่วนบุคคลและ Telegram Bot (Personal & Admin Notification Center)
+    * 11.12 เกราะป้องกันความเข้ากันได้ของชื่อฟิลด์ฐานข้อมูล (Schema Integrity Defense Layer & Smart Accessors)
 ---
 
 ## บทที่ 1: การเข้าสู่ระบบ ความปลอดภัย และการยืนยันตัวตนนักวิจัย (Authentication & Onboarding)
@@ -636,6 +639,14 @@ php artisan rdb:generate-pdf-covers --module=all
 * **ไทม์ไลน์กิจกรรม (Editorial Timeline)**: แสดงลำดับเหตุการณ์จากล่าสุด วันที่และเวลา พ.ศ. พร้อมระยะเวลาสัมพัทธ์ (เช่น "2 ชั่วโมงที่แล้ว")
 * **ป้ายประเภทกิจกรรม**: แยกสีชัดเจน เช่น สร้างรายการใหม่ (สีเขียว), อัปเดตข้อมูล (สีน้ำเงิน), ปรับเปลี่ยนสถานะ (สีเหลือง), ลบข้อมูล (สีแดง)
 * **เครื่องมือตรวจสอบความเปลี่ยนแปลง (Field-by-Field Diff Viewer)**: คลิกปุ่ม **"ดูรายละเอียดที่เปลี่ยน"** เพื่อเปิดตารางเปรียบเทียบค่าเดิม (Old Value) และค่าใหม่ (New Value) แบบเรียลไทม์
+* **ระบบแบ่งหน้าอัจฉริยะ (Instant Client-Side Pagination)**: จัดกลุ่มประวัติกิจกรรมเป็นหน้าละ **10 รายการ** อย่างเป็นระเบียบ พร้อมปุ่ม **"ก่อนหน้า"**, **"ถัดไป"**, และหมายเลขหน้า ช่วยลดความยาวของหน้าจอและโหลดข้อมูลได้ทันทีโดยไม่ต้อง Refresh หน้าเว็บ
+* **การบันทึกประวัติความสัมพันธ์ย่อย (Sub-Resource Audit Tracking)**:
+  - **นักวิจัยร่วมโครงการ (`rdb_project_work`)**: เมื่อมีการเพิ่ม แก้ไขสัดส่วน (%) หรือลบนักวิจัยร่วม ระบบจะบันทึกประวัติลงในการ์ดโครงการวิจัยนั้นทันที ระบุชื่อนักวิจัย ตำแหน่ง และสัดส่วนที่เปลี่ยนแปลง
+  - **ผู้เขียนผลงานตีพิมพ์ (`rdb_published_work`)**: บันทึกการเพิ่ม/เปลี่ยนประเภทผู้แต่ง (เช่น ผู้ประพันธ์อันดับแรก, Corresponding Author)
+  - **ไฟล์แนบเพิ่มเติม (`rdb_project_files`)**: บันทึกการอัปโหลดไฟล์ การแก้ไขชื่อไฟล์ หรือการลบไฟล์แนบ
+* **นโยบายการคัดแยก Log ขยะ (Log Hygiene & Noise Reduction Policy)**:
+  - ระบบ**ยกเว้นการบันทึกการนับสถิติการเข้าดู (View Counts) และการดาวน์โหลดไฟล์ (Download Counts)** ออกจากตาราง Audit Log เพื่อป้องกันการสะสมของ Event ขยะนับแสนรายการ
+  - มุ่งเน้นการจัดเก็บเฉพาะกิจกรรมที่มีนัยสำคัญต่อความโปร่งใสและตรวจสอบได้ (Data Governance) ได้แก่ การสร้าง, การแก้ไขฟิลด์ข้อมูล, การเปลี่ยนสถานะโครงการ, การส่งประเมินเล่มรายงาน, การนำเข้าคลัง DSpace, และการจัดการผู้ร่วมวิจัย/ไฟล์แนบ
 
 ---
 
@@ -1014,3 +1025,45 @@ php artisan schedule:list
   - 💾 สำรอง & กู้คืนระบบ (Backup/Restore): การสร้างแพ็กเกจหรือคำขอกู้คืนฐานข้อมูล
   - 🔐 เข้าสู่ระบบ/สวมสิทธิ์ (Auth Login): การล็อกอินหรือสลับสิทธิ์การใช้งาน
   - ⚡ รันคำสั่งบำรุงรักษา / Scheduler Manual Run
+
+---
+
+### 11.12 เกราะป้องกันความเข้ากันได้ของชื่อฟิลด์ฐานข้อมูล (Schema Integrity Defense Layer & Smart Accessors)
+
+ระบบฐานข้อมูลวิจัยมหาวิทยาลัยราชภัฏเพชรบูรณ์มีประวัติการพัฒนาและสืบทอดข้อมูลมาจากระบบเดิม (Yii2 Framework) ซึ่งมีรูปแบบการตั้งชื่อฟิลด์เฉพาะตัว เช่น การลงท้ายด้วย `TH` หรือ `EN`, การสะกดคำมรดก หรือการใช้ชื่อฟิลด์ที่แตกต่างจากมาตรฐานของ Laravel (เช่น `department_nameTH`, `position_nameTH`, `pubta_nameTH`, `ps_name`, `restatus_name`, `utz_typr_name`, `changwat_t`):
+
+#### 1. ความเสี่ยงของภาวะข้อมูลเงียบ (Silent Null Vulnerability)
+หากนักพัฒนาเขียนโค้ดเรียกคุณสมบัติของโมเดลตามความคุ้นเคยของ Laravel เช่น:
+* เรียก `$department->department_name` แทนที่จะเป็น `department_nameTH`
+* เรียก `$status->status_name` หรือ `ps_nameTH` แทนที่จะเป็น `ps_name`
+* เรียก `$researcher->prefix->prefix_name` แทนที่จะเป็น `prefix_nameTH`
+* เรียก `$position->position_name` แทนที่จะเป็น `position_nameTH`
+
+ระบบจะไม่ขึ้น Error สีแดงแจ้งเตือน แต่จะส่งคืนค่า `null` ทำให้หน้าเว็บแสดงเป็นช่องว่าง หรือแสดงเครื่องหมายขีด `-` โดยไม่มีใครทราบ (Silent Null)
+
+#### 2. สถาปัตยกรรม Smart Accessors & Aliases บน 16 โมเดลหลัก
+เพื่อกำจัดความเสี่ยงนี้อย่างถาวร ระบบได้ติดตั้ง **Smart Accessors Layer** ทำหน้าที่เป็นสะพานเชื่อมโยงชื่อฟิลด์อัตโนมัติ:
+
+| โมเดล Eloquent | ฟิลด์หลักใน Database | Smart Accessors & Aliases ที่รองรับ |
+|---|---|---|
+| `RdbDepartment` | `department_nameTH`, `department_nameEN` | `department_name`, `name`, `department_name_en` |
+| `RdbPrefix` | `prefix_nameTH`, `prefix_abbreviationTH` | `prefix_name`, `name`, `abbreviation` |
+| `RdbProjectStatus` | `ps_name` | `ps_nameTH`, `status_name`, `name` |
+| `RdbProjectPosition` | `position_nameTH` | `position_name`, `name` |
+| `RdbPublishedTypeAuthor` | `pubta_nameTH`, `pubta_nameEN` | `author_type`, `author_type_name`, `pubta_name`, `name` |
+| `RdbDipType` | `dipt_name` | `dipt_nameTH`, `name`, `type_name` |
+| `RdbProjectUtilizeType` | `utz_typr_name` | `utz_type_name`, `name`, `type_name` |
+| `RdbChangwat` | `changwat_t`, `amphoe_t`, `tambon_t` | `changwat_name`, `province_name`, `name`, `amphoe_name`, `tambon_name` |
+| `RdbDepartmentCategory` | `depcat_name` | `depcat_nameTH`, `name` |
+| `RdbDepartmentCourse` | `cou_name` | `cou_nameTH`, `name` |
+| `RdbYear` | `year_name` | `year_nameTH`, `name` |
+| `RdbProjectFiles` | `rf_filesname` | `file_name`, `rf_filename`, `name` |
+| `RdbResearcherStatus` | `restatus_name` | `rst_name`, `name`, `status_name` |
+| `RdbProject` | `pro_nameTH`, `pro_abstract`, `pro_date_start`, `pro_date_end` | `pro_name_th`, `pro_name_en`, `title`, `project_name`, `pro_detail`, `pro_start`, `pro_end`, `projectStatus()`, `projectFiles()` |
+| `RdbPublished` | `pub_name`, `pf_path` | `pub_nameTH`, `pub_name_th`, `title`, `published_name`, `pub_file_path` |
+| `RdbDip` | `dip_data2_name`, `dip_data2_conclusion`, `dip_note` | `dip_name`, `dip_nameTH`, `title`, `name`, `dip_detail` |
+| `RdbResearcher` | `researcher_fname`, `researcher_lname` | `full_name`, `name`, `researcher_name`, `position_academic`, `full_name_en` |
+
+#### 3. พจนานุกรมฟิลด์ระบบและการทดสอบอัตโนมัติ (Automated Schema Verification)
+* **พจนานุกรม 131 ตาราง**: บันทึกโครงสร้างคอลัมน์ ชนิดข้อมูล และ Primary Key ทั้งระบบไว้ที่ [`storage/framework/schema_dict.json`](file:///c:/laragon/www/laravel_rdb/storage/framework/schema_dict.json)
+* **ชุดทดสอบรับประกันความถูกต้อง**: รันคำสั่ง `php artisan test --filter=SchemaIntegrityDefenseTest` (17 เคสทดสอบ 77 assertions ผ่าน 100%) เพื่อตรวจสอบว่าทุก Accessor ดึงข้อมูลตรงกับฐานข้อมูลจริงเสมอ

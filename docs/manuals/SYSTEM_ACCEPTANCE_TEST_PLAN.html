@@ -412,10 +412,12 @@
 <a id="ระบบฐานข้อมูลงานวิจัย-มหาวิทยาลัยราชภัฏเพชรบูรณ์-pcru-research-database-laravelrdb" class="manual-anchor"></a><a id="%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%90%E0%B8%B2%E0%B8%99%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-%E0%B8%A1%E0%B8%AB%E0%B8%B2%E0%B8%A7%E0%B8%B4%E0%B8%97%E0%B8%A2%E0%B8%B2%E0%B8%A5%E0%B8%B1%E0%B8%A2%E0%B8%A3%E0%B8%B2%E0%B8%8A%E0%B8%A0%E0%B8%B1%E0%B8%8F%E0%B9%80%E0%B8%9E%E0%B8%8A%E0%B8%A3%E0%B8%9A%E0%B8%B9%E0%B8%A3%E0%B8%93%E0%B9%8C-pcru-research-database---laravelrdb" class="manual-anchor"></a><a id="%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%90%E0%B8%B2%E0%B8%99%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-%E0%B8%A1%E0%B8%AB%E0%B8%B2%E0%B8%A7%E0%B8%B4%E0%B8%97%E0%B8%A2%E0%B8%B2%E0%B8%A5%E0%B8%B1%E0%B8%A2%E0%B8%A3%E0%B8%B2%E0%B8%8A%E0%B8%A0%E0%B8%B1%E0%B8%8F%E0%B9%80%E0%B8%9E%E0%B8%8A%E0%B8%A3%E0%B8%9A%E0%B8%B9%E0%B8%A3%E0%B8%93%E0%B9%8C-pcru-research-database-laravelrdb" class="manual-anchor"></a><h2 id="ระบบฐานข้อมูลงานวิจัย-มหาวิทยาลัยราชภัฏเพชรบูรณ์-pcru-research-database---laravelrdb">ระบบฐานข้อมูลงานวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์ (PCRU Research Database - laravel_rdb)</h2>
 <div class="manual-callout callout-note"><div class="callout-header"><i class="bi bi-info-circle-fill"></i> ข้อมูลจำเพาะ / หมายเหตุ (NOTE)</div><div class="callout-body"><p><strong>สถานะการทดสอบระบบจริง (Test Execution Summary)</strong>:</p>
 <ul>
-<li><strong>วันและเวลาที่ดำเนินการทดสอบล่าสุด</strong>: 3 พฤศจิกายน 2569 เวลา 22:36:47 น.</li>
-<li><strong>ผลการรันชุดทดสอบอัตโนมัติ (Automated Test Suite)</strong>: <strong>ผ่านทั้งหมด 72 รายการ (529 Assertions) 100%</strong>
+<li><strong>วันและเวลาที่ดำเนินการทดสอบล่าสุด</strong>: 4 พฤศจิกายน 2569 เวลา 22:15:00 น.</li>
+<li><strong>ผลการรันชุดทดสอบอัตโนมัติ (Automated Test Suite)</strong>: <strong>ผ่านทั้งหมด 101 รายการ (652 Assertions) 100%</strong>
 <ul>
-<li><code>Tests\Feature\BackendAuditTest</code>: ผ่าน 47 รายการ (421 Assertions)</li>
+<li><code>Tests\Feature\BackendAuditTest</code>: ผ่าน 47 รายการ (422 Assertions)</li>
+<li><code>Tests\Feature\SchemaIntegrityDefenseTest</code>: ผ่าน 17 รายการ (77 Assertions)</li>
+<li><code>Tests\Feature\RecordLevelAuditLogTest</code>: ผ่าน 12 รายการ (46 Assertions)</li>
 <li><code>Tests\Feature\SystemAcceptancePlanExecutionTest</code>: ผ่าน 13 รายการ (69 Assertions)</li>
 <li><code>Tests\Feature\SystemBackupTest</code>: ผ่าน 5 รายการ (12 Assertions)</li>
 <li><code>Tests\Feature\PdfCoverGenerationTest</code>: ผ่าน 4 รายการ (16 Assertions)</li>
@@ -1005,6 +1007,22 @@
 <td align="center">[x] ผ่าน (Pass)</td>
 </tr>
 <tr>
+<td align="left"><strong>ADM-LOG-02</strong></td>
+<td align="left"><strong>ประวัติกิจกรรมระดับเรคคอร์ดและการแบ่งหน้า (<code>&lt;x-audit-trail&gt;</code>)</strong></td>
+<td align="left">1. เข้าหน้ารายละเอียดโครงการ/ผลงานวิชาการ/บัญชีผู้ใช้<br>2. เพิ่ม/แก้ไขนักวิจัยร่วม หรือไฟล์แนบ<br>3. ตรวจสอบการแบ่งหน้า 10 รายการ และปุ่มเปลี่ยนหน้า</td>
+<td align="left">หน้ารายละเอียดทุกโมดูล</td>
+<td align="left">- บันทึกประวัติกิจกรรมทันทีพร้อมแสดงชื่อ/สัดส่วนนักวิจัยร่วมและไฟล์แนบ<br>- แบ่งหน้า 10 รายการ Client-side Pagination รวดเร็วไม่ Refresh หน้า<br>- สถิตินับวิว/ดาวน์โหลดไม่ถูกบันทึกเป็นขยะ Log</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>ADM-DATA-01</strong></td>
+<td align="left"><strong>เกราะป้องกันชื่อฟิลด์ฐานข้อมูล (Schema Integrity Defense Layer)</strong></td>
+<td align="left">1. เรียกใช้งานคุณสมบัติโมเดลตามมาตรฐาน Laravel เช่น <code>$dept-&gt;department_name</code>, <code>$status-&gt;ps_nameTH</code>, <code>$user-&gt;name</code><br>2. รัน <code>php artisan test --filter=SchemaIntegrityDefenseTest</code></td>
+<td align="left">16 โมเดลหลัก และ 131 ตารางในพจนานุกรม</td>
+<td align="left">- ไม่เกิดปัญหา Silent Null (ค่าว่าง/ขีด - โดยไม่ทราบสาเหตุ)<br>- Smart Accessors เชื่อมโยงฟิลด์มรดก Yii2 (<code>*TH</code>, <code>*EN</code>, <code>ps_name</code>) เข้ากับ Laravel สมบูรณ์<br>- ชุดทดสอบผ่าน 17/17 เคส (77 assertions) 100%</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
 <td align="left"><strong>ADM-SYS-01</strong></td>
 <td align="left"><strong>ศูนย์จัดการคำสั่งระบบและการบำรุงรักษา (<code>/backend/system-commands</code>)</strong></td>
 <td align="left">1. เข้าสู่ระบบด้วย Super Admin<br>2. เข้าเมนู &quot;คำสั่งและบำรุงรักษาระบบ&quot;<br>3. ทดสอบรันคำสั่งล้างแคช หรือสั่งสร้างภาพปก PDF แบบกำหนด Limit</td>
@@ -1148,7 +1166,7 @@
 <a id="%E0%B8%AB%E0%B8%A1%E0%B8%A7%E0%B8%94%E0%B8%97%E0%B8%B5%E0%B9%88-6-%E0%B9%80%E0%B8%81%E0%B8%93%E0%B8%91%E0%B9%8C%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AD%E0%B8%99%E0%B8%B8%E0%B8%A1%E0%B8%B1%E0%B8%95%E0%B8%B4%E0%B9%80%E0%B8%9E%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B9%80%E0%B8%9B%E0%B8%B4%E0%B8%94%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%88%E0%B8%A3%E0%B8%B4%E0%B8%87-production-sign-off-criteria" class="manual-anchor"></a><h2 id="หมวดที่-6-เกณฑ์การอนุมัติเพื่อเปิดใช้งานจริง-production-sign-off-criteria">หมวดที่ 6: เกณฑ์การอนุมัติเพื่อเปิดใช้งานจริง (Production Sign-off Criteria)</h2>
 <p>ระบบจะถือว่ามีความพร้อมในการขึ้นสู่สถานะ Production 100% เมื่อผ่านเกณฑ์ต่อไปนี้ทั้งหมด:</p>
 <ul>
-<li><input checked="" disabled="" type="checkbox"> <strong>ชุดทดสอบหลักผ่านทั้งหมด</strong>: รัน <code>php artisan test --filter=&quot;SystemAcceptancePlanExecutionTest|PdfCoverGenerationTest|BackendAuditTest&quot;</code> ผ่าน 63/63 รายการ (493 Assertions 100%)</li>
+<li><input checked="" disabled="" type="checkbox"> <strong>ชุดทดสอบหลักผ่านทั้งหมด</strong>: รัน <code>php artisan test --filter=&quot;BackendAuditTest|SchemaIntegrityDefenseTest|RecordLevelAuditLogTest|SystemAcceptancePlanExecutionTest|PdfCoverGenerationTest|SystemBackupTest|SystemCommandBackendTest&quot;</code> ผ่าน 101/101 รายการ (652 Assertions 100%)</li>
 <li><input checked="" disabled="" type="checkbox"> <strong>การทดสอบ UAT ในหมวดที่ 2 และ 3</strong>: ผ่านการทดสอบรายการระดับ Critical และ High ครบทุกข้อ รวมถึงวงจรส่งร่าง-ตรวจรับ WF-01 ถึง WF-07</li>
 <li><input checked="" disabled="" type="checkbox"> <strong>ข้อมูลนำเข้าเดิมสมบูรณ์</strong>: โครงการวิจัย 2,870 โครงการ และงานตีพิมพ์ 1,873 รายการ เข้าถึงได้และแสดงผลถูกต้อง</li>
 <li><input checked="" disabled="" type="checkbox"> <strong>ความปลอดภัยข้อมูล</strong>: เอกสารที่ตั้งค่า &quot;ปกปิดเล่ม&quot; ไม่สามารถเข้าถึงได้จากบุคคลภายนอกในทุกกรณี</li>

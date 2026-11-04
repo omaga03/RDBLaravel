@@ -507,6 +507,9 @@
 <li>11.7 ศูนย์สำรองและกู้คืนข้อมูลระบบ (System Backup, Restore with Email OTP &amp; Cloud Sync)</li>
 <li>11.8 การตั้งค่าระบบการส่งอีเมลของมหาวิทยาลัย (Mail &amp; SMTP Configuration)</li>
 <li>11.9 การตั้งเวลาทำงานอัตโนมัติและการตรวจสุขภาพระบบ (Task Scheduling &amp; Live Diagnostics)</li>
+<li>11.10 ศูนย์สำรองและกู้คืนข้อมูลระบบแบบแยกเฉพาะ (Dedicated Disaster Recovery Hub)</li>
+<li>11.11 ระบบการจัดการการแจ้งเตือนส่วนบุคคลและ Telegram Bot (Personal &amp; Admin Notification Center)</li>
+<li>11.12 เกราะป้องกันความเข้ากันได้ของชื่อฟิลด์ฐานข้อมูล (Schema Integrity Defense Layer &amp; Smart Accessors)</li>
 </ul>
 </li>
 </ol>
@@ -1281,6 +1284,20 @@ php artisan rdb:generate-pdf-covers --module=all
 <li><strong>ไทม์ไลน์กิจกรรม (Editorial Timeline)</strong>: แสดงลำดับเหตุการณ์จากล่าสุด วันที่และเวลา พ.ศ. พร้อมระยะเวลาสัมพัทธ์ (เช่น &quot;2 ชั่วโมงที่แล้ว&quot;)</li>
 <li><strong>ป้ายประเภทกิจกรรม</strong>: แยกสีชัดเจน เช่น สร้างรายการใหม่ (สีเขียว), อัปเดตข้อมูล (สีน้ำเงิน), ปรับเปลี่ยนสถานะ (สีเหลือง), ลบข้อมูล (สีแดง)</li>
 <li><strong>เครื่องมือตรวจสอบความเปลี่ยนแปลง (Field-by-Field Diff Viewer)</strong>: คลิกปุ่ม <strong>&quot;ดูรายละเอียดที่เปลี่ยน&quot;</strong> เพื่อเปิดตารางเปรียบเทียบค่าเดิม (Old Value) และค่าใหม่ (New Value) แบบเรียลไทม์</li>
+<li><strong>ระบบแบ่งหน้าอัจฉริยะ (Instant Client-Side Pagination)</strong>: จัดกลุ่มประวัติกิจกรรมเป็นหน้าละ <strong>10 รายการ</strong> อย่างเป็นระเบียบ พร้อมปุ่ม <strong>&quot;ก่อนหน้า&quot;</strong>, <strong>&quot;ถัดไป&quot;</strong>, และหมายเลขหน้า ช่วยลดความยาวของหน้าจอและโหลดข้อมูลได้ทันทีโดยไม่ต้อง Refresh หน้าเว็บ</li>
+<li><strong>การบันทึกประวัติความสัมพันธ์ย่อย (Sub-Resource Audit Tracking)</strong>:
+<ul>
+<li><strong>นักวิจัยร่วมโครงการ (<code>rdb_project_work</code>)</strong>: เมื่อมีการเพิ่ม แก้ไขสัดส่วน (%) หรือลบนักวิจัยร่วม ระบบจะบันทึกประวัติลงในการ์ดโครงการวิจัยนั้นทันที ระบุชื่อนักวิจัย ตำแหน่ง และสัดส่วนที่เปลี่ยนแปลง</li>
+<li><strong>ผู้เขียนผลงานตีพิมพ์ (<code>rdb_published_work</code>)</strong>: บันทึกการเพิ่ม/เปลี่ยนประเภทผู้แต่ง (เช่น ผู้ประพันธ์อันดับแรก, Corresponding Author)</li>
+<li><strong>ไฟล์แนบเพิ่มเติม (<code>rdb_project_files</code>)</strong>: บันทึกการอัปโหลดไฟล์ การแก้ไขชื่อไฟล์ หรือการลบไฟล์แนบ</li>
+</ul>
+</li>
+<li><strong>นโยบายการคัดแยก Log ขยะ (Log Hygiene &amp; Noise Reduction Policy)</strong>:
+<ul>
+<li>ระบบ<strong>ยกเว้นการบันทึกการนับสถิติการเข้าดู (View Counts) และการดาวน์โหลดไฟล์ (Download Counts)</strong> ออกจากตาราง Audit Log เพื่อป้องกันการสะสมของ Event ขยะนับแสนรายการ</li>
+<li>มุ่งเน้นการจัดเก็บเฉพาะกิจกรรมที่มีนัยสำคัญต่อความโปร่งใสและตรวจสอบได้ (Data Governance) ได้แก่ การสร้าง, การแก้ไขฟิลด์ข้อมูล, การเปลี่ยนสถานะโครงการ, การส่งประเมินเล่มรายงาน, การนำเข้าคลัง DSpace, และการจัดการผู้ร่วมวิจัย/ไฟล์แนบ</li>
+</ul>
+</li>
 </ul>
 <hr />
 <a id="บทที่-11-ศูนย์จัดการคำสั่งระบบและการบำรุงรักษา-system-commands-maintenance-dashboard" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-11-%E0%B8%A8%E0%B8%B9%E0%B8%99%E0%B8%A2%E0%B9%8C%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%84%E0%B8%B3%E0%B8%AA%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9A%E0%B8%B3%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B8%A3%E0%B8%B1%E0%B8%81%E0%B8%A9%E0%B8%B2-system-commands--maintenance-dashboard" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-11-%E0%B8%A8%E0%B8%B9%E0%B8%99%E0%B8%A2%E0%B9%8C%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%84%E0%B8%B3%E0%B8%AA%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9A%E0%B8%B3%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B8%A3%E0%B8%B1%E0%B8%81%E0%B8%A9%E0%B8%B2-system-commands-maintenance-dashboard" class="manual-anchor"></a><h2 id="บทที่-11-ศูนย์จัดการคำสั่งระบบและการบำรุงรักษา-system-commands--maintenance-dashboard">บทที่ 11: ศูนย์จัดการคำสั่งระบบและการบำรุงรักษา (System Commands &amp; Maintenance Dashboard)</h2>
@@ -1777,6 +1794,121 @@ crontab -e
 <li>⚡ รันคำสั่งบำรุงรักษา / Scheduler Manual Run</li>
 </ul>
 </li>
+</ul>
+<hr />
+<a id="1112-เกราะป้องกันความเข้ากันได้ของชื่อฟิลด์ฐานข้อมูล-schema-integrity-defense-layer-smart-accessors" class="manual-anchor"></a><a id="1112-%E0%B9%80%E0%B8%81%E0%B8%A3%E0%B8%B2%E0%B8%B0%E0%B8%9B%E0%B9%89%E0%B8%AD%E0%B8%87%E0%B8%81%E0%B8%B1%E0%B8%99%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B9%80%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B8%81%E0%B8%B1%E0%B8%99%E0%B9%84%E0%B8%94%E0%B9%89%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B8%8A%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%9F%E0%B8%B4%E0%B8%A5%E0%B8%94%E0%B9%8C%E0%B8%90%E0%B8%B2%E0%B8%99%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5-schema-integrity-defense-layer--smart-accessors" class="manual-anchor"></a><a id="1112-%E0%B9%80%E0%B8%81%E0%B8%A3%E0%B8%B2%E0%B8%B0%E0%B8%9B%E0%B9%89%E0%B8%AD%E0%B8%87%E0%B8%81%E0%B8%B1%E0%B8%99%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B9%80%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B8%81%E0%B8%B1%E0%B8%99%E0%B9%84%E0%B8%94%E0%B9%89%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B8%8A%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%9F%E0%B8%B4%E0%B8%A5%E0%B8%94%E0%B9%8C%E0%B8%90%E0%B8%B2%E0%B8%99%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5-schema-integrity-defense-layer-smart-accessors" class="manual-anchor"></a><h3 id="1112-เกราะป้องกันความเข้ากันได้ของชื่อฟิลด์ฐานข้อมูล-schema-integrity-defense-layer--smart-accessors">11.12 เกราะป้องกันความเข้ากันได้ของชื่อฟิลด์ฐานข้อมูล (Schema Integrity Defense Layer &amp; Smart Accessors)</h3>
+<p>ระบบฐานข้อมูลวิจัยมหาวิทยาลัยราชภัฏเพชรบูรณ์มีประวัติการพัฒนาและสืบทอดข้อมูลมาจากระบบเดิม (Yii2 Framework) ซึ่งมีรูปแบบการตั้งชื่อฟิลด์เฉพาะตัว เช่น การลงท้ายด้วย <code>TH</code> หรือ <code>EN</code>, การสะกดคำมรดก หรือการใช้ชื่อฟิลด์ที่แตกต่างจากมาตรฐานของ Laravel (เช่น <code>department_nameTH</code>, <code>position_nameTH</code>, <code>pubta_nameTH</code>, <code>ps_name</code>, <code>restatus_name</code>, <code>utz_typr_name</code>, <code>changwat_t</code>):</p>
+<a id="1-%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B9%80%E0%B8%AA%E0%B8%B5%E0%B9%88%E0%B8%A2%E0%B8%87%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B8%A0%E0%B8%B2%E0%B8%A7%E0%B8%B0%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B9%80%E0%B8%87%E0%B8%B5%E0%B8%A2%E0%B8%9A-silent-null-vulnerability" class="manual-anchor"></a><h4 id="1-ความเสี่ยงของภาวะข้อมูลเงียบ-silent-null-vulnerability">1. ความเสี่ยงของภาวะข้อมูลเงียบ (Silent Null Vulnerability)</h4>
+<p>หากนักพัฒนาเขียนโค้ดเรียกคุณสมบัติของโมเดลตามความคุ้นเคยของ Laravel เช่น:</p>
+<ul>
+<li>เรียก <code>$department-&gt;department_name</code> แทนที่จะเป็น <code>department_nameTH</code></li>
+<li>เรียก <code>$status-&gt;status_name</code> หรือ <code>ps_nameTH</code> แทนที่จะเป็น <code>ps_name</code></li>
+<li>เรียก <code>$researcher-&gt;prefix-&gt;prefix_name</code> แทนที่จะเป็น <code>prefix_nameTH</code></li>
+<li>เรียก <code>$position-&gt;position_name</code> แทนที่จะเป็น <code>position_nameTH</code></li>
+</ul>
+<p>ระบบจะไม่ขึ้น Error สีแดงแจ้งเตือน แต่จะส่งคืนค่า <code>null</code> ทำให้หน้าเว็บแสดงเป็นช่องว่าง หรือแสดงเครื่องหมายขีด <code>-</code> โดยไม่มีใครทราบ (Silent Null)</p>
+<a id="2-สถาปัตยกรรม-smart-accessors-aliases-บน-16-โมเดลหลัก" class="manual-anchor"></a><a id="2-%E0%B8%AA%E0%B8%96%E0%B8%B2%E0%B8%9B%E0%B8%B1%E0%B8%95%E0%B8%A2%E0%B8%81%E0%B8%A3%E0%B8%A3%E0%B8%A1-smart-accessors--aliases-%E0%B8%9A%E0%B8%99-16-%E0%B9%82%E0%B8%A1%E0%B9%80%E0%B8%94%E0%B8%A5%E0%B8%AB%E0%B8%A5%E0%B8%B1%E0%B8%81" class="manual-anchor"></a><a id="2-%E0%B8%AA%E0%B8%96%E0%B8%B2%E0%B8%9B%E0%B8%B1%E0%B8%95%E0%B8%A2%E0%B8%81%E0%B8%A3%E0%B8%A3%E0%B8%A1-smart-accessors-aliases-%E0%B8%9A%E0%B8%99-16-%E0%B9%82%E0%B8%A1%E0%B9%80%E0%B8%94%E0%B8%A5%E0%B8%AB%E0%B8%A5%E0%B8%B1%E0%B8%81" class="manual-anchor"></a><h4 id="2-สถาปัตยกรรม-smart-accessors--aliases-บน-16-โมเดลหลัก">2. สถาปัตยกรรม Smart Accessors &amp; Aliases บน 16 โมเดลหลัก</h4>
+<p>เพื่อกำจัดความเสี่ยงนี้อย่างถาวร ระบบได้ติดตั้ง <strong>Smart Accessors Layer</strong> ทำหน้าที่เป็นสะพานเชื่อมโยงชื่อฟิลด์อัตโนมัติ:</p>
+<table>
+<thead>
+<tr>
+<th>โมเดล Eloquent</th>
+<th>ฟิลด์หลักใน Database</th>
+<th>Smart Accessors &amp; Aliases ที่รองรับ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RdbDepartment</code></td>
+<td><code>department_nameTH</code>, <code>department_nameEN</code></td>
+<td><code>department_name</code>, <code>name</code>, <code>department_name_en</code></td>
+</tr>
+<tr>
+<td><code>RdbPrefix</code></td>
+<td><code>prefix_nameTH</code>, <code>prefix_abbreviationTH</code></td>
+<td><code>prefix_name</code>, <code>name</code>, <code>abbreviation</code></td>
+</tr>
+<tr>
+<td><code>RdbProjectStatus</code></td>
+<td><code>ps_name</code></td>
+<td><code>ps_nameTH</code>, <code>status_name</code>, <code>name</code></td>
+</tr>
+<tr>
+<td><code>RdbProjectPosition</code></td>
+<td><code>position_nameTH</code></td>
+<td><code>position_name</code>, <code>name</code></td>
+</tr>
+<tr>
+<td><code>RdbPublishedTypeAuthor</code></td>
+<td><code>pubta_nameTH</code>, <code>pubta_nameEN</code></td>
+<td><code>author_type</code>, <code>author_type_name</code>, <code>pubta_name</code>, <code>name</code></td>
+</tr>
+<tr>
+<td><code>RdbDipType</code></td>
+<td><code>dipt_name</code></td>
+<td><code>dipt_nameTH</code>, <code>name</code>, <code>type_name</code></td>
+</tr>
+<tr>
+<td><code>RdbProjectUtilizeType</code></td>
+<td><code>utz_typr_name</code></td>
+<td><code>utz_type_name</code>, <code>name</code>, <code>type_name</code></td>
+</tr>
+<tr>
+<td><code>RdbChangwat</code></td>
+<td><code>changwat_t</code>, <code>amphoe_t</code>, <code>tambon_t</code></td>
+<td><code>changwat_name</code>, <code>province_name</code>, <code>name</code>, <code>amphoe_name</code>, <code>tambon_name</code></td>
+</tr>
+<tr>
+<td><code>RdbDepartmentCategory</code></td>
+<td><code>depcat_name</code></td>
+<td><code>depcat_nameTH</code>, <code>name</code></td>
+</tr>
+<tr>
+<td><code>RdbDepartmentCourse</code></td>
+<td><code>cou_name</code></td>
+<td><code>cou_nameTH</code>, <code>name</code></td>
+</tr>
+<tr>
+<td><code>RdbYear</code></td>
+<td><code>year_name</code></td>
+<td><code>year_nameTH</code>, <code>name</code></td>
+</tr>
+<tr>
+<td><code>RdbProjectFiles</code></td>
+<td><code>rf_filesname</code></td>
+<td><code>file_name</code>, <code>rf_filename</code>, <code>name</code></td>
+</tr>
+<tr>
+<td><code>RdbResearcherStatus</code></td>
+<td><code>restatus_name</code></td>
+<td><code>rst_name</code>, <code>name</code>, <code>status_name</code></td>
+</tr>
+<tr>
+<td><code>RdbProject</code></td>
+<td><code>pro_nameTH</code>, <code>pro_abstract</code>, <code>pro_date_start</code>, <code>pro_date_end</code></td>
+<td><code>pro_name_th</code>, <code>pro_name_en</code>, <code>title</code>, <code>project_name</code>, <code>pro_detail</code>, <code>pro_start</code>, <code>pro_end</code>, <code>projectStatus()</code>, <code>projectFiles()</code></td>
+</tr>
+<tr>
+<td><code>RdbPublished</code></td>
+<td><code>pub_name</code>, <code>pf_path</code></td>
+<td><code>pub_nameTH</code>, <code>pub_name_th</code>, <code>title</code>, <code>published_name</code>, <code>pub_file_path</code></td>
+</tr>
+<tr>
+<td><code>RdbDip</code></td>
+<td><code>dip_data2_name</code>, <code>dip_data2_conclusion</code>, <code>dip_note</code></td>
+<td><code>dip_name</code>, <code>dip_nameTH</code>, <code>title</code>, <code>name</code>, <code>dip_detail</code></td>
+</tr>
+<tr>
+<td><code>RdbResearcher</code></td>
+<td><code>researcher_fname</code>, <code>researcher_lname</code></td>
+<td><code>full_name</code>, <code>name</code>, <code>researcher_name</code>, <code>position_academic</code>, <code>full_name_en</code></td>
+</tr>
+</tbody>
+</table>
+<a id="3-%E0%B8%9E%E0%B8%88%E0%B8%99%E0%B8%B2%E0%B8%99%E0%B8%B8%E0%B8%81%E0%B8%A3%E0%B8%A1%E0%B8%9F%E0%B8%B4%E0%B8%A5%E0%B8%94%E0%B9%8C%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%94%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%AD%E0%B8%B1%E0%B8%95%E0%B9%82%E0%B8%99%E0%B8%A1%E0%B8%B1%E0%B8%95%E0%B8%B4-automated-schema-verification" class="manual-anchor"></a><h4 id="3-พจนานุกรมฟิลด์ระบบและการทดสอบอัตโนมัติ-automated-schema-verification">3. พจนานุกรมฟิลด์ระบบและการทดสอบอัตโนมัติ (Automated Schema Verification)</h4>
+<ul>
+<li><strong>พจนานุกรม 131 ตาราง</strong>: บันทึกโครงสร้างคอลัมน์ ชนิดข้อมูล และ Primary Key ทั้งระบบไว้ที่ <a href="file:///c:/laragon/www/laravel_rdb/storage/framework/schema_dict.json"><code>storage/framework/schema_dict.json</code></a></li>
+<li><strong>ชุดทดสอบรับประกันความถูกต้อง</strong>: รันคำสั่ง <code>php artisan test --filter=SchemaIntegrityDefenseTest</code> (17 เคสทดสอบ 77 assertions ผ่าน 100%) เพื่อตรวจสอบว่าทุก Accessor ดึงข้อมูลตรงกับฐานข้อมูลจริงเสมอ</li>
 </ul>
 
             </div>

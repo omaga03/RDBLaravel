@@ -243,20 +243,30 @@ php .agents/skills/documentation-and-manuals/scripts/build_html_manuals.php
      - ซิงค์ข่าวทุนวิจัย NRIIS ทุกเช้า เวลา 06:00 น. (`rdb:sync-nriis-news`)
      - ซิงค์ข่าวงานประชุมวิชาการจากเพจ Facebook ทุกเช้า เวลา 06:30 น. (`rdb:sync-facebook-conferences`)
    * ตั้งเวลาบนเซิร์ฟเวอร์บรรทัดเดียว: `* * * * * cd /path/to/laravel_rdb && php artisan schedule:run >> /dev/null 2>&1`
-2. **ระบบส่งอีเมลแจ้งเตือนงานวิจัยตามกระบวนการทำงาน (Workflow Email Notifications via SMTP):**
+5. **ระบบส่งอีเมลแจ้งเตือนงานวิจัยตามกระบวนการทำงาน (Workflow Email Notifications via SMTP):**
    * ขยายขีดความสามารถของระบบแจ้งเตือนให้ส่งอีเมลคู่กับการแจ้งเตือนในระบบ (Dual Channel: `database` + `mail`):
      - ส่งอีเมลแจ้ง**นักวิจัย**ทันทีเมื่อผลงานวิจัยได้รับการอนุมัติเผยแพร่ (`ResearchItemApprovedNotification`) พร้อมปุ่มลิงก์เปิดดูหน้าบ้าน
      - ส่งอีเมลแจ้ง**นักวิจัย**พร้อมระบุข้อคิดเห็น/เหตุผลเมื่อผลงานถูกส่งกลับแก้ไข (`ResearchItemRejectedNotification`)
      - ส่งอีเมลแจ้ง**ผู้ทรงคุณวุฒิ (Reviewer)** ทันทีเมื่อได้รับมอบหมายให้ประเมินเล่มรายงานวิจัยฉบับสมบูรณ์ (`ReviewAssignedNotification`) พร้อมลิงก์เข้าสู่แบบฟอร์มประเมิน
      - ส่งอีเมลแจ้ง**นักวิจัย**เมื่อเล่มรายงานวิจัยผ่านการประเมินรอบสุดท้าย (`ReviewFinalApprovedNotification`)
    * ปลอดภัยด้วยสถาปัตยกรรม Non-blocking Exception Guard ไม่กระทบต่อการบันทึกข้อมูลหลักหากระบบเครือข่าย SMTP ติดขัด
-3. **การ์ดวิเคราะห์สุขภาพเซิร์ฟเวอร์แบบเรียลไทม์ (Live Server Health & Diagnostics Strip):**
+6. **การ์ดวิเคราะห์สุขภาพเซิร์ฟเวอร์แบบเรียลไทม์ (Live Server Health & Diagnostics Strip):**
    * เพิ่มแถบตรวจสุขภาพระบบ 4 การ์ดในศูนย์คำสั่งระบบ (`/backend/system-commands`):
      - ตรวจสอบสถานะการเชื่อมต่อฐานข้อมูล MariaDB/MySQL และเวอร์ชันเอนจินแบบเรียลไทม์
      - ตรวจสอบคิวงานประมวลผลเบื้องหลัง (Queue Worker Driver, งานที่รอดำเนินการ, งานที่ผิดพลาด `failed_jobs`)
      - ตรวจสอบสถานะระบบตั้งเวลาอัตโนมัติ (6 Scheduled Tasks)
      - ตรวจสอบความพร้อมสำหรับการใช้งานจริง (PHP Version, Memory Limit, Environment และแจ้งเตือนสถานะ `APP_DEBUG`)
-4. **แนวทางและข้อปฏิบัติสำหรับการนำระบบขึ้นใช้งานจริง (Production Deployment Readiness):**
+7. **ศูนย์บันทึกประวัติกิจกรรมและการแก้ไขระดับเรคคอร์ด (Record-Level Activity & Audit Trail Hub):**
+   * ฝังกล่องประวัติกิจกรรม `<x-audit-trail>` ในหน้ารายละเอียดของทุกโมดูล (`rdb_project`, `rdb_published`, `rdb_dip`, `rdb_projectutilize`, `user`, `rdb_researcher`)
+   * จัดระเบียบการแสดงผลแบบ **Compact Typography** ไม่แย่งสายตา พร้อมระบบแบ่งหน้า **Client-side Pagination หน้าละ 10 รายการ** รวดเร็วแบบเรียลไทม์ไม่ต้องโหลดหน้าเว็บใหม่
+   * บันทึกกิจกรรมของ Sub-Resources อย่างละเอียด: เพิ่ม/แก้ไข/ลบ นักวิจัยร่วมโครงการ (`rdb_project_work`), ผู้เขียนผลงานตีพิมพ์ (`rdb_published_work`), และไฟล์แนบโครงการ (`rdb_project_files`)
+   * นโยบาย **Log Hygiene & Noise Reduction**: แยกสถิติจำนวนครั้งการเข้าดู (View Counts) และการดาวน์โหลดไฟล์ (Download Counts) ออกจาก Event Audit Log อย่างเด็ดขาด พร้อมสคริปต์กวาดล้าง Log ขยะเดิม 2,369 รายการ
+   * ระบบสิทธิ์ความเป็นส่วนตัวเข้มงวด: นักวิจัยดูได้เฉพาะงานของตนเองและถูกซ่อนข้อมูลเทคนิค (IP/User Agent) ส่วนหน้าบ้านถูกปิดกั้น 100%
+8. **เกราะป้องกันความเข้ากันได้ของชื่อฟิลด์ฐานข้อมูล (Schema Integrity Defense Layer & Smart Accessors):**
+   * สกัดพจนานุกรมฟิลด์ฉบับสมบูรณ์ 131 ตารางจากฐานข้อมูลจริงไว้ที่ `storage/framework/schema_dict.json`
+   * ติดตั้ง Smart Accessors & Aliases บน 16 โมเดลหลัก ขจัดปัญหา **Silent Null** (ค่าว่าง/เครื่องหมายขีด `-` โดยไม่มีแจ้งเตือน) จากความสับสนระหว่างฟิลด์มรดก Yii2 (`*TH`, `*EN`, `ps_name`, `restatus_name`, `utz_typr_name`, `changwat_t`) กับรูปแบบ Laravel มาตรฐาน
+   * ผ่านการตรวจรับด้วยชุดทดสอบ Feature Test: `SchemaIntegrityDefenseTest` (17 เคส 77 assertions) และ `RecordLevelAuditLogTest` (12 เคส 46 assertions) 100%
+9. **แนวทางและข้อปฏิบัติสำหรับการนำระบบขึ้นใช้งานจริง (Production Deployment Readiness):**
    * เอกสารและคำแนะนำสำหรับการปรับแต่ง `.env` ในสภาวะ Production (`APP_DEBUG=false`, `QUEUE_CONNECTION=database`)
    * คำสั่งรัน Worker ในโหมด Daemon (`php artisan queue:work --tries=3 --timeout=90`) และการแคชระดับสูง (`php artisan optimize`)
 

@@ -3,9 +3,11 @@
 
 > [!NOTE]
 > **สถานะการทดสอบระบบจริง (Test Execution Summary)**:
-> - **วันและเวลาที่ดำเนินการทดสอบล่าสุด**: 3 พฤศจิกายน 2569 เวลา 22:36:47 น.
-> - **ผลการรันชุดทดสอบอัตโนมัติ (Automated Test Suite)**: **ผ่านทั้งหมด 72 รายการ (529 Assertions) 100%**
->   - `Tests\Feature\BackendAuditTest`: ผ่าน 47 รายการ (421 Assertions)
+> - **วันและเวลาที่ดำเนินการทดสอบล่าสุด**: 4 พฤศจิกายน 2569 เวลา 22:15:00 น.
+> - **ผลการรันชุดทดสอบอัตโนมัติ (Automated Test Suite)**: **ผ่านทั้งหมด 101 รายการ (652 Assertions) 100%**
+>   - `Tests\Feature\BackendAuditTest`: ผ่าน 47 รายการ (422 Assertions)
+>   - `Tests\Feature\SchemaIntegrityDefenseTest`: ผ่าน 17 รายการ (77 Assertions)
+>   - `Tests\Feature\RecordLevelAuditLogTest`: ผ่าน 12 รายการ (46 Assertions)
 >   - `Tests\Feature\SystemAcceptancePlanExecutionTest`: ผ่าน 13 รายการ (69 Assertions)
 >   - `Tests\Feature\SystemBackupTest`: ผ่าน 5 รายการ (12 Assertions)
 >   - `Tests\Feature\PdfCoverGenerationTest`: ผ่าน 4 รายการ (16 Assertions)
@@ -148,6 +150,8 @@
 | **ADM-RES-01** | ข้อมูลนักวิจัยและการเชื่อมโยง Scopus / ORCID | 1. เพิ่ม/แก้ไขข้อมูลนักวิจัย<br>2. กรอกเลขบัตรประชาชน, Scopus Author ID, ORCID iD | ข้อมูลนักวิจัย | - ตรวจสอบความถูกต้องของโครงสร้างเลขบัตร ปชช. 13 หลัก<br>- ตรวจสอบโครงสร้าง ORCID Format (XXXX-XXXX-XXXX-XXXX) | [x] ผ่าน (Pass) |
 | **ADM-EXP-01** | **การ Export ข้อมูลขนาดใหญ่เป็น CSV/Excel (UTF-8 BOM)** | 1. ไปที่หน้ารายการโครงการ/งานตีพิมพ์/นักวิจัย<br>2. กดปุ่ม "Export Excel / CSV"<br>3. เปิดไฟล์ที่ได้ด้วยโปรแกรม Microsoft Excel | ข้อมูลภาษาไทยทั้งหมด | ไฟล์มีขนาดครบถ้วน ตัวอักษรภาษาไทยแสดงผลสมบูรณ์ **ไม่เป็นภาษาต่างดาว (UTF-8 BOM `\xEF\xBB\xBF`)** | [x] ผ่าน (Pass) |
 | **ADM-LOG-01** | ระบบบันทึกประวัติการเปลี่ยนแปลง (Audit Trail) | 1. แก้ไขข้อมูลโครงการหรือลบรายการ<br>2. เข้าเมนู "ประวัติการใช้งาน (Audit Logs)" | การกระทำของผู้ใช้ | มี Log บันทึกชัดเจน: ผู้กระทำ, วันที่/เวลา, IP Address, ข้อมูลเดิม (Old Values) และข้อมูลใหม่ (New Values) | [x] ผ่าน (Pass) |
+| **ADM-LOG-02** | **ประวัติกิจกรรมระดับเรคคอร์ดและการแบ่งหน้า (`<x-audit-trail>`)** | 1. เข้าหน้ารายละเอียดโครงการ/ผลงานวิชาการ/บัญชีผู้ใช้<br>2. เพิ่ม/แก้ไขนักวิจัยร่วม หรือไฟล์แนบ<br>3. ตรวจสอบการแบ่งหน้า 10 รายการ และปุ่มเปลี่ยนหน้า | หน้ารายละเอียดทุกโมดูล | - บันทึกประวัติกิจกรรมทันทีพร้อมแสดงชื่อ/สัดส่วนนักวิจัยร่วมและไฟล์แนบ<br>- แบ่งหน้า 10 รายการ Client-side Pagination รวดเร็วไม่ Refresh หน้า<br>- สถิตินับวิว/ดาวน์โหลดไม่ถูกบันทึกเป็นขยะ Log | [x] ผ่าน (Pass) |
+| **ADM-DATA-01** | **เกราะป้องกันชื่อฟิลด์ฐานข้อมูล (Schema Integrity Defense Layer)** | 1. เรียกใช้งานคุณสมบัติโมเดลตามมาตรฐาน Laravel เช่น `$dept->department_name`, `$status->ps_nameTH`, `$user->name`<br>2. รัน `php artisan test --filter=SchemaIntegrityDefenseTest` | 16 โมเดลหลัก และ 131 ตารางในพจนานุกรม | - ไม่เกิดปัญหา Silent Null (ค่าว่าง/ขีด - โดยไม่ทราบสาเหตุ)<br>- Smart Accessors เชื่อมโยงฟิลด์มรดก Yii2 (`*TH`, `*EN`, `ps_name`) เข้ากับ Laravel สมบูรณ์<br>- ชุดทดสอบผ่าน 17/17 เคส (77 assertions) 100% | [x] ผ่าน (Pass) |
 | **ADM-SYS-01** | **ศูนย์จัดการคำสั่งระบบและการบำรุงรักษา (`/backend/system-commands`)** | 1. เข้าสู่ระบบด้วย Super Admin<br>2. เข้าเมนู "คำสั่งและบำรุงรักษาระบบ"<br>3. ทดสอบรันคำสั่งล้างแคช หรือสั่งสร้างภาพปก PDF แบบกำหนด Limit | บัญชี Super Admin | - แสดงสถานะเอนจิน MuPDF, Poppler, GD และดิสก์<br>- รันคำสั่งผ่านหน้าเว็บสำเร็จพร้อมแสดง Terminal Log Box และบันทึก Audit Log | [x] ผ่าน (Pass) |
 | **ADM-SYS-02** | **ปุ่มดึงภาพหน้าปกไฟล์ใหม่ อีกครั้ง (Regenerate PDF Cover)** | 1. เข้าหน้ารายละเอียดโครงการวิจัย หรือผลงานตีพิมพ์<br>2. กดปุ่ม "ดึงภาพหน้าปกไฟล์ใหม่ อีกครั้ง" | โครงการ/ผลงานที่มีไฟล์ | ระบบสกัดภาพหน้าปกใหม่และรีโหลดภาพด้วยพารามิเตอร์ `?v=` ทันทีโดยไม่ต้องอัปโหลดไฟล์ซ้ำ | [x] ผ่าน (Pass) |
 | **PUB-SEO-01** | **การทำดัชนีทางวิชาการและไดนามิกไซต์แมป (Academic SEO & Sitemaps)** | 1. ตรวจสอบแท็ก `<meta name="citation_*">` ในหน้ารายละเอียด<br>2. เรียกดู URL `/sitemap.xml` | บทความตีพิมพ์ / โครงการวิจัย | - แสดงแท็ก Highwire Press, Dublin Core, Schema.org ครบถ้วน<br>- ไซต์แมปแยก 5 หมวด คัดกรองเฉพาะ `data_show = 1` เท่านั้น | [x] ผ่าน (Pass) |
@@ -184,7 +188,7 @@
 
 ระบบจะถือว่ามีความพร้อมในการขึ้นสู่สถานะ Production 100% เมื่อผ่านเกณฑ์ต่อไปนี้ทั้งหมด:
 
-- [x] **ชุดทดสอบหลักผ่านทั้งหมด**: รัน `php artisan test --filter="SystemAcceptancePlanExecutionTest|PdfCoverGenerationTest|BackendAuditTest"` ผ่าน 63/63 รายการ (493 Assertions 100%)
+- [x] **ชุดทดสอบหลักผ่านทั้งหมด**: รัน `php artisan test --filter="BackendAuditTest|SchemaIntegrityDefenseTest|RecordLevelAuditLogTest|SystemAcceptancePlanExecutionTest|PdfCoverGenerationTest|SystemBackupTest|SystemCommandBackendTest"` ผ่าน 101/101 รายการ (652 Assertions 100%)
 - [x] **การทดสอบ UAT ในหมวดที่ 2 และ 3**: ผ่านการทดสอบรายการระดับ Critical และ High ครบทุกข้อ รวมถึงวงจรส่งร่าง-ตรวจรับ WF-01 ถึง WF-07
 - [x] **ข้อมูลนำเข้าเดิมสมบูรณ์**: โครงการวิจัย 2,870 โครงการ และงานตีพิมพ์ 1,873 รายการ เข้าถึงได้และแสดงผลถูกต้อง
 - [x] **ความปลอดภัยข้อมูล**: เอกสารที่ตั้งค่า "ปกปิดเล่ม" ไม่สามารถเข้าถึงได้จากบุคคลภายนอกในทุกกรณี
