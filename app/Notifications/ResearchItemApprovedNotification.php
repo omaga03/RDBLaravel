@@ -21,7 +21,38 @@ class ResearchItemApprovedNotification extends Notification
         if (!empty($notifiable->email) && filter_var($notifiable->email, FILTER_VALIDATE_EMAIL)) {
             $channels[] = 'mail';
         }
+        if (!empty($notifiable->telegram_chat_id) && \App\Services\TelegramNotificationService::isConfigured()) {
+            $channels[] = \App\Notifications\Channels\TelegramChannel::class;
+        }
         return $channels;
+    }
+
+    public function toTelegram($notifiable): string
+    {
+        $titleName = match ($this->type) {
+            'project' => $this->item->pro_nameTH,
+            'published' => $this->item->pub_name,
+            'dip' => $this->item->dip_data2_name ?? $this->item->dip_name,
+            'utilize' => 'การนำโครงการวิจัยไปใช้ประโยชน์ #' . $this->item->pro_id,
+            default => 'ผลงานวิชาการ',
+        };
+
+        $routeName = match ($this->type) {
+            'utilize' => 'frontend.rdbprojectutilize.show',
+            default => 'frontend.rdb' . $this->type . '.show',
+        };
+
+        $url = \Illuminate\Support\Facades\Route::has($routeName)
+            ? route($routeName, $this->item->getKey())
+            : url('/');
+
+        $greeting = htmlspecialchars($notifiable->name ?? 'ท่านนักวิจัย');
+        $escapedTitle = htmlspecialchars($titleName);
+
+        return "🎉 <b>[PCRU RDB] ผลงานวิจัยได้รับการอนุมัติเผยแพร่แล้ว</b>\n\n"
+             . "เรียน {$greeting}\n"
+             . "ผลงานวิจัยรายการ <b>'{$escapedTitle}'</b> ได้รับการตรวจสอบและอนุมัติให้เผยแพร่สู่ระบบฐานข้อมูลงานวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์ เรียบร้อยแล้ว\n\n"
+             . "🔗 <a href=\"{$url}\">เปิดดูผลงานบนระบบหน้าบ้าน</a>";
     }
 
     public function toMail($notifiable): MailMessage

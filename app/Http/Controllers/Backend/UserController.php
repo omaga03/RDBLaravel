@@ -84,6 +84,7 @@ class UserController extends Controller
         $user = new User();
         $user->username = $validated['username'];
         $user->email = $validated['email'];
+        $user->telegram_chat_id = $validated['telegram_chat_id'] ?? null;
         $user->password_hash = Hash::make($validated['password']);
         $user->auth_key = Str::random(32);
         $user->confirmed_at = time();
@@ -136,6 +137,9 @@ class UserController extends Controller
 
         $user->username = $validated['username'];
         $user->email = $validated['email'];
+        if (array_key_exists('telegram_chat_id', $validated)) {
+            $user->telegram_chat_id = !empty($validated['telegram_chat_id']) ? trim($validated['telegram_chat_id']) : null;
+        }
         if (!empty($validated['password'])) {
             $user->password_hash = Hash::make($validated['password']);
         }

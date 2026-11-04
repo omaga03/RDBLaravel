@@ -148,10 +148,17 @@ php artisan test --filter=BackendAuditTest
 2. **ตรวจนับจำนวนหน้าเอกสาร PDF ย้อนหลังทั้งระบบ**: คำนวณจำนวนหน้าด้วย 4-Tier Engine (Poppler pdftotext แม่นยำ 99.99%) และบันทึกลงฐานข้อมูล `pro_page_num` และ `pub_numfile` อัตโนมัติ
 3. **ล้างแคชระบบและเพิ่มประสิทธิภาพ (Clear Cache)**: ล้าง Application, Route, Blade View, และ Config Cache เพื่อให้ระบบอ่านค่าล่าสุดทันที
 4. **ตรวจสอบความพร้อมของเซิร์ฟเวอร์ (Server Engine Status)**: ตรวจจับ MuPDF/PyMuPDF, Poppler pdftotext/pdftoppm, PHP GD WebP, และสถานะ Storage Symlink พร้อมปุ่มคู่มือติดตั้ง
-5. **ศูนย์สำรองและกู้คืนข้อมูลระบบ (System Backup & Safe Restore Hub — The Creator Only)**: 
-   * สำรองข้อมูล 3 รูปแบบ: เฉพาะฐานข้อมูล MariaDB (`.sql.gz`), เฉพาะไฟล์เอกสาร Storage (`.zip`), และสำรองทั้งระบบ (Full Archive)
-   * ระบบกู้คืนฐานข้อมูลผ่านหน้าเว็บที่ปลอดภัยสูงสุด ด้วยการยืนยันรหัส OTP 6 หลักส่งตรงเข้า Email ของ The Creator พร้อมสร้าง Safety Snapshot ให้อัตโนมัติก่อนเริ่มกู้คืน
-   * ดาวน์โหลดไฟล์สำรองลงเครื่องแอดมินโดยตรง และคู่มือซิงค์ขึ้น Google Drive อัตโนมัติผ่าน Rclone
+
+---
+
+## 💾 ศูนย์สำรองและกู้คืนข้อมูลระบบ (System Backup & Disaster Recovery Hub — The Creator Only)
+
+ระบบสำรองและกู้คืนฐานข้อมูลที่ปลอดภัยสูงสุด ถูกแยกออกเป็นเมนูเฉพาะสำหรับ **The Creator (ผู้ดูแลระบบสูงสุด)**:
+👉 **`http://laravel_rdb.test/backend/system-backup`** (เมนูแถบซ้าย: **การดูแลระบบ ➔ สำรองและกู้คืนระบบ (Disaster Recovery)**)
+
+* **สำรองข้อมูล 3 รูปแบบ**: เฉพาะฐานข้อมูล MariaDB (`.sql.gz`), เฉพาะไฟล์เอกสาร Storage (`.zip`), และสำรองทั้งระบบ (Full Archive)
+* **ระบบกู้คืนฐานข้อมูลผ่านหน้าเว็บ (Safe Web Restore with Email OTP)**: ยืนยันรหัส OTP 6 หลักส่งตรงเข้า Email ของ The Creator พร้อมสร้าง Safety Snapshot ให้อัตโนมัติก่อนเริ่มกู้คืนเสมอ
+* **ดาวน์โหลดไฟล์สำรองและซิงค์คลาวด์**: ดาวน์โหลดไฟล์สำรองลงเครื่องแอดมินโดยตรง พร้อมคู่มือซิงค์ขึ้น Google Drive อัตโนมัติผ่าน Rclone
 
 ```bash
 # คำสั่งสำรองข้อมูลผ่าน Terminal
@@ -160,6 +167,27 @@ php artisan rdb:backup --type=all --clean-older-than-days=30
 
 # คำสั่งกู้คืนระบบฉุกเฉินผ่าน Shell
 php artisan rdb:restore backup_db_xxxx.sql.gz --force
+```
+
+---
+
+## ⏱️ ศูนย์จัดการระบบตั้งเวลาทำงานอัตโนมัติ (Automated Task Scheduler Hub) & ระบบแจ้งเตือน Telegram
+
+ควบคุมงานประมวลผลอัตโนมัติทั้ง 6 งาน และระบบแจ้งเตือนผ่านบอท Telegram สำหรับผู้ดูแลระบบ:
+👉 **`http://laravel_rdb.test/backend/system-scheduler`** (เมนูแถบซ้าย: **การดูแลระบบ ➔ ระบบตั้งเวลาอัตโนมัติ (Scheduler)**)
+
+* **ตารางรอบงานอัตโนมัติ 6 รายการ**: สำรองฐานข้อมูลประจำวัน (02:00), สำรองเต็มรูปแบบประจำสัปดาห์ (วันอาทิตย์ 03:00), ตรวจนับหน้า PDF (04:00), เรนเดอร์ปก WebP (04:30), ซิงค์ข่าวทุน NRIIS (06:00), ซิงค์ข่าวประชุมวิชาการ Facebook (06:30)
+* **สั่งรันงานทันที (Run Now)**: ผู้ดูแลระบบสามารถกดปุ่มสั่งรันงานใดก็ได้ทันที พร้อมหน้าต่าง Terminal Console Output
+* **ระบบแจ้งเตือนผ่าน Telegram Bot อัตโนมัติ**:
+  * **Super Admin**: แจ้งเตือนทันทีเมื่อมีการ **เพิ่ม (Create), ลบ (Delete), แก้ไข (Update), อัปโหลดไฟล์ (File Upload), สำรอง/กู้คืนระบบ (Backup/Restore)** หรือกิจกรรมสำคัญ
+  * **แจ้งเตือนส่วนบุคคลของนักวิจัย**: รองรับการส่งแจ้งเตือนผลการอนุมัติงานวิจัย และงานมอบหมายประเมินผ่าน Telegram ควบคู่กับอีเมล (`mail` + `telegram`) สำหรับผู้ใช้ที่ระบุ `telegram_chat_id`
+
+```bash
+# ตรวจสอบรายการและรอบการรันงานอัตโนมัติ
+php artisan schedule:list
+
+# รันตัวจำลองเวลาบนเครื่อง Development / Laragon
+php artisan schedule:work
 ```
 
 ---
@@ -195,7 +223,18 @@ php .agents/skills/documentation-and-manuals/scripts/build_html_manuals.php
 ## 📝 บันทึกการอัปเดตระบบล่าสุด (Changelog / Update Log)
 
 ### อัปเดตประจำวันที่ 4 พฤศจิกายน 2569 (Release 2026.11.04)
-1. **ระบบตั้งเวลาทำงานอัตโนมัติ (Automated Task Scheduling & Crontab Integration):**
+1. **แยกศูนย์สำรองและกู้คืนข้อมูลระบบ (Dedicated Disaster Recovery Hub — The Creator Only):**
+   * แยกออกจากหน้าคำสั่งระบบเดิมไปเป็นหน้าจอเฉพาะที่ `/backend/system-backup` (เมนู: **การดูแลระบบ ➔ สำรองและกู้คืนระบบ**)
+   * สงวนสิทธิ์ขั้นเด็ดขาดเฉพาะ **The Creator** เท่านั้น พร้อมระบบยืนยันรหัส OTP 6 หลัก และสร้าง Safety Snapshot ก่อนกู้คืนเสมอ
+2. **ศูนย์จัดการระบบตั้งเวลาทำงานอัตโนมัติ (Automated Task Scheduler Hub):**
+   * เพิ่มหน้าจอควบคุมระบบตั้งเวลาอัตโนมัติที่ `/backend/system-scheduler` (เมนู: **การดูแลระบบ ➔ ระบบตั้งเวลาอัตโนมัติ**)
+   * แสดงตารางงานทั้ง 6 งานพร้อมคำนวณรอบการรันล่วงหน้า (Next Due Date พ.ศ. และระยะเวลาคงเหลือ)
+   * ปุ่ม **"⚡ รันทันที (Run Now)"** สำหรับสั่งรันงานแบบ On-Demand ผ่านหน้าเว็บ พร้อมหน้าต่าง Terminal Console Output
+3. **ระบบแจ้งเตือนผ่าน Telegram Bot อัตโนมัติ (Dual-Tier Telegram Notification System):**
+   * **Super Admin Instant Audit Alerts**: เชื่อมต่อเข้ากับ `AuditLog` โดยตรงเพื่อส่งการแจ้งเตือนหาผู้ดูแลระบบสูงสุดทันทีเมื่อมีกิจกรรมสำคัญ (สร้างข้อมูลใหม่, แก้ไข, ลบข้อมูล, อัปโหลดไฟล์แนบ, สำรอง/กู้คืนฐานข้อมูล)
+   * **Individual Researcher Alerts**: รองรับการแจ้งเตือนส่วนบุคคลของนักวิจัยผ่านช่องทาง Telegram ควบคู่กับ Email (`mail` + `telegram`) เช่น การอนุมัติเผยแพร่, การส่งกลับแก้ไข, และงานมอบหมายประเมิน
+   * เพิ่มฟิลด์ `telegram_chat_id` ในตาราง `user` และรองรับการจัดการในหน้าผู้ใช้งาน
+4. **ระบบตั้งเวลาทำงานอัตโนมัติ (Automated Task Scheduling & Crontab Integration):**
    * กำหนด Schedule ใน `routes/console.php` รองรับการทำงานเบื้องหลังอัตโนมัติ 6 งานหลัก:
      - สำรองฐานข้อมูลระบบอัตโนมัติทุกวัน เวลา 02:00 น. (`rdb:backup --type=db`)
      - สำรองข้อมูลเต็มระบบ (ฐานข้อมูล + ไฟล์ Storage) ทุกคืนวันอาทิตย์ เวลา 03:00 น. (`rdb:backup --type=all`)

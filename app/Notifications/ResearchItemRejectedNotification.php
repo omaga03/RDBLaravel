@@ -22,7 +22,40 @@ class ResearchItemRejectedNotification extends Notification
         if (!empty($notifiable->email) && filter_var($notifiable->email, FILTER_VALIDATE_EMAIL)) {
             $channels[] = 'mail';
         }
+        if (!empty($notifiable->telegram_chat_id) && \App\Services\TelegramNotificationService::isConfigured()) {
+            $channels[] = \App\Notifications\Channels\TelegramChannel::class;
+        }
         return $channels;
+    }
+
+    public function toTelegram($notifiable): string
+    {
+        $titleName = match ($this->type) {
+            'project' => $this->item->pro_nameTH,
+            'published' => $this->item->pub_name,
+            'dip' => $this->item->dip_data2_name ?? $this->item->dip_name,
+            'utilize' => 'การนำโครงการวิจัยไปใช้ประโยชน์ #' . $this->item->pro_id,
+            default => 'ผลงานวิชาการ',
+        };
+
+        $routeName = match ($this->type) {
+            'utilize' => 'backend.rdbprojectutilize.edit',
+            default => 'backend.rdb_' . $this->type . '.edit',
+        };
+
+        $url = \Illuminate\Support\Facades\Route::has($routeName)
+            ? route($routeName, $this->item->getKey())
+            : url('/backend');
+
+        $greeting = htmlspecialchars($notifiable->name ?? 'ท่านนักวิจัย');
+        $escapedTitle = htmlspecialchars($titleName);
+        $escapedRemarks = htmlspecialchars($this->remarks ?: 'ไม่มีข้อเสนอแนะเพิ่มเติม');
+
+        return "⚠️ <b>[PCRU RDB] แจ้งเตือน: มีรายการที่ต้องแก้ไขเพิ่มเติม</b>\n\n"
+             . "เรียน {$greeting}\n"
+             . "ผลงานวิจัยรายการ <b>'{$escapedTitle}'</b> ได้รับการตรวจสอบและมีข้อเสนอแนะให้ปรับปรุง:\n\n"
+             . "💬 <i>\"{$escapedRemarks}\"</i>\n\n"
+             . "🔗 <a href=\"{$url}\">คลิกเพื่อเข้าสู่ระบบและแก้ไขข้อมูล</a>";
     }
 
     public function toMail($notifiable): MailMessage

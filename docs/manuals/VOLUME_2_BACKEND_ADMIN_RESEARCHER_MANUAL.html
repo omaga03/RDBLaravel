@@ -1466,9 +1466,9 @@ pdftotext -v
 php -r &quot;echo extension_loaded('gd') &amp;&amp; function_exists('imagewebp') ? 'GD WebP OK' : 'GD Missing';&quot;
 </code></pre>
 <hr />
-<a id="117-ศูนย์สำรองและกู้คืนข้อมูลระบบ-system-backup-restore-with-email-otp-cloud-sync" class="manual-anchor"></a><a id="117-%E0%B8%A8%E0%B8%B9%E0%B8%99%E0%B8%A2%E0%B9%8C%E0%B8%AA%E0%B8%B3%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B9%E0%B9%89%E0%B8%84%E0%B8%B7%E0%B8%99%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A-system-backup-restore-with-email-otp--cloud-sync" class="manual-anchor"></a><a id="117-%E0%B8%A8%E0%B8%B9%E0%B8%99%E0%B8%A2%E0%B9%8C%E0%B8%AA%E0%B8%B3%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B9%E0%B9%89%E0%B8%84%E0%B8%B7%E0%B8%99%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A-system-backup-restore-with-email-otp-cloud-sync" class="manual-anchor"></a><h3 id="117-ศูนย์สำรองและกู้คืนข้อมูลระบบ-system-backup-restore-with-email-otp--cloud-sync">11.7 ศูนย์สำรองและกู้คืนข้อมูลระบบ (System Backup, Restore with Email OTP &amp; Cloud Sync)</h3>
+<a id="117-ศูนย์สำรองและกู้คืนข้อมูลระบบ-dedicated-system-backup-disaster-recovery-hub" class="manual-anchor"></a><a id="117-%E0%B8%A8%E0%B8%B9%E0%B8%99%E0%B8%A2%E0%B9%8C%E0%B8%AA%E0%B8%B3%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B9%E0%B9%89%E0%B8%84%E0%B8%B7%E0%B8%99%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A-dedicated-system-backup--disaster-recovery-hub" class="manual-anchor"></a><a id="117-%E0%B8%A8%E0%B8%B9%E0%B8%99%E0%B8%A2%E0%B9%8C%E0%B8%AA%E0%B8%B3%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B9%E0%B9%89%E0%B8%84%E0%B8%B7%E0%B8%99%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A-dedicated-system-backup-disaster-recovery-hub" class="manual-anchor"></a><h3 id="117-ศูนย์สำรองและกู้คืนข้อมูลระบบ-dedicated-system-backup--disaster-recovery-hub">11.7 ศูนย์สำรองและกู้คืนข้อมูลระบบ (Dedicated System Backup &amp; Disaster Recovery Hub)</h3>
 <div class="manual-callout callout-caution"><div class="callout-header"><i class="bi bi-shield-exclamation"></i> คำเตือนความปลอดภัย (CAUTION)</div><div class="callout-body"><p><strong>การสงวนสิทธิ์ขั้นเด็ดขาด (The Creator Only)</strong>:
-ฟังก์ชันการสำรอง กู้คืน และดาวน์โหลดไฟล์สำรองฐานข้อมูลระบบ <strong>สงวนสิทธิ์เฉพาะผู้ใช้บทบาท The Creator (ผู้ดูแลระบบสูงสุด) เพียงผู้เดียวเท่านั้น</strong> โดยระบบจะทำการปฏิเสธการเข้าถึง (HTTP 403 Forbidden) โดยอัตโนมัติหากเป็นผู้ใช้บทบาทอื่น</p>
+ฟังก์ชันการสำรอง กู้คืน และดาวน์โหลดไฟล์สำรองฐานข้อมูลระบบ <strong>สงวนสิทธิ์เฉพาะผู้ใช้บทบาท The Creator (ผู้ดูแลระบบสูงสุด) เพียงผู้เดียวเท่านั้น</strong> โดยระบบได้แยกออกเป็นเมนูเฉพาะที่ <strong>การดูแลระบบ ➔ สำรองและกู้คืนระบบ (Disaster Recovery)</strong> หรือ URL: <code>http://laravel_rdb.test/backend/system-backup</code> ระบบจะทำการปฏิเสธการเข้าถึง (HTTP 403 Forbidden) โดยอัตโนมัติหากเป็นผู้ใช้บทบาทอื่น</p>
 </div></div>
 <a id="1-%E0%B8%A3%E0%B8%B9%E0%B8%9B%E0%B9%81%E0%B8%9A%E0%B8%9A%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%B3%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5-3-%E0%B8%A3%E0%B8%B0%E0%B8%94%E0%B8%B1%E0%B8%9A" class="manual-anchor"></a><h4 id="1-รูปแบบการสำรองข้อมูล-3-ระดับ">1. รูปแบบการสำรองข้อมูล 3 ระดับ</h4>
 <ol>
@@ -1688,6 +1688,50 @@ crontab -e
 <li><strong>คิวงานประมวลผล (Queue)</strong>: แสดงไดรเวอร์คิวงาน จำนวนงานที่กำลังรอดำเนินการ และจำนวนงานที่ผิดพลาด (<code>failed_jobs</code>)</li>
 <li><strong>ระบบตั้งเวลา (Scheduler)</strong>: แสดงจำนวนงานตั้งเวลาที่พร้อมรัน (6 งาน) และรอบเวลาการสำรองข้อมูลอัตโนมัติ</li>
 <li><strong>ความพร้อมใช้งานจริง (Production Readiness)</strong>: แสดงเวอร์ชัน PHP, ขีดจำกัดหน่วยความจำ RAM, สภาพแวดล้อม (<code>APP_ENV</code>) และป้ายเตือนความปลอดภัยของโหมด Debug (<code>APP_DEBUG=false</code>)</li>
+</ol>
+<hr />
+<a id="1110-%E0%B8%A8%E0%B8%B9%E0%B8%99%E0%B8%A2%E0%B9%8C%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B9%80%E0%B8%A7%E0%B8%A5%E0%B8%B2%E0%B8%97%E0%B8%B3%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%AD%E0%B8%B1%E0%B8%95%E0%B9%82%E0%B8%99%E0%B8%A1%E0%B8%B1%E0%B8%95%E0%B8%B4-automated-task-scheduler-hub-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%81%E0%B8%88%E0%B9%89%E0%B8%87%E0%B9%80%E0%B8%95%E0%B8%B7%E0%B8%AD%E0%B8%99-telegram" class="manual-anchor"></a><h3 id="1110-ศูนย์จัดการระบบตั้งเวลาทำงานอัตโนมัติ-automated-task-scheduler-hub-และการแจ้งเตือน-telegram">11.10 ศูนย์จัดการระบบตั้งเวลาทำงานอัตโนมัติ (Automated Task Scheduler Hub) และการแจ้งเตือน Telegram</h3>
+<div class="manual-callout callout-note"><div class="callout-header"><i class="bi bi-info-circle-fill"></i> ข้อมูลจำเพาะ / หมายเหตุ (NOTE)</div><div class="callout-body"><p><strong>การเข้าใช้งานหน้าจอ</strong>:
+เข้าใช้งานผ่านเมนูแถบซ้าย: <strong>การดูแลระบบ ➔ ระบบตั้งเวลาอัตโนมัติ (Scheduler)</strong> หรือ URL: <code>http://laravel_rdb.test/backend/system-scheduler</code> สงวนสิทธิ์สำหรับ Super Admin</p>
+</div></div>
+<a id="1-%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B2%E0%B8%A3%E0%B8%96%E0%B8%AB%E0%B8%A5%E0%B8%B1%E0%B8%81%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B8%88%E0%B8%AD-task-scheduler-hub" class="manual-anchor"></a><h4 id="1-ความสามารถหลักของหน้าจอ-task-scheduler-hub">1. ความสามารถหลักของหน้าจอ Task Scheduler Hub</h4>
+<ol>
+<li><strong>ตรวจสอบรอบการรันงานอัตโนมัติล่วงหน้า (Next Due Calculation)</strong>: แสดงเวลาที่งานแต่ละตัวจะทำงานครั้งถัดไปในรูปแบบ พ.ศ. พร้อมระยะเวลาคงเหลือ (เช่น &quot;อีก 14 ชม.&quot;)</li>
+<li><strong>สั่งรันงานทันทีแบบ On-Demand (Run Now)</strong>: ผู้ดูแลระบบสามารถกดปุ่ม <strong>&quot;⚡ รันทันที&quot;</strong> เพื่อสั่งให้ระบบประมวลผลงานนั้น ๆ ทันทีโดยไม่ต้องรอเวลากลางคืน พร้อมหน้าต่าง <strong>Terminal Console Output</strong> แสดงผลลัพธ์การรันจริง</li>
+<li><strong>การ์ดตรวจเช็คระบบ 4 ด้าน</strong>: งานอัตโนมัติที่พร้อมทำงาน, รอบงานถัดไปที่ใกล้ที่สุด, เวลาเซิร์ฟเวอร์ (ICT), และสถานะการเชื่อมต่อบอท Telegram</li>
+</ol>
+<a id="2-%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%88%E0%B9%89%E0%B8%87%E0%B9%80%E0%B8%95%E0%B8%B7%E0%B8%AD%E0%B8%99%E0%B8%9C%E0%B9%88%E0%B8%B2%E0%B8%99-telegram-bot-%E0%B8%AD%E0%B8%B1%E0%B8%95%E0%B9%82%E0%B8%99%E0%B8%A1%E0%B8%B1%E0%B8%95%E0%B8%B4-telegram-notifications" class="manual-anchor"></a><h4 id="2-ระบบแจ้งเตือนผ่าน-telegram-bot-อัตโนมัติ-telegram-notifications">2. ระบบแจ้งเตือนผ่าน Telegram Bot อัตโนมัติ (Telegram Notifications)</h4>
+<p>ระบบมีกลไกแจ้งเตือน 2 ระดับ:</p>
+<h5>ระดับที่ 1: แจ้งเตือนผู้ดูแลระบบสูงสุด (Super Admin Instant Audit Alerts)</h5>
+<p>เชื่อมโยงเข้ากับระบบ <code>AuditLog</code> โดยตรง ทุกครั้งที่มีกิจกรรมสำคัญในทุกระบบงาน ระบบจะส่งการแจ้งเตือนเข้า Telegram ของ Admin ทันที ได้แก่:</p>
+<ul>
+<li>🟢 <strong>การสร้างข้อมูลใหม่ (Create)</strong>: โครงการวิจัย, ผลงานตีพิมพ์, ทรัพย์สินทางปัญญา, การนำไปใช้ประโยชน์</li>
+<li>🟡 <strong>การแก้ไขข้อมูล (Update)</strong>: การปรับปรุงรายละเอียด, การเปลี่ยนสถานะงานวิจัย</li>
+<li>🔴 <strong>การลบข้อมูล (Delete)</strong>: การลบรายการข้อมูล หรือการย้ายเข้าถังขยะ</li>
+<li>📎 <strong>การอัปโหลดไฟล์ (File Upload)</strong>: ตรวจจับไฟล์แนบเล่มรายงาน, ปกวิจัย, เอกสารประกอบ</li>
+<li>💾 <strong>การสำรองและกู้คืน (Backup &amp; Restore)</strong>: แจ้งเตือนเมื่อมีการสำรองฐานข้อมูล หรือมีคำขอกู้คืนระบบผ่าน OTP</li>
+<li>⚡ <strong>การสั่งรันงานระบบ (Scheduler Manual Run)</strong>: แจ้งเตือนเมื่อมีการกดสั่งรันคำสั่งระบบ</li>
+</ul>
+<h5>ระดับที่ 2: แจ้งเตือนส่วนบุคคลของนักวิจัย / ผู้ทรงคุณวุฒิ (Individual Notifications)</h5>
+<p>ทำงานควบคู่กับการส่งอีเมล (Dual-Channel: <code>mail</code> + <code>telegram</code>) สำหรับผู้ใช้ที่มีการกรอก <strong>Telegram Chat ID</strong>:</p>
+<ul>
+<li>แจ้งเตือนเมื่อผลงานวิจัยได้รับการอนุมัติเผยแพร่ หรือส่งกลับแก้ไข</li>
+<li>แจ้งเตือนผู้ทรงคุณวุฒิเมื่อได้รับมอบหมายให้ประเมินเล่มรายงานวิจัย</li>
+<li>แจ้งเตือนนักวิจัยเมื่อรายงานวิจัยฉบับสมบูรณ์ผ่านการอนุมัติขั้นสุดท้าย</li>
+</ul>
+<a id="3-%E0%B8%82%E0%B8%B1%E0%B9%89%E0%B8%99%E0%B8%95%E0%B8%AD%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%84%E0%B9%88%E0%B8%B2-telegram-bot-%E0%B9%83%E0%B8%99%E0%B9%84%E0%B8%9F%E0%B8%A5%E0%B9%8C-env" class="manual-anchor"></a><h4 id="3-ขั้นตอนการตั้งค่า-telegram-bot-ในไฟล์-env">3. ขั้นตอนการตั้งค่า Telegram Bot ในไฟล์ <code>.env</code></h4>
+<ol>
+<li>สร้างบอทผ่าน Telegram โดยคุยกับ <strong>@BotFather</strong> ➔ พิมพ์ <code>/newbot</code> ➔ นำ HTTP API Token ที่ได้มาระบุใน <code>TELEGRAM_BOT_TOKEN</code></li>
+<li>หา Chat ID ของตนเอง โดยคุยกับ <strong>@userinfobot</strong> ➔ นำหมายเลข ID มาระบุใน <code>TELEGRAM_ADMIN_CHAT_ID</code></li>
+<li>ทักแชทบอทที่สร้างไว้ แล้วกดปุ่ม <strong>/start</strong> เพื่อเปิดรับข้อความ</li>
+<li>บันทึกค่าลงในไฟล์ <code>.env</code>:
+<pre><code class="language-env">TELEGRAM_BOT_TOKEN=&quot;123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ&quot;
+TELEGRAM_ADMIN_CHAT_ID=&quot;123456789&quot;
+TELEGRAM_NOTIFICATIONS_ENABLED=true
+TELEGRAM_TIMEOUT=4
+</code></pre>
+</li>
+<li>คลิกปุ่ม <strong>&quot;ทดสอบส่งแจ้งเตือน Telegram&quot;</strong> บนหน้าจอระบบตั้งเวลาอัตโนมัติ เพื่อยืนยันว่าการเชื่อมต่อสมบูรณ์ 100%</li>
 </ol>
 
             </div>

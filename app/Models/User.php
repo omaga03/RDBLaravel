@@ -22,6 +22,7 @@ class User extends Authenticatable
         'researcher_id',
         'username',
         'email',
+        'telegram_chat_id',
         'status',
         'onboarding_status',
         'onboarding_department_id',
@@ -310,5 +311,13 @@ class User extends Authenticatable
             return trim($prefix . $this->researcher->researcher_fname . ' ' . $this->researcher->researcher_lname);
         }
         return $this->username;
+    }
+
+    /**
+     * Get user's Telegram Chat ID for direct notifications.
+     */
+    public function routeNotificationForTelegram(): ?string
+    {
+        return $this->telegram_chat_id;
     }
 }

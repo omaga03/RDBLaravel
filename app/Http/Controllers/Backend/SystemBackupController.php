@@ -30,6 +30,28 @@ class SystemBackupController extends Controller
     }
 
     /**
+     * Display the System Backup & Disaster Recovery Hub
+     */
+    public function index()
+    {
+        $this->ensureTheCreatorOnly();
+
+        $backupList = $this->backupService->getBackupList();
+        $dbSizeFormatted = $this->backupService->formatBytes($this->backupService->getDatabaseSize());
+        $storageSizeFormatted = $this->backupService->formatBytes($this->backupService->getStorageSize());
+        $mysqldumpAvailable = !empty($this->backupService->getMysqldumpBinary());
+        $mysqlAvailable = !empty($this->backupService->getMysqlBinary());
+
+        return view('backend.system_backup.index', compact(
+            'backupList',
+            'dbSizeFormatted',
+            'storageSizeFormatted',
+            'mysqldumpAvailable',
+            'mysqlAvailable'
+        ));
+    }
+
+    /**
      * Trigger backup creation
      */
     public function create(Request $request)
@@ -54,10 +76,10 @@ class SystemBackupController extends Controller
                 $msg = "สำรองข้อมูลทั้งระบบ (Full Archive) สำเร็จ: {$res['filename']} ({$res['size_formatted']})";
             }
 
-            return redirect()->route('backend.system_commands.index', ['#backup-section'])
+            return redirect()->route('backend.system_backup.index')
                              ->with('success', $msg);
         } catch (\Throwable $e) {
-            return redirect()->route('backend.system_commands.index', ['#backup-section'])
+            return redirect()->route('backend.system_backup.index')
                              ->with('error', 'การสำรองข้อมูลล้มเหลว: ' . $e->getMessage());
         }
     }
@@ -103,11 +125,11 @@ class SystemBackupController extends Controller
 
         $deleted = $this->backupService->deleteBackup($filename);
         if ($deleted) {
-            return redirect()->route('backend.system_commands.index', ['#backup-section'])
+            return redirect()->route('backend.system_backup.index')
                              ->with('success', "ลบไฟล์สำรอง {$filename} เรียบร้อยแล้ว");
         }
 
-        return redirect()->route('backend.system_commands.index', ['#backup-section'])
+        return redirect()->route('backend.system_backup.index')
                          ->with('error', "ไม่สามารถลบไฟล์ {$filename} ได้ หรือไม่พบไฟล์");
     }
 
@@ -164,13 +186,13 @@ class SystemBackupController extends Controller
         $confirmText = trim($request->input('confirm_text'));
 
         if (strtoupper($confirmText) !== 'CONFIRM RESTORE') {
-            return redirect()->route('backend.system_commands.index', ['#backup-section'])
+            return redirect()->route('backend.system_backup.index')
                              ->with('error', 'ข้อความยืนยันไม่ถูกต้อง กรุณาพิมพ์ CONFIRM RESTORE ให้ตรงตามที่ระบบระบุ');
         }
 
         $validOtp = $this->backupService->verifyRestoreOtp($filename, $otp);
         if (!$validOtp) {
-            return redirect()->route('backend.system_commands.index', ['#backup-section'])
+            return redirect()->route('backend.system_backup.index')
                              ->with('error', 'รหัสความปลอดภัย OTP ไม่ถูกต้องหรือหมดอายุแล้ว (กรุณากดขอ OTP ใหม่)');
         }
 
@@ -188,10 +210,10 @@ class SystemBackupController extends Controller
 
             $successMsg = "กู้คืนระบบจากไฟล์ {$res['restored_file']} สำเร็จสมบูรณ์! (ระบบได้สร้าง Safety Snapshot ไว้ที่ {$res['safety_snapshot']} โดยอัตโนมัติก่อนเริ่มกู้คืน)";
 
-            return redirect()->route('backend.system_commands.index', ['#backup-section'])
+            return redirect()->route('backend.system_backup.index')
                              ->with('success', $successMsg);
         } catch (\Throwable $e) {
-            return redirect()->route('backend.system_commands.index', ['#backup-section'])
+            return redirect()->route('backend.system_backup.index')
                              ->with('error', 'การกู้คืนระบบล้มเหลว: ' . $e->getMessage());
         }
     }

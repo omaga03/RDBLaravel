@@ -53,7 +53,7 @@ class AuditLog extends Model
             $user = auth()->user();
             $scope = ($user && method_exists($user, 'getActiveRoleScope')) ? $user->getActiveRoleScope() : null;
 
-            return self::create([
+            $log = self::create([
                 'user_id' => $user?->id,
                 'user_name' => $user ? ($user->researcher ? $user->researcher->full_name : $user->username) : 'Guest / System',
                 'user_role' => $scope ? $scope->role_name : ($user ? ($user->roles->first()?->item_name ?? 'User') : 'Guest'),
@@ -70,6 +70,16 @@ class AuditLog extends Model
                 'remarks' => $remarks,
                 'created_at' => now(),
             ]);
+
+            if ($log) {
+                try {
+                    \App\Services\TelegramNotificationService::notifyAuditEvent($log);
+                } catch (\Throwable $te) {
+                    \Log::warning('Telegram audit notification skipped: ' . $te->getMessage());
+                }
+            }
+
+            return $log;
         } catch (\Throwable $e) {
             \Log::error('AuditLog record error: ' . $e->getMessage());
             return null;

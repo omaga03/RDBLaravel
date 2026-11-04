@@ -27,6 +27,22 @@
             </div>
 
             <div class="col-md-6">
+                <label for="telegram_chat_id" class="form-label fw-bold">
+                    <i class="bi bi-telegram text-info me-1"></i>Telegram Chat ID <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle ms-1" style="font-size: 0.65rem;">ไม่บังคับ</span>
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text bg-body-tertiary text-body-secondary"><i class="bi bi-chat-dots"></i></span>
+                    <input type="text" class="form-control @error('telegram_chat_id') is-invalid @enderror" id="telegram_chat_id" name="telegram_chat_id" value="{{ old('telegram_chat_id') }}" placeholder="เช่น 123456789">
+                </div>
+                <div class="form-text text-body-secondary" style="font-size: 0.78rem;">
+                    กรอก Chat ID เพื่อรับการแจ้งเตือนงานวิจัยส่วนบุคคลผ่าน Telegram
+                </div>
+                @error('telegram_chat_id')
+                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="col-md-6">
                 <label for="password" class="form-label fw-bold">รหัสผ่าน (Password) <span class="text-danger">*</span></label>
                 <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" required placeholder="อย่างน้อย 8 ตัวอักษร">
                 @error('password')

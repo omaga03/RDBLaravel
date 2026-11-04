@@ -188,7 +188,20 @@ Route::prefix('backend')->name('backend.')->middleware(['auth', \App\Http\Middle
     Route::get('/system-commands', [\App\Http\Controllers\Backend\SystemCommandController::class, 'index'])->name('system_commands.index');
     Route::post('/system-commands/run', [\App\Http\Controllers\Backend\SystemCommandController::class, 'run'])->name('system_commands.run');
 
-    // System Backup & Disaster Recovery (The Creator Only)
+    // System Automated Task Scheduler Hub (ศูนย์ตั้งเวลาและรันงานอัตโนมัติ)
+    Route::get('/system-scheduler', [\App\Http\Controllers\Backend\SystemSchedulerController::class, 'index'])->name('system_scheduler.index');
+    Route::post('/system-scheduler/run', [\App\Http\Controllers\Backend\SystemSchedulerController::class, 'run'])->name('system_scheduler.run');
+    Route::post('/system-scheduler/test-telegram', [\App\Http\Controllers\Backend\SystemSchedulerController::class, 'testTelegram'])->name('system_scheduler.test_telegram');
+
+    // System Backup & Disaster Recovery Hub (ศูนย์สำรองและกู้คืนข้อมูลระบบ - The Creator Only)
+    Route::get('/system-backup', [\App\Http\Controllers\Backend\SystemBackupController::class, 'index'])->name('system_backup.index');
+    Route::post('/system-backup/create', [\App\Http\Controllers\Backend\SystemBackupController::class, 'create'])->name('system_backup.create');
+    Route::get('/system-backup/download/{filename}', [\App\Http\Controllers\Backend\SystemBackupController::class, 'download'])->name('system_backup.download');
+    Route::delete('/system-backup/{filename}', [\App\Http\Controllers\Backend\SystemBackupController::class, 'destroy'])->name('system_backup.destroy');
+    Route::post('/system-backup/restore-otp', [\App\Http\Controllers\Backend\SystemBackupController::class, 'requestRestoreOtp'])->name('system_backup.request_otp');
+    Route::post('/system-backup/confirm-restore', [\App\Http\Controllers\Backend\SystemBackupController::class, 'confirmRestore'])->name('system_backup.confirm_restore');
+
+    // Backward compatibility aliases
     Route::post('/system-commands/backup/create', [\App\Http\Controllers\Backend\SystemBackupController::class, 'create'])->name('system_commands.backup.create');
     Route::get('/system-commands/backup/download/{filename}', [\App\Http\Controllers\Backend\SystemBackupController::class, 'download'])->name('system_commands.backup.download');
     Route::delete('/system-commands/backup/{filename}', [\App\Http\Controllers\Backend\SystemBackupController::class, 'destroy'])->name('system_commands.backup.destroy');

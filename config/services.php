@@ -40,4 +40,11 @@ return [
         'insttoken' => env('SCOPUS_INST_TOKEN'),
     ],
 
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'admin_chat_id' => env('TELEGRAM_ADMIN_CHAT_ID'),
+        'enabled' => env('TELEGRAM_NOTIFICATIONS_ENABLED', true),
+        'timeout' => (int) env('TELEGRAM_TIMEOUT', 4),
+    ],
+
 ];

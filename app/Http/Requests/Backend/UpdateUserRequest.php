@@ -22,6 +22,7 @@ class UpdateUserRequest extends FormRequest
         $rules = [
             'username' => ['required', 'string', 'max:255', Rule::unique('user')->ignore($userId)],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('user')->ignore($userId)],
+            'telegram_chat_id' => ['nullable', 'string', 'max:64'],
             'password' => ['nullable', 'string', 'min:8'],
         ];
 

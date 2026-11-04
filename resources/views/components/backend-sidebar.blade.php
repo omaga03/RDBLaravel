@@ -1,6 +1,7 @@
 @php
     $currentUser = auth()->user();
     $isSuperAdmin = $currentUser && ($currentUser->hasRole('The Creator') || $currentUser->hasRole('Admin') || $currentUser->hasRole('Admin Research'));
+    $isCreator = $currentUser && ($currentUser->id === 129 || $currentUser->hasRole('The Creator'));
     $canDspaceProject = $isSuperAdmin || ($currentUser && ($currentUser->hasRole(['Admin Project', 'Admin Library']) || $currentUser->hasPermission('DSpace.Export')));
     $canDspacePublished = $isSuperAdmin || ($currentUser && ($currentUser->hasRole(['Admin Published', 'Admin Library']) || $currentUser->hasPermission('DSpace.Export')));
     $canManageResearchers = $isSuperAdmin || ($currentUser && ($currentUser->hasRole(['Admin Researcher', 'Admin Position']) || ($currentUser->hasPermission('RdbResearcher.View') && !$currentUser->hasRole('Researcher') && !$currentUser->researcher_id && !$currentUser->hasRole('Faculty Coordinator'))));
@@ -36,7 +37,7 @@
 
     $isNewsActive = request()->is('backend/research_news*') || request()->is('backend/research_conference*');
     $isDeptActive = request()->is('backend/rdbdepartment*');
-    $isAdminActive = request()->is('backend/user*') || request()->is('backend/rbac*') || request()->is('backend/settings*') || request()->is('backend/audit-logs*') || request()->is('backend/api-management*') || request()->is('backend/system-commands*');
+    $isAdminActive = request()->is('backend/user*') || request()->is('backend/rbac*') || request()->is('backend/settings*') || request()->is('backend/audit-logs*') || request()->is('backend/api-management*') || request()->is('backend/system-commands*') || request()->is('backend/system-scheduler*') || request()->is('backend/system-backup*');
 @endphp
 
 <!-- Mobile Backdrop for Offcanvas Sidebar (< 992px) -->
@@ -543,7 +544,11 @@
                             <li><a class="nav-link rdb-sub-link {{ request()->is('backend/api-management*') ? 'active' : '' }}" href="{{ route('backend.api_management.index') }}"><span class="rdb-sub-dash">-</span><i class="bi bi-braces-asterisk me-1.5 text-primary"></i>จัดการ API &amp; Bearer Token</a></li>
                             <li><a class="nav-link rdb-sub-link {{ request()->is('backend/settings/access-control*') ? 'active' : '' }}" href="{{ route('backend.settings.access_control') }}"><span class="rdb-sub-dash">-</span><i class="bi bi-shield-lock-fill me-1.5 text-warning"></i>ควบคุมล็อกอิน &amp; นโยบายดาวน์โหลด</a></li>
                             <li><a class="nav-link rdb-sub-link {{ request()->is('backend/audit-logs*') ? 'active' : '' }}" href="{{ route('backend.audit_log.index') }}"><span class="rdb-sub-dash">-</span><i class="bi bi-clock-history me-1.5 text-info"></i>ประวัติการใช้งานระบบ (Audit Trail)</a></li>
+                            <li><a class="nav-link rdb-sub-link {{ request()->is('backend/system-scheduler*') ? 'active' : '' }}" href="{{ route('backend.system_scheduler.index') }}"><span class="rdb-sub-dash">-</span><i class="bi bi-calendar2-range-fill me-1.5 text-info"></i>ระบบตั้งเวลาอัตโนมัติ (Scheduler)</a></li>
                             <li><a class="nav-link rdb-sub-link {{ request()->is('backend/system-commands*') ? 'active' : '' }}" href="{{ route('backend.system_commands.index') }}"><span class="rdb-sub-dash">-</span><i class="bi bi-terminal-fill me-1.5 text-warning"></i>คำสั่งและบำรุงรักษาระบบ</a></li>
+                            @if($isCreator)
+                            <li><a class="nav-link rdb-sub-link {{ request()->is('backend/system-backup*') ? 'active' : '' }}" href="{{ route('backend.system_backup.index') }}"><span class="rdb-sub-dash">-</span><i class="bi bi-shield-shaded me-1.5 text-danger"></i>สำรองและกู้คืนระบบ (Disaster Recovery)</a></li>
+                            @endif
                             @endif
                         </ul>
                     </div>

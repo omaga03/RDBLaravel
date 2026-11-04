@@ -21,7 +21,23 @@ class ReviewFinalApprovedNotification extends Notification
         if (!empty($notifiable->email) && filter_var($notifiable->email, FILTER_VALIDATE_EMAIL)) {
             $channels[] = 'mail';
         }
+        if (!empty($notifiable->telegram_chat_id) && \App\Services\TelegramNotificationService::isConfigured()) {
+            $channels[] = \App\Notifications\Channels\TelegramChannel::class;
+        }
         return $channels;
+    }
+
+    public function toTelegram($notifiable): string
+    {
+        $project = $this->submission->project;
+        $projectTitle = htmlspecialchars(strip_tags($project?->pro_nameTH ?? $this->submission->submission_title ?? 'โครงการวิจัย'));
+        $url = route('backend.project_review.project', $this->submission->pro_id);
+        $greeting = htmlspecialchars($notifiable->name ?? 'ท่านนักวิจัย');
+
+        return "✅ <b>[PCRU RDB] อนุมัติเล่มรายงานวิจัยฉบับสมบูรณ์เรียบร้อยแล้ว</b>\n\n"
+             . "เรียน {$greeting}\n"
+             . "รายงานวิจัยฉบับสมบูรณ์ของโครงการ <b>'{$projectTitle}'</b> ได้รับการอนุมัติและเชื่อมโยงเข้าสู่ระบบคลังข้อมูลโครงการวิจัยเรียบร้อยแล้ว\n\n"
+             . "🔗 <a href=\"{$url}\">คลิกเพื่อเปิดดูรายละเอียดโครงการวิจัย</a>";
     }
 
     public function toMail($notifiable): MailMessage

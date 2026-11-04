@@ -574,199 +574,38 @@
         </div>
     </div>
 
-    <!-- 5. System Backup & Disaster Recovery Hub (Strictly The Creator Only) -->
-    <div class="row g-4 mt-1 mb-4" id="backup-section">
+    <!-- 5. System Backup & Disaster Recovery Link Card -->
+    <div class="row g-4 mt-1 mb-4">
         <div class="col-12">
-            <div class="card border shadow-sm">
-                <div class="card-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-3 flex-wrap gap-2">
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="p-2 rounded-2 bg-dark text-warning">
-                            <i class="bi bi-shield-lock-fill fs-5"></i>
+            <div class="card border shadow-sm bg-body">
+                <div class="card-body p-3 p-md-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="p-3 rounded-3 bg-danger-subtle text-danger border border-danger-subtle">
+                            <i class="bi bi-shield-shaded fs-3"></i>
                         </div>
                         <div>
                             <div class="d-flex align-items-center gap-2">
-                                <h6 class="mb-0 fw-bold text-body">5. ศูนย์สำรองและกู้คืนข้อมูลระบบ (System Backup &amp; Disaster Recovery Hub)</h6>
-                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                                <h5 class="fw-bold mb-1 text-body">ศูนย์สำรองและกู้คืนข้อมูลระบบ (Backup &amp; Disaster Recovery)</h5>
+                                <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle">
                                     <i class="bi bi-crown me-1"></i>The Creator Only
                                 </span>
                             </div>
-                            <small class="text-body-secondary">ระบบสร้างแพ็กเกจสำรองฐานข้อมูล MariaDB และไฟล์ Storage พร้อมระบบกู้คืนยืนยัน 2 ชั้นผ่าน Email OTP</small>
+                            <p class="text-body-secondary small mb-0">
+                                สำรองฐานข้อมูล MariaDB (.sql.gz), สำรองไฟล์ Storage (.zip), กู้คืนระบบยืนยัน 2 ชั้นผ่าน Email OTP และการซิงค์ขึ้น Google Drive
+                            </p>
                         </div>
                     </div>
-                    @if($isCreator)
-                        <div class="d-flex align-items-center gap-2">
-                            <button type="button" class="btn btn-outline-info btn-sm d-inline-flex align-items-center gap-1.5" data-bs-toggle="modal" data-bs-target="#rcloneGuideModal">
-                                <i class="bi bi-google me-1"></i> เชื่อมต่อ Google Drive (Rclone)
+                    <div class="d-flex align-items-center gap-2">
+                        @if($isCreator)
+                            <a href="{{ route('backend.system_backup.index') }}" class="btn btn-danger btn-sm d-inline-flex align-items-center gap-1.5 px-3 py-2 shadow-sm">
+                                <i class="bi bi-shield-lock-fill"></i> เข้าสู่ศูนย์สำรองและกู้คืนระบบ <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        @else
+                            <button type="button" class="btn btn-secondary btn-sm" disabled title="สงวนสิทธิ์เฉพาะ The Creator">
+                                <i class="bi bi-lock-fill me-1"></i> จำกัดสิทธิ์เฉพาะ The Creator
                             </button>
-                        </div>
-                    @endif
-                </div>
-                <div class="card-body p-3 p-md-4">
-                    @if(!$isCreator)
-                        <div class="alert alert-secondary border d-flex align-items-center mb-0 p-3 rounded-3">
-                            <i class="bi bi-lock-fill fs-4 text-secondary me-3"></i>
-                            <div>
-                                <div class="fw-bold text-body">ฟังก์ชันสำรองและกู้คืนระบบถูกจำกัดสิทธิ์ระดับสูงสุด</div>
-                                <div class="small text-body-secondary">
-                                    สงวนสิทธิ์การเข้าถึงและสั่งการเฉพาะบัญชี <strong>The Creator</strong> (ผู้ดูแลระบบสูงสุด) เพียงผู้เดียวเท่านั้น เพื่อความปลอดภัยสูงสุดของข้อมูลงานวิจัยทั้งมหาวิทยาลัย
-                                </div>
-                            </div>
-                        </div>
-                    @else
-                        <!-- Metrics Strip -->
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-3 col-sm-6">
-                                <div class="p-3 bg-body-tertiary rounded-3 border">
-                                    <div class="small text-body-secondary fw-semibold mb-1"><i class="bi bi-database me-1 text-primary"></i>ขนาดฐานข้อมูล MariaDB</div>
-                                    <div class="h5 mb-0 fw-bold text-body" style="font-variant-numeric: tabular-nums;">{{ $dbSizeFormatted }}</div>
-                                </div>
-                            </div>
-                            <div class="col-md-3 col-sm-6">
-                                <div class="p-3 bg-body-tertiary rounded-3 border">
-                                    <div class="small text-body-secondary fw-semibold mb-1"><i class="bi bi-folder2-open me-1 text-info"></i>ขนาดไฟล์เอกสาร Storage</div>
-                                    <div class="h5 mb-0 fw-bold text-body" style="font-variant-numeric: tabular-nums;">{{ $storageSizeFormatted }}</div>
-                                </div>
-                            </div>
-                            <div class="col-md-3 col-sm-6">
-                                <div class="p-3 bg-body-tertiary rounded-3 border">
-                                    <div class="small text-body-secondary fw-semibold mb-1"><i class="bi bi-archive me-1 text-success"></i>ไฟล์สำรองบนเซิร์ฟเวอร์</div>
-                                    <div class="h5 mb-0 fw-bold text-body" style="font-variant-numeric: tabular-nums;">{{ count($backupList) }} ไฟล์</div>
-                                </div>
-                            </div>
-                            <div class="col-md-3 col-sm-6">
-                                <div class="p-3 bg-body-tertiary rounded-3 border">
-                                    <div class="small text-body-secondary fw-semibold mb-1"><i class="bi bi-terminal me-1 text-warning"></i>สถานะ mysqldump</div>
-                                    <div class="h5 mb-0 fw-bold {{ $mysqldumpAvailable ? 'text-success' : 'text-danger' }}">
-                                        {{ $mysqldumpAvailable ? 'พร้อมใช้งาน ✓' : 'ไม่พบไบนารี ✗' }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons Strip -->
-                        <div class="d-flex align-items-center gap-2 mb-4 flex-wrap p-3 bg-body-tertiary rounded-3 border">
-                            <span class="small fw-bold text-body me-2"><i class="bi bi-play-circle-fill text-primary me-1"></i>สั่งสำรองข้อมูลทันที:</span>
-                            
-                            <form action="{{ route('backend.system_commands.backup.create') }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันสำรองเฉพาะฐานข้อมูล (Database .sql.gz)?');">
-                                @csrf
-                                <input type="hidden" name="type" value="db">
-                                <button type="submit" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1.5" {{ !$mysqldumpAvailable ? 'disabled' : '' }}>
-                                    <i class="bi bi-database-down"></i> สำรองฐานข้อมูล (.sql.gz)
-                                </button>
-                            </form>
-
-                            <form action="{{ route('backend.system_commands.backup.create') }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันสำรองไฟล์เอกสาร Storage (.zip)?');">
-                                @csrf
-                                <input type="hidden" name="type" value="files">
-                                <button type="submit" class="btn btn-outline-info btn-sm d-inline-flex align-items-center gap-1.5">
-                                    <i class="bi bi-file-earmark-zip"></i> สำรองไฟล์ Storage (.zip)
-                                </button>
-                            </form>
-
-                            <form action="{{ route('backend.system_commands.backup.create') }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันสำรองข้อมูลทั้งระบบแบบสมบูรณ์ (Full Archive: DB + Storage + Config)?');">
-                                @csrf
-                                <input type="hidden" name="type" value="all">
-                                <button type="submit" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1.5" {{ !$mysqldumpAvailable ? 'disabled' : '' }}>
-                                    <i class="bi bi-archive-fill"></i> สำรองทั้งระบบ (Full Archive)
-                                </button>
-                            </form>
-                        </div>
-
-                        <!-- Backup Archives Table -->
-                        <div class="table-responsive">
-                            <table class="table table-hover table-bordered align-middle mb-0 small">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th style="width: 42%;">ชื่อไฟล์สำรอง (Archive Filename)</th>
-                                        <th style="width: 14%;">ประเภท</th>
-                                        <th style="width: 12%;" class="text-end">ขนาดไฟล์</th>
-                                        <th style="width: 16%;">วันที่-เวลาสำรอง</th>
-                                        <th style="width: 16%;" class="text-center">การดำเนินการ</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($backupList as $b)
-                                        <tr>
-                                            <td>
-                                                <div class="fw-semibold text-body text-break font-monospace" style="font-size: 0.82rem;">
-                                                    <i class="bi bi-file-earmark-binary text-secondary me-1"></i>{{ $b['filename'] }}
-                                                </div>
-                                                <div class="text-body-tertiary small" style="font-size: 0.72rem;">
-                                                    MD5: <code>{{ substr($b['checksum'], 0, 16) }}...</code>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                @if($b['type'] === 'full')
-                                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
-                                                        <i class="bi bi-archive-fill me-1"></i>ทั้งระบบ (Full)
-                                                    </span>
-                                                @elseif($b['type'] === 'database')
-                                                    <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle">
-                                                        <i class="bi bi-database me-1"></i>ฐานข้อมูล (DB)
-                                                    </span>
-                                                @elseif($b['type'] === 'files')
-                                                    <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle">
-                                                        <i class="bi bi-folder-fill me-1"></i>ไฟล์เอกสาร
-                                                    </span>
-                                                @elseif($b['type'] === 'safety_snapshot')
-                                                    <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle">
-                                                        <i class="bi bi-shield-shaded me-1"></i>Safety Snapshot
-                                                    </span>
-                                                @else
-                                                    <span class="badge bg-secondary-subtle text-secondary-emphasis">ทั่วไป</span>
-                                                @endif
-                                            </td>
-                                            <td class="text-end fw-semibold text-body" style="font-variant-numeric: tabular-nums;">
-                                                {{ $b['size_formatted'] }}
-                                            </td>
-                                            <td class="text-body-secondary" style="font-variant-numeric: tabular-nums;">
-                                                {{ $b['created_at_thai'] }} น.
-                                            </td>
-                                            <td class="text-center">
-                                                <div class="btn-group btn-group-sm" role="group">
-                                                    <!-- Download Button -->
-                                                    <a href="{{ route('backend.system_commands.backup.download', $b['filename']) }}" 
-                                                       class="btn btn-outline-success" 
-                                                       title="ดาวน์โหลดไฟล์สำรองนี้ลงเครื่อง">
-                                                        <i class="bi bi-download"></i>
-                                                    </a>
-
-                                                    <!-- Restore Button (Triggers OTP Modal) -->
-                                                    @if(in_array($b['type'], ['database', 'full', 'safety_snapshot']))
-                                                        <button type="button" 
-                                                                class="btn btn-outline-danger" 
-                                                                title="กู้คืนระบบจากไฟล์นี้ (ต้องใช้ OTP ยืนยัน)"
-                                                                onclick="openRestoreModal('{{ $b['filename'] }}', '{{ $b['type'] }}', '{{ $b['size_formatted'] }}')">
-                                                            <i class="bi bi-arrow-counterclockwise"></i>
-                                                        </button>
-                                                    @endif
-
-                                                    <!-- Delete Button -->
-                                                    <form action="{{ route('backend.system_commands.backup.destroy', $b['filename']) }}" 
-                                                          method="POST" 
-                                                          class="d-inline" 
-                                                          onsubmit="return confirm('ยืนยันลบไฟล์สำรอง {{ $b['filename'] }} ออกจากเซิร์ฟเวอร์?');">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-outline-secondary" title="ลบไฟล์สำรอง">
-                                                            <i class="bi bi-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="5" class="text-center py-4 text-body-secondary">
-                                                <i class="bi bi-inbox fs-3 d-block mb-1 text-muted"></i>
-                                                ยังไม่มีไฟล์สำรองในระบบ คลิกปุ่ม <strong>"สำรองฐานข้อมูล"</strong> ด้านบนเพื่อเริ่มสร้างไฟล์แรก
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    @endif
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
@@ -954,167 +793,6 @@ PDFTOPPM_PATH="/usr/bin/pdftoppm"</pre>
     </div>
 </div>
 
-<!-- Modal: Safe System Restore with Email OTP -->
-<div class="modal fade" id="restoreModal" tabindex="-1" aria-labelledby="restoreModalLabel" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-danger text-white py-3">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-shield-exclamation fs-4"></i>
-                    <div>
-                        <h5 class="modal-title fw-bold mb-0" id="restoreModalLabel">ยืนยันการกู้คืนระบบ (System Restore)</h5>
-                        <small class="text-white-50">การดำเนินการขั้นวิกฤต — จำเป็นต้องใช้รหัส OTP ยืนยัน</small>
-                    </div>
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            
-            <form action="{{ route('backend.system_commands.backup.confirm_restore') }}" method="POST" id="restoreForm">
-                @csrf
-                <input type="hidden" name="filename" id="restoreFilenameInput" value="">
-
-                <div class="modal-body p-4">
-                    <!-- Critical Warning Alert -->
-                    <div class="alert alert-danger-subtle border border-danger-subtle mb-3 p-3 rounded-3 small">
-                        <div class="fw-bold text-danger mb-1"><i class="bi bi-exclamation-triangle-fill me-1"></i>คำเตือนความปลอดภัยสูงสุด:</div>
-                        การกู้คืนจะนำข้อมูลจากไฟล์สำรองมาเขียนทับฐานข้อมูลปัจจุบัน ระบบจะสร้าง <strong>Safety Snapshot</strong> สำรองฐานข้อมูลปัจจุบันไว้ให้อัตโนมัติก่อนเริ่มกู้คืนเสมอ
-                    </div>
-
-                    <!-- Target File Info -->
-                    <div class="p-3 bg-body-tertiary rounded-3 border mb-3 small">
-                        <div class="d-flex justify-content-between mb-1">
-                            <span class="text-body-secondary">ไฟล์สำรองเป้าหมาย:</span>
-                            <span class="fw-bold text-body font-monospace text-break" id="restoreFilenameDisplay">-</span>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <span class="text-body-secondary">ขนาดไฟล์:</span>
-                            <span class="fw-bold text-body" id="restoreFileSizeDisplay">-</span>
-                        </div>
-                    </div>
-
-                    <!-- Step 1: Request OTP Section -->
-                    <div id="otpRequestSection" class="mb-3 text-center p-3 bg-body-secondary rounded-3 border">
-                        <div class="small text-body-secondary mb-2">
-                            ระบบจะจัดส่งรหัสความปลอดภัย OTP 6 หลักไปยังอีเมลของผู้ดูแลระบบสูงสุด
-                        </div>
-                        <button type="button" class="btn btn-outline-danger btn-sm d-inline-flex align-items-center gap-1.5" id="btnSendOtp" onclick="sendRestoreOtp()">
-                            <i class="bi bi-envelope-arrow-up-fill"></i> กดส่งรหัส OTP ไปยังอีเมลของฉัน
-                        </button>
-                        <div id="otpLoadingSpinner" class="d-none mt-2">
-                            <span class="spinner-border spinner-border-sm text-danger me-1" role="status" aria-hidden="true"></span>
-                            <span class="small text-body-secondary">กำลังจัดส่งรหัสความปลอดภัย OTP...</span>
-                        </div>
-                    </div>
-
-                    <!-- Step 2: Input OTP & Confirmation Phrase (Hidden initially) -->
-                    <div id="otpInputSection" class="d-none">
-                        <div class="alert alert-success-subtle border border-success-subtle small mb-3 p-2.5 rounded-3 d-flex align-items-center" id="otpSentAlert">
-                            <i class="bi bi-check-circle-fill text-success fs-5 me-2"></i>
-                            <span id="otpSentMessage">จัดส่งรหัส OTP เรียบร้อยแล้ว กรุณาตรวจสอบอีเมล</span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-body">
-                                1. รหัสความปลอดภัย OTP 6 หลัก: <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" 
-                                   name="otp" 
-                                   id="otpInput" 
-                                   class="form-control text-center font-monospace fw-bold fs-4" 
-                                   maxlength="6" 
-                                   placeholder="● ● ● ● ● ●" 
-                                   required 
-                                   autocomplete="off"
-                                   style="letter-spacing: 6px;">
-                            <div class="form-text small text-body-tertiary">รหัสมีอายุการใช้งาน 10 นาที</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-body">
-                                2. พิมพ์ยืนยันคำว่า <code class="text-danger fw-bold">CONFIRM RESTORE</code>: <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" 
-                                   name="confirm_text" 
-                                   id="confirmTextInput" 
-                                   class="form-control text-center font-monospace" 
-                                   placeholder="พิมพ์ CONFIRM RESTORE ที่นี่" 
-                                   required 
-                                   autocomplete="off">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal-footer bg-body-tertiary border-top py-2.5">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">ยกเลิก</button>
-                    <button type="submit" class="btn btn-danger btn-sm d-inline-flex align-items-center gap-1.5" id="btnSubmitRestore" disabled>
-                        <i class="bi bi-arrow-counterclockwise"></i> ยืนยันเริ่มการกู้คืนระบบ
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Modal: Google Drive & Cloud Backup Sync Guide (Rclone) -->
-<div class="modal fade" id="rcloneGuideModal" tabindex="-1" aria-labelledby="rcloneGuideModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-body-tertiary border-bottom py-3">
-                <div class="d-flex align-items-center gap-2">
-                    <div class="p-2 rounded-2 bg-info-subtle text-info">
-                        <i class="bi bi-cloud-arrow-up-fill fs-5"></i>
-                    </div>
-                    <div>
-                        <h5 class="modal-title fw-bold text-body" id="rcloneGuideModalLabel">การเชื่อมต่อสำรองข้อมูลขึ้น Google Drive อัตโนมัติ (Rclone Sync Guide)</h5>
-                        <small class="text-body-secondary">แนวทางมาตรฐานสากลสำหรับ SysAdmin ในการซิงค์ไฟล์สำรองขึ้นคลาวด์โดยไม่ต้องเขียนโค้ด API</small>
-                    </div>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4 small">
-                <div class="alert alert-info-subtle border border-info-subtle d-flex align-items-center mb-3 p-3 rounded-3">
-                    <i class="bi bi-info-circle-fill text-info fs-5 me-2.5"></i>
-                    <div>
-                        <strong>ทำไม Rclone จึงเป็นทางเลือกที่ดีที่สุด:</strong> ไม่ต้องเสี่ยงกับ Google OAuth Token หมดอายุทุก 7 วัน ไม่กินหน่วยความจำของ PHP และทำงานแบบ Background Synchronization ซิงค์เฉพาะไฟล์ใหม่หรือไฟล์ที่มีการเปลี่ยนแปลงอย่างรวดเร็ว
-                    </div>
-                </div>
-
-                <h6 class="fw-bold text-body mb-2">1. ติดตั้ง Rclone:</h6>
-                <div class="mb-3">
-                    <span class="text-body-secondary d-block mb-1">บน Windows / Laragon:</span>
-                    <ul class="mb-2 ps-3 text-body-secondary">
-                        <li>ดาวน์โหลด Rclone for Windows จาก <a href="https://rclone.org/downloads/" target="_blank">rclone.org</a></li>
-                        <li>แตกไฟล์นำ <code>rclone.exe</code> ไปวางไว้ใน <code>C:\laragon\bin\rclone\rclone.exe</code></li>
-                    </ul>
-                    <span class="text-body-secondary d-block mb-1">บน Linux (Ubuntu / Debian Production):</span>
-                    <pre class="p-2.5 bg-dark text-light rounded font-monospace" style="font-size: 0.8rem;">sudo apt update && sudo apt install -y rclone</pre>
-                </div>
-
-                <h6 class="fw-bold text-body mb-2">2. เชื่อมต่อบัญชี Google Drive ของมหาวิทยาลัย:</h6>
-                <p class="text-body-secondary mb-2">เปิด Terminal / CMD แล้วรันคำสั่งตัวช่วยตั้งค่าแบบโต้ตอบ:</p>
-                <pre class="p-2.5 bg-dark text-warning rounded mb-3 font-monospace" style="font-size: 0.8rem;">rclone config</pre>
-                <ol class="ps-3 text-body-secondary mb-3">
-                    <li>พิมพ์ <code>n</code> (New remote) ➔ ตั้งชื่อ เช่น <code>gdrive</code></li>
-                    <li>เลือกประเภทสตอเรจ ➔ พิมพ์หมายเลขของ <code>Google Drive</code> (ปกติคือ <code>drive</code>)</li>
-                    <li>ข้าม Client ID และ Secret (กด Enter)</li>
-                    <li>เลือกสิทธิ์ ➔ <code>1</code> (Full access all files)</li>
-                    <li>ทำตามขั้นตอนล็อกอินด้วยบัญชี Google ของมหาวิทยาลัยบนเบราว์เซอร์จนเสร็จสิ้น</li>
-                </ol>
-
-                <h6 class="fw-bold text-body mb-2">3. ทดสอบคำสั่งซิงค์ไฟล์สำรองขึ้น Google Drive:</h6>
-                <pre class="p-2.5 bg-dark text-light rounded mb-3 font-monospace" style="font-size: 0.8rem;">rclone sync storage/app/backups/ gdrive:PCRU_Research_Backups/ -v</pre>
-
-                <h6 class="fw-bold text-body mb-2">4. ตั้งเวลาอัตโนมัติ (Automated Nightly Cloud Sync):</h6>
-                <p class="text-body-secondary mb-1">ตั้ง Cron Job ให้ซิงค์ไฟล์สำรองขึ้น Google Drive อัตโนมัติทุกคืนเวลา 03:00 น.:</p>
-                <pre class="p-2.5 bg-dark text-success rounded mb-0 font-monospace" style="font-size: 0.8rem;">0 3 * * * rclone sync /var/www/laravel_rdb/storage/app/backups/ gdrive:PCRU_Research_Backups/ --quiet</pre>
-            </div>
-            <div class="modal-footer bg-body-tertiary border-top py-2.5">
-                <button type="button" class="btn btn-secondary btn-sm px-3" data-bs-dismiss="modal">ปิดหน้าต่าง</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
 function openEngineModal(tabBtnId) {
     const btn = document.getElementById(tabBtnId);
@@ -1129,86 +807,5 @@ function openEngineModal(tabBtnId) {
     }
 }
 
-let currentRestoreFilename = '';
-
-function openRestoreModal(filename, type, sizeFormatted) {
-    currentRestoreFilename = filename;
-    document.getElementById('restoreFilenameInput').value = filename;
-    document.getElementById('restoreFilenameDisplay').innerText = filename;
-    document.getElementById('restoreFileSizeDisplay').innerText = sizeFormatted;
-    
-    // Reset modal state
-    document.getElementById('otpRequestSection').classList.remove('d-none');
-    document.getElementById('otpInputSection').classList.add('d-none');
-    document.getElementById('btnSubmitRestore').disabled = true;
-    document.getElementById('otpInput').value = '';
-    document.getElementById('confirmTextInput').value = '';
-    document.getElementById('btnSendOtp').disabled = false;
-    document.getElementById('otpLoadingSpinner').classList.add('d-none');
-
-    const modalEl = document.getElementById('restoreModal');
-    if (modalEl) {
-        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-        modal.show();
-    }
-}
-
-function sendRestoreOtp() {
-    if (!currentRestoreFilename) return;
-
-    const btn = document.getElementById('btnSendOtp');
-    const spinner = document.getElementById('otpLoadingSpinner');
-    btn.disabled = true;
-    spinner.classList.remove('d-none');
-
-    fetch('{{ route('backend.system_commands.backup.request_otp') }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({ filename: currentRestoreFilename })
-    })
-    .then(res => res.json())
-    .then(data => {
-        spinner.classList.add('d-none');
-        if (data.success) {
-            document.getElementById('otpRequestSection').classList.add('d-none');
-            document.getElementById('otpInputSection').classList.remove('d-none');
-            document.getElementById('otpSentMessage').innerText = data.message;
-            if (data.dev_otp) {
-                // In local/log mailer, provide handy OTP helper for testing
-                document.getElementById('otpInput').value = data.dev_otp;
-                checkRestoreInputs();
-            }
-        } else {
-            btn.disabled = false;
-            alert(data.message || 'ไม่สามารถส่ง OTP ได้');
-        }
-    })
-    .catch(err => {
-        spinner.classList.add('d-none');
-        btn.disabled = false;
-        alert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
-    });
-}
-
-function checkRestoreInputs() {
-    const otp = document.getElementById('otpInput').value.trim();
-    const text = document.getElementById('confirmTextInput').value.trim();
-    const btn = document.getElementById('btnSubmitRestore');
-    if (otp.length === 6 && text.toUpperCase() === 'CONFIRM RESTORE') {
-        btn.disabled = false;
-    } else {
-        btn.disabled = true;
-    }
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    const otpEl = document.getElementById('otpInput');
-    const confirmEl = document.getElementById('confirmTextInput');
-    if (otpEl) otpEl.addEventListener('input', checkRestoreInputs);
-    if (confirmEl) confirmEl.addEventListener('input', checkRestoreInputs);
-});
 </script>
 @endsection

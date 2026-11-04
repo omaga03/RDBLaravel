@@ -21,7 +21,26 @@ class ReviewAssignedNotification extends Notification
         if (!empty($notifiable->email) && filter_var($notifiable->email, FILTER_VALIDATE_EMAIL)) {
             $channels[] = 'mail';
         }
+        if (!empty($notifiable->telegram_chat_id) && \App\Services\TelegramNotificationService::isConfigured()) {
+            $channels[] = \App\Notifications\Channels\TelegramChannel::class;
+        }
         return $channels;
+    }
+
+    public function toTelegram($notifiable): string
+    {
+        $submission = $this->assignment->submission;
+        $project = $submission?->project;
+        $projectTitle = htmlspecialchars(strip_tags($project?->pro_nameTH ?? $submission?->submission_title ?? 'โครงการวิจัย'));
+        $round = $submission?->round_number ?? 1;
+        $url = route('backend.project_review.evaluate', $this->assignment->id);
+        $greeting = htmlspecialchars($notifiable->name ?? 'ท่านผู้ทรงคุณวุฒิ');
+
+        return "📋 <b>[PCRU RDB] มอบหมายงานประเมินเล่มรายงานวิจัย</b>\n\n"
+             . "เรียน ท่านผู้ทรงคุณวุฒิ {$greeting}\n"
+             . "ท่านได้รับมอบหมายให้ทำหน้าที่ประเมินเล่มรายงานวิจัยฉบับสมบูรณ์ (รอบที่ {$round})\n"
+             . "โครงการ: <b>\"{$projectTitle}\"</b>\n\n"
+             . "🔗 <a href=\"{$url}\">คลิกเพื่อเปิดแบบประเมินและดาวน์โหลดเล่มรายงาน</a>";
     }
 
     public function toMail($notifiable): MailMessage
