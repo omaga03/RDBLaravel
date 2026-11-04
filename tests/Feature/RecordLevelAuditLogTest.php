@@ -317,6 +317,8 @@ class RecordLevelAuditLogTest extends TestCase
                 ->where('remarks', 'like', "%เพิ่มนักวิจัยร่วมโครงการ%")
                 ->first();
             $this->assertNotNull($addLog, 'Adding a researcher must record audit log on project');
+            $this->assertNotEmpty($addLog->new_values['position'], 'Position must not be null in audit log');
+            $this->assertStringNotContainsString('()', $addLog->remarks, 'Remarks must include position name, not empty parentheses');
 
             // 2. Update researcher
             $response = $this->actingAs($admin)->put(route('backend.rdb_project.researcher.update', [$project->pro_id, $researcher->researcher_id]), [

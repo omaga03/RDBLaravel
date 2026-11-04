@@ -10,6 +10,11 @@ class RdbProjectPosition extends Model
     protected $primaryKey = 'position_id';
     public $timestamps = true;
 
+    public function getPositionNameAttribute(): string
+    {
+        return $this->position_nameTH ?? '';
+    }
+
     public function projectWorks()
     {
         return $this->hasMany(RdbProjectWork::class, 'position_id', 'position_id');

@@ -878,7 +878,7 @@ class RdbProjectController extends Controller
         $researcher = RdbResearcher::with('prefix')->find($validated['researcher_id']);
         $position = RdbProjectPosition::find($validated['position_id']);
         $researcherName = $researcher ? trim(($researcher->prefix->prefix_nameTH ?? '') . $researcher->researcher_fname . ' ' . $researcher->researcher_lname) : "ID: {$validated['researcher_id']}";
-        $positionName = $position ? $position->position_name : "ตำแหน่ง ID: {$validated['position_id']}";
+        $positionName = $position ? ($position->position_nameTH ?? $position->position_name) : "ตำแหน่ง ID: {$validated['position_id']}";
 
         if (in_array($validated['position_id'], [RdbProjectPosition::DIRECTOR, RdbProjectPosition::HEAD])) {
             if ($researcher) {
@@ -923,6 +923,8 @@ class RdbProjectController extends Controller
         $oldWork = RdbProjectWork::where('pro_id', $id)->where('researcher_id', $rid)->first();
         $oldPosition = $oldWork ? RdbProjectPosition::find($oldWork->position_id) : null;
         $newPosition = RdbProjectPosition::find($validated['position_id']);
+        $oldPosName = $oldPosition ? ($oldPosition->position_nameTH ?? $oldPosition->position_name) : ($oldWork?->position_id ?? '-');
+        $newPosName = $newPosition ? ($newPosition->position_nameTH ?? $newPosition->position_name) : "ตำแหน่ง ID: {$validated['position_id']}";
         $researcher = RdbResearcher::with('prefix')->find($rid);
         $researcherName = $researcher ? trim(($researcher->prefix->prefix_nameTH ?? '') . $researcher->researcher_fname . ' ' . $researcher->researcher_lname) : "ID: {$rid}";
 
@@ -943,15 +945,15 @@ class RdbProjectController extends Controller
             event: 'update',
             auditable: $project,
             oldValues: [
-                'position' => $oldPosition?->position_name ?? ($oldWork?->position_id ?? '-'),
+                'position' => $oldPosName,
                 'ratio' => ($oldWork?->ratio ?? '-') . '%',
             ],
             newValues: [
-                'position' => $newPosition?->position_name ?? $validated['position_id'],
+                'position' => $newPosName,
                 'ratio' => $validated['ratio'] . '%',
             ],
             remarks: "ปรับปรุงข้อมูลนักวิจัยร่วม: {$researcherName}",
-            diffSummary: "แก้ไขนักวิจัยร่วม: {$researcherName} (เป็น " . ($newPosition?->position_name ?? '') . ", {$validated['ratio']}%)"
+            diffSummary: "แก้ไขนักวิจัยร่วม: {$researcherName} (เป็น {$newPosName}, {$validated['ratio']}%)"
         );
 
         return redirect()->back()->with('success', 'Researcher updated successfully.');
@@ -966,6 +968,7 @@ class RdbProjectController extends Controller
         $researcher = RdbResearcher::with('prefix')->find($rid);
         $researcherName = $researcher ? trim(($researcher->prefix->prefix_nameTH ?? '') . $researcher->researcher_fname . ' ' . $researcher->researcher_lname) : "ID: {$rid}";
         $position = $oldWork ? RdbProjectPosition::find($oldWork->position_id) : null;
+        $posName = $position ? ($position->position_nameTH ?? $position->position_name) : ($oldWork?->position_id ?? '-');
 
         RdbProjectWork::where('pro_id', $id)
             ->where('researcher_id', $rid)
@@ -977,11 +980,11 @@ class RdbProjectController extends Controller
             oldValues: [
                 'researcher_id' => $rid,
                 'researcher_name' => $researcherName,
-                'position' => $position?->position_name ?? ($oldWork?->position_id ?? '-'),
+                'position' => $posName,
                 'ratio' => ($oldWork?->ratio ?? '-') . '%',
             ],
             newValues: null,
-            remarks: "ลบนักวิจัยออกจากโครงการ: {$researcherName}",
+            remarks: "ลบนักวิจัยออกจากโครงการ: {$researcherName} ({$posName})",
             diffSummary: "ลบนักวิจัยร่วม: {$researcherName}"
         );
 
