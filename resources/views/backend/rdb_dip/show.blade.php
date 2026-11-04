@@ -432,6 +432,9 @@
         :canDelete="auth()->user()->can('delete', $item)"
         :showPrint="true"
     />
+
+    <!-- Activity & Audit Trail -->
+    <x-audit-trail :auditable="$item" title="ประวัติกิจกรรมและการแก้ไขทรัพย์สินทางปัญญา (Activity & Audit Trail)" />
 </div>
 
 <!-- Modal Manage File (Relocated to root of section for proper DOM stacking context) -->

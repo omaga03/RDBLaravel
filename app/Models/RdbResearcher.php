@@ -9,7 +9,7 @@ use App\Services\FileUploadService;
 
 class RdbResearcher extends Model
 {
-    use HasDualFilePath, \App\Traits\HasDataShowScope;
+    use HasDualFilePath, \App\Traits\HasDataShowScope, \App\Traits\Auditable;
 
     protected $table = 'rdb_researcher';
     protected $primaryKey = 'researcher_id';

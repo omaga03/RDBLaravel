@@ -493,6 +493,7 @@
 <ul>
 <li>10.1 การตรวจสอบประวัติการทำรายการ (Audit Trail) และเครื่องมือเปรียบเทียบค่าเดิม-ใหม่ (Diff Viewer)</li>
 <li>10.2 การตั้งค่านโยบายความปลอดภัยการดาวน์โหลดเอกสาร (Document Access Policy)</li>
+<li>10.3 การตรวจสอบประวัติกิจกรรมและการแก้ไขรายรายการ (Record-Level Audit Trail)</li>
 </ul>
 </li>
 <li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-11-%E0%B8%A8%E0%B8%B9%E0%B8%99%E0%B8%A2%E0%B9%8C%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%84%E0%B8%B3%E0%B8%AA%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9A%E0%B8%B3%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B8%A3%E0%B8%B1%E0%B8%81%E0%B8%A9%E0%B8%B2-system-commands--maintenance-dashboard">บทที่ 11: ศูนย์จัดการคำสั่งระบบและการบำรุงรักษา (System Commands &amp; Maintenance Dashboard)</a>
@@ -1260,6 +1261,27 @@ php artisan rdb:generate-pdf-covers --module=all
 </li>
 <li>คลิกปุ่ม <strong>&quot;บันทึกการตั้งค่า&quot;</strong> นโยบายจะมีผลบังคับใช้ทั่วทั้งระบบทันที</li>
 </ol>
+<hr />
+<a id="103-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%95%E0%B8%B4%E0%B8%81%E0%B8%B4%E0%B8%88%E0%B8%81%E0%B8%A3%E0%B8%A3%E0%B8%A1%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%81%E0%B8%81%E0%B9%89%E0%B9%84%E0%B8%82%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%81%E0%B8%B2%E0%B8%A3-record-level-audit-trail" class="manual-anchor"></a><h3 id="103-การตรวจสอบประวัติกิจกรรมและการแก้ไขรายรายการ-record-level-audit-trail">10.3 การตรวจสอบประวัติกิจกรรมและการแก้ไขรายรายการ (Record-Level Audit Trail)</h3>
+<p>ระบบได้ติดตั้งการ์ดประวัติกิจกรรมและการแก้ไขงาน (<code>&lt;x-audit-trail&gt;</code>) ฝังไว้ที่ส่วนล่างของหน้ารายละเอียด (<code>show.blade.php</code>) ในทุกโมดูลหลักของระบบหลังบ้าน ได้แก่:</p>
+<ol>
+<li><strong>ผลงานวิชาการ</strong>: โครงการวิจัย (<code>/backend/rdb_project/{id}</code>), ผลงานตีพิมพ์ (<code>/backend/rdb_published/{id}</code>), ทรัพย์สินทางปัญญา (<code>/backend/rdb_dip/{id}</code>), การนำผลงานไปใช้ประโยชน์ (<code>/backend/rdb_projectutilize/{id}</code>)</li>
+<li><strong>บัญชีและข้อมูลบุคลากร</strong>: บัญชีผู้ใช้งาน (<code>/backend/user/{id}</code>), ข้อมูลประวัตินักวิจัย (<code>/backend/rdb_researcher/{id}</code>)</li>
+<li><strong>โมดูลย่อยวิชาการ</strong>: ข่าวสารประชาสัมพันธ์/ทุนวิจัย (<code>/backend/research_news/{id}</code>), งานประชุมวิชาการ (<code>/backend/research_conference/{id}</code>)</li>
+</ol>
+<a id="%E0%B8%AA%E0%B8%B4%E0%B8%97%E0%B8%98%E0%B8%B4%E0%B9%8C%E0%B9%83%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%80%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B8%96%E0%B8%B6%E0%B8%87%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%A1%E0%B8%B2%E0%B8%95%E0%B8%A3%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%9B%E0%B8%A5%E0%B8%AD%E0%B8%94%E0%B8%A0%E0%B8%B1%E0%B8%A2" class="manual-anchor"></a><h4 id="สิทธิ์ในการเข้าถึงและมาตรการความปลอดภัย">สิทธิ์ในการเข้าถึงและมาตรการความปลอดภัย</h4>
+<ul>
+<li><strong>ผู้ดูแลระบบส่วนกลาง (The Creator / Admin / Admin Research)</strong>: สามารถตรวจสอบประวัติกิจกรรมของทุกรายการ พร้อมดูข้อมูลเชิงเทคนิค เช่น IP Address, User Agent และ URL Endpoint เพื่อความปลอดภัย</li>
+<li><strong>นักวิจัยเจ้าของผลงาน (Owner / Co-researcher)</strong>: สามารถเข้าดูประวัติกิจกรรมและการแก้ไขเฉพาะผลงานของตนเอง และประวัติบัญชีผู้ใช้ของตนเองได้ โดยระบบจะซ่อนข้อมูลเชิงเทคนิค (IP / User Agent) เพื่อความปลอดภัยและความเป็นส่วนตัว</li>
+<li><strong>ผู้ใช้งานอื่นที่ไม่เกี่ยวข้อง</strong>: ถูกปฏิเสธการเข้าถึง (403 Forbidden) ไม่สามารถส่องดูประวัติผลงานหรือบัญชีของผู้อื่นได้</li>
+<li><strong>ระบบหน้าบ้าน (Public Portal)</strong>: ปิดกั้นการมองเห็นและไม่ส่งข้อมูล Audit Log ออกสู่หน้าบ้าน 100%</li>
+</ul>
+<a id="%E0%B8%9F%E0%B8%B1%E0%B8%87%E0%B8%81%E0%B9%8C%E0%B8%8A%E0%B8%B1%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99" class="manual-anchor"></a><h4 id="ฟังก์ชันการใช้งาน">ฟังก์ชันการใช้งาน</h4>
+<ul>
+<li><strong>ไทม์ไลน์กิจกรรม (Editorial Timeline)</strong>: แสดงลำดับเหตุการณ์จากล่าสุด วันที่และเวลา พ.ศ. พร้อมระยะเวลาสัมพัทธ์ (เช่น &quot;2 ชั่วโมงที่แล้ว&quot;)</li>
+<li><strong>ป้ายประเภทกิจกรรม</strong>: แยกสีชัดเจน เช่น สร้างรายการใหม่ (สีเขียว), อัปเดตข้อมูล (สีน้ำเงิน), ปรับเปลี่ยนสถานะ (สีเหลือง), ลบข้อมูล (สีแดง)</li>
+<li><strong>เครื่องมือตรวจสอบความเปลี่ยนแปลง (Field-by-Field Diff Viewer)</strong>: คลิกปุ่ม <strong>&quot;ดูรายละเอียดที่เปลี่ยน&quot;</strong> เพื่อเปิดตารางเปรียบเทียบค่าเดิม (Old Value) และค่าใหม่ (New Value) แบบเรียลไทม์</li>
+</ul>
 <hr />
 <a id="บทที่-11-ศูนย์จัดการคำสั่งระบบและการบำรุงรักษา-system-commands-maintenance-dashboard" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-11-%E0%B8%A8%E0%B8%B9%E0%B8%99%E0%B8%A2%E0%B9%8C%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%84%E0%B8%B3%E0%B8%AA%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9A%E0%B8%B3%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B8%A3%E0%B8%B1%E0%B8%81%E0%B8%A9%E0%B8%B2-system-commands--maintenance-dashboard" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-11-%E0%B8%A8%E0%B8%B9%E0%B8%99%E0%B8%A2%E0%B9%8C%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%84%E0%B8%B3%E0%B8%AA%E0%B8%B1%E0%B9%88%E0%B8%87%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9A%E0%B8%B3%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B8%A3%E0%B8%B1%E0%B8%81%E0%B8%A9%E0%B8%B2-system-commands-maintenance-dashboard" class="manual-anchor"></a><h2 id="บทที่-11-ศูนย์จัดการคำสั่งระบบและการบำรุงรักษา-system-commands--maintenance-dashboard">บทที่ 11: ศูนย์จัดการคำสั่งระบบและการบำรุงรักษา (System Commands &amp; Maintenance Dashboard)</h2>
 <div class="manual-callout callout-important"><div class="callout-header"><i class="bi bi-exclamation-diamond-fill"></i> ข้อสำคัญ (IMPORTANT)</div><div class="callout-body"><p><strong>การจำกัดสิทธิ์ระดับสูง (Super Admin Only)</strong>:

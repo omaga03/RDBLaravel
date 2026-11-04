@@ -110,5 +110,8 @@
             </div>
         </div>
     </div>
+
+    <!-- Activity & Audit Trail -->
+    <x-audit-trail :auditable="$user" title="ประวัติกิจกรรมและการแก้ไขบัญชีผู้ใช้ (Account Activity & Audit Trail)" />
 </div>
 @endsection

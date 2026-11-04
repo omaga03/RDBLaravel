@@ -409,6 +409,9 @@
         :showPrint="false"
     />
 
+    <!-- Activity & Audit Trail -->
+    <x-audit-trail :auditable="$item" title="ประวัติกิจกรรมและการแก้ไขข้อมูลนักวิจัย (Researcher Activity & Audit Trail)" />
+
 <!-- Edit Code ID Modal -->
 <div class="modal fade" id="editCodeIdModal" tabindex="-1" aria-labelledby="editCodeIdModalLabel" aria-hidden="true">
     <div class="modal-dialog">

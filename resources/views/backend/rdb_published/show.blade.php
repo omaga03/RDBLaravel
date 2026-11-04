@@ -476,6 +476,9 @@
         :canDelete="auth()->user()->can('delete', $item)"
         :showPrint="true"
     />
+
+    <!-- Activity & Audit Trail -->
+    <x-audit-trail :auditable="$item" title="ประวัติกิจกรรมและการแก้ไขผลงานตีพิมพ์ (Activity & Audit Trail)" />
 </div>
 
 <!-- Modals -->

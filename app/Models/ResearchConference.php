@@ -8,7 +8,7 @@ use App\Models\Traits\HasDualFilePath;
 
 class ResearchConference extends Model
 {
-    use HasDualFilePath;
+    use HasDualFilePath, \App\Traits\Auditable;
 
     protected $table = 'research_coferenceinthai';
     protected $primaryKey = 'id';

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class RdbTraining extends Model
 {
+    use \App\Traits\Auditable;
     protected $table = 'rdb_training';
     protected $primaryKey = 'tra_id';
     public $timestamps = true; // Assuming no standard created_at/updated_at, change if needed

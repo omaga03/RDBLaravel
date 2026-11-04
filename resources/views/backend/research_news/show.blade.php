@@ -109,5 +109,10 @@
                 :showPrint="true"
             />
         </div>
+
+        <!-- Activity & Audit Trail -->
+        <div class="col-md-12">
+            <x-audit-trail :auditable="$item" title="ประวัติกิจกรรมและการแก้ไขข่าวสารงานวิจัย (News Activity & Audit Trail)" />
+        </div>
     </div>
 @endsection

@@ -877,6 +877,11 @@
             />
         </div>
 
+        <!-- Activity & Audit Trail -->
+        <div class="col-12">
+            <x-audit-trail :auditable="$project" title="ประวัติกิจกรรมและการแก้ไขโครงการวิจัย (Activity & Audit Trail)" />
+        </div>
+
         <!-- Project Status Modal -->
         <div class="modal fade" id="projectStatusModal" tabindex="-1" aria-labelledby="projectStatusModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">

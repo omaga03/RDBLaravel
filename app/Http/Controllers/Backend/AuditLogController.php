@@ -12,8 +12,8 @@ class AuditLogController extends Controller
     public function index(Request $request)
     {
         $currentUser = auth()->user();
-        if (!$currentUser->hasRole('The Creator') && $currentUser->id !== 129 && !$currentUser->hasRole('Admin Research')) {
-            abort(403, 'เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถดูประวัติการใช้งานระบบได้');
+        if (!$currentUser->hasRole(['The Creator', 'Admin', 'Admin Research']) && (int)$currentUser->id !== 129) {
+            abort(403, 'เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถดูประวัติการทำงานของระบบ');
         }
 
         $query = AuditLog::query();
@@ -45,7 +45,7 @@ class AuditLogController extends Controller
 
         if ($hasDateStart || $hasDateEnd) {
             if (!$hasDateStart || !$hasDateEnd) {
-                return redirect()->back()->withInput()->with('error', 'กรุณาระบุทั้งวันที่เริ่มและวันที่สิ้นสุด');
+                return redirect()->back()->withInput()->with('error', 'กรุณาระบุทั้งวันที่เริ่มต้นและสิ้นสุด');
             }
             if ($request->date_end < $request->date_start) {
                 return redirect()->back()->withInput()->with('error', 'วันที่สิ้นสุดต้องไม่น้อยกว่าวันที่เริ่มต้น');
@@ -67,8 +67,8 @@ class AuditLogController extends Controller
     public function show($id)
     {
         $currentUser = auth()->user();
-        if (!$currentUser->hasRole('The Creator') && $currentUser->id !== 129 && !$currentUser->hasRole('Admin Research')) {
-            abort(403, 'เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถดูประวัติการใช้งานระบบได้');
+        if (!$currentUser->hasRole(['The Creator', 'Admin', 'Admin Research']) && (int)$currentUser->id !== 129) {
+            abort(403, 'เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถดูประวัติการทำงานของระบบ');
         }
 
         $log = AuditLog::findOrFail($id);
