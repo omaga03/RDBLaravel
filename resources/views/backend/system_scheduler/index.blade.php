@@ -33,9 +33,6 @@
             <button type="button" class="btn btn-outline-info btn-sm d-inline-flex align-items-center gap-1.5 shadow-sm" data-bs-toggle="modal" data-bs-target="#cronSetupGuideModal">
                 <i class="bi bi-terminal-split"></i> คู่มือตั้งค่า Crontab
             </button>
-            <a href="{{ route('backend.user.edit', auth()->id()) }}#notification-settings" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1.5 shadow-sm">
-                <i class="bi bi-bell-fill"></i> ตั้งค่าแจ้งเตือน Telegram / Mail
-            </a>
             <a href="{{ route('backend.system_scheduler.index') }}" class="btn btn-secondary btn-sm d-inline-flex align-items-center gap-1.5 shadow-sm">
                 <i class="bi bi-arrow-clockwise"></i> รีเฟรชสถานะ
             </a>

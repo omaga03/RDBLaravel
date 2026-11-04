@@ -101,6 +101,12 @@ class SystemCommandController extends Controller
             }
         } catch (\Throwable $e) {}
 
+        // 4. Resolve Active Scheduler Events Dynamically
+        $activeScheduleEvents = [];
+        try {
+            $activeScheduleEvents = app()->make(\Illuminate\Console\Scheduling\Schedule::class)->events();
+        } catch (\Throwable $e) {}
+
         $healthInfo = [
             'db_status' => $dbStatus,
             'db_version' => $dbVersion,
@@ -112,7 +118,10 @@ class SystemCommandController extends Controller
             'app_debug' => (bool)config('app.debug', false),
             'php_version' => PHP_VERSION,
             'memory_limit' => ini_get('memory_limit'),
-            'schedule_count' => 6,
+            'schedule_count' => count($activeScheduleEvents),
+            'db_backup_time' => \App\Models\SystemSetting::get('scheduler_backup_db_schedule_text', '02:00 น. ทุกวัน'),
+            'full_backup_time' => \App\Models\SystemSetting::get('scheduler_backup_all_schedule_text', 'อาทิตย์ 03:00 น.'),
+            'nriis_time' => \App\Models\SystemSetting::get('scheduler_sync_nriis_news_schedule_text', '06:00 น.'),
         ];
 
         // 5. System Backup & Restore Information (Strictly The Creator Only)

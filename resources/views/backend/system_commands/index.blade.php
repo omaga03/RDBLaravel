@@ -220,16 +220,16 @@
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <span class="small fw-semibold text-body-secondary"><i class="bi bi-clock-history me-1 text-success"></i>ระบบตั้งเวลา (Scheduler)</span>
-                        <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle">
+                        <a href="{{ route('backend.system_scheduler.index') }}" class="badge {{ $healthInfo['schedule_count'] > 0 ? 'bg-success-subtle text-success-emphasis border border-success-subtle' : 'bg-secondary-subtle text-body-secondary border' }} text-decoration-none" title="คลิกเพื่อตรวจสอบและจัดการระบบตั้งเวลา">
                             <i class="bi bi-check-all me-1"></i>{{ $healthInfo['schedule_count'] }} งานพร้อมรัน
-                        </span>
+                        </a>
                     </div>
                     <div class="small fw-bold text-body mb-1">
-                        สำรองข้อมูลอัตโนมัติ: <span class="text-success">02:00 น. ทุกวัน</span>
+                        สำรองฐานข้อมูล: <span class="text-success">{{ $healthInfo['db_backup_time'] }}</span>
                     </div>
                     <div class="text-body-tertiary small d-flex justify-content-between align-items-center" style="font-size: 0.78rem;">
-                        <span>สำรองเต็มระบบ: <span class="text-body">อาทิตย์ 03:00 น.</span></span>
-                        <span>NRIIS: <span class="text-body">06:00 น.</span></span>
+                        <span>สำรองเต็มระบบ: <span class="text-body">{{ $healthInfo['full_backup_time'] }}</span></span>
+                        <span>NRIIS: <span class="text-body">{{ $healthInfo['nriis_time'] }}</span></span>
                     </div>
                 </div>
             </div>

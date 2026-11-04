@@ -29,9 +29,12 @@ class SystemCommandBackendTest extends TestCase
         $response = $this->actingAs($admin)->get(route('backend.system_commands.index'));
         $response->assertStatus(200);
         $response->assertSee('ศูนย์จัดการคำสั่งระบบและการบำรุงรักษา');
-        $response->assertSee('คำสั่งสร้างภาพหน้าปก');
-        $response->assertSee('คำสั่งตรวจนับจำนวนหน้า');
+        $response->assertSee('สร้างภาพหน้าปก');
+        $response->assertSee('สั่งตรวจนับจำนวนหน้า');
         $response->assertSee('ล้างแคชระบบทันที');
+        $response->assertSee('ระบบตั้งเวลา (Scheduler)');
+        $response->assertSee('งานพร้อมรัน');
+        $response->assertSee(route('backend.system_scheduler.index'));
     }
 
     public function test_regular_researcher_cannot_access_system_commands()
