@@ -38,6 +38,7 @@ class FileUploadService
         'application/vnd.rar' => 'rar',
         'image/jpeg' => 'jpg',
         'image/png' => 'png',
+        'image/webp' => 'webp',
     ];
 
     private const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
@@ -74,6 +75,7 @@ class FileUploadService
             'jpg' => 'jpg',
             'jpeg' => 'jpg',
             'png' => 'png',
+            'webp' => 'webp',
         ];
 
         // ตรวจสอบ MIME type
@@ -198,6 +200,108 @@ class FileUploadService
             'size' => $file->getSize(),
             'mime_type' => $mimeType,
             'page_count' => $pageCount,
+        ];
+    }
+
+    /**
+     * บันทึกไฟล์รูปภาพและแปลงเป็นฟอร์แมต WebP อัตโนมัติ (พร้อมปรับขนาดสูงสุดและรักษาความโปร่งใส)
+     *
+     * @param UploadedFile $file
+     * @param string $directory โฟลเดอร์ปลายทาง เช่น 'news', 'conference'
+     * @param int $maxDimension ขนาดด้านกว้าง/สูงสูงสุด (พิกเซล, ค่าเริ่มต้น 2048)
+     * @param int $quality คุณภาพการบีบอัด WebP (0-100, ค่าเริ่มต้น 85)
+     * @return array ['path' => '...', 'safe_name' => '...', 'original_name' => '...', 'size' => ..., 'mime_type' => 'image/webp', 'page_count' => 0]
+     * @throws \Exception
+     */
+    public function storeImageAsWebp(UploadedFile $file, string $directory, int $maxDimension = 2048, int $quality = 85): array
+    {
+        if (empty($directory)) {
+            throw new \Exception('Directory path must not be empty');
+        }
+
+        if (!$file || !$file->isValid()) {
+            throw new \Exception('Invalid file upload');
+        }
+
+        $allowedImageTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        $mimeType = $file->getMimeType();
+        if (!in_array($mimeType, $allowedImageTypes, true)) {
+            throw new \Exception('ไฟล์ที่อัปโหลดไม่ใช่รูปภาพที่รองรับ (รองรับ JPEG, PNG, WEBP, GIF)');
+        }
+
+        $directory = trim($directory, '/');
+        if (!Storage::disk('public')->exists($directory)) {
+            Storage::disk('public')->makeDirectory($directory, 0755, true);
+        }
+
+        $safeFileName = Str::uuid() . '.webp';
+        $fullPath = $directory . '/' . $safeFileName;
+
+        $rawContent = $file->get();
+        if ($rawContent === false || empty($rawContent)) {
+            throw new \Exception('ไม่สามารถอ่านข้อมูลไฟล์ภาพได้');
+        }
+
+        $webpContent = null;
+        if (extension_loaded('gd') && function_exists('imagecreatefromstring') && function_exists('imagewebp')) {
+            $im = @imagecreatefromstring($rawContent);
+            if ($im) {
+                imagepalettetotruecolor($im);
+                imagealphablending($im, true);
+                imagesavealpha($im, true);
+
+                $width = imagesx($im);
+                $height = imagesy($im);
+
+                if ($width > $maxDimension || $height > $maxDimension) {
+                    $ratio = $maxDimension / max($width, $height);
+                    $newW = (int) round($width * $ratio);
+                    $newH = (int) round($height * $ratio);
+
+                    $target = imagecreatetruecolor($newW, $newH);
+                    imagealphablending($target, false);
+                    imagesavealpha($target, true);
+
+                    $transparent = imagecolorallocatealpha($target, 255, 255, 255, 127);
+                    imagefilledrectangle($target, 0, 0, $newW, $newH, $transparent);
+
+                    imagecopyresampled($target, $im, 0, 0, 0, 0, $newW, $newH, $width, $height);
+                    imagedestroy($im);
+                    $im = $target;
+                }
+
+                ob_start();
+                imagewebp($im, null, $quality);
+                $webpContent = ob_get_clean();
+                imagedestroy($im);
+            }
+        }
+
+        if (empty($webpContent)) {
+            $safeFileName = $this->generateSafeFileName($file);
+            $fullPath = $directory . '/' . $safeFileName;
+            Storage::disk('public')->put($fullPath, $rawContent);
+            return [
+                'path' => $fullPath,
+                'safe_name' => $safeFileName,
+                'original_name' => $file->getClientOriginalName(),
+                'size' => strlen($rawContent),
+                'mime_type' => $mimeType,
+                'page_count' => 0,
+            ];
+        }
+
+        Storage::disk('public')->put($fullPath, $webpContent);
+        $origBase = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $originalWebpName = $origBase ? ($origBase . '.webp') : 'image.webp';
+
+        return [
+            'path' => $fullPath,
+            'safe_name' => $safeFileName,
+            'original_name' => $originalWebpName,
+            'size' => strlen($webpContent),
+            'mime_type' => 'image/webp',
+            'page_count' => 0,
         ];
     }
 

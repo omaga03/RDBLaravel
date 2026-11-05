@@ -228,7 +228,7 @@ class FacebookConferenceSyncService
                     'con_venue' => $venue,
                     'con_link' => $photoPageUrl,
                     'image_url' => $imgUri,
-                    'simulated_storage_file' => "uploads/datacoferenceinthai/{$fbid}.jpg",
+                    'simulated_storage_file' => "uploads/datacoferenceinthai/conth_{$fbid}.webp",
                 ];
 
                 $simulatedTelegram = "📢 [จำลองการแจ้งเตือน] งานประชุมวิชาการใหม่\n"
@@ -605,6 +605,41 @@ class FacebookConferenceSyncService
                 return null;
             }
 
+            $newFileName = "conth_{$fbid}.webp";
+            $targetDir = storage_path('app/public/uploads/datacoferenceinthai');
+            if (!is_dir($targetDir)) {
+                @mkdir($targetDir, 0755, true);
+            }
+            $targetPath = $targetDir . DIRECTORY_SEPARATOR . $newFileName;
+
+            if (extension_loaded('gd') && function_exists('imagecreatefromstring') && function_exists('imagewebp')) {
+                $im = @imagecreatefromstring($content);
+                if ($im) {
+                    imagepalettetotruecolor($im);
+                    imagealphablending($im, true);
+                    imagesavealpha($im, true);
+
+                    $width = imagesx($im);
+                    $height = imagesy($im);
+                    if ($width > 2048 || $height > 2048) {
+                        $percent = 2000 / max($width, $height);
+                        $newW = (int) round($width * $percent);
+                        $newH = (int) round($height * $percent);
+                        $thumb = imagecreatetruecolor($newW, $newH);
+                        imagealphablending($thumb, false);
+                        imagesavealpha($thumb, true);
+                        imagecopyresampled($thumb, $im, 0, 0, 0, 0, $newW, $newH, $width, $height);
+                        imagewebp($thumb, $targetPath, 85);
+                        imagedestroy($thumb);
+                    } else {
+                        imagewebp($im, $targetPath, 85);
+                    }
+                    imagedestroy($im);
+                    return $newFileName;
+                }
+            }
+
+            // Fallback direct write if GD/WebP is unavailable
             $nameExp = explode('?', $imgUri);
             $nameExpArr = explode('.', $nameExp[0]);
             $ext = strtolower(end($nameExpArr)) ?: 'jpg';
@@ -612,14 +647,9 @@ class FacebookConferenceSyncService
                 $ext = 'jpg';
             }
 
-            $newFileName = "conth_{$fbid}.{$ext}";
-            $targetDir = storage_path('app/public/uploads/datacoferenceinthai');
-            if (!is_dir($targetDir)) {
-                @mkdir($targetDir, 0755, true);
-            }
-
-            file_put_contents($targetDir . DIRECTORY_SEPARATOR . $newFileName, $content);
-            return $newFileName;
+            $fallbackFileName = "conth_{$fbid}.{$ext}";
+            file_put_contents($targetDir . DIRECTORY_SEPARATOR . $fallbackFileName, $content);
+            return $fallbackFileName;
         } catch (\Throwable $e) {
             return null;
         }

@@ -128,14 +128,13 @@ class ResearchConferenceController extends Controller
         }
         
         if ($request->hasFile('con_img')) {
-            $fileInfo = $this->fileUploadService->storeFile($request->file('con_img'), 'conference');
+            $fileInfo = $this->fileUploadService->storeImageAsWebp($request->file('con_img'), 'conference');
             $data['con_safe_name'] = $fileInfo['safe_name'];
             $data['con_path'] = $fileInfo['path'];
             $data['con_size'] = $fileInfo['size'];
             $data['con_mime_type'] = $fileInfo['mime_type'];
-            $origName = $request->file('con_img')->getClientOriginalName();
-            $ext = pathinfo($origName, PATHINFO_EXTENSION);
-            $data['con_img'] = mb_strlen($origName) > 30 ? (mb_substr(pathinfo($origName, PATHINFO_FILENAME), 0, 25) . ($ext ? '.' . $ext : '')) : $origName;
+            $origName = $fileInfo['original_name'];
+            $data['con_img'] = mb_strlen($origName) > 30 ? (mb_substr(pathinfo($origName, PATHINFO_FILENAME), 0, 25) . '.webp') : $origName;
         }
 
         $item->fill($data);
@@ -178,15 +177,14 @@ class ResearchConferenceController extends Controller
                 Storage::disk('public')->delete($item->con_path);
             }
             
-            $fileInfo = $this->fileUploadService->storeFile($request->file('con_img'), 'conference');
+            $fileInfo = $this->fileUploadService->storeImageAsWebp($request->file('con_img'), 'conference');
             
             $data['con_safe_name'] = $fileInfo['safe_name'];
             $data['con_path'] = $fileInfo['path'];
             $data['con_size'] = $fileInfo['size'];
             $data['con_mime_type'] = $fileInfo['mime_type'];
-            $origName = $request->file('con_img')->getClientOriginalName();
-            $ext = pathinfo($origName, PATHINFO_EXTENSION);
-            $data['con_img'] = mb_strlen($origName) > 30 ? (mb_substr(pathinfo($origName, PATHINFO_FILENAME), 0, 25) . ($ext ? '.' . $ext : '')) : $origName;
+            $origName = $fileInfo['original_name'];
+            $data['con_img'] = mb_strlen($origName) > 30 ? (mb_substr(pathinfo($origName, PATHINFO_FILENAME), 0, 25) . '.webp') : $origName;
         }
 
         $item->fill($data);

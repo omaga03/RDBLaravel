@@ -51,7 +51,7 @@ class ResearchNewsController extends Controller
         $item = new ResearchNews();
         
         if ($request->hasFile('news_img')) {
-            $fileInfo = $this->fileUploadService->storeFile($validated['news_img'], 'news');
+            $fileInfo = $this->fileUploadService->storeImageAsWebp($validated['news_img'], 'news');
             $item->news_safe_name = $fileInfo['safe_name'];
             $item->news_path = $fileInfo['path'];
             $item->news_size = $fileInfo['size'];
@@ -96,7 +96,7 @@ class ResearchNewsController extends Controller
                 Storage::disk('public')->delete($item->news_path);
             }
             
-            $fileInfo = $this->fileUploadService->storeFile($validated['news_img'], 'news');
+            $fileInfo = $this->fileUploadService->storeImageAsWebp($validated['news_img'], 'news');
             
             $item->news_safe_name = $fileInfo['safe_name'];
             $item->news_path = $fileInfo['path'];

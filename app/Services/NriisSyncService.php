@@ -119,7 +119,7 @@ class NriisSyncService
                 }
 
                 $imgNewsUrl = $news['imgNews'] ?? null;
-                $simulatedFileName = "{$nid}." . (pathinfo(parse_url((string)$imgNewsUrl, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION) ?: 'jpg');
+                $simulatedFileName = "{$nid}.webp";
 
                 $simulatedWebhook = [
                     'event' => 'research_news_created',
@@ -389,40 +389,47 @@ class NriisSyncService
                 return null;
             }
 
-            $parsedExt = pathinfo(parse_url($urlImg, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION);
-            $ext = in_array(strtolower($parsedExt), ['jpg', 'jpeg', 'png', 'webp', 'gif']) ? strtolower($parsedExt) : 'jpg';
-
-            $newFileName = "{$nid}.{$ext}";
+            $newFileName = "{$nid}.webp";
             $targetDir = storage_path('app/public/uploads/datanewsimg');
             if (!is_dir($targetDir)) {
                 @mkdir($targetDir, 0755, true);
             }
             $targetPath = $targetDir . DIRECTORY_SEPARATOR . $newFileName;
 
-            if (extension_loaded('gd') && function_exists('imagecreatefromstring')) {
+            if (extension_loaded('gd') && function_exists('imagecreatefromstring') && function_exists('imagewebp')) {
                 $im = @imagecreatefromstring($content);
                 if ($im) {
+                    imagepalettetotruecolor($im);
+                    imagealphablending($im, true);
+                    imagesavealpha($im, true);
+
                     $width = imagesx($im);
                     $height = imagesy($im);
                     if ($width > 2048 || $height > 2048) {
                         $percent = 2000 / max($width, $height);
-                        $newW = (int) ($width * $percent);
-                        $newH = (int) ($height * $percent);
+                        $newW = (int) round($width * $percent);
+                        $newH = (int) round($height * $percent);
                         $thumb = imagecreatetruecolor($newW, $newH);
+                        imagealphablending($thumb, false);
+                        imagesavealpha($thumb, true);
                         imagecopyresampled($thumb, $im, 0, 0, 0, 0, $newW, $newH, $width, $height);
-                        imagejpeg($thumb, $targetPath, 85);
+                        imagewebp($thumb, $targetPath, 85);
                         imagedestroy($thumb);
                     } else {
-                        file_put_contents($targetPath, $content);
+                        imagewebp($im, $targetPath, 85);
                     }
                     imagedestroy($im);
                     return $newFileName;
                 }
             }
 
-            // Fallback direct write
-            file_put_contents($targetPath, $content);
-            return $newFileName;
+            // Fallback direct write if GD/WebP is unavailable
+            $fallbackExt = pathinfo(parse_url($urlImg, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION);
+            $ext = in_array(strtolower($fallbackExt), ['jpg', 'jpeg', 'png', 'webp', 'gif']) ? strtolower($fallbackExt) : 'jpg';
+            $fallbackName = "{$nid}.{$ext}";
+            $targetPathFallback = $targetDir . DIRECTORY_SEPARATOR . $fallbackName;
+            file_put_contents($targetPathFallback, $content);
+            return $fallbackName;
         } catch (\Throwable $e) {
             return null;
         }

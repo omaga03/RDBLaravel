@@ -468,4 +468,48 @@ class IntegrationsAndAutomationTest extends TestCase
         $forceResp->assertRedirect();
         $this->assertNull(\App\Models\ResearchConference::find($testConf->id));
     }
+
+    public function test_news_and_conference_webp_conversion_workflow()
+    {
+        // 1. Test FileUploadService::storeImageAsWebp
+        $fileUploadService = app(\App\Services\FileUploadService::class);
+        $fakeFile = \Illuminate\Http\UploadedFile::fake()->image('sample_announcement.png', 800, 600);
+
+        $result = $fileUploadService->storeImageAsWebp($fakeFile, 'news');
+
+        $this->assertStringEndsWith('.webp', $result['safe_name']);
+        $this->assertStringEndsWith('.webp', $result['original_name']);
+        $this->assertEquals('image/webp', $result['mime_type']);
+        $this->assertTrue(\Illuminate\Support\Facades\Storage::disk('public')->exists($result['path']));
+
+        // Clean up test file
+        \Illuminate\Support\Facades\Storage::disk('public')->delete($result['path']);
+
+        // 2. Test Artisan Command rdb:convert-news-webp
+        $exitCode = \Illuminate\Support\Facades\Artisan::call('rdb:convert-news-webp', [
+            '--module' => 'all',
+            '--limit' => 2,
+        ]);
+        $this->assertEquals(0, $exitCode);
+
+        // 3. Verify NriisSyncService simulated filename is .webp
+        $nriisService = app(\App\Services\NriisSyncService::class);
+        $newsReport = $nriisService->testSync(1);
+        if (!empty($newsReport['items'])) {
+            $first = $newsReport['items'][0];
+            if (isset($first['simulated_webhook']['simulated_storage_file'])) {
+                $this->assertStringEndsWith('.webp', $first['simulated_webhook']['simulated_storage_file']);
+            }
+        }
+
+        // 4. Verify FacebookConferenceSyncService simulated storage file is .webp
+        $fbService = app(\App\Services\FacebookConferenceSyncService::class);
+        $confReport = $fbService->testSync(1);
+        if (!empty($confReport['items'])) {
+            $first = $confReport['items'][0];
+            if (isset($first['simulated_webhook']['simulated_storage_file'])) {
+                $this->assertStringEndsWith('.webp', $first['simulated_webhook']['simulated_storage_file']);
+            }
+        }
+    }
 }
