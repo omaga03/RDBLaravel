@@ -227,6 +227,8 @@ class PdfCoverService
 
         $metadata = $this->buildProjectMetadata($project);
 
+        $oldCoverPath = $project->pro_cover_path;
+
         if ($pdfPath && file_exists($pdfPath)) {
             $success = $this->extractFirstPageToWebp($pdfPath, $absoluteTargetPath, $metadata);
         } else {
@@ -234,6 +236,9 @@ class PdfCoverService
         }
 
         if ($success && file_exists($absoluteTargetPath) && filesize($absoluteTargetPath) > 0) {
+            if ($oldCoverPath && $oldCoverPath !== $relativeStoragePath && Storage::disk('public')->exists($oldCoverPath)) {
+                Storage::disk('public')->delete($oldCoverPath);
+            }
             $project->pro_cover_path = $relativeStoragePath;
             $project->saveQuietly();
             return $relativeStoragePath;
@@ -270,6 +275,8 @@ class PdfCoverService
 
         $metadata = $this->buildPublishedMetadata($published);
 
+        $oldCoverPath = $published->pub_cover_path;
+
         if ($pdfPath && file_exists($pdfPath)) {
             $success = $this->extractFirstPageToWebp($pdfPath, $absoluteTargetPath, $metadata);
         } else {
@@ -277,6 +284,9 @@ class PdfCoverService
         }
 
         if ($success && file_exists($absoluteTargetPath) && filesize($absoluteTargetPath) > 0) {
+            if ($oldCoverPath && $oldCoverPath !== $relativeStoragePath && Storage::disk('public')->exists($oldCoverPath)) {
+                Storage::disk('public')->delete($oldCoverPath);
+            }
             $published->pub_cover_path = $relativeStoragePath;
             $published->saveQuietly();
             return $relativeStoragePath;
@@ -431,6 +441,14 @@ class PdfCoverService
     }
 
     /**
+     * ดึงพาธไฟล์ Python Helper Script สำหรับการเรนเดอร์ PDF หน้าแรก
+     */
+    public function getRasterizeScriptPath(): string
+    {
+        return app_path('Services/scripts/rasterize_pdf.py');
+    }
+
+    /**
      * เรนเดอร์ภาพหน้าแรกของ PDF ทั้งหน้าแบบ Batch (ความเร็วสูงสำหรับ CLI หลายพันไฟล์)
      *
      * @param array<int, array{key: int|string, pdf: string, webp: string, meta: array}> $batchItems
@@ -444,8 +462,9 @@ class PdfCoverService
 
         $results = [];
         $python = $this->getPythonPyMuPdfBinary();
+        $scriptPath = $this->getRasterizeScriptPath();
 
-        if ($python) {
+        if ($python && file_exists($scriptPath)) {
             $payload = [];
             foreach ($batchItems as $item) {
                 $targetDir = dirname($item['webp']);
@@ -461,70 +480,18 @@ class PdfCoverService
 
             $tmpJson = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'rdb_pdf_batch_in_' . uniqid() . '.json';
             $tmpOutJson = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'rdb_pdf_batch_out_' . uniqid() . '.json';
-            $tmpPy = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'rdb_pdf_batch_' . uniqid() . '.py';
 
             @file_put_contents($tmpJson, json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 
-            $pyScript = <<<'PYTHON'
-import sys, json, os
-import pymupdf
-from PIL import Image
-
-pymupdf.TOOLS.mupdf_display_errors(False)
-pymupdf.TOOLS.mupdf_display_warnings(False)
-
-def main():
-    json_path = sys.argv[1]
-    out_path = sys.argv[2]
-    with open(json_path, 'r', encoding='utf-8') as f:
-        items = json.load(f)
-    out = {}
-    for item in items:
-        key = item['key']
-        pdf_path = item['pdf']
-        webp_path = item['webp']
-        try:
-            if os.path.isfile(webp_path):
-                os.remove(webp_path)
-            doc = pymupdf.open(pdf_path)
-            if len(doc) < 1:
-                doc.close()
-                out[key] = False
-                continue
-            page = doc[0]
-            rect = page.rect
-            w = rect.width if rect.width > 0 else 595.0
-            zoom = max(1.2, min(3.0, 800.0 / w))
-            pix = page.get_pixmap(matrix=pymupdf.Matrix(zoom, zoom), alpha=False)
-            img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-            if img.width > 800:
-                new_h = max(1, int(img.height * (800.0 / img.width)))
-                img = img.resize((800, new_h), Image.Resampling.LANCZOS)
-            img.save(webp_path, "WEBP", quality=85, method=4)
-            img.close()
-            pix = None
-            doc.close()
-            out[key] = os.path.isfile(webp_path) and os.path.getsize(webp_path) > 0
-        except Exception:
-            out[key] = False
-    with open(out_path, 'w', encoding='utf-8') as f:
-        json.dump(out, f)
-
-if __name__ == '__main__':
-    main()
-PYTHON;
-
-            @file_put_contents($tmpPy, $pyScript);
             $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
             $nullDev = $isWindows ? 'nul' : '/dev/null';
-            $cmd = escapeshellarg($python) . ' ' . escapeshellarg($tmpPy) . ' ' . escapeshellarg($tmpJson) . ' ' . escapeshellarg($tmpOutJson) . ' >' . $nullDev . ' 2>&1';
+            $cmd = escapeshellarg($python) . ' ' . escapeshellarg($scriptPath) . ' batch ' . escapeshellarg($tmpJson) . ' ' . escapeshellarg($tmpOutJson) . ' >' . $nullDev . ' 2>&1';
             @shell_exec($cmd);
 
             $rawOut = is_file($tmpOutJson) ? @file_get_contents($tmpOutJson) : null;
 
             @unlink($tmpJson);
             @unlink($tmpOutJson);
-            @unlink($tmpPy);
 
             $decoded = is_string($rawOut) ? @json_decode(trim($rawOut), true) : null;
             if (is_array($decoded)) {
@@ -626,27 +593,14 @@ PYTHON;
             return false;
         }
 
-        $payloadB64 = base64_encode(json_encode([
-            'pdf' => $pdfPath,
-            'webp' => $targetWebpPath,
-        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-
-        $pyInline = 'import sys, json, base64, pymupdf; from PIL import Image; '
-            . 'pymupdf.TOOLS.mupdf_display_errors(False); pymupdf.TOOLS.mupdf_display_warnings(False); '
-            . 'd = json.loads(base64.b64decode(sys.argv[1]).decode("utf-8")); '
-            . 'doc = pymupdf.open(d["pdf"]); '
-            . 'page = doc[0]; '
-            . 'w = page.rect.width if page.rect.width > 0 else 595.0; '
-            . 'z = max(1.2, min(3.0, 800.0 / w)); '
-            . 'pix = page.get_pixmap(matrix=pymupdf.Matrix(z, z), alpha=False); '
-            . 'img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples); '
-            . 'img = img.resize((800, max(1, int(img.height * (800.0 / img.width)))), Image.Resampling.LANCZOS) if img.width > 800 else img; '
-            . 'img.save(d["webp"], "WEBP", quality=85, method=4); '
-            . 'doc.close(); print("OK")';
+        $scriptPath = $this->getRasterizeScriptPath();
+        if (!file_exists($scriptPath)) {
+            return false;
+        }
 
         $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
         $nullDev = $isWindows ? 'nul' : '/dev/null';
-        $cmd = escapeshellarg($python) . ' -c ' . escapeshellarg($pyInline) . ' ' . escapeshellarg($payloadB64) . ' 2>' . $nullDev;
+        $cmd = escapeshellarg($python) . ' ' . escapeshellarg($scriptPath) . ' single ' . escapeshellarg($pdfPath) . ' ' . escapeshellarg($targetWebpPath) . ' 2>' . $nullDev;
         $out = trim((string) @shell_exec($cmd));
 
         return $out === 'OK' && file_exists($targetWebpPath) && filesize($targetWebpPath) > 0;
