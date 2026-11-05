@@ -87,4 +87,43 @@ class SystemCommandBackendTest extends TestCase
         $response->assertSessionHas('command_name');
         $response->assertSessionHas('command_output');
     }
+
+    public function test_system_commands_dashboard_displays_image_webp_coverage_and_shortcuts()
+    {
+        $admin = User::whereHas('roles', fn($q) => $q->whereIn('item_name', ['The Creator', 'Admin']))->first();
+        if (!$admin) {
+            $this->markTestSkipped('No admin user found');
+        }
+
+        $response = $this->actingAs($admin)->get(route('backend.system_commands.index'));
+        $response->assertStatus(200);
+        $response->assertSee('ภาพระบบ WebP');
+        $response->assertSee('โปรไฟล์นักวิจัย');
+        $response->assertSee('ข่าวทุนวิจัย NRIIS');
+        $response->assertSee('งานประชุมวิชาการ');
+        $response->assertSee('คำสั่งแปลงรูปภาพทั้งระบบเป็น WebP');
+        $response->assertSee(route('backend.api_management.index'));
+        $response->assertSee(route('backend.research_news.test_sync'));
+        $response->assertSee(route('backend.research_conference.test_sync'));
+    }
+
+    public function test_superadmin_can_run_convert_images_webp_command()
+    {
+        $admin = User::whereHas('roles', fn($q) => $q->whereIn('item_name', ['The Creator', 'Admin']))->first();
+        if (!$admin) {
+            $this->markTestSkipped('No admin user found');
+        }
+
+        $response = $this->actingAs($admin)->post(route('backend.system_commands.run'), [
+            'command' => 'convert_images_webp',
+            'module' => 'researcher',
+            'limit' => '1',
+            'max_dimension' => 1024,
+        ]);
+
+        $response->assertRedirect(route('backend.system_commands.index'));
+        $response->assertSessionHas('success');
+        $response->assertSessionHas('command_name', 'rdb:convert-images-webp');
+        $response->assertSessionHas('command_output');
+    }
 }

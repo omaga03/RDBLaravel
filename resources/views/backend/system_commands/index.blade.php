@@ -15,7 +15,7 @@
             <h2 class="mb-1 fw-bold text-body">
                 <i class="bi bi-terminal-fill me-2 text-warning"></i>ศูนย์จัดการคำสั่งระบบและการบำรุงรักษา (System Commands &amp; Maintenance)
             </h2>
-            <p class="text-body-secondary mb-0">เครื่องมือควบคุมการประมวลผลไฟล์ PDF, การเรนเดอร์ภาพหน้าแรก (.webp), การนับหน้าเอกสาร และการล้างแคชเพิ่มประสิทธิภาพ</p>
+            <p class="text-body-secondary mb-0">เครื่องมือควบคุมการประมวลผลไฟล์ PDF, การแปลงรูปภาพระบบเป็น WebP (จำกัด 1024px), การเรนเดอร์ภาพหน้าแรก, การนับหน้าเอกสาร และการล้างแคชเพิ่มประสิทธิภาพ</p>
         </div>
         <div class="d-flex align-items-center gap-2">
             <button type="button" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1.5 shadow-sm" data-bs-toggle="modal" data-bs-target="#engineSetupModal">
@@ -262,16 +262,43 @@
             </div>
         </div>
     </div>
+    <!-- 1.3 Quick Action Shortcuts (Connected Tools Strip) -->
+    <div class="card border shadow-sm bg-body mb-4">
+        <div class="card-body p-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle py-1.5 px-2">
+                    <i class="bi bi-link-45deg me-1"></i>เครื่องมือเชื่อมโยง (Quick Shortcuts)
+                </span>
+                <span class="small text-body-secondary d-none d-md-inline">ทางลัดสำหรับตรวจสอบ API, เครื่องมือจำลองการซิงค์ข้อมูล (Dry-Run), และระบบตั้งเวลา</span>
+            </div>
+            <div class="d-flex align-items-center flex-wrap gap-1.5">
+                <a href="{{ route('backend.api_management.index') }}" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1.5">
+                    <i class="bi bi-cpu text-primary"></i> จัดการ API &amp; Endpoints
+                </a>
+                <a href="{{ route('backend.research_news.test_sync') }}" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1.5" target="_blank">
+                    <i class="bi bi-newspaper text-info"></i> ทดสอบดึงข่าว NRIIS
+                </a>
+                <a href="{{ route('backend.research_conference.test_sync') }}" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1.5" target="_blank">
+                    <i class="bi bi-calendar-event text-warning"></i> ทดสอบดึงงานประชุม Facebook
+                </a>
+                <a href="{{ route('backend.system_scheduler.index') }}" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1.5">
+                    <i class="bi bi-clock-history text-success"></i> ระบบตั้งเวลาอัตโนมัติ
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. System Coverage Overview (3 Columns: Projects, Publications, Universal WebP Images) -->
     <div class="row g-4 mb-4">
         <!-- Project Coverage Card -->
-        <div class="col-md-6">
+        <div class="col-lg-4 col-md-6">
             <div class="card border shadow-sm h-100">
                 <div class="card-header bg-body-tertiary d-flex align-items-center justify-content-between py-2.5 px-3">
-                    <h6 class="mb-0 fw-bold text-body">
-                        <i class="bi bi-folder2-open text-primary me-2"></i>ความครอบคลุมโครงการวิจัย (Research Projects)
+                    <h6 class="mb-0 fw-bold text-body small">
+                        <i class="bi bi-folder2-open text-primary me-1.5"></i>โครงการวิจัย (Projects)
                     </h6>
                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-variant-numeric: tabular-nums;">
-                        {{ number_format($projectTotalWithFile) }} โครงการที่มีไฟล์
+                        {{ number_format($projectTotalWithFile) }} ไฟล์
                     </span>
                 </div>
                 <div class="card-body p-3">
@@ -292,7 +319,7 @@
                     </div>
                     <div>
                         <div class="d-flex justify-content-between align-items-center small mb-1">
-                            <span class="fw-semibold text-body"><i class="bi bi-file-earmark-text me-1 text-info"></i>บันทึกจำนวนหน้าเอกสาร (Page Count)</span>
+                            <span class="fw-semibold text-body"><i class="bi bi-file-earmark-text me-1 text-info"></i>บันทึกจำนวนหน้า (Pages)</span>
                             <span class="fw-bold text-body" style="font-variant-numeric: tabular-nums;">
                                 {{ number_format($projectWithPageNum) }} / {{ number_format($projectTotalWithFile) }} ({{ $projPagePct }}%)
                             </span>
@@ -306,14 +333,14 @@
         </div>
 
         <!-- Published Coverage Card -->
-        <div class="col-md-6">
+        <div class="col-lg-4 col-md-6">
             <div class="card border shadow-sm h-100">
                 <div class="card-header bg-body-tertiary d-flex align-items-center justify-content-between py-2.5 px-3">
-                    <h6 class="mb-0 fw-bold text-body">
-                        <i class="bi bi-journal-richtext text-success me-2"></i>ความครอบคลุมผลงานตีพิมพ์ (Published Articles)
+                    <h6 class="mb-0 fw-bold text-body small">
+                        <i class="bi bi-journal-richtext text-success me-1.5"></i>ผลงานตีพิมพ์ (Publications)
                     </h6>
                     <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-variant-numeric: tabular-nums;">
-                        {{ number_format($publishedTotalWithFile) }} ผลงานที่มีไฟล์
+                        {{ number_format($publishedTotalWithFile) }} ไฟล์
                     </span>
                 </div>
                 <div class="card-body p-3">
@@ -334,13 +361,73 @@
                     </div>
                     <div>
                         <div class="d-flex justify-content-between align-items-center small mb-1">
-                            <span class="fw-semibold text-body"><i class="bi bi-file-earmark-text me-1 text-info"></i>บันทึกจำนวนหน้าเอกสาร (Page Count)</span>
+                            <span class="fw-semibold text-body"><i class="bi bi-file-earmark-text me-1 text-info"></i>บันทึกจำนวนหน้า (Pages)</span>
                             <span class="fw-bold text-body" style="font-variant-numeric: tabular-nums;">
                                 {{ number_format($publishedWithPageNum) }} / {{ number_format($publishedTotalWithFile) }} ({{ $pubPagePct }}%)
                             </span>
                         </div>
                         <div class="progress" style="height: 8px;">
                             <div class="progress-bar bg-info" role="progressbar" style="width: {{ $pubPagePct }}%;" aria-valuenow="{{ $pubPagePct }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Universal Images WebP Coverage Card -->
+        <div class="col-lg-4 col-md-12">
+            <div class="card border shadow-sm h-100">
+                <div class="card-header bg-body-tertiary d-flex align-items-center justify-content-between py-2.5 px-3">
+                    <h6 class="mb-0 fw-bold text-body small">
+                        <i class="bi bi-file-earmark-image-fill text-warning me-1.5"></i>ภาพระบบ WebP (&le;1024px)
+                    </h6>
+                    @php
+                        $grandImgPct = $imageStats['grand_total'] > 0 ? round(($imageStats['grand_webp'] / $imageStats['grand_total']) * 100, 1) : 0;
+                        $resImgPct = $imageStats['researcher_total'] > 0 ? round(($imageStats['researcher_webp'] / $imageStats['researcher_total']) * 100, 1) : 0;
+                        $newsImgPct = $imageStats['news_total'] > 0 ? round(($imageStats['news_webp'] / $imageStats['news_total']) * 100, 1) : 0;
+                        $confImgPct = $imageStats['conference_total'] > 0 ? round(($imageStats['conference_webp'] / $imageStats['conference_total']) * 100, 1) : 0;
+                    @endphp
+                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" style="font-variant-numeric: tabular-nums;">
+                        {{ number_format($imageStats['grand_webp']) }} / {{ number_format($imageStats['grand_total']) }} ({{ $grandImgPct }}%)
+                    </span>
+                </div>
+                <div class="card-body p-3">
+                    <!-- Researcher Images -->
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between align-items-center small mb-1" style="font-size: 0.8rem;">
+                            <span class="text-body"><i class="bi bi-person-circle me-1 text-primary"></i>โปรไฟล์นักวิจัย</span>
+                            <span class="fw-semibold text-body" style="font-variant-numeric: tabular-nums;">
+                                {{ number_format($imageStats['researcher_webp']) }}/{{ number_format($imageStats['researcher_total']) }} ({{ $resImgPct }}%)
+                            </span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ $resImgPct }}%;" aria-valuenow="{{ $resImgPct }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+
+                    <!-- News Images -->
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between align-items-center small mb-1" style="font-size: 0.8rem;">
+                            <span class="text-body"><i class="bi bi-newspaper me-1 text-info"></i>ข่าวทุนวิจัย NRIIS</span>
+                            <span class="fw-semibold text-body" style="font-variant-numeric: tabular-nums;">
+                                {{ number_format($imageStats['news_webp']) }}/{{ number_format($imageStats['news_total']) }} ({{ $newsImgPct }}%)
+                            </span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-info" role="progressbar" style="width: {{ $newsImgPct }}%;" aria-valuenow="{{ $newsImgPct }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+
+                    <!-- Conference Images -->
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center small mb-1" style="font-size: 0.8rem;">
+                            <span class="text-body"><i class="bi bi-calendar-event me-1 text-success"></i>งานประชุมวิชาการ</span>
+                            <span class="fw-semibold text-body" style="font-variant-numeric: tabular-nums;">
+                                {{ number_format($imageStats['conference_webp']) }}/{{ number_format($imageStats['conference_total']) }} ({{ $confImgPct }}%)
+                            </span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ $confImgPct }}%;" aria-valuenow="{{ $confImgPct }}" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
                     </div>
                 </div>
@@ -494,7 +581,83 @@
             </div>
         </div>
 
-        <!-- Command 3: Cache Management & Optimization -->
+        <!-- Command 3: Universal WebP Image Converter -->
+        <div class="col-lg-6">
+            <div class="card border shadow-sm h-100">
+                <div class="card-header bg-body-tertiary d-flex align-items-center gap-2 py-3 px-3">
+                    <div class="p-2 rounded-2 bg-success-subtle text-success">
+                        <i class="bi bi-file-earmark-image-fill fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 fw-bold text-body">3. คำสั่งแปลงรูปภาพทั้งระบบเป็น WebP (&le;1024px)</h6>
+                        <small class="text-body-secondary">คำสั่ง: <code>php artisan rdb:convert-images-webp</code></small>
+                    </div>
+                </div>
+                <div class="card-body p-3 p-md-4">
+                    <p class="small text-body-secondary mb-3">
+                        แปลงรูปภาพทั้งหมดในระบบ (รูปโปรไฟล์นักวิจัย, ภาพข่าวทุนวิจัย NRIIS, ภาพงานประชุมวิชาการ Facebook) เป็นฟอร์แมต <code>.webp</code> คุณภาพสูง พร้อมปรับลดขนาดความกว้าง/สูงสูงสุดไม่เกิน 1024px อัตโนมัติ เพื่อเพิ่มความเร็วในการโหลดหน้าเว็บ
+                    </p>
+
+                    <form action="{{ route('backend.system_commands.run') }}" method="POST" onsubmit="return confirm('ยืนยันเริ่มประมวลผลการแปลงไฟล์รูปภาพระบบเป็น WebP?');">
+                        @csrf
+                        <input type="hidden" name="command" value="convert_images_webp">
+
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">เลือกโมดูลรูปภาพ:</label>
+                                <select name="module" class="form-select form-select-sm">
+                                    <option value="all">ทั้งหมด (นักวิจัย + ข่าว + งานประชุม)</option>
+                                    <option value="researcher">เฉพาะ รูปโปรไฟล์นักวิจัย (rdb_researcher)</option>
+                                    <option value="news">เฉพาะ ข่าวทุนวิจัย (research_news)</option>
+                                    <option value="conference">เฉพาะ งานประชุมวิชาการ (research_coferenceinthai)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">จำนวนรายการ (Limit):</label>
+                                <select name="limit" class="form-select form-select-sm">
+                                    <option value="10">ทดสอบ 10 รายการแรก</option>
+                                    <option value="50">50 รายการ</option>
+                                    <option value="100">100 รายการ</option>
+                                    <option value="all" selected>ทั้งหมดในระบบ (Full System)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold">ขนาดภาพสูงสุด (Max Dimension):</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="number" name="max_dimension" class="form-control form-control-sm" value="1024" min="300" max="3840" step="32" placeholder="1024">
+                                    <span class="input-group-text">พิกเซล (px)</span>
+                                </div>
+                                <div class="text-body-secondary mt-1" style="font-size: 0.74rem;">
+                                    <i class="bi bi-info-circle me-1 text-primary"></i>ค่ามาตรฐาน 1024px: รักษาสัดส่วนเดิม (Aspect Ratio) และลดขนาดไฟล์ลงกว่า 70-85%
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-check form-switch mb-3 p-2.5 bg-body-tertiary rounded border">
+                            <input class="form-check-input ms-0 me-2" type="checkbox" role="switch" id="force_image_webp" name="force" value="1">
+                            <label class="form-check-label small fw-semibold text-body" for="force_image_webp">
+                                บังคับแปลงใหม่ทับของเดิม (--force)
+                                <div class="text-body-secondary fw-normal" style="font-size: 0.75rem;">แปลงรูปภาพและคำนวณขนาดใหม่ทุกรายการ แม้ไฟล์เดิมจะเป็น .webp แล้ว</div>
+                            </label>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between pt-2 border-top">
+                            <div class="small text-body-tertiary" style="font-size: 0.76rem;">
+                                <i class="bi bi-shield-check text-success me-1"></i>สำรองชื่อไฟล์เดิมและบันทึกฐานข้อมูล
+                            </div>
+                            <button type="submit" class="btn btn-success btn-sm d-inline-flex align-items-center gap-1.5 px-3">
+                                <i class="bi bi-play-circle-fill"></i> รันคำสั่งแปลงรูปภาพ WebP
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Command 4: Cache Management & Optimization -->
         <div class="col-lg-6">
             <div class="card border shadow-sm h-100">
                 <div class="card-header bg-body-tertiary d-flex align-items-center gap-2 py-3 px-3">
@@ -502,7 +665,7 @@
                         <i class="bi bi-lightning-charge-fill fs-5"></i>
                     </div>
                     <div>
-                        <h6 class="mb-0 fw-bold text-body">3. คำสั่งล้างแคชและรีเซ็ตระบบ (System Cache Clear)</h6>
+                        <h6 class="mb-0 fw-bold text-body">4. คำสั่งล้างแคชและรีเซ็ตระบบ (System Cache Clear)</h6>
                         <small class="text-body-secondary">คำสั่ง: <code>cache:clear</code>, <code>route:clear</code>, <code>view:clear</code></small>
                     </div>
                 </div>
@@ -538,36 +701,43 @@
             </div>
         </div>
 
-        <!-- Command 4: System CLI Quick Reference -->
-        <div class="col-lg-6">
-            <div class="card border shadow-sm h-100">
+        <!-- Command 5: System CLI Quick Reference -->
+        <div class="col-12">
+            <div class="card border shadow-sm">
                 <div class="card-header bg-body-tertiary d-flex align-items-center gap-2 py-3 px-3">
                     <div class="p-2 rounded-2 bg-secondary-subtle text-secondary">
                         <i class="bi bi-code-slash fs-5"></i>
                     </div>
                     <div>
-                        <h6 class="mb-0 fw-bold text-body">4. คู่มือคำสั่งผ่านหน้าต่าง Terminal / Shell (SysAdmin CLI)</h6>
+                        <h6 class="mb-0 fw-bold text-body">5. คู่มือคำสั่งผ่านหน้าต่าง Terminal / Shell (SysAdmin CLI)</h6>
                         <small class="text-body-secondary">สำหรับผู้ดูแลระบบที่ต้องการรันคำสั่งผ่าน SSH หรือ CMD</small>
                     </div>
                 </div>
                 <div class="card-body p-3 p-md-4">
-                    <p class="small text-body-secondary mb-2">
+                    <p class="small text-body-secondary mb-3">
                         หากต้องการรันคำสั่งขนาดใหญ่ในโหมดพื้นหลัง (Background) หรือตั้ง Cron Job อัตโนมัติ สามารถใช้คำสั่ง Artisan ได้ดังนี้:
                     </p>
 
-                    <div class="mb-2">
-                        <small class="text-body fw-bold d-block mb-1">สร้างภาพหน้าปก PDF ทั้งระบบ:</small>
-                        <pre class="p-2 bg-dark text-light rounded small mb-2" style="font-size: 0.75rem;">php artisan rdb:generate-pdf-covers --module=all --force</pre>
-                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6 col-lg-3">
+                            <small class="text-body fw-bold d-block mb-1"><i class="bi bi-images me-1 text-primary"></i>สร้างภาพหน้าปก PDF:</small>
+                            <pre class="p-2.5 bg-dark text-light rounded small mb-0 font-monospace" style="font-size: 0.75rem;">php artisan rdb:generate-pdf-covers --module=all --force</pre>
+                        </div>
 
-                    <div class="mb-2">
-                        <small class="text-body fw-bold d-block mb-1">นับจำนวนหน้าเอกสาร PDF ทั้งระบบ:</small>
-                        <pre class="p-2 bg-dark text-light rounded small mb-2" style="font-size: 0.75rem;">php artisan rdb:count-pdf-pages --module=all --force</pre>
-                    </div>
+                        <div class="col-md-6 col-lg-3">
+                            <small class="text-body fw-bold d-block mb-1"><i class="bi bi-123 me-1 text-info"></i>นับจำนวนหน้าเอกสาร PDF:</small>
+                            <pre class="p-2.5 bg-dark text-light rounded small mb-0 font-monospace" style="font-size: 0.75rem;">php artisan rdb:count-pdf-pages --module=all --force</pre>
+                        </div>
 
-                    <div>
-                        <small class="text-body fw-bold d-block mb-1">ตรวจสอบโครงสร้างและสถานะการเชื่อมต่อ:</small>
-                        <pre class="p-2 bg-dark text-light rounded small mb-0" style="font-size: 0.75rem;">php artisan storage:link && php artisan optimize:clear</pre>
+                        <div class="col-md-6 col-lg-3">
+                            <small class="text-body fw-bold d-block mb-1"><i class="bi bi-file-earmark-image me-1 text-success"></i>แปลงรูปภาพระบบเป็น WebP:</small>
+                            <pre class="p-2.5 bg-dark text-light rounded small mb-0 font-monospace" style="font-size: 0.75rem;">php artisan rdb:convert-images-webp --module=all --force --max-dimension=1024</pre>
+                        </div>
+
+                        <div class="col-md-6 col-lg-3">
+                            <small class="text-body fw-bold d-block mb-1"><i class="bi bi-hdd-network me-1 text-warning"></i>ล้างแคชและเชื่อม Symlink:</small>
+                            <pre class="p-2.5 bg-dark text-light rounded small mb-0 font-monospace" style="font-size: 0.75rem;">php artisan storage:link && php artisan optimize:clear</pre>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -718,7 +888,7 @@ PDFTOPPM_PATH="C:/laragon/bin/poppler/bin/pdftoppm.exe"</pre>
                         <div class="alert alert-warning-subtle border border-warning-subtle d-flex align-items-center mb-3 p-3 rounded-3">
                             <i class="bi bi-lightbulb-fill fs-5 text-warning me-2.5"></i>
                             <div class="small">
-                                <strong>หน้าที่ในระบบ:</strong> สังเคราะห์ภาพหน้าปกสำรองสไตล์วิชาการภาษาไทย (Academic GD Cover) เมื่อไฟล์ PDF ชำรุดหรือไม่พบไฟล์ และใช้แปลงไฟล์ภาพเป็นฟอร์แมต <code>.webp</code>
+                                <strong>หน้าที่ในระบบ:</strong> สังเคราะห์ภาพหน้าปกสำรองสไตล์วิชาการภาษาไทย (Academic GD Cover) เมื่อไฟล์ PDF ชำรุดหรือไม่พบไฟล์ และใช้แปลงไฟล์ภาพถ่าย (รูปโปรไฟล์นักวิจัย, ข่าว NRIIS, งานประชุม) เป็นฟอร์แมต <code>.webp</code> พร้อมย่อขนาดสูงสุด &le; 1024px คุณภาพ 85% เพื่อประหยัดพื้นที่จัดเก็บและเพิ่มความเร็วโหลดหน้าเว็บ
                             </div>
                         </div>
 
@@ -778,9 +948,13 @@ PDFTOPPM_PATH="/usr/bin/pdftoppm"</pre>
                             <small class="text-body-secondary fw-semibold d-block">2. ทดสอบ Poppler pdftotext:</small>
                             <pre class="p-2 bg-dark text-light rounded font-monospace small mb-2" style="font-size: 0.76rem;">pdftotext -v</pre>
                         </div>
-                        <div>
+                        <div class="mb-2">
                             <small class="text-body-secondary fw-semibold d-block">3. ทดสอบ PHP GD Extension &amp; WebP:</small>
-                            <pre class="p-2 bg-dark text-light rounded font-monospace small mb-0" style="font-size: 0.76rem;">php -r "echo extension_loaded('gd') && function_exists('imagewebp') ? 'GD WebP OK' : 'GD Missing';"</pre>
+                            <pre class="p-2 bg-dark text-light rounded font-monospace small mb-2" style="font-size: 0.76rem;">php -r "echo extension_loaded('gd') && function_exists('imagewebp') ? 'GD WebP OK' : 'GD Missing';"</pre>
+                        </div>
+                        <div>
+                            <small class="text-body-secondary fw-semibold d-block">4. ทดสอบคำสั่งแปลงรูปภาพระบบเป็น WebP (&le;1024px):</small>
+                            <pre class="p-2 bg-dark text-light rounded font-monospace small mb-0" style="font-size: 0.76rem;">php artisan rdb:convert-images-webp --limit=10</pre>
                         </div>
                     </div>
                 </div>

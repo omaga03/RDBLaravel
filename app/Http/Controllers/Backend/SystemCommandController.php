@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
 use App\Models\RdbProject;
 use App\Models\RdbPublished;
+use App\Models\RdbResearcher;
+use App\Models\ResearchNews;
+use App\Models\ResearchConference;
 use App\Models\AuditLog;
 use App\Services\PdfCoverService;
 use App\Services\DSpaceExportService;
@@ -60,7 +63,55 @@ class SystemCommandController extends Controller
             ->where('pub_numfile', '>', 0)
             ->count();
 
-        // 3. Engine & Environment Status Check
+        // 3. Image WebP Statistics (Researchers, NRIIS News, Conferences)
+        $researcherTotalWithImage = RdbResearcher::withoutGlobalScopes()
+            ->where(function ($q) {
+                $q->whereNotNull('researcher_picture')->where('researcher_picture', '<>', '')
+                  ->orWhereNotNull('rf_path')->where('rf_path', '<>', '');
+            })->count();
+
+        $researcherWithWebp = RdbResearcher::withoutGlobalScopes()
+            ->where(function ($q) {
+                $q->where('researcher_picture', 'like', '%.webp')
+                  ->orWhere('rf_path', 'like', '%.webp');
+            })->count();
+
+        $newsTotalWithImage = ResearchNews::withoutGlobalScopes()
+            ->where(function ($q) {
+                $q->whereNotNull('news_img')->where('news_img', '<>', '')
+                  ->orWhereNotNull('news_path')->where('news_path', '<>', '');
+            })->count();
+
+        $newsWithWebp = ResearchNews::withoutGlobalScopes()
+            ->where(function ($q) {
+                $q->where('news_img', 'like', '%.webp')
+                  ->orWhere('news_path', 'like', '%.webp');
+            })->count();
+
+        $conferenceTotalWithImage = ResearchConference::withoutGlobalScopes()
+            ->where(function ($q) {
+                $q->whereNotNull('con_img')->where('con_img', '<>', '')
+                  ->orWhereNotNull('con_path')->where('con_path', '<>', '');
+            })->count();
+
+        $conferenceWithWebp = ResearchConference::withoutGlobalScopes()
+            ->where(function ($q) {
+                $q->where('con_img', 'like', '%.webp')
+                  ->orWhere('con_path', 'like', '%.webp');
+            })->count();
+
+        $imageStats = [
+            'researcher_total' => $researcherTotalWithImage,
+            'researcher_webp' => $researcherWithWebp,
+            'news_total' => $newsTotalWithImage,
+            'news_webp' => $newsWithWebp,
+            'conference_total' => $conferenceTotalWithImage,
+            'conference_webp' => $conferenceWithWebp,
+            'grand_total' => $researcherTotalWithImage + $newsTotalWithImage + $conferenceTotalWithImage,
+            'grand_webp' => $researcherWithWebp + $newsWithWebp + $conferenceWithWebp,
+        ];
+
+        // 4. Engine & Environment Status Check
         $pdftotextBin = $dspaceService->getPdftotextBinary();
         $pdftoppmBin = $coverService->getPdftoppmBinary();
 
@@ -146,6 +197,7 @@ class SystemCommandController extends Controller
             'publishedWithCover',
             'projectWithPageNum',
             'publishedWithPageNum',
+            'imageStats',
             'engineInfo',
             'healthInfo',
             'isCreator',
@@ -165,10 +217,11 @@ class SystemCommandController extends Controller
         $this->ensureAuthorized();
 
         $request->validate([
-            'command' => 'required|string|in:generate_covers,count_pages,clear_cache,optimize_all',
-            'module' => 'nullable|string|in:all,project,published',
+            'command' => 'required|string|in:generate_covers,count_pages,clear_cache,optimize_all,convert_images_webp',
+            'module' => 'nullable|string|in:all,project,published,researcher,news,conference',
             'force' => 'nullable|boolean',
             'limit' => 'nullable|string',
+            'max_dimension' => 'nullable|integer|min:200|max:3840',
         ]);
 
         $commandKey = $request->input('command');
@@ -176,6 +229,7 @@ class SystemCommandController extends Controller
         $force = $request->boolean('force');
         $limitInput = $request->input('limit');
         $limit = ($limitInput && is_numeric($limitInput) && (int)$limitInput > 0) ? (int)$limitInput : null;
+        $maxDimension = $request->filled('max_dimension') ? (int)$request->input('max_dimension') : 1024;
 
         @ini_set('memory_limit', '1024M');
         @set_time_limit(600);
@@ -218,6 +272,23 @@ class SystemCommandController extends Controller
                     $output = Artisan::output();
                     break;
 
+                case 'convert_images_webp':
+                    $commandName = 'rdb:convert-images-webp';
+                    $params = [
+                        '--module' => $module,
+                        '--max-dimension' => $maxDimension,
+                    ];
+                    if ($force) {
+                        $params['--force'] = true;
+                    }
+                    if ($limit) {
+                        $params['--limit'] = $limit;
+                    }
+
+                    Artisan::call($commandName, $params);
+                    $output = Artisan::output();
+                    break;
+
                 case 'clear_cache':
                     $commandName = 'cache:clear & optimize';
                     Artisan::call('cache:clear');
@@ -242,7 +313,7 @@ class SystemCommandController extends Controller
                 'execute_system_command',
                 auth()->user(),
                 null,
-                ['command' => $commandName, 'module' => $module, 'force' => $force, 'limit' => $limit],
+                ['command' => $commandName, 'module' => $module, 'force' => $force, 'limit' => $limit, 'max_dimension' => $maxDimension],
                 "รันคำสั่งระบบ: {$commandName} (สถานะ: สำเร็จ)"
             );
 
