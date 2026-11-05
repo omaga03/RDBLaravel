@@ -14,18 +14,16 @@ use Tests\TestCase;
 
 class ApiDualTierTest extends TestCase
 {
-    use DatabaseTransactions;
-
     protected function setUp(): void
     {
         parent::setUp();
         config([
             'database.default' => 'mysql',
+            'database.connections.mysql.host' => '127.0.0.1',
             'database.connections.mysql.database' => 'rdbpcru',
             'database.connections.mysql.password' => '',
         ]);
         \Illuminate\Support\Facades\DB::purge('mysql');
-        \Illuminate\Support\Facades\DB::reconnect('mysql');
     }
 
     /**
@@ -426,5 +424,93 @@ class ApiDualTierTest extends TestCase
         $this->withToken($plainToken)
             ->getJson('/api/v1/auth/me')
             ->assertStatus(401);
+    }
+
+    /**
+     * Tier 3: Open Public News & Conferences APIs (GET only)
+     */
+    public function test_open_public_research_news_api(): void
+    {
+        // 1. List news without token (Open API)
+        $response = $this->getJson('/api/v1/news');
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data' => [
+                '*' => [
+                    'id',
+                    'news_id',
+                    'title',
+                    'type',
+                    'date',
+                    'view_count',
+                    'image_url',
+                    'public_url',
+                ]
+            ],
+            'links',
+            'meta',
+        ]);
+
+        // 2. Alias /api/news and /api/research-news
+        $this->getJson('/api/news')->assertStatus(200);
+        $this->getJson('/api/research-news')->assertStatus(200);
+
+        // 3. Test Show single item
+        $firstItem = $response->json('data.0');
+        if ($firstItem) {
+            $showResp = $this->getJson('/api/v1/news/' . $firstItem['id']);
+            $showResp->assertStatus(200);
+            $showResp->assertJsonPath('data.id', $firstItem['id']);
+            $showResp->assertJsonPath('data.title', $firstItem['title']);
+
+            // Alias /api/news/{id}
+            $this->getJson('/api/news/' . $firstItem['id'])->assertStatus(200);
+        }
+
+        // 4. Unsafe method blocked (GET only)
+        $this->postJson('/api/v1/news', ['title' => 'test'])->assertStatus(405);
+    }
+
+    public function test_open_public_research_conference_api(): void
+    {
+        // 1. List conferences without token (Open API)
+        $response = $this->getJson('/api/v1/conferences');
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'data' => [
+                '*' => [
+                    'id',
+                    'conference_id',
+                    'title',
+                    'event_date',
+                    'submission_deadline',
+                    'venue',
+                    'view_count',
+                    'image_url',
+                    'public_url',
+                ]
+            ],
+            'links',
+            'meta',
+        ]);
+
+        // 2. Alias /api/conferences and /api/research-conferences
+        $this->getJson('/api/conferences')->assertStatus(200);
+        $this->getJson('/api/research-conferences')->assertStatus(200);
+
+        // 3. Test Show single item
+        $firstItem = $response->json('data.0');
+        if ($firstItem) {
+            $showResp = $this->getJson('/api/v1/conferences/' . $firstItem['id']);
+            $showResp->assertStatus(200);
+            $showResp->assertJsonPath('data.id', $firstItem['id']);
+            $showResp->assertJsonPath('data.title', $firstItem['title']);
+
+            // Alias /api/conferences/{id}
+            $this->getJson('/api/conferences/' . $firstItem['id'])->assertStatus(200);
+        }
+
+        // 4. Unsafe method blocked (GET only)
+        $this->postJson('/api/v1/conferences', ['title' => 'test'])->assertStatus(405);
     }
 }

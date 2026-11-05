@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\V1\ProjectController;
 use App\Http\Controllers\Api\V1\ProjectUtilizeController;
 use App\Http\Controllers\Api\V1\PublicationController;
 use App\Http\Controllers\Api\V1\ResearcherController;
+use App\Http\Controllers\Api\V1\ResearchNewsApiController;
+use App\Http\Controllers\Api\V1\ResearchConferenceApiController;
 use App\Http\Controllers\Frontend\RdbresearcherController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,20 +21,31 @@ use Illuminate\Support\Facades\Route;
 |    - /api/pmis/research
 |    - /api/pmis/publication
 |
-| 2. Modern RESTful API (v1):
+| 2. Open Public APIs (GET only):
+|    - /api/v1/news, /api/v1/news/{id}
+|    - /api/v1/conferences, /api/v1/conferences/{id}
+|    - /api/news, /api/conferences
+|
+| 3. Modern RESTful API (v1 with Sanctum for core research databases):
 |    - /api/v1/auth/token (POST)
-|    - /api/v1/auth/me (GET, auth:sanctum)
-|    - /api/v1/auth/logout (POST, auth:sanctum)
-|    - /api/v1/master/departments (GET)
-|    - /api/v1/master/years (GET)
-|    - /api/v1/master/project-types (GET)
-|    - /api/v1/projects (GET, POST auth:sanctum)
-|    - /api/v1/projects/{id} (GET, PUT auth:sanctum, DELETE auth:sanctum)
+|    - /api/v1/master/...
+|    - /api/v1/projects (GET)
 |    - /api/v1/publications (GET)
-|    - /api/v1/publications/{id} (GET)
-|    - /api/v1/researchers/{id} (GET)
-|    - /api/v1/researchers/{pmis}/portfolio (GET)
 */
+
+// Open Public News & Conference Endpoints under /api
+Route::middleware('throttle:60,1')->group(function () {
+    Route::get('news', [ResearchNewsApiController::class, 'index'])->name('api.news.index');
+    Route::get('news/{id}', [ResearchNewsApiController::class, 'show'])->name('api.news.show');
+    Route::get('conferences', [ResearchConferenceApiController::class, 'index'])->name('api.conferences.index');
+    Route::get('conferences/{id}', [ResearchConferenceApiController::class, 'show'])->name('api.conferences.show');
+
+    // Aliases
+    Route::get('research-news', [ResearchNewsApiController::class, 'index'])->name('api.research_news.index');
+    Route::get('research-news/{id}', [ResearchNewsApiController::class, 'show'])->name('api.research_news.show');
+    Route::get('research-conferences', [ResearchConferenceApiController::class, 'index'])->name('api.research_conferences.index');
+    Route::get('research-conferences/{id}', [ResearchConferenceApiController::class, 'show'])->name('api.research_conferences.show');
+});
 
 // Legacy PMIS aliases under /api
 Route::middleware('throttle:60,1')->group(function () {
@@ -42,6 +55,12 @@ Route::middleware('throttle:60,1')->group(function () {
 
 // Modern RESTful API v1
 Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
+    // Open / Public Endpoints (GET only) - ข่าวทุนวิจัย & งานประชุมวิชาการ
+    Route::get('news', [ResearchNewsApiController::class, 'index'])->name('api.v1.news.index');
+    Route::get('news/{id}', [ResearchNewsApiController::class, 'show'])->name('api.v1.news.show');
+    Route::get('conferences', [ResearchConferenceApiController::class, 'index'])->name('api.v1.conferences.index');
+    Route::get('conferences/{id}', [ResearchConferenceApiController::class, 'show'])->name('api.v1.conferences.show');
+
     // Authentication: Token issuance via API is disabled (restricted to Super Admin via Backend only)
     Route::post('auth/token', [AuthController::class, 'token'])->name('api.v1.auth.token');
     Route::post('login', [AuthController::class, 'token'])->name('api.v1.login');
