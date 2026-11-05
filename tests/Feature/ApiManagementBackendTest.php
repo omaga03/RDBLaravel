@@ -9,18 +9,16 @@ use Tests\TestCase;
 
 class ApiManagementBackendTest extends TestCase
 {
-    use DatabaseTransactions;
-
     protected function setUp(): void
     {
         parent::setUp();
         config([
             'database.default' => 'mysql',
+            'database.connections.mysql.host' => '127.0.0.1',
             'database.connections.mysql.database' => 'rdbpcru',
             'database.connections.mysql.password' => '',
         ]);
         \Illuminate\Support\Facades\DB::purge('mysql');
-        \Illuminate\Support\Facades\DB::reconnect('mysql');
     }
 
     public function test_admin_can_access_api_management_dashboard(): void
@@ -35,6 +33,9 @@ class ApiManagementBackendTest extends TestCase
         $response->assertSee('ตรวจดู Endpoint &amp; ทดสอบเรียลไทม์', false);
         $response->assertSee('คู่มือการเชื่อมต่อสำหรับนักพัฒนา');
         $response->assertSee('ออก Bearer Token ใหม่');
+        $response->assertSee('Tier 3: Open Public News & Conferences APIs');
+        $response->assertSee('/api/v1/news');
+        $response->assertSee('/api/v1/conferences');
     }
 
     public function test_admin_can_create_bearer_token_for_user(): void

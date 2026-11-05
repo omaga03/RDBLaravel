@@ -550,6 +550,80 @@ class ApiManagementController extends Controller
                         'sample_url' => '/api/v1/researchers/656219/portfolio',
                     ],
                 ]
+            ],
+            'tier3' => [
+                'name' => 'Tier 3: Open Public News & Conferences APIs (แบบเปิด ไม่ต้องใช้ Token, GET เท่านั้น)',
+                'badge' => 'Open Public API (GET Only)',
+                'color' => 'success',
+                'description' => 'บริการ API แบบเปิดสำหรับข่าวทุนวิจัยและกิจกรรม และข่าวงานประชุมวิชาการ สามารถเข้าถึงได้ทันทีโดยไม่ต้องใช้ Bearer Token (จำกัด Rate Limit 60 ครั้ง/นาที เพื่อความปลอดภัยของเซิร์ฟเวอร์)',
+                'items' => [
+                    [
+                        'id' => 'v1-news-index',
+                        'method' => 'GET',
+                        'path' => '/api/v1/news',
+                        'alt_paths' => ['/api/news', '/api/research-news'],
+                        'auth' => 'Public (Rate Limited 60/min)',
+                        'auth_type' => 'public',
+                        'title' => 'List Research News & Funding Announcements (ข่าวทุนวิจัยและกิจกรรม)',
+                        'desc' => 'ดึงรายการข่าวทุนวิจัย ข่าวประกาศ และกิจกรรมวิจัยทั้งหมด พร้อมรูปภาพ พรีวิวเนื้อหา และ Pagination (ไม่ต้องใช้ Token)',
+                        'params' => [
+                            ['name' => 'search / q', 'type' => 'string', 'desc' => 'คำค้นหาในหัวข้อข่าว หรือเนื้อหาข่าว เช่น q=ทุนวิจัย'],
+                            ['name' => 'type', 'type' => 'string', 'desc' => 'ประเภทข่าว เช่น type=ข่าวประชาสัมพันธ์'],
+                            ['name' => 'date', 'type' => 'string', 'desc' => 'วันที่หรือปี เช่น date=2026 หรือ date=2026-11'],
+                            ['name' => 'per_page / limit / n', 'type' => 'integer', 'desc' => 'จำนวนต่อหน้า (Default: 20, Max: 100)'],
+                            ['name' => 'sort_by', 'type' => 'string', 'desc' => 'created_at, news_date, news_count, id'],
+                            ['name' => 'sort_order', 'type' => 'string', 'desc' => 'desc, asc'],
+                        ],
+                        'sample_url' => '/api/v1/news?limit=5',
+                    ],
+                    [
+                        'id' => 'v1-news-show',
+                        'method' => 'GET',
+                        'path' => '/api/v1/news/{id}',
+                        'alt_paths' => ['/api/news/{id}', '/api/research-news/{id}'],
+                        'auth' => 'Public (Rate Limited 60/min)',
+                        'auth_type' => 'public',
+                        'title' => 'Get Single Research News Details (รายละเอียดข่าวทุนวิจัย)',
+                        'desc' => 'ดูรายละเอียดข่าวทุนวิจัยรายรายการ (รองรับทั้ง ID ในระบบ หรือ NID ของ NRIIS เช่น 12330)',
+                        'params' => [
+                            ['name' => 'id', 'type' => 'string', 'desc' => 'รหัสข่าวในระบบ หรือ รหัส NRIIS NID เช่น 12330'],
+                        ],
+                        'sample_url' => '/api/v1/news/12330',
+                    ],
+                    [
+                        'id' => 'v1-conferences-index',
+                        'method' => 'GET',
+                        'path' => '/api/v1/conferences',
+                        'alt_paths' => ['/api/conferences', '/api/research-conferences'],
+                        'auth' => 'Public (Rate Limited 60/min)',
+                        'auth_type' => 'public',
+                        'title' => 'List Academic Conferences & Call for Papers (งานประชุมวิชาการ)',
+                        'desc' => 'ดึงรายการข่าวงานประชุมวิชาการทั้งหมด พร้อมสถานที่ วันจัดงาน วันหมดเขตรับบทความ และภาพแบนเนอร์ (ไม่ต้องใช้ Token)',
+                        'params' => [
+                            ['name' => 'search / q', 'type' => 'string', 'desc' => 'คำค้นชื่อการประชุม รายละเอียด หรือสถานที่จัดงาน เช่น q=ประชุมวิชาการ'],
+                            ['name' => 'venue', 'type' => 'string', 'desc' => 'สถานที่จัดงาน เช่น venue=โรงแรม'],
+                            ['name' => 'deadline', 'type' => 'string', 'desc' => 'คำค้นวันหมดเขตรับบทความ'],
+                            ['name' => 'per_page / limit / n', 'type' => 'integer', 'desc' => 'จำนวนต่อหน้า (Default: 20, Max: 100)'],
+                            ['name' => 'sort_by', 'type' => 'string', 'desc' => 'created_at, con_count, id'],
+                            ['name' => 'sort_order', 'type' => 'string', 'desc' => 'desc, asc'],
+                        ],
+                        'sample_url' => '/api/v1/conferences?limit=5',
+                    ],
+                    [
+                        'id' => 'v1-conferences-show',
+                        'method' => 'GET',
+                        'path' => '/api/v1/conferences/{id}',
+                        'alt_paths' => ['/api/conferences/{id}', '/api/research-conferences/{id}'],
+                        'auth' => 'Public (Rate Limited 60/min)',
+                        'auth_type' => 'public',
+                        'title' => 'Get Single Conference Details (รายละเอียดงานประชุมวิชาการ)',
+                        'desc' => 'ดูรายละเอียดงานประชุมวิชาการรายรายการ (รองรับทั้ง ID ในระบบ หรือ FBID เช่น 1612849823975027)',
+                        'params' => [
+                            ['name' => 'id', 'type' => 'string', 'desc' => 'รหัสงานประชุมในระบบ หรือ รหัส FBID จาก Facebook'],
+                        ],
+                        'sample_url' => '/api/v1/conferences/1612849823975027',
+                    ],
+                ]
             ]
         ];
     }

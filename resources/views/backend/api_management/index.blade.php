@@ -443,7 +443,7 @@
                             <div class="card-header bg-body border-bottom py-3 px-4">
                                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                                     <h5 class="fw-bold mb-0 text-{{ $tier['color'] }} d-flex align-items-center gap-2">
-                                        <i class="bi {{ $tierKey === 'tier1' ? 'bi-link-45deg' : 'bi-stars' }}"></i>
+                                        <i class="bi {{ $tierKey === 'tier1' ? 'bi-link-45deg' : ($tierKey === 'tier3' ? 'bi-megaphone-fill' : 'bi-stars') }}"></i>
                                         <span>{{ $tier['name'] }}</span>
                                     </h5>
                                     <span class="badge bg-{{ $tier['color'] }}-subtle text-{{ $tier['color'] }} border border-{{ $tier['color'] }}-subtle px-2.5 py-1">
@@ -643,7 +643,15 @@ curl -X GET "http://laravel_rdb.test/api/v1/intellectual-properties?dipt_id=2" \
      -H "Accept: application/json" \
      -H "Authorization: Bearer YOUR_BEARER_TOKEN"
 
-# 5. เพิกถอน Token ของตนเองเมื่อเลิกใช้งาน (Self Token Deletion)
+# 5. เรียกดูข่าวทุนวิจัย (Open Public API - ไม่ต้องใช้ Token)
+curl -X GET "http://laravel_rdb.test/api/v1/news?limit=5" \
+     -H "Accept: application/json"
+
+# 6. เรียกดูงานประชุมวิชาการ (Open Public API - ไม่ต้องใช้ Token)
+curl -X GET "http://laravel_rdb.test/api/v1/conferences?limit=5" \
+     -H "Accept: application/json"
+
+# 7. เพิกถอน Token ของตนเองเมื่อเลิกใช้งาน (Self Token Deletion)
 curl -X POST "http://laravel_rdb.test/api/v1/auth/logout" \
      -H "Accept: application/json" \
      -H "Authorization: Bearer YOUR_BEARER_TOKEN"</code></pre>
