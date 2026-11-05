@@ -554,6 +554,15 @@ if (!app()->isLocal()) {
     })->where('any', '.*');
 }
 
+// User Manuals Documentation Hub
+Route::prefix('manuals')->name('manuals.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\ManualController::class, 'index'])->name('index');
+    Route::get('/frontend', [\App\Http\Controllers\ManualController::class, 'frontend'])->name('frontend');
+    Route::get('/backend', [\App\Http\Controllers\ManualController::class, 'backend'])->name('backend');
+    Route::get('/screenshots/{file}', [\App\Http\Controllers\ManualController::class, 'screenshot'])->name('screenshot');
+    Route::get('/{file}', [\App\Http\Controllers\ManualController::class, 'show'])->name('show');
+});
+
 require __DIR__.'/auth.php';
 
 // ✅ Frontend Routes - Public/Guest Access (Read Only)

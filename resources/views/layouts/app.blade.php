@@ -498,6 +498,39 @@
             box-shadow: 0 4px 14px rgba(37, 99, 235, 0.5);
         }
 
+        /* Topbar User Manual Icon Link (Next to PCRU RDB) */
+        .rdb-manual-link-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            color: var(--bs-body-color);
+            background: var(--bs-body-bg);
+            border: 1px solid var(--bs-border-color);
+            font-size: 1rem;
+            transition: all 0.2s ease-in-out;
+            text-decoration: none;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            margin-left: 0.35rem;
+        }
+        .rdb-manual-link-icon:hover {
+            color: var(--bs-primary);
+            border-color: var(--bs-primary-border-subtle, #93c5fd);
+            background-color: var(--bs-primary-bg-subtle, rgba(37, 99, 235, 0.08));
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(37, 99, 235, 0.18);
+        }
+        [data-bs-theme="dark"] .rdb-manual-link-icon {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.15);
+            color: var(--bs-body-color);
+        }
+        [data-bs-theme="dark"] .rdb-manual-link-icon:hover {
+            background: rgba(37, 99, 235, 0.2);
+            border-color: #3b82f6;
+            color: #60a5fa;
+            box-shadow: 0 3px 10px rgba(59, 130, 246, 0.3);
+        }
+
         /* Backend Topbar Quick Nav Buttons (Light & Dark Theme Calibrated) */
         .rdb-nav-portal-btn {
             color: var(--bs-body-color, #0F172A) !important;
@@ -1160,10 +1193,31 @@
                         <i class="bi bi-layout-sidebar-inset fs-5"></i>
                     </button>
                 @endif
-                <a class="navbar-brand d-inline-flex align-items-center" href="{{ request()->is('backend*') ? route('backend.site.index') : url('/') }}">
-                    <img src="https://research.pcru.ac.th/rdb/images/pcru.png" alt="PCRU Logo" style="height: 36px;" class="me-2">
-                    <span class="brand-badge ms-1">PCRU RDB</span>
-                </a>
+                <div class="d-inline-flex align-items-center me-2">
+                    <a class="navbar-brand d-inline-flex align-items-center me-0" href="{{ request()->is('backend*') ? route('backend.site.index') : url('/') }}">
+                        <img src="https://research.pcru.ac.th/rdb/images/pcru.png" alt="PCRU Logo" style="height: 36px;" class="me-2">
+                        <span class="brand-badge ms-1">PCRU RDB</span>
+                    </a>
+                    @if(request()->is('backend*'))
+                        <a href="{{ route('manuals.index') }}"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="rdb-manual-link-icon d-inline-flex align-items-center justify-content-center text-decoration-none"
+                           title="คู่มือการใช้งานระบบทั้งหมด (System Manuals)"
+                           aria-label="คู่มือการใช้งานระบบทั้งหมด">
+                            <i class="bi bi-book-half"></i>
+                        </a>
+                    @else
+                        <a href="{{ route('manuals.frontend') }}"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="rdb-manual-link-icon d-inline-flex align-items-center justify-content-center text-decoration-none"
+                           title="คู่มือการใช้งานระบบหน้าบ้าน (User Manual)"
+                           aria-label="คู่มือการใช้งานระบบหน้าบ้าน">
+                            <i class="bi bi-book-half"></i>
+                        </a>
+                    @endif
+                </div>
                 @if(request()->is('backend*'))
                     <div class="d-none d-sm-inline-flex align-items-center gap-1.5 ms-2 ps-2 border-start border-secondary-subtle">
                         <a href="{{ route('backend.site.index') }}"
