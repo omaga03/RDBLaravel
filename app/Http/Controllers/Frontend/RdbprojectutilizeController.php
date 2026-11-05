@@ -486,6 +486,11 @@ class RdbprojectutilizeController extends Controller
         // Support legacy yii2 datautilize
         $safeName = basename(trim($filename));
         if ($safeName) {
+            $legacyUploaded = 'uploads/datautilize/' . $item->utz_id . '/' . $safeName;
+            if (Storage::disk('public')->exists($legacyUploaded)) {
+                $item->increment('utz_countfile');
+                return Storage::disk('public')->response($legacyUploaded);
+            }
             $legacyPath = 'datautilize/' . $item->utz_id . '/' . $safeName;
             if (file_exists(public_path($legacyPath))) {
                 $item->increment('utz_countfile');

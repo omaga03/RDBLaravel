@@ -170,6 +170,7 @@ class SyncAttachments extends Command
         foreach ($records as $r) {
             $candidates = [
                 $r->pro_file_path,
+                "uploads/datafiles/{$r->pro_id}/{$r->pro_file}",
                 "uploads/project_files/{$r->pro_id}/{$r->pro_file}",
                 "uploads/projects/{$r->pro_file}",
                 "projects/{$r->pro_file}",
@@ -212,6 +213,7 @@ class SyncAttachments extends Command
         foreach ($records as $r) {
             $candidates = [
                 $r->pro_abstract_file_path,
+                "uploads/datafiles/{$r->pro_id}/{$r->pro_abstract_file}",
                 "uploads/project_files/{$r->pro_id}/{$r->pro_abstract_file}",
                 "uploads/projects/{$r->pro_abstract_file}",
                 "abstracts/{$r->pro_abstract_file}",
@@ -254,6 +256,8 @@ class SyncAttachments extends Command
         foreach ($records as $r) {
             $candidates = [
                 $r->prf_path,
+                "uploads/datafiles/{$r->pro_id}/{$r->rf_files}",
+                "uploads/datafiles/{$r->rf_files}",
                 "uploads/project_files/{$r->pro_id}/{$r->rf_files}",
                 "uploads/project_files/{$r->rf_files}",
                 "project_files/{$r->rf_files}",
@@ -338,6 +342,8 @@ class SyncAttachments extends Command
         foreach ($records as $r) {
             $candidates = [
                 $r->dip_path,
+                "uploads/datadip/{$r->dip_id}/{$r->dip_files}",
+                "uploads/datadip/{$r->dip_files}",
                 "uploads/dips/{$r->dip_id}/{$r->dip_files}",
                 "uploads/dips/{$r->dip_files}",
                 "dips/{$r->dip_files}",
@@ -420,6 +426,7 @@ class SyncAttachments extends Command
         foreach ($records as $r) {
             $candidates = [
                 $r->news_path,
+                "uploads/datanewsimg/{$r->news_img}",
                 "uploads/news/{$r->news_img}",
                 "uploads/images/{$r->news_img}",
                 "news/{$r->news_img}",
@@ -461,6 +468,7 @@ class SyncAttachments extends Command
         foreach ($records as $r) {
             $candidates = [
                 $r->con_path,
+                "uploads/datacoferenceinthai/{$r->con_img}",
                 "uploads/conference/{$r->con_img}",
                 "uploads/images/{$r->con_img}",
                 "conference/{$r->con_img}",

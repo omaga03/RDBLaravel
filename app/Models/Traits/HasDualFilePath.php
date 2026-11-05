@@ -7,25 +7,58 @@ use Illuminate\Support\Facades\Storage;
 trait HasDualFilePath
 {
 	/**
+	 * Normalize legacy upload folder prefixes to the canonical 9 legacy folder names.
+	 */
+	public function normalizeLegacyUploadPath(string $path): string
+	{
+		$map = [
+			'uploads/project_files/' => 'uploads/datafiles/',
+			'uploads/dips/'          => 'uploads/datadip/',
+			'uploads/conference/'    => 'uploads/datacoferenceinthai/',
+			'uploads/conferences/'   => 'uploads/datacoferenceinthai/',
+			'uploads/news/'          => 'uploads/datanewsimg/',
+			'uploads/journals/'      => 'uploads/datajournalstatus/',
+		];
+
+		foreach ($map as $oldPrefix => $newPrefix) {
+			if (str_starts_with($path, $oldPrefix)) {
+				$remapped = $newPrefix . substr($path, strlen($oldPrefix));
+				if (Storage::disk('public')->exists($remapped) || file_exists(public_path('storage/' . $remapped)) || file_exists(public_path($remapped)) || !Storage::disk('public')->exists($path)) {
+					return $remapped;
+				}
+			}
+		}
+
+		return $path;
+	}
+
+	/**
 	 * Resolve file path: prefer newField (stored path), fallback to oldField under oldDir (or multiple candidates).
 	 *
 	 * @param string $newField  e.g. 'pro_file_path' (stored path like 'reports/uuid.pdf')
 	 * @param string $oldField  e.g. 'pro_file' (legacy filename stored, e.g. 'oldname.pdf')
-	 * @param string|array $oldDir e.g. 'uploads/projects' or ['uploads/project_files/{pro_id}', 'uploads/projects']
+	 * @param string|array $oldDir e.g. 'uploads/datafiles/{pro_id}' or ['uploads/datafiles/{pro_id}', 'uploads/projects']
 	 * @return string|null      relative storage path or null
 	 */
 	public function resolveDualFilePath(string $newField, string $oldField, string|array $oldDir = []): ?string
 	{
-        // 1. Prefer new path if present
+        // 1. Prefer new path if present and valid (with automatic legacy folder prefix normalization)
         if (!empty($this->{$newField})) {
-            return $this->{$newField};
+            $normalizedNew = $this->normalizeLegacyUploadPath(trim($this->{$newField}));
+            if (Storage::disk('public')->exists($normalizedNew) || file_exists(public_path('storage/' . $normalizedNew)) || file_exists(public_path($normalizedNew))) {
+                return $normalizedNew;
+            }
+            // If oldField is empty, return normalizedNew directly (supports unit tests and new UUID paths)
+            if (empty($this->{$oldField})) {
+                return $normalizedNew;
+            }
         }
 
         // 2. Fallback to legacy filename under candidate directories
         if (!empty($this->{$oldField})) {
             $filename = basename(trim($this->{$oldField}));
             if (empty($filename)) {
-                return null;
+                return !empty($this->{$newField}) ? $this->normalizeLegacyUploadPath(trim($this->{$newField})) : null;
             }
 
             $dirs = is_array($oldDir) ? $oldDir : [$oldDir];
@@ -50,6 +83,10 @@ trait HasDualFilePath
                     return $oldPath;
                 }
             }
+        }
+
+        if (!empty($this->{$newField})) {
+            return $this->normalizeLegacyUploadPath(trim($this->{$newField}));
         }
 
 		return null;

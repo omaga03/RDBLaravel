@@ -61,7 +61,7 @@ class RdbResearcher extends Model
             'uploads/researchers',
             'researchers',
             'dataresearcher',
-        ]) ?? (!empty($this->researcher_picture) ? 'uploads/researchers/' . basename(trim($this->researcher_picture)) : null);
+        ]) ?? (!empty($this->researcher_picture) ? 'uploads/dataresearcher/' . basename(trim($this->researcher_picture)) : null);
     }
 
     public function getProfileImageUrlAttribute(): ?string
@@ -113,7 +113,7 @@ class RdbResearcher extends Model
         return FileUploadService::checkFileIntegrity(
             $this->rf_path ?? '',
             $this->researcher_picture ?? '',
-            'uploads/researchers'
+            'uploads/dataresearcher'
         );
     }
 
@@ -205,7 +205,10 @@ class RdbResearcher extends Model
     }
 
     // Example helper for researcher file (e.g. CV/photo)
-    public function getResearcherFilePath(string $newField = 'rf_path', string $oldField = 'rf_file', string $oldDir = 'uploads/researchers'): ?string
+    public function getResearcherFilePath(string $newField = 'rf_path', string $oldField = 'rf_file', string|array $oldDir = [
+        'uploads/dataresearcher',
+        'uploads/researchers',
+    ]): ?string
     {
         return $this->resolveDualFilePath($newField, $oldField, $oldDir);
     }

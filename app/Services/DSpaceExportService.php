@@ -430,6 +430,8 @@ class DSpaceExportService
         $rawFile = ($type === 'report') ? $model->pro_file : $model->pro_abstract_file;
         if (!empty($rawFile)) {
             $legacyCandidates = [
+                storage_path('app/public/uploads/datafiles/' . $model->pro_id . '/' . $rawFile),
+                storage_path('app/public/uploads/project_files/' . $model->pro_id . '/' . $rawFile),
                 base_path('yii2_rdb-main/frontend/web/datafiles/' . $model->pro_id . '/' . $rawFile),
                 public_path('datafiles/' . $model->pro_id . '/' . $rawFile),
                 storage_path('app/public/project/' . $rawFile),
@@ -691,11 +693,11 @@ class DSpaceExportService
         $rawFile = $model->pub_file;
         if (!empty($rawFile)) {
             $legacyCandidates = [
+                storage_path('app/public/uploads/datapublished/' . $model->id . '/' . $rawFile),
                 base_path('yii2_rdb-main/frontend/web/datapublished/' . $model->id . '/' . $rawFile),
                 public_path('datapublished/' . $model->id . '/' . $rawFile),
                 public_path('uploads/datapublished/' . $model->id . '/' . $rawFile),
                 storage_path('app/public/published/' . $rawFile),
-                storage_path('app/public/uploads/datapublished/' . $model->id . '/' . $rawFile),
                 storage_path('app/public/uploads/rdb_published/' . $rawFile),
             ];
             foreach ($legacyCandidates as $c) {

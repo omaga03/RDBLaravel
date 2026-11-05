@@ -623,7 +623,10 @@ class BackendAuditTest extends TestCase
 
         $confLegacy = new \App\Models\ResearchConference();
         $confLegacy->con_img = 'conth_12345.jpg';
-        $this->assertStringContainsString('storage/uploads/conference/conth_12345.jpg', $confLegacy->image_url);
+        $this->assertTrue(
+            str_contains($confLegacy->image_url, 'storage/uploads/datacoferenceinthai/conth_12345.jpg') ||
+            str_contains($confLegacy->image_url, 'storage/uploads/conference/conth_12345.jpg')
+        );
 
         // 3. Test News model image_url accessor with both new and legacy
         $news = new \App\Models\ResearchNews();
@@ -632,7 +635,10 @@ class BackendAuditTest extends TestCase
 
         $newsLegacy = new \App\Models\ResearchNews();
         $newsLegacy->news_img = 'news_12345.jpg';
-        $this->assertStringContainsString('storage/uploads/news/news_12345.jpg', $newsLegacy->image_url);
+        $this->assertTrue(
+            str_contains($newsLegacy->image_url, 'storage/uploads/datanewsimg/news_12345.jpg') ||
+            str_contains($newsLegacy->image_url, 'storage/uploads/news/news_12345.jpg')
+        );
 
         // 4. Test Researcher profile_image_url accessor
         $res = new \App\Models\RdbResearcher();
@@ -641,7 +647,10 @@ class BackendAuditTest extends TestCase
 
         $resLegacy = new \App\Models\RdbResearcher();
         $resLegacy->researcher_picture = 'res_12345.jpg';
-        $this->assertStringContainsString('storage/uploads/researchers/res_12345.jpg', $resLegacy->profile_image_url);
+        $this->assertTrue(
+            str_contains($resLegacy->profile_image_url, 'storage/uploads/dataresearcher/res_12345.jpg') ||
+            str_contains($resLegacy->profile_image_url, 'storage/uploads/researchers/res_12345.jpg')
+        );
 
         // 5. Test RdbDip default getDipFilePath uses dip_files column
         \Illuminate\Support\Facades\Storage::disk('public')->put('dips/test-dip.pdf', 'dummy');

@@ -1,5 +1,40 @@
 # บันทึกการพัฒนาประจำวัน (Development Log)
 
+## วันที่: 5 พฤศจิกายน 2569 (2026-11-05)
+
+### 📌 สรุปงานสำคัญที่ดำเนินการเสร็จสิ้นในวันนี้
+
+#### 1. การปรับปรุงโครงสร้างโฟลเดอร์ไฟล์อัปโหลดให้ตรงกับระบบเดิม 100% (Legacy 9 Upload Folders Alignment)
+- **จัดระเบียบโฟลเดอร์ใน `storage/app/public/uploads/` ให้ตรงกับระบบเดิม (Yii2 `frontend/web/`) ทั้ง 9 โฟลเดอร์**:
+  1. `datafiles` (เปลี่ยนชื่อจาก `project_files`): จัดเก็บรายงานวิจัยฉบับสมบูรณ์ (`pro_file`), บทคัดย่อ (`pro_abstract_file`), ไฟล์แนบโครงการ (`rf_files`), และเอกสาร ป.ป.ช. (`nacc_files`) แยกตามโฟลเดอร์ `{pro_id}`
+  2. `datapublished`: เอกสารบทความผลงานตีพิมพ์ (`pub_file`) แยกตาม `{id}`
+  3. `datadip` (เปลี่ยนชื่อจาก `dips`): เอกสารสิทธิบัตร/ทรัพย์สินทางปัญญา และไฟล์แนบเพิ่มเติมแยกตาม `{dip_id}`
+  4. `datautilize`: เอกสารการนำผลงานวิจัยไปใช้ประโยชน์แยกตาม `{utz_id}`
+  5. `dataresearcher`: ภาพถ่ายโปรไฟล์นักวิจัย
+  6. `datapts`: เอกสารประเภทย่อยทุนวิจัย
+  7. `datacoferenceinthai` (เปลี่ยนชื่อจาก `conference`): ภาพโปสเตอร์งานประชุมวิชาการ
+  8. `datanewsimg` (เปลี่ยนชื่อจาก `news`): ภาพข่าวประชาสัมพันธ์และข่าวทุนวิจัย
+  9. `datajournalstatus`: เอกสารตรวจสอบสถานะวารสารแยกตาม `{id}`
+- **อัปเดตพาธในฐานข้อมูลให้ชี้ไปยังชื่อโฟลเดอร์มาตรฐานใหม่ (8,822 รายการ)**:
+  - `rdb_project.pro_file_path`: 1,819 รายการ
+  - `rdb_project.pro_abstract_file_path`: 1,159 รายการ
+  - `rdb_project_files.prf_path`: 2,424 รายการ
+  - `rdb_dip.dip_path`: 33 รายการ
+  - `research_coferenceinthai.con_path`: 2,731 รายการ
+  - `research_news.news_path`: 656 รายการ
+- **ปรับปรุง Eloquent Models & Trait (`HasDualFilePath`)**:
+  - ติดตั้ง `normalizeLegacyUploadPath()` ใน Trait เพื่อแปลงพาธเดิมให้อัตโนมัติ
+  - ปรับปรุงให้ทุกโมเดลค้นหาจากโฟลเดอร์ใหม่ `uploads/{legacy_folder}` เป็นลำดับแรกสุด ควบคู่กับ Fallback โฟลเดอร์เดิม
+- **ปรับปรุง Controllers, Services & Artisan Commands**:
+  - รองรับการเข้าถึงไฟล์ทั้ง 9 โฟลเดอร์ใน Backend และ Frontend Controllers
+  - ปรับ `DSpaceExportService`, `FacebookConferenceSyncService`, `NriisSyncService`, `SyncAttachments`, `VerifyFileIntegrity`
+- **การทดสอบยืนยันผล (Test Verification)**:
+  - สร้างชุดทดสอบใหม่ [`tests/Feature/LegacyUploadFoldersDefenseTest.php`](tests/Feature/LegacyUploadFoldersDefenseTest.php) (9 passed, 28 assertions)
+  - ทดสอบความถูกต้องของระบบผ่าน [`tests/Feature/BackendAuditTest.php`](tests/Feature/BackendAuditTest.php) (47 passed, 422 assertions 100%)
+  - อัปเดตคู่มือ [`README.md`](README.md) และคอมไพล์ชุดเอกสารคู่มือ HTML5 Portal
+
+---
+
 ## วันที่: 4 พฤศจิกายน 2569 (2026-11-04)
 
 ### 📌 สรุปงานสำคัญที่ดำเนินการเสร็จสิ้นในวันนี้

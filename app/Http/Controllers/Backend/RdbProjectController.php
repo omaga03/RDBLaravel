@@ -1065,10 +1065,12 @@ class RdbProjectController extends Controller
             Storage::disk('public')->delete($project->pro_abstract_file_path);
         }
 
-        if ($project->pro_abstract_file && 
-            $project->pro_abstract_file !== $project->pro_abstract_file_path &&
-            Storage::disk('public')->exists('uploads/projects/' . $project->pro_abstract_file)) {
-            Storage::disk('public')->delete('uploads/projects/' . $project->pro_abstract_file);
+        if ($project->pro_abstract_file && $project->pro_abstract_file !== $project->pro_abstract_file_path) {
+            foreach (['uploads/datafiles/' . $project->pro_id . '/' . $project->pro_abstract_file, 'uploads/projects/' . $project->pro_abstract_file] as $cand) {
+                if (Storage::disk('public')->exists($cand)) {
+                    Storage::disk('public')->delete($cand);
+                }
+            }
         }
 
         $project->pro_abstract_file = null;
@@ -1153,10 +1155,12 @@ class RdbProjectController extends Controller
             Storage::disk('public')->delete($project->pro_file_path);
         }
 
-        if ($project->pro_file &&
-            $project->pro_file !== $project->pro_file_path &&
-            Storage::disk('public')->exists('uploads/project_files/' . $project->pro_id . '/' . $project->pro_file)) {
-            Storage::disk('public')->delete('uploads/project_files/' . $project->pro_id . '/' . $project->pro_file);
+        if ($project->pro_file && $project->pro_file !== $project->pro_file_path) {
+            foreach (['uploads/datafiles/' . $project->pro_id . '/' . $project->pro_file, 'uploads/project_files/' . $project->pro_id . '/' . $project->pro_file] as $cand) {
+                if (Storage::disk('public')->exists($cand)) {
+                    Storage::disk('public')->delete($cand);
+                }
+            }
         }
 
         $project->pro_file = null;
@@ -1192,8 +1196,13 @@ class RdbProjectController extends Controller
             return response()->file(public_path($filePath));
         }
 
-        // Support legacy folder: datafiles/{pro_id}/{pro_abstract_file}
+        // Support legacy folder: uploads/datafiles/{pro_id}/{pro_abstract_file} or datafiles/{pro_id}/{pro_abstract_file}
         if (!empty($project->pro_abstract_file)) {
+            $legacyUploaded = 'uploads/datafiles/' . $project->pro_id . '/' . $project->pro_abstract_file;
+            if (Storage::disk('public')->exists($legacyUploaded)) {
+                $project->increment('pro_count_abs');
+                return Storage::disk('public')->response($legacyUploaded);
+            }
             $legacyRelative = 'datafiles/' . $project->pro_id . '/' . $project->pro_abstract_file;
             if (Storage::disk('public')->exists($legacyRelative)) {
                 $project->increment('pro_count_abs');
@@ -1234,8 +1243,13 @@ class RdbProjectController extends Controller
             return response()->file(public_path($filePath));
         }
 
-        // Support legacy folder: datafiles/{pro_id}/{pro_file}
+        // Support legacy folder: uploads/datafiles/{pro_id}/{pro_file} or datafiles/{pro_id}/{pro_file}
         if (!empty($project->pro_file)) {
+            $legacyUploaded = 'uploads/datafiles/' . $project->pro_id . '/' . $project->pro_file;
+            if (Storage::disk('public')->exists($legacyUploaded)) {
+                $project->increment('pro_count_full');
+                return Storage::disk('public')->response($legacyUploaded);
+            }
             $legacyRelative = 'datafiles/' . $project->pro_id . '/' . $project->pro_file;
             if (Storage::disk('public')->exists($legacyRelative)) {
                 $project->increment('pro_count_full');

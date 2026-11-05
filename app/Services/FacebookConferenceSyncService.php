@@ -192,7 +192,7 @@ class FacebookConferenceSyncService
             }
 
             $filename = "conth_{$fbid}.jpg";
-            $relativePath = "uploads/conference/{$filename}";
+            $relativePath = "uploads/datacoferenceinthai/{$filename}";
 
             Storage::disk('public')->put($relativePath, $content);
             return $relativePath;

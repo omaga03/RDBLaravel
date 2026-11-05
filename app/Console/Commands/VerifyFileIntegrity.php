@@ -78,15 +78,15 @@ class VerifyFileIntegrity extends Command
         foreach (RdbDip::cursor() as $dip) {
              // Checking multiple potential files for RdbDip
              $dipFiles = [
-                'dip_files' => $dip->getDipFilePath('dip_path', 'dip_files', 'uploads/dips'),
-                'dip_data1_files' => $dip->getDipFilePath('dip_data1_path', 'dip_data1_files', 'uploads/dips'),
-                'dip_data2_files_con' => $dip->getDipFilePath('dip_data2_con_path', 'dip_data2_files_con', 'uploads/dips'),
-                'dip_data3_filesass1' => $dip->getDipFilePath('dip_data3_ass1_path', 'dip_data3_filesass1', 'uploads/dips'),
-                'dip_data3_filesass2' => $dip->getDipFilePath('dip_data3_ass2_path', 'dip_data3_filesass2', 'uploads/dips'),
-                'dip_data3_filesass3' => $dip->getDipFilePath('dip_data3_ass3_path', 'dip_data3_filesass3', 'uploads/dips'),
+                'dip_files' => $dip->getDipFilePath('dip_files'),
+                'dip_data1_files' => $dip->getDipFilePath('dip_data1_files'),
+                'dip_data2_files_con' => $dip->getDipFilePath('dip_data2_files_con'),
+                'dip_data3_filesass1' => $dip->getDipFilePath('dip_data3_filesass1'),
+                'dip_data3_filesass2' => $dip->getDipFilePath('dip_data3_filesass2'),
+                'dip_data3_filesass3' => $dip->getDipFilePath('dip_data3_filesass3'),
              ];
              foreach($dipFiles as $field => $path) {
-                if ($path && !Storage::exists($path)) {
+                if ($path && !Storage::disk('public')->exists($path)) {
                     $this->warn("MISSING Dip File: Dip ID {$dip->dip_id}, Field: {$field}, Path: {$path}");
                     $totalMissing++;
                 }
@@ -97,7 +97,7 @@ class VerifyFileIntegrity extends Command
         $this->line('Checking RdbResearcher (Profile Images)...');
         foreach (RdbResearcher::cursor() as $researcher) {
             $path = $researcher->getProfileFilePath();
-            if ($path && !Storage::exists($path)) {
+            if ($path && !Storage::disk('public')->exists($path)) {
                 $this->warn("MISSING Researcher Image: Researcher ID {$researcher->researcher_id}, Path: {$path}");
                 $totalMissing++;
             }
@@ -106,12 +106,12 @@ class VerifyFileIntegrity extends Command
         // 6. ResearchConference
         $this->line('Checking ResearchConference...');
         foreach (ResearchConference::cursor() as $conference) {
-            if ($conference->con_img && !Storage::disk('public')->exists('uploads/conference/' . $conference->con_img)) {
-                $this->warn("MISSING Conference Image (con_img): Conference ID {$conference->id}, Path: uploads/conference/{$conference->con_img}");
+            if ($conference->con_img && !Storage::disk('public')->exists('uploads/datacoferenceinthai/' . $conference->con_img) && !Storage::disk('public')->exists('uploads/conference/' . $conference->con_img)) {
+                $this->warn("MISSING Conference Image (con_img): Conference ID {$conference->id}, Path: uploads/datacoferenceinthai/{$conference->con_img}");
                 $totalMissing++;
             }
-            if ($conference->con_site_img && !Storage::disk('public')->exists('uploads/conference/' . $conference->con_site_img)) {
-                $this->warn("MISSING Conference Image (con_site_img): Conference ID {$conference->id}, Path: uploads/conference/{$conference->con_site_img}");
+            if ($conference->con_site_img && !Storage::disk('public')->exists('uploads/datacoferenceinthai/' . $conference->con_site_img) && !Storage::disk('public')->exists('uploads/conference/' . $conference->con_site_img)) {
+                $this->warn("MISSING Conference Image (con_site_img): Conference ID {$conference->id}, Path: uploads/datacoferenceinthai/{$conference->con_site_img}");
                 $totalMissing++;
             }
         }

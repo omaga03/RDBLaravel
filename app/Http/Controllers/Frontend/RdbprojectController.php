@@ -661,8 +661,13 @@ class RdbprojectController extends Controller
             return response()->file(public_path($filePath));
         }
 
-        // Support legacy folder: datafiles/{pro_id}/{pro_abstract_file}
+        // Support legacy folder: uploads/datafiles/{pro_id}/{pro_abstract_file} or datafiles/{pro_id}/{pro_abstract_file}
         if (!empty($project->pro_abstract_file)) {
+            $legacyUploaded = 'uploads/datafiles/' . $project->pro_id . '/' . $project->pro_abstract_file;
+            if (Storage::disk('public')->exists($legacyUploaded)) {
+                $project->increment('pro_count_abs');
+                return Storage::disk('public')->response($legacyUploaded);
+            }
             $legacyRelative = 'datafiles/' . $project->pro_id . '/' . $project->pro_abstract_file;
             if (Storage::disk('public')->exists($legacyRelative)) {
                 $project->increment('pro_count_abs');
@@ -738,8 +743,13 @@ class RdbprojectController extends Controller
             return response()->file(public_path($filePath));
         }
 
-        // Support legacy folder: datafiles/{pro_id}/{pro_file}
+        // Support legacy folder: uploads/datafiles/{pro_id}/{pro_file} or datafiles/{pro_id}/{pro_file}
         if (!empty($project->pro_file)) {
+            $legacyUploaded = 'uploads/datafiles/' . $project->pro_id . '/' . $project->pro_file;
+            if (Storage::disk('public')->exists($legacyUploaded)) {
+                $logDownload();
+                return Storage::disk('public')->response($legacyUploaded);
+            }
             $legacyRelative = 'datafiles/' . $project->pro_id . '/' . $project->pro_file;
             if (Storage::disk('public')->exists($legacyRelative)) {
                 $logDownload();

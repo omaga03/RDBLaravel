@@ -418,6 +418,10 @@ class RdbdipController extends Controller
         }
 
         // Support legacy yii2 datadip
+        $legacyUploaded = 'uploads/datadip/' . $item->dip_id . '/' . basename($filename);
+        if (Storage::disk('public')->exists($legacyUploaded)) {
+            return Storage::disk('public')->response($legacyUploaded);
+        }
         $legacyPath = 'datadip/' . $item->dip_id . '/' . basename($filename);
         if (file_exists(public_path($legacyPath))) {
             return response()->file(public_path($legacyPath));

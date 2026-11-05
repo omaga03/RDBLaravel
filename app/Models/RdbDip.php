@@ -104,17 +104,21 @@ class RdbDip extends Model
         // 1. กรณีไฟล์หลัก
         if ($targetField === 'dip_files') {
             return $this->resolveDualFilePath('dip_path', 'dip_files', [
+                'uploads/datadip/{dip_id}',
+                'uploads/datadip',
                 'uploads/dips/{dip_id}',
                 'uploads/dips',
                 'dips/{dip_id}',
                 'dips',
                 'datadip/{dip_id}',
-            ]) ?? (!empty($this->dip_files) ? 'uploads/dips/' . basename(trim($this->dip_files)) : null);
+            ]) ?? (!empty($this->dip_files) ? 'uploads/datadip/' . $this->dip_id . '/' . basename(trim($this->dip_files)) : null);
         } else {
             // 2. กรณีไฟล์แนบเพิ่มเติม (dip_data1_files, dip_data2_files_con, ฯลฯ)
             if (!empty($this->{$targetField})) {
                 $filename = basename(trim($this->{$targetField}));
                 $candidates = [
+                    'uploads/datadip/' . $this->dip_id . '/' . $filename,
+                    'uploads/datadip/' . $filename,
                     'uploads/dips/' . $this->dip_id . '/' . $filename,
                     'uploads/dips/' . $filename,
                     'dips/' . $filename,
@@ -128,7 +132,7 @@ class RdbDip extends Model
                 if (file_exists(base_path('yii2_rdb-main/frontend/web/datadip/' . $this->dip_id . '/' . $filename))) {
                     return 'datadip/' . $this->dip_id . '/' . $filename;
                 }
-                return 'uploads/dips/' . $filename;
+                return 'uploads/datadip/' . $this->dip_id . '/' . $filename;
             }
         }
 

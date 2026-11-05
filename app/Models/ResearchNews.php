@@ -33,7 +33,12 @@ class ResearchNews extends Model
         'news_count',
     ];
 
-    public function getNewsFilePath(string $newField = 'news_path', string $oldField = 'news_img', string $oldDir = 'uploads/news'): ?string
+    public function getNewsFilePath(string $newField = 'news_path', string $oldField = 'news_img', string|array $oldDir = [
+        'uploads/datanewsimg',
+        'uploads/news',
+        'uploads/images',
+        'datanewsimg',
+    ]): ?string
     {
         return $this->resolveDualFilePath($newField, $oldField, $oldDir);
     }
@@ -41,10 +46,14 @@ class ResearchNews extends Model
     public function getImageUrlAttribute(): ?string
     {
         if (!empty($this->news_path)) {
-            return asset('storage/' . $this->news_path);
+            $normalized = $this->normalizeLegacyUploadPath(trim($this->news_path));
+            return asset('storage/' . $normalized);
         }
         if (!empty($this->news_img)) {
             $img = basename(trim($this->news_img));
+            if (Storage::disk('public')->exists('uploads/datanewsimg/' . $img)) {
+                return asset('storage/uploads/datanewsimg/' . $img);
+            }
             if (Storage::disk('public')->exists('uploads/images/' . $img)) {
                 return asset('storage/uploads/images/' . $img);
             }
@@ -55,7 +64,7 @@ class ResearchNews extends Model
                 return asset('storage/news/' . $img);
             }
             if (app()->runningUnitTests() || !$this->exists) {
-                return asset('storage/uploads/news/' . $img);
+                return asset('storage/uploads/datanewsimg/' . $img);
             }
         }
         if (!empty($this->news_detail)) {

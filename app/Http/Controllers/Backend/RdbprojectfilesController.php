@@ -112,8 +112,12 @@ class RdbprojectfilesController extends Controller
         if ($item->prf_path && Storage::disk('public')->exists($item->prf_path)) {
             Storage::disk('public')->delete($item->prf_path);
         }
-        if ($item->rf_files && $item->rf_files != $item->prf_safe_name && Storage::disk('public')->exists('uploads/project_files/' . $item->rf_files)) {
-            Storage::disk('public')->delete('uploads/project_files/' . $item->rf_files);
+        if ($item->rf_files && $item->rf_files != $item->prf_safe_name) {
+            foreach (['uploads/datafiles/' . $item->pro_id . '/' . $item->rf_files, 'uploads/datafiles/' . $item->rf_files, 'uploads/project_files/' . $item->rf_files] as $cand) {
+                if (Storage::disk('public')->exists($cand)) {
+                    Storage::disk('public')->delete($cand);
+                }
+            }
         }
 
         $item->delete();

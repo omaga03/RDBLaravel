@@ -62,6 +62,6 @@ class RdbProjectTypeSub extends Model
             'uploads/project_types_sub',
             'project_types_sub',
             'datapts',
-        ]) ?? (!empty($file) ? 'uploads/project_types_sub/' . basename(trim($file)) : null);
+        ]) ?? (!empty($file) ? 'uploads/datapts/' . basename(trim($file)) : null);
     }
 }

@@ -59,12 +59,15 @@ class RdbProjectFiles extends Model
     public function getFilePath(): ?string
     {
         return $this->resolveDualFilePath('prf_path', 'rf_files', [
+            'uploads/datafiles/{pro_id}',
+            'uploads/datafiles',
             'uploads/project_files/{pro_id}',
             'uploads/project_files',
             'project_files/{pro_id}',
             'project_files',
             'uploads/projects',
             'projects',
+            'datafiles/{pro_id}',
         ]);
     }
 

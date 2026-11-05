@@ -170,7 +170,7 @@ class NriisSyncService
             $ext = in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'webp', 'gif']) ? strtolower($ext) : 'jpg';
 
             $filename = "nriis_{$nid}.{$ext}";
-            $relativePath = "uploads/news/{$filename}";
+            $relativePath = "uploads/datanewsimg/{$filename}";
 
             Storage::disk('public')->put($relativePath, $content);
             return $relativePath;

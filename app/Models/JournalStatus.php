@@ -28,8 +28,14 @@ class JournalStatus extends Model
         'updated_at',
     ];
 
-    public function getJournalStatusFilePath(string $newField = 'js_path', string $oldField = 'js_file', string $oldDir = 'uploads/journals'): ?string
+    public function getJournalStatusFilePath(string $newField = 'js_path', string $oldField = 'jou_files', string|array $oldDir = [
+        'uploads/datajournalstatus/{id}',
+        'uploads/datajournalstatus',
+        'uploads/journals',
+        'datajournalstatus/{id}',
+    ]): ?string
     {
-        return $this->resolveDualFilePath($newField, $oldField, $oldDir);
+        $effectiveOldField = !empty($this->{$oldField}) ? $oldField : 'js_file';
+        return $this->resolveDualFilePath($newField, $effectiveOldField, $oldDir);
     }
 }

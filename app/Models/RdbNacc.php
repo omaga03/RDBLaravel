@@ -37,4 +37,18 @@ class RdbNacc extends Model
     public function updater() {
         return $this->belongsTo(User::class, 'user_updated');
     }
+
+    /**
+     * Get path ที่ถูกต้องสำหรับไฟล์ ป.ป.ช. (เก็บใน uploads/datafiles/{pro_id})
+     */
+    public function getNaccFilePath(): ?string
+    {
+        return $this->resolveDualFilePath('nacc_path', 'nacc_files', [
+            'uploads/datafiles/{pro_id}',
+            'uploads/datafiles',
+            'datafiles/{pro_id}',
+            'uploads/nacc',
+            'nacc',
+        ]) ?? (!empty($this->nacc_files) ? 'uploads/datafiles/' . $this->pro_id . '/' . basename(trim($this->nacc_files)) : null);
+    }
 }

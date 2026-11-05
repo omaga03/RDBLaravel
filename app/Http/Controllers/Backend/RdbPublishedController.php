@@ -930,6 +930,11 @@ class RdbPublishedController extends Controller
 
         // Support legacy yii2 datapublished
         if (!empty($item->pub_file)) {
+            $legacyUploaded = 'uploads/datapublished/' . $item->id . '/' . basename($item->pub_file);
+            if (Storage::disk('public')->exists($legacyUploaded)) {
+                $item->increment('pub_download');
+                return Storage::disk('public')->response($legacyUploaded);
+            }
             $legacyPath = 'datapublished/' . $item->id . '/' . basename($item->pub_file);
             if (file_exists(public_path($legacyPath))) {
                 $item->increment('pub_download');

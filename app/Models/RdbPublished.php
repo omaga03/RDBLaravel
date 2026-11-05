@@ -115,7 +115,7 @@ class RdbPublished extends Model
             'uploads/published',
             'published',
             'datapublished/{id}',
-        ]) ?? (!empty($this->pub_file) ? 'uploads/rdb_published/' . $this->pub_file : null);
+        ]) ?? (!empty($this->pub_file) ? 'uploads/datapublished/' . $this->id . '/' . $this->pub_file : null);
     }
 
     /**
@@ -126,7 +126,7 @@ class RdbPublished extends Model
         return FileUploadService::checkFileIntegrity(
             $this->pf_path ?? '',
             $this->pub_file ?? '',
-            'uploads/published'
+            'uploads/datapublished/' . $this->id
         );
     }
 

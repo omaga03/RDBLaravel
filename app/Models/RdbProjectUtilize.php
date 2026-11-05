@@ -109,7 +109,7 @@ class RdbProjectUtilize extends Model
                     return $cand;
                 }
             }
-            return 'uploads/utilize/' . $safeName;
+            return 'uploads/datautilize/' . $this->utz_id . '/' . $safeName;
         }
 
         return $this->resolveDualFilePath('uf_path', 'utz_files', [
@@ -118,6 +118,6 @@ class RdbProjectUtilize extends Model
             'utilize',
             'uploads/utilize',
             'datautilize/{utz_id}',
-        ]) ?? (!empty($this->utz_files) ? 'uploads/utilize/' . basename(trim($this->utz_files)) : null);
+        ]) ?? (!empty($this->utz_files) ? 'uploads/datautilize/' . $this->utz_id . '/' . basename(trim($this->utz_files)) : null);
     }
 }

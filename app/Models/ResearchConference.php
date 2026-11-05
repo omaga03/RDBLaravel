@@ -35,7 +35,12 @@ class ResearchConference extends Model
         'file_mime_type',
     ];
 
-    public function getConferenceFilePath(string $newField = 'con_path', string $oldField = 'con_img', string $oldDir = 'uploads/conference'): ?string
+    public function getConferenceFilePath(string $newField = 'con_path', string $oldField = 'con_img', string|array $oldDir = [
+        'uploads/datacoferenceinthai',
+        'uploads/conference',
+        'uploads/images',
+        'datacoferenceinthai',
+    ]): ?string
     {
         return $this->resolveDualFilePath($newField, $oldField, $oldDir);
     }
@@ -44,10 +49,14 @@ class ResearchConference extends Model
     {
         $path = $this->con_path ?: $this->file_path;
         if (!empty($path)) {
-            return asset('storage/' . $path);
+            $normalized = $this->normalizeLegacyUploadPath(trim($path));
+            return asset('storage/' . $normalized);
         }
         if (!empty($this->con_img)) {
             $img = basename(trim($this->con_img));
+            if (Storage::disk('public')->exists('uploads/datacoferenceinthai/' . $img)) {
+                return asset('storage/uploads/datacoferenceinthai/' . $img);
+            }
             if (Storage::disk('public')->exists('uploads/images/' . $img)) {
                 return asset('storage/uploads/images/' . $img);
             }
@@ -58,7 +67,7 @@ class ResearchConference extends Model
                 return asset('storage/conference/' . $img);
             }
             if (app()->runningUnitTests() || !$this->exists) {
-                return asset('storage/uploads/conference/' . $img);
+                return asset('storage/uploads/datacoferenceinthai/' . $img);
             }
             // Fallback to upstream PCRU CDN if locally missing
             return 'https://research.pcru.ac.th/rdb/datacoferenceinthai/' . $img;

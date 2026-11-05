@@ -147,7 +147,7 @@ class ResearchNewsController extends Controller
         $item = ResearchNews::findOrFail($id);
         $this->authorize('view', $item);
 
-        $filePath = $item->getNewsFilePath(oldField: 'news_img', oldDir: 'uploads/news');
+        $filePath = $item->getNewsFilePath();
 
         if ($filePath && Storage::disk('public')->exists($filePath)) {
             return Storage::disk('public')->response($filePath);

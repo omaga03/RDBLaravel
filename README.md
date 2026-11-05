@@ -111,6 +111,31 @@ php artisan storage:link
 
 ---
 
+## 📂 ขั้นตอนที่ 5.1: นำเข้าไฟล์เอกสารและภาพจากระบบเดิม (Legacy Uploads — 9 Folders)
+
+ระบบได้รับการออกแบบโครงสร้างโฟลเดอร์จัดเก็บไฟล์ใน `storage/app/public/uploads/` ให้**ตรงกับระบบเดิม (Yii2) ทั้ง 9 โฟลเดอร์ 100%**  
+ผู้ดูแลระบบสามารถคัดลอก (Copy & Paste) ทั้ง 9 โฟลเดอร์จากระบบเดิมที่ `frontend/web/` มาวางใน `storage/app/public/uploads/` ได้ทันที และระบบจะสามารถเปิดดู/ดาวน์โหลดไฟล์ได้ตามปกติทุกโมดูล:
+
+| ลำดับ | โฟลเดอร์ใน `storage/app/public/uploads/` | โมดูลที่ใช้งาน | โครงสร้างจัดเก็บไฟล์ |
+| :---: | :--- | :--- | :--- |
+| 1 | `datafiles` | เล่มรายงานวิจัยฉบับสมบูรณ์ (`pro_file`), บทคัดย่อ (`pro_abstract_file`), ไฟล์แนบ (`rf_files`), เอกสาร ป.ป.ช. | `datafiles/{pro_id}/{filename}` |
+| 2 | `datapublished` | เอกสารบทความผลงานตีพิมพ์ (`pub_file`) | `datapublished/{id}/{filename}` |
+| 3 | `datadip` | เอกสารทรัพย์สินทางปัญญาและไฟล์แนบเพิ่มเติม | `datadip/{dip_id}/{filename}` |
+| 4 | `datautilize` | เอกสารการนำผลงานวิจัยไปใช้ประโยชน์ | `datautilize/{utz_id}/{filename}` |
+| 5 | `dataresearcher` | ภาพถ่ายโปรไฟล์นักวิจัย | `dataresearcher/{filename}` |
+| 6 | `datapts` | เอกสารประเภทย่อยทุนวิจัย | `datapts/{filename}` |
+| 7 | `datacoferenceinthai` | ภาพโปสเตอร์งานประชุมวิชาการ | `datacoferenceinthai/{filename}` |
+| 8 | `datanewsimg` | ภาพข่าวประชาสัมพันธ์และข่าวทุนวิจัย | `datanewsimg/{filename}` |
+| 9 | `datajournalstatus` | เอกสารตรวจสอบสถานะวารสาร | `datajournalstatus/{id}/{filename}` |
+
+> 💡 **คำสั่งตรวจสอบความสมบูรณ์ของไฟล์หลังวางโฟลเดอร์ (File Verification):**
+> ```bash
+> php artisan rdb:sync-attachments --dry-run
+> ```
+> *(ระบบจะรายงานสถิติความพร้อมของไฟล์ทั้ง 10 โมดูล โดยต้องมีความครอบคลุมมากกว่า 97% ขึ้นไป)*
+
+---
+
 ## ✅ ขั้นตอนที่ 6: ตรวจสอบความถูกต้องของระบบ
 
 รันคำสั่งทดสอบระบบเพื่อความมั่นใจ:

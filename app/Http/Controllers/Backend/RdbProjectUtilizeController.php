@@ -409,11 +409,15 @@ class RdbProjectUtilizeController extends Controller
             $filePath = $candidate;
         }
 
-        // 2. Fallback to specific $filename under uploads/utilize or datautilize
+        // 2. Fallback to specific $filename under uploads/datautilize, uploads/utilize or datautilize
         if (!$filePath && $filename) {
             $safeName = basename(trim($filename));
             if ($safeName) {
-                if (Storage::disk('public')->exists('uploads/utilize/' . $safeName)) {
+                if (Storage::disk('public')->exists('uploads/datautilize/' . $item->utz_id . '/' . $safeName)) {
+                    $filePath = 'uploads/datautilize/' . $item->utz_id . '/' . $safeName;
+                } elseif (Storage::disk('public')->exists('uploads/datautilize/' . $safeName)) {
+                    $filePath = 'uploads/datautilize/' . $safeName;
+                } elseif (Storage::disk('public')->exists('uploads/utilize/' . $safeName)) {
                     $filePath = 'uploads/utilize/' . $safeName;
                 } elseif (file_exists(public_path('uploads/utilize/' . $safeName))) {
                     $filePath = 'uploads/utilize/' . $safeName;

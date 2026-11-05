@@ -305,18 +305,20 @@ class RdbProject extends Model
 
     /**
      * Get path ที่ถูกต้องสำหรับไฟล์บทคัดย่อ
-     * ลองใช้ path ใหม่ (UUID) ก่อน → fallback ใช้เก่า
+     * ลองใช้ path ใหม่ (UUID) ก่อน → fallback ใช้เก่า (uploads/datafiles/{pro_id})
      */
     public function getAbstractFilePath(): ?string
     {
         return $this->resolveDualFilePath('pro_abstract_file_path', 'pro_abstract_file', [
+            'uploads/datafiles/{pro_id}',
+            'uploads/datafiles',
             'uploads/project_files/{pro_id}',
             'uploads/projects',
             'abstracts',
             'projects',
             'datafiles/{pro_id}',
             'uploads',
-        ]) ?? (!empty($this->pro_abstract_file) ? 'uploads/projects/' . $this->pro_abstract_file : null);
+        ]) ?? (!empty($this->pro_abstract_file) ? 'uploads/datafiles/' . $this->pro_id . '/' . $this->pro_abstract_file : null);
     }
 
     /**
@@ -325,12 +327,14 @@ class RdbProject extends Model
     public function getReportFilePath(): ?string
     {
         return $this->resolveDualFilePath('pro_file_path', 'pro_file', [
+            'uploads/datafiles/{pro_id}',
+            'uploads/datafiles',
             'uploads/project_files/{pro_id}',
             'uploads/projects',
             'projects',
             'datafiles/{pro_id}',
             'uploads',
-        ]) ?? (!empty($this->pro_file) ? 'uploads/projects/' . $this->pro_file : null);
+        ]) ?? (!empty($this->pro_file) ? 'uploads/datafiles/' . $this->pro_id . '/' . $this->pro_file : null);
     }
 
     /**
@@ -369,7 +373,7 @@ class RdbProject extends Model
         return FileUploadService::checkFileIntegrity(
             $this->pro_abstract_file_path ?? '',
             $this->pro_abstract_file ?? '',
-            'uploads/projects'
+            'uploads/datafiles/' . $this->pro_id
         );
     }
 
@@ -381,7 +385,7 @@ class RdbProject extends Model
         return FileUploadService::checkFileIntegrity(
             $this->pro_file_path ?? '',
             $this->pro_file ?? '',
-            'uploads/projects'
+            'uploads/datafiles/' . $this->pro_id
         );
     }
 

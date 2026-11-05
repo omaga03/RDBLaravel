@@ -325,8 +325,13 @@ class RdbpublishedController extends Controller
             return response()->file(public_path('storage/' . $filePath));
         }
 
-        // Support legacy folder: datapublished/{id}/{pub_file}
+        // Support legacy folder: uploads/datapublished/{id}/{pub_file} or datapublished/{id}/{pub_file}
         if (!empty($item->pub_file)) {
+            $legacyUploaded = 'uploads/datapublished/' . $item->id . '/' . $item->pub_file;
+            if (Storage::disk('public')->exists($legacyUploaded)) {
+                $item->increment('pub_download');
+                return Storage::disk('public')->response($legacyUploaded);
+            }
             $legacyRelative = 'datapublished/' . $item->id . '/' . $item->pub_file;
             if (Storage::disk('public')->exists($legacyRelative)) {
                 $item->increment('pub_download');
