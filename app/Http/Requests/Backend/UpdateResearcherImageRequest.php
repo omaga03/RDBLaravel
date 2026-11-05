@@ -22,7 +22,7 @@ class UpdateResearcherImageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'fileimg' => 'required|image|mimes:jpeg,png,jpg,gif|max:51200', // Matches form request rule
+            'fileimg' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:51200', // Matches form request rule
         ];
     }
 
@@ -36,7 +36,7 @@ class UpdateResearcherImageRequest extends FormRequest
         return [
             'fileimg.required' => 'กรุณาเลือกไฟล์รูปภาพ',
             'fileimg.image' => 'ไฟล์ต้องเป็นรูปภาพ',
-            'fileimg.mimes' => 'ไฟล์รูปภาพต้องเป็นประเภท jpeg, png, jpg, หรือ gif',
+            'fileimg.mimes' => 'ไฟล์รูปภาพต้องเป็นประเภท jpeg, png, jpg, gif หรือ webp',
             'fileimg.max' => 'ขนาดไฟล์รูปภาพต้องไม่เกิน 50MB',
         ];
     }

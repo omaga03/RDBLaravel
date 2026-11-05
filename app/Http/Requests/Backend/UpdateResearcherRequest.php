@@ -34,7 +34,7 @@ class UpdateResearcherRequest extends FormRequest
             'researcher_fname' => 'required|string|max:255',
             'researcher_lname' => 'required|string|max:255',
             'researcher_email' => 'nullable|email|unique:rdb_researcher,researcher_email,' . $this->route('rdb_researcher') . ',researcher_id', // Exclude current ID
-            'fileimg' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:51200', // Increased max size to 50MB
+            'fileimg' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:51200', // Increased max size to 50MB
             
             // Other fields from RdbResearcher model
             'citizen_id' => 'nullable|string|max:13', // Optional for update, as it's for codeid

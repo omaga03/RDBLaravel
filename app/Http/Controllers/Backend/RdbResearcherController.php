@@ -211,7 +211,7 @@ class RdbResearcherController extends Controller
         }
 
         if ($request->hasFile('fileimg')) {
-            $fileInfo = $this->fileUploadService->storeFile($request->file('fileimg'), 'researchers');
+            $fileInfo = $this->fileUploadService->storeImageAsWebp($request->file('fileimg'), 'researchers');
             $data['rf_safe_name'] = $fileInfo['safe_name'];
             $data['rf_path'] = $fileInfo['path'];
             $data['rf_size'] = $fileInfo['size'];
@@ -352,7 +352,7 @@ class RdbResearcherController extends Controller
                 Storage::disk('public')->delete($researcher->rf_path);
             }
 
-            $fileInfo = $this->fileUploadService->storeFile($request->file('fileimg'), 'researchers');
+            $fileInfo = $this->fileUploadService->storeImageAsWebp($request->file('fileimg'), 'researchers');
             $data['rf_safe_name'] = $fileInfo['safe_name'];
             $data['rf_path'] = $fileInfo['path'];
             $data['rf_size'] = $fileInfo['size'];
@@ -404,7 +404,7 @@ class RdbResearcherController extends Controller
                 Storage::disk('public')->delete($researcher->rf_path);
             }
             
-            $fileInfo = $this->fileUploadService->storeFile($request->file('fileimg'), 'researchers');
+            $fileInfo = $this->fileUploadService->storeImageAsWebp($request->file('fileimg'), 'researchers');
             
             $researcher->rf_safe_name = $fileInfo['safe_name'];
             $researcher->rf_path = $fileInfo['path'];

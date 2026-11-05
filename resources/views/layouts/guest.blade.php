@@ -27,9 +27,12 @@
             <div class="mb-6 text-center z-10">
                 <a href="{{ url('/') }}" class="inline-block transition-transform duration-300 hover:scale-105" title="กลับสู่หน้าหลัก">
                     <div class="inline-flex items-center justify-center p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-2xl mb-3">
-                        <img src="{{ asset('images/logo.png') }}" 
-                             alt="PCRU Logo" 
-                             style="width: 84px; height: 84px; max-width: 84px; max-height: 84px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));" />
+                        <picture>
+                            <source srcset="{{ asset('images/logo.webp') }}" type="image/webp">
+                            <img src="{{ asset('images/logo.png') }}" 
+                                 alt="PCRU Logo" 
+                                 style="width: 84px; height: 84px; max-width: 84px; max-height: 84px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));" />
+                        </picture>
                     </div>
                 </a>
                 <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight" style="text-shadow: 0 2px 10px rgba(0,0,0,0.35);">

@@ -485,12 +485,26 @@ class IntegrationsAndAutomationTest extends TestCase
         // Clean up test file
         \Illuminate\Support\Facades\Storage::disk('public')->delete($result['path']);
 
-        // 2. Test Artisan Command rdb:convert-news-webp
+        // 2. Test Artisan Commands rdb:convert-news-webp & rdb:convert-images-webp
         $exitCode = \Illuminate\Support\Facades\Artisan::call('rdb:convert-news-webp', [
             '--module' => 'all',
             '--limit' => 2,
         ]);
         $this->assertEquals(0, $exitCode);
+
+        $exitCodeImages = \Illuminate\Support\Facades\Artisan::call('rdb:convert-images-webp', [
+            '--module' => 'researcher',
+            '--limit' => 2,
+        ]);
+        $this->assertEquals(0, $exitCodeImages);
+
+        // Test researcher profile image upload directly via FileUploadService
+        $fakeProfile = \Illuminate\Http\UploadedFile::fake()->image('researcher_avatar.jpg', 400, 400);
+        $resResult = $fileUploadService->storeImageAsWebp($fakeProfile, 'researchers');
+        $this->assertStringEndsWith('.webp', $resResult['safe_name']);
+        $this->assertEquals('image/webp', $resResult['mime_type']);
+        $this->assertTrue(\Illuminate\Support\Facades\Storage::disk('public')->exists($resResult['path']));
+        \Illuminate\Support\Facades\Storage::disk('public')->delete($resResult['path']);
 
         // 3. Verify NriisSyncService simulated filename is .webp
         $nriisService = app(\App\Services\NriisSyncService::class);
