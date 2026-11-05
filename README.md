@@ -320,6 +320,22 @@ php .agents/skills/documentation-and-manuals/scripts/build_html_manuals.php
    * ผนวกรวมเข้าสู่ **Tier 3 (Open Public API)** ในหน้า `/backend/api-management#endpointsTab` พร้อมแสดงตัวอย่าง JSON Response
    * ปรับปรุงปุ่ม **"คัดลอก JSON"** และ **"คัดลอกคำสั่ง cURL"** ด้วยฟังก์ชัน `copyTextToClipboardSafe` รองรับเบราว์เซอร์ทั้งในสภาพแวดล้อม HTTP (`laravel_rdb.test`) และ HTTPS
 
+### อัปเดตประจำวันที่ 5 พฤศจิกายน 2569 (Release 2026.11.05)
+1. **การปรับปรุงโครงสร้างโฟลเดอร์ไฟล์อัปโหลดให้ตรงกับระบบเดิม 100% (Legacy 9 Upload Folders Alignment):**
+   * จัดระเบียบโฟลเดอร์ใน `storage/app/public/uploads/` ให้ตรงกับระบบเดิม (Yii2 `frontend/web/`) ทั้ง 9 โฟลเดอร์ (`datafiles`, `datapublished`, `datadip`, `datautilize`, `dataresearcher`, `datapts`, `datacoferenceinthai`, `datanewsimg`, `datajournalstatus`)
+   * อัปเดตพาธในฐานข้อมูลให้ชี้ไปยังชื่อโฟลเดอร์มาตรฐานใหม่ 8,822 รายการ และปรับปรุง Eloquent Trait `HasDualFilePath` ให้ค้นหาจากโฟลเดอร์ใหม่เป็นลำดับแรกสุด ควบคู่กับ Fallback โฟลเดอร์เดิม
+2. **ระบบศูนย์รวมคู่มือการใช้งานระบบและการนำทางอัจฉริยะ (System Manuals Documentation Hub & Seamless Navigation):**
+   * พัฒนา Controller ควบคุมการเสิร์ฟคู่มือระบบ (`ManualController`) แยกสิทธิ์การเข้าถึงระหว่างคู่มือหน้าบ้าน (Public) และคู่มือหลังบ้าน (Protected Authenticated Access)
+   * ปรับแก้ค่า `APP_URL=http://laravel_rdb.test` ขจัดปัญหา URL Scheme Mismatch และป้องกัน Session Cookie หลุดข้าม Scheme
+   * ติดตั้งกลไกฉีด `<base href="http://laravel_rdb.test/manuals/">` อัตโนมัติในหน้าสารบัญรวม (`index.html`) และพาธฐาน ป้องกันปัญหาลิงก์และรูปภาพในคู่มือเกิดข้อผิดพลาด 404
+   * **ระบบนำทางแบบแยกสิทธิ์อัจฉริยะ (Role-Aware Seamless Manual Navigation)**:
+     - ผู้เยี่ยมชมทั่วไป (Guest): แยกเฉพาะเล่มที่ 1 (ระบบหน้าบ้าน) ปิดกั้นลิงก์คู่มือหลังบ้าน 100% พร้อมปุ่มเข้าสู่ระบบ
+     - ผู้เข้าสู่ระบบแล้ว (Authenticated Users): แสดงแถบเมนูนำทางครบทุกเล่ม (สารบัญรวม, เล่ม 1, เล่ม 2, คู่มือย่อ, UAT) พร้อมปุ่ม **"ระบบหลังบ้าน"** ใน Topbar ทุกหน้า สลับอ่านได้ทันทีโดยไม่ต้องกดปุ่มย้อนกลับของเบราว์เซอร์
+     - เพิ่มเมนูดรอปดาวน์ **"คู่มือระบบ"** ในแถบเมนูหน้าบ้าน (`<x-frontend-menu />`) สำหรับผู้ที่ล็อกอินแล้ว เปิดคู่มือหลังบ้านได้จากหน้าบ้านทันที
+     - ไอคอนคู่มือข้างโลโก้ PCRU RDB ใน Topbar Navbar ทำงานสอดคล้องตามสถานะการล็อกอิน (`@auth`)
+     - เพิ่มทางลัดคู่มือใน Profile Dropdown และแถบเมนูด้านซ้ายของระบบหลังบ้าน (Backend Sidebar)
+   * ผ่านการตรวจรับด้วยชุดทดสอบ Feature Test: `ManualsAccessTest` (11 เคส 47 assertions) และ `BackendAuditTest` (47 เคส 422 assertions 100%)
+
 ### อัปเดตประจำวันที่ 4 พฤศจิกายน 2569 (Release 2026.11.04)
 1. **แยกศูนย์สำรองและกู้คืนข้อมูลระบบ (Dedicated Disaster Recovery Hub — The Creator Only):**
    * แยกออกจากหน้าคำสั่งระบบเดิมไปเป็นหน้าจอเฉพาะที่ `/backend/system-backup` (เมนู: **การดูแลระบบ ➔ สำรองและกู้คืนระบบ**)

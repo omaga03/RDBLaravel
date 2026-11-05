@@ -3,13 +3,14 @@
 
 > [!NOTE]
 > **สถานะการทดสอบระบบจริง (Test Execution Summary)**:
-> - **วันและเวลาที่ดำเนินการทดสอบล่าสุด**: 5 พฤศจิกายน 2569 เวลา 21:20:00 น.
-> - **ผลการรันชุดทดสอบอัตโนมัติ (Automated Test Suite)**: **ผ่านทั้งหมด 131 รายการ (2,123 Assertions) 100%**
+> - **วันและเวลาที่ดำเนินการทดสอบล่าสุด**: 5 พฤศจิกายน 2569 เวลา 22:50:00 น.
+> - **ผลการรันชุดทดสอบอัตโนมัติ (Automated Test Suite)**: **ผ่านทั้งหมด 142 รายการ (2,170 Assertions) 100%**
 >   - `Tests\Feature\BackendAuditTest`: ผ่าน 47 รายการ (422 Assertions)
 >   - `Tests\Feature\ApiDualTierTest`: ผ่าน 15 รายการ (1,253 Assertions)
 >   - `Tests\Feature\IntegrationsAndAutomationTest`: ผ่าน 15 รายการ (207 Assertions)
 >   - `Tests\Feature\SchemaIntegrityDefenseTest`: ผ่าน 17 รายการ (77 Assertions)
 >   - `Tests\Feature\RecordLevelAuditLogTest`: ผ่าน 12 รายการ (46 Assertions)
+>   - `Tests\Feature\ManualsAccessTest`: ผ่าน 11 รายการ (47 Assertions)
 >   - `Tests\Feature\SystemAcceptancePlanExecutionTest`: ผ่าน 13 รายการ (69 Assertions)
 >   - `Tests\Feature\SystemBackupTest`: ผ่าน 5 รายการ (12 Assertions)
 >   - `Tests\Feature\PdfCoverGenerationTest`: ผ่าน 4 รายการ (16 Assertions)

@@ -33,6 +33,26 @@
   - ทดสอบความถูกต้องของระบบผ่าน [`tests/Feature/BackendAuditTest.php`](tests/Feature/BackendAuditTest.php) (47 passed, 422 assertions 100%)
   - อัปเดตคู่มือ [`README.md`](README.md) และคอมไพล์ชุดเอกสารคู่มือ HTML5 Portal
 
+#### 2. ระบบศูนย์รวมคู่มือการใช้งานระบบและการนำทางอัจฉริยะ (System Manuals Documentation Hub & Seamless Navigation)
+- **การพัฒนาระบบเสิร์ฟคู่มืออย่างเป็นทางการผ่าน `ManualController`**:
+  - สร้าง Route ควบคุมการเข้าถึงเอกสารคู่มือระบบ (`/manuals`, `/manuals/frontend`, `/manuals/backend`, `/manuals/{file}`, `/manuals/screenshots/{file}`)
+  - กำหนดนโยบายความปลอดภัยเข้มงวด: คู่มือหน้าบ้าน (เล่ม 1) เปิดให้เข้าถึงแบบสาธารณะ (Public/Guest) ขณะที่คู่มือหลังบ้าน (เล่ม 2), คู่มือฉบับย่อ (Cheatsheet), แผนตรวจรับระบบ (UAT) และสารบัญรวม (`index.html`) สงวนสิทธิ์เฉพาะผู้เข้าสู่ระบบแล้วเท่านั้น หากเป็น Guest จะถูกส่งกลับไปหน้า Login พร้อมข้อความแจ้งเตือนทันที
+- **การแก้ไขปัญหา URL Scheme Mismatch & Cookie Partitioning**:
+  - ปรับค่า `APP_URL` ใน `.env` จาก `https://laravel_rdb.test` เป็น `http://laravel_rdb.test` ให้ตรงกับสภาพแวดล้อม Laragon Apache จริง 100%
+  - แก้ไขปัญหา Session Cookie ไม่ถูกส่งข้ามระหว่าง HTTP และ HTTPS ซึ่งเดิมทำให้ผู้ใช้งานในหลังบ้านถูกดีดออกจากระบบเมื่อคลิกเปิดดูคู่มือ
+- **การแก้ปัญหา Base Path Resolution ในหน้าคู่มือ HTML5**:
+  - ติดตั้งกลไกฉีด `<base href="http://laravel_rdb.test/manuals/">` อัตโนมัติใน `ManualController::serveManual()` เมื่อเปิดหน้าสารบัญรวม (`index.html`) และพาธฐาน ป้องกันปัญหาลิงก์และรูปภาพในคู่มือเกิดข้อผิดพลาด 404
+  - เพิ่ม Fallback Routes สำหรับรูปภาพ `/screenshots/{file}` และไฟล์ `.html` ที่ระดับ Root Domain เพื่อความปลอดภัยสูงสุด
+- **การนำทางแบบแยกสิทธิ์อัจฉริยะ (Role-Aware Seamless Manual Navigation)**:
+  - **สำหรับผู้เยี่ยมชมทั่วไป (Guest)**: หน้าเล่ม 1 จะแสดงเฉพาะเนื้อหาหน้าบ้านและปุ่มเข้าสู่ระบบ โดยซ่อนลิงก์ไปยังคู่มือหลังบ้านทั้งหมด 100%
+  - **สำหรับผู้เข้าสู่ระบบแล้ว (Authenticated Users)**: ระบบจะฉีดแถบนำทางครบทุกเล่ม (สารบัญรวม, เล่ม 1, เล่ม 2, คู่มือย่อ, UAT) พร้อมปุ่ม **"ระบบหลังบ้าน"** ใน Topbar ทุกหน้า ให้สามารถคลิกสลับอ่านระหว่างเล่ม 1 และเล่ม 2 ได้อย่างไร้รอยต่อโดยไม่ต้องกดปุ่มย้อนกลับของเบราว์เซอร์
+  - **เมนูดรอปดาวน์ "คู่มือระบบ" ในแถบเมนูหน้าบ้าน (`<x-frontend-menu />`)**: เพิ่มเมนูลัดสำหรับผู้ที่ล็อกอินแล้ว สามารถเปิดคู่มือหลังบ้านและสารบัญรวมได้จากหน้าบ้านทันที
+  - **ไอคอนคู่มือข้างโลโก้ PCRU RDB (`app.blade.php`)**: ปรับเงื่อนไขเป็น `@auth` โดยผู้ใช้ที่ล็อกอินแล้วจะได้รับลิงก์สู่คู่มือทั้งหมดเสมอ ไม่ว่าจะเปิดจากหน้าบ้านหรือหลังบ้าน
+  - **ทางลัดใน Profile Dropdown & Backend Sidebar**: เพิ่มลิงก์ "คู่มือการใช้งานระบบทั้งหมด" ในเมนูโปรไฟล์มุมขวาบน และแถบเมนูด้านซ้ายของระบบหลังบ้าน
+- **การทดสอบยืนยันผล (Automated Test Assurance)**:
+  - สร้าง Feature Test [`tests/Feature/ManualsAccessTest.php`](tests/Feature/ManualsAccessTest.php) ครอบคลุม 11 กรณีทดสอบ (47 assertions) ผ่าน 100%
+  - รันตรวจสอบความเข้ากันได้ผ่าน [`tests/Feature/BackendAuditTest.php`](tests/Feature/BackendAuditTest.php) (47 passed, 422 assertions) ครบถ้วน
+
 ---
 
 ## วันที่: 4 พฤศจิกายน 2569 (2026-11-04)
