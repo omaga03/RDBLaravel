@@ -135,4 +135,37 @@ class ManualsAccessTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('ศูนย์รวมคู่มือการใช้งานระบบฐานข้อมูลงานวิจัย');
     }
+
+    public function test_authenticated_user_on_frontend_sees_all_manuals_links_and_menu()
+    {
+        $admin = \App\Models\User::whereHas('roles', fn($q) => $q->whereIn('item_name', ['The Creator', 'Admin']))->first();
+        if (!$admin) {
+            $this->markTestSkipped('No admin found');
+        }
+
+        $response = $this->actingAs($admin)->get('/');
+        $response->assertStatus(200);
+        // Brand icon points to all manuals
+        $response->assertSee('href="' . route('manuals.index') . '"', false);
+        // Frontend subnav contains system manual dropdown
+        $response->assertSee('คู่มือระบบ');
+        $response->assertSee(route('manuals.backend'));
+        // User profile dropdown contains system manual link
+        $response->assertSee('คู่มือการใช้งานระบบทั้งหมด');
+    }
+
+    public function test_authenticated_user_viewing_frontend_manual_sees_full_topbar_navigation()
+    {
+        $admin = \App\Models\User::whereHas('roles', fn($q) => $q->whereIn('item_name', ['The Creator', 'Admin']))->first();
+        if (!$admin) {
+            $this->markTestSkipped('No admin found');
+        }
+
+        $response = $this->actingAs($admin)->get(route('manuals.frontend'));
+        $response->assertStatus(200);
+        // Authenticated user can see and switch to backend manual and hub directly
+        $response->assertSee('VOLUME_2_BACKEND_ADMIN_RESEARCHER_MANUAL.html');
+        $response->assertSee('index.html');
+        $response->assertSee('ระบบหลังบ้าน');
+    }
 }

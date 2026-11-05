@@ -1198,7 +1198,7 @@
                         <img src="https://research.pcru.ac.th/rdb/images/pcru.png" alt="PCRU Logo" style="height: 36px;" class="me-2">
                         <span class="brand-badge ms-1">PCRU RDB</span>
                     </a>
-                    @if(request()->is('backend*'))
+                    @auth
                         <a href="{{ route('manuals.index') }}"
                            target="_blank"
                            rel="noopener noreferrer"
@@ -1216,7 +1216,7 @@
                            aria-label="คู่มือการใช้งานระบบหน้าบ้าน">
                             <i class="bi bi-book-half"></i>
                         </a>
-                    @endif
+                    @endauth
                 </div>
                 @if(request()->is('backend*'))
                     <div class="d-none d-sm-inline-flex align-items-center gap-1.5 ms-2 ps-2 border-start border-secondary-subtle">
@@ -1350,7 +1350,6 @@
                                     </div>
 
                                     @if(Auth::user()->roleScopes && Auth::user()->roleScopes->count() > 1)
-                                        <div class="dropdown-divider"></div>
                                         <div class="dropdown-header small text-body-secondary fw-bold text-uppercase py-1" style="font-size: 0.72rem;">
                                             <i class="bi bi-arrow-repeat me-1 text-primary"></i> สลับบทบาทการทำงาน (Multi-Role)
                                         </div>
@@ -1405,6 +1404,9 @@
                                     </a>
                                     <a class="dropdown-item d-flex align-items-center {{ (request()->routeIs('backend.user.edit') && (request()->route('user')?->id ?? request()->route('user')) == Auth::id()) ? 'active' : '' }}" href="{{ route('backend.user.edit', Auth::id()) }}">
                                         <i class="bi bi-gear-wide-connected me-2 text-warning"></i> จัดการข้อมูลส่วนตัว &amp; แจ้งเตือน
+                                    </a>
+                                    <a class="dropdown-item d-flex align-items-center" href="{{ route('manuals.index') }}" target="_blank">
+                                        <i class="bi bi-journal-bookmark-fill me-2 text-primary"></i> คู่มือการใช้งานระบบทั้งหมด
                                     </a>
                                     <div class="dropdown-divider"></div>
                                     <a class="dropdown-item text-danger d-flex align-items-center" href="{{ route('logout') }}"

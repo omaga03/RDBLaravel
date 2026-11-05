@@ -568,6 +568,19 @@
                 @endif
             </ul>
             @endif
+
+            <!-- 5. เอกสารและคู่มือการใช้งานระบบ (Documentation Hub) -->
+            <div class="rdb-sidebar-section-title">
+                <span class="sidebar-text">เอกสารและช่วยเหลือ</span>
+            </div>
+            <ul class="nav flex-column rdb-sidebar-nav mb-3">
+                <li class="nav-item">
+                    <a class="nav-link rdb-side-link" href="{{ route('manuals.index') }}" target="_blank" title="ศูนย์รวมคู่มือการใช้งานระบบทั้งหมด">
+                        <i class="bi bi-journal-bookmark-fill text-warning rdb-side-icon"></i>
+                        <span class="sidebar-text">คู่มือการใช้งานระบบ</span>
+                    </a>
+                </li>
+            </ul>
         @endif
     </div>
 </aside>

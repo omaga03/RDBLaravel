@@ -201,6 +201,43 @@
                         </li>
                     </ul>
                 </li>
+
+                @auth
+                <!-- 7. คู่มือการใช้งานระบบ (สำหรับผู้เข้าสู่ระบบ) -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-primary fw-medium" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="คู่มือการใช้งานระบบฐานข้อมูลวิจัย">
+                        <i class="bi bi-book-half text-primary me-1.5" style="font-size: 0.95rem;"></i> คู่มือระบบ
+                    </a>
+                    <ul class="dropdown-menu shadow-sm">
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="{{ route('manuals.index') }}" target="_blank">
+                                <i class="bi bi-collection text-warning me-2"></i> สารบัญรวมคู่มือทั้งหมด
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="{{ route('manuals.frontend') }}" target="_blank">
+                                <i class="bi bi-globe2 text-info me-2"></i> เล่ม 1: คู่มือหน้าบ้าน
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="{{ route('manuals.backend') }}" target="_blank">
+                                <i class="bi bi-shield-lock text-primary me-2"></i> เล่ม 2: คู่มือหลังบ้าน
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider my-1"></li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="{{ route('manuals.show', 'RESEARCHER_QUICK_START_CHEATSHEET.html') }}" target="_blank">
+                                <i class="bi bi-lightning-charge text-warning me-2"></i> คู่มือฉบับย่อ 3 นาที
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="{{ route('manuals.show', 'SYSTEM_ACCEPTANCE_TEST_PLAN.html') }}" target="_blank">
+                                <i class="bi bi-check2-circle text-success me-2"></i> รายงานผลทดสอบ UAT
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                @endauth
             </ul>
 
             <!-- Right side indicator -->

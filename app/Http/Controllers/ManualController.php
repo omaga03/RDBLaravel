@@ -93,6 +93,37 @@ class ManualController extends Controller
             }
         }
 
+        // If authenticated user is viewing Volume 1 Frontend manual, dynamically restore the full manual navigation
+        if (auth()->check()) {
+            if ($safeFile === 'VOLUME_1_FRONTEND_USER_MANUAL.html') {
+                $fullNav = '<a href="index.html" class="nav-pill "><i class="bi bi-collection me-1"></i> สารบัญรวม</a>' .
+                    '<a href="VOLUME_1_FRONTEND_USER_MANUAL.html" class="nav-pill active"><i class="bi bi-globe2 me-1"></i> เล่ม 1: หน้าบ้าน</a>' .
+                    '<a href="VOLUME_2_BACKEND_ADMIN_RESEARCHER_MANUAL.html" class="nav-pill "><i class="bi bi-shield-lock me-1"></i> เล่ม 2: หลังบ้าน</a>' .
+                    '<a href="RESEARCHER_QUICK_START_CHEATSHEET.html" class="nav-pill "><i class="bi bi-lightning-charge me-1"></i> คู่มือย่อ 3 นาที</a>' .
+                    '<a href="SYSTEM_ACCEPTANCE_TEST_PLAN.html" class="nav-pill "><i class="bi bi-check2-circle me-1"></i> รายงานผลทดสอบ UAT</a>';
+
+                $html = preg_replace(
+                    '/<nav class="topbar-nav">[\s\S]*?<\/nav>/',
+                    '<nav class="topbar-nav">' . $fullNav . '</nav>',
+                    $html,
+                    1
+                );
+
+                $html = preg_replace(
+                    '/<a href="\/" class="topbar-brand"[\s\S]*?<\/a>/',
+                    '<a href="index.html" class="topbar-brand" title="กลับสู่สารบัญรวมคู่มือการใช้งานระบบ"><i class="bi bi-journal-bookmark-fill"></i><span>PCRU Research Database Manuals</span></a>',
+                    $html,
+                    1
+                );
+            }
+
+            // Add backend shortcut button to topbar actions for authenticated users
+            $backendBtn = '<a href="' . url('backend') . '" class="btn-action" title="กลับสู่ระบบจัดการข้อมูลหลังบ้าน"><i class="bi bi-speedometer2"></i> <span>ระบบหลังบ้าน</span></a>';
+            if (stripos($html, $backendBtn) === false) {
+                $html = preg_replace('/<div class="topbar-actions">/i', '<div class="topbar-actions">' . $backendBtn, $html, 1);
+            }
+        }
+
         return response($html, 200, [
             'Content-Type' => 'text/html; charset=UTF-8',
             'X-Frame-Options' => 'SAMEORIGIN',
