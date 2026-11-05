@@ -564,13 +564,18 @@
                                     ความเร็ว: <span id="resDurationBadge" class="fw-bold font-monospace">0 ms</span>
                                 </div>
                                 <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" onclick="copyResponseJson()">
-                                    <i class="bi bi-clipboard me-1.5"></i> คัดลอก JSON
+                                    <i class="bi bi-clipboard me-1.5" id="copyJsonIcon"></i> <span id="copyJsonText">คัดลอก JSON</span>
                                 </button>
                             </div>
 
                             <!-- Response JSON Box -->
                             <div class="mt-3">
-                                <label class="form-label small fw-bold text-body-secondary mb-1">ผลลัพธ์ (Response JSON Payload):</label>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label class="form-label small fw-bold text-body-secondary mb-0">ผลลัพธ์ (Response JSON Payload):</label>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2" style="font-size: 0.78rem;" onclick="copyResponseJson()" title="คัดลอก JSON ผลลัพธ์">
+                                        <i class="bi bi-clipboard me-1" id="copyJsonIconTop"></i> <span id="copyJsonTextTop">คัดลอก JSON</span>
+                                    </button>
+                                </div>
                                 <pre id="testerResponseBox" class="json-code-box p-3 mb-0"><code>{
   "message": "กดปุ่ม 'ส่งคำขอเรียกดูข้อมูล' ด้านบน หรือคลิกปุ่ม 'ทดสอบเรียกดู' จากรายการ Endpoint ทางซ้ายมือ เพื่อดูข้อมูลจริง"
 }</code></pre>
@@ -912,21 +917,82 @@ else:
         });
     }
 
+    // Robust clipboard helper compatible with non-HTTPS (e.g. http://laravel_rdb.test) and all browsers
+    function copyTextToClipboardSafe(text, onSuccess, onError) {
+        if (!text) return;
+        text = text.trim();
+
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(() => {
+                if (typeof onSuccess === 'function') onSuccess();
+            }).catch(() => {
+                fallbackCopy(text, onSuccess, onError);
+            });
+        } else {
+            fallbackCopy(text, onSuccess, onError);
+        }
+
+        function fallbackCopy(str, okCb, failCb) {
+            let textarea = document.createElement('textarea');
+            textarea.value = str;
+            textarea.style.position = 'fixed';
+            textarea.style.top = '0';
+            textarea.style.left = '0';
+            textarea.style.width = '2em';
+            textarea.style.height = '2em';
+            textarea.style.padding = '0';
+            textarea.style.border = 'none';
+            textarea.style.outline = 'none';
+            textarea.style.boxShadow = 'none';
+            textarea.style.background = 'transparent';
+            textarea.style.opacity = '0';
+            textarea.setAttribute('readonly', '');
+            document.body.appendChild(textarea);
+
+            textarea.focus();
+            textarea.select();
+
+            let ok = false;
+            try {
+                ok = document.execCommand('copy');
+            } catch (err) {
+                console.error('execCommand copy failed:', err);
+            }
+            document.body.removeChild(textarea);
+
+            if (ok) {
+                if (typeof okCb === 'function') okCb();
+            } else {
+                if (typeof failCb === 'function') {
+                    failCb();
+                } else {
+                    window.prompt('กด Ctrl+C เพื่อคัดลอกข้อความ:', str);
+                }
+            }
+        }
+    }
+
     // Copy newly generated token
     function copyTokenToClipboard() {
         const input = document.getElementById('plainTextTokenInput');
-        if (input) {
-            input.select();
-            input.setSelectionRange(0, 99999);
-            navigator.clipboard.writeText(input.value).then(() => {
-                document.getElementById('copyBtnText').innerText = 'คัดลอกเรียบร้อย!';
-                document.getElementById('copyIcon').className = 'bi bi-check-lg text-white';
+        if (!input || !input.value) return;
+
+        copyTextToClipboardSafe(input.value, () => {
+            const btnText = document.getElementById('copyBtnText');
+            const btnIcon = document.getElementById('copyIcon');
+            if (btnText && btnIcon) {
+                btnText.innerText = 'คัดลอกเรียบร้อย!';
+                btnIcon.className = 'bi bi-check-lg text-white';
                 setTimeout(() => {
-                    document.getElementById('copyBtnText').innerText = 'คัดลอก Token';
-                    document.getElementById('copyIcon').className = 'bi bi-clipboard-check';
+                    btnText.innerText = 'คัดลอก Token';
+                    btnIcon.className = 'bi bi-clipboard-check';
                 }, 2500);
-            });
-        }
+            }
+        }, () => {
+            input.focus();
+            input.select();
+            window.prompt('กด Ctrl+C เพื่อคัดลอก Token:', input.value);
+        });
     }
 
     // Preload endpoint into tester
@@ -1081,9 +1147,38 @@ else:
 
     // Copy JSON from tester box
     function copyResponseJson() {
-        const text = document.getElementById('testerResponseBox').innerText;
-        navigator.clipboard.writeText(text).then(() => {
-            alert('คัดลอกผลลัพธ์ JSON เรียบร้อยแล้ว');
+        const box = document.getElementById('testerResponseBox');
+        if (!box) return;
+        const text = box.innerText || box.textContent || '';
+        if (!text) return;
+
+        copyTextToClipboardSafe(text, () => {
+            const btnText = document.getElementById('copyJsonText');
+            const btnIcon = document.getElementById('copyJsonIcon');
+            const topBtnText = document.getElementById('copyJsonTextTop');
+            const topBtnIcon = document.getElementById('copyJsonIconTop');
+
+            if (btnText && btnIcon) {
+                const orig = btnText.innerText;
+                btnText.innerText = 'คัดลอกแล้ว!';
+                btnIcon.className = 'bi bi-check2 text-success me-1.5';
+                setTimeout(() => {
+                    btnText.innerText = orig;
+                    btnIcon.className = 'bi bi-clipboard me-1.5';
+                }, 2000);
+            }
+
+            if (topBtnText && topBtnIcon) {
+                const origTop = topBtnText.innerText;
+                topBtnText.innerText = 'คัดลอกแล้ว!';
+                topBtnIcon.className = 'bi bi-check2 text-success me-1';
+                setTimeout(() => {
+                    topBtnText.innerText = origTop;
+                    topBtnIcon.className = 'bi bi-clipboard me-1';
+                }, 2000);
+            }
+        }, () => {
+            window.prompt('กด Ctrl+C เพื่อคัดลอก JSON:', text);
         });
     }
 </script>
