@@ -242,7 +242,7 @@ php artisan schedule:work
   - **เครื่องมือทดสอบดึงโพสต์ Facebook (Dry-Run Inspector)**: เข้าได้ที่ `/backend/research_conference/test-sync`
   - รองรับระบบถังขยะและลบถาวรแบบเดียวกัน
 * **การแปลงรูปภาพเป็น WebP อัตโนมัติ**:
-  - รูปภาพข่าวและงานประชุมที่ถูกนำเข้าสู่ระบบทั้งจากการดาวน์โหลด Sync และการอัปโหลดผ่านแบบฟอร์ม จะถูกแปลงเป็นนามสกุล `.webp` คุณภาพ 85 พร้อม Auto-resize ไม่เกิน 2048px โดยอัตโนมัติ
+  - รูปภาพข่าวและงานประชุมที่ถูกนำเข้าสู่ระบบทั้งจากการดาวน์โหลด Sync และการอัปโหลดผ่านแบบฟอร์ม จะถูกแปลงเป็นนามสกุล `.webp` คุณภาพ 85 พร้อม Auto-resize ไม่เกิน 1024px โดยอัตโนมัติ
 
 ---
 
@@ -299,7 +299,7 @@ php .agents/skills/documentation-and-manuals/scripts/build_html_manuals.php
 
 ### อัปเดตประจำวันที่ 5 พฤศจิกายน 2569 (Release 2026.11.05)
 1. **สถาปัตยกรรมระบบแปลงรูปภาพทั้งระบบเป็น WebP (Universal WebP Image Processing Pipeline):**
-   * ปรับปรุง `FileUploadService::storeImageAsWebp()` ให้แปลงไฟล์รูปภาพที่เข้าสู่ระบบทั้งหมด (JPEG, PNG, GIF, WebP) เป็นฟอร์แมต `.webp` คุณภาพ 85 พร้อม Auto-resize ไม่เกิน 2048px รักษาความโปร่งแสง (Alpha Transparency) และจัดเก็บด้วย UUID ปลอดภัย
+   * ปรับปรุง `FileUploadService::storeImageAsWebp()` ให้แปลงไฟล์รูปภาพที่เข้าสู่ระบบทั้งหมด (JPEG, PNG, GIF, WebP) เป็นฟอร์แมต `.webp` คุณภาพ 85 พร้อม Auto-resize ไม่เกิน 1024px รักษาความโปร่งแสง (Alpha Transparency) และจัดเก็บด้วย UUID ปลอดภัย
    * ครอบคลุมจุดนำเข้าภาพ 3 โมดูลหลัก:
      - **ข้อมูลนักวิจัย (`RdbResearcher`)**: อัปโหลดภาพโปรไฟล์ผ่านฟอร์มหลักและฟอร์มเปลี่ยนภาพด่วน
      - **ข่าวทุนวิจัย (`ResearchNews`)**: ดึงภาพผ่าน NRIIS API และอัปโหลดผ่านแบบฟอร์ม

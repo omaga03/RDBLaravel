@@ -621,8 +621,8 @@ class FacebookConferenceSyncService
 
                     $width = imagesx($im);
                     $height = imagesy($im);
-                    if ($width > 2048 || $height > 2048) {
-                        $percent = 2000 / max($width, $height);
+                    if ($width > 1024 || $height > 1024) {
+                        $percent = 1024 / max($width, $height);
                         $newW = (int) round($width * $percent);
                         $newH = (int) round($height * $percent);
                         $thumb = imagecreatetruecolor($newW, $newH);

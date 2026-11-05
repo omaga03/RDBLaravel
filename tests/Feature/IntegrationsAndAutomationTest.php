@@ -485,6 +485,16 @@ class IntegrationsAndAutomationTest extends TestCase
         // Clean up test file
         \Illuminate\Support\Facades\Storage::disk('public')->delete($result['path']);
 
+        // Test 1024px auto-downscaling on large image (1920x1080)
+        $largeFakeFile = \Illuminate\Http\UploadedFile::fake()->image('large_banner.png', 1920, 1080);
+        $largeResult = $fileUploadService->storeImageAsWebp($largeFakeFile, 'news');
+        $storedLargePath = \Illuminate\Support\Facades\Storage::disk('public')->path($largeResult['path']);
+        [$w, $h] = getimagesize($storedLargePath);
+        $this->assertLessThanOrEqual(1024, max($w, $h));
+        $this->assertEquals(1024, $w);
+        $this->assertEquals(576, $h);
+        \Illuminate\Support\Facades\Storage::disk('public')->delete($largeResult['path']);
+
         // 2. Test Artisan Commands rdb:convert-news-webp & rdb:convert-images-webp
         $exitCode = \Illuminate\Support\Facades\Artisan::call('rdb:convert-news-webp', [
             '--module' => 'all',

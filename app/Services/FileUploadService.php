@@ -208,12 +208,12 @@ class FileUploadService
      *
      * @param UploadedFile $file
      * @param string $directory โฟลเดอร์ปลายทาง เช่น 'news', 'conference'
-     * @param int $maxDimension ขนาดด้านกว้าง/สูงสูงสุด (พิกเซล, ค่าเริ่มต้น 2048)
+     * @param int $maxDimension ขนาดด้านกว้าง/สูงสูงสุด (พิกเซล, ค่าเริ่มต้น 1024)
      * @param int $quality คุณภาพการบีบอัด WebP (0-100, ค่าเริ่มต้น 85)
      * @return array ['path' => '...', 'safe_name' => '...', 'original_name' => '...', 'size' => ..., 'mime_type' => 'image/webp', 'page_count' => 0]
      * @throws \Exception
      */
-    public function storeImageAsWebp(UploadedFile $file, string $directory, int $maxDimension = 2048, int $quality = 85): array
+    public function storeImageAsWebp(UploadedFile $file, string $directory, int $maxDimension = 1024, int $quality = 85): array
     {
         if (empty($directory)) {
             throw new \Exception('Directory path must not be empty');

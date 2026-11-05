@@ -1087,9 +1087,9 @@ php artisan schedule:list
 เพื่อเพิ่มความเร็วในการโหลดหน้าเว็บ (PageSpeed) และลดขนาดพื้นที่จัดเก็บไฟล์ภาพลงกว่า 70-80% ระบบได้ติดตั้งสถาปัตยกรรม **Universal WebP Image Processing Pipeline** ครอบคลุมรูปภาพทั้งหมดที่เข้าสู่ระบบ:
 
 #### 1. จุดนำเข้าภาพและกระบวนการแปลงแบบเรียลไทม์ (Real-time Ingestion)
-ผ่านเมธอด `FileUploadService::storeImageAsWebp(UploadedFile $file, string $directory, int $maxDimension = 2048, int $quality = 85)`:
+ผ่านเมธอด `FileUploadService::storeImageAsWebp(UploadedFile $file, string $directory, int $maxDimension = 1024, int $quality = 85)`:
 * **การตรวจสอบประเภทไฟล์**: รองรับไฟล์ภาพต้นฉบับ JPEG, PNG, GIF, WebP
-* **การปรับขนาดอัตโนมัติ (Downscaling)**: ปรับขนาดด้านยาวสุดไม่เกิน 2,048 พิกเซล รักษาอัตราส่วนเดิม (Aspect Ratio) เพื่อป้องกันไฟล์ภาพขนาดใหญ่เกินความจำเป็น
+* **การปรับขนาดอัตโนมัติ (Downscaling)**: ปรับขนาดด้านยาวสุดไม่เกิน 1,024 พิกเซล รักษาอัตราส่วนเดิม (Aspect Ratio) เพื่อป้องกันไฟล์ภาพขนาดใหญ่เกินความจำเป็น
 * **การรักษาความโปร่งใส (Alpha Transparency)**: ประมวลผลด้วย PHP GD ฟังก์ชัน `imagepalettetotruecolor()`, `imagealphablending()`, และ `imagesavealpha()` ทำให้ภาพ PNG ที่มีพื้นหลังโปร่งแสงไม่เกิดปัญหาพื้นหลังกลายเป็นสีดำ
 * **การจัดเก็บด้วยชื่อปลอดภัย (UUID Safe Name)**: ตั้งชื่อไฟล์ภาพใหม่เป็น UUID เช่น `7a9b8c0d-....webp` ป้องกันปัญหาชื่อไฟล์ซ้ำและการโจมตีแบบ Directory Traversal
 

@@ -18,7 +18,8 @@ class ConvertImagesToWebp extends Command
     protected $signature = 'rdb:convert-images-webp
                             {--module=all : Module to process (all, researcher, news, conference)}
                             {--force : Force reconvert even if already .webp}
-                            {--limit= : Limit number of records to process}';
+                            {--limit= : Limit number of records to process}
+                            {--max-dimension=1024 : Maximum width or height in pixels}';
 
     /**
      * The console command description.
@@ -35,23 +36,24 @@ class ConvertImagesToWebp extends Command
         $module = strtolower($this->option('module') ?: 'all');
         $force = (bool) $this->option('force');
         $limit = $this->option('limit') ? (int) $this->option('limit') : null;
+        $maxDimension = (int) ($this->option('max-dimension') ?: 1024);
 
         $this->info("==================================================================");
         $this->info(" PCRU RDB - Universal System Images (.webp) Converter");
-        $this->info(" Module: {$module} | Force: " . ($force ? 'YES' : 'NO') . " | Limit: " . ($limit ?: 'NONE'));
+        $this->info(" Module: {$module} | Force: " . ($force ? 'YES' : 'NO') . " | Limit: " . ($limit ?: 'NONE') . " | Max Dimension: {$maxDimension}px");
         $this->info("==================================================================");
         $this->newLine();
 
         if (in_array($module, ['all', 'researcher', 'researchers'])) {
-            $this->processResearchers($force, $limit);
+            $this->processResearchers($force, $limit, $maxDimension);
         }
 
         if (in_array($module, ['all', 'news'])) {
-            $this->processNews($force, $limit);
+            $this->processNews($force, $limit, $maxDimension);
         }
 
         if (in_array($module, ['all', 'conference', 'conferences'])) {
-            $this->processConferences($force, $limit);
+            $this->processConferences($force, $limit, $maxDimension);
         }
 
         $this->newLine();
@@ -59,7 +61,7 @@ class ConvertImagesToWebp extends Command
         return Command::SUCCESS;
     }
 
-    protected function processResearchers(bool $force, ?int $limit): void
+    protected function processResearchers(bool $force, ?int $limit, int $maxDimension = 1024): void
     {
         $this->info("Processing Module: RdbResearcher (Profile Pictures)...");
 
@@ -116,7 +118,7 @@ class ConvertImagesToWebp extends Command
             $newFileName = $baseName . '.webp';
             $targetPath = $dir . DIRECTORY_SEPARATOR . $newFileName;
 
-            $success = $this->convertImageToWebp($sourcePath, $targetPath);
+            $success = $this->convertImageToWebp($sourcePath, $targetPath, $maxDimension);
 
             if ($success && file_exists($targetPath)) {
                 $relativeDir = $this->getRelativeStorageDir($dir);
@@ -143,7 +145,7 @@ class ConvertImagesToWebp extends Command
         $this->newLine();
     }
 
-    protected function processNews(bool $force, ?int $limit): void
+    protected function processNews(bool $force, ?int $limit, int $maxDimension = 1024): void
     {
         $this->info("Processing Module: ResearchNews...");
 
@@ -200,7 +202,7 @@ class ConvertImagesToWebp extends Command
             $newFileName = $baseName . '.webp';
             $targetPath = $dir . DIRECTORY_SEPARATOR . $newFileName;
 
-            $success = $this->convertImageToWebp($sourcePath, $targetPath);
+            $success = $this->convertImageToWebp($sourcePath, $targetPath, $maxDimension);
 
             if ($success && file_exists($targetPath)) {
                 $relativeDir = $this->getRelativeStorageDir($dir);
@@ -227,7 +229,7 @@ class ConvertImagesToWebp extends Command
         $this->newLine();
     }
 
-    protected function processConferences(bool $force, ?int $limit): void
+    protected function processConferences(bool $force, ?int $limit, int $maxDimension = 1024): void
     {
         $this->info("Processing Module: ResearchConference...");
 
@@ -284,7 +286,7 @@ class ConvertImagesToWebp extends Command
             $newFileName = $baseName . '.webp';
             $targetPath = $dir . DIRECTORY_SEPARATOR . $newFileName;
 
-            $success = $this->convertImageToWebp($sourcePath, $targetPath);
+            $success = $this->convertImageToWebp($sourcePath, $targetPath, $maxDimension);
 
             if ($success && file_exists($targetPath)) {
                 $relativeDir = $this->getRelativeStorageDir($dir);
@@ -311,7 +313,7 @@ class ConvertImagesToWebp extends Command
         $this->newLine();
     }
 
-    public function convertImageToWebp(string $sourcePath, string $targetPath, int $maxDimension = 2048, int $quality = 85): bool
+    public function convertImageToWebp(string $sourcePath, string $targetPath, int $maxDimension = 1024, int $quality = 85): bool
     {
         try {
             if (!extension_loaded('gd') || !function_exists('imagecreatefromstring') || !function_exists('imagewebp')) {
