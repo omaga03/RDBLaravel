@@ -90,6 +90,12 @@ Route::get('sitemap-researchers.xml', [SitemapController::class, 'researchers'])
 Route::get('sitemap-utilizations.xml', [SitemapController::class, 'utilizations'])->name('sitemap.utilizations');
 Route::get('sitemap-ip.xml', [SitemapController::class, 'ip'])->name('sitemap.ip');
 
+// RSS Feeds (News & Conferences - Legacy & Modern)
+Route::get('/rss/news', [\App\Http\Controllers\Backend\ResearchNewsController::class, 'rss'])->name('rss.news');
+Route::get('/rss/conference', [\App\Http\Controllers\Backend\ResearchConferenceController::class, 'rss'])->name('rss.conference');
+Route::get('/researchnews/jsonrssnewsresearch', [\App\Http\Controllers\Backend\ResearchNewsController::class, 'rss']);
+Route::get('/researchcoferenceinthai/jsonrssnewscoferenceinthai', [\App\Http\Controllers\Backend\ResearchConferenceController::class, 'rss']);
+
 
 // Backend Routes (Protected)
 Route::prefix('backend')->name('backend.')->middleware(['auth', \App\Http\Middleware\EnsureResearcherVerified::class])->group(function () {
@@ -259,6 +265,7 @@ Route::prefix('backend')->name('backend.')->middleware(['auth', \App\Http\Middle
     Route::post('/rdbprojectutilize/{id}/restore', [\App\Http\Controllers\Backend\RdbProjectUtilizeController::class, 'restore'])->name('rdbprojectutilize.restore');
     
     Route::resource('rdbprojectutilize', \App\Http\Controllers\Backend\RdbProjectUtilizeController::class);
+    Route::get('/research_news/reports', [\App\Http\Controllers\Backend\ResearchNewsController::class, 'monthlyReport'])->name('research_news.reports');
     Route::post('/research_news/sync-nriis', [\App\Http\Controllers\Backend\ResearchNewsController::class, 'syncNriis'])->name('research_news.sync_nriis');
     Route::post('/research_news/{id}/restore', [\App\Http\Controllers\Backend\ResearchNewsController::class, 'restore'])->name('research_news.restore');
     Route::resource('research_news', \App\Http\Controllers\Backend\ResearchNewsController::class);

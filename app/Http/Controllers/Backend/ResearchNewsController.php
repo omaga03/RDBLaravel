@@ -136,10 +136,75 @@ class ResearchNewsController extends Controller
         $this->authorize('create', ResearchNews::class);
 
         $limit = min(50, max(5, (int) $request->input('limit', 20)));
-        $stats = $syncService->sync($limit);
+        $result = $syncService->sync($limit);
 
+        if (!empty($result['error'])) {
+            return redirect()->route('backend.research_news.index')
+                ->with('error', $result['error']);
+        }
+
+        $stats = $result['stats'];
         return redirect()->route('backend.research_news.index')
+            ->with('sync_report', $result)
             ->with('success', "ดึงข้อมูลข่าวทุนวิจัยจาก NRIIS เรียบร้อยแล้ว (เพิ่มใหม่ {$stats['synced']} รายการ, ซ้ำ/ข้าม {$stats['skipped']} รายการ)");
+    }
+
+    public function rss(Request $request)
+    {
+        $n = (int) $request->input('n', 20);
+        $items = ResearchNews::query()
+            ->where('data_show', 1)
+            ->orderBy('created_at', 'desc')
+            ->limit($n)
+            ->get();
+
+        $siteTitle = 'ศูนย์ข่าววิจัย สถาบันวิจัยและพัฒนา มหาวิทยาลัยราชภัฏเพชรบูรณ์';
+        $siteDescription = 'ข่าวประกาศและกิจกรรมด้านการวิจัย สถาบันวิจัยและพัฒนา มหาวิทยาลัยราชภัฏเพชรบูรณ์';
+        $siteLink = url('/');
+
+        $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+        $xml .= "<rss version=\"2.0\"><channel>\n";
+        $xml .= "    <title>" . htmlspecialchars($siteTitle, ENT_QUOTES | ENT_XML1, 'UTF-8') . "</title>\n";
+        $xml .= "    <link>" . htmlspecialchars($siteLink, ENT_QUOTES | ENT_XML1, 'UTF-8') . "</link>\n";
+        $xml .= "    <description>" . htmlspecialchars($siteDescription, ENT_QUOTES | ENT_XML1, 'UTF-8') . "</description>\n";
+        $xml .= "    <language>th-TH</language>\n";
+        $xml .= "    <generator>PCRU RDB Research RSS Generator</generator>\n";
+
+        foreach ($items as $row) {
+            $title = $row->news_name ?: '';
+            $link = route('backend.research_news.show', $row->id);
+            $imgUrl = $row->image_url ?: '';
+            $pubDate = $row->news_date;
+            $description = $title;
+            if (!empty($imgUrl)) {
+                $description = '<p><img src="' . htmlspecialchars($imgUrl, ENT_QUOTES | ENT_XML1, 'UTF-8') . '" alt="' . htmlspecialchars($title, ENT_QUOTES | ENT_XML1, 'UTF-8') . '"></p><p>' . htmlspecialchars($title, ENT_QUOTES | ENT_XML1, 'UTF-8') . '</p>';
+            }
+
+            $xml .= "    <item>\n";
+            $xml .= "        <title>" . htmlspecialchars($title, ENT_QUOTES | ENT_XML1, 'UTF-8') . "</title>\n";
+            $xml .= "        <link>" . htmlspecialchars($link, ENT_QUOTES | ENT_XML1, 'UTF-8') . "</link>\n";
+            $xml .= "        <guid isPermaLink=\"true\">" . htmlspecialchars($link, ENT_QUOTES | ENT_XML1, 'UTF-8') . "</guid>\n";
+            $xml .= "        <imgUrl>" . htmlspecialchars($imgUrl, ENT_QUOTES | ENT_XML1, 'UTF-8') . "</imgUrl>\n";
+            $xml .= "        <pubDate>" . htmlspecialchars((string) $pubDate, ENT_QUOTES | ENT_XML1, 'UTF-8') . "</pubDate>\n";
+            $xml .= "        <newsCount>" . (int) $row->news_count . "</newsCount>\n";
+            $xml .= "        <description><![CDATA[" . $description . "]]></description>\n";
+            $xml .= "    </item>\n";
+        }
+
+        $xml .= "</channel></rss>";
+
+        return response($xml, 200)->header('Content-Type', 'application/rss+xml; charset=utf-8');
+    }
+
+    public function monthlyReport(Request $request)
+    {
+        $this->authorize('viewAny', ResearchNews::class);
+        $month = $request->input('month', now()->subMonth()->format('Y-m'));
+
+        $nriis = ResearchNews::whereRaw("DATE_FORMAT(created_at, '%Y-%m') = ?", [$month])->get();
+        $conferences = \App\Models\ResearchConference::whereRaw("DATE_FORMAT(created_at, '%Y-%m') = ?", [$month])->get();
+
+        return view('backend.research_news.reports', compact('nriis', 'conferences', 'month'));
     }
 
     public function viewNewsImage($id)

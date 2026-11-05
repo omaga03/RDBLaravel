@@ -218,15 +218,71 @@ class ResearchConferenceController extends Controller
         $this->authorize('create', ResearchConference::class);
 
         $limit = min(20, max(1, (int) $request->input('limit', 8)));
-        $stats = $syncService->sync($limit);
+        $result = $syncService->sync($limit);
 
+        if (!empty($result['error'])) {
+            return redirect()->route('backend.research_conference.index')
+                ->with('sync_report', $result)
+                ->with('error', $result['error']);
+        }
+
+        $stats = $result['stats'];
         if ($stats['synced'] > 0) {
             return redirect()->route('backend.research_conference.index')
+                ->with('sync_report', $result)
                 ->with('success', "ดึงข้อมูลงานประชุมวิชาการจาก Facebook สำเร็จ ({$stats['synced']} รายการ, ซ้ำ {$stats['skipped']} รายการ)");
         }
 
         return redirect()->route('backend.research_conference.index')
+            ->with('sync_report', $result)
             ->with($stats['skipped'] > 0 ? 'info' : 'warning', $stats['message'] ?: 'ไม่พบรายการใหม่จาก Facebook');
+    }
+
+    public function rss(Request $request)
+    {
+        $n = (int) $request->input('n', 20);
+        $items = ResearchConference::query()
+            ->where('data_show', 1)
+            ->orderBy('created_at', 'desc')
+            ->limit($n)
+            ->get();
+
+        $siteTitle = 'ศูนย์ข่าววิจัย สถาบันวิจัยและพัฒนา มหาวิทยาลัยราชภัฏเพชรบูรณ์';
+        $siteDescription = 'ข่าวการประชุมวิชาการ สถาบันวิจัยและพัฒนา มหาวิทยาลัยราชภัฏเพชรบูรณ์';
+        $siteLink = url('/');
+
+        $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+        $xml .= "<rss version=\"2.0\"><channel>\n";
+        $xml .= "    <title>" . htmlspecialchars($siteTitle, ENT_QUOTES | ENT_XML1, 'UTF-8') . "</title>\n";
+        $xml .= "    <link>" . htmlspecialchars($siteLink, ENT_QUOTES | ENT_XML1, 'UTF-8') . "</link>\n";
+        $xml .= "    <description>" . htmlspecialchars($siteDescription, ENT_QUOTES | ENT_XML1, 'UTF-8') . "</description>\n";
+        $xml .= "    <language>th-TH</language>\n";
+        $xml .= "    <generator>PCRU RDB Research RSS Generator</generator>\n";
+
+        foreach ($items as $row) {
+            $title = $row->con_name ?: '';
+            $link = route('backend.research_conference.show', $row->id);
+            $imgUrl = $row->image_url ?: '';
+            $pubDate = $row->created_at ? $row->created_at->format('Y-m-d') : '';
+            $description = $title;
+            if (!empty($imgUrl)) {
+                $description = '<p><img src="' . htmlspecialchars($imgUrl, ENT_QUOTES | ENT_XML1, 'UTF-8') . '" alt="' . htmlspecialchars($title, ENT_QUOTES | ENT_XML1, 'UTF-8') . '"></p><p>' . htmlspecialchars($title, ENT_QUOTES | ENT_XML1, 'UTF-8') . '</p>';
+            }
+
+            $xml .= "    <item>\n";
+            $xml .= "        <title>" . htmlspecialchars($title, ENT_QUOTES | ENT_XML1, 'UTF-8') . "</title>\n";
+            $xml .= "        <link>" . htmlspecialchars($link, ENT_QUOTES | ENT_XML1, 'UTF-8') . "</link>\n";
+            $xml .= "        <guid isPermaLink=\"true\">" . htmlspecialchars($link, ENT_QUOTES | ENT_XML1, 'UTF-8') . "</guid>\n";
+            $xml .= "        <imgUrl>" . htmlspecialchars($imgUrl, ENT_QUOTES | ENT_XML1, 'UTF-8') . "</imgUrl>\n";
+            $xml .= "        <pubDate>" . htmlspecialchars((string) $pubDate, ENT_QUOTES | ENT_XML1, 'UTF-8') . "</pubDate>\n";
+            $xml .= "        <newsCount>" . (int) $row->con_count . "</newsCount>\n";
+            $xml .= "        <description><![CDATA[" . $description . "]]></description>\n";
+            $xml .= "    </item>\n";
+        }
+
+        $xml .= "</channel></rss>";
+
+        return response($xml, 200)->header('Content-Type', 'application/rss+xml; charset=utf-8');
     }
 
     public function viewConferenceImage($id)

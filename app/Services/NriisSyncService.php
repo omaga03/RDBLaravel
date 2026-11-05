@@ -11,6 +11,7 @@ class NriisSyncService
 {
     private string $baseApiUrl = 'https://nriis.go.th/home/api/v1';
     private string $baseUrl = 'https://nriis.go.th/home';
+    private string $makeWebhookUrl = 'https://hook.eu1.make.com/9juofv3nru0zf6z9gtnyufvkd3ryvknn';
 
     /**
      * Sync news from NRIIS
@@ -18,28 +19,31 @@ class NriisSyncService
      * @param int $limit Number of items to fetch
      * @param bool $force Re-sync already existing news
      * @param callable|null $progressCallback Optional callback for CLI output
-     * @return array [synced => int, skipped => int, failed => int]
+     * @return array [stats => [synced => int, skipped => int, failed => int], items => array]
      */
     public function sync(int $limit = 50, bool $force = false, ?callable $progressCallback = null): array
     {
         $stats = ['synced' => 0, 'skipped' => 0, 'failed' => 0];
+        $itemsReport = [];
 
         try {
-            $response = Http::timeout(20)->get("{$this->baseApiUrl}/general/news/?ngroup=&d=&page=1&limit={$limit}");
+            $response = Http::timeout(25)->get("{$this->baseApiUrl}/general/news/?ngroup=&d=&page=1&limit={$limit}");
             if (!$response->successful()) {
+                $err = "เชื่อมต่อ API รายการหน้าหลัก NRIIS ไม่ได้ (HTTP {$response->status()})";
                 if ($progressCallback) {
-                    $progressCallback("Error connecting to NRIIS API (HTTP {$response->status()})");
+                    $progressCallback($err);
                 }
-                return $stats;
+                return ['stats' => $stats, 'items' => [], 'error' => $err];
             }
 
             $listData = $response->json();
             $items = $listData['data'] ?? [];
         } catch (\Throwable $e) {
+            $err = "เกิดข้อผิดพลาดในการเชื่อมต่อ NRIIS API: " . $e->getMessage();
             if ($progressCallback) {
-                $progressCallback("Exception connecting to NRIIS API: " . $e->getMessage());
+                $progressCallback($err);
             }
-            return $stats;
+            return ['stats' => $stats, 'items' => [], 'error' => $err];
         }
 
         foreach ($items as $item) {
@@ -51,22 +55,41 @@ class NriisSyncService
             $existing = ResearchNews::where('news_id', $nid)->first();
             if ($existing && !$force) {
                 $stats['skipped']++;
+                $skipMsg = "ID: {$nid} -- ซ้ำ (ข้ามไป) --";
                 if ($progressCallback) {
-                    $progressCallback("ID: {$nid} - ซ้ำ (ข้ามไป)");
+                    $progressCallback($skipMsg);
                 }
+                $itemsReport[] = [
+                    'status' => 'skipped',
+                    'news_id' => $nid,
+                    'title' => $existing->news_name,
+                    'message' => $skipMsg,
+                    'detail_url' => route('backend.research_news.show', $existing->id),
+                ];
                 continue;
             }
 
             try {
-                $detailResponse = Http::timeout(15)->get("{$this->baseApiUrl}/general/news/{$nid}");
+                $detailResponse = Http::timeout(20)->get("{$this->baseApiUrl}/general/news/{$nid}");
                 if (!$detailResponse->successful()) {
                     $stats['failed']++;
+                    $itemsReport[] = [
+                        'status' => 'failed',
+                        'news_id' => $nid,
+                        'message' => "ID: {$nid} -- เกิดข้อผิดพลาด: HTTP {$detailResponse->status()}",
+                    ];
                     continue;
                 }
 
                 $news = $detailResponse->json();
-                if (!$news || empty($news['NNAME'])) {
+                if (!$news || empty($news['NNAME']) || mb_strlen(trim($news['NNAME'])) <= 10) {
                     $stats['skipped']++;
+                    $itemsReport[] = [
+                        'status' => 'skipped',
+                        'news_id' => $nid,
+                        'title' => $news['NNAME'] ?? '',
+                        'message' => "ID: {$nid} -- หัวข้อข่าวสั้นเกินไปหรือไม่พบเนื้อหา --",
+                    ];
                     continue;
                 }
 
@@ -82,11 +105,11 @@ class NriisSyncService
                 $model->news_reference = 'NRIIS : ระบบข้อมูลสารสนเทศวิจัยและนวัตกรรมแห่งชาติ';
                 $model->news_link = "{$this->baseUrl}/news/{$nid}";
 
-                // Clean iframe in details
+                // 1. Clean iframe in details
                 $rawDetail = $news['NDETAIL'] ?? '';
                 $htmlDetail = $this->cleanIframeDetail($rawDetail);
 
-                // Main PDF attachment
+                // 2. Main PDF attachment (NFILE_PDF)
                 if (!empty($news['NFILE_PDF'])) {
                     $mainFileUrl = 'https://nriis.go.th/FileUpload/AttatchFile/News/' . trim($news['NFILE_PDF']);
                     $htmlDetail .= '<div class="alert alert-info mt-3 p-3 rounded border">';
@@ -95,10 +118,10 @@ class NriisSyncService
                     $htmlDetail .= '</div>';
                 }
 
-                // Additional attachments
+                // 3. Additional attachments (files)
                 if (!empty($news['files']) && is_array($news['files'])) {
-                    $fileHtml = '<div class="card bg-light mt-3 p-3 border rounded">';
-                    $fileHtml .= '<b class="mb-2 d-block"><i class="bi bi-paperclip me-1"></i> ไฟล์แนบเพิ่มเติม:</b><ul class="list-unstyled mb-0">';
+                    $fileHtml = '<div class="card bg-body-tertiary mt-3 p-3 border rounded">';
+                    $fileHtml .= '<b class="mb-2 d-block"><i class="bi bi-paperclip me-1"></i> ไฟล์แนบเพิ่มเติม:</b><ul class="mb-0 ps-3">';
                     foreach ($news['files'] as $file) {
                         $fUrl = $file['fileUrl'] ?? '';
                         $fName = $file['FileNameOriginal'] ?? 'ดาวน์โหลดไฟล์';
@@ -113,30 +136,63 @@ class NriisSyncService
                 $model->news_detail = $htmlDetail;
                 $model->data_show = 1;
 
-                // Download and store image locally if available
+                // 4. Download and resize image locally: {nid}.{ext}
                 if (!empty($news['imgNews'])) {
-                    $savedPath = $this->downloadImage($news['imgNews'], $nid);
-                    if ($savedPath) {
-                        $model->news_path = $savedPath;
-                        $model->news_img = basename($savedPath);
-                        $model->news_safe_name = basename($savedPath);
+                    $savedFileName = $this->downloadAndResize($news['imgNews'], $nid);
+                    if ($savedFileName) {
+                        $model->news_path = "uploads/datanewsimg/{$savedFileName}";
+                        $model->news_img = $savedFileName;
+                        $model->news_safe_name = $savedFileName;
                     }
                 }
 
                 $model->save();
                 $stats['synced']++;
+
+                // 5. Send to Make.com Webhook (Facebook automation)
+                $makeStatus = $this->sendToMakeWebhook($model);
+
+                // 6. Send Line/Telegram Notify
+                $this->sendTelegramNotify($model, $makeStatus);
+
                 if ($progressCallback) {
                     $progressCallback("ID: {$nid} - บันทึกสำเร็จ: " . Str::limit($model->news_name, 50));
                 }
+
+                $itemsReport[] = [
+                    'status' => 'synced',
+                    'news_id' => $model->news_id,
+                    'id' => $model->id,
+                    'title' => $model->news_name,
+                    'title_len' => mb_strlen(trim($model->news_name)),
+                    'news_link' => $model->news_link,
+                    'news_img' => $model->news_img,
+                    'image_url' => $model->image_url,
+                    'news_date' => $model->news_date,
+                    'news_type' => $model->news_type,
+                    'news_detail' => $model->news_detail,
+                    'detail_url' => route('backend.research_news.show', $model->id),
+                    'make_status' => $makeStatus,
+                ];
+
             } catch (\Throwable $e) {
                 $stats['failed']++;
+                $errMsg = "ID: {$nid} - เกิดข้อผิดพลาด: " . $e->getMessage();
                 if ($progressCallback) {
-                    $progressCallback("ID: {$nid} - เกิดข้อผิดพลาด: " . $e->getMessage());
+                    $progressCallback($errMsg);
                 }
+                $itemsReport[] = [
+                    'status' => 'failed',
+                    'news_id' => $nid,
+                    'message' => $errMsg,
+                ];
             }
         }
 
-        return $stats;
+        return [
+            'stats' => $stats,
+            'items' => $itemsReport,
+        ];
     }
 
     private function cleanIframeDetail(string $content): string
@@ -153,10 +209,14 @@ class NriisSyncService
         }, $content);
     }
 
-    private function downloadImage(string $url, string $nid): ?string
+    /**
+     * Download and resize image using GD (same logic as Yii2 downloadAndResize)
+     * Saves file as {nid}.{ext} under storage/app/public/uploads/datanewsimg/
+     */
+    private function downloadAndResize(string $urlImg, string $nid): ?string
     {
         try {
-            $resp = Http::timeout(10)->get(trim($url));
+            $resp = Http::timeout(15)->get(trim($urlImg));
             if (!$resp->successful()) {
                 return null;
             }
@@ -166,16 +226,93 @@ class NriisSyncService
                 return null;
             }
 
-            $ext = pathinfo(parse_url($url, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION);
-            $ext = in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'webp', 'gif']) ? strtolower($ext) : 'jpg';
+            $parsedExt = pathinfo(parse_url($urlImg, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION);
+            $ext = in_array(strtolower($parsedExt), ['jpg', 'jpeg', 'png', 'webp', 'gif']) ? strtolower($parsedExt) : 'jpg';
 
-            $filename = "nriis_{$nid}.{$ext}";
-            $relativePath = "uploads/datanewsimg/{$filename}";
+            $newFileName = "{$nid}.{$ext}";
+            $targetDir = storage_path('app/public/uploads/datanewsimg');
+            if (!is_dir($targetDir)) {
+                @mkdir($targetDir, 0755, true);
+            }
+            $targetPath = $targetDir . DIRECTORY_SEPARATOR . $newFileName;
 
-            Storage::disk('public')->put($relativePath, $content);
-            return $relativePath;
+            if (extension_loaded('gd') && function_exists('imagecreatefromstring')) {
+                $im = @imagecreatefromstring($content);
+                if ($im) {
+                    $width = imagesx($im);
+                    $height = imagesy($im);
+                    if ($width > 2048 || $height > 2048) {
+                        $percent = 2000 / max($width, $height);
+                        $newW = (int) ($width * $percent);
+                        $newH = (int) ($height * $percent);
+                        $thumb = imagecreatetruecolor($newW, $newH);
+                        imagecopyresampled($thumb, $im, 0, 0, 0, 0, $newW, $newH, $width, $height);
+                        imagejpeg($thumb, $targetPath, 85);
+                        imagedestroy($thumb);
+                    } else {
+                        file_put_contents($targetPath, $content);
+                    }
+                    imagedestroy($im);
+                    return $newFileName;
+                }
+            }
+
+            // Fallback direct write
+            file_put_contents($targetPath, $content);
+            return $newFileName;
         } catch (\Throwable $e) {
             return null;
+        }
+    }
+
+    /**
+     * Send payload to Make.com Webhook
+     */
+    private function sendToMakeWebhook(ResearchNews $model): string
+    {
+        try {
+            $makeNewsData = [
+                'news_id' => (string) $model->news_id,
+                'type' => $model->news_type,
+                'title' => $model->news_name,
+                'content' => $model->news_detail,
+                'source_url' => route('backend.research_news.show', $model->id),
+                'image_url' => $model->image_url ?: '',
+            ];
+
+            $response = Http::timeout(8)
+                ->withHeaders(['Content-Type' => 'application/json'])
+                ->post($this->makeWebhookUrl, $makeNewsData);
+
+            if ($response->successful()) {
+                return $model->id . " - ส่งข้อมูลไป Make สำเร็จ!";
+            } else {
+                return $model->id . " - ส่งไป Make เกิดข้อผิดพลาด (HTTP {$response->status()})";
+            }
+        } catch (\Throwable $e) {
+            return $model->id . " - ส่งไป Make ไม่สำเร็จ: " . $e->getMessage();
+        }
+    }
+
+    /**
+     * Send Telegram notification matching Yii2 format
+     */
+    private function sendTelegramNotify(ResearchNews $model, string $makeStatus): void
+    {
+        try {
+            $text = "📌 " . $model->news_name . "\n";
+            $text .= "--------------------\n";
+            $text .= "🔗 รายละเอียด: " . route('backend.research_news.show', $model->id) . "\n";
+            $text .= "📅 วันที่ประกาศ: " . $model->news_date;
+
+            $imageUrl = $model->image_url;
+            if ($imageUrl) {
+                TelegramNotificationService::sendMessageToNotify($text . "\n\n🔎 " . $imageUrl . "\n\n" . $makeStatus, $imageUrl);
+            } else {
+                TelegramNotificationService::sendMessageToNotify($text . "\n\n" . $makeStatus);
+            }
+        } catch (\Throwable $e) {
+            // Non-blocking
         }
     }
 }

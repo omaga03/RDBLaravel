@@ -104,6 +104,59 @@ class TelegramNotificationService
     }
 
     /**
+     * Send message + optional photo to Telegram admin chat (compatible with Yii2 RdbProject::sendMessageToNotify)
+     */
+    public static function sendMessageToNotify(string $message, ?string $photoUrl = null): array
+    {
+        $token = self::getBotToken();
+        $chatId = self::getAdminChatId();
+        $enabled = config('services.telegram.enabled', true);
+        $timeout = (int) config('services.telegram.timeout', 6);
+
+        if (!$enabled || empty($token) || empty($chatId)) {
+            return [
+                'success' => false,
+                'error' => 'Telegram service is not configured or disabled.',
+            ];
+        }
+
+        try {
+            if (!empty($photoUrl) && filter_var($photoUrl, FILTER_VALIDATE_URL)) {
+                $response = Http::timeout($timeout)->post("https://api.telegram.org/bot{$token}/sendPhoto", [
+                    'chat_id' => $chatId,
+                    'photo' => $photoUrl,
+                    'caption' => mb_substr($message, 0, 1024),
+                ]);
+
+                if ($response->successful()) {
+                    return [
+                        'success' => true,
+                        'response' => $response->json(),
+                    ];
+                }
+            }
+
+            // Fallback text message
+            $response = Http::timeout($timeout)->post("https://api.telegram.org/bot{$token}/sendMessage", [
+                'chat_id' => $chatId,
+                'text' => $message,
+                'disable_web_page_preview' => false,
+            ]);
+
+            return [
+                'success' => $response->successful(),
+                'response' => $response->json(),
+            ];
+        } catch (\Throwable $e) {
+            Log::warning('Telegram notification failed to send: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
      * Send notification to the Super Admin (The Creator / Admin Research).
      */
     public static function notifyAdmin(string $title, string $body, array $meta = []): bool

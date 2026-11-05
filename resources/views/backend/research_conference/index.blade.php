@@ -42,6 +42,124 @@
         </div>
     </div>
 
+    @if(session('sync_report'))
+        @php
+            $report = session('sync_report');
+            $stats = $report['stats'] ?? ['synced' => 0, 'skipped' => 0, 'failed' => 0];
+            $itemsList = $report['items'] ?? [];
+            $discoveredLinks = $report['discovered_links'] ?? [];
+            $syncedItems = array_filter($itemsList, fn($x) => ($x['status'] ?? '') === 'synced');
+            $skippedItems = array_filter($itemsList, fn($x) => ($x['status'] ?? '') === 'skipped');
+        @endphp
+        <div class="card border-primary shadow-sm mb-4">
+            <div class="card-header bg-primary-subtle border-primary-subtle text-primary-emphasis d-flex justify-content-between align-items-center py-3">
+                <div>
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-facebook me-2 text-primary"></i>ผลการดึงข้อมูลงานประชุมวิชาการจาก Facebook (Sync Output Report)
+                    </h5>
+                    <div class="small mt-1">
+                        <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle me-1">บันทึกใหม่: {{ count($syncedItems) }} รายการ</span>
+                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle me-1">ซ้ำ/ข้าม: {{ count($skippedItems) }} รายการ</span>
+                        @if(($stats['failed'] ?? 0) > 0)
+                            <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle">ผิดพลาด: {{ $stats['failed'] }} รายการ</span>
+                        @endif
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" onclick="this.closest('.card').remove();" aria-label="Close"></button>
+            </div>
+            <div class="card-body">
+                @if(count($discoveredLinks) > 0)
+                    <div class="mb-3 p-3 bg-body-tertiary border rounded">
+                        <div class="fw-bold mb-2 text-body">
+                            <i class="bi bi-link-45deg me-1"></i> รายการลิงก์ภาพถ่ายที่ตรวจพบจากหน้า Facebook ({{ count($discoveredLinks) }} รายการ):
+                        </div>
+                        <div class="small font-monospace" style="max-height: 120px; overflow-y: auto;">
+                            @foreach($discoveredLinks as $dl)
+                                <div class="py-0.5">
+                                    {{ $dl['index'] }}. <a href="{{ $dl['url'] }}" target="_blank" class="text-decoration-none">{{ $dl['label'] }}</a>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                @if(count($syncedItems) > 0)
+                    <h6 class="fw-bold text-success mb-3"><i class="bi bi-check-circle-fill me-1"></i> รายการงานประชุมวิชาการที่บันทึกสำเร็จ ({{ count($syncedItems) }} รายการ):</h6>
+                    <div class="d-flex flex-column gap-3 mb-4">
+                        @foreach($syncedItems as $idx => $cItem)
+                            <div class="border rounded p-3 bg-body">
+                                <div class="row g-3 align-items-start">
+                                    <div class="col-md-2 text-center">
+                                        @if(!empty($cItem['image_url']))
+                                            <img src="{{ $cItem['image_url'] }}" alt="รูปงานประชุม" class="img-fluid rounded border shadow-sm mb-2" style="max-height: 160px; object-fit: cover;">
+                                        @else
+                                            <div class="p-3 bg-body-secondary rounded border text-body-secondary text-center">
+                                                <i class="bi bi-image fs-1 d-block"></i>
+                                                <small>ไม่มีรูปภาพ</small>
+                                            </div>
+                                        @endif
+                                        <div class="small text-body-secondary font-monospace">FBID: {{ $cItem['con_id'] }}</div>
+                                    </div>
+                                    <div class="col-md-10">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h6 class="fw-bold mb-0">
+                                                <span class="badge bg-primary me-1">{{ $idx + 1 }}</span>
+                                                <a href="{{ $cItem['detail_url'] }}" target="_blank" class="text-decoration-none text-body hover-primary">
+                                                    {{ $cItem['name'] }}
+                                                </a>
+                                            </h6>
+                                            <a href="{{ $cItem['detail_url'] }}" target="_blank" class="btn btn-sm btn-outline-primary text-nowrap ms-2">
+                                                <i class="bi bi-box-arrow-up-right me-1"></i> เปิดดูในระบบ
+                                            </a>
+                                        </div>
+
+                                        <ul class="list-unstyled small mb-2 text-body-secondary">
+                                            <li class="mb-1"><strong>Link:</strong> <a href="{{ $cItem['website'] }}" target="_blank" class="text-break">{{ $cItem['website'] }}</a></li>
+                                            <li class="mb-1"><strong>EvenDate:</strong> <span class="badge bg-primary-subtle text-primary-emphasis">{{ $cItem['even_date'] ?: 'ไม่ได้ระบุ' }}</span></li>
+                                            <li class="mb-1"><strong>Deadline:</strong> <span class="badge bg-danger-subtle text-danger-emphasis">{{ $cItem['deadline'] ?: 'ไม่ได้ระบุ' }}</span></li>
+                                            <li class="mb-1"><strong>Venue:</strong> {{ $cItem['venue'] ?: 'ไม่ได้ระบุ' }}</li>
+                                            @if(!empty($cItem['make_status']))
+                                                <li class="mb-1"><strong>MakeToFb:</strong> <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle"><i class="bi bi-send-check me-1"></i>{{ $cItem['make_status'] }}</span></li>
+                                            @endif
+                                        </ul>
+
+                                        <div class="small text-body-secondary bg-body-tertiary p-2 rounded border">
+                                            <strong>Detail Preview:</strong> {{ $cItem['detail_preview'] }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="alert alert-secondary py-2 mb-3">
+                        <i class="bi bi-info-circle me-1"></i> {{ $report['message'] ?? 'ไม่มีรายการงานประชุมใหม่ที่ต้องบันทึก (รายการที่มีอยู่ในระบบแล้ว)' }}
+                    </div>
+                @endif
+
+                @if(count($skippedItems) > 0)
+                    <div class="border-top pt-3">
+                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#skipped-conf-list">
+                            <i class="bi bi-list-check me-1"></i> ดูรายการที่ซ้ำ/ข้ามไป ({{ count($skippedItems) }} รายการ)
+                        </button>
+                        <div class="collapse mt-2" id="skipped-conf-list">
+                            <div class="p-3 bg-body-tertiary border rounded font-monospace small" style="max-height: 200px; overflow-y: auto;">
+                                @foreach($skippedItems as $sk)
+                                    <div class="text-body-secondary py-1 border-bottom border-light">
+                                        {{ $sk['message'] ?? "FBID: {$sk['con_id']} -- not save (ID ซ้ำ) --" }}
+                                        @if(!empty($sk['title']))
+                                            <span class="text-body ms-2">{{ Str::limit($sk['title'], 60) }}</span>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+    @endif
+
     <!-- Search Bar -->
     <x-search-bar :searchRoute="route('backend.research_conference.index')" simplePlaceholder="พิมพ์ชื่องานประชุม, สถานที่จัดงาน, หรือคำสำคัญ...">
         <div class="row g-3">
@@ -83,8 +201,11 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 100px;" class="text-center">รูปภาพ</th>
-                            <th>ชื่องานประชุมวิชาการ</th>
+                            <th style="width: 90px;" class="text-center">รูปภาพ</th>
+                            <th>ชื่องานประชุมวิชาการ / วันจัดงาน</th>
+                            <th style="width: 15%;">หมดเขตรับบทความ</th>
+                            <th style="width: 18%;">สถานที่จัดงาน</th>
+                            <th style="width: 90px;" class="text-center">เข้าชม</th>
                             <th style="width: 120px;" class="text-center text-nowrap">จัดการ</th>
                         </tr>
                     </thead>
@@ -108,21 +229,33 @@
                                         {{ strip_tags($item->con_name) }}
                                     </a>
                                 </div>
-                                <div class="small text-body-secondary d-flex flex-wrap gap-2 align-items-center mt-1">
-                                    @if($item->con_even_date)
-                                        <span>
-                                            <i class="bi bi-calendar3 me-1 text-primary"></i>{{ \App\Helpers\ThaiDateHelper::format($item->con_even_date, false, true) }}
-                                        </span>
-                                    @endif
-                                    @if($item->con_venue)
-                                        <span>
-                                            <i class="bi bi-geo-alt-fill me-1 text-danger"></i>{{ Str::limit(strip_tags($item->con_venue), 40) }}
-                                        </span>
-                                    @endif
-                                    <span>
-                                        <i class="bi bi-eye me-1"></i>{{ number_format($item->con_count ?? 0) }}
-                                    </span>
+                                @if($item->con_even_date)
+                                    <div class="small text-primary mt-1">
+                                        <i class="bi bi-calendar3 me-1"></i>{{ $item->con_even_date }}
+                                    </div>
+                                @endif
+                                <div class="small text-body-secondary mt-1">
+                                    <i class="bi bi-clock-history me-1"></i>ประกาศเมื่อ: {{ \App\Helpers\ThaiDateHelper::format($item->created_at, false, true) }}
                                 </div>
+                            </td>
+                            <td class="p-3">
+                                @if(!empty($item->con_sub_deadline))
+                                    <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle">
+                                        <i class="bi bi-calendar-x me-1"></i>{{ $item->con_sub_deadline }}
+                                    </span>
+                                @else
+                                    <span class="text-body-secondary small">-</span>
+                                @endif
+                            </td>
+                            <td class="p-3 small text-body">
+                                @if(!empty($item->con_venue))
+                                    <i class="bi bi-geo-alt-fill me-1 text-danger"></i>{{ Str::limit(strip_tags($item->con_venue), 50) }}
+                                @else
+                                    <span class="text-body-secondary">-</span>
+                                @endif
+                            </td>
+                            <td class="text-center p-3 font-monospace">
+                                {{ number_format($item->con_count ?? 0) }}
                             </td>
                             <td class="text-center p-3 text-nowrap">
                                 <div class="btn-group btn-group-sm" role="group">
@@ -147,7 +280,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="3" class="text-center py-5 text-body-secondary">
+                            <td colspan="6" class="text-center py-5 text-body-secondary">
                                 <i class="bi bi-inbox fs-2 d-block mb-3 opacity-50"></i>
                                 ไม่พบข้อมูลการประชุมวิชาการ
                             </td>

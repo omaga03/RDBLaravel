@@ -462,4 +462,12 @@ class RdbProject extends Model
     {
         return $this->attributes['pro_date_end'] ?? null;
     }
+
+    /**
+     * Send notification to Telegram (Legacy Compatibility)
+     */
+    public static function sendMessageToNotify(string $message, ?string $photoUrl = null): array
+    {
+        return \App\Services\TelegramNotificationService::sendMessageToNotify($message, $photoUrl);
+    }
 }
