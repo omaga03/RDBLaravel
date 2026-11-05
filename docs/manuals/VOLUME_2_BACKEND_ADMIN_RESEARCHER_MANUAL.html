@@ -510,6 +510,24 @@
 <li>11.10 ศูนย์สำรองและกู้คืนข้อมูลระบบแบบแยกเฉพาะ (Dedicated Disaster Recovery Hub)</li>
 <li>11.11 ระบบการจัดการการแจ้งเตือนส่วนบุคคลและ Telegram Bot (Personal &amp; Admin Notification Center)</li>
 <li>11.12 เกราะป้องกันความเข้ากันได้ของชื่อฟิลด์ฐานข้อมูล (Schema Integrity Defense Layer &amp; Smart Accessors)</li>
+<li>11.13 สถาปัตยกรรมระบบแปลงรูปภาพทั้งระบบเป็น WebP (Universal WebP Image Converter Pipeline)</li>
+</ul>
+</li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-12-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%AB%E0%B8%B2%E0%B8%A3%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%82%E0%B9%88%E0%B8%B2%E0%B8%A7%E0%B8%AA%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%B8%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-research-news--conference-management">บทที่ 12: การบริหารจัดการข่าวสารทุนวิจัยและงานประชุมวิชาการ (Research News &amp; Conference Management)</a>
+<ul>
+<li>12.1 การจัดการข่าวทุนวิจัย NRIIS (<code>/backend/research_news</code>)</li>
+<li>12.2 การจัดการงานประชุมวิชาการ Facebook (<code>/backend/research_conference</code>)</li>
+<li>12.3 เครื่องมือตรวจสอบและทดสอบดึงข้อมูลจำลอง (Dry-Run Inspector)</li>
+<li>12.4 ระบบรายงานสรุปข่าวสารประจำเดือน (<code>/backend/research_news/reports</code>)</li>
+<li>12.5 ระบบถังขยะ การกู้คืน และการลบถาวร (Soft Delete, Restore &amp; Force Delete)</li>
+</ul>
+</li>
+<li><a href="#%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-13-%E0%B8%A8%E0%B8%B9%E0%B8%99%E0%B8%A2%E0%B9%8C%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B8%E0%B8%8D%E0%B9%81%E0%B8%88%E0%B9%80%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B8%96%E0%B8%B6%E0%B8%87%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A-api-token--endpoint-management-hub">บทที่ 13: ศูนย์จัดการบริการข้อมูลและกุญแจเข้าถึงระบบ (API Token &amp; Endpoint Management Hub)</a>
+<ul>
+<li>13.1 ภาพรวมสถาปัตยกรรม API 3 ระดับ (Tier 1: Admin, Tier 2: PMIS, Tier 3: Open Public)</li>
+<li>13.2 การสร้างและเพิกถอนสิทธิ์ API Token (Personal Access Tokens)</li>
+<li>13.3 คู่มือและทดสอบ Endpoints พร้อมการคัดลอก JSON / cURL แบบปลอดภัยบนทุก Context</li>
+<li>13.4 Open Public API สำหรับข่าวและงานประชุม (<code>/api/v1/news</code>, <code>/api/v1/conferences</code>)</li>
 </ul>
 </li>
 </ol>
@@ -1910,6 +1928,220 @@ crontab -e
 <li><strong>พจนานุกรม 131 ตาราง</strong>: บันทึกโครงสร้างคอลัมน์ ชนิดข้อมูล และ Primary Key ทั้งระบบไว้ที่ <a href="file:///c:/laragon/www/laravel_rdb/storage/framework/schema_dict.json"><code>storage/framework/schema_dict.json</code></a></li>
 <li><strong>ชุดทดสอบรับประกันความถูกต้อง</strong>: รันคำสั่ง <code>php artisan test --filter=SchemaIntegrityDefenseTest</code> (17 เคสทดสอบ 77 assertions ผ่าน 100%) เพื่อตรวจสอบว่าทุก Accessor ดึงข้อมูลตรงกับฐานข้อมูลจริงเสมอ</li>
 </ul>
+<hr />
+<a id="1113-%E0%B8%AA%E0%B8%96%E0%B8%B2%E0%B8%9B%E0%B8%B1%E0%B8%95%E0%B8%A2%E0%B8%81%E0%B8%A3%E0%B8%A3%E0%B8%A1%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%81%E0%B8%9B%E0%B8%A5%E0%B8%87%E0%B8%A3%E0%B8%B9%E0%B8%9B%E0%B8%A0%E0%B8%B2%E0%B8%9E%E0%B8%97%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%80%E0%B8%9B%E0%B9%87%E0%B8%99-webp-universal-webp-image-converter-pipeline" class="manual-anchor"></a><h3 id="1113-สถาปัตยกรรมระบบแปลงรูปภาพทั้งระบบเป็น-webp-universal-webp-image-converter-pipeline">11.13 สถาปัตยกรรมระบบแปลงรูปภาพทั้งระบบเป็น WebP (Universal WebP Image Converter Pipeline)</h3>
+<p>เพื่อเพิ่มความเร็วในการโหลดหน้าเว็บ (PageSpeed) และลดขนาดพื้นที่จัดเก็บไฟล์ภาพลงกว่า 70-80% ระบบได้ติดตั้งสถาปัตยกรรม <strong>Universal WebP Image Processing Pipeline</strong> ครอบคลุมรูปภาพทั้งหมดที่เข้าสู่ระบบ:</p>
+<a id="1-%E0%B8%88%E0%B8%B8%E0%B8%94%E0%B8%99%E0%B8%B3%E0%B9%80%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B8%A0%E0%B8%B2%E0%B8%9E%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%A7%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%81%E0%B8%9B%E0%B8%A5%E0%B8%87%E0%B9%81%E0%B8%9A%E0%B8%9A%E0%B9%80%E0%B8%A3%E0%B8%B5%E0%B8%A2%E0%B8%A5%E0%B9%84%E0%B8%97%E0%B8%A1%E0%B9%8C-real-time-ingestion" class="manual-anchor"></a><h4 id="1-จุดนำเข้าภาพและกระบวนการแปลงแบบเรียลไทม์-real-time-ingestion">1. จุดนำเข้าภาพและกระบวนการแปลงแบบเรียลไทม์ (Real-time Ingestion)</h4>
+<p>ผ่านเมธอด <code>FileUploadService::storeImageAsWebp(UploadedFile $file, string $directory, int $maxDimension = 2048, int $quality = 85)</code>:</p>
+<ul>
+<li><strong>การตรวจสอบประเภทไฟล์</strong>: รองรับไฟล์ภาพต้นฉบับ JPEG, PNG, GIF, WebP</li>
+<li><strong>การปรับขนาดอัตโนมัติ (Downscaling)</strong>: ปรับขนาดด้านยาวสุดไม่เกิน 2,048 พิกเซล รักษาอัตราส่วนเดิม (Aspect Ratio) เพื่อป้องกันไฟล์ภาพขนาดใหญ่เกินความจำเป็น</li>
+<li><strong>การรักษาความโปร่งใส (Alpha Transparency)</strong>: ประมวลผลด้วย PHP GD ฟังก์ชัน <code>imagepalettetotruecolor()</code>, <code>imagealphablending()</code>, และ <code>imagesavealpha()</code> ทำให้ภาพ PNG ที่มีพื้นหลังโปร่งแสงไม่เกิดปัญหาพื้นหลังกลายเป็นสีดำ</li>
+<li><strong>การจัดเก็บด้วยชื่อปลอดภัย (UUID Safe Name)</strong>: ตั้งชื่อไฟล์ภาพใหม่เป็น UUID เช่น <code>7a9b8c0d-....webp</code> ป้องกันปัญหาชื่อไฟล์ซ้ำและการโจมตีแบบ Directory Traversal</li>
+</ul>
+<a id="2-%E0%B9%82%E0%B8%A1%E0%B8%94%E0%B8%B9%E0%B8%A5%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%81%E0%B8%9B%E0%B8%A5%E0%B8%87%E0%B9%80%E0%B8%9B%E0%B9%87%E0%B8%99-webp" class="manual-anchor"></a><h4 id="2-โมดูลที่รองรับการแปลงเป็น-webp">2. โมดูลที่รองรับการแปลงเป็น WebP</h4>
+<ol>
+<li><strong>ภาพโปรไฟล์นักวิจัย (<code>RdbResearcher</code>)</strong>: อัปโหลดผ่านฟอร์มข้อมูลนักวิจัย หรือฟอร์มเปลี่ยนภาพด่วนในหน้าดูข้อมูล</li>
+<li><strong>ภาพข่าวทุนวิจัย (<code>ResearchNews</code>)</strong>: ดึงภาพผ่าน NRIIS API และอัปโหลดผ่านแบบฟอร์ม</li>
+<li><strong>ภาพงานประชุมวิชาการ (<code>ResearchConference</code>)</strong>: ดึงภาพโปสเตอร์ผ่าน Facebook โพสต์ และอัปโหลดผ่านแบบฟอร์ม</li>
+<li><strong>ภาพหน้าปกเอกสารวิจัย (<code>RdbProject</code> / <code>RdbPublished</code>)</strong>: เรนเดอร์หน้าแรกของ PDF เป็น <code>.webp</code> 100% ผ่าน <code>PdfCoverService</code></li>
+<li><strong>ภาพกราฟิกหลักของระบบ</strong>: โลโก้มหาวิทยาลัย <code>public/images/logo.webp</code> ขนาดลดลงจาก 234 KB เหลือเพียง 51 KB (ประหยัดแบนด์วิดท์ 78%)</li>
+</ol>
+<a id="3-%E0%B8%84%E0%B8%B3%E0%B8%AA%E0%B8%B1%E0%B9%88%E0%B8%87-artisan-%E0%B9%81%E0%B8%9B%E0%B8%A5%E0%B8%87%E0%B8%A0%E0%B8%B2%E0%B8%9E%E0%B9%80%E0%B8%94%E0%B8%B4%E0%B8%A1%E0%B8%A2%E0%B9%89%E0%B8%AD%E0%B8%99%E0%B8%AB%E0%B8%A5%E0%B8%B1%E0%B8%87%E0%B8%97%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A-batch-migration-cli" class="manual-anchor"></a><h4 id="3-คำสั่ง-artisan-แปลงภาพเดิมย้อนหลังทั้งระบบ-batch-migration-cli">3. คำสั่ง Artisan แปลงภาพเดิมย้อนหลังทั้งระบบ (Batch Migration CLI)</h4>
+<pre><code class="language-bash"># แปลงภาพทุกโมดูลทั้งระบบ (นักวิจัย, ข่าว, งานประชุม)
+php artisan rdb:convert-images-webp
+
+# เลือกแปลงเฉพาะโมดูล
+php artisan rdb:convert-images-webp --module=researcher # แปลงภาพโปรไฟล์นักวิจัย
+php artisan rdb:convert-images-webp --module=news       # แปลงภาพข่าวทุนวิจัย
+php artisan rdb:convert-images-webp --module=conference # แปลงภาพงานประชุม
+
+# ตัวเลือกเพิ่มเติม
+php artisan rdb:convert-images-webp --limit=50          # จำกัดจำนวนรายการ
+php artisan rdb:convert-images-webp --force             # บังคับแปลงใหม่แม้เป็น .webp อยู่แล้ว
+</code></pre>
+<hr />
+<a id="บทที่-12-การบริหารจัดการข่าวสารทุนวิจัยและงานประชุมวิชาการ-research-news-conference-management" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-12-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%AB%E0%B8%B2%E0%B8%A3%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%82%E0%B9%88%E0%B8%B2%E0%B8%A7%E0%B8%AA%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%B8%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-research-news--conference-management" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-12-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%AB%E0%B8%B2%E0%B8%A3%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%82%E0%B9%88%E0%B8%B2%E0%B8%A7%E0%B8%AA%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%B8%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-research-news-conference-management" class="manual-anchor"></a><h2 id="บทที่-12-การบริหารจัดการข่าวสารทุนวิจัยและงานประชุมวิชาการ-research-news--conference-management">บทที่ 12: การบริหารจัดการข่าวสารทุนวิจัยและงานประชุมวิชาการ (Research News &amp; Conference Management)</h2>
+<p>ระบบหลังบ้านมีศูนย์รวมการบริหารจัดการข่าวทุนวิจัยจากหน่วยงานระดับชาติ และข่าวสารการประชุมวิชาการทั้งในและต่างประเทศ โดยเข้าใช้งานผ่านเมนูแถบซ้าย <strong>&quot;ข่าว/กิจกรรม&quot;</strong>:</p>
+<a id="121-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%82%E0%B9%88%E0%B8%B2%E0%B8%A7%E0%B8%97%E0%B8%B8%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-nriis-backendresearchnews" class="manual-anchor"></a><h3 id="121-การจัดการข่าวทุนวิจัย-nriis-backendresearchnews">12.1 การจัดการข่าวทุนวิจัย NRIIS (<code>/backend/research_news</code>)</h3>
+<ul>
+<li><strong>การซิงค์ข้อมูลอัตโนมัติ</strong>: ทำงานผ่านระบบตั้งเวลาอัตโนมัติทุกเช้า เวลา 06:00 น. (<code>php artisan rdb:sync-nriis-news</code>) ดึงข้อมูลประกาศทุนใหม่จาก NRIIS API</li>
+<li><strong>การส่งต่อ Webhook และแจ้งเตือน Telegram</strong>: ส่งข้อมูลข่าวที่ซิงค์สำเร็จไปยัง Make.com Webhook เพื่อโพสต์ลง Facebook เพจของสถาบันวิจัยฯ และส่งข้อความแจ้งเตือนเข้า Telegram กลุ่มของผู้บริหาร</li>
+<li><strong>การเพิ่ม/แก้ไขข่าวผ่านแบบฟอร์ม</strong>: เจ้าหน้าที่สามารถเพิ่มข่าวกิจกรรมหรือทุนวิจัยภายในมหาวิทยาลัย พร้อมอัปโหลดภาพประกอบซึ่งจะแปลงเป็น <code>.webp</code> อัตโนมัติ</li>
+</ul>
+<a id="122-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%81%E0%B8%B2%E0%B8%A3-facebook-backendresearchconference" class="manual-anchor"></a><h3 id="122-การจัดการงานประชุมวิชาการ-facebook-backendresearchconference">12.2 การจัดการงานประชุมวิชาการ Facebook (<code>/backend/research_conference</code>)</h3>
+<ul>
+<li><strong>การดึงข้อมูลจากเพจ Facebook</strong>: ซิงค์โพสต์งานประชุมวิชาการทุกเช้า เวลา 06:30 น. (<code>php artisan rdb:sync-facebook-conferences</code>)</li>
+<li><strong>การสกัดข้อมูลอัจฉริยะ</strong>: สกัดวันที่จัดงาน (<code>con_even_date</code>), วันหมดเขตส่งผลงาน (<code>con_sub_deadline</code>), สถานที่จัดงาน (<code>con_venue</code>), และลิงก์เว็บไซต์ต้นฉบับอัตโนมัติ</li>
+<li><strong>การจัดการผ่านแบบฟอร์ม</strong>: บันทึกรายละเอียด แก้ไขข้อมูล และอัปโหลดภาพโปสเตอร์</li>
+</ul>
+<a id="123-%E0%B9%80%E0%B8%84%E0%B8%A3%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%97%E0%B8%94%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%94%E0%B8%B6%E0%B8%87%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%88%E0%B8%B3%E0%B8%A5%E0%B8%AD%E0%B8%87-dry-run-inspector" class="manual-anchor"></a><h3 id="123-เครื่องมือตรวจสอบและทดสอบดึงข้อมูลจำลอง-dry-run-inspector">12.3 เครื่องมือตรวจสอบและทดสอบดึงข้อมูลจำลอง (Dry-Run Inspector)</h3>
+<p>สำหรับผู้ดูแลระบบใช้ตรวจสอบความพร้อมของ API ภายนอก และดูตัวอย่างข้อมูลจริงก่อนตัดสินใจนำเข้า:</p>
+<ul>
+<li><strong>เครื่องมือทดสอบข่าวทุน NRIIS</strong>: เข้าใช้งานที่ <code>/backend/research_news/test-sync</code>
+<ul>
+<li>ทดสอบดึงข้อมูลตามจำนวนที่ระบุ (Limit 1-50 รายการ) หรือระบุรหัสข่าว NRIIS (<code>nid</code>) ที่ต้องการเจาะจง</li>
+<li>แสดงผลข้อมูลที่สกัดได้: หัวข้อข่าว, ลิงก์รูปภาพ, รายการไฟล์แนบ PDF, ข้อมูลจำลอง Storage File (<code>.webp</code>), โครงสร้าง Payload สำหรับ Make.com และข้อความจำลองที่จะส่งเข้า Telegram</li>
+<li><strong>ไม่บันทึกลงฐานข้อมูลจริง (Dry-Run Mode)</strong></li>
+</ul>
+</li>
+<li><strong>เครื่องมือทดสอบงานประชุม Facebook</strong>: เข้าใช้งานที่ <code>/backend/research_conference/test-sync</code>
+<ul>
+<li>ทดสอบเชื่อมต่อเพจ Facebook ตรวจสอบสถานะการล็อกอินและคุกกี้</li>
+<li>แสดงผลข้อความสกัด, กำหนดส่งผลงาน, สถานที่จัดงาน และภาพพรีวิวจาก Facebook CDN</li>
+</ul>
+</li>
+</ul>
+<a id="124-%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%AA%E0%B8%A3%E0%B8%B8%E0%B8%9B%E0%B8%82%E0%B9%88%E0%B8%B2%E0%B8%A7%E0%B8%AA%E0%B8%B2%E0%B8%A3%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%88%E0%B8%B3%E0%B9%80%E0%B8%94%E0%B8%B7%E0%B8%AD%E0%B8%99-backendresearchnewsreports" class="manual-anchor"></a><h3 id="124-ระบบรายงานสรุปข่าวสารประจำเดือน-backendresearchnewsreports">12.4 ระบบรายงานสรุปข่าวสารประจำเดือน (<code>/backend/research_news/reports</code>)</h3>
+<p>แยกเป็นเมนูย่อยเฉพาะในแถบนำทาง &quot;ข่าว/กิจกรรม&quot; สำหรับสรุปสถิติงานประชาสัมพันธ์:</p>
+<ul>
+<li>กรองดูสถิติตามปี พ.ศ. และเดือนที่ต้องการ</li>
+<li>แสดงการ์ดสรุปยอดรวมข่าวทุนวิจัย, จำนวนครั้งที่มีผู้เข้าชม, และตารางแจกแจงตามประเภทข่าว</li>
+<li>เหมาะสำหรับการนำตัวเลขไปรายงานผลการดำเนินงานประจำเดือนต่อผู้บริหาร</li>
+</ul>
+<a id="125-ระบบถังขยะ-การกู้คืน-และการลบถาวร-soft-delete-restore-force-delete" class="manual-anchor"></a><a id="125-%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%96%E0%B8%B1%E0%B8%87%E0%B8%82%E0%B8%A2%E0%B8%B0-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%81%E0%B8%B9%E0%B9%89%E0%B8%84%E0%B8%B7%E0%B8%99-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A5%E0%B8%9A%E0%B8%96%E0%B8%B2%E0%B8%A7%E0%B8%A3-soft-delete-restore--force-delete" class="manual-anchor"></a><a id="125-%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%96%E0%B8%B1%E0%B8%87%E0%B8%82%E0%B8%A2%E0%B8%B0-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%81%E0%B8%B9%E0%B9%89%E0%B8%84%E0%B8%B7%E0%B8%99-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%A5%E0%B8%9A%E0%B8%96%E0%B8%B2%E0%B8%A7%E0%B8%A3-soft-delete-restore-force-delete" class="manual-anchor"></a><h3 id="125-ระบบถังขยะ-การกู้คืน-และการลบถาวร-soft-delete-restore--force-delete">12.5 ระบบถังขยะ การกู้คืน และการลบถาวร (Soft Delete, Restore &amp; Force Delete)</h3>
+<p>ทั้งโมดูลข่าวทุนวิจัยและงานประชุมวิชาการได้รับการติดตั้งระบบความปลอดภัยข้อมูล 3 ระดับ:</p>
+<ol>
+<li><strong>ย้ายไปถังขยะ (Soft Delete)</strong>: เมื่อกดปุ่ม <strong>&quot;ลบ (ถังขยะ)&quot;</strong> ระบบจะปรับสถานะ <code>data_show = 0</code> ข้อมูลจะถูกซ่อนจากหน้าบ้านทันที แต่ยังคงอยู่ในฐานข้อมูล</li>
+<li><strong>กู้คืนข้อมูล (Restore)</strong>: หากลบผิดพลาด สามารถกดปุ่ม <strong>&quot;กู้คืน&quot;</strong> เพื่อปรับสถานะกลับเป็น <code>data_show = 1</code> ให้แสดงผลตามเดิม</li>
+<li><strong>ลบถาวร (Force Delete)</strong>: เมื่อผู้ดูแลระบบต้องการลบออกจากระบบอย่างสิ้นเชิง ระบบจะลบเรคคอร์ดออกจากฐานข้อมูล <strong>พร้อมทั้งลบไฟล์ภาพจริงออกจาก Storage</strong> ป้องกันการเกิดไฟล์ขยะตกค้างบนเซิร์ฟเวอร์</li>
+</ol>
+<hr />
+<a id="บทที่-13-ศูนย์จัดการบริการข้อมูลและกุญแจเข้าถึงระบบ-api-token-endpoint-management-hub" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-13-%E0%B8%A8%E0%B8%B9%E0%B8%99%E0%B8%A2%E0%B9%8C%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B8%E0%B8%8D%E0%B9%81%E0%B8%88%E0%B9%80%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B8%96%E0%B8%B6%E0%B8%87%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A-api-token--endpoint-management-hub" class="manual-anchor"></a><a id="%E0%B8%9A%E0%B8%97%E0%B8%97%E0%B8%B5%E0%B9%88-13-%E0%B8%A8%E0%B8%B9%E0%B8%99%E0%B8%A2%E0%B9%8C%E0%B8%88%E0%B8%B1%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%81%E0%B8%B8%E0%B8%8D%E0%B9%81%E0%B8%88%E0%B9%80%E0%B8%82%E0%B9%89%E0%B8%B2%E0%B8%96%E0%B8%B6%E0%B8%87%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A-api-token-endpoint-management-hub" class="manual-anchor"></a><h2 id="บทที่-13-ศูนย์จัดการบริการข้อมูลและกุญแจเข้าถึงระบบ-api-token--endpoint-management-hub">บทที่ 13: ศูนย์จัดการบริการข้อมูลและกุญแจเข้าถึงระบบ (API Token &amp; Endpoint Management Hub)</h2>
+<p>ระบบบริการข้อมูลเชื่อมโยงภายนอก (RESTful APIs) ถูกออกแบบตามมาตรฐานสถาปัตยกรรม 3 ระดับ (Tiered API Architecture) เข้าถึงศูนย์ควบคุมได้ที่:
+👉 <strong><code>/backend/api-management</code></strong> (เมนู: <strong>การดูแลระบบ ➔ จัดการ API &amp; Token</strong>)</p>
+<a id="131-%E0%B8%A0%E0%B8%B2%E0%B8%9E%E0%B8%A3%E0%B8%A7%E0%B8%A1%E0%B8%AA%E0%B8%96%E0%B8%B2%E0%B8%9B%E0%B8%B1%E0%B8%95%E0%B8%A2%E0%B8%81%E0%B8%A3%E0%B8%A3%E0%B8%A1-api-3-%E0%B8%A3%E0%B8%B0%E0%B8%94%E0%B8%B1%E0%B8%9A-three-tier-api-architecture" class="manual-anchor"></a><h3 id="131-ภาพรวมสถาปัตยกรรม-api-3-ระดับ-three-tier-api-architecture">13.1 ภาพรวมสถาปัตยกรรม API 3 ระดับ (Three-Tier API Architecture)</h3>
+
+<div class="mermaid-container"><pre class="mermaid">
+flowchart TD
+    Client["ระบบภายนอก / แอปพลิเคชัน / เว็บไซต์คณะ"] --&gt; Gateway{"API Routing Layer"}
+    Gateway --&gt;|"Tier 1: ติดสิทธิ์ Admin (Bearer Token)"| T1["Private Admin API (/api/v1/projects, /api/v1/publications)"]
+    Gateway --&gt;|"Tier 2: ข้อมูลสถิติและ PMIS (Public Read-Only)"| T2["PMIS &amp; Portfolio API (/api/pmis/*)"]
+    Gateway --&gt;|"Tier 3: ข้อมูลเปิดสาธารณะ (No Auth Needed)"| T3["Open Public API (/api/v1/news, /api/v1/conferences)"]
+</pre></div>
+
+<ol>
+<li><strong>Tier 1: Private Administrative API</strong>:
+<ul>
+<li>บังคับยืนยันตัวตนด้วย <strong>Bearer Token (Sanctum Personal Access Token)</strong> ใน HTTP Header <code>Authorization: Bearer &lt;token&gt;</code></li>
+<li>ใช้สำหรับระบบที่ต้องการเข้าถึงข้อมูลผลงานฉบับเต็มและสถิติเชิงลึก</li>
+</ul>
+</li>
+<li><strong>Tier 2: PMIS &amp; Legacy Integration API</strong>:
+<ul>
+<li>ให้บริการข้อมูลเชิงสรุปสำหรับระบบประกันคุณภาพการศึกษา (PMIS) และการเชื่อมต่อระบบเดิม</li>
+</ul>
+</li>
+<li><strong>Tier 3: Open Public API</strong>:
+<ul>
+<li>เปิดให้เว็บไซต์คณะ, แอปพลิเคชันมือถือ หรือหน่วยงานภายนอก เรียกดึงข่าวทุนวิจัยและงานประชุมวิชาการได้ทันทีโดยไม่ต้องใช้ Token</li>
+</ul>
+</li>
+</ol>
+<a id="132-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AA%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%87%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B9%80%E0%B8%9E%E0%B8%B4%E0%B8%81%E0%B8%96%E0%B8%AD%E0%B8%99%E0%B8%AA%E0%B8%B4%E0%B8%97%E0%B8%98%E0%B8%B4%E0%B9%8C-api-token-personal-access-tokens" class="manual-anchor"></a><h3 id="132-การสร้างและเพิกถอนสิทธิ์-api-token-personal-access-tokens">13.2 การสร้างและเพิกถอนสิทธิ์ API Token (Personal Access Tokens)</h3>
+<ul>
+<li><strong>สิทธิ์การเข้าถึง</strong>: สงวนสิทธิ์เฉพาะผู้ดูแลระบบบทบาท <strong>The Creator</strong> เท่านั้น</li>
+<li><strong>ขั้นตอนการออก Token ใหม่</strong>:
+<ol>
+<li>เข้าสู่หน้า <code>/backend/api-management</code> คลิกแท็บ <strong>&quot;จัดการ Access Token&quot;</strong></li>
+<li>กรอก <strong>ชื่อ Token (Token Name)</strong> เช่น <code>Mobile App PCRU</code> หรือ <code>Faculty of Science Web</code></li>
+<li>กำหนดวันหมดอายุ (หรือปล่อยว่างหากไม่ต้องการให้หมดอายุ)</li>
+<li>คลิกปุ่ม <strong>&quot;สร้าง Token&quot;</strong></li>
+<li>ระบบจะแสดงรหัส Token แบบเต็ม (Plain Text Token) <strong>เพียงครั้งเดียวเท่านั้น</strong> ให้กดปุ่ม <strong>&quot;คัดลอก Token&quot;</strong> และนำไปเก็บไว้ในที่ปลอดภัย</li>
+</ol>
+</li>
+<li><strong>การเพิกถอน Token (Revoke)</strong>: สามารถกดปุ่ม <strong>&quot;เพิกถอน (Revoke)&quot;</strong> ที่แถว Token นั้นๆ ได้ทันทีเพื่อยกเลิกการเข้าถึง</li>
+</ul>
+<a id="133-คู่มือและทดสอบ-endpoints-พร้อมการคัดลอก-json-curl-แบบปลอดภัยบนทุก-context" class="manual-anchor"></a><a id="133-%E0%B8%84%E0%B8%B9%E0%B9%88%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%97%E0%B8%94%E0%B8%AA%E0%B8%AD%E0%B8%9A-endpoints-%E0%B8%9E%E0%B8%A3%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%84%E0%B8%B1%E0%B8%94%E0%B8%A5%E0%B8%AD%E0%B8%81-json--curl-%E0%B9%81%E0%B8%9A%E0%B8%9A%E0%B8%9B%E0%B8%A5%E0%B8%AD%E0%B8%94%E0%B8%A0%E0%B8%B1%E0%B8%A2%E0%B8%9A%E0%B8%99%E0%B8%97%E0%B8%B8%E0%B8%81-context" class="manual-anchor"></a><a id="133-%E0%B8%84%E0%B8%B9%E0%B9%88%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%97%E0%B8%94%E0%B8%AA%E0%B8%AD%E0%B8%9A-endpoints-%E0%B8%9E%E0%B8%A3%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%84%E0%B8%B1%E0%B8%94%E0%B8%A5%E0%B8%AD%E0%B8%81-json-curl-%E0%B9%81%E0%B8%9A%E0%B8%9A%E0%B8%9B%E0%B8%A5%E0%B8%AD%E0%B8%94%E0%B8%A0%E0%B8%B1%E0%B8%A2%E0%B8%9A%E0%B8%99%E0%B8%97%E0%B8%B8%E0%B8%81-context" class="manual-anchor"></a><h3 id="133-คู่มือและทดสอบ-endpoints-พร้อมการคัดลอก-json--curl-แบบปลอดภัยบนทุก-context">13.3 คู่มือและทดสอบ Endpoints พร้อมการคัดลอก JSON / cURL แบบปลอดภัยบนทุก Context</h3>
+<p>ในแท็บ <strong>&quot;รายการ Endpoints&quot;</strong> บนหน้าเว็บ มีเอกสารแสดงรายละเอียดของทุก API Endpoint:</p>
+<ul>
+<li>แสดง HTTP Method (<code>GET</code>), พาธ URL, พารามิเตอร์การค้นหา (<code>limit</code>, <code>search</code>, <code>page</code>)</li>
+<li>มีกล่องตัวอย่าง <strong>JSON Response</strong> ให้ดูโครงสร้างข้อมูล</li>
+<li><strong>ปุ่มคัดลอกปลอดภัย (Non-Secure HTTP Safe Clipboard)</strong>:
+<ul>
+<li>พัฒนาด้วยฟังก์ชัน <code>copyTextToClipboardSafe</code> รองรับเบราว์เซอร์ทั้งบนเครื่องจำลองที่เป็น HTTP (<code>http://laravel_rdb.test</code>) และเซิร์ฟเวอร์จริงที่เป็น HTTPS</li>
+<li>กดปุ่ม <strong>&quot;คัดลอก JSON&quot;</strong> เพื่อคัดลอกตัวอย่างโครงสร้างข้อมูล</li>
+<li>กดปุ่ม <strong>&quot;คัดลอกคำสั่ง cURL&quot;</strong> เพื่อนำคำสั่งไปรันบน Terminal / Postman ได้ทันที</li>
+</ul>
+</li>
+</ul>
+<a id="134-%E0%B8%AA%E0%B8%A3%E0%B8%B8%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%81%E0%B8%B2%E0%B8%A3-endpoints-%E0%B8%AA%E0%B8%B3%E0%B8%84%E0%B8%B1%E0%B8%8D-endpoints-quick-reference" class="manual-anchor"></a><h3 id="134-สรุปรายการ-endpoints-สำคัญ-endpoints-quick-reference">13.4 สรุปรายการ Endpoints สำคัญ (Endpoints Quick Reference)</h3>
+<table>
+<thead>
+<tr>
+<th>หมวด</th>
+<th align="center">Method</th>
+<th>Endpoint URL</th>
+<th align="center">สิทธิ์การเข้าถึง</th>
+<th>วัตถุประสงค์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ข่าวสาร</strong></td>
+<td align="center"><code>GET</code></td>
+<td><code>/api/v1/news</code></td>
+<td align="center">สาธารณะ (No Auth)</td>
+<td>ดึงรายการข่าวทุนวิจัย NRIIS และกิจกรรมล่าสุด</td>
+</tr>
+<tr>
+<td><strong>ข่าวสาร</strong></td>
+<td align="center"><code>GET</code></td>
+<td><code>/api/v1/news/{id}</code></td>
+<td align="center">สาธารณะ (No Auth)</td>
+<td>ดึงเนื้อหาข่าวฉบับเต็มและลิงก์เอกสาร</td>
+</tr>
+<tr>
+<td><strong>งานประชุม</strong></td>
+<td align="center"><code>GET</code></td>
+<td><code>/api/v1/conferences</code></td>
+<td align="center">สาธารณะ (No Auth)</td>
+<td>ดึงรายการงานประชุมวิชาการ กำหนดส่งผลงาน</td>
+</tr>
+<tr>
+<td><strong>งานประชุม</strong></td>
+<td align="center"><code>GET</code></td>
+<td><code>/api/v1/conferences/{id}</code></td>
+<td align="center">สาธารณะ (No Auth)</td>
+<td>ดึงรายละเอียดงานประชุมและภาพโปสเตอร์</td>
+</tr>
+<tr>
+<td><strong>โครงการ</strong></td>
+<td align="center"><code>GET</code></td>
+<td><code>/api/v1/projects</code></td>
+<td align="center">Bearer Token</td>
+<td>รายการโครงการวิจัยทั้งหมด พร้อมตัวกรองปีและคณะ</td>
+</tr>
+<tr>
+<td><strong>ผลงานตีพิมพ์</strong></td>
+<td align="center"><code>GET</code></td>
+<td><code>/api/v1/publications</code></td>
+<td align="center">Bearer Token</td>
+<td>รายการบทความตีพิมพ์ วารสาร และการอ้างอิง</td>
+</tr>
+<tr>
+<td><strong>นักวิจัย</strong></td>
+<td align="center"><code>GET</code></td>
+<td><code>/api/v1/researchers</code></td>
+<td align="center">Bearer Token</td>
+<td>ทำเนียบนักวิจัย สังกัด และข้อมูล Scopus / ORCID</td>
+</tr>
+<tr>
+<td><strong>PMIS</strong></td>
+<td align="center"><code>GET</code></td>
+<td><code>/api/pmis/summary-by-faculty</code></td>
+<td align="center">สาธารณะ (Read-Only)</td>
+<td>สถิติสรุปจำนวนผลงานวิจัยจำแนกตามคณะ</td>
+</tr>
+<tr>
+<td><strong>PMIS</strong></td>
+<td align="center"><code>GET</code></td>
+<td><code>/api/pmis/portfolio-by-year</code></td>
+<td align="center">สาธารณะ (Read-Only)</td>
+<td>สถิติผลงานวิจัยจำแนกตามปีงบประมาณ</td>
+</tr>
+</tbody>
+</table>
 
             </div>
             <footer>

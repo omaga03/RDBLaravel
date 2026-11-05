@@ -412,10 +412,12 @@
 <a id="ระบบฐานข้อมูลงานวิจัย-มหาวิทยาลัยราชภัฏเพชรบูรณ์-pcru-research-database-laravelrdb" class="manual-anchor"></a><a id="%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%90%E0%B8%B2%E0%B8%99%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-%E0%B8%A1%E0%B8%AB%E0%B8%B2%E0%B8%A7%E0%B8%B4%E0%B8%97%E0%B8%A2%E0%B8%B2%E0%B8%A5%E0%B8%B1%E0%B8%A2%E0%B8%A3%E0%B8%B2%E0%B8%8A%E0%B8%A0%E0%B8%B1%E0%B8%8F%E0%B9%80%E0%B8%9E%E0%B8%8A%E0%B8%A3%E0%B8%9A%E0%B8%B9%E0%B8%A3%E0%B8%93%E0%B9%8C-pcru-research-database---laravelrdb" class="manual-anchor"></a><a id="%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B8%90%E0%B8%B2%E0%B8%99%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-%E0%B8%A1%E0%B8%AB%E0%B8%B2%E0%B8%A7%E0%B8%B4%E0%B8%97%E0%B8%A2%E0%B8%B2%E0%B8%A5%E0%B8%B1%E0%B8%A2%E0%B8%A3%E0%B8%B2%E0%B8%8A%E0%B8%A0%E0%B8%B1%E0%B8%8F%E0%B9%80%E0%B8%9E%E0%B8%8A%E0%B8%A3%E0%B8%9A%E0%B8%B9%E0%B8%A3%E0%B8%93%E0%B9%8C-pcru-research-database-laravelrdb" class="manual-anchor"></a><h2 id="ระบบฐานข้อมูลงานวิจัย-มหาวิทยาลัยราชภัฏเพชรบูรณ์-pcru-research-database---laravelrdb">ระบบฐานข้อมูลงานวิจัย มหาวิทยาลัยราชภัฏเพชรบูรณ์ (PCRU Research Database - laravel_rdb)</h2>
 <div class="manual-callout callout-note"><div class="callout-header"><i class="bi bi-info-circle-fill"></i> ข้อมูลจำเพาะ / หมายเหตุ (NOTE)</div><div class="callout-body"><p><strong>สถานะการทดสอบระบบจริง (Test Execution Summary)</strong>:</p>
 <ul>
-<li><strong>วันและเวลาที่ดำเนินการทดสอบล่าสุด</strong>: 4 พฤศจิกายน 2569 เวลา 22:15:00 น.</li>
-<li><strong>ผลการรันชุดทดสอบอัตโนมัติ (Automated Test Suite)</strong>: <strong>ผ่านทั้งหมด 101 รายการ (652 Assertions) 100%</strong>
+<li><strong>วันและเวลาที่ดำเนินการทดสอบล่าสุด</strong>: 5 พฤศจิกายน 2569 เวลา 21:20:00 น.</li>
+<li><strong>ผลการรันชุดทดสอบอัตโนมัติ (Automated Test Suite)</strong>: <strong>ผ่านทั้งหมด 131 รายการ (2,123 Assertions) 100%</strong>
 <ul>
 <li><code>Tests\Feature\BackendAuditTest</code>: ผ่าน 47 รายการ (422 Assertions)</li>
+<li><code>Tests\Feature\ApiDualTierTest</code>: ผ่าน 15 รายการ (1,253 Assertions)</li>
+<li><code>Tests\Feature\IntegrationsAndAutomationTest</code>: ผ่าน 15 รายการ (207 Assertions)</li>
 <li><code>Tests\Feature\SchemaIntegrityDefenseTest</code>: ผ่าน 17 รายการ (77 Assertions)</li>
 <li><code>Tests\Feature\RecordLevelAuditLogTest</code>: ผ่าน 12 รายการ (46 Assertions)</li>
 <li><code>Tests\Feature\SystemAcceptancePlanExecutionTest</code>: ผ่าน 13 รายการ (69 Assertions)</li>
@@ -1163,12 +1165,152 @@
 </tbody>
 </table>
 <hr />
+<a id="หมวดที่-51-การทดสอบศูนย์ข่าวสาร-ทุนวิจัย-งานประชุม-และบริการข้อมูลเปิด-news-conferences-open-apis" class="manual-anchor"></a><a id="%E0%B8%AB%E0%B8%A1%E0%B8%A7%E0%B8%94%E0%B8%97%E0%B8%B5%E0%B9%88-51-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%94%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%A8%E0%B8%B9%E0%B8%99%E0%B8%A2%E0%B9%8C%E0%B8%82%E0%B9%88%E0%B8%B2%E0%B8%A7%E0%B8%AA%E0%B8%B2%E0%B8%A3-%E0%B8%97%E0%B8%B8%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B9%80%E0%B8%9B%E0%B8%B4%E0%B8%94-news-conferences--open-apis" class="manual-anchor"></a><a id="%E0%B8%AB%E0%B8%A1%E0%B8%A7%E0%B8%94%E0%B8%97%E0%B8%B5%E0%B9%88-51-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%94%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%A8%E0%B8%B9%E0%B8%99%E0%B8%A2%E0%B9%8C%E0%B8%82%E0%B9%88%E0%B8%B2%E0%B8%A7%E0%B8%AA%E0%B8%B2%E0%B8%A3-%E0%B8%97%E0%B8%B8%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2-%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B8%E0%B8%A1-%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%82%E0%B9%89%E0%B8%AD%E0%B8%A1%E0%B8%B9%E0%B8%A5%E0%B9%80%E0%B8%9B%E0%B8%B4%E0%B8%94-news-conferences-open-apis" class="manual-anchor"></a><h2 id="หมวดที่-51-การทดสอบศูนย์ข่าวสาร-ทุนวิจัย-งานประชุม-และบริการข้อมูลเปิด-news-conferences--open-apis">หมวดที่ 5.1: การทดสอบศูนย์ข่าวสาร ทุนวิจัย งานประชุม และบริการข้อมูลเปิด (News, Conferences &amp; Open APIs)</h2>
+<table>
+<thead>
+<tr>
+<th align="left">รหัสทดสอบ</th>
+<th align="left">รายการทดสอบ</th>
+<th align="left">ขั้นตอนการทดสอบ</th>
+<th align="left">ข้อมูลนำเข้า / เงื่อนไข</th>
+<th align="left">เกณฑ์การยอมรับ (Acceptance Criteria)</th>
+<th align="center">สถานะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>NWS-01</strong></td>
+<td align="left">ทดสอบดึงข่าว NRIIS API (Dry-Run Inspector)</td>
+<td align="left">เปิดหน้า <code>/backend/research_news/test-sync?run=1&amp;limit=2</code></td>
+<td align="left">สิทธิ์ Admin / Creator</td>
+<td align="left">แสดงผล JSON ที่สกัดได้, ลิงก์รูปภาพ, ไฟล์แนบ และไม่บันทึกลงฐานข้อมูลจริง</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>NWS-02</strong></td>
+<td align="left">ระบบถังขยะและลบถาวรข่าวทุนวิจัย</td>
+<td align="left">1. ย้ายข่าวไปถังขยะ (<code>destroy</code>)<br>2. กู้คืน (<code>restore</code>)<br>3. ลบถาวร (<code>forceDelete</code>)</td>
+<td align="left">ข่าวทดสอบ Unit Test</td>
+<td align="left"><code>data_show</code> เปลี่ยนเป็น 0 (ซ่อนหน้าบ้าน), กู้คืนเป็น 1 ได้, และลบถาวรลบไฟล์ภาพ Storage ด้วย</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>NWS-03</strong></td>
+<td align="left">หน้ารายงานสรุปข่าวประจำเดือน</td>
+<td align="left">เปิดหน้า <code>/backend/research_news/reports</code></td>
+<td align="left">เลือกปี พ.ศ. และเดือน</td>
+<td align="left">แสดงการ์ดสรุปยอดรวมข่าว และตารางแจกแจงประเภทข่าวถูกต้อง</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>NWS-04</strong></td>
+<td align="left">ทดสอบดึงงานประชุม Facebook (Dry-Run Inspector)</td>
+<td align="left">เปิดหน้า <code>/backend/research_conference/test-sync?run=1&amp;limit=2</code></td>
+<td align="left">สิทธิ์ Admin / Creator</td>
+<td align="left">เชื่อมต่อ Facebook ได้ สกัดวันที่จัดงาน วันหมดเขตส่งผลงาน และภาพโปสเตอร์ได้</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>NWS-05</strong></td>
+<td align="left">ระบบถังขยะและลบถาวรงานประชุมวิชาการ</td>
+<td align="left">1. ย้ายงานประชุมไปถังขยะ<br>2. กู้คืน<br>3. ลบถาวร</td>
+<td align="left">งานประชุมทดสอบ</td>
+<td align="left">ซ่อนหน้าบ้านได้ กู้คืนได้ และลบถาวรลบไฟล์โปสเตอร์ Storage จริง</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>API-01</strong></td>
+<td align="left">Open Public GET ข่าวทุนวิจัย (<code>/api/v1/news</code>)</td>
+<td align="left">เรียก <code>GET /api/v1/news</code></td>
+<td align="left">บุคคลภายนอก (No Token)</td>
+<td align="left">ส่งคืน HTTP 200 JSON พร้อมรายการข่าวล่าสุด Pagination และลิงก์รูปภาพ <code>.webp</code></td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>API-02</strong></td>
+<td align="left">Open Public GET งานประชุม (<code>/api/v1/conferences</code>)</td>
+<td align="left">เรียก <code>GET /api/v1/conferences</code></td>
+<td align="left">บุคคลภายนอก (No Token)</td>
+<td align="left">ส่งคืน HTTP 200 JSON ข้อมูลงานประชุม วันที่จัดงาน และสถานที่</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>API-03</strong></td>
+<td align="left">การจัดการ Access Token ในหลังบ้าน</td>
+<td align="left">สร้าง Token ใหม่ และสั่งเพิกถอน Token ที่ <code>/backend/api-management</code></td>
+<td align="left">สิทธิ์ The Creator</td>
+<td align="left">สร้าง Token สำเร็จ แสดง Plain Text Token ครั้งเดียว และเพิกถอนสิทธิ์ได้ทันที</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>API-04</strong></td>
+<td align="left">ปุ่มคัดลอก JSON และ cURL ปลอดภัยบนทุก Context</td>
+<td align="left">คลิกปุ่ม &quot;คัดลอก JSON&quot; และ &quot;คัดลอกคำสั่ง cURL&quot;</td>
+<td align="left">เครื่องจำลอง HTTP (<code>laravel_rdb.test</code>)</td>
+<td align="left">คัดลอกข้อความสำเร็จด้วย <code>copyTextToClipboardSafe</code> โดยไม่ติดขัดปัญหา Non-secure context</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<a id="%E0%B8%AB%E0%B8%A1%E0%B8%A7%E0%B8%94%E0%B8%97%E0%B8%B5%E0%B9%88-52-%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%94%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B8%AA%E0%B8%96%E0%B8%B2%E0%B8%9B%E0%B8%B1%E0%B8%95%E0%B8%A2%E0%B8%81%E0%B8%A3%E0%B8%A3%E0%B8%A1%E0%B9%81%E0%B8%9B%E0%B8%A5%E0%B8%87%E0%B8%A3%E0%B8%B9%E0%B8%9B%E0%B8%A0%E0%B8%B2%E0%B8%9E%E0%B8%97%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%E0%B9%80%E0%B8%9B%E0%B9%87%E0%B8%99-webp-universal-webp-pipeline" class="manual-anchor"></a><h2 id="หมวดที่-52-การทดสอบสถาปัตยกรรมแปลงรูปภาพทั้งระบบเป็น-webp-universal-webp-pipeline">หมวดที่ 5.2: การทดสอบสถาปัตยกรรมแปลงรูปภาพทั้งระบบเป็น WebP (Universal WebP Pipeline)</h2>
+<table>
+<thead>
+<tr>
+<th align="left">รหัสทดสอบ</th>
+<th align="left">รายการทดสอบ</th>
+<th align="left">ขั้นตอนการทดสอบ</th>
+<th align="left">ข้อมูลนำเข้า / เงื่อนไข</th>
+<th align="left">เกณฑ์การยอมรับ (Acceptance Criteria)</th>
+<th align="center">สถานะ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><strong>IMG-01</strong></td>
+<td align="left">การอัปโหลดภาพโปรไฟล์นักวิจัยเป็น WebP</td>
+<td align="left">อัปโหลดภาพ JPEG/PNG ผ่านฟอร์มข้อมูลนักวิจัย</td>
+<td align="left">รูปภาพขนาด 800x600 px</td>
+<td align="left">บันทึกเป็นไฟล์ <code>.webp</code> คุณภาพ 85 ใน Storage และ MIME type เป็น <code>image/webp</code></td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>IMG-02</strong></td>
+<td align="left">การอัปโหลดภาพข่าวและงานประชุมเป็น WebP</td>
+<td align="left">อัปโหลดภาพผ่านฟอร์มข่าวทุนวิจัยและงานประชุม</td>
+<td align="left">รูปภาพขนาดใหญ่ (&gt; 2048px)</td>
+<td align="left">แปลงเป็น <code>.webp</code> อัตโนมัติ พร้อม Downscale ด้านยาวสุดไม่เกิน 2048px รักษา Alpha</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>IMG-03</strong></td>
+<td align="left">คำสั่ง Artisan แปลงภาพเดิมย้อนหลัง (<code>rdb:convert-images-webp</code>)</td>
+<td align="left">รัน <code>php artisan rdb:convert-images-webp --module=all</code></td>
+<td align="left">ภาพเดิมในระบบ</td>
+<td align="left">สแกนหาไฟล์ภาพเดิม แปลงเป็น <code>.webp</code> และอัปเดตฟิลด์ในฐานข้อมูลสำเร็จ 100%</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+<tr>
+<td align="left"><strong>IMG-04</strong></td>
+<td align="left">การแสดงผลภาพโลโก้ WebP หน้า Login</td>
+<td align="left">ตรวจสอบหน้า <code>/login</code> ผ่านเบราว์เซอร์</td>
+<td align="left">ผู้ใช้งานทั่วไป</td>
+<td align="left">โหลด <code>logo.webp</code> (ลดขนาด 78% จาก 234KB เหลือ 51KB) ผ่านแท็ก <code>&lt;picture&gt;</code> คมชัด</td>
+<td align="center">[x] ผ่าน (Pass)</td>
+</tr>
+</tbody>
+</table>
+<hr />
 <a id="%E0%B8%AB%E0%B8%A1%E0%B8%A7%E0%B8%94%E0%B8%97%E0%B8%B5%E0%B9%88-6-%E0%B9%80%E0%B8%81%E0%B8%93%E0%B8%91%E0%B9%8C%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AD%E0%B8%99%E0%B8%B8%E0%B8%A1%E0%B8%B1%E0%B8%95%E0%B8%B4%E0%B9%80%E0%B8%9E%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B9%80%E0%B8%9B%E0%B8%B4%E0%B8%94%E0%B9%83%E0%B8%8A%E0%B9%89%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%88%E0%B8%A3%E0%B8%B4%E0%B8%87-production-sign-off-criteria" class="manual-anchor"></a><h2 id="หมวดที่-6-เกณฑ์การอนุมัติเพื่อเปิดใช้งานจริง-production-sign-off-criteria">หมวดที่ 6: เกณฑ์การอนุมัติเพื่อเปิดใช้งานจริง (Production Sign-off Criteria)</h2>
 <p>ระบบจะถือว่ามีความพร้อมในการขึ้นสู่สถานะ Production 100% เมื่อผ่านเกณฑ์ต่อไปนี้ทั้งหมด:</p>
 <ul>
-<li><input checked="" disabled="" type="checkbox"> <strong>ชุดทดสอบหลักผ่านทั้งหมด</strong>: รัน <code>php artisan test --filter=&quot;BackendAuditTest|SchemaIntegrityDefenseTest|RecordLevelAuditLogTest|SystemAcceptancePlanExecutionTest|PdfCoverGenerationTest|SystemBackupTest|SystemCommandBackendTest&quot;</code> ผ่าน 101/101 รายการ (652 Assertions 100%)</li>
+<li><input checked="" disabled="" type="checkbox"> <strong>ชุดทดสอบหลักผ่านทั้งหมด</strong>: รัน <code>php artisan test</code> ชุดทดสอบทั้ง 9 Suites ผ่าน 131/131 รายการ (2,123 Assertions 100%)</li>
 <li><input checked="" disabled="" type="checkbox"> <strong>การทดสอบ UAT ในหมวดที่ 2 และ 3</strong>: ผ่านการทดสอบรายการระดับ Critical และ High ครบทุกข้อ รวมถึงวงจรส่งร่าง-ตรวจรับ WF-01 ถึง WF-07</li>
 <li><input checked="" disabled="" type="checkbox"> <strong>ข้อมูลนำเข้าเดิมสมบูรณ์</strong>: โครงการวิจัย 2,870 โครงการ และงานตีพิมพ์ 1,873 รายการ เข้าถึงได้และแสดงผลถูกต้อง</li>
+<li><input checked="" disabled="" type="checkbox"> <strong>ระบบแปลงภาพ WebP</strong>: รูปภาพสื่อทั้งหมด (นักวิจัย, ข่าว, งานประชุม, ปก PDF) ได้รับการประมวลผลเป็น <code>.webp</code> คุณภาพสูง</li>
+<li><input checked="" disabled="" type="checkbox"> <strong>บริการข้อมูลเปิด (Open APIs)</strong>: Endpoints ข่าวสารและงานประชุมวิชาการเปิดให้บริการถูกต้องตามมาตรฐาน RESTful JSON</li>
+<li><input checked="" disabled="" type="checkbox"> <strong>ความปลอดภัยข้อมูล</strong>: เอกสารที่ตั้งค่า &quot;ปกปิดเล่ม&quot; ไม่สามารถเข้าถึงได้จากบุคคลภายนอกในทุกกรณี</li>
+<li><input checked="" disabled="" type="checkbox"> <strong>การส่งออกข้อมูล</strong>: ไฟล์ Export ภาษาไทยทุกโมดูลเปิดดูใน Microsoft Excel ได้อย่างถูกต้อง ไม่เป็นภาษาต่างดาว (UTF-8 BOM <code>\xEF\xBB\xBF</code>)</li>
 <li><input checked="" disabled="" type="checkbox"> <strong>ความปลอดภัยข้อมูล</strong>: เอกสารที่ตั้งค่า &quot;ปกปิดเล่ม&quot; ไม่สามารถเข้าถึงได้จากบุคคลภายนอกในทุกกรณี</li>
 <li><input checked="" disabled="" type="checkbox"> <strong>การส่งออกข้อมูล</strong>: ไฟล์ Export ภาษาไทยทุกโมดูลเปิดดูใน Microsoft Excel ได้อย่างถูกต้อง ไม่เป็นภาษาต่างดาว (UTF-8 BOM <code>\xEF\xBB\xBF</code>)</li>
 </ul>

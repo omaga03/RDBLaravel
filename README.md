@@ -13,6 +13,8 @@
 4. **💡 ทรัพย์สินทางปัญญา (Intellectual Property - DIP):** สิทธิบัตร อนุสิทธิบัตร ลิขสิทธิ์ และเครื่องหมายการค้า
 5. **🚀 การนำไปใช้ประโยชน์ (Utilization):** ติดตามผลงานวิจัยเชิงพาณิชย์ เชิงนโยบาย เชิงสาธารณะ และเชิงวิชาการ
 6. **👨‍🔬 ข้อมูลนักวิจัย (Researchers):** ข้อมูลส่วนตัว ผลงานสะสม และการเชื่อมโยง Scopus / ORCID
+7. **📢 ข่าวทุนวิจัยและงานประชุมวิชาการ (News & Conferences):** ระบบดึงข่าวทุนวิจัยอัตโนมัติจาก NRIIS และงานประชุมจาก Facebook พร้อม Webhook, Telegram Notify, ระบบตรวจดูข้อมูลจำลอง (Dry-Run Inspector) และรายงานประจำเดือน
+8. **🔌 ระบบศูนย์บริการข้อมูล API สองระดับ (Dual-Tier & Open Public API):** RESTful APIs สำหรับเชื่อมโยงระบบภายนอก (PMIS, Mobile Apps, Open Data) พร้อมระบบจัดการ Token และคู่มือ Endpoint บนหน้าเว็บ
 
 ---
 
@@ -171,8 +173,17 @@ php artisan test --filter=BackendAuditTest
 เครื่องมือที่พร้อมใช้งานผ่านหน้าเว็บ:
 1. **สร้างภาพหน้าแรกของ PDF เป็นภาพ (.webp)**: สั่งประมวลผลเรนเดอร์หน้าแรกของไฟล์ PDF ทั้งระบบ แยกตามโมดูล พร้อมตัวเลือกบังคับสร้างใหม่ (`--force`) และกำหนดขอบเขตจำนวนรายการ (Limit)
 2. **ตรวจนับจำนวนหน้าเอกสาร PDF ย้อนหลังทั้งระบบ**: คำนวณจำนวนหน้าด้วย 4-Tier Engine (Poppler pdftotext แม่นยำ 99.99%) และบันทึกลงฐานข้อมูล `pro_page_num` และ `pub_numfile` อัตโนมัติ
-3. **ล้างแคชระบบและเพิ่มประสิทธิภาพ (Clear Cache)**: ล้าง Application, Route, Blade View, และ Config Cache เพื่อให้ระบบอ่านค่าล่าสุดทันที
-4. **ตรวจสอบความพร้อมของเซิร์ฟเวอร์ (Server Engine Status)**: ตรวจจับ MuPDF/PyMuPDF, Poppler pdftotext/pdftoppm, PHP GD WebP, และสถานะ Storage Symlink พร้อมปุ่มคู่มือติดตั้ง
+3. **แปลงไฟล์รูปภาพทั้งระบบเป็น .webp (Universal WebP Image Converter)**: คำสั่งแปลงรูปภาพโปรไฟล์นักวิจัย ภาพข่าวทุนวิจัย และภาพงานประชุมวิชาการเป็น `.webp` คุณภาพ 85 ย้อนหลังทั้งระบบพร้อมอัปเดตฐานข้อมูล
+4. **ล้างแคชระบบและเพิ่มประสิทธิภาพ (Clear Cache)**: ล้าง Application, Route, Blade View, และ Config Cache เพื่อให้ระบบอ่านค่าล่าสุดทันที
+5. **ตรวจสอบความพร้อมของเซิร์ฟเวอร์ (Server Engine Status)**: ตรวจจับ MuPDF/PyMuPDF, Poppler pdftotext/pdftoppm, PHP GD WebP, และสถานะ Storage Symlink พร้อมปุ่มคู่มือติดตั้ง
+
+```bash
+# คำสั่งแปลงรูปภาพเป็น WebP ผ่าน Terminal:
+php artisan rdb:convert-images-webp                    # แปลงทุกโมดูลทั้งระบบ
+php artisan rdb:convert-images-webp --module=researcher # เฉพาะภาพนักวิจัย
+php artisan rdb:convert-images-webp --module=news       # เฉพาะภาพข่าว NRIIS
+php artisan rdb:convert-images-webp --module=conference # เฉพาะภาพงานประชุม
+```
 
 ---
 
@@ -217,6 +228,45 @@ php artisan schedule:work
 
 ---
 
+## 📢 ระบบศูนย์ข่าวทุนวิจัยและงานประชุมวิชาการ (Research News & Conferences Hub)
+
+ระบบบริหารจัดการข่าวสารและงานประชุมวิชาการทั้งหน้าบ้านและหลังบ้าน:
+* **ข่าวทุนวิจัยและกิจกรรม (`/backend/research_news`)**:
+  - เชื่อมโยงอัตโนมัติกับ **NRIIS API** (`NriisSyncService`) ทุกวัน เวลา 06:00 น.
+  - ระบบส่งต่อไปยัง Make.com Webhook (Facebook Automation) และส่งแจ้งเตือน Telegram
+  - **เครื่องมือทดสอบดึงข้อมูล (Dry-Run Inspector)**: เข้าได้ที่ `/backend/research_news/test-sync` สำหรับทดสอบดึงข้อมูลข่าวจาก NRIIS เพื่อดูโครงสร้างข้อมูลโดยไม่บันทึกลงฐานข้อมูลจริง
+  - **หน้ารายงานสรุปข่าวประจำเดือน**: แยกเป็นเมนูย่อยเฉพาะใน "ข่าว/กิจกรรม" ที่ `/backend/research_news/reports` แสดงสถิติจำนวนข่าวแยกตามประเภทและเดือน
+  - รองรับการลบลงถังขยะ (Soft Delete), การกู้คืน (Restore), และการลบถาวร (Force Delete พร้อมลบไฟล์ภาพ)
+* **งานประชุมวิชาการในและต่างประเทศ (`/backend/research_conference`)**:
+  - ดึงโพสต์งานประชุมจาก Facebook อัตโนมัติ (`FacebookConferenceSyncService`) ทุกวัน เวลา 06:30 น.
+  - **เครื่องมือทดสอบดึงโพสต์ Facebook (Dry-Run Inspector)**: เข้าได้ที่ `/backend/research_conference/test-sync`
+  - รองรับระบบถังขยะและลบถาวรแบบเดียวกัน
+* **การแปลงรูปภาพเป็น WebP อัตโนมัติ**:
+  - รูปภาพข่าวและงานประชุมที่ถูกนำเข้าสู่ระบบทั้งจากการดาวน์โหลด Sync และการอัปโหลดผ่านแบบฟอร์ม จะถูกแปลงเป็นนามสกุล `.webp` คุณภาพ 85 พร้อม Auto-resize ไม่เกิน 2048px โดยอัตโนมัติ
+
+---
+
+## 🔌 ศูนย์จัดการและบริการข้อมูล API (Dual-Tier & Open Public API Management)
+
+ระบบบริการข้อมูลเชื่อมโยงภายนอก (RESTful APIs) ครอบคลุม 3 ระดับ เข้าถึงคู่มือและการจัดการได้ที่:
+👉 **`http://laravel_rdb.test/backend/api-management`** (เมนูแถบซ้าย: **การดูแลระบบ ➔ จัดการ API & Token**)
+
+* **Tier 1: Private Administrative API (ต้องใช้ Bearer Token)**:
+  - สิทธิ์เฉพาะ The Creator ในการสร้างและเพิกถอน Token สำหรับแอปพลิเคชันภายในหรือ Mobile App
+  - Endpoints: ข้อมูลสถิติ, ข้อมูลนักวิจัย, ผลงานวิจัยฉบับเต็ม (`/api/v1/projects`, `/api/v1/publications` ฯลฯ)
+* **Tier 2: PMIS & Legacy Integration API (Public Read-Only)**:
+  - รองรับระบบประเมินคุณภาพการศึกษา PMIS และระบบดั้งเดิม
+  - Endpoints: `/api/pmis/summary-by-faculty`, `/api/pmis/portfolio-by-year`, `/api/project/json-detail` ฯลฯ
+* **Tier 3: Open Public API สำหรับข่าวสารและงานประชุม (ไม่ต้องใช้ Token)**:
+  - บริการข้อมูลข่าวทุนวิจัยและงานประชุมวิชาการแบบเปิดสำหรับเว็บไซต์คณะ หรือหน่วยงานภายนอก
+  - Endpoints:
+    - `GET /api/v1/news` และ `GET /api/v1/news/{id}` (หรือ `GET /api/news`)
+    - `GET /api/v1/conferences` และ `GET /api/v1/conferences/{id}` (หรือ `GET /api/conferences`)
+* **เครื่องมือทดสอบและคัดลอก (Non-Secure HTTP Safe Clipboard)**:
+  - แท็บ **"รายการ Endpoints"** บนหน้าเว็บ มีปุ่ม **"คัดลอก JSON"** และ **"คัดลอกคำสั่ง cURL"** ที่ปลอดภัยรองรับทั้งสภาพแวดล้อม HTTP (`laravel_rdb.test`) และ HTTPS
+
+---
+
 ## 🔍 ระบบสืบค้นและทำดัชนีทางวิชาการสากล (Academic SEO & Sitemaps)
 
 ระบบติดตั้งสถาปัตยกรรม Academic SEO อัตโนมัติเต็มรูปแบบ:
@@ -246,6 +296,27 @@ php .agents/skills/documentation-and-manuals/scripts/build_html_manuals.php
 ---
 
 ## 📝 บันทึกการอัปเดตระบบล่าสุด (Changelog / Update Log)
+
+### อัปเดตประจำวันที่ 5 พฤศจิกายน 2569 (Release 2026.11.05)
+1. **สถาปัตยกรรมระบบแปลงรูปภาพทั้งระบบเป็น WebP (Universal WebP Image Processing Pipeline):**
+   * ปรับปรุง `FileUploadService::storeImageAsWebp()` ให้แปลงไฟล์รูปภาพที่เข้าสู่ระบบทั้งหมด (JPEG, PNG, GIF, WebP) เป็นฟอร์แมต `.webp` คุณภาพ 85 พร้อม Auto-resize ไม่เกิน 2048px รักษาความโปร่งแสง (Alpha Transparency) และจัดเก็บด้วย UUID ปลอดภัย
+   * ครอบคลุมจุดนำเข้าภาพ 3 โมดูลหลัก:
+     - **ข้อมูลนักวิจัย (`RdbResearcher`)**: อัปโหลดภาพโปรไฟล์ผ่านฟอร์มหลักและฟอร์มเปลี่ยนภาพด่วน
+     - **ข่าวทุนวิจัย (`ResearchNews`)**: ดึงภาพผ่าน NRIIS API และอัปโหลดผ่านแบบฟอร์ม
+     - **งานประชุมวิชาการ (`ResearchConference`)**: ดึงภาพโปสเตอร์ผ่าน Facebook โพสต์ และอัปโหลดผ่านแบบฟอร์ม
+   * รันคำสั่งแปลงภาพเดิมย้อนหลังทั้งระบบ: `php artisan rdb:convert-images-webp` (แปลงภาพนักวิจัยสำเร็จ 147 รายการ และภาพข่าว/งานประชุมเดิม)
+   * แปลงโลโก้ระบบ `logo.png` (234 KB) เป็น `logo.webp` (51 KB) ลดขนาดลง 78% พร้อมใช้แท็ก `<picture>` ในหน้า Login
+   * Database Migration ขยายขนาดคอลัมน์ชื่อไฟล์รูปภาพ `researcher_picture` และ `con_img` เป็น `varchar(255)` เพื่อรองรับชื่อไฟล์ WebP ได้อย่างสมบูรณ์
+2. **ระบบศูนย์ข่าวทุนวิจัย NRIIS และงานประชุมวิชาการ Facebook:**
+   * **เครื่องมือทดสอบดึงข้อมูลจำลอง (Dry-Run Inspector)**: เพิ่มหน้า `/backend/research_news/test-sync` และ `/backend/research_conference/test-sync` สำหรับทดสอบเชื่อมต่อ API ดึงข้อมูลสด ดูโครงสร้าง JSON, รายการไฟล์แนบ, และข้อความจำลอง Telegram โดยไม่บันทึกลงฐานข้อมูลจริง
+   * **หน้ารายงานสรุปข่าวประจำเดือน**: แยกเมนูย่อย "รายงานประจำเดือน" ที่ `/backend/research_news/reports` ในกลุ่มเมนู "ข่าว/กิจกรรม" ทั้ง Top Navigation และ Left Sidebar
+   * **ระบบถังขยะและการลบถาวร (Soft Delete / Force Delete)**: รองรับการย้ายข่าวไปถังขยะ (`data_show = 0`), กู้คืน (`restore`), และการลบถาวร (`forceDelete`) พร้อมลบไฟล์ภาพจริงใน Storage ป้องกันไฟล์ขยะตกค้าง
+3. **ระบบ Open Public GET APIs สำหรับข่าวสารและงานประชุมวิชาการ:**
+   * เปิด RESTful GET Endpoints สาธารณะสำหรับหน่วยงานภายนอกหรือเว็บไซต์คณะโดยไม่ต้องยืนยันตัวตนด้วย Bearer Token:
+     - `GET /api/v1/news` และ `GET /api/v1/news/{id}` (รวมทั้ง alias `/api/news`)
+     - `GET /api/v1/conferences` และ `GET /api/v1/conferences/{id}` (รวมทั้ง alias `/api/conferences`)
+   * ผนวกรวมเข้าสู่ **Tier 3 (Open Public API)** ในหน้า `/backend/api-management#endpointsTab` พร้อมแสดงตัวอย่าง JSON Response
+   * ปรับปรุงปุ่ม **"คัดลอก JSON"** และ **"คัดลอกคำสั่ง cURL"** ด้วยฟังก์ชัน `copyTextToClipboardSafe` รองรับเบราว์เซอร์ทั้งในสภาพแวดล้อม HTTP (`laravel_rdb.test`) และ HTTPS
 
 ### อัปเดตประจำวันที่ 4 พฤศจิกายน 2569 (Release 2026.11.04)
 1. **แยกศูนย์สำรองและกู้คืนข้อมูลระบบ (Dedicated Disaster Recovery Hub — The Creator Only):**

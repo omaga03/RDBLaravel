@@ -3,9 +3,11 @@
 
 > [!NOTE]
 > **สถานะการทดสอบระบบจริง (Test Execution Summary)**:
-> - **วันและเวลาที่ดำเนินการทดสอบล่าสุด**: 4 พฤศจิกายน 2569 เวลา 22:15:00 น.
-> - **ผลการรันชุดทดสอบอัตโนมัติ (Automated Test Suite)**: **ผ่านทั้งหมด 101 รายการ (652 Assertions) 100%**
+> - **วันและเวลาที่ดำเนินการทดสอบล่าสุด**: 5 พฤศจิกายน 2569 เวลา 21:20:00 น.
+> - **ผลการรันชุดทดสอบอัตโนมัติ (Automated Test Suite)**: **ผ่านทั้งหมด 131 รายการ (2,123 Assertions) 100%**
 >   - `Tests\Feature\BackendAuditTest`: ผ่าน 47 รายการ (422 Assertions)
+>   - `Tests\Feature\ApiDualTierTest`: ผ่าน 15 รายการ (1,253 Assertions)
+>   - `Tests\Feature\IntegrationsAndAutomationTest`: ผ่าน 15 รายการ (207 Assertions)
 >   - `Tests\Feature\SchemaIntegrityDefenseTest`: ผ่าน 17 รายการ (77 Assertions)
 >   - `Tests\Feature\RecordLevelAuditLogTest`: ผ่าน 12 รายการ (46 Assertions)
 >   - `Tests\Feature\SystemAcceptancePlanExecutionTest`: ผ่าน 13 รายการ (69 Assertions)
@@ -184,13 +186,44 @@
 
 ---
 
+## หมวดที่ 5.1: การทดสอบศูนย์ข่าวสาร ทุนวิจัย งานประชุม และบริการข้อมูลเปิด (News, Conferences & Open APIs)
+
+| รหัสทดสอบ | รายการทดสอบ | ขั้นตอนการทดสอบ | ข้อมูลนำเข้า / เงื่อนไข | เกณฑ์การยอมรับ (Acceptance Criteria) | สถานะ |
+| :--- | :--- | :--- | :--- | :--- | :---: |
+| **NWS-01** | ทดสอบดึงข่าว NRIIS API (Dry-Run Inspector) | เปิดหน้า `/backend/research_news/test-sync?run=1&limit=2` | สิทธิ์ Admin / Creator | แสดงผล JSON ที่สกัดได้, ลิงก์รูปภาพ, ไฟล์แนบ และไม่บันทึกลงฐานข้อมูลจริง | [x] ผ่าน (Pass) |
+| **NWS-02** | ระบบถังขยะและลบถาวรข่าวทุนวิจัย | 1. ย้ายข่าวไปถังขยะ (`destroy`)<br>2. กู้คืน (`restore`)<br>3. ลบถาวร (`forceDelete`) | ข่าวทดสอบ Unit Test | `data_show` เปลี่ยนเป็น 0 (ซ่อนหน้าบ้าน), กู้คืนเป็น 1 ได้, และลบถาวรลบไฟล์ภาพ Storage ด้วย | [x] ผ่าน (Pass) |
+| **NWS-03** | หน้ารายงานสรุปข่าวประจำเดือน | เปิดหน้า `/backend/research_news/reports` | เลือกปี พ.ศ. และเดือน | แสดงการ์ดสรุปยอดรวมข่าว และตารางแจกแจงประเภทข่าวถูกต้อง | [x] ผ่าน (Pass) |
+| **NWS-04** | ทดสอบดึงงานประชุม Facebook (Dry-Run Inspector) | เปิดหน้า `/backend/research_conference/test-sync?run=1&limit=2` | สิทธิ์ Admin / Creator | เชื่อมต่อ Facebook ได้ สกัดวันที่จัดงาน วันหมดเขตส่งผลงาน และภาพโปสเตอร์ได้ | [x] ผ่าน (Pass) |
+| **NWS-05** | ระบบถังขยะและลบถาวรงานประชุมวิชาการ | 1. ย้ายงานประชุมไปถังขยะ<br>2. กู้คืน<br>3. ลบถาวร | งานประชุมทดสอบ | ซ่อนหน้าบ้านได้ กู้คืนได้ และลบถาวรลบไฟล์โปสเตอร์ Storage จริง | [x] ผ่าน (Pass) |
+| **API-01** | Open Public GET ข่าวทุนวิจัย (`/api/v1/news`) | เรียก `GET /api/v1/news` | บุคคลภายนอก (No Token) | ส่งคืน HTTP 200 JSON พร้อมรายการข่าวล่าสุด Pagination และลิงก์รูปภาพ `.webp` | [x] ผ่าน (Pass) |
+| **API-02** | Open Public GET งานประชุม (`/api/v1/conferences`) | เรียก `GET /api/v1/conferences` | บุคคลภายนอก (No Token) | ส่งคืน HTTP 200 JSON ข้อมูลงานประชุม วันที่จัดงาน และสถานที่ | [x] ผ่าน (Pass) |
+| **API-03** | การจัดการ Access Token ในหลังบ้าน | สร้าง Token ใหม่ และสั่งเพิกถอน Token ที่ `/backend/api-management` | สิทธิ์ The Creator | สร้าง Token สำเร็จ แสดง Plain Text Token ครั้งเดียว และเพิกถอนสิทธิ์ได้ทันที | [x] ผ่าน (Pass) |
+| **API-04** | ปุ่มคัดลอก JSON และ cURL ปลอดภัยบนทุก Context | คลิกปุ่ม "คัดลอก JSON" และ "คัดลอกคำสั่ง cURL" | เครื่องจำลอง HTTP (`laravel_rdb.test`) | คัดลอกข้อความสำเร็จด้วย `copyTextToClipboardSafe` โดยไม่ติดขัดปัญหา Non-secure context | [x] ผ่าน (Pass) |
+
+---
+
+## หมวดที่ 5.2: การทดสอบสถาปัตยกรรมแปลงรูปภาพทั้งระบบเป็น WebP (Universal WebP Pipeline)
+
+| รหัสทดสอบ | รายการทดสอบ | ขั้นตอนการทดสอบ | ข้อมูลนำเข้า / เงื่อนไข | เกณฑ์การยอมรับ (Acceptance Criteria) | สถานะ |
+| :--- | :--- | :--- | :--- | :--- | :---: |
+| **IMG-01** | การอัปโหลดภาพโปรไฟล์นักวิจัยเป็น WebP | อัปโหลดภาพ JPEG/PNG ผ่านฟอร์มข้อมูลนักวิจัย | รูปภาพขนาด 800x600 px | บันทึกเป็นไฟล์ `.webp` คุณภาพ 85 ใน Storage และ MIME type เป็น `image/webp` | [x] ผ่าน (Pass) |
+| **IMG-02** | การอัปโหลดภาพข่าวและงานประชุมเป็น WebP | อัปโหลดภาพผ่านฟอร์มข่าวทุนวิจัยและงานประชุม | รูปภาพขนาดใหญ่ (> 2048px) | แปลงเป็น `.webp` อัตโนมัติ พร้อม Downscale ด้านยาวสุดไม่เกิน 2048px รักษา Alpha | [x] ผ่าน (Pass) |
+| **IMG-03** | คำสั่ง Artisan แปลงภาพเดิมย้อนหลัง (`rdb:convert-images-webp`) | รัน `php artisan rdb:convert-images-webp --module=all` | ภาพเดิมในระบบ | สแกนหาไฟล์ภาพเดิม แปลงเป็น `.webp` และอัปเดตฟิลด์ในฐานข้อมูลสำเร็จ 100% | [x] ผ่าน (Pass) |
+| **IMG-04** | การแสดงผลภาพโลโก้ WebP หน้า Login | ตรวจสอบหน้า `/login` ผ่านเบราว์เซอร์ | ผู้ใช้งานทั่วไป | โหลด `logo.webp` (ลดขนาด 78% จาก 234KB เหลือ 51KB) ผ่านแท็ก `<picture>` คมชัด | [x] ผ่าน (Pass) |
+
+---
+
 ## หมวดที่ 6: เกณฑ์การอนุมัติเพื่อเปิดใช้งานจริง (Production Sign-off Criteria)
 
 ระบบจะถือว่ามีความพร้อมในการขึ้นสู่สถานะ Production 100% เมื่อผ่านเกณฑ์ต่อไปนี้ทั้งหมด:
 
-- [x] **ชุดทดสอบหลักผ่านทั้งหมด**: รัน `php artisan test --filter="BackendAuditTest|SchemaIntegrityDefenseTest|RecordLevelAuditLogTest|SystemAcceptancePlanExecutionTest|PdfCoverGenerationTest|SystemBackupTest|SystemCommandBackendTest"` ผ่าน 101/101 รายการ (652 Assertions 100%)
+- [x] **ชุดทดสอบหลักผ่านทั้งหมด**: รัน `php artisan test` ชุดทดสอบทั้ง 9 Suites ผ่าน 131/131 รายการ (2,123 Assertions 100%)
 - [x] **การทดสอบ UAT ในหมวดที่ 2 และ 3**: ผ่านการทดสอบรายการระดับ Critical และ High ครบทุกข้อ รวมถึงวงจรส่งร่าง-ตรวจรับ WF-01 ถึง WF-07
 - [x] **ข้อมูลนำเข้าเดิมสมบูรณ์**: โครงการวิจัย 2,870 โครงการ และงานตีพิมพ์ 1,873 รายการ เข้าถึงได้และแสดงผลถูกต้อง
+- [x] **ระบบแปลงภาพ WebP**: รูปภาพสื่อทั้งหมด (นักวิจัย, ข่าว, งานประชุม, ปก PDF) ได้รับการประมวลผลเป็น `.webp` คุณภาพสูง
+- [x] **บริการข้อมูลเปิด (Open APIs)**: Endpoints ข่าวสารและงานประชุมวิชาการเปิดให้บริการถูกต้องตามมาตรฐาน RESTful JSON
+- [x] **ความปลอดภัยข้อมูล**: เอกสารที่ตั้งค่า "ปกปิดเล่ม" ไม่สามารถเข้าถึงได้จากบุคคลภายนอกในทุกกรณี
+- [x] **การส่งออกข้อมูล**: ไฟล์ Export ภาษาไทยทุกโมดูลเปิดดูใน Microsoft Excel ได้อย่างถูกต้อง ไม่เป็นภาษาต่างดาว (UTF-8 BOM `\xEF\xBB\xBF`)
 - [x] **ความปลอดภัยข้อมูล**: เอกสารที่ตั้งค่า "ปกปิดเล่ม" ไม่สามารถเข้าถึงได้จากบุคคลภายนอกในทุกกรณี
 - [x] **การส่งออกข้อมูล**: ไฟล์ Export ภาษาไทยทุกโมดูลเปิดดูใน Microsoft Excel ได้อย่างถูกต้อง ไม่เป็นภาษาต่างดาว (UTF-8 BOM `\xEF\xBB\xBF`)
 

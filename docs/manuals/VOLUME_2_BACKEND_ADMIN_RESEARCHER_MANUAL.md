@@ -69,6 +69,18 @@
     * 11.10 ศูนย์สำรองและกู้คืนข้อมูลระบบแบบแยกเฉพาะ (Dedicated Disaster Recovery Hub)
     * 11.11 ระบบการจัดการการแจ้งเตือนส่วนบุคคลและ Telegram Bot (Personal & Admin Notification Center)
     * 11.12 เกราะป้องกันความเข้ากันได้ของชื่อฟิลด์ฐานข้อมูล (Schema Integrity Defense Layer & Smart Accessors)
+    * 11.13 สถาปัตยกรรมระบบแปลงรูปภาพทั้งระบบเป็น WebP (Universal WebP Image Converter Pipeline)
+12. [บทที่ 12: การบริหารจัดการข่าวสารทุนวิจัยและงานประชุมวิชาการ (Research News & Conference Management)](#บทที่-12-การบริหารจัดการข่าวสารทุนวิจัยและงานประชุมวิชาการ-research-news--conference-management)
+    * 12.1 การจัดการข่าวทุนวิจัย NRIIS (`/backend/research_news`)
+    * 12.2 การจัดการงานประชุมวิชาการ Facebook (`/backend/research_conference`)
+    * 12.3 เครื่องมือตรวจสอบและทดสอบดึงข้อมูลจำลอง (Dry-Run Inspector)
+    * 12.4 ระบบรายงานสรุปข่าวสารประจำเดือน (`/backend/research_news/reports`)
+    * 12.5 ระบบถังขยะ การกู้คืน และการลบถาวร (Soft Delete, Restore & Force Delete)
+13. [บทที่ 13: ศูนย์จัดการบริการข้อมูลและกุญแจเข้าถึงระบบ (API Token & Endpoint Management Hub)](#บทที่-13-ศูนย์จัดการบริการข้อมูลและกุญแจเข้าถึงระบบ-api-token--endpoint-management-hub)
+    * 13.1 ภาพรวมสถาปัตยกรรม API 3 ระดับ (Tier 1: Admin, Tier 2: PMIS, Tier 3: Open Public)
+    * 13.2 การสร้างและเพิกถอนสิทธิ์ API Token (Personal Access Tokens)
+    * 13.3 คู่มือและทดสอบ Endpoints พร้อมการคัดลอก JSON / cURL แบบปลอดภัยบนทุก Context
+    * 13.4 Open Public API สำหรับข่าวและงานประชุม (`/api/v1/news`, `/api/v1/conferences`)
 ---
 
 ## บทที่ 1: การเข้าสู่ระบบ ความปลอดภัย และการยืนยันตัวตนนักวิจัย (Authentication & Onboarding)
@@ -1067,3 +1079,134 @@ php artisan schedule:list
 #### 3. พจนานุกรมฟิลด์ระบบและการทดสอบอัตโนมัติ (Automated Schema Verification)
 * **พจนานุกรม 131 ตาราง**: บันทึกโครงสร้างคอลัมน์ ชนิดข้อมูล และ Primary Key ทั้งระบบไว้ที่ [`storage/framework/schema_dict.json`](file:///c:/laragon/www/laravel_rdb/storage/framework/schema_dict.json)
 * **ชุดทดสอบรับประกันความถูกต้อง**: รันคำสั่ง `php artisan test --filter=SchemaIntegrityDefenseTest` (17 เคสทดสอบ 77 assertions ผ่าน 100%) เพื่อตรวจสอบว่าทุก Accessor ดึงข้อมูลตรงกับฐานข้อมูลจริงเสมอ
+
+---
+
+### 11.13 สถาปัตยกรรมระบบแปลงรูปภาพทั้งระบบเป็น WebP (Universal WebP Image Converter Pipeline)
+
+เพื่อเพิ่มความเร็วในการโหลดหน้าเว็บ (PageSpeed) และลดขนาดพื้นที่จัดเก็บไฟล์ภาพลงกว่า 70-80% ระบบได้ติดตั้งสถาปัตยกรรม **Universal WebP Image Processing Pipeline** ครอบคลุมรูปภาพทั้งหมดที่เข้าสู่ระบบ:
+
+#### 1. จุดนำเข้าภาพและกระบวนการแปลงแบบเรียลไทม์ (Real-time Ingestion)
+ผ่านเมธอด `FileUploadService::storeImageAsWebp(UploadedFile $file, string $directory, int $maxDimension = 2048, int $quality = 85)`:
+* **การตรวจสอบประเภทไฟล์**: รองรับไฟล์ภาพต้นฉบับ JPEG, PNG, GIF, WebP
+* **การปรับขนาดอัตโนมัติ (Downscaling)**: ปรับขนาดด้านยาวสุดไม่เกิน 2,048 พิกเซล รักษาอัตราส่วนเดิม (Aspect Ratio) เพื่อป้องกันไฟล์ภาพขนาดใหญ่เกินความจำเป็น
+* **การรักษาความโปร่งใส (Alpha Transparency)**: ประมวลผลด้วย PHP GD ฟังก์ชัน `imagepalettetotruecolor()`, `imagealphablending()`, และ `imagesavealpha()` ทำให้ภาพ PNG ที่มีพื้นหลังโปร่งแสงไม่เกิดปัญหาพื้นหลังกลายเป็นสีดำ
+* **การจัดเก็บด้วยชื่อปลอดภัย (UUID Safe Name)**: ตั้งชื่อไฟล์ภาพใหม่เป็น UUID เช่น `7a9b8c0d-....webp` ป้องกันปัญหาชื่อไฟล์ซ้ำและการโจมตีแบบ Directory Traversal
+
+#### 2. โมดูลที่รองรับการแปลงเป็น WebP
+1. **ภาพโปรไฟล์นักวิจัย (`RdbResearcher`)**: อัปโหลดผ่านฟอร์มข้อมูลนักวิจัย หรือฟอร์มเปลี่ยนภาพด่วนในหน้าดูข้อมูล
+2. **ภาพข่าวทุนวิจัย (`ResearchNews`)**: ดึงภาพผ่าน NRIIS API และอัปโหลดผ่านแบบฟอร์ม
+3. **ภาพงานประชุมวิชาการ (`ResearchConference`)**: ดึงภาพโปสเตอร์ผ่าน Facebook โพสต์ และอัปโหลดผ่านแบบฟอร์ม
+4. **ภาพหน้าปกเอกสารวิจัย (`RdbProject` / `RdbPublished`)**: เรนเดอร์หน้าแรกของ PDF เป็น `.webp` 100% ผ่าน `PdfCoverService`
+5. **ภาพกราฟิกหลักของระบบ**: โลโก้มหาวิทยาลัย `public/images/logo.webp` ขนาดลดลงจาก 234 KB เหลือเพียง 51 KB (ประหยัดแบนด์วิดท์ 78%)
+
+#### 3. คำสั่ง Artisan แปลงภาพเดิมย้อนหลังทั้งระบบ (Batch Migration CLI)
+```bash
+# แปลงภาพทุกโมดูลทั้งระบบ (นักวิจัย, ข่าว, งานประชุม)
+php artisan rdb:convert-images-webp
+
+# เลือกแปลงเฉพาะโมดูล
+php artisan rdb:convert-images-webp --module=researcher # แปลงภาพโปรไฟล์นักวิจัย
+php artisan rdb:convert-images-webp --module=news       # แปลงภาพข่าวทุนวิจัย
+php artisan rdb:convert-images-webp --module=conference # แปลงภาพงานประชุม
+
+# ตัวเลือกเพิ่มเติม
+php artisan rdb:convert-images-webp --limit=50          # จำกัดจำนวนรายการ
+php artisan rdb:convert-images-webp --force             # บังคับแปลงใหม่แม้เป็น .webp อยู่แล้ว
+```
+
+---
+
+## บทที่ 12: การบริหารจัดการข่าวสารทุนวิจัยและงานประชุมวิชาการ (Research News & Conference Management)
+
+ระบบหลังบ้านมีศูนย์รวมการบริหารจัดการข่าวทุนวิจัยจากหน่วยงานระดับชาติ และข่าวสารการประชุมวิชาการทั้งในและต่างประเทศ โดยเข้าใช้งานผ่านเมนูแถบซ้าย **"ข่าว/กิจกรรม"**:
+
+### 12.1 การจัดการข่าวทุนวิจัย NRIIS (`/backend/research_news`)
+* **การซิงค์ข้อมูลอัตโนมัติ**: ทำงานผ่านระบบตั้งเวลาอัตโนมัติทุกเช้า เวลา 06:00 น. (`php artisan rdb:sync-nriis-news`) ดึงข้อมูลประกาศทุนใหม่จาก NRIIS API
+* **การส่งต่อ Webhook และแจ้งเตือน Telegram**: ส่งข้อมูลข่าวที่ซิงค์สำเร็จไปยัง Make.com Webhook เพื่อโพสต์ลง Facebook เพจของสถาบันวิจัยฯ และส่งข้อความแจ้งเตือนเข้า Telegram กลุ่มของผู้บริหาร
+* **การเพิ่ม/แก้ไขข่าวผ่านแบบฟอร์ม**: เจ้าหน้าที่สามารถเพิ่มข่าวกิจกรรมหรือทุนวิจัยภายในมหาวิทยาลัย พร้อมอัปโหลดภาพประกอบซึ่งจะแปลงเป็น `.webp` อัตโนมัติ
+
+### 12.2 การจัดการงานประชุมวิชาการ Facebook (`/backend/research_conference`)
+* **การดึงข้อมูลจากเพจ Facebook**: ซิงค์โพสต์งานประชุมวิชาการทุกเช้า เวลา 06:30 น. (`php artisan rdb:sync-facebook-conferences`)
+* **การสกัดข้อมูลอัจฉริยะ**: สกัดวันที่จัดงาน (`con_even_date`), วันหมดเขตส่งผลงาน (`con_sub_deadline`), สถานที่จัดงาน (`con_venue`), และลิงก์เว็บไซต์ต้นฉบับอัตโนมัติ
+* **การจัดการผ่านแบบฟอร์ม**: บันทึกรายละเอียด แก้ไขข้อมูล และอัปโหลดภาพโปสเตอร์
+
+### 12.3 เครื่องมือตรวจสอบและทดสอบดึงข้อมูลจำลอง (Dry-Run Inspector)
+สำหรับผู้ดูแลระบบใช้ตรวจสอบความพร้อมของ API ภายนอก และดูตัวอย่างข้อมูลจริงก่อนตัดสินใจนำเข้า:
+* **เครื่องมือทดสอบข่าวทุน NRIIS**: เข้าใช้งานที่ `/backend/research_news/test-sync`
+  - ทดสอบดึงข้อมูลตามจำนวนที่ระบุ (Limit 1-50 รายการ) หรือระบุรหัสข่าว NRIIS (`nid`) ที่ต้องการเจาะจง
+  - แสดงผลข้อมูลที่สกัดได้: หัวข้อข่าว, ลิงก์รูปภาพ, รายการไฟล์แนบ PDF, ข้อมูลจำลอง Storage File (`.webp`), โครงสร้าง Payload สำหรับ Make.com และข้อความจำลองที่จะส่งเข้า Telegram
+  - **ไม่บันทึกลงฐานข้อมูลจริง (Dry-Run Mode)**
+* **เครื่องมือทดสอบงานประชุม Facebook**: เข้าใช้งานที่ `/backend/research_conference/test-sync`
+  - ทดสอบเชื่อมต่อเพจ Facebook ตรวจสอบสถานะการล็อกอินและคุกกี้
+  - แสดงผลข้อความสกัด, กำหนดส่งผลงาน, สถานที่จัดงาน และภาพพรีวิวจาก Facebook CDN
+
+### 12.4 ระบบรายงานสรุปข่าวสารประจำเดือน (`/backend/research_news/reports`)
+แยกเป็นเมนูย่อยเฉพาะในแถบนำทาง "ข่าว/กิจกรรม" สำหรับสรุปสถิติงานประชาสัมพันธ์:
+* กรองดูสถิติตามปี พ.ศ. และเดือนที่ต้องการ
+* แสดงการ์ดสรุปยอดรวมข่าวทุนวิจัย, จำนวนครั้งที่มีผู้เข้าชม, และตารางแจกแจงตามประเภทข่าว
+* เหมาะสำหรับการนำตัวเลขไปรายงานผลการดำเนินงานประจำเดือนต่อผู้บริหาร
+
+### 12.5 ระบบถังขยะ การกู้คืน และการลบถาวร (Soft Delete, Restore & Force Delete)
+ทั้งโมดูลข่าวทุนวิจัยและงานประชุมวิชาการได้รับการติดตั้งระบบความปลอดภัยข้อมูล 3 ระดับ:
+1. **ย้ายไปถังขยะ (Soft Delete)**: เมื่อกดปุ่ม **"ลบ (ถังขยะ)"** ระบบจะปรับสถานะ `data_show = 0` ข้อมูลจะถูกซ่อนจากหน้าบ้านทันที แต่ยังคงอยู่ในฐานข้อมูล
+2. **กู้คืนข้อมูล (Restore)**: หากลบผิดพลาด สามารถกดปุ่ม **"กู้คืน"** เพื่อปรับสถานะกลับเป็น `data_show = 1` ให้แสดงผลตามเดิม
+3. **ลบถาวร (Force Delete)**: เมื่อผู้ดูแลระบบต้องการลบออกจากระบบอย่างสิ้นเชิง ระบบจะลบเรคคอร์ดออกจากฐานข้อมูล **พร้อมทั้งลบไฟล์ภาพจริงออกจาก Storage** ป้องกันการเกิดไฟล์ขยะตกค้างบนเซิร์ฟเวอร์
+
+---
+
+## บทที่ 13: ศูนย์จัดการบริการข้อมูลและกุญแจเข้าถึงระบบ (API Token & Endpoint Management Hub)
+
+ระบบบริการข้อมูลเชื่อมโยงภายนอก (RESTful APIs) ถูกออกแบบตามมาตรฐานสถาปัตยกรรม 3 ระดับ (Tiered API Architecture) เข้าถึงศูนย์ควบคุมได้ที่:
+👉 **`/backend/api-management`** (เมนู: **การดูแลระบบ ➔ จัดการ API & Token**)
+
+### 13.1 ภาพรวมสถาปัตยกรรม API 3 ระดับ (Three-Tier API Architecture)
+
+```mermaid
+flowchart TD
+    Client["ระบบภายนอก / แอปพลิเคชัน / เว็บไซต์คณะ"] --> Gateway{"API Routing Layer"}
+    Gateway -->|"Tier 1: ติดสิทธิ์ Admin (Bearer Token)"| T1["Private Admin API (/api/v1/projects, /api/v1/publications)"]
+    Gateway -->|"Tier 2: ข้อมูลสถิติและ PMIS (Public Read-Only)"| T2["PMIS & Portfolio API (/api/pmis/*)"]
+    Gateway -->|"Tier 3: ข้อมูลเปิดสาธารณะ (No Auth Needed)"| T3["Open Public API (/api/v1/news, /api/v1/conferences)"]
+```
+
+1. **Tier 1: Private Administrative API**:
+   - บังคับยืนยันตัวตนด้วย **Bearer Token (Sanctum Personal Access Token)** ใน HTTP Header `Authorization: Bearer <token>`
+   - ใช้สำหรับระบบที่ต้องการเข้าถึงข้อมูลผลงานฉบับเต็มและสถิติเชิงลึก
+2. **Tier 2: PMIS & Legacy Integration API**:
+   - ให้บริการข้อมูลเชิงสรุปสำหรับระบบประกันคุณภาพการศึกษา (PMIS) และการเชื่อมต่อระบบเดิม
+3. **Tier 3: Open Public API**:
+   - เปิดให้เว็บไซต์คณะ, แอปพลิเคชันมือถือ หรือหน่วยงานภายนอก เรียกดึงข่าวทุนวิจัยและงานประชุมวิชาการได้ทันทีโดยไม่ต้องใช้ Token
+
+### 13.2 การสร้างและเพิกถอนสิทธิ์ API Token (Personal Access Tokens)
+* **สิทธิ์การเข้าถึง**: สงวนสิทธิ์เฉพาะผู้ดูแลระบบบทบาท **The Creator** เท่านั้น
+* **ขั้นตอนการออก Token ใหม่**:
+  1. เข้าสู่หน้า `/backend/api-management` คลิกแท็บ **"จัดการ Access Token"**
+  2. กรอก **ชื่อ Token (Token Name)** เช่น `Mobile App PCRU` หรือ `Faculty of Science Web`
+  3. กำหนดวันหมดอายุ (หรือปล่อยว่างหากไม่ต้องการให้หมดอายุ)
+  4. คลิกปุ่ม **"สร้าง Token"**
+  5. ระบบจะแสดงรหัส Token แบบเต็ม (Plain Text Token) **เพียงครั้งเดียวเท่านั้น** ให้กดปุ่ม **"คัดลอก Token"** และนำไปเก็บไว้ในที่ปลอดภัย
+* **การเพิกถอน Token (Revoke)**: สามารถกดปุ่ม **"เพิกถอน (Revoke)"** ที่แถว Token นั้นๆ ได้ทันทีเพื่อยกเลิกการเข้าถึง
+
+### 13.3 คู่มือและทดสอบ Endpoints พร้อมการคัดลอก JSON / cURL แบบปลอดภัยบนทุก Context
+ในแท็บ **"รายการ Endpoints"** บนหน้าเว็บ มีเอกสารแสดงรายละเอียดของทุก API Endpoint:
+* แสดง HTTP Method (`GET`), พาธ URL, พารามิเตอร์การค้นหา (`limit`, `search`, `page`)
+* มีกล่องตัวอย่าง **JSON Response** ให้ดูโครงสร้างข้อมูล
+* **ปุ่มคัดลอกปลอดภัย (Non-Secure HTTP Safe Clipboard)**:
+  - พัฒนาด้วยฟังก์ชัน `copyTextToClipboardSafe` รองรับเบราว์เซอร์ทั้งบนเครื่องจำลองที่เป็น HTTP (`http://laravel_rdb.test`) และเซิร์ฟเวอร์จริงที่เป็น HTTPS
+  - กดปุ่ม **"คัดลอก JSON"** เพื่อคัดลอกตัวอย่างโครงสร้างข้อมูล
+  - กดปุ่ม **"คัดลอกคำสั่ง cURL"** เพื่อนำคำสั่งไปรันบน Terminal / Postman ได้ทันที
+
+### 13.4 สรุปรายการ Endpoints สำคัญ (Endpoints Quick Reference)
+
+| หมวด | Method | Endpoint URL | สิทธิ์การเข้าถึง | วัตถุประสงค์ |
+|---|:---:|---|:---:|---|
+| **ข่าวสาร** | `GET` | `/api/v1/news` | สาธารณะ (No Auth) | ดึงรายการข่าวทุนวิจัย NRIIS และกิจกรรมล่าสุด |
+| **ข่าวสาร** | `GET` | `/api/v1/news/{id}` | สาธารณะ (No Auth) | ดึงเนื้อหาข่าวฉบับเต็มและลิงก์เอกสาร |
+| **งานประชุม** | `GET` | `/api/v1/conferences` | สาธารณะ (No Auth) | ดึงรายการงานประชุมวิชาการ กำหนดส่งผลงาน |
+| **งานประชุม** | `GET` | `/api/v1/conferences/{id}` | สาธารณะ (No Auth) | ดึงรายละเอียดงานประชุมและภาพโปสเตอร์ |
+| **โครงการ** | `GET` | `/api/v1/projects` | Bearer Token | รายการโครงการวิจัยทั้งหมด พร้อมตัวกรองปีและคณะ |
+| **ผลงานตีพิมพ์** | `GET` | `/api/v1/publications` | Bearer Token | รายการบทความตีพิมพ์ วารสาร และการอ้างอิง |
+| **นักวิจัย** | `GET` | `/api/v1/researchers` | Bearer Token | ทำเนียบนักวิจัย สังกัด และข้อมูล Scopus / ORCID |
+| **PMIS** | `GET` | `/api/pmis/summary-by-faculty` | สาธารณะ (Read-Only) | สถิติสรุปจำนวนผลงานวิจัยจำแนกตามคณะ |
+| **PMIS** | `GET` | `/api/pmis/portfolio-by-year` | สาธารณะ (Read-Only) | สถิติผลงานวิจัยจำแนกตามปีงบประมาณ |
