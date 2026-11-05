@@ -139,10 +139,23 @@ function wrapInEditorialTemplate(string $title, string $subtitle, string $badge,
         'SYSTEM_ACCEPTANCE_TEST_PLAN.html' => '<i class="bi bi-check2-circle me-1"></i> รายงานผลทดสอบ UAT',
     ];
 
-    $navHtml = '';
-    foreach ($navLinks as $href => $label) {
-        $active = ($href === $currentKey . '.html' || ($currentKey === 'index' && $href === 'index.html')) ? 'active' : '';
-        $navHtml .= "<a href=\"{$href}\" class=\"nav-pill {$active}\">{$label}</a>";
+    if ($currentKey === 'VOLUME_1_FRONTEND_USER_MANUAL') {
+        $brandHref = '/';
+        $brandIcon = 'bi-mortarboard-fill';
+        $brandText = 'ระบบฐานข้อมูลงานวิจัย PCRU (หน้าหลัก)';
+        $brandTitle = 'กลับสู่หน้าหลักระบบฐานข้อมูลงานวิจัย (Public Portal)';
+        $navHtml = '<span class="nav-pill active"><i class="bi bi-globe2 me-1"></i> เล่ม 1: คู่มือระบบหน้าบ้าน (Public User Manual)</span>' .
+                   '<a href="/login" class="nav-pill" style="border: 1px solid rgba(255, 255, 255, 0.25);" title="เข้าสู่ระบบสำหรับนักวิจัยและผู้ดูแลระบบ"><i class="bi bi-box-arrow-in-right me-1"></i> เข้าสู่ระบบ (นักวิจัย/แอดมิน)</a>';
+    } else {
+        $brandHref = 'index.html';
+        $brandIcon = 'bi-journal-bookmark-fill';
+        $brandText = 'PCRU Research Database Manuals';
+        $brandTitle = 'กลับสู่สารบัญรวมคู่มือการใช้งานระบบ';
+        $navHtml = '';
+        foreach ($navLinks as $href => $label) {
+            $active = ($href === $currentKey . '.html' || ($currentKey === 'index' && $href === 'index.html')) ? 'active' : '';
+            $navHtml .= "<a href=\"{$href}\" class=\"nav-pill {$active}\">{$label}</a>";
+        }
     }
 
     return <<<HTML
@@ -531,9 +544,9 @@ function wrapInEditorialTemplate(string $title, string $subtitle, string $badge,
 </head>
 <body>
     <header class="topbar">
-        <a href="index.html" class="topbar-brand">
-            <i class="bi bi-journal-bookmark-fill"></i>
-            <span>PCRU Research Database Manuals</span>
+        <a href="{$brandHref}" class="topbar-brand" title="{$brandTitle}">
+            <i class="bi {$brandIcon}"></i>
+            <span>{$brandText}</span>
         </a>
         <nav class="topbar-nav">
             {$navHtml}

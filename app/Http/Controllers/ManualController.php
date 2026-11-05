@@ -8,15 +8,19 @@ use Symfony\Component\HttpFoundation\Response;
 class ManualController extends Controller
 {
     /**
-     * Display the Manuals Index / Hub (คู่มือทั้งหมด)
+     * Display the Manuals Index / Hub (คู่มือทั้งหมด - เฉพาะผู้เข้าสู่ระบบ)
      */
-    public function index(): Response
+    public function index()
     {
+        if (!auth()->check()) {
+            return redirect()->guest(route('login'))->with('warning', 'กรุณาเข้าสู่ระบบเพื่อเข้าใช้งานคู่มือระบบหลังบ้าน');
+        }
+
         return $this->serveManual('index.html');
     }
 
     /**
-     * Display Volume 1: Frontend User Manual (คู่มือหน้าบ้าน)
+     * Display Volume 1: Frontend User Manual (คู่มือหน้าบ้าน - สาธารณะ)
      */
     public function frontend(): Response
     {
@@ -24,10 +28,14 @@ class ManualController extends Controller
     }
 
     /**
-     * Display Volume 2: Backend Admin & Researcher Manual (คู่มือหลังบ้าน)
+     * Display Volume 2: Backend Admin & Researcher Manual (คู่มือหลังบ้าน - เฉพาะผู้เข้าสู่ระบบ)
      */
-    public function backend(): Response
+    public function backend()
     {
+        if (!auth()->check()) {
+            return redirect()->guest(route('login'))->with('warning', 'กรุณาเข้าสู่ระบบเพื่อเข้าใช้งานคู่มือระบบหลังบ้าน');
+        }
+
         return $this->serveManual('VOLUME_2_BACKEND_ADMIN_RESEARCHER_MANUAL.html');
     }
 
@@ -49,9 +57,17 @@ class ManualController extends Controller
     /**
      * Display a specific manual file
      */
-    public function show(string $file): Response
+    public function show(string $file)
     {
         $safeFile = basename($file);
+
+        // Only Volume 1 Frontend manual is public. All other manuals require authentication.
+        if ($safeFile !== 'VOLUME_1_FRONTEND_USER_MANUAL.html') {
+            if (!auth()->check()) {
+                return redirect()->guest(route('login'))->with('warning', 'กรุณาเข้าสู่ระบบเพื่อเข้าใช้งานคู่มือระบบหลังบ้าน');
+            }
+        }
+
         return $this->serveManual($safeFile);
     }
 
