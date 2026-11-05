@@ -31,6 +31,7 @@ class ResearchNews extends Model
         'news_reference',
         'news_link',
         'news_count',
+        'data_show',
     ];
 
     public function getNewsFilePath(string $newField = 'news_path', string $oldField = 'news_img', string|array $oldDir = [

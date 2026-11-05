@@ -14,6 +14,166 @@ class NriisSyncService
     private string $makeWebhookUrl = 'https://hook.eu1.make.com/9juofv3nru0zf6z9gtnyufvkd3ryvknn';
 
     /**
+     * Dry-Run / Test fetch from NRIIS API without saving to DB or sending webhooks
+     *
+     * @param int $limit
+     * @param string|null $specificNid
+     * @return array
+     */
+    public function testSync(int $limit = 5, ?string $specificNid = null): array
+    {
+        $limit = min(50, max(1, $limit));
+        $itemsReport = [];
+
+        $targetNids = [];
+        if (!empty($specificNid)) {
+            $targetNids[] = trim($specificNid);
+        } else {
+            try {
+                $response = Http::timeout(25)->get("{$this->baseApiUrl}/general/news/?ngroup=&d=&page=1&limit={$limit}");
+                if (!$response->successful()) {
+                    return [
+                        'success' => false,
+                        'error' => "เชื่อมต่อ API รายการหน้าหลัก NRIIS ไม่ได้ (HTTP {$response->status()})",
+                        'items' => [],
+                    ];
+                }
+
+                $listData = $response->json();
+                $items = $listData['data'] ?? [];
+                foreach ($items as $item) {
+                    $nid = (string) ($item['NID'] ?? '');
+                    if (!empty($nid)) {
+                        $targetNids[] = $nid;
+                    }
+                }
+            } catch (\Throwable $e) {
+                return [
+                    'success' => false,
+                    'error' => "เกิดข้อผิดพลาดในการเชื่อมต่อ NRIIS API: " . $e->getMessage(),
+                    'items' => [],
+                ];
+            }
+        }
+
+        if (empty($targetNids)) {
+            return [
+                'success' => false,
+                'error' => "ไม่พบรายการข่าวจาก NRIIS API",
+                'items' => [],
+            ];
+        }
+
+        foreach ($targetNids as $nid) {
+            try {
+                $detailResponse = Http::timeout(20)->get("{$this->baseApiUrl}/general/news/{$nid}");
+                if (!$detailResponse->successful()) {
+                    $itemsReport[] = [
+                        'status' => 'error',
+                        'news_id' => $nid,
+                        'message' => "HTTP {$detailResponse->status()} ไม่สามารถดึงรายละเอียดข่าวได้",
+                    ];
+                    continue;
+                }
+
+                $news = $detailResponse->json();
+                if (!$news || empty($news['NNAME'])) {
+                    $itemsReport[] = [
+                        'status' => 'empty',
+                        'news_id' => $nid,
+                        'message' => "ไม่พบข้อมูลเนื้อหาข่าวจาก API (NNAME ว่างเปล่า)",
+                    ];
+                    continue;
+                }
+
+                // Check DB status (informative only, DO NOT SKIP!)
+                $existing = ResearchNews::where('news_id', $nid)->first();
+
+                // Format detail & attachments
+                $rawDetail = $news['NDETAIL'] ?? '';
+                $htmlDetail = $this->cleanIframeDetail($rawDetail);
+
+                $pdfAttachment = null;
+                if (!empty($news['NFILE_PDF'])) {
+                    $pdfAttachment = 'https://nriis.go.th/FileUpload/AttatchFile/News/' . trim($news['NFILE_PDF']);
+                    $htmlDetail .= '<div class="alert alert-info mt-3 p-3 rounded border">';
+                    $htmlDetail .= '<b><i class="bi bi-file-earmark-pdf-fill me-1"></i> เอกสารประกาศหลัก:</b> ';
+                    $htmlDetail .= '<a href="' . htmlspecialchars($pdfAttachment) . '" target="_blank" class="btn btn-primary btn-sm ms-2"><i class="bi bi-download me-1"></i> ดาวน์โหลดประกาศ</a>';
+                    $htmlDetail .= '</div>';
+                }
+
+                $filesList = [];
+                if (!empty($news['files']) && is_array($news['files'])) {
+                    $fileHtml = '<div class="card bg-body-tertiary mt-3 p-3 border rounded">';
+                    $fileHtml .= '<b class="mb-2 d-block"><i class="bi bi-paperclip me-1"></i> ไฟล์แนบเพิ่มเติม:</b><ul class="mb-0 ps-3">';
+                    foreach ($news['files'] as $file) {
+                        $fUrl = $file['fileUrl'] ?? '';
+                        $fName = $file['FileNameOriginal'] ?? 'ดาวน์โหลดไฟล์';
+                        if ($fUrl) {
+                            $filesList[] = ['name' => $fName, 'url' => $fUrl];
+                            $fileHtml .= '<li class="mb-1"><a href="' . htmlspecialchars($fUrl) . '" target="_blank" class="text-decoration-none"><i class="bi bi-file-earmark-arrow-down me-1"></i>' . htmlspecialchars($fName) . '</a></li>';
+                        }
+                    }
+                    $fileHtml .= '</ul></div>';
+                    $htmlDetail .= $fileHtml;
+                }
+
+                $imgNewsUrl = $news['imgNews'] ?? null;
+                $simulatedFileName = "{$nid}." . (pathinfo(parse_url((string)$imgNewsUrl, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION) ?: 'jpg');
+
+                $simulatedWebhook = [
+                    'event' => 'research_news_created',
+                    'news_id' => $nid,
+                    'news_type' => $news['NTNAME'] ?? 'ข่าวประชาสัมพันธ์',
+                    'news_name' => trim($news['NNAME']),
+                    'news_date' => $news['createdateTH'] ?? now()->format('Y-m-d'),
+                    'news_link' => "{$this->baseUrl}/news/{$nid}",
+                    'image_url' => $imgNewsUrl,
+                    'simulated_storage_file' => "uploads/datanewsimg/{$simulatedFileName}",
+                ];
+
+                $simulatedTelegram = "📢 [จำลองการแจ้งเตือน] ข่าวทุนวิจัยใหม่จาก NRIIS\n"
+                    . "📌 หัวข้อ: " . trim($news['NNAME']) . "\n"
+                    . "🏷️ ประเภท: " . ($news['NTNAME'] ?? 'ข่าวประชาสัมพันธ์') . "\n"
+                    . "📅 วันที่: " . ($news['createdateTH'] ?? now()->format('Y-m-d')) . "\n"
+                    . "🔗 ลิงก์: {$this->baseUrl}/news/{$nid}";
+
+                $itemsReport[] = [
+                    'status' => 'success',
+                    'news_id' => $nid,
+                    'news_name' => trim($news['NNAME']),
+                    'news_type' => $news['NTNAME'] ?? 'ข่าวประชาสัมพันธ์',
+                    'news_date' => $news['createdateTH'] ?? now()->format('Y-m-d'),
+                    'news_link' => "{$this->baseUrl}/news/{$nid}",
+                    'news_img_url' => $imgNewsUrl,
+                    'simulated_file_name' => $simulatedFileName,
+                    'pdf_attachment' => $pdfAttachment,
+                    'files_list' => $filesList,
+                    'html_detail' => $htmlDetail,
+                    'exists_in_db' => $existing !== null,
+                    'existing_id' => $existing?->id,
+                    'simulated_webhook' => $simulatedWebhook,
+                    'simulated_telegram' => $simulatedTelegram,
+                    'raw_api_data' => $news,
+                ];
+            } catch (\Throwable $e) {
+                $itemsReport[] = [
+                    'status' => 'error',
+                    'news_id' => $nid,
+                    'message' => "เกิดข้อผิดพลาดในการประมวลผล NID {$nid}: " . $e->getMessage(),
+                ];
+            }
+        }
+
+        return [
+            'success' => true,
+            'limit' => $limit,
+            'specific_nid' => $specificNid,
+            'items' => $itemsReport,
+        ];
+    }
+
+    /**
      * Sync news from NRIIS
      *
      * @param int $limit Number of items to fetch
@@ -191,6 +351,9 @@ class NriisSyncService
 
         return [
             'stats' => $stats,
+            'synced' => $stats['synced'],
+            'skipped' => $stats['skipped'],
+            'failed' => $stats['failed'],
             'items' => $itemsReport,
         ];
     }

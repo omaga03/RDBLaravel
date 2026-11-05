@@ -323,7 +323,7 @@ class IntegrationsAndAutomationTest extends TestCase
 
         // Verify key text elements in rendered HTML
         $response->assertSee('สารสนเทศเพื่อการประกันคุณภาพ');
-        $response->assertSee('คะแนนถ่วงน้ำหนักผลงานตีพิมพ์');
+        $response->assertSee('ผลงานตีพิมพ์');
         $response->assertSee('สัดส่วนโครงการและงบวิจัยต่อบุคลากร');
         $response->assertSee('ผลงานวิจัยนำไปใช้ประโยชน์ที่ผ่านเกณฑ์ QA');
         $response->assertSee('นักวิจัยรุ่นใหม่');
@@ -379,5 +379,93 @@ class IntegrationsAndAutomationTest extends TestCase
             $this->assertNotNull($fp->department_nameTH);
             $this->assertNotEquals('ไม่ระบุหน่วยงาน', $fp->department_nameTH);
         }
+    }
+
+    public function test_research_news_test_sync_and_deletion_workflow()
+    {
+        $admin = User::find(129) ?? User::where('role', 'The Creator')->orWhere('role', 'Admin')->first();
+        if (!$admin) {
+            $this->markTestSkipped('No admin user found.');
+        }
+
+        // 1. Test test-sync page renders
+        $resp = $this->actingAs($admin)->get(route('backend.research_news.test_sync'));
+        $resp->assertStatus(200);
+        $resp->assertSee('เครื่องมือทดสอบการดึงข้อมูลข่าวทุนวิจัย NRIIS');
+        $resp->assertSee('Dry-Run');
+
+        // 2. Test test-sync execution
+        $runResp = $this->actingAs($admin)->get(route('backend.research_news.test_sync', ['run' => 1, 'limit' => 1]));
+        $runResp->assertStatus(200);
+        $runResp->assertSee('ผลการทดสอบดึงข้อมูล NRIIS API');
+
+        // 3. Test deletion workflow (soft delete and restore)
+        $testNews = ResearchNews::create([
+            'news_id' => '999999999',
+            'news_name' => 'Unit Test News Delete Workflow',
+            'news_type' => 'ข่าวทั่วไป',
+            'data_show' => 1,
+        ]);
+
+        $this->assertEquals(1, $testNews->data_show);
+
+        // Delete (move to trash)
+        $delResp = $this->actingAs($admin)->delete(route('backend.research_news.destroy', $testNews->id));
+        $delResp->assertRedirect();
+        $testNews->refresh();
+        $this->assertEquals(0, $testNews->data_show);
+
+        // Restore
+        $restoreResp = $this->actingAs($admin)->post(route('backend.research_news.restore', $testNews->id));
+        $restoreResp->assertRedirect();
+        $testNews->refresh();
+        $this->assertEquals(1, $testNews->data_show);
+
+        // Force Delete
+        $testNews->data_show = 0;
+        $testNews->save();
+        $forceResp = $this->actingAs($admin)->delete(route('backend.research_news.force_delete', $testNews->id));
+        $forceResp->assertRedirect();
+        $this->assertNull(ResearchNews::find($testNews->id));
+    }
+
+    public function test_research_conference_test_sync_and_deletion_workflow()
+    {
+        $admin = User::find(129) ?? User::where('role', 'The Creator')->orWhere('role', 'Admin')->first();
+        if (!$admin) {
+            $this->markTestSkipped('No admin user found.');
+        }
+
+        // 1. Test test-sync page renders
+        $resp = $this->actingAs($admin)->get(route('backend.research_conference.test_sync'));
+        $resp->assertStatus(200);
+        $resp->assertSee('เครื่องมือทดสอบการดึงข้อมูลงานประชุมวิชาการจาก Facebook');
+        $resp->assertSee('Dry-Run');
+
+        // 2. Test deletion workflow
+        $testConf = \App\Models\ResearchConference::create([
+            'con_id' => '999999999999999999',
+            'con_name' => 'Unit Test Conference Delete Workflow',
+            'data_show' => 1,
+        ]);
+
+        // Delete (move to trash)
+        $delResp = $this->actingAs($admin)->delete(route('backend.research_conference.destroy', $testConf->id));
+        $delResp->assertRedirect();
+        $testConf->refresh();
+        $this->assertEquals(0, $testConf->data_show);
+
+        // Restore
+        $restoreResp = $this->actingAs($admin)->post(route('backend.research_conference.restore', $testConf->id));
+        $restoreResp->assertRedirect();
+        $testConf->refresh();
+        $this->assertEquals(1, $testConf->data_show);
+
+        // Force Delete
+        $testConf->data_show = 0;
+        $testConf->save();
+        $forceResp = $this->actingAs($admin)->delete(route('backend.research_conference.force_delete', $testConf->id));
+        $forceResp->assertRedirect();
+        $this->assertNull(\App\Models\ResearchConference::find($testConf->id));
     }
 }

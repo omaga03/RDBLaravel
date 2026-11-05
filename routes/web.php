@@ -266,12 +266,16 @@ Route::prefix('backend')->name('backend.')->middleware(['auth', \App\Http\Middle
     
     Route::resource('rdbprojectutilize', \App\Http\Controllers\Backend\RdbProjectUtilizeController::class);
     Route::get('/research_news/reports', [\App\Http\Controllers\Backend\ResearchNewsController::class, 'monthlyReport'])->name('research_news.reports');
+    Route::get('/research_news/test-sync', [\App\Http\Controllers\Backend\ResearchNewsController::class, 'testSync'])->name('research_news.test_sync');
     Route::post('/research_news/sync-nriis', [\App\Http\Controllers\Backend\ResearchNewsController::class, 'syncNriis'])->name('research_news.sync_nriis');
     Route::post('/research_news/{id}/restore', [\App\Http\Controllers\Backend\ResearchNewsController::class, 'restore'])->name('research_news.restore');
+    Route::delete('/research_news/{id}/force-delete', [\App\Http\Controllers\Backend\ResearchNewsController::class, 'forceDelete'])->name('research_news.force_delete');
     Route::resource('research_news', \App\Http\Controllers\Backend\ResearchNewsController::class);
     Route::get('/research_news/{id}/view-image', [\App\Http\Controllers\Backend\ResearchNewsController::class, 'viewNewsImage'])->name('research_news.view_image');
+    Route::get('/research_conference/test-sync', [\App\Http\Controllers\Backend\ResearchConferenceController::class, 'testSync'])->name('research_conference.test_sync');
     Route::post('/research_conference/sync-facebook', [\App\Http\Controllers\Backend\ResearchConferenceController::class, 'syncFacebook'])->name('research_conference.sync_facebook');
     Route::post('/research_conference/{id}/restore', [\App\Http\Controllers\Backend\ResearchConferenceController::class, 'restore'])->name('research_conference.restore');
+    Route::delete('/research_conference/{id}/force-delete', [\App\Http\Controllers\Backend\ResearchConferenceController::class, 'forceDelete'])->name('research_conference.force_delete');
     Route::resource('research_conference', \App\Http\Controllers\Backend\ResearchConferenceController::class);
     Route::get('/research_conference/{id}/view-image', [\App\Http\Controllers\Backend\ResearchConferenceController::class, 'viewConferenceImage'])->name('research_conference.view_image');
 

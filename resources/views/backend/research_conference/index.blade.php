@@ -28,6 +28,9 @@
                     <i class="bi bi-trash3 me-1.5"></i> ถังขยะ
                 </a>
             @endif
+            <a href="{{ route('backend.research_conference.test_sync') }}" class="btn btn-outline-warning d-inline-flex align-items-center shadow-sm" style="height: 38px;" title="ทดสอบการดึงข้อมูลจาก Facebook (Dry-Run Inspector)">
+                <i class="bi bi-flask me-1.5"></i> ทดสอบดึงข่าว Facebook
+            </a>
             @can('create', \App\Models\ResearchConference::class)
             <form action="{{ route('backend.research_conference.sync_facebook') }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันการดึงข่าวงานประชุมวิชาการล่าสุดจาก Facebook หรือไม่?');">
                 @csrf
@@ -268,10 +271,27 @@
                                     </a>
                                     @endcan
                                     @if((int)$item->data_show === 0)
-                                        @can('delete', $item)
+                                        @can('restore', $item)
                                         <form action="{{ route('backend.research_conference.restore', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันกู้คืนข่าวงานประชุมนี้จากถังขยะ?');">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-success" title="กู้คืนข้อมูล"><i class="bi bi-arrow-counterclockwise me-1.5"></i> กู้คืน</button>
+                                        </form>
+                                        @endcan
+                                        @can('forceDelete', $item)
+                                        <form action="{{ route('backend.research_conference.force_delete', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันการลบข่าวงานประชุมนี้อย่างถาวร? การดำเนินการนี้ไม่สามารถย้อนกลับได้');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="ลบถาวร"><i class="bi bi-trash3-fill me-1.5"></i> ลบถาวร</button>
+                                        </form>
+                                        @endcan
+                                    @else
+                                        @can('delete', $item)
+                                        <form action="{{ route('backend.research_conference.destroy', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันการย้ายข่าวงานประชุมนี้ไปที่ถังขยะ?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-outline-danger" title="ย้ายไปถังขยะ">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
                                         </form>
                                         @endcan
                                     @endif

@@ -31,6 +31,9 @@
             <a href="{{ route('backend.research_news.reports') }}" class="btn btn-outline-secondary d-inline-flex align-items-center shadow-sm" style="height: 38px;" title="ดูรายงานสรุปข่าวประจำเดือน">
                 <i class="bi bi-file-earmark-bar-graph me-1.5"></i> รายงานประจำเดือน
             </a>
+            <a href="{{ route('backend.research_news.test_sync') }}" class="btn btn-outline-warning d-inline-flex align-items-center shadow-sm" style="height: 38px;" title="ทดสอบการดึงข้อมูลจาก NRIIS (Dry-Run Inspector)">
+                <i class="bi bi-flask me-1.5"></i> ทดสอบดึงข่าว NRIIS
+            </a>
             @can('create', \App\Models\ResearchNews::class)
             <form action="{{ route('backend.research_news.sync_nriis') }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันการดึงข่าวทุนวิจัยล่าสุดจากระบบ NRIIS หรือไม่?');">
                 @csrf
@@ -228,10 +231,27 @@
                                     </a>
                                     @endcan
                                     @if((int)$item->data_show === 0)
-                                        @can('delete', $item)
+                                        @can('restore', $item)
                                         <form action="{{ route('backend.research_news.restore', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันกู้คืนข่าวนี้จากถังขยะ?');">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-success" title="กู้คืนข้อมูล"><i class="bi bi-arrow-counterclockwise me-1.5"></i> กู้คืน</button>
+                                        </form>
+                                        @endcan
+                                        @can('forceDelete', $item)
+                                        <form action="{{ route('backend.research_news.force_delete', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันการลบข่าวนี้อย่างถาวร? การดำเนินการนี้ไม่สามารถย้อนกลับได้');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="ลบถาวร"><i class="bi bi-trash3-fill me-1.5"></i> ลบถาวร</button>
+                                        </form>
+                                        @endcan
+                                    @else
+                                        @can('delete', $item)
+                                        <form action="{{ route('backend.research_news.destroy', $item->id) }}" method="POST" class="d-inline" onsubmit="return confirm('ยืนยันการย้ายข่าวนี้ไปที่ถังขยะ?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-outline-danger" title="ย้ายไปถังขยะ">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
                                         </form>
                                         @endcan
                                     @endif

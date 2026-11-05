@@ -201,7 +201,7 @@ class ResearchConferenceController extends Controller
         $this->authorize('delete', $item);
         $item->data_show = 0;
         $item->save();
-        return redirect()->route('backend.research_conference.index')->with('success', 'ลบข้อมูลเรียบร้อยแล้ว');
+        return redirect()->route('backend.research_conference.index')->with('success', 'ย้ายข่าวงานประชุมไปที่ถังขยะเรียบร้อยแล้ว');
     }
 
     public function restore($id)
@@ -211,6 +211,35 @@ class ResearchConferenceController extends Controller
         $item->data_show = 1;
         $item->save();
         return redirect()->back()->with('success', 'กู้คืนข่าวงานประชุมเรียบร้อยแล้ว');
+    }
+
+    public function forceDelete($id)
+    {
+        $item = ResearchConference::withoutGlobalScope('active')->findOrFail($id);
+        $this->authorize('forceDelete', $item);
+
+        if ($item->con_path && Storage::disk('public')->exists($item->con_path)) {
+            Storage::disk('public')->delete($item->con_path);
+        }
+
+        $item->delete();
+        return redirect()->back()->with('success', 'ลบข่าวงานประชุมอย่างถาวรเรียบร้อยแล้ว');
+    }
+
+    public function testSync(Request $request, \App\Services\FacebookConferenceSyncService $syncService)
+    {
+        $this->authorize('viewAny', ResearchConference::class);
+
+        $limit = min(15, max(1, (int) $request->input('limit', 3)));
+        $fbid = $request->filled('fbid') ? trim($request->input('fbid')) : null;
+        $cookie = $request->filled('cookie') ? trim($request->input('cookie')) : null;
+        $testResult = null;
+
+        if ($request->has('run')) {
+            $testResult = $syncService->testSync($limit, $fbid, $cookie);
+        }
+
+        return view('backend.research_conference.test_sync', compact('testResult', 'limit', 'fbid', 'cookie'));
     }
 
     public function syncFacebook(Request $request, \App\Services\FacebookConferenceSyncService $syncService)

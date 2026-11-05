@@ -119,7 +119,7 @@ class ResearchNewsController extends Controller
         $this->authorize('delete', $item);
         $item->data_show = 0;
         $item->save();
-        return redirect()->route('backend.research_news.index')->with('success', 'ลบข้อมูลเรียบร้อยแล้ว');
+        return redirect()->route('backend.research_news.index')->with('success', 'ย้ายข่าวไปที่ถังขยะเรียบร้อยแล้ว');
     }
 
     public function restore($id)
@@ -129,6 +129,35 @@ class ResearchNewsController extends Controller
         $item->data_show = 1;
         $item->save();
         return redirect()->back()->with('success', 'กู้คืนข่าวเรียบร้อยแล้ว');
+    }
+
+    public function forceDelete($id)
+    {
+        $item = ResearchNews::withoutGlobalScope('active')->findOrFail($id);
+        $this->authorize('forceDelete', $item);
+
+        $filePath = $item->getNewsFilePath();
+        if ($filePath && Storage::disk('public')->exists($filePath)) {
+            Storage::disk('public')->delete($filePath);
+        }
+
+        $item->delete();
+        return redirect()->back()->with('success', 'ลบข่าวอย่างถาวรเรียบร้อยแล้ว');
+    }
+
+    public function testSync(Request $request, \App\Services\NriisSyncService $syncService)
+    {
+        $this->authorize('viewAny', ResearchNews::class);
+
+        $limit = min(50, max(1, (int) $request->input('limit', 5)));
+        $nid = $request->filled('nid') ? trim($request->input('nid')) : null;
+        $testResult = null;
+
+        if ($request->has('run')) {
+            $testResult = $syncService->testSync($limit, $nid);
+        }
+
+        return view('backend.research_news.test_sync', compact('testResult', 'limit', 'nid'));
     }
 
     public function syncNriis(Request $request, \App\Services\NriisSyncService $syncService)

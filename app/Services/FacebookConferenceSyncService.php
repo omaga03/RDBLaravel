@@ -14,6 +14,270 @@ class FacebookConferenceSyncService
     private string $makeWebhookUrl = 'https://hook.eu1.make.com/9juofv3nru0zf6z9gtnyufvkd3ryvknn';
 
     /**
+     * Dry-Run / Test fetch conference posts from Facebook without saving to DB or sending webhooks
+     *
+     * @param int $limit
+     * @param string|null $specificFbid
+     * @param string|null $customCookie
+     * @return array
+     */
+    public function testSync(int $limit = 3, ?string $specificFbid = null, ?string $customCookie = null): array
+    {
+        $limit = min(15, max(1, $limit));
+        $cookie = !empty($customCookie) ? $customCookie : (config('services.facebook.cookie') ?: env('FACEBOOK_SCRAPE_COOKIE') ?: SystemSetting::get('facebook_scrape_cookie', ''));
+
+        $headers = [
+            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'Accept-Language' => 'th-TH,th;q=0.9,en;q=0.8',
+            'Cache-Control' => 'max-age=0',
+            'Sec-Ch-Ua' => '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+            'Sec-Ch-Ua-Mobile' => '?0',
+            'Sec-Ch-Ua-Platform' => '"Windows"',
+            'Sec-Fetch-Dest' => 'document',
+            'Sec-Fetch-Mode' => 'navigate',
+            'Sec-Fetch-Site' => 'same-origin',
+            'Sec-Fetch-User' => '?1',
+            'Upgrade-Insecure-Requests' => '1',
+        ];
+
+        if (!empty($cookie)) {
+            $headers['Cookie'] = $cookie;
+        }
+
+        $discoveredCandidates = [];
+        $diagnostics = [
+            'has_cookie' => !empty($cookie),
+            'cookie_length' => strlen($cookie ?? ''),
+            'specific_fbid' => $specificFbid,
+            'http_status' => null,
+            'discovered_links_count' => 0,
+        ];
+
+        if (!empty($specificFbid)) {
+            $discoveredCandidates[] = 'fbid=' . trim($specificFbid);
+        } else {
+            try {
+                $response = Http::timeout(25)->withHeaders($headers)->get($this->targetPageUrl);
+                $diagnostics['http_status'] = $response->status();
+
+                if (!$response->successful()) {
+                    return [
+                        'success' => false,
+                        'diagnostics' => $diagnostics,
+                        'error' => "เชื่อมต่อ Facebook ไม่สำเร็จ (HTTP {$response->status()})",
+                        'items' => [],
+                    ];
+                }
+
+                $body = $response->body();
+                $extractedQueries = [];
+                if (preg_match_all('/"url":"https:....www\.facebook\.com..photo\.php\.(.*?)"/', $body, $exdata2)) {
+                    $extractedQueries = $exdata2[1];
+                }
+                if (empty($extractedQueries) && preg_match_all('/photo\.php\?([^\'"\s>]+)/i', $body, $mStd)) {
+                    $extractedQueries = $mStd[1];
+                }
+
+                foreach ($extractedQueries as $linkQuery) {
+                    $cleanQuery = str_replace(['\\u0026', '&amp;'], '&', $linkQuery);
+                    $discoveredCandidates[] = $cleanQuery;
+                }
+
+                $diagnostics['discovered_links_count'] = count($discoveredCandidates);
+            } catch (\Throwable $e) {
+                return [
+                    'success' => false,
+                    'diagnostics' => $diagnostics,
+                    'error' => "เกิดข้อผิดพลาดในการเชื่อมต่อ Facebook: " . $e->getMessage(),
+                    'items' => [],
+                ];
+            }
+        }
+
+        if (empty($discoveredCandidates)) {
+            return [
+                'success' => false,
+                'diagnostics' => $diagnostics,
+                'error' => "ไม่พบรูปภาพงานประชุมจาก Facebook (อาจติดบล็อกหรือ Cookie หมดอายุ)",
+                'items' => [],
+            ];
+        }
+
+        $itemsReport = [];
+        $count = 0;
+
+        foreach ($discoveredCandidates as $linkQuery) {
+            if ($count >= $limit) {
+                break;
+            }
+            $count++;
+
+            $fbid = null;
+            if (preg_match('/fbid=([0-9]+)/', $linkQuery, $sLink)) {
+                $fbid = $sLink[1];
+            }
+            if (!$fbid) {
+                continue;
+            }
+
+            $photoPageUrl = 'https://www.facebook.com/photo.php?' . $linkQuery;
+            $existing = ResearchConference::where('con_id', $fbid)->first();
+
+            try {
+                $pResp = Http::timeout(20)->withHeaders($headers)->get($photoPageUrl);
+                if (!$pResp->successful()) {
+                    $itemsReport[] = [
+                        'status' => 'error',
+                        'con_id' => $fbid,
+                        'url' => $photoPageUrl,
+                        'message' => "HTTP {$pResp->status()} ไม่สามารถดึงหน้าภาพถ่ายได้",
+                    ];
+                    continue;
+                }
+
+                $data2 = $pResp->body();
+
+                $rawText = null;
+                if (preg_match('/mobileUrl":".*?","__isNode":".*?","id":".*?"},"entity_is_weak_reference":.*?,"length":.*?,"offset":.*?}],"color_ranges":.*?,"text":"(.*?)"},"message_preferred_body"/', $data2, $extextconf)) {
+                    $rawText = str_replace(["\\n"], "||", $extextconf[1]);
+                } elseif (preg_match('/"text":"(.*?)"(?:,"message_preferred_body"|,"entity_ranges")/s', $data2, $mTextAlt)) {
+                    $rawText = str_replace(["\r\n", "\r", "\n", "\\n"], "||", $mTextAlt[1]);
+                }
+
+                if (!$rawText) {
+                    $itemsReport[] = [
+                        'status' => 'skipped',
+                        'con_id' => $fbid,
+                        'url' => $photoPageUrl,
+                        'message' => "ไม่พบข้อความเนื้อหาในหน้า Facebook (preg_match ข้อความไม่พบ)",
+                        'exists_in_db' => $existing !== null,
+                        'existing_id' => $existing?->id,
+                    ];
+                    continue;
+                }
+
+                $jsonStr = '{"text":"' . $rawText . '"}';
+                $objText = json_decode($jsonStr);
+                $textDecoded = $objText->text ?? $rawText;
+
+                // Extract image URI
+                $imgUri = null;
+                if (preg_match('/"image":{"uri":"(.*?)"/', $data2, $exuriconf)) {
+                    $jsonUri = '{"uri":"' . $exuriconf[1] . '"}';
+                    $objUri = json_decode($jsonUri);
+                    $imgUri = $objUri->uri ?? stripslashes($exuriconf[1]);
+                }
+
+                // Format text into HTML
+                $textdata2 = str_replace("||", "<br>", $textDecoded);
+                $textdata2 = str_replace('<a href="', '<a target="_blank" href="', $textdata2);
+                $textdata2 = str_replace('-\\', '-', $textdata2);
+                $textdata2 = preg_replace('/<a class(.*?)href="\/hashtag\/(.*?)>#(.*?)<.a>/', '', $textdata2);
+                $textdata2 = str_replace("[เบื้องต้น]<br>.<br>", "", $textdata2);
+                $textdata2 = $this->sanitizeOutput($textdata2);
+
+                // Keywords check
+                $hasConfKeyword = (
+                    str_contains($textdata2, 'ประชุม') ||
+                    str_contains(strtolower($textdata2), 'onference') ||
+                    str_contains(strtolower($textdata2), 'nternational') ||
+                    str_contains(strtolower($textdata2), 'ymposium') ||
+                    str_contains(strtolower($textdata2), 'ongress') ||
+                    str_contains(strtolower($textdata2), 'esearch')
+                );
+
+                $hasDetailKeyword = (
+                    str_contains(strtolower($textdata2), 'eadline') ||
+                    str_contains(strtolower($textdata2), 'ubmission') ||
+                    str_contains(strtolower($textdata2), 'ebsite') ||
+                    str_contains(strtolower($textdata2), 'acebook') ||
+                    str_contains(strtolower($textdata2), 'http')
+                );
+
+                // Parse fields
+                $lines = explode('<br>', $textdata2);
+                $conName = trim(strip_tags($lines[0] ?? "งานประชุมวิชาการ {$fbid}"));
+
+                $conEvenDate = null;
+                if (preg_match('/<br>\s*วัน(.+?)<br>/u', $textdata2, $mEvent)) {
+                    $conEvenDate = 'วัน' . trim(strip_tags($mEvent[1]));
+                } elseif (preg_match('/(?:วัน(?:ที่)?\s*)?(\d{1,2}\s+(?:ม\.ค\.|ก\.พ\.|มี\.ค\.|เม\.ย\.|พ\.ค\.|มิ\.ย\.|ก\.ค\.|ส\.ค\.|ก\.ย\.|ต\.ค\.|พ\.ย\.|ธ\.ค\.|มกราคม|กุมภาพันธ์|มีนาคม|เมษายน|พฤษภาคม|มิถุนายน|กรกฎาคม|สิงหาคม|กันยายน|ตุลาคม|พฤศจิกายน|ธันวาคม)\s+\d{2,4})/u', $textdata2, $mEventAlt)) {
+                    $conEvenDate = trim($mEventAlt[0]);
+                }
+
+                $patterndeadline = '/(?:<br>|\s)Deadline sub.*n:\s*(\d{1,2}\s+(?:ม\.ค\.|ก\.พ\.|มี\.ค\.|เม\.ย\.|พ\.ค\.|มิ\.ย\.|ก\.ค\.|ส\.ค\.|ก\.ย\.|ต\.ค\.|พ\.ย\.|ธ\.ค\.|มกราคม|กุมภาพันธ์|มีนาคม|เมษายน|พฤษภาคม|มิถุนายน|กรกฎาคม|สิงหาคม|กันยายน|ตุลาคม|พฤศจิกายน|ธันวาคม)\s+\d{2,4})/u';
+                $deadlineSubmission = null;
+                if (preg_match($patterndeadline, $textdata2, $mDl)) {
+                    $deadlineSubmission = trim($mDl[1]);
+                }
+
+                $venue = null;
+                if (preg_match('/[<br>|<br> ]ณ.(.+?)<br>/u', $textdata2, $mVn)) {
+                    $venue = trim(strip_tags($mVn[1]));
+                }
+
+                $cleanDetail = preg_replace('/[\x{1F600}-\x{1F64F}\x{1F300}-\x{1F5FF}\x{1F680}-\x{1F6FF}\x{2600}-\x{26FF}\x{2700}-\x{27BF}]/u', '', $textdata2);
+
+                $simulatedWebhook = [
+                    'event' => 'research_conference_created',
+                    'con_id' => $fbid,
+                    'con_name' => Str::limit($conName, 250),
+                    'con_even_date' => $conEvenDate,
+                    'con_sub_deadline' => $deadlineSubmission,
+                    'con_venue' => $venue,
+                    'con_link' => $photoPageUrl,
+                    'image_url' => $imgUri,
+                    'simulated_storage_file' => "uploads/datacoferenceinthai/{$fbid}.jpg",
+                ];
+
+                $simulatedTelegram = "📢 [จำลองการแจ้งเตือน] งานประชุมวิชาการใหม่\n"
+                    . "📌 หัวข้อ: " . Str::limit($conName, 120) . "\n"
+                    . ($conEvenDate ? "📅 วันจัดงาน: {$conEvenDate}\n" : "")
+                    . ($deadlineSubmission ? "⏰ หมดเขต: {$deadlineSubmission}\n" : "")
+                    . ($venue ? "📍 สถานที่: {$venue}\n" : "")
+                    . "🔗 ลิงก์โพสต์: {$photoPageUrl}";
+
+                $itemsReport[] = [
+                    'status' => 'success',
+                    'con_id' => $fbid,
+                    'url' => $photoPageUrl,
+                    'con_name' => Str::limit($conName, 250),
+                    'con_even_date' => $conEvenDate,
+                    'con_sub_deadline' => $deadlineSubmission,
+                    'con_venue' => $venue,
+                    'image_uri' => $imgUri,
+                    'con_detail' => $cleanDetail,
+                    'keyword_checks' => [
+                        'has_conf_keyword' => $hasConfKeyword,
+                        'has_detail_keyword' => $hasDetailKeyword,
+                        'passed' => $hasConfKeyword && $hasDetailKeyword,
+                    ],
+                    'exists_in_db' => $existing !== null,
+                    'existing_id' => $existing?->id,
+                    'simulated_webhook' => $simulatedWebhook,
+                    'simulated_telegram' => $simulatedTelegram,
+                ];
+            } catch (\Throwable $e) {
+                $itemsReport[] = [
+                    'status' => 'error',
+                    'con_id' => $fbid,
+                    'url' => $photoPageUrl,
+                    'message' => "เกิดข้อผิดพลาดในการดึงข้อมูล FBID {$fbid}: " . $e->getMessage(),
+                ];
+            }
+        }
+
+        return [
+            'success' => true,
+            'diagnostics' => $diagnostics,
+            'limit' => $limit,
+            'specific_fbid' => $specificFbid,
+            'items' => $itemsReport,
+        ];
+    }
+
+    /**
      * Sync conference posts from Facebook page
      *
      * @param int $limit Max items to inspect (default 8 like Yii2)
@@ -312,6 +576,9 @@ class FacebookConferenceSyncService
         $stats['message'] = "ดึงข้อมูลจาก Facebook เสร็จสิ้น (บันทึกใหม่: {$stats['synced']}, ข้าม: {$stats['skipped']})";
         return [
             'stats' => $stats,
+            'synced' => $stats['synced'],
+            'skipped' => $stats['skipped'],
+            'failed' => $stats['failed'],
             'items' => $itemsReport,
             'discovered_links' => $discoveredLinks,
         ];
