@@ -28,9 +28,6 @@
                     <i class="bi bi-trash3 me-1.5"></i> ถังขยะ
                 </a>
             @endif
-            <a href="{{ route('backend.research_news.reports') }}" class="btn btn-outline-secondary d-inline-flex align-items-center shadow-sm" style="height: 38px;" title="ดูรายงานสรุปข่าวประจำเดือน">
-                <i class="bi bi-file-earmark-bar-graph me-1.5"></i> รายงานประจำเดือน
-            </a>
             <a href="{{ route('backend.research_news.test_sync') }}" class="btn btn-outline-warning d-inline-flex align-items-center shadow-sm" style="height: 38px;" title="ทดสอบการดึงข้อมูลจาก NRIIS (Dry-Run Inspector)">
                 <i class="bi bi-flask me-1.5"></i> ทดสอบดึงข่าว NRIIS
             </a>

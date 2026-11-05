@@ -282,10 +282,14 @@
                         </a>
                         <ul class="dropdown-menu">
                             @if($isSuperAdmin || ($currentUser && $currentUser->hasPermission('news')))
-                            <li><a class="dropdown-item d-flex align-items-center" href="{{ route('backend.research_news.index') }}"><i class="bi bi-megaphone-fill me-2 text-warning"></i> ข่าวทุนวิจัย</a></li>
+                            <li><a class="dropdown-item d-flex align-items-center {{ request()->routeIs('backend.research_news.index') || (request()->is('backend/research_news*') && !request()->is('backend/research_news/reports*')) ? 'active' : '' }}" href="{{ route('backend.research_news.index') }}"><i class="bi bi-megaphone-fill me-2 text-warning"></i> ข่าวทุนวิจัย</a></li>
                             @endif
                             @if($isSuperAdmin || ($currentUser && $currentUser->hasPermission(['Event', 'MasterData.Manage'])))
                             <li><a class="dropdown-item d-flex align-items-center {{ request()->is('backend/research_conference*') ? 'active' : '' }}" href="{{ route('backend.research_conference.index') }}"><i class="bi bi-calendar-event-fill me-2 text-primary"></i> ข่าวงานประชุมวิชาการ</a></li>
+                            @endif
+                            @if($isSuperAdmin || ($currentUser && ($currentUser->hasPermission('news') || $currentUser->hasPermission('Event'))))
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item d-flex align-items-center {{ request()->is('backend/research_news/reports*') ? 'active' : '' }}" href="{{ route('backend.research_news.reports') }}"><i class="bi bi-file-earmark-bar-graph me-2 text-success"></i> รายงานสรุปข่าวประจำเดือน</a></li>
                             @endif
                         </ul>
                     </li>

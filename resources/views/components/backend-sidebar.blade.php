@@ -474,10 +474,13 @@
                     <div class="collapse {{ $isNewsActive ? 'show' : '' }} rdb-side-submenu" id="sidebarMenuNews" data-bs-parent="#rdbSidebarAccordion">
                         <ul class="nav flex-column">
                             @if($isSuperAdmin || ($currentUser && $currentUser->hasPermission('news')))
-                            <li><a class="nav-link rdb-sub-link {{ request()->is('backend/research_news*') ? 'active' : '' }}" href="{{ route('backend.research_news.index') }}"><span class="rdb-sub-dash">-</span><i class="bi bi-megaphone-fill me-1.5 text-warning"></i>ข่าวทุนวิจัย</a></li>
+                            <li><a class="nav-link rdb-sub-link {{ (request()->is('backend/research_news*') && !request()->is('backend/research_news/reports*')) ? 'active' : '' }}" href="{{ route('backend.research_news.index') }}"><span class="rdb-sub-dash">-</span><i class="bi bi-megaphone-fill me-1.5 text-warning"></i>ข่าวทุนวิจัย</a></li>
                             @endif
                             @if($isSuperAdmin || ($currentUser && $currentUser->hasPermission(['Event', 'MasterData.Manage'])))
                             <li><a class="nav-link rdb-sub-link {{ request()->is('backend/research_conference*') ? 'active' : '' }}" href="{{ route('backend.research_conference.index') }}"><span class="rdb-sub-dash">-</span><i class="bi bi-calendar-event-fill me-1.5 text-primary"></i>ข่าวงานประชุมวิชาการ</a></li>
+                            @endif
+                            @if($isSuperAdmin || ($currentUser && ($currentUser->hasPermission('news') || $currentUser->hasPermission('Event'))))
+                            <li><a class="nav-link rdb-sub-link {{ request()->is('backend/research_news/reports*') ? 'active' : '' }}" href="{{ route('backend.research_news.reports') }}"><span class="rdb-sub-dash">-</span><i class="bi bi-file-earmark-bar-graph me-1.5 text-success"></i>รายงานสรุปข่าวประจำเดือน</a></li>
                             @endif
                         </ul>
                     </div>
