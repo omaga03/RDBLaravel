@@ -100,4 +100,39 @@ class ManualsAccessTest extends TestCase
         $response->assertSee('คู่มือการใช้งานระบบทั้งหมด');
         $response->assertDontSee('href="' . route('manuals.frontend') . '"', false);
     }
+
+    public function test_index_manual_contains_base_href_tag()
+    {
+        $admin = \App\Models\User::whereHas('roles', fn($q) => $q->whereIn('item_name', ['The Creator', 'Admin']))->first();
+        if (!$admin) {
+            $this->markTestSkipped('No admin found');
+        }
+
+        $response = $this->actingAs($admin)->get(route('manuals.index'));
+        $response->assertStatus(200);
+        $response->assertSee('<base href="http://laravel_rdb.test/manuals/">', false);
+    }
+
+    public function test_fallback_routes_for_screenshots_and_html_files()
+    {
+        // Fallback direct screenshot route
+        $resImg = $this->get('/screenshots/frontend_01_home.png');
+        $resImg->assertStatus(200);
+
+        // Fallback direct html file redirect
+        $resHtml = $this->get('/VOLUME_1_FRONTEND_USER_MANUAL.html');
+        $resHtml->assertRedirect(url('manuals/VOLUME_1_FRONTEND_USER_MANUAL.html'));
+    }
+
+    public function test_backend_manuals_route_works_for_authenticated_user()
+    {
+        $admin = \App\Models\User::whereHas('roles', fn($q) => $q->whereIn('item_name', ['The Creator', 'Admin']))->first();
+        if (!$admin) {
+            $this->markTestSkipped('No admin found');
+        }
+
+        $response = $this->actingAs($admin)->get('/backend/manuals');
+        $response->assertStatus(200);
+        $response->assertSee('ศูนย์รวมคู่มือการใช้งานระบบฐานข้อมูลงานวิจัย');
+    }
 }

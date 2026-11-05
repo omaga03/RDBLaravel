@@ -83,7 +83,17 @@ class ManualController extends Controller
             abort(404, 'ไม่พบเอกสารคู่มือการใช้งานระบบ');
         }
 
-        return response(file_get_contents($path), 200, [
+        $html = file_get_contents($path);
+
+        // If serving index.html or when accessed via base route, inject <base> so all relative links and screenshots resolve correctly
+        if ($safeFile === 'index.html' || request()->is('manuals') || request()->is('backend/manuals')) {
+            $baseHref = url('manuals') . '/';
+            if (stripos($html, '<base ') === false) {
+                $html = preg_replace('/<head>/i', "<head>\n    <base href=\"{$baseHref}\">", $html, 1);
+            }
+        }
+
+        return response($html, 200, [
             'Content-Type' => 'text/html; charset=UTF-8',
             'X-Frame-Options' => 'SAMEORIGIN',
         ]);

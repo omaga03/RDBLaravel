@@ -109,6 +109,10 @@ Route::prefix('backend')->name('backend.')->middleware(['auth', \App\Http\Middle
 
     Route::get('/', [SiteController::class, 'index'])->name('site.index');
 
+    // System Manuals inside Backend (Protected)
+    Route::get('/manuals', [\App\Http\Controllers\ManualController::class, 'index'])->name('manuals.index');
+    Route::get('/manuals/{file}', [\App\Http\Controllers\ManualController::class, 'show'])->name('manuals.show');
+
     // AJAX Researcher Search (must be BEFORE resource route)
     Route::get('/rdb_project/search-researchers', [RdbProjectController::class, 'searchResearchers'])->name('rdb_project.search_researchers');
     // AJAX Project Search (Central)
@@ -562,6 +566,12 @@ Route::prefix('manuals')->name('manuals.')->group(function () {
     Route::get('/screenshots/{file}', [\App\Http\Controllers\ManualController::class, 'screenshot'])->name('screenshot');
     Route::get('/{file}', [\App\Http\Controllers\ManualController::class, 'show'])->name('show');
 });
+
+// Fallback direct routes for manual screenshots and html files
+Route::get('/screenshots/{file}', [\App\Http\Controllers\ManualController::class, 'screenshot']);
+Route::get('/{file}.html', function ($file) {
+    return redirect()->to(url("manuals/{$file}.html"));
+})->where('file', '(VOLUME_1_FRONTEND_USER_MANUAL|VOLUME_2_BACKEND_ADMIN_RESEARCHER_MANUAL|RESEARCHER_QUICK_START_CHEATSHEET|SYSTEM_ACCEPTANCE_TEST_PLAN|index)');
 
 require __DIR__.'/auth.php';
 
