@@ -41,6 +41,8 @@ class ExecutiveReportTest extends TestCase
         $response->assertSee('Scopus Q1');
         $response->assertSee('มิติการนำผลงานวิจัยไปใช้ประโยชน์ 4 ด้าน');
         $response->assertSee('โครงการวิจัยที่ได้รับงบประมาณสูงสุด');
+        $response->assertSee('ประเภททุนหลัก');
+        $response->assertSee('ววน. / สกสว.');
         $response->assertSee('พิมพ์เล่มรายงาน / บันทึก PDF');
     }
 

@@ -11,6 +11,7 @@ use App\Models\RdbResearcher;
 use App\Models\RdbYear;
 use App\Models\RdbDepartment;
 use App\Models\RdbProjectType;
+use App\Models\RdbProjectTypeMaster;
 
 class ExecutiveReportService
 {
@@ -43,20 +44,20 @@ class ExecutiveReportService
         $isSqlite = DB::connection()->getDriverName() === 'sqlite';
 
         // 1. Base Query Builders
-        $projectQ = RdbProject::where('data_show', '1');
+        $projectQ = RdbProject::where('rdb_project.data_show', '1');
         $publishedQ = RdbPublished::where('data_show', '1');
         $dipQ = RdbDip::where('data_show', '1');
         $utilQ = RdbProjectUtilize::where('data_show', '1');
 
         if ($yearId) {
-            $projectQ->where('year_id', $yearId);
+            $projectQ->where('rdb_project.year_id', $yearId);
             $publishedQ->where(function ($q) use ($yearId) {
                 $q->where('year_id', $yearId)
                   ->orWhere('year_bud', $yearId)
                   ->orWhere('year_edu', $yearId);
             });
             $dipQ->whereHas('project', function ($q) use ($yearId) {
-                $q->where('year_id', $yearId);
+                $q->where('rdb_project.year_id', $yearId);
             });
             $utilQ->where(function ($q) use ($yearId) {
                 $q->where('utz_year_id', $yearId)
@@ -65,25 +66,25 @@ class ExecutiveReportService
         }
 
         if ($deptId) {
-            $projectQ->where('department_id', $deptId);
+            $projectQ->where('rdb_project.department_id', $deptId);
             $publishedQ->where('department_id', $deptId);
             $dipQ->whereHas('project', function ($q) use ($deptId) {
-                $q->where('department_id', $deptId);
+                $q->where('rdb_project.department_id', $deptId);
             });
             $utilQ->whereHas('project', function ($q) use ($deptId) {
-                $q->where('department_id', $deptId);
+                $q->where('rdb_project.department_id', $deptId);
             });
         }
 
         // 2. High-Level Executive KPI Strip
         $totalProjects = (clone $projectQ)->count();
-        $totalBudget = (float) (clone $projectQ)->sum('pro_budget');
+        $totalBudget = (float) (clone $projectQ)->sum('rdb_project.pro_budget');
         $totalPublished = (clone $publishedQ)->count();
         $totalDips = (clone $dipQ)->count();
         $totalUtilizations = (clone $utilQ)->count();
 
         // Active Researchers
-        $projectIds = (clone $projectQ)->pluck('pro_id');
+        $projectIds = (clone $projectQ)->pluck('rdb_project.pro_id');
         $activeProjectResearchers = DB::table('rdb_project_work')
             ->whereIn('pro_id', $projectIds)
             ->pluck('researcher_id')
@@ -92,24 +93,35 @@ class ExecutiveReportService
         $activePubResearchers = (clone $publishedQ)->pluck('researcher_id')->filter()->unique();
         $totalActiveResearchers = $activeProjectResearchers->merge($activePubResearchers)->unique()->count();
 
-        // 3. Dimension: Budget by Project Type / Fund Source
+        // 3. Dimension: Budget by Master Project Type / Strategic Fund Source (rdb_project_types_master)
         $budgetByTypeRaw = (clone $projectQ)
-            ->select('pt_id', DB::raw('count(*) as count'), DB::raw('sum(pro_budget) as total_budget'))
-            ->groupBy('pt_id')
+            ->leftJoin('rdb_project_types', 'rdb_project.pt_id', '=', 'rdb_project_types.pt_id')
+            ->leftJoin('rdb_project_types_master', 'rdb_project_types.master_pt_id', '=', 'rdb_project_types_master.master_pt_id')
+            ->select(
+                'rdb_project_types_master.master_pt_id',
+                'rdb_project_types_master.master_pt_name',
+                'rdb_project_types_master.color_code',
+                DB::raw('count(rdb_project.pro_id) as count'),
+                DB::raw('sum(rdb_project.pro_budget) as total_budget')
+            )
+            ->groupBy(
+                'rdb_project_types_master.master_pt_id',
+                'rdb_project_types_master.master_pt_name',
+                'rdb_project_types_master.color_code'
+            )
             ->orderByDesc('total_budget')
             ->get();
 
-        $projectTypes = RdbProjectType::all()->keyBy('pt_id');
         $budgetByType = [];
         foreach ($budgetByTypeRaw as $row) {
-            $pt = $projectTypes->get($row->pt_id);
-            $name = $pt ? $pt->pt_name : 'ไม่ระบุประเภททุน';
+            $name = $row->master_pt_name ?: 'อื่น ๆ / ไม่ระบุประเภททุนหลัก';
             $budget = (float) $row->total_budget;
             $percent = $totalBudget > 0 ? round(($budget / $totalBudget) * 100, 1) : 0;
             $budgetByType[] = [
-                'pt_id' => $row->pt_id,
+                'master_pt_id' => $row->master_pt_id,
                 'name' => $name,
-                'count' => $row->count,
+                'color' => $row->color_code ?: '#6b7280',
+                'count' => (int) $row->count,
                 'budget' => $budget,
                 'percentage' => $percent,
             ];
@@ -118,8 +130,8 @@ class ExecutiveReportService
         // 4. Dimension: Budget & Output by Faculty
         $departments = RdbDepartment::all()->keyBy('department_id');
         $byFacultyRaw = (clone $projectQ)
-            ->select('department_id', DB::raw('count(*) as count'), DB::raw('sum(pro_budget) as total_budget'))
-            ->groupBy('department_id')
+            ->select('rdb_project.department_id', DB::raw('count(*) as count'), DB::raw('sum(rdb_project.pro_budget) as total_budget'))
+            ->groupBy('rdb_project.department_id')
             ->orderByDesc('total_budget')
             ->get();
 
@@ -218,7 +230,7 @@ class ExecutiveReportService
         // 7. Top Highlights
         $topProjects = (clone $projectQ)
             ->with(['rdbProjectWorks.researcher', 'department', 'year'])
-            ->orderByDesc('pro_budget')
+            ->orderByDesc('rdb_project.pro_budget')
             ->take(5)
             ->get();
 
