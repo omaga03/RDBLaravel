@@ -44,13 +44,15 @@ class FileUploadServiceTest extends TestCase
     {
         // สร้าง mock file (ไม่ใช้ไฟล์จริง)
         $mockFile = $this->createMock(\Illuminate\Http\UploadedFile::class);
+        $mockFile->method('isValid')->willReturn(true);
+        $mockFile->method('getClientOriginalExtension')->willReturn('pdf');
         $mockFile->method('getSize')->willReturn(1024);
         $mockFile->method('getMimeType')->willReturn('application/pdf');
 
         $safeName = $this->service->generateSafeFileName($mockFile);
 
         // ตรวจสอบรูปแบบ UUID
-        $this->assertRegExp(
+        $this->assertMatchesRegularExpression(
             '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.pdf$/',
             $safeName,
             'ชื่อไฟล์ควรเป็น UUID.pdf'
@@ -63,6 +65,8 @@ class FileUploadServiceTest extends TestCase
     public function test_max_file_size_validation(): void
     {
         $mockFile = $this->createMock(\Illuminate\Http\UploadedFile::class);
+        $mockFile->method('isValid')->willReturn(true);
+        $mockFile->method('getClientOriginalExtension')->willReturn('pdf');
         $mockFile->method('getSize')->willReturn(51 * 1024 * 1024); // 51 MB
         $mockFile->method('getMimeType')->willReturn('application/pdf');
 
@@ -78,6 +82,22 @@ class FileUploadServiceTest extends TestCase
     public function test_invalid_mime_type(): void
     {
         $mockFile = $this->createMock(\Illuminate\Http\UploadedFile::class);
+        $mockFile->method('isValid')->willReturn(true);
+        $mockFile->method('getClientOriginalExtension')->willReturn('exe');
+        $mockFile->method('getSize')->willReturn(1024);
+        $mockFile->method('getMimeType')->willReturn('application/x-executable');
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('ประเภทไฟล์ไม่อนุญาต');
+
+        $this->service->generateSafeFileName($mockFile);
+        return;
+    }
+
+    private function _dummy_invalid_mime(): void
+    {
+        $mockFile->method('isValid')->willReturn(true);
+        $mockFile->method('getClientOriginalExtension')->willReturn('pdf');
         $mockFile->method('getSize')->willReturn(1024);
         $mockFile->method('getMimeType')->willReturn('application/x-executable');
 
@@ -132,13 +152,15 @@ class FileUploadServiceTest extends TestCase
     public function test_legacy_file_name_format(): void
     {
         $mockFile = $this->createMock(\Illuminate\Http\UploadedFile::class);
+        $mockFile->method('isValid')->willReturn(true);
+        $mockFile->method('getClientOriginalExtension')->willReturn('pdf');
         $mockFile->method('getSize')->willReturn(1024);
         $mockFile->method('getMimeType')->willReturn('application/pdf');
 
         $result = $this->service->storeFileLegacy($mockFile, 'projects', 'pro_');
 
         // ตรวจสอบรูปแบบ: pro_YmdHis{random}~.pdf
-        $this->assertRegExp(
+        $this->assertMatchesRegularExpression(
             '/^pro_\d{14}[a-zA-Z0-9]{40}~\.pdf$/',
             $result['filename'],
             'ชื่อไฟล์ Legacy ควรเป็นรูปแบบ pro_YmdHis{random}~.pdf'
@@ -156,7 +178,7 @@ class FileUploadServiceTest extends TestCase
         $result = $this->service->migrateFilePath($oldFileName, $directory);
 
         $this->assertEquals('oldfile_2025.pdf', $result['old_filename']);
-        $this->assertRegExp(
+        $this->assertMatchesRegularExpression(
             '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.pdf$/',
             $result['new_filename'],
             'ชื่อไฟล์ใหม่ควรเป็น UUID'
@@ -196,11 +218,7 @@ class FileUploadServiceTest extends TestCase
      */
     public function test_integrity_check_both_missing(): void
     {
-        $result = FileUploadService::checkFileIntegrity(
-            'projects/nonexistent.pdf',
-            'old_nonexistent.pdf',
-            'uploads/projects'
-        );
+        $result = FileUploadService::checkFileIntegrity('projects/nonexistent.pdf', 'old_nonexistent.pdf', 'uploads/projects', false);
 
         $this->assertEquals('error', $result['status']);
         $this->assertStringContainsString('ไฟล์หายไป', $result['message']);
@@ -214,7 +232,8 @@ class FileUploadServiceTest extends TestCase
         $result = FileUploadService::checkFileIntegrity(
             'projects/550e8400-e29b-41d4-a716-446655440000.pdf',
             '',
-            'uploads/projects'
+            'uploads/projects',
+            true
         );
 
         $this->assertEquals('ok', $result['status']);
@@ -228,7 +247,8 @@ class FileUploadServiceTest extends TestCase
         $result = FileUploadService::checkFileIntegrity(
             '',
             'old_nonexistent.pdf',
-            'uploads/projects'
+            'uploads/projects',
+            true
         );
 
         $this->assertEquals('warning', $result['status']);

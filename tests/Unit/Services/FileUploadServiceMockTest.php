@@ -15,7 +15,7 @@ class FileUploadServiceMockTest extends TestCase
         $mockData = FileUploadService::generateMockFileData('report_2025.pdf');
 
         $this->assertEquals('report_2025.pdf', $mockData['old_filename']);
-        $this->assertRegExp('/^[0-9a-f]{8}-[0-9a-f]{4}.*\.pdf$/', $mockData['new_filename']);
+        $this->assertMatchesRegularExpression('/^[0-9a-f]{8}-[0-9a-f]{4}.*\.pdf$/', $mockData['new_filename']);
         $this->assertEquals('application/pdf', $mockData['mime_type']);
         $this->assertIsInt($mockData['size']);
     }

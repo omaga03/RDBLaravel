@@ -406,7 +406,7 @@ class FileUploadService
      * @param bool $mockMode ใช้ mock data แทนตรวจสอบจริง
      * @return bool
      */
-    public static function fileExists(string $filePath, bool $mockMode = false): bool
+    public static function fileExists(?string $filePath, bool $mockMode = false): bool
     {
         if (empty($filePath)) {
             return false;
@@ -429,7 +429,7 @@ class FileUploadService
      * @param bool $mockMode ใช้ mock data แทนตรวจสอบจริง
      * @return bool
      */
-    public static function legacyFileExists(string $oldFileName, string $oldDirectory, bool $mockMode = false): bool
+    public static function legacyFileExists(?string $oldFileName, string $oldDirectory, bool $mockMode = false): bool
     {
         if (empty($oldFileName)) {
             return false;
