@@ -54,6 +54,41 @@
   - เพิ่ม **บทที่ 14: เล่มรายงานภาพรวมผู้บริหารและการจัดการข้อมูลชุดใหญ่** ใน [`docs/manuals/VOLUME_2_BACKEND_ADMIN_RESEARCHER_MANUAL.md`](docs/manuals/VOLUME_2_BACKEND_ADMIN_RESEARCHER_MANUAL.md)
   - คอมไพล์ชุดเอกสารคู่มือ HTML5 Portal ทั้ง 5 เล่มเรียบร้อยสมบูรณ์
 
+### 📌 การยกระดับขึ้นสู่ Laravel 13.40.0 และการทดสอบบูรณาการทั้งระบบ (Laravel 13 Full-System Assurance)
+
+#### 1. การอัปเกรดแกนหลักและระบบนิเวศ (Framework & Ecosystem Upgrade)
+- **ปรับปรุง `composer.json` สู่ Laravel 13**:
+  - `laravel/framework`: `^12.0` ➔ `^13.40` (ติดตั้งเวอร์ชัน `v13.40.0`)
+  - `laravel/tinker`: `^2.10.1` ➔ `^3.0` (ติดตั้งเวอร์ชัน `v3.0.2` สำหรับ Laravel 13)
+  - `nunomaduro/collision`: `^8.6` ➔ `^8.9` (ติดตั้งเวอร์ชัน `v8.9.5`)
+  - `doctrine/dbal`: อัปเกรดเป็น `4.5.0`
+  - ตรวจสอบผ่าน `composer update` ไร้ข้อขัดแย้ง (0 conflicts, 0 advisories)
+
+#### 2. การสร้างชุดทดสอบบูรณาการระดับทั้งระบบ (Full-System Integration Test)
+- **พัฒนา Feature Test ใหม่**: [`tests/Feature/Laravel13FullSystemAuditTest.php`](tests/Feature/Laravel13FullSystemAuditTest.php) ผ่าน 7/7 การทดสอบ (69 assertions):
+  1. `test_all_frontend_pages_render_successfully_on_laravel_13`: หน้าบ้าน 16 เส้นทางหลัก (หน้าแรก, โครงการ, ผลงาน, DIP, นำไปใช้ประโยชน์, นักวิจัย, ข่าวสาร, งานประชุม, คู่มือ, XML Sitemaps)
+  2. `test_all_frontend_detail_pages_with_metadata_on_laravel_13`: หน้ารายละเอียด 5 มิติพร้อม Dublin Core, Google Scholar citation tags, และ Schema.org JSON-LD
+  3. `test_all_backend_admin_modules_render_successfully_on_laravel_13`: หลังบ้าน 17 ศูนย์ควบคุมหลัก (แดชบอร์ด, รายงานผู้บริหาร, จัดการ 5 ฐานข้อมูล, ข่าวสาร, งานประชุม, Dry-Run Inspector, สำรองกู้คืน, ตั้งเวลาอัตโนมัติ, จัดการ API, RBAC, ผู้ใช้งาน)
+  4. `test_all_backend_csv_exports_stream_with_utf8_bom_on_laravel_13`: สตรีมไฟล์ CSV ส่งออกทั้ง 5 โมดูลพร้อม UTF-8 BOM (`\xEF\xBB\xBF`)
+  5. `test_bulk_operations_hub_functionality_on_laravel_13`: การจัดการชุดข้อมูลโครงการและผลงานตีพิมพ์แบบกลุ่ม (Bulk Export)
+  6. `test_all_api_tiers_on_laravel_13`: ระบบ REST API ทั้ง 3 ระดับ (Tier 3 Open Public, Tier 2 PMIS, Tier 1 Private Protected)
+  7. `test_all_custom_artisan_commands_on_laravel_13`: คำสั่ง CLI (`rdb:count-pdf-pages`, `rdb:generate-pdf-covers`, `rdb:convert-images-webp`, `rdb:backup`)
+
+#### 3. การปรับปรุงความเข้ากันได้ของชุดทดสอบ (Modernized PHPUnit Assertions)
+- ปรับปรุง `tests/Unit/Services/FileUploadServiceTest.php` และ `FileUploadServiceMockTest.php`:
+  - เปลี่ยน `assertRegExp()` ที่เลิกใช้เป็น `assertMatchesRegularExpression()` ตามมาตรฐาน PHPUnit 11/12
+  - เพิ่มการตรวจสอบประเภทอาร์กิวเมนต์แบบ Nullable `?string` ใน `FileUploadService::fileExists()` และ `legacyFileExists()` รองรับ PHP 8.5 Strict Typing
+- **ผลการรันชุดทดสอบความปลอดภัยและการทำงานทั้งหมด**: **103 เทสต์เคส 715 assertions ผ่าน 100% (0 errors, 0 failures)**
+- **ผลการทดสอบ Stress & Concurrency ด้วย Apache Bench (`ab.exe`)**: 100 Concurrency (1,000 requests) อัตราความผิดพลาด **0.00% (Failed requests: 0)**
+
+#### 4. แผนความปลอดภัยและการสำรองย้อนกลับ (Zero-Risk Fallback Points)
+- สร้างจุดเซฟถาวรบน Git และ GitHub ก่อนทำการ Merge:
+  - Git Branch: `backup/laravel-12-lts` (ชี้ไปที่ commit `4a4c2b9`)
+  - Git Tag: `v12-stable-backup` (ชี้ไปที่ commit `4a4c2b9`)
+- หากต้องการย้อนกลับสู่ Laravel 12 ในอนาคต เพียงรัน: `git checkout backup/laravel-12-lts && composer install`
+
+---
+
 ### 📌 การทดสอบสมรรถนะและความทนทาน (Performance & Stress Testing) และการเจาะช่องโหว่ความปลอดภัย (Penetration Audit)
 
 #### 1. การตรวจสอบและปรับแต่งดัชนีฐานข้อมูล (Database Query Profiling & Index Optimization)
