@@ -92,7 +92,7 @@
             </div>
         </div>
 
-        <!-- Section 1: Executive KPI Strip -->
+        <!-- Section 1: Executive KPI Strip (3 Columns x 2 Rows) -->
         <div class="mb-4">
             <div class="section-title-strip mb-3">
                 <h3 class="h6 fw-bold text-uppercase text-body-secondary mb-0 d-flex align-items-center gap-1.5">
@@ -100,64 +100,64 @@
                 </h3>
             </div>
             <div class="row g-2 g-sm-3">
-                <!-- 1. โครงการวิจัย -->
-                <div class="col-6 col-md-4 col-lg-2">
-                    <div class="p-2.5 p-sm-3 rounded-3 border bg-body-tertiary text-center h-100">
-                        <div class="text-secondary small mb-1 text-truncate"><i class="bi bi-folder2-open text-primary me-1"></i> โครงการวิจัย</div>
+                <!-- Row 1: Col 1 - โครงการวิจัย -->
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="p-3 rounded-3 border bg-body-tertiary text-center h-100 d-flex flex-column justify-content-center">
+                        <div class="text-secondary small mb-1 fw-semibold text-truncate"><i class="bi bi-folder2-open text-primary me-1"></i> โครงการวิจัย</div>
                         <div class="kpi-stat-number fw-bold text-primary mb-0 font-monospace text-truncate" style="font-variant-numeric: tabular-nums;">
                             {{ number_format($kpis['total_projects']) }}
                         </div>
-                        <div class="text-body-tertiary small" style="font-size: 0.7rem;">โครงการ</div>
+                        <div class="text-body-tertiary small mt-1" style="font-size: 0.72rem;">โครงการ</div>
                     </div>
                 </div>
-                <!-- 2. งบประมาณรวม -->
-                <div class="col-6 col-md-4 col-lg-2">
-                    <div class="p-2.5 p-sm-3 rounded-3 border bg-body-tertiary text-center h-100">
-                        <div class="text-secondary small mb-1 text-truncate"><i class="bi bi-cash-stack text-success me-1"></i> งบประมาณรวม</div>
+                <!-- Row 1: Col 2 - งบประมาณรวม -->
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="p-3 rounded-3 border bg-body-tertiary text-center h-100 d-flex flex-column justify-content-center">
+                        <div class="text-secondary small mb-1 fw-semibold text-truncate"><i class="bi bi-cash-stack text-success me-1"></i> งบประมาณรวม</div>
                         <div class="kpi-stat-number fw-bold text-success mb-0 font-monospace text-truncate" style="font-variant-numeric: tabular-nums;">
                             {{ number_format($kpis['total_budget'], 0) }}
                         </div>
-                        <div class="text-body-tertiary small" style="font-size: 0.7rem;">บาท</div>
+                        <div class="text-body-tertiary small mt-1" style="font-size: 0.72rem;">บาท</div>
                     </div>
                 </div>
-                <!-- 3. ผลงานตีพิมพ์ -->
-                <div class="col-6 col-md-4 col-lg-2">
-                    <div class="p-2.5 p-sm-3 rounded-3 border bg-body-tertiary text-center h-100">
-                        <div class="text-secondary small mb-1 text-truncate"><i class="bi bi-journal-richtext text-info me-1"></i> งานตีพิมพ์</div>
+                <!-- Row 1: Col 3 - ผลงานตีพิมพ์ -->
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="p-3 rounded-3 border bg-body-tertiary text-center h-100 d-flex flex-column justify-content-center">
+                        <div class="text-secondary small mb-1 fw-semibold text-truncate"><i class="bi bi-journal-richtext text-info me-1"></i> งานตีพิมพ์</div>
                         <div class="kpi-stat-number fw-bold text-info mb-0 font-monospace text-truncate" style="font-variant-numeric: tabular-nums;">
                             {{ number_format($kpis['total_published']) }}
                         </div>
-                        <div class="text-body-tertiary small" style="font-size: 0.7rem;">บทความ</div>
+                        <div class="text-body-tertiary small mt-1" style="font-size: 0.72rem;">บทความ</div>
                     </div>
                 </div>
-                <!-- 4. ทรัพย์สินทางปัญญา -->
-                <div class="col-6 col-md-4 col-lg-2">
-                    <div class="p-2.5 p-sm-3 rounded-3 border bg-body-tertiary text-center h-100">
-                        <div class="text-secondary small mb-1 text-truncate"><i class="bi bi-lightbulb text-warning me-1"></i> ทรัพย์สินทางปัญญา</div>
+                <!-- Row 2: Col 1 - ทรัพย์สินทางปัญญา -->
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="p-3 rounded-3 border bg-body-tertiary text-center h-100 d-flex flex-column justify-content-center">
+                        <div class="text-secondary small mb-1 fw-semibold text-truncate"><i class="bi bi-lightbulb text-warning me-1"></i> ทรัพย์สินทางปัญญา</div>
                         <div class="kpi-stat-number fw-bold text-warning mb-0 font-monospace text-truncate" style="font-variant-numeric: tabular-nums;">
                             {{ number_format($kpis['total_dips']) }}
                         </div>
-                        <div class="text-body-tertiary small" style="font-size: 0.7rem;">ผลงาน/คำขอ</div>
+                        <div class="text-body-tertiary small mt-1" style="font-size: 0.72rem;">ผลงาน/คำขอ</div>
                     </div>
                 </div>
-                <!-- 5. การใช้ประโยชน์ -->
-                <div class="col-6 col-md-4 col-lg-2">
-                    <div class="p-2.5 p-sm-3 rounded-3 border bg-body-tertiary text-center h-100">
-                        <div class="text-secondary small mb-1 text-truncate"><i class="bi bi-rocket-takeoff text-danger me-1"></i> การใช้ประโยชน์</div>
+                <!-- Row 2: Col 2 - การใช้ประโยชน์ -->
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="p-3 rounded-3 border bg-body-tertiary text-center h-100 d-flex flex-column justify-content-center">
+                        <div class="text-secondary small mb-1 fw-semibold text-truncate"><i class="bi bi-rocket-takeoff text-danger me-1"></i> การใช้ประโยชน์</div>
                         <div class="kpi-stat-number fw-bold text-danger mb-0 font-monospace text-truncate" style="font-variant-numeric: tabular-nums;">
                             {{ number_format($kpis['total_utilizations']) }}
                         </div>
-                        <div class="text-body-tertiary small" style="font-size: 0.7rem;">เรื่อง/พื้นที่</div>
+                        <div class="text-body-tertiary small mt-1" style="font-size: 0.72rem;">เรื่อง/พื้นที่</div>
                     </div>
                 </div>
-                <!-- 6. นักวิจัยที่มีผลงาน -->
-                <div class="col-6 col-md-4 col-lg-2">
-                    <div class="p-2.5 p-sm-3 rounded-3 border bg-body-tertiary text-center h-100">
-                        <div class="text-secondary small mb-1 text-truncate"><i class="bi bi-people text-primary me-1"></i> นักวิจัย active</div>
+                <!-- Row 2: Col 3 - นักวิจัยที่มีผลงาน -->
+                <div class="col-12 col-sm-6 col-md-4">
+                    <div class="p-3 rounded-3 border bg-body-tertiary text-center h-100 d-flex flex-column justify-content-center">
+                        <div class="text-secondary small mb-1 fw-semibold text-truncate"><i class="bi bi-people text-primary me-1"></i> นักวิจัย active</div>
                         <div class="kpi-stat-number fw-bold text-body-emphasis mb-0 font-monospace text-truncate" style="font-variant-numeric: tabular-nums;">
                             {{ number_format($kpis['active_researchers']) }}
                         </div>
-                        <div class="text-body-tertiary small" style="font-size: 0.7rem;">ท่าน</div>
+                        <div class="text-body-tertiary small mt-1" style="font-size: 0.72rem;">ท่าน</div>
                     </div>
                 </div>
             </div>
@@ -273,49 +273,108 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                @php
+                                    $totPub = $kpis['total_published'] > 0 ? $kpis['total_published'] : 1;
+                                    $scopusPct = round(($publication_quality['total_scopus'] / $totPub) * 100, 1);
+                                    $tci1Pct = round(($publication_quality['tci_tier1'] / $totPub) * 100, 1);
+                                    $tci2Pct = round(($publication_quality['tci_tier2'] / $totPub) * 100, 1);
+                                    $intConfPct = round(($publication_quality['international_conf'] / $totPub) * 100, 1);
+                                    $otherPubsSum = $publication_quality['national_conf'] + $publication_quality['other_pubs'];
+                                    $otherPubsPct = round(($otherPubsSum / $totPub) * 100, 1);
+                                @endphp
                                 <tr>
-                                    <td><i class="bi bi-star-fill text-warning me-1.5"></i> รวมฐานข้อมูลสากล Scopus (Q1-Q4)</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-1.5">
+                                            <i class="bi bi-star-fill text-warning flex-shrink-0"></i>
+                                            <span class="fw-semibold text-body">รวมฐานข้อมูลสากล Scopus (Q1-Q4)</span>
+                                        </div>
+                                        <div class="progress mt-1 ms-3" style="height: 3px; max-width: 140px;">
+                                            <div class="progress-bar bg-primary" style="width: {{ $scopusPct }}%;"></div>
+                                        </div>
+                                    </td>
                                     <td class="text-center font-monospace fw-bold text-primary" style="font-variant-numeric: tabular-nums;">
                                         {{ $publication_quality['total_scopus'] }}
                                     </td>
-                                    <td class="text-end font-monospace" style="font-variant-numeric: tabular-nums;">
-                                        {{ $kpis['total_published'] > 0 ? round(($publication_quality['total_scopus'] / $kpis['total_published']) * 100, 1) : 0 }}%
+                                    <td class="text-end">
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace" style="font-variant-numeric: tabular-nums;">
+                                            {{ $scopusPct }}%
+                                        </span>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><i class="bi bi-check2-circle text-success me-1.5"></i> วารสารระดับชาติ TCI กลุ่มที่ 1</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-1.5">
+                                            <i class="bi bi-check2-circle text-success flex-shrink-0"></i>
+                                            <span class="fw-medium text-body">วารสารระดับชาติ TCI กลุ่มที่ 1</span>
+                                        </div>
+                                        <div class="progress mt-1 ms-3" style="height: 3px; max-width: 140px;">
+                                            <div class="progress-bar bg-success" style="width: {{ $tci1Pct }}%;"></div>
+                                        </div>
+                                    </td>
                                     <td class="text-center font-monospace" style="font-variant-numeric: tabular-nums;">
                                         {{ $publication_quality['tci_tier1'] }}
                                     </td>
-                                    <td class="text-end font-monospace" style="font-variant-numeric: tabular-nums;">
-                                        {{ $kpis['total_published'] > 0 ? round(($publication_quality['tci_tier1'] / $kpis['total_published']) * 100, 1) : 0 }}%
+                                    <td class="text-end">
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle font-monospace" style="font-variant-numeric: tabular-nums;">
+                                            {{ $tci1Pct }}%
+                                        </span>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><i class="bi bi-check2 text-secondary me-1.5"></i> วารสารระดับชาติ TCI กลุ่มที่ 2</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-1.5">
+                                            <i class="bi bi-check2 text-secondary flex-shrink-0"></i>
+                                            <span class="fw-medium text-body">วารสารระดับชาติ TCI กลุ่มที่ 2</span>
+                                        </div>
+                                        <div class="progress mt-1 ms-3" style="height: 3px; max-width: 140px;">
+                                            <div class="progress-bar bg-secondary" style="width: {{ $tci2Pct }}%;"></div>
+                                        </div>
+                                    </td>
                                     <td class="text-center font-monospace" style="font-variant-numeric: tabular-nums;">
                                         {{ $publication_quality['tci_tier2'] }}
                                     </td>
-                                    <td class="text-end font-monospace" style="font-variant-numeric: tabular-nums;">
-                                        {{ $kpis['total_published'] > 0 ? round(($publication_quality['tci_tier2'] / $kpis['total_published']) * 100, 1) : 0 }}%
+                                    <td class="text-end">
+                                        <span class="badge bg-secondary-subtle text-secondary-emphasis font-monospace" style="font-variant-numeric: tabular-nums;">
+                                            {{ $tci2Pct }}%
+                                        </span>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><i class="bi bi-globe2 text-info me-1.5"></i> รายงานสืบเนื่องการประชุมนานาชาติ</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-1.5">
+                                            <i class="bi bi-globe2 text-info flex-shrink-0"></i>
+                                            <span class="fw-medium text-body">รายงานสืบเนื่องการประชุมนานาชาติ</span>
+                                        </div>
+                                        <div class="progress mt-1 ms-3" style="height: 3px; max-width: 140px;">
+                                            <div class="progress-bar bg-info" style="width: {{ $intConfPct }}%;"></div>
+                                        </div>
+                                    </td>
                                     <td class="text-center font-monospace" style="font-variant-numeric: tabular-nums;">
                                         {{ $publication_quality['international_conf'] }}
                                     </td>
-                                    <td class="text-end font-monospace" style="font-variant-numeric: tabular-nums;">
-                                        {{ $kpis['total_published'] > 0 ? round(($publication_quality['international_conf'] / $kpis['total_published']) * 100, 1) : 0 }}%
+                                    <td class="text-end">
+                                        <span class="badge bg-info-subtle text-info border border-info-subtle font-monospace" style="font-variant-numeric: tabular-nums;">
+                                            {{ $intConfPct }}%
+                                        </span>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><i class="bi bi-people text-secondary me-1.5"></i> การประชุมระดับชาติ / อื่นๆ</td>
-                                    <td class="text-center font-monospace" style="font-variant-numeric: tabular-nums;">
-                                        {{ $publication_quality['national_conf'] + $publication_quality['other_pubs'] }}
+                                    <td>
+                                        <div class="d-flex align-items-center gap-1.5">
+                                            <i class="bi bi-people text-secondary flex-shrink-0"></i>
+                                            <span class="fw-medium text-body">การประชุมระดับชาติ / อื่นๆ</span>
+                                        </div>
+                                        <div class="progress mt-1 ms-3" style="height: 3px; max-width: 140px;">
+                                            <div class="progress-bar bg-secondary-subtle" style="width: {{ $otherPubsPct }}%;"></div>
+                                        </div>
                                     </td>
-                                    <td class="text-end font-monospace" style="font-variant-numeric: tabular-nums;">
-                                        {{ $kpis['total_published'] > 0 ? round((($publication_quality['national_conf'] + $publication_quality['other_pubs']) / $kpis['total_published']) * 100, 1) : 0 }}%
+                                    <td class="text-center font-monospace" style="font-variant-numeric: tabular-nums;">
+                                        {{ $otherPubsSum }}
+                                    </td>
+                                    <td class="text-end">
+                                        <span class="badge bg-secondary-subtle text-secondary-emphasis font-monospace" style="font-variant-numeric: tabular-nums;">
+                                            {{ $otherPubsPct }}%
+                                        </span>
                                     </td>
                                 </tr>
                             </tbody>
@@ -348,8 +407,11 @@
                                 @forelse($budget_by_faculty as $bf)
                                     <tr>
                                         <td>
-                                            <div class="text-truncate fw-medium" style="max-width: 250px;" title="{{ $bf['name'] }}">
+                                            <div class="text-truncate fw-medium text-body" style="max-width: 250px;" title="{{ $bf['name'] }}">
                                                 {{ $bf['name'] }}
+                                            </div>
+                                            <div class="progress mt-1" style="height: 3px; max-width: 140px;">
+                                                <div class="progress-bar bg-primary" style="width: {{ $bf['percentage'] }}%;"></div>
                                             </div>
                                         </td>
                                         <td class="text-center font-monospace" style="font-variant-numeric: tabular-nums;">{{ number_format($bf['count']) }}</td>
