@@ -1383,4 +1383,131 @@ class RdbPublishedController extends Controller
 
         return back()->with('warning', 'ไม่สามารถสร้างภาพหน้าปกได้ หรือไม่พบไฟล์เอกสารบนเซิร์ฟเวอร์');
     }
+
+    /**
+     * Bulk update published status (data_show or todspace)
+     */
+    public function bulkUpdateStatus(Request $request)
+    {
+        $this->authorize('viewAny', RdbPublished::class);
+
+        $request->validate([
+            'selected_ids' => 'required',
+            'action_type' => 'required|in:data_show,todspace',
+            'status_val' => 'required|integer',
+        ]);
+
+        $ids = $request->input('selected_ids', []);
+        if (is_string($ids)) {
+            $ids = explode(',', $ids);
+        }
+        $ids = array_values(array_filter(array_map('intval', (array)$ids)));
+
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'กรุณาเลือกผลงานตีพิมพ์อย่างน้อย 1 รายการ');
+        }
+
+        $actionType = $request->input('action_type');
+        $statusVal = (int) $request->input('status_val');
+        $updatedCount = 0;
+        $skippedCount = 0;
+
+        $items = RdbPublished::whereIn('id', $ids)->get();
+        foreach ($items as $item) {
+            if (!auth()->user()->can('update', $item)) {
+                $skippedCount++;
+                continue;
+            }
+
+            if ($actionType === 'data_show') {
+                $item->data_show = in_array($statusVal, [0, 1], true) ? $statusVal : 1;
+            } elseif ($actionType === 'todspace') {
+                $item->todspace = in_array($statusVal, [1, 2], true) ? $statusVal : 1;
+            }
+            $item->user_updated = auth()->id();
+            $item->save();
+            $updatedCount++;
+        }
+
+        $msg = "ปรับปรุงสถานะผลงานตีพิมพ์สำเร็จจำนวน {$updatedCount} รายการ";
+        if ($skippedCount > 0) {
+            $msg .= " (ข้าม {$skippedCount} รายการเนื่องจากไม่มีสิทธิ์แก้ไข)";
+        }
+
+        return redirect()->back()->with('success', $msg);
+    }
+
+    /**
+     * Bulk export selected publications to CSV with UTF-8 BOM
+     */
+    public function bulkExport(Request $request)
+    {
+        $this->authorize('viewAny', RdbPublished::class);
+
+        $ids = $request->input('selected_ids', []);
+        if (is_string($ids)) {
+            $ids = explode(',', $ids);
+        }
+        $ids = array_values(array_filter(array_map('intval', (array)$ids)));
+
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'กรุณาเลือกผลงานตีพิมพ์อย่างน้อย 1 รายการ');
+        }
+
+        $filename = 'publications_selected_' . date('Y-m-d_His') . '.csv';
+        $headers = $this->csvHeaders($filename);
+
+        return response()->stream(function () use ($ids) {
+            $handle = fopen('php://output', 'w');
+            fputs($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, [
+                'ID',
+                'ชื่อผลงานตีพิมพ์',
+                'วารสาร/แหล่งตีพิมพ์',
+                'ประเภทผลงาน',
+                'กลุ่มประเภท',
+                'นักวิจัยหลัก',
+                'คณะผู้ร่วมวิจัย',
+                'ปี พ.ศ.',
+                'วันที่ตีพิมพ์',
+                'หน่วยงาน/คณะ',
+                'สถานะเผยแพร่',
+                'ค่าน้ำหนัก (Score)',
+                'งบประมาณ (บาท)'
+            ]);
+
+            RdbPublished::with(['year', 'pubtype', 'department', 'researcher.prefix', 'authors.prefix'])
+                ->whereIn('id', $ids)
+                ->orderBy('id', 'desc')
+                ->chunk(250, function ($items) use ($handle) {
+                    foreach ($items as $item) {
+                        $mainResearcher = $item->researcher ? (($item->researcher->prefix->prefix_nameTH ?? '') . $item->researcher->researcher_fname . ' ' . $item->researcher->researcher_lname) : '-';
+                        $coAuthors = $item->authors->map(function ($a) {
+                            return ($a->prefix->prefix_nameTH ?? '') . $a->researcher_fname . ' ' . $a->researcher_lname;
+                        })->implode(', ');
+
+                        $statusLabel = ((int)$item->data_show === 1) ? 'เผยแพร่' : 'ซ่อน';
+
+                        fputcsv($handle, $this->sanitizeCsvRow([
+                            $item->id,
+                            strip_tags(html_entity_decode($item->pub_name ?? '', ENT_QUOTES, 'UTF-8')),
+                            strip_tags(html_entity_decode($item->pub_name_journal ?? '', ENT_QUOTES, 'UTF-8')),
+                            $item->pubtype->pubtype_name ?? '-',
+                            $item->pubtype->pubtype_group ?? '-',
+                            $mainResearcher,
+                            $coAuthors ?: '-',
+                            $item->year->year_name ?? '-',
+                            $item->pub_date ?? '-',
+                            $item->department->department_nameTH ?? '-',
+                            $statusLabel,
+                            $item->pub_score ?? 0,
+                            $item->pub_budget ?? 0,
+                        ]));
+                    }
+                });
+
+            fclose($handle);
+        }, 200, $headers);
+    }
 }

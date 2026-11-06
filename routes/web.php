@@ -113,6 +113,18 @@ Route::prefix('backend')->name('backend.')->middleware(['auth', \App\Http\Middle
     Route::get('/manuals', [\App\Http\Controllers\ManualController::class, 'index'])->name('manuals.index');
     Route::get('/manuals/{file}', [\App\Http\Controllers\ManualController::class, 'show'])->name('manuals.show');
 
+    // Executive Strategic Summary Report (Printable Editorial Report)
+    Route::get('/reports/executive-summary', [\App\Http\Controllers\Backend\ExecutiveReportController::class, 'index'])->name('reports.executive_summary');
+
+    // Bulk Operations Routes (Projects & Publications)
+    Route::post('/rdb_project/bulk-status', [RdbProjectController::class, 'bulkUpdateStatus'])->name('rdb_project.bulk_status');
+    Route::post('/rdb_project/bulk-visibility', [RdbProjectController::class, 'bulkUpdateVisibility'])->name('rdb_project.bulk_visibility');
+    Route::post('/rdb_project/bulk-export', [RdbProjectController::class, 'bulkExport'])->name('rdb_project.bulk_export');
+    Route::post('/rdb_project/bulk-export-dspace', [RdbProjectController::class, 'bulkExportDspace'])->name('rdb_project.bulk_export_dspace');
+
+    Route::post('/rdb_published/bulk-status', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'bulkUpdateStatus'])->name('rdb_published.bulk_status');
+    Route::post('/rdb_published/bulk-export', [\App\Http\Controllers\Backend\RdbPublishedController::class, 'bulkExport'])->name('rdb_published.bulk_export');
+
     // AJAX Researcher Search (must be BEFORE resource route)
     Route::get('/rdb_project/search-researchers', [RdbProjectController::class, 'searchResearchers'])->name('rdb_project.search_researchers');
     // AJAX Project Search (Central)

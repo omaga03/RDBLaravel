@@ -1907,4 +1907,203 @@ class RdbProjectController extends Controller
 
         return back()->with('warning', 'ไม่สามารถสร้างภาพหน้าปกได้ หรือไม่พบไฟล์เอกสารรายงานบนเซิร์ฟเวอร์');
     }
+
+    /**
+     * Bulk update project status (ps_id) with authorization checks
+     */
+    public function bulkUpdateStatus(Request $request)
+    {
+        $this->authorize('viewAny', RdbProject::class);
+
+        $request->validate([
+            'selected_ids' => 'required',
+            'ps_id' => 'required|integer|exists:rdb_project_status,ps_id',
+        ]);
+
+        $ids = $request->input('selected_ids', []);
+        if (is_string($ids)) {
+            $ids = explode(',', $ids);
+        }
+        $ids = array_values(array_filter(array_map('intval', (array)$ids)));
+
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'กรุณาเลือกโครงการวิจัยอย่างน้อย 1 รายการ');
+        }
+
+        $newPsId = (int)$request->input('ps_id');
+        $updatedCount = 0;
+        $skippedCount = 0;
+
+        $projects = RdbProject::whereIn('pro_id', $ids)->get();
+        foreach ($projects as $project) {
+            if (!auth()->user()->can('update', $project)) {
+                $skippedCount++;
+                continue;
+            }
+
+            $oldPsId = (int)$project->ps_id;
+            $this->applyStatusChangesToProject($project, $oldPsId, $newPsId);
+            $project->user_updated = auth()->id();
+            $project->save();
+            $updatedCount++;
+        }
+
+        $status = RdbProjectStatus::find($newPsId);
+        $statusName = $status ? $status->ps_name : $newPsId;
+
+        $msg = "ปรับปรุงสถานะโครงการวิจัยเป็น \"{$statusName}\" สำเร็จจำนวน {$updatedCount} รายการ";
+        if ($skippedCount > 0) {
+            $msg .= " (ข้าม {$skippedCount} รายการเนื่องจากไม่มีสิทธิ์แก้ไข)";
+        }
+
+        return redirect()->back()->with('success', $msg);
+    }
+
+    /**
+     * Bulk update document access visibility (pro_file_show)
+     */
+    public function bulkUpdateVisibility(Request $request)
+    {
+        $this->authorize('viewAny', RdbProject::class);
+
+        $request->validate([
+            'selected_ids' => 'required',
+            'pro_file_show' => 'required|in:0,1,2',
+        ]);
+
+        $ids = $request->input('selected_ids', []);
+        if (is_string($ids)) {
+            $ids = explode(',', $ids);
+        }
+        $ids = array_values(array_filter(array_map('intval', (array)$ids)));
+
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'กรุณาเลือกโครงการวิจัยอย่างน้อย 1 รายการ');
+        }
+
+        $newShow = (int)$request->input('pro_file_show');
+        $updatedCount = 0;
+        $skippedCount = 0;
+
+        $projects = RdbProject::whereIn('pro_id', $ids)->get();
+        foreach ($projects as $project) {
+            if (!auth()->user()->can('update', $project)) {
+                $skippedCount++;
+                continue;
+            }
+
+            $project->pro_file_show = $newShow;
+            $project->user_updated = auth()->id();
+            $project->save();
+            $updatedCount++;
+        }
+
+        $label = match ($newShow) {
+            0 => 'เปิดเผยสาธารณะ',
+            1 => 'ปิดซ่อน / เฉพาะภายใน',
+            2 => 'แบบร่าง',
+            default => 'กำหนดสถานะ',
+        };
+
+        $msg = "ปรับปรุงสิทธิ์การเข้าถึงรายงานโครงการเป็น \"{$label}\" สำเร็จจำนวน {$updatedCount} รายการ";
+        if ($skippedCount > 0) {
+            $msg .= " (ข้าม {$skippedCount} รายการเนื่องจากไม่มีสิทธิ์แก้ไข)";
+        }
+
+        return redirect()->back()->with('success', $msg);
+    }
+
+    /**
+     * Bulk export selected projects to CSV with UTF-8 BOM
+     */
+    public function bulkExport(Request $request)
+    {
+        $this->authorize('viewAny', RdbProject::class);
+
+        $ids = $request->input('selected_ids', []);
+        if (is_string($ids)) {
+            $ids = explode(',', $ids);
+        }
+        $ids = array_values(array_filter(array_map('intval', (array)$ids)));
+
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'กรุณาเลือกโครงการวิจัยอย่างน้อย 1 รายการ');
+        }
+
+        $filename = 'projects_selected_' . date('Y-m-d_His') . '.csv';
+        $headers = $this->csvHeaders($filename);
+
+        return response()->stream(function () use ($ids) {
+            $handle = fopen('php://output', 'w');
+            fputs($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, [
+                'ID',
+                'รหัสโครงการ',
+                'ปีงบประมาณ',
+                'ชื่อโครงการ (ไทย)',
+                'ชื่อโครงการ (อังกฤษ)',
+                'ประเภททุน',
+                'ประเภททุนย่อย',
+                'งบประมาณ (บาท)',
+                'หน่วยงาน/คณะ',
+                'หัวหน้าโครงการ',
+                'สถานะ',
+                'สิทธิ์การเข้าถึงไฟล์',
+                'วันที่เริ่มต้น',
+                'วันที่สิ้นสุด'
+            ]);
+
+            RdbProject::with(['year', 'type', 'typeSub', 'department', 'status', 'researchers.prefix'])
+                ->whereIn('pro_id', $ids)
+                ->orderBy('pro_id', 'desc')
+                ->chunk(250, function ($projects) use ($handle) {
+                    foreach ($projects as $p) {
+                        $headResearcher = $p->researchers->first();
+                        $headName = $headResearcher ? (($headResearcher->prefix->prefix_nameTH ?? '') . $headResearcher->researcher_fname . ' ' . $headResearcher->researcher_lname) : '-';
+
+                        $fileShowLabel = match ((int)$p->pro_file_show) {
+                            0 => 'เปิดเผยสาธารณะ',
+                            1 => 'เฉพาะภายในสถาบัน / ปิดซ่อน',
+                            2 => 'ฉบับร่าง',
+                            default => 'ไม่ระบุ',
+                        };
+
+                        fputcsv($handle, $this->sanitizeCsvRow([
+                            $p->pro_id,
+                            $p->pro_code ?? '-',
+                            $p->year->year_name ?? '-',
+                            strip_tags(html_entity_decode($p->pro_nameTH ?? '', ENT_QUOTES, 'UTF-8')),
+                            strip_tags(html_entity_decode($p->pro_nameEN ?? '', ENT_QUOTES, 'UTF-8')),
+                            $p->type->pt_name ?? '-',
+                            $p->typeSub->pts_name ?? '-',
+                            $p->pro_budget ?? 0,
+                            $p->department->department_nameTH ?? '-',
+                            $headName,
+                            $p->status->ps_name ?? '-',
+                            $fileShowLabel,
+                            $p->pro_date_start ?? '-',
+                            $p->pro_date_end ?? '-'
+                        ]));
+                    }
+                });
+
+            fclose($handle);
+        }, 200, $headers);
+    }
+
+    /**
+     * Bulk export selected projects to DSpace SAF ZIP package
+     */
+    public function bulkExportDspace(Request $request, \App\Services\DSpaceExportService $dspaceService)
+    {
+        if (!$request->filled('ids') && $request->filled('selected_ids')) {
+            $ids = $request->input('selected_ids');
+            if (is_string($ids)) {
+                $ids = explode(',', $ids);
+            }
+            $request->merge(['ids' => (array)$ids]);
+        }
+        return $this->exportDspaceBatch($request, $dspaceService);
+    }
 }

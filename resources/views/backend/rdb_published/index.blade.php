@@ -148,15 +148,21 @@
                 <table class="table table-hover align-top mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 45%;">ชื่อผลงาน</th>
+                            <th style="width: 40px;" class="text-center align-middle">
+                                <input type="checkbox" id="selectAllPublished" class="form-check-input" title="เลือกทั้งหมดในหน้านี้">
+                            </th>
+                            <th style="width: 42%;">ชื่อผลงาน</th>
                             <th style="width: 20%;">ประเภท</th>
-                            <th style="width: 25%;">คณะผู้เขียน</th>
-                            <th style="width: 10%;" class="text-center text-nowrap">จัดการ</th>
+                            <th style="width: 24%;">คณะผู้เขียน</th>
+                            <th style="width: 14%;" class="text-center text-nowrap">จัดการ</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($items as $item)
                         <tr>
+                            <td class="text-center align-middle p-3">
+                                <input type="checkbox" name="selected_published_ids[]" value="{{ $item->getKey() }}" class="form-check-input published-checkbox">
+                            </td>
                             <td class="p-3">
                                 <div class="fw-bold mb-1">
                                     <a href="{{ route('backend.rdb_published.show', $item->getKey()) }}" class="text-decoration-none text-body fw-bold hover-primary text-break">
@@ -294,7 +300,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="4" class="text-center py-5 text-body-secondary">
+                            <td colspan="5" class="text-center py-5 text-body-secondary">
                                 <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
                                 ไม่พบข้อมูลการตีพิมพ์
                             </td>
@@ -312,6 +318,55 @@
         </div>
     </div>
 </div>
+
+<!-- Floating Bulk Actions Toolbar -->
+<div id="bulkPublishedToolbar" class="position-fixed bottom-0 start-50 translate-middle-x mb-4 shadow-lg border rounded-4 bg-body p-2 px-3 d-none align-items-center gap-3 z-3" style="max-width: 95vw; box-shadow: 0 10px 30px rgba(0,0,0,0.18) !important;">
+    <div class="d-flex align-items-center gap-2 border-end pe-3">
+        <span class="badge bg-primary rounded-pill px-2.5 py-1.5" id="selectedPublishedCount" style="font-variant-numeric: tabular-nums;">0</span>
+        <span class="small fw-semibold text-body">รายการที่เลือก</span>
+    </div>
+    
+    <div class="d-flex flex-wrap align-items-center gap-2">
+        {{-- Change Visibility (data_show) --}}
+        <div class="dropdown">
+            <button class="btn btn-sm btn-outline-primary dropdown-toggle fw-medium" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-eye me-1"></i> ปรับการแสดงผลหน้าบ้าน
+            </button>
+            <ul class="dropdown-menu shadow-sm">
+                <li><button type="button" class="dropdown-item py-1.5" onclick="submitBulkPublishedStatus('data_show', 1, 'เผยแพร่สู่สาธารณะ')"><i class="bi bi-eye text-success me-1.5"></i> เผยแพร่สู่สาธารณะ</button></li>
+                <li><button type="button" class="dropdown-item py-1.5" onclick="submitBulkPublishedStatus('data_show', 0, 'ซ่อน (ไม่แสดงหน้าบ้าน)')"><i class="bi bi-eye-slash text-warning me-1.5"></i> ซ่อน (ไม่แสดงหน้าบ้าน)</button></li>
+            </ul>
+        </div>
+
+        {{-- Change DSpace Type (todspace) --}}
+        <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle fw-medium" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-box-seam me-1"></i> ประเภทส่งออก DSpace
+            </button>
+            <ul class="dropdown-menu shadow-sm">
+                <li><button type="button" class="dropdown-item py-1.5" onclick="submitBulkPublishedStatus('todspace', 1, 'บทความสมบูรณ์')"><i class="bi bi-file-earmark-check text-primary me-1.5"></i> บทความสมบูรณ์ (1)</button></li>
+                <li><button type="button" class="dropdown-item py-1.5" onclick="submitBulkPublishedStatus('todspace', 2, 'ตัวอย่างบทความ')"><i class="bi bi-file-earmark-text text-secondary me-1.5"></i> ตัวอย่างบทความ (2)</button></li>
+            </ul>
+        </div>
+
+        {{-- Bulk Export CSV --}}
+        <button type="button" class="btn btn-sm btn-outline-success fw-medium" onclick="submitBulkPublishedExport()">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i> ส่งออก CSV (ที่เลือก)
+        </button>
+
+        {{-- Clear Selection --}}
+        <button type="button" class="btn btn-sm btn-link text-body-secondary text-decoration-none border-0 ms-1" onclick="clearPublishedSelection()">
+            <i class="bi bi-x-circle me-1"></i> ยกเลิก
+        </button>
+    </div>
+</div>
+
+<form id="bulkPublishedActionForm" method="POST" style="display: none;">
+    @csrf
+    <input type="hidden" name="selected_ids" id="bulkPubFormSelectedIds">
+    <input type="hidden" name="action_type" id="bulkPubFormActionType">
+    <input type="hidden" name="status_val" id="bulkPubFormStatusVal">
+</form>
 
 <!-- Request Unlock Modal -->
 <div class="modal fade" id="requestUnlockModal" tabindex="-1" aria-labelledby="requestUnlockModalLabel" aria-hidden="true">
@@ -474,6 +529,87 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
+
+    // =========================================================================
+    // BULK SELECTION & FLOATING TOOLBAR
+    // =========================================================================
+    const selectAllPublished = document.getElementById('selectAllPublished');
+    const publishedCheckboxes = document.querySelectorAll('.published-checkbox');
+    const bulkPubToolbar = document.getElementById('bulkPublishedToolbar');
+    const selectedPubCountBadge = document.getElementById('selectedPublishedCount');
+    const bulkPubForm = document.getElementById('bulkPublishedActionForm');
+    const bulkPubFormSelectedIds = document.getElementById('bulkPubFormSelectedIds');
+    const bulkPubFormActionType = document.getElementById('bulkPubFormActionType');
+    const bulkPubFormStatusVal = document.getElementById('bulkPubFormStatusVal');
+
+    function getSelectedPublishedIds() {
+        const checked = document.querySelectorAll('.published-checkbox:checked');
+        return Array.from(checked).map(cb => cb.value);
+    }
+
+    function updateBulkPublishedToolbar() {
+        const ids = getSelectedPublishedIds();
+        const count = ids.length;
+        if (selectedPubCountBadge) selectedPubCountBadge.textContent = count;
+
+        if (bulkPubToolbar) {
+            if (count > 0) {
+                bulkPubToolbar.classList.remove('d-none');
+                bulkPubToolbar.classList.add('d-flex');
+            } else {
+                bulkPubToolbar.classList.add('d-none');
+                bulkPubToolbar.classList.remove('d-flex');
+            }
+        }
+
+        if (selectAllPublished) {
+            selectAllPublished.checked = publishedCheckboxes.length > 0 && count === publishedCheckboxes.length;
+            selectAllPublished.indeterminate = count > 0 && count < publishedCheckboxes.length;
+        }
+    }
+
+    if (selectAllPublished) {
+        selectAllPublished.addEventListener('change', function() {
+            publishedCheckboxes.forEach(cb => {
+                cb.checked = selectAllPublished.checked;
+            });
+            updateBulkPublishedToolbar();
+        });
+    }
+
+    publishedCheckboxes.forEach(cb => {
+        cb.addEventListener('change', updateBulkPublishedToolbar);
+    });
+
+    window.clearPublishedSelection = function() {
+        publishedCheckboxes.forEach(cb => cb.checked = false);
+        if (selectAllPublished) {
+            selectAllPublished.checked = false;
+            selectAllPublished.indeterminate = false;
+        }
+        updateBulkPublishedToolbar();
+    };
+
+    window.submitBulkPublishedStatus = function(actionType, statusVal, label) {
+        const ids = getSelectedPublishedIds();
+        if (ids.length === 0) return;
+        if (!confirm(`คุณต้องการปรับปรุงผลงานที่เลือกจำนวน ${ids.length} รายการ เป็น "${label}" หรือไม่?`)) return;
+
+        bulkPubForm.action = "{{ route('backend.rdb_published.bulk_status') }}";
+        bulkPubFormSelectedIds.value = ids.join(',');
+        bulkPubFormActionType.value = actionType;
+        bulkPubFormStatusVal.value = statusVal;
+        bulkPubForm.submit();
+    };
+
+    window.submitBulkPublishedExport = function() {
+        const ids = getSelectedPublishedIds();
+        if (ids.length === 0) return;
+
+        bulkPubForm.action = "{{ route('backend.rdb_published.bulk_export') }}";
+        bulkPubFormSelectedIds.value = ids.join(',');
+        bulkPubForm.submit();
+    };
 });
 </script>
 @endpush

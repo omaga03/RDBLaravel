@@ -55,6 +55,11 @@ class ThaiDateHelper
         return self::format($date, true);
     }
 
+    public static function formatShort($date)
+    {
+        return self::format($date, false, true);
+    }
+
     /**
      * Convert Thai date string (Buddhist Era or CE) to ISO YYYY-MM-DD
      * Supports formats:

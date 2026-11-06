@@ -98,6 +98,25 @@
                 </li>
             </ul>
         @else
+            <!-- 0. ภาพรวม & สารสนเทศผู้บริหาร (Dashboard & Executive Reports) -->
+            <div class="rdb-sidebar-section-title">
+                <span class="sidebar-text">ภาพรวม &amp; รายงานผู้บริหาร</span>
+            </div>
+            <ul class="nav flex-column rdb-sidebar-nav mb-2">
+                <li class="nav-item">
+                    <a class="nav-link rdb-side-link {{ request()->routeIs('backend.site.index') ? 'active' : '' }}" href="{{ route('backend.site.index') }}" title="แดชบอร์ดภาพรวมระบบ">
+                        <i class="bi bi-speedometer2 text-primary rdb-side-icon"></i>
+                        <span class="sidebar-text">แดชบอร์ดภาพรวม</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link rdb-side-link {{ request()->routeIs('backend.reports.executive_summary') ? 'active' : '' }}" href="{{ route('backend.reports.executive_summary') }}" title="เล่มรายงานสารสนเทศวิจัยสำหรับผู้บริหาร (PDF)">
+                        <i class="bi bi-file-earmark-bar-graph-fill text-success rdb-side-icon"></i>
+                        <span class="sidebar-text">รายงานสรุปผู้บริหาร (PDF)</span>
+                    </a>
+                </li>
+            </ul>
+
             @php
                 $hasOverviewQueue = $isSuperAdmin || ($currentUser && ($currentUser->hasRole(['Admin Project', 'Admin Published', 'Admin Dip', 'Admin Utilize', 'Faculty Coordinator', 'Sub Admin']) || $currentUser->hasPermission(['Project', 'Published', 'Dip', 'Utilize'])));
                 $hasMyReviews = $myPendingReviewsCount > 0;

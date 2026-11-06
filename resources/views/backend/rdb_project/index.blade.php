@@ -200,14 +200,20 @@
                 <table class="table table-hover align-top mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 60%;">ชื่อโครงการ</th>
+                            <th style="width: 40px;" class="text-center align-middle">
+                                <input type="checkbox" id="selectAllProjects" class="form-check-input" title="เลือกทั้งหมดในหน้านี้">
+                            </th>
+                            <th style="width: 55%;">ชื่อโครงการ</th>
                             <th style="width: 25%;">นักวิจัย / สังกัด</th>
-                            <th style="width: 15%;" class="text-center text-nowrap">จัดการ</th>
+                            <th style="width: 16%;" class="text-center text-nowrap">จัดการ</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($projects as $project)
                         <tr>
+                            <td class="text-center align-middle p-3">
+                                <input type="checkbox" name="selected_project_ids[]" value="{{ $project->pro_id }}" class="form-check-input project-checkbox">
+                            </td>
                             <td class="p-3">
                                 <div class="fw-bold mb-1">
                                     @if($project->pro_id)
@@ -352,7 +358,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="3" class="text-center py-5 text-body-secondary">
+                            <td colspan="4" class="text-center py-5 text-body-secondary">
                                 <i class="bi bi-folder-x fs-1 d-block mb-2 opacity-50"></i>
                                 ไม่พบข้อมูลโครงการวิจัย
                             </td>
@@ -408,6 +414,73 @@
         </div>
     </div>
 </div>
+
+<!-- Floating Bulk Actions Toolbar -->
+<div id="bulkProjectToolbar" class="position-fixed bottom-0 start-50 translate-middle-x mb-4 shadow-lg border rounded-4 bg-body p-2 px-3 d-none align-items-center gap-3 z-3" style="max-width: 95vw; box-shadow: 0 10px 30px rgba(0,0,0,0.18) !important;">
+    <div class="d-flex align-items-center gap-2 border-end pe-3">
+        <span class="badge bg-primary rounded-pill px-2.5 py-1.5" id="selectedProjectCount" style="font-variant-numeric: tabular-nums;">0</span>
+        <span class="small fw-semibold text-body">รายการที่เลือก</span>
+    </div>
+    
+    <div class="d-flex flex-wrap align-items-center gap-2">
+        {{-- Change Status Dropdown --}}
+        <div class="dropdown">
+            <button class="btn btn-sm btn-outline-primary dropdown-toggle fw-medium" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-tag me-1"></i> เปลี่ยนสถานะโครงการ
+            </button>
+            <ul class="dropdown-menu shadow-sm">
+                @foreach($statuses as $st)
+                    <li>
+                        <button type="button" class="dropdown-item py-1.5" onclick="submitBulkStatus({{ $st->ps_id }}, '{{ addslashes($st->ps_name) }}')">
+                            <span class="badge me-1" style="background-color: {{ $st->ps_color ?? '#6c757d' }}; color: #fff;">•</span>
+                            {{ $st->ps_name }}
+                        </button>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+
+        {{-- Document Access Visibility Dropdown --}}
+        <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle fw-medium" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-file-earmark-lock me-1"></i> สิทธิ์เอกสาร (pro_file_show)
+            </button>
+            <ul class="dropdown-menu shadow-sm">
+                <li><button type="button" class="dropdown-item py-1.5" onclick="submitBulkVisibility(0, 'เปิดเผยสาธารณะ')"><i class="bi bi-eye text-success me-1.5"></i> เปิดเผยสาธารณะ (0)</button></li>
+                <li><button type="button" class="dropdown-item py-1.5" onclick="submitBulkVisibility(1, 'ปิดซ่อน / เฉพาะภายใน')"><i class="bi bi-eye-slash text-warning me-1.5"></i> ปิดซ่อน / เฉพาะภายใน (1)</button></li>
+                <li><button type="button" class="dropdown-item py-1.5" onclick="submitBulkVisibility(2, 'ฉบับร่าง')"><i class="bi bi-pencil text-secondary me-1.5"></i> ฉบับร่าง (2)</button></li>
+            </ul>
+        </div>
+
+        {{-- Bulk Export CSV --}}
+        <button type="button" class="btn btn-sm btn-outline-success fw-medium" onclick="submitBulkExport()">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i> ส่งออก CSV (ที่เลือก)
+        </button>
+
+        {{-- Bulk Export DSpace SAF --}}
+        @php
+            $u = auth()->user();
+            $canDspace = $u && ($u->hasRole(['The Creator', 'Admin', 'Admin Research', 'Admin Project', 'Admin Library']) || $u->hasPermission('DSpace.Export'));
+        @endphp
+        @if($canDspace)
+            <button type="button" class="btn btn-sm btn-outline-info fw-medium" onclick="submitBulkDspace()">
+                <i class="bi bi-box-arrow-up-right me-1"></i> ส่งออก DSpace SAF (ที่เลือก)
+            </button>
+        @endif
+
+        {{-- Clear Selection --}}
+        <button type="button" class="btn btn-sm btn-link text-body-secondary text-decoration-none border-0 ms-1" onclick="clearProjectSelection()">
+            <i class="bi bi-x-circle me-1"></i> ยกเลิก
+        </button>
+    </div>
+</div>
+
+<form id="bulkProjectActionForm" method="POST" style="display: none;">
+    @csrf
+    <input type="hidden" name="selected_ids" id="bulkFormSelectedIds">
+    <input type="hidden" name="ps_id" id="bulkFormPsId">
+    <input type="hidden" name="pro_file_show" id="bulkFormProFileShow">
+</form>
 @endsection
 
 @push('scripts')
@@ -657,6 +730,107 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // =========================================================================
+    // BULK SELECTION & FLOATING TOOLBAR
+    // =========================================================================
+    const selectAllCheckbox = document.getElementById('selectAllProjects');
+    const projectCheckboxes = document.querySelectorAll('.project-checkbox');
+    const bulkToolbar = document.getElementById('bulkProjectToolbar');
+    const selectedCountBadge = document.getElementById('selectedProjectCount');
+    const bulkForm = document.getElementById('bulkProjectActionForm');
+    const bulkFormSelectedIds = document.getElementById('bulkFormSelectedIds');
+    const bulkFormPsId = document.getElementById('bulkFormPsId');
+    const bulkFormProFileShow = document.getElementById('bulkFormProFileShow');
+
+    function getSelectedProjectIds() {
+        const checked = document.querySelectorAll('.project-checkbox:checked');
+        return Array.from(checked).map(cb => cb.value);
+    }
+
+    function updateBulkToolbar() {
+        const ids = getSelectedProjectIds();
+        const count = ids.length;
+        if (selectedCountBadge) selectedCountBadge.textContent = count;
+
+        if (bulkToolbar) {
+            if (count > 0) {
+                bulkToolbar.classList.remove('d-none');
+                bulkToolbar.classList.add('d-flex');
+            } else {
+                bulkToolbar.classList.add('d-none');
+                bulkToolbar.classList.remove('d-flex');
+            }
+        }
+
+        if (selectAllCheckbox) {
+            selectAllCheckbox.checked = projectCheckboxes.length > 0 && count === projectCheckboxes.length;
+            selectAllCheckbox.indeterminate = count > 0 && count < projectCheckboxes.length;
+        }
+    }
+
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            projectCheckboxes.forEach(cb => {
+                cb.checked = selectAllCheckbox.checked;
+            });
+            updateBulkToolbar();
+        });
+    }
+
+    projectCheckboxes.forEach(cb => {
+        cb.addEventListener('change', updateBulkToolbar);
+    });
+
+    window.clearProjectSelection = function() {
+        projectCheckboxes.forEach(cb => cb.checked = false);
+        if (selectAllCheckbox) {
+            selectAllCheckbox.checked = false;
+            selectAllCheckbox.indeterminate = false;
+        }
+        updateBulkToolbar();
+    };
+
+    window.submitBulkStatus = function(psId, psName) {
+        const ids = getSelectedProjectIds();
+        if (ids.length === 0) return;
+        if (!confirm(`คุณต้องการเปลี่ยนสถานะโครงการที่เลือกจำนวน ${ids.length} รายการ เป็น "${psName}" หรือไม่?`)) return;
+
+        bulkForm.action = "{{ route('backend.rdb_project.bulk_status') }}";
+        bulkFormSelectedIds.value = ids.join(',');
+        bulkFormPsId.value = psId;
+        bulkForm.submit();
+    };
+
+    window.submitBulkVisibility = function(val, label) {
+        const ids = getSelectedProjectIds();
+        if (ids.length === 0) return;
+        if (!confirm(`คุณต้องการปรับปรุงสิทธิ์เอกสารโครงการที่เลือกจำนวน ${ids.length} รายการ เป็น "${label}" หรือไม่?`)) return;
+
+        bulkForm.action = "{{ route('backend.rdb_project.bulk_visibility') }}";
+        bulkFormSelectedIds.value = ids.join(',');
+        bulkFormProFileShow.value = val;
+        bulkForm.submit();
+    };
+
+    window.submitBulkExport = function() {
+        const ids = getSelectedProjectIds();
+        if (ids.length === 0) return;
+
+        bulkForm.action = "{{ route('backend.rdb_project.bulk_export') }}";
+        bulkFormSelectedIds.value = ids.join(',');
+        bulkForm.submit();
+    };
+
+    window.submitBulkDspace = function() {
+        const ids = getSelectedProjectIds();
+        if (ids.length === 0) return;
+        if (!confirm(`คุณต้องการส่งออกแพ็กเกจ DSpace SAF สำหรับโครงการที่เลือกจำนวน ${ids.length} รายการหรือไม่?`)) return;
+
+        bulkForm.action = "{{ route('backend.rdb_project.bulk_export_dspace') }}";
+        bulkFormSelectedIds.value = ids.join(',');
+        bulkForm.submit();
+    };
 });
 </script>
 @endpush

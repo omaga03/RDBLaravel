@@ -57,7 +57,11 @@
                 @endif
             </form>
 
-            <a href="{{ route('frontend.site.index') }}" target="_blank" class="btn btn-sm btn-outline-primary shadow-sm text-nowrap">
+            <a href="{{ route('backend.reports.executive_summary', ['year_id' => $selectedYearId]) }}" class="btn btn-sm btn-outline-primary shadow-sm text-nowrap">
+                <i class="bi bi-file-earmark-text me-1"></i> รายงานผู้บริหาร
+            </a>
+
+            <a href="{{ route('frontend.site.index') }}" target="_blank" class="btn btn-sm btn-outline-secondary shadow-sm text-nowrap">
                 <i class="bi bi-box-arrow-up-right me-1"></i> ดูหน้าบ้าน
             </a>
         </div>
