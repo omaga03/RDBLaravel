@@ -54,6 +54,42 @@
   - เพิ่ม **บทที่ 14: เล่มรายงานภาพรวมผู้บริหารและการจัดการข้อมูลชุดใหญ่** ใน [`docs/manuals/VOLUME_2_BACKEND_ADMIN_RESEARCHER_MANUAL.md`](docs/manuals/VOLUME_2_BACKEND_ADMIN_RESEARCHER_MANUAL.md)
   - คอมไพล์ชุดเอกสารคู่มือ HTML5 Portal ทั้ง 5 เล่มเรียบร้อยสมบูรณ์
 
+### 📌 การทดสอบสมรรถนะและความทนทาน (Performance & Stress Testing) และการเจาะช่องโหว่ความปลอดภัย (Penetration Audit)
+
+#### 1. การตรวจสอบและปรับแต่งดัชนีฐานข้อมูล (Database Query Profiling & Index Optimization)
+- **การวิเคราะห์ Execution Plan (`EXPLAIN`)**:
+  - ตรวจพบการทำ Full Table Scan (`Type: ALL`) และ `filesort` ในการดึงข้อมูล `rdb_published` และ `rdb_project` บนหน้าแรกและหน้าสืบค้นหลัก
+  - สร้าง Migration ใหม่: [`database/migrations/2026_11_06_130600_add_performance_and_stress_test_indexes.php`](database/migrations/2026_11_06_130600_add_performance_and_stress_test_indexes.php)
+  - เพิ่ม Composite Indexes ประสิทธิภาพสูง:
+    - `rdb_published`: `idx_pub_data_show_date (data_show, pub_date)` ขจัด `filesort`, `idx_pub_type_id (pubtype_id)`, `idx_pub_data_show_year (data_show, year_id)`
+    - `rdb_project`: `idx_pro_data_show_date (data_show, pro_date_start)`, `idx_pro_data_show_year (data_show, year_id)`, `idx_pro_data_show_pt (data_show, pt_id)`
+    - `rdb_dip`: `idx_dip_data_show (data_show)`
+    - `rdb_project_utilize`: `idx_util_data_show (data_show)`
+  - ผลลัพธ์หลัง Migration: เปลี่ยน Query Access Type จาก `ALL` เป็น `range/ref` ลดจำนวนแถวที่ต้องสแกนลงกว่า 50-80% ป้องกัน Slow Query คอขวด
+
+#### 2. ผลการทดสอบ Stress & Concurrency Test ด้วย Apache Bench (`ab.exe`)
+- จำลองผู้ใช้งานสืบค้นข้อมูลพร้อมกันเป็นขั้นบันไดตั้งแต่ 50 ถึง 500 Concurrency:
+  - **หน้าแรกระบบ (`/`)**:
+    - **50 Concurrency (500 requests)**: 0 Failed requests, 80.33 RPS, มัธยฐาน 68 ms
+    - **100 Concurrency (1,000 requests)**: 0 Failed requests, 164.86 RPS, มัธยฐาน 278 ms
+    - **250 Concurrency (2,500 requests)**: 0 Failed requests, 188.14 RPS, มัธยฐาน 1,073 ms (ส่งถ่ายข้อมูล 542 MB)
+    - **500 Concurrency (5,000 requests)**: **0 Failed requests (0.00% Error Rate)**, ความเร็ว **194.12 RPS**, ส่งถ่ายข้อมูลมหาศาล **1.08 GB** (Transfer Rate 41 MB/s)
+  - **หน้าสืบค้นโครงการวิจัย (`/rdbproject`)**:
+    - **100 Concurrency (1,000 requests)**: 0 Failed requests, 171.72 RPS, มัธยฐาน 285 ms
+  - **หน้าสืบค้นผลงานตีพิมพ์ (`/rdbpublished`)**:
+    - **100 Concurrency (1,000 requests)**: 0 Failed requests, 191.46 RPS, มัธยฐาน 301 ms
+  - **หน้า REST API (`/api/v1/news`)**:
+    - **100 Concurrency**: Rate Limiting ทำงานถูกต้อง โดยอนุญาต 60 คำขอแรก และตัดคำขอส่วนเกินด้วย HTTP 429 Too Many Requests ตามนโยบายป้องกัน DoS
+
+#### 3. การทดสอบเจาะช่องโหว่ความปลอดภัยอัตโนมัติ (Automated Penetration Test Suite)
+- พัฒนาชุดทดสอบ [`tests/Feature/SecurityPenetrationAuditTest.php`](tests/Feature/SecurityPenetrationAuditTest.php) ผ่าน 6/6 การทดสอบ (67 assertions):
+  1. `test_sql_injection_payloads_are_safely_parameterized`: ป้องกัน SQL Injection Fuzzing (`' OR '1'='1`, `UNION SELECT`, `; DROP TABLE`, `SLEEP()`) ทั้งใน Eloquent และ Search Query
+  2. `test_xss_injection_payloads_are_escaped_on_render`: Neutralize สคริปต์อันตราย (`<script>`, `onerror=`, `<svg/onload=>`) ทุกอินพุต
+  3. `test_csrf_token_is_enforced_on_state_changing_post_routes`: ยืนยันการบังคับใช้ CSRF Token ป้องกันคำขอปลอมแปลง (HTTP 419 TokenMismatchException)
+  4. `test_api_rate_limiting_protects_against_brute_force`: ตรวจสอบ Middleware Rate Limiter สำหรับป้องกันการเดาสุ่มรหัสผ่านและยิง API ถล่มระบบ
+  5. `test_researcher_cannot_edit_unauthorized_records`: ป้องกันช่องโหว่ IDOR (Insecure Direct Object Reference) ด้วย Policy Authorization Gates (HTTP 403 Forbidden)
+  6. `test_executive_report_query_parameter_binding`: ตรวจสอบการผูกพารามิเตอร์รายงานผู้บริหาร ป้องกัน Injection ผ่านตัวกรองปีงบประมาณและหน่วยงาน
+
 ---
 
 ## วันที่: 5 พฤศจิกายน 2569 (2026-11-05)
