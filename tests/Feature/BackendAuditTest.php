@@ -582,6 +582,12 @@ class BackendAuditTest extends TestCase
         $utilize = \App\Models\RdbProjectUtilize::find(1036);
         $this->assertNotNull($utilize);
 
+        $testFilePath = storage_path('app/public/' . $utilize->getUtilizeFilePath());
+        if (!file_exists($testFilePath)) {
+            @mkdir(dirname($testFilePath), 0755, true);
+            file_put_contents($testFilePath, '%PDF-1.4 test dummy');
+        }
+
         // Test edit page contains target="_blank" and download route
         $editResponse = $this->actingAs($admin)->get(route('backend.rdbprojectutilize.edit', 1036));
         $editResponse->assertStatus(200);
