@@ -58,6 +58,7 @@ database/*.sql
 database/**/*.sql
 *.sql
 !/backups/structure_ordered_*.sql
+!database/schema/legacy_base_tables.sql
 
 # Assets/Uploads
 /public/uploads/*
