@@ -238,6 +238,10 @@ class SystemBackupTest extends TestCase
         $this->actingAs($regularUser)->postJson('/backend/system-backup/git-push', [
             'commit_message' => 'test unauthorized push',
         ])->assertStatus(403);
+        $this->actingAs($regularUser)->postJson('/backend/system-backup/git-pull-otp')->assertStatus(403);
+        $this->actingAs($regularUser)->postJson('/backend/system-backup/git-pull', [
+            'otp' => '123456',
+        ])->assertStatus(403);
 
         // The Creator can inspect live Git status
         $creator = User::where('id', 129)->first();
@@ -255,5 +259,25 @@ class SystemBackupTest extends TestCase
         ]);
         $this->assertNotEmpty($res->json('status.branch'));
         $this->assertIsArray($res->json('status.changed_files'));
+
+        // Request Git Pull OTP
+        $otpRes = $this->actingAs($creator)->postJson('/backend/system-backup/git-pull-otp');
+        $otpRes->assertStatus(200);
+        $otpRes->assertJson(['success' => true]);
+
+        $cachedPullOtp = Cache::get('git_pull_otp');
+        $this->assertNotNull($cachedPullOtp);
+        $this->assertEquals(6, strlen($cachedPullOtp['otp']));
+
+        // Invalid OTP for git-pull must fail with 422
+        $badPullRes = $this->actingAs($creator)->postJson('/backend/system-backup/git-pull', [
+            'otp' => '000000',
+        ]);
+        $badPullRes->assertStatus(422);
+        $badPullRes->assertJson(['success' => false]);
+
+        // Valid OTP verification via service
+        $service = app(SystemBackupService::class);
+        $this->assertTrue($service->verifyGitPullOtp($cachedPullOtp['otp']));
     }
 }

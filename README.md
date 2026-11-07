@@ -201,10 +201,11 @@ php artisan rdb:convert-images-webp --module=all --max-dimension=1024 # ระ�
   - 3. สำรองทั้งระบบแบบเต็ม (Full Archive DB + Files + Environment Snapshot)
   - มีแถบแสดงสถานะสด (Live Progress Bar) อัปเดต % ความคืบหน้า จำนวนไฟล์ที่ประมวลผล และเวลาที่ใช้ไปแบบเรียลไทม์ ทำงานเบื้องหลัง ไม่ค้างหน้าจอ
 * **ระบบคำนวณ Checksum ไร้คอขวด (Fast Cryptographic Fingerprinting)**: ตรวจสอบความถูกต้องของไฟล์สำรองขนาดใหญ่ระดับ 20+ GB ด้วยเทคนิค 64KB Header/Middle/Footer Sampling ร่วมกับแคชถาวร เปิดหน้าเว็บได้ทันทีใน 0.001 วินาที (จากเดิมที่ต้องรอนานกว่า 46 วินาที)
-* **ระบบอัปเดตโค้ดขึ้น GitHub ในคลิกเดียว (One-Click Git Commit & Push Modal)**:
+* **ระบบอัปเดตโค้ดและดึงโค้ดกับ GitHub ในคลิกเดียว (One-Click Git Commit & Push / Git Pull with Email OTP)**:
   - ปุ่ม **"อัปเดตขึ้น Git (Git Push)"** พร้อมป้าย Badge แสดงจำนวนไฟล์ที่แก้ไขค้างอยู่แบบสด
   - หน้าต่าง Modal แสดงสาขา, Commit ล่าสุด, และรายการไฟล์ที่มีการเปลี่ยนแปลง (Modified, Added, Deleted)
-  - ระบุ Commit Message และกด Push ขึ้น GitHub ได้ทันทีผ่านหน้าเว็บ พร้อม Console Log แบบสด
+  - **ส่วนที่ 1 (Git Commit & Push)**: ระบุ Commit Message และกด Push ขึ้น GitHub ได้ทันทีผ่านหน้าเว็บ พร้อม Console Log แบบสด
+  - **ส่วนที่ 2 (Git Pull with Email OTP)**: สำหรับเซิร์ฟเวอร์จริง กดขอรหัสความปลอดภัย OTP 6 หลักทางอีเมลของ The Creator เพื่อยืนยันก่อนสั่งดึงโค้ดล่าสุด (`git pull origin main`) และล้างแคชระบบ (`optimize:clear`) อัตโนมัติ
   - รองรับทั้งบน Windows/Laragon และ Linux Production Server (มีระบบ Auto-fallback Identity และกลไกความปลอดภัยบล็อก `.env` และไฟล์ขนาดเกิน 50 MB อัตโนมัติ)
 * **ระบบกู้คืนฐานข้อมูลผ่านหน้าเว็บ (Safe Web Restore with Email OTP)**: ยืนยันรหัส OTP 6 หลักส่งตรงเข้า Email ของ The Creator พร้อมสร้าง Safety Snapshot ให้อัตโนมัติก่อนเริ่มกู้คืนเสมอ
 * **ระบบลบไฟล์สำรองแบบ Idempotent ปลอดภัย**: ป้องกันการส่งคำสั่งลบซ้ำและตัดปัญหาระบบแจ้งเตือนว่าลบไม่ได้ ทั้งที่ไฟล์ถูกลบไปแล้ว

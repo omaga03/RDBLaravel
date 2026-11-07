@@ -81,7 +81,10 @@
     * 13.1 ภาพรวมสถาปัตยกรรม API 3 ระดับ (Tier 1: Admin, Tier 2: PMIS, Tier 3: Open Public)
     * 13.2 การสร้างและเพิกถอนสิทธิ์ API Token (Personal Access Tokens)
     * 13.3 คู่มือและทดสอบ Endpoints พร้อมการคัดลอก JSON / cURL แบบปลอดภัยบนทุก Context
-    * 13.4 Open Public API สำหรับข่าวและงานประชุม (`/api/v1/news`, `/api/v1/conferences`)
+    * 13.4 Open Public API สำหรับข่าวและงานประชุม (`/api/v1/news`, `/api/v1/conferences`)
+14. [บทที่ 14: เล่มรายงานภาพรวมผู้บริหารและการจัดการข้อมูลชุดใหญ่ (Executive Strategic Intelligence & Bulk Operations Hub)](#บทที่-14-เล่มรายงานภาพรวมผู้บริหารและการจัดการข้อมูลชุดใหญ่-executive-strategic-intelligence--bulk-operations-hub)
+    * 14.1 เล่มรายงานสรุปภาพรวมงานวิจัยสำหรับผู้บริหาร (`/backend/reports/executive-summary`)
+    * 14.2 ศูนย์จัดการข้อมูลชุดใหญ่ (Bulk Operations & Batch Management Hub)
 ---
 
 ## บทที่ 1: การเข้าสู่ระบบ ความปลอดภัย และการยืนยันตัวตนนักวิจัย (Authentication & Onboarding)
@@ -849,7 +852,8 @@ php -r "echo extension_loaded('gd') && function_exists('imagewebp') ? 'GD WebP O
 5. **ระบบคำนวณ Checksum ความเร็วสูงพิเศษ (Sub-Millisecond Checksum Fingerprint)**: สำหรับไฟล์ขนาดใหญ่เกิน 50 MB ระบบใช้เทคนิคการสุ่มอ่าน Header, Middle และ Footer รวม 192 KB ร่วมกับแคชถาวร ทำให้เปิดดูหน้ารายการไฟล์สำรองขนาด 20+ GB ได้ทันทีใน 0.001 วินาที (ลดเวลาจากเดิมที่ใช้ `md5_file()` ทั้งก้อนนาน 46 วินาที)
 6. **การลบไฟล์สำรองอย่างปลอดภัย (Idempotent Deletion)**: สั่งลบผ่านเส้นทาง `POST /backend/system-backup/delete` พร้อม Hidden Input ป้องกันปัญหาโปรแกรมช่วยดาวน์โหลดดักจับ URL นามสกุล `.zip` หรือการส่งคำสั่งเบิ้ลซ้ำซ้อน
 
-#### 2. ระบบอัปเดตโค้ดขึ้น GitHub ในคลิกเดียว (One-Click Git Commit & Push Modal)
+#### 2. ระบบอัปเดตโค้ดและดึงโค้ดกับ GitHub ในคลิกเดียว (One-Click Git Commit & Push / Git Pull with Email OTP)
+รองรับทั้งการส่งโค้ดขึ้น GitHub (`git push`) และการดึงโค้ดล่าสุดจาก GitHub ลงเซิร์ฟเวอร์ (`git pull` พร้อมยืนยันรหัสความปลอดภัย OTP 6 หลักทางอีเมลของ The Creator และล้างแคช `optimize:clear` อัตโนมัติ)
 สำหรับผู้ดูแลระบบสูงสุด (The Creator) เมื่อมีการปรับปรุงแก้ไขโค้ดหรือคอนฟิกบนเซิร์ฟเวอร์ สามารถส่งขึ้น GitHub ได้ทันทีผ่านหน้าเว็บ:
 1. **คลิกปุ่ม "อัปเดตขึ้น Git (Git Push)"** บริเวณมุมขวาบนของหน้าจอ
    * มีป้ายสถานะสด (Live Badge): หากมีไฟล์ที่แก้ไขค้างอยู่จะแสดงเป็นสีเหลืองพร้อมจำนวนไฟล์ (เช่น `3 ไฟล์`) หรือหากโค้ดตรงกับ GitHub ทั้งหมดแล้วจะแสดงเป็นสีเขียว `ซิงค์แล้ว ✓`

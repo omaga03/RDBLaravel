@@ -156,15 +156,14 @@ class SystemBackupController extends Controller
         }
 
         try {
-            AuditLog::create([
-                'user_id' => auth()->id(),
-                'action' => 'backup_downloaded',
-                'model_type' => 'SystemBackup',
-                'model_id' => 0,
-                'ip_address' => request()->ip() ?? '127.0.0.1',
-                'user_agent' => request()->userAgent() ?? 'N/A',
-                'details' => json_encode(['filename' => basename($filename), 'size' => filesize($path)], JSON_UNESCAPED_UNICODE),
-            ]);
+            AuditLog::record(
+                event: 'backup_downloaded',
+                auditable: 'SystemBackup',
+                oldValues: null,
+                newValues: ['filename' => basename($filename), 'size' => filesize($path)],
+                remarks: 'ดาวน์โหลดไฟล์สำรองข้อมูล: ' . basename($filename),
+                diffSummary: 'ขนาดไฟล์: ' . $this->backupService->formatBytes(filesize($path))
+            );
         } catch (\Throwable $e) {
             // ignore audit log error
         }
@@ -321,6 +320,68 @@ class SystemBackupController extends Controller
         try {
             $message = (string) $request->input('commit_message', '');
             $res = $this->backupService->commitAndPushGit($message);
+
+            return response()->json($res);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'status' => $this->backupService->getGitStatus(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Request Email OTP for Git Pull
+     */
+    public function requestGitPullOtp(Request $request)
+    {
+        $this->ensureTheCreatorOnly();
+
+        try {
+            $creator = auth()->user();
+            $res = $this->backupService->sendGitPullOtp($creator, $request->ip() ?? '127.0.0.1', $request->userAgent() ?? 'N/A');
+
+            $msg = $res['mail_sent']
+                ? "ระบบได้ส่งรหัสความปลอดภัย OTP 6 หลักไปยังอีเมล {$creator->email} แล้ว กรุณานำรหัสมากรอกเพื่อยืนยันการดึงโค้ด (Git Pull)"
+                : "สร้างรหัสความปลอดภัย OTP สำหรับ Git Pull สำเร็จแล้ว (บันทึกลงในระบบ Log สำหรับทดสอบ)";
+
+            return response()->json([
+                'success' => true,
+                'message' => $msg,
+                'recipient' => $creator->email,
+                'dev_otp' => $res['dev_otp'] ?? null,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'ไม่สามารถส่ง OTP สำหรับ Git Pull ได้: ' . $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Verify OTP and execute Git Pull + Cache Clear
+     */
+    public function gitPull(Request $request)
+    {
+        $this->ensureTheCreatorOnly();
+
+        $request->validate([
+            'otp' => 'required|string|size:6',
+        ]);
+
+        $otp = (string) $request->input('otp', '');
+        if (!$this->backupService->verifyGitPullOtp($otp)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'รหัสความปลอดภัย OTP ไม่ถูกต้องหรือหมดอายุแล้ว กรุณากดขอรหัส OTP ใหม่',
+                'status' => $this->backupService->getGitStatus(),
+            ], 422);
+        }
+
+        try {
+            $res = $this->backupService->pullFromGit();
 
             return response()->json($res);
         } catch (\Throwable $e) {

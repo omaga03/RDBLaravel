@@ -1038,11 +1038,33 @@ class SystemBackupService
                 }
             }
 
-            // Also restore storage files
-            $zip->extractTo(storage_path('app/public'), array_filter(
-                array_map(fn ($idx) => $zip->getNameIndex($idx), range(0, $zip->numFiles - 1)),
-                fn ($name) => str_starts_with($name, 'storage/')
-            ));
+            // Also restore storage files directly into storage/app/public/ (stripping leading 'storage/')
+            $targetBase = storage_path('app/public');
+            for ($i = 0; $i < $zip->numFiles; $i++) {
+                $entryName = $zip->getNameIndex($i);
+                if (!str_starts_with($entryName, 'storage/')) {
+                    continue;
+                }
+                $relPath = substr($entryName, strlen('storage/'));
+                $relPath = str_replace(['../', '..\\'], '', $relPath);
+                if ($relPath === '' || str_ends_with($relPath, '/')) {
+                    continue;
+                }
+                $destPath = $targetBase . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $relPath);
+                $destDir = dirname($destPath);
+                if (!is_dir($destDir)) {
+                    @mkdir($destDir, 0755, true);
+                }
+                $stream = $zip->getStream($entryName);
+                if ($stream) {
+                    $outFp = @fopen($destPath, 'wb');
+                    if ($outFp) {
+                        stream_copy_to_stream($stream, $outFp);
+                        fclose($outFp);
+                    }
+                    fclose($stream);
+                }
+            }
 
             $zip->close();
         }
@@ -1522,20 +1544,145 @@ class SystemBackupService
     }
 
     /**
-     * Record action in AuditLog
+     * Send Git Pull OTP to The Creator via Email
+     */
+    public function sendGitPullOtp(User $creator, string $ip, string $userAgent): array
+    {
+        $status = $this->getGitStatus();
+        $branch = $status['branch'] ?? 'main';
+        $targetLabel = "GIT PULL (origin/{$branch})";
+
+        $otp = (string) random_int(100000, 999999);
+        $cacheKey = 'git_pull_otp';
+
+        Cache::put($cacheKey, [
+            'otp' => $otp,
+            'creator_id' => $creator->id,
+            'branch' => $branch,
+            'ip' => $ip,
+            'requested_at' => time(),
+        ], 600);
+
+        $mailSent = false;
+        $errorMsg = null;
+        try {
+            Mail::to($creator->email)->send(
+                new RestoreOtpMail($otp, $targetLabel, $ip, $userAgent, $creator->name ?? 'The Creator')
+            );
+            $mailSent = true;
+        } catch (\Throwable $e) {
+            Log::warning("SystemBackupService: Failed to send Git Pull OTP email: {$e->getMessage()}");
+            $errorMsg = $e->getMessage();
+        }
+
+        Log::info("CRITICAL SECURITY: Git Pull OTP generated for origin/{$branch} by Creator #{$creator->id}: [{$otp}] (Expires in 10 mins)");
+
+        $this->logAction('git_pull_otp_requested', [
+            'branch' => $branch,
+            'creator_id' => $creator->id,
+            'ip' => $ip,
+            'mail_sent' => $mailSent,
+        ]);
+
+        return [
+            'success' => true,
+            'mail_sent' => $mailSent,
+            'recipient' => $creator->email,
+            'expires_in' => 600,
+            'error' => $errorMsg,
+            'dev_otp' => (config('app.env') === 'local' && config('mail.default') === 'log') ? $otp : null,
+        ];
+    }
+
+    /**
+     * Verify Git Pull OTP
+     */
+    public function verifyGitPullOtp(string $otp): bool
+    {
+        $cacheKey = 'git_pull_otp';
+        $data = Cache::get($cacheKey);
+
+        if (!$data || !is_array($data)) {
+            return false;
+        }
+
+        if (hash_equals((string) $data['otp'], trim($otp))) {
+            Cache::forget($cacheKey);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Pull latest code from remote origin and clear system caches
+     */
+    public function pullFromGit(): array
+    {
+        $status = $this->getGitStatus();
+        if (!$status['available']) {
+            throw new \RuntimeException('ระบบ Git ไม่พร้อมใช้งานบนเซิร์ฟเวอร์นี้');
+        }
+
+        $branch = $status['branch'] ?: 'main';
+        $outputs = [];
+
+        $pullProc = $this->runGitProcess(['pull', 'origin', $branch], 120);
+        $pullOut = trim($pullProc->getOutput() . "\n" . $pullProc->getErrorOutput());
+        if (!$pullProc->isSuccessful()) {
+            throw new \RuntimeException('คำสั่ง git pull ล้มเหลว: ' . $pullOut);
+        }
+        $outputs[] = "> git pull origin {$branch}:\n" . ($pullOut ?: 'Already up to date.');
+
+        try {
+            \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+            $outputs[] = "> php artisan optimize:clear:\n" . trim(\Illuminate\Support\Facades\Artisan::output());
+        } catch (\Throwable $e) {
+            // ignore cache clear error
+        }
+
+        $updatedStatus = $this->getGitStatus();
+
+        $this->logAction('git_sync_pulled', [
+            'branch' => $branch,
+            'commit_hash' => $updatedStatus['last_commit_hash'] ?? '-',
+        ]);
+
+        return [
+            'success' => true,
+            'message' => "ดึงโค้ดล่าสุดจาก GitHub (origin/{$branch}) และล้างแคชระบบสำเร็จเรียบร้อยแล้ว (Commit: {$updatedStatus['last_commit_hash']})",
+            'output' => implode("\n\n", $outputs),
+            'status' => $updatedStatus,
+        ];
+    }
+
+    /**
+     * Record action in AuditLog using the standard schema
      */
     protected function logAction(string $action, array $data = []): void
     {
         try {
-            AuditLog::create([
-                'user_id' => auth()->id() ?? 0,
-                'action' => $action,
-                'model_type' => 'SystemBackup',
-                'model_id' => 0,
-                'ip_address' => request()->ip() ?? '127.0.0.1',
-                'user_agent' => request()->userAgent() ?? 'CLI/System',
-                'details' => json_encode($data, JSON_UNESCAPED_UNICODE),
-            ]);
+            $remarksMap = [
+                'backup_db_created' => 'สร้างไฟล์สำรองฐานข้อมูล MariaDB (.sql.gz)',
+                'backup_files_created' => 'สร้างไฟล์สำรองเอกสาร Storage (.zip)',
+                'backup_full_created' => 'สร้างแพ็กเกจสำรองข้อมูลทั้งระบบเต็มรูปแบบ (Full Archive)',
+                'backup_deleted' => 'ลบไฟล์สำรองข้อมูลออกจากเซิร์ฟเวอร์',
+                'backups_cleaned_automatically' => 'ลบไฟล์สำรองเก่าอัตโนมัติตามรอบอายุ',
+                'restore_otp_requested' => 'ขอรหัสความปลอดภัย OTP สำหรับกู้คืนระบบ',
+                'backup_restored' => 'กู้คืนข้อมูลระบบจากไฟล์สำรองสำเร็จ',
+                'git_sync_pushed' => 'Commit และ Push โค้ดขึ้น GitHub Repository',
+                'git_pull_otp_requested' => 'ขอรหัสความปลอดภัย OTP สำหรับดึงโค้ดจาก GitHub (Git Pull)',
+                'git_sync_pulled' => 'ดึงโค้ดล่าสุดจาก GitHub (Git Pull) ลงเซิร์ฟเวอร์สำเร็จ',
+            ];
+
+            AuditLog::record(
+                event: $action,
+                auditable: 'SystemBackup',
+                oldValues: null,
+                newValues: $data,
+                remarks: $remarksMap[$action] ?? "SystemBackup: {$action}",
+                diffSummary: json_encode($data, JSON_UNESCAPED_UNICODE)
+            );
         } catch (\Throwable $e) {
             Log::info("SystemBackupService audit log: {$action}", $data);
         }

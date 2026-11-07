@@ -336,15 +336,13 @@
                                             <i class="bi bi-download"></i>
                                         </a>
 
-                                        <!-- Safe Restore Button (Database only) -->
-                                        @if($isDb)
-                                            <button type="button" 
-                                                    class="btn btn-outline-danger" 
-                                                    title="กู้คืนฐานข้อมูล (Restore with OTP)" 
-                                                    onclick="openRestoreModal('{{ $b['filename'] }}', '{{ $b['type'] }}', '{{ $b['size_formatted'] }}')">
-                                                <i class="bi bi-arrow-counterclockwise"></i>
-                                            </button>
-                                        @endif
+                                        <!-- Safe Restore Button (Database, Storage Files, or Full Archive) -->
+                                        <button type="button" 
+                                                class="btn btn-outline-danger" 
+                                                title="กู้คืนข้อมูลจากไฟล์สำรองนี้ (Restore with Email OTP)" 
+                                                onclick="openRestoreModal('{{ $b['filename'] }}', '{{ $b['type'] }}', '{{ $b['size_formatted'] }}')">
+                                            <i class="bi bi-arrow-counterclockwise"></i>
+                                        </button>
 
                                         <!-- Delete Button -->
                                         <form action="{{ route('backend.system_backup.delete') }}" 
@@ -599,6 +597,48 @@
                            placeholder="เช่น chore: update system changes">
                     <div class="form-text small text-body-secondary">
                         ระบบจะรันคำสั่ง <code>git add -A</code> ➔ <code>git commit -m "..."</code> ➔ <code>git push origin <span id="gitBranchCode">{{ $gitStatus['branch'] ?? 'main' }}</span></code> ตามลำดับ (เคารพกฎ <code>.gitignore</code> และไม่ส่งไฟล์ <code>.env</code> หรือไฟล์สำรองขนาดใหญ่)
+                    </div>
+                </div>
+
+                <!-- Git Pull with Email OTP Section (For Production Server Sync) -->
+                <div class="p-3 rounded-3 bg-body-tertiary border border-primary-subtle mb-2">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div>
+                            <div class="fw-bold text-body small">
+                                <i class="bi bi-cloud-download-fill text-primary me-1.5"></i>ดึงโค้ดล่าสุดจาก GitHub ลงเซิร์ฟเวอร์ (Git Pull with Email OTP)
+                            </div>
+                            <div class="text-body-secondary" style="font-size: 0.78rem;">
+                                สำหรับอัปเดตโค้ดบนเซิร์ฟเวอร์จริงจาก GitHub พร้อมล้างแคชระบบอัตโนมัติ (ต้องยืนยันรหัส OTP 6 หลักทางอีเมลก่อนเสมอ)
+                            </div>
+                        </div>
+                        <button type="button" id="btnSendGitPullOtp" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1.5" onclick="sendGitPullOtp()">
+                            <span id="gitPullOtpSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                            <i class="bi bi-envelope-check"></i> ขอรหัส OTP เพื่อ Git Pull
+                        </button>
+                    </div>
+
+                    <!-- OTP Verification Box (Shown after requesting OTP) -->
+                    <div id="gitPullOtpBox" class="d-none mt-2.5 pt-2.5 border-top">
+                        <div class="small text-success fw-semibold mb-2" id="gitPullOtpSentMsg"></div>
+                        <div class="row g-2 align-items-center">
+                            <div class="col-sm-6">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-body"><i class="bi bi-key-fill text-primary"></i></span>
+                                    <input type="text"
+                                           id="gitPullOtpInput"
+                                           class="form-control font-monospace text-center fw-bold"
+                                           maxlength="6"
+                                           placeholder="รหัส OTP 6 หลัก"
+                                           style="letter-spacing: 0.2em; font-variant-numeric: tabular-nums;">
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <button type="button" id="btnExecuteGitPull" class="btn btn-primary btn-sm w-100 d-inline-flex align-items-center justify-content-center gap-1.5 fw-semibold" onclick="executeGitPull()">
+                                    <span id="gitPullExecSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                                    <i class="bi bi-cloud-arrow-down-fill"></i> ยืนยัน OTP &amp; ดึงโค้ด (Git Pull)
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -923,6 +963,9 @@ function openGitSyncModal() {
     }
     document.getElementById('gitOutputSection').classList.add('d-none');
     document.getElementById('gitOutputConsole').innerText = '';
+    document.getElementById('gitPullOtpBox').classList.add('d-none');
+    document.getElementById('gitPullOtpInput').value = '';
+    document.getElementById('btnSendGitPullOtp').disabled = false;
 
     const modalEl = document.getElementById('gitSyncModal');
     if (modalEl) {
@@ -1079,6 +1122,102 @@ function executeGitPush() {
         icon.classList.remove('d-none');
         btn.disabled = false;
         btnText.innerText = 'Commit & Push ขึ้น GitHub ทันที';
+        outConsole.className = 'p-3 bg-dark text-danger rounded-3 font-monospace mb-0';
+        outConsole.innerText = '✗ เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์';
+    });
+}
+
+function sendGitPullOtp() {
+    const btn = document.getElementById('btnSendGitPullOtp');
+    const spinner = document.getElementById('gitPullOtpSpinner');
+    btn.disabled = true;
+    spinner.classList.remove('d-none');
+
+    fetch('{{ route('backend.system_backup.git_pull_otp') }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        spinner.classList.add('d-none');
+        btn.disabled = false;
+        if (data.success) {
+            document.getElementById('gitPullOtpBox').classList.remove('d-none');
+            document.getElementById('gitPullOtpSentMsg').innerText = '✓ ' + (data.message || 'ส่งรหัส OTP เรียบร้อยแล้ว');
+            if (data.dev_otp) {
+                document.getElementById('gitPullOtpInput').value = data.dev_otp;
+            }
+            document.getElementById('gitPullOtpInput').focus();
+        } else {
+            alert(data.message || 'ไม่สามารถส่งรหัส OTP ได้');
+        }
+    })
+    .catch(() => {
+        spinner.classList.add('d-none');
+        btn.disabled = false;
+        alert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
+    });
+}
+
+function executeGitPull() {
+    const otpInput = document.getElementById('gitPullOtpInput');
+    const otp = otpInput ? otpInput.value.trim() : '';
+    if (otp.length !== 6) {
+        alert('กรุณากรอกรหัสความปลอดภัย OTP 6 หลักที่ได้รับทางอีเมล');
+        if (otpInput) otpInput.focus();
+        return;
+    }
+
+    if (!confirm('ยืนยันดึงโค้ดล่าสุดจาก GitHub (git pull) และล้างแคชระบบทันทีหรือไม่?')) {
+        return;
+    }
+
+    const btn = document.getElementById('btnExecuteGitPull');
+    const spinner = document.getElementById('gitPullExecSpinner');
+    const outSec = document.getElementById('gitOutputSection');
+    const outConsole = document.getElementById('gitOutputConsole');
+
+    btn.disabled = true;
+    spinner.classList.remove('d-none');
+    outSec.classList.remove('d-none');
+    outConsole.className = 'p-3 bg-dark text-info rounded-3 font-monospace mb-0';
+    outConsole.innerText = 'กำลังตรวจสอบรหัส OTP และรันคำสั่ง git pull origin... กรุณารอสักครู่';
+
+    fetch('{{ route('backend.system_backup.git_pull') }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({ otp: otp })
+    })
+    .then(res => res.json())
+    .then(data => {
+        spinner.classList.add('d-none');
+        btn.disabled = false;
+
+        if (data.status) {
+            renderGitStatus(data.status);
+        }
+
+        if (data.success) {
+            document.getElementById('gitPullOtpBox').classList.add('d-none');
+            otpInput.value = '';
+            outConsole.className = 'p-3 bg-dark text-success rounded-3 font-monospace mb-0';
+            outConsole.innerText = '✓ ' + (data.message || 'สำเร็จ') + '\n\n' + (data.output || '');
+        } else {
+            outConsole.className = 'p-3 bg-dark text-danger rounded-3 font-monospace mb-0';
+            outConsole.innerText = '✗ เกิดข้อผิดพลาด: ' + (data.message || 'ไม่สามารถดึงโค้ดจาก GitHub ได้');
+        }
+    })
+    .catch(() => {
+        spinner.classList.add('d-none');
+        btn.disabled = false;
         outConsole.className = 'p-3 bg-dark text-danger rounded-3 font-monospace mb-0';
         outConsole.innerText = '✗ เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์';
     });
