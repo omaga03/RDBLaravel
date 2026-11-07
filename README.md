@@ -91,26 +91,30 @@ npm run build
 
 ---
 
-## 🗄️ ขั้นตอนที่ 5: นำเข้าฐานข้อมูลจริง (Database Setup)
+## 🗄️ ขั้นตอนที่ 5: นำเข้าฐานข้อมูลและรัน Migration (Single-Command Database Setup)
 
-พิมพ์คำสั่งนำเข้าฐานข้อมูลและสร้างตารางโครงสร้างทั้งหมด:
+ระบบฐานข้อมูลได้รับการจัดลำดับ Migration ทั้ง **38 ขั้นตอน (5 Phases)** ให้ทำงานแบบ **Idempotent 100%** (ตรวจสอบตาราง, คอลัมน์, Foreign Key, และ Index ก่อนสร้างเสมอ) จึงสามารถใช้คำสั่ง **`php artisan migrate --force` เพียงคำสั่งเดียว** ได้ในทุกกรณี:
 
 ```bash
 # 1. สร้างฐานข้อมูล rdbpcru เปล่า
 mysql -u root -e "CREATE DATABASE IF NOT EXISTS rdbpcru CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
-# 2. นำเข้าข้อมูลจริงจากไฟล์ SQL Dump (เช่น DB_PCRURDI_691031.sql)
-mysql -u root --default-character-set=utf8mb4 --max_allowed_packet=128M rdbpcru -e "source C:/laragon/www/laravel_rdb/database/migrations/DB_PCRURDI_691031.sql"
+# 2. กู้คืนข้อมูลจากไฟล์สำรองชุดสมบูรณ์ (แนะนำ) หรือนำเข้า SQL จากระบบเดิม
+php artisan rdb:restore backup_db_xxxxxxxx_xxxxxx.sql.gz --force
 
-# 3. รันคำสั่งสร้าง View Aliases (ป้องกันปัญหา Table / View เดิม)
-mysql -u root rdbpcru -e "CREATE OR REPLACE VIEW \`rdb_project_type\` AS SELECT * FROM \`rdb_project_type----\`; CREATE OR REPLACE VIEW \`rdb_strategic\` AS SELECT * FROM \`rdb_strategic---\`;"
+# 3. รันคำสั่งอัปเดตโครงสร้างฐานข้อมูลและ View Aliases ทั้งระบบในคำสั่งเดียว
+php artisan migrate --force
 
-# 4. อัปเดตโครงสร้างระบบล่าสุด
-php artisan migrate
-
-# 5. เชื่อมโยงโฟลเดอร์จัดเก็บไฟล์เอกสาร/ไฟล์แนบวิจัย
+# 4. เชื่อมโยงโฟลเดอร์จัดเก็บไฟล์เอกสาร/ไฟล์แนบวิจัย
 php artisan storage:link
 ```
+
+### 📋 ลำดับการทำงานอัตโนมัติของระบบ Migration (5 Phases — 38 ไฟล์):
+1. **Phase 0 (`0000_00_00_000000`) — โครงสร้างตารางพื้นฐานและ View Aliases:** สร้างตารางพื้นฐานจาก [`database/schema/legacy_base_tables.sql`](database/schema/legacy_base_tables.sql) (กรณีฐานข้อมูลว่างเปล่า) และสร้าง View `rdb_project_type` / `rdb_strategic` อัตโนมัติ
+2. **Phase 1 (`0001_01_01_*` ถึง `2019_12_14_*`) — ตารางระบบหลักของ Laravel 12:** สร้างตาราง `users`, `password_reset_tokens`, `sessions`, `cache`, `jobs`, และ `personal_access_tokens` (Sanctum API)
+3. **Phase 2 (`2025_12_15_*` ถึง `2025_12_29_*`) — ปรับปรุงตารางวิจัยเดิม:** เพิ่ม `remember_token`, เชื่อม Foreign Key `depcat_id`, ตั้งค่าเริ่มต้น `pub_download`, เพิ่มที่อยู่หน่วยงานใช้ประโยชน์ (`utz_department_address`), และ `researcher_hindex`
+4. **Phase 3 (`2026_01_03_*`) — ระบบจัดเก็บไฟล์คู่ขนาน (Dual File Path & UUID Storage):** เพิ่มคอลัมน์ `*_safe_name`, `*_path`, `*_size`, `*_mime_type` ครบทั้ง 12 ตารางโมดูลไฟล์แนบและรูปภาพ
+5. **Phase 4 (`2026_10_18_*` ถึง `2026_11_06_*`) — ฟีเจอร์ระดับองค์กร, Peer Review, WebP และ Performance Indexes:** สร้างตาราง `system_settings`, `user_role_scopes`, `audit_logs`, `notifications`, `rdb_project_types_master`, ระบบประเมินโครงการวิจัย 6 ตาราง (`rdb_review_*`), คอลัมน์หน้าปก PDF (`pro_cover_path`, `pub_cover_path`), การแจ้งเตือน Telegram, และ Composite Indexes เพิ่มความเร็วการค้นหา
 
 ---
 

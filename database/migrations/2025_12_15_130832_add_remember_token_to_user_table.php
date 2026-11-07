@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('user', function (Blueprint $table) {
-            $table->rememberToken();
-        });
+        if (Schema::hasTable('user') && !Schema::hasColumn('user', 'remember_token')) {
+            Schema::table('user', function (Blueprint $table) {
+                $table->rememberToken();
+            });
+        }
     }
 
     /**
@@ -21,8 +23,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('user', function (Blueprint $table) {
-            $table->dropRememberToken();
-        });
+        if (Schema::hasTable('user') && Schema::hasColumn('user', 'remember_token')) {
+            Schema::table('user', function (Blueprint $table) {
+                $table->dropRememberToken();
+            });
+        }
     }
 };

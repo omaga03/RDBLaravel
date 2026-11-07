@@ -11,18 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_role_scopes', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('user_id')->index();
-            $table->string('role_name', 64)->index();
-            $table->unsignedInteger('department_id')->nullable()->index();
-            $table->string('domain_key', 32)->nullable()->index();
-            $table->boolean('is_active')->default(true);
-            $table->string('notes', 255)->nullable();
-            $table->timestamps();
+        if (!Schema::hasTable('user_role_scopes')) {
+            Schema::create('user_role_scopes', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('user_id')->index();
+                $table->string('role_name', 64)->index();
+                $table->unsignedInteger('department_id')->nullable()->index();
+                $table->string('domain_key', 32)->nullable()->index();
+                $table->boolean('is_active')->default(true);
+                $table->string('notes', 255)->nullable();
+                $table->timestamps();
 
-            $table->index(['user_id', 'is_active']);
-        });
+                $table->index(['user_id', 'is_active']);
+            });
+        }
     }
 
     /**

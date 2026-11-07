@@ -11,12 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('rdb_project', function (Blueprint $table) {
-            // Drop FK first
-            $table->dropForeign('fk_depcou_id');
-            // Then drop columns
-            $table->dropColumn(['depcou_id', 'major_id']);
-        });
+        if (!Schema::hasTable('rdb_project')) {
+            return;
+        }
+
+        // Preserve depcou_id and major_id columns (2,658 historical records exist in rdb_project).
+        // Only drop legacy fk_depcou_id foreign key constraint if it still exists.
+        $foreignKeys = array_map(fn ($fk) => $fk['name'] ?? '', Schema::getForeignKeys('rdb_project'));
+        if (in_array('fk_depcou_id', $foreignKeys, true)) {
+            Schema::table('rdb_project', function (Blueprint $table) {
+                $table->dropForeign('fk_depcou_id');
+            });
+        }
     }
 
     /**

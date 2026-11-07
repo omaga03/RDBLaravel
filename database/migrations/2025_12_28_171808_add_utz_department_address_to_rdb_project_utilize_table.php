@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('rdb_project_utilize', function (Blueprint $table) {
-            $table->text('utz_department_address')->nullable()->after('utz_department_name');
-        });
+        if (Schema::hasTable('rdb_project_utilize') && !Schema::hasColumn('rdb_project_utilize', 'utz_department_address')) {
+            Schema::table('rdb_project_utilize', function (Blueprint $table) {
+                $table->text('utz_department_address')->nullable()->after('utz_department_name');
+            });
+        }
     }
 
     /**
@@ -21,8 +23,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('rdb_project_utilize', function (Blueprint $table) {
-            $table->dropColumn('utz_department_address');
-        });
+        if (Schema::hasTable('rdb_project_utilize') && Schema::hasColumn('rdb_project_utilize', 'utz_department_address')) {
+            Schema::table('rdb_project_utilize', function (Blueprint $table) {
+                $table->dropColumn('utz_department_address');
+            });
+        }
     }
 };

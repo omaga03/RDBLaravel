@@ -11,16 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('rdb_project', function (Blueprint $table) {
-            // Ensure the column is indexed (foreign keys technically create one, but good to be explicit or just let FK do it)
-            // Adding Foreign Key
-            // Assuming rdb_department_category is the table name and depcat_id is the PK
-            $table->foreign('depcat_id', 'fk_rdb_project_depcat_id')
-                  ->references('depcat_id')
-                  ->on('rdb_department_category')
-                  ->onDelete('set null')
-                  ->onUpdate('cascade');
-        });
+        if (!Schema::hasTable('rdb_project') || !Schema::hasTable('rdb_department_category')) {
+            return;
+        }
+
+        $foreignKeys = array_map(fn ($fk) => $fk['name'] ?? '', Schema::getForeignKeys('rdb_project'));
+        if (!in_array('fk_rdb_project_depcat_id', $foreignKeys, true)) {
+            Schema::table('rdb_project', function (Blueprint $table) {
+                $table->foreign('depcat_id', 'fk_rdb_project_depcat_id')
+                      ->references('depcat_id')
+                      ->on('rdb_department_category')
+                      ->onDelete('set null')
+                      ->onUpdate('cascade');
+            });
+        }
     }
 
     /**
@@ -28,8 +32,15 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('rdb_project', function (Blueprint $table) {
-            $table->dropForeign('fk_rdb_project_depcat_id');
-        });
+        if (!Schema::hasTable('rdb_project')) {
+            return;
+        }
+
+        $foreignKeys = array_map(fn ($fk) => $fk['name'] ?? '', Schema::getForeignKeys('rdb_project'));
+        if (in_array('fk_rdb_project_depcat_id', $foreignKeys, true)) {
+            Schema::table('rdb_project', function (Blueprint $table) {
+                $table->dropForeign('fk_rdb_project_depcat_id');
+            });
+        }
     }
 };

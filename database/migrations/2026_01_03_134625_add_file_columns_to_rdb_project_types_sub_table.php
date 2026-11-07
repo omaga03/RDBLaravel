@@ -11,12 +11,24 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Schema::table('rdb_project_types_sub', function (Blueprint $table) {
-        //     $table->string('pts_safe_name')->nullable()->after('pts_file');
-        //     $table->string('pts_path')->nullable()->after('pts_safe_name');
-        //     $table->integer('pts_size')->nullable()->after('pts_path');
-        //     $table->string('pts_mime_type', 100)->nullable()->after('pts_size');
-        // });
+        if (!Schema::hasTable('rdb_project_types_sub')) {
+            return;
+        }
+
+        Schema::table('rdb_project_types_sub', function (Blueprint $table) {
+            if (!Schema::hasColumn('rdb_project_types_sub', 'pts_safe_name')) {
+                $table->string('pts_safe_name')->nullable()->after('pts_file');
+            }
+            if (!Schema::hasColumn('rdb_project_types_sub', 'pts_path')) {
+                $table->string('pts_path')->nullable()->after('pts_safe_name');
+            }
+            if (!Schema::hasColumn('rdb_project_types_sub', 'pts_size')) {
+                $table->unsignedBigInteger('pts_size')->nullable()->after('pts_path');
+            }
+            if (!Schema::hasColumn('rdb_project_types_sub', 'pts_mime_type')) {
+                $table->string('pts_mime_type', 100)->nullable()->after('pts_size');
+            }
+        });
     }
 
     /**
@@ -24,8 +36,16 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Schema::table('rdb_project_types_sub', function (Blueprint $table) {
-        //     $table->dropColumn(['pts_safe_name', 'pts_path', 'pts_size', 'pts_mime_type']);
-        // });
+        if (!Schema::hasTable('rdb_project_types_sub')) {
+            return;
+        }
+
+        Schema::table('rdb_project_types_sub', function (Blueprint $table) {
+            foreach (['pts_safe_name', 'pts_path', 'pts_size', 'pts_mime_type'] as $col) {
+                if (Schema::hasColumn('rdb_project_types_sub', $col)) {
+                    $table->dropColumn($col);
+                }
+            }
+        });
     }
 };

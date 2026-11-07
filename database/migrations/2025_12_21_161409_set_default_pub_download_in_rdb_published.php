@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('rdb_published', function (Blueprint $table) {
-            $table->integer('pub_download')->default(0)->change();
-        });
+        if (Schema::hasTable('rdb_published') && Schema::hasColumn('rdb_published', 'pub_download')) {
+            Schema::table('rdb_published', function (Blueprint $table) {
+                $table->integer('pub_download')->default(0)->change();
+            });
+        }
     }
 
     /**
