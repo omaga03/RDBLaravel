@@ -342,7 +342,7 @@
                                                     class="btn btn-outline-danger" 
                                                     title="กู้คืนฐานข้อมูล (Restore with OTP)" 
                                                     onclick="openRestoreModal('{{ $b['filename'] }}', '{{ $b['type'] }}', '{{ $b['size_formatted'] }}')">
-                                                <i class="bi bi-arrow-counterclockwise"></i> กู้คืน
+                                                <i class="bi bi-arrow-counterclockwise"></i>
                                             </button>
                                         @endif
 

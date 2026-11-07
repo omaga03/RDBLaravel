@@ -1297,7 +1297,7 @@ class SystemBackupService
     }
 
     /**
-     * Run a git command safely in project root
+     * Run a git command safely in project root (with full user profile environment for Apache/HTTPD)
      */
     protected function runGitProcess(array $args, int $timeout = 60): Process
     {
@@ -1306,8 +1306,27 @@ class SystemBackupService
             throw new \RuntimeException('ไม่พบคำสั่ง git บนเซิร์ฟเวอร์');
         }
 
+        $env = null;
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            $userProfile = getenv('USERPROFILE') ?: ($_SERVER['USERPROFILE'] ?? '');
+            if ((!$userProfile || !is_dir($userProfile)) && is_dir('C:\Users\User')) {
+                $userProfile = 'C:\Users\User';
+            }
+            if ($userProfile && is_dir($userProfile)) {
+                $env = [
+                    'HOME' => $userProfile,
+                    'USERPROFILE' => $userProfile,
+                    'APPDATA' => getenv('APPDATA') ?: ($userProfile . '\AppData\Roaming'),
+                    'LOCALAPPDATA' => getenv('LOCALAPPDATA') ?: ($userProfile . '\AppData\Local'),
+                    'SystemRoot' => getenv('SystemRoot') ?: 'C:\Windows',
+                    'PATH' => getenv('PATH') ?: ($_SERVER['PATH'] ?? ''),
+                    'GIT_TERMINAL_PROMPT' => '0',
+                ];
+            }
+        }
+
         $cmd = array_merge([$git], $args);
-        $process = new Process($cmd, base_path());
+        $process = new Process($cmd, base_path(), $env);
         $process->setTimeout($timeout);
         $process->run();
 
@@ -1459,7 +1478,15 @@ class SystemBackupService
             }
             $outputs[] = '> git add -A: สำเร็จ (' . $status['changed_count'] . ' ไฟล์)';
 
-            $commitProc = $this->runGitProcess(['commit', '-m', $commitMessage], 30);
+            $authorName = env('GIT_AUTHOR_NAME', 'omaga03');
+            $authorEmail = env('GIT_AUTHOR_EMAIL', auth()->user()->email ?? 'omaga03@gmail.com');
+
+            $commitProc = $this->runGitProcess([
+                '-c', "user.name={$authorName}",
+                '-c', "user.email={$authorEmail}",
+                'commit',
+                '-m', $commitMessage,
+            ], 30);
             $commitOut = trim($commitProc->getOutput() . "\n" . $commitProc->getErrorOutput());
             if (!$commitProc->isSuccessful() && !str_contains($commitOut, 'nothing to commit')) {
                 throw new \RuntimeException('คำสั่ง git commit ล้มเหลว: ' . $commitOut);
