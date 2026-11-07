@@ -221,6 +221,8 @@ Route::prefix('backend')->name('backend.')->middleware(['auth', \App\Http\Middle
     // System Backup & Disaster Recovery Hub (ศูนย์สำรองและกู้คืนข้อมูลระบบ - The Creator Only)
     Route::get('/system-backup', [\App\Http\Controllers\Backend\SystemBackupController::class, 'index'])->name('system_backup.index');
     Route::post('/system-backup/create', [\App\Http\Controllers\Backend\SystemBackupController::class, 'create'])->name('system_backup.create');
+    Route::get('/system-backup/progress', [\App\Http\Controllers\Backend\SystemBackupController::class, 'progress'])->name('system_backup.progress');
+    Route::post('/system-backup/cancel', [\App\Http\Controllers\Backend\SystemBackupController::class, 'cancelProgress'])->name('system_backup.cancel');
     Route::get('/system-backup/download/{filename}', [\App\Http\Controllers\Backend\SystemBackupController::class, 'download'])->name('system_backup.download');
     Route::delete('/system-backup/{filename}', [\App\Http\Controllers\Backend\SystemBackupController::class, 'destroy'])->name('system_backup.destroy');
     Route::post('/system-backup/restore-otp', [\App\Http\Controllers\Backend\SystemBackupController::class, 'requestRestoreOtp'])->name('system_backup.request_otp');

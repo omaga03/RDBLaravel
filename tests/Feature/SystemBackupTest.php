@@ -130,4 +130,46 @@ class SystemBackupTest extends TestCase
         $response->assertStatus(200);
         $this->assertStringContainsString('attachment;', $response->headers->get('content-disposition'));
     }
+
+    /**
+     * The Creator can trigger background backup and track progress via AJAX
+     */
+    public function test_creator_can_trigger_background_backup_and_poll_progress(): void
+    {
+        $creator = User::where('id', 129)->first();
+        if (!$creator) {
+            $creator = User::factory()->create(['id' => 129]);
+        }
+
+        SystemBackupService::clearProgress();
+
+        // 1. Dispatch backup via AJAX
+        $response = $this->actingAs($creator)->postJson('/backend/system-backup/create', [
+            'type' => 'db',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+            'type' => 'db',
+        ]);
+
+        // 2. Poll progress
+        $progressRes = $this->actingAs($creator)->getJson('/backend/system-backup/progress');
+        $progressRes->assertStatus(200);
+        $progressRes->assertJsonStructure([
+            'running',
+            'progress' => [
+                'status',
+                'percent',
+            ],
+        ]);
+
+        // 3. Clear progress
+        $cancelRes = $this->actingAs($creator)->postJson('/backend/system-backup/cancel');
+        $cancelRes->assertStatus(200);
+        $cancelRes->assertJson(['success' => true]);
+
+        $this->assertNull(SystemBackupService::getProgress());
+    }
 }

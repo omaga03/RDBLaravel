@@ -41,18 +41,22 @@ class SystemBackupController extends Controller
         $storageSizeFormatted = $this->backupService->formatBytes($this->backupService->getStorageSize());
         $mysqldumpAvailable = !empty($this->backupService->getMysqldumpBinary());
         $mysqlAvailable = !empty($this->backupService->getMysqlBinary());
+        $currentProgress = SystemBackupService::getProgress();
+        $isBackupRunning = SystemBackupService::isBackupRunning();
 
         return view('backend.system_backup.index', compact(
             'backupList',
             'dbSizeFormatted',
             'storageSizeFormatted',
             'mysqldumpAvailable',
-            'mysqlAvailable'
+            'mysqlAvailable',
+            'currentProgress',
+            'isBackupRunning'
         ));
     }
 
     /**
-     * Trigger backup creation
+     * Trigger backup creation (Asynchronous Background Execution)
      */
     public function create(Request $request)
     {
@@ -64,24 +68,68 @@ class SystemBackupController extends Controller
 
         $type = $request->input('type');
 
-        try {
-            if ($type === 'db') {
-                $res = $this->backupService->createDatabaseBackup();
-                $msg = "สำรองฐานข้อมูลสำเร็จ: {$res['filename']} ({$res['size_formatted']})";
-            } elseif ($type === 'files') {
-                $res = $this->backupService->createFilesBackup();
-                $msg = "สำรองไฟล์ Storage สำเร็จ: {$res['filename']} ({$res['size_formatted']}, " . number_format($res['file_count']) . " ไฟล์)";
-            } else {
-                $res = $this->backupService->createFullBackup();
-                $msg = "สำรองข้อมูลทั้งระบบ (Full Archive) สำเร็จ: {$res['filename']} ({$res['size_formatted']})";
+        // Prevent overlapping backups
+        if (SystemBackupService::isBackupRunning()) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'มีกระบวนการสำรองข้อมูลกำลังดำเนินการอยู่แล้ว กรุณารอสักครู่',
+                    'progress' => SystemBackupService::getProgress(),
+                ], 429);
             }
-
             return redirect()->route('backend.system_backup.index')
-                             ->with('success', $msg);
-        } catch (\Throwable $e) {
-            return redirect()->route('backend.system_backup.index')
-                             ->with('error', 'การสำรองข้อมูลล้มเหลว: ' . $e->getMessage());
+                             ->with('warning', 'มีกระบวนการสำรองข้อมูลกำลังดำเนินการอยู่แล้ว');
         }
+
+        // Dispatch background worker
+        $this->backupService->dispatchBackgroundBackup($type);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'เริ่มต้นกระบวนการสำรองข้อมูลในเบื้องหลังเรียบร้อยแล้ว',
+                'type' => $type,
+                'progress' => SystemBackupService::getProgress(),
+            ]);
+        }
+
+        return redirect()->route('backend.system_backup.index')
+                         ->with('success', 'ระบบกำลังดำเนินการสำรองข้อมูลในเบื้องหลัง พร้อมแสดงแถบสถานะการทำงาน');
+    }
+
+    /**
+     * Get real-time backup progress (AJAX polling)
+     */
+    public function progress()
+    {
+        $this->ensureTheCreatorOnly();
+
+        $progress = SystemBackupService::getProgress();
+        $isRunning = SystemBackupService::isBackupRunning();
+
+        return response()->json([
+            'running' => $isRunning,
+            'progress' => $progress ?: [
+                'status' => 'idle',
+                'percent' => 0,
+                'stage_label' => 'ไม่มีงานสำรองข้อมูลที่กำลังทำงาน',
+            ],
+        ]);
+    }
+
+    /**
+     * Cancel or clear backup progress state
+     */
+    public function cancelProgress()
+    {
+        $this->ensureTheCreatorOnly();
+
+        SystemBackupService::clearProgress();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'ล้างสถานะการสำรองข้อมูลเรียบร้อยแล้ว',
+        ]);
     }
 
     /**

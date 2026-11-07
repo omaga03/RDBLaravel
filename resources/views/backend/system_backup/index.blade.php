@@ -131,10 +131,10 @@
                                 สกัดตารางทั้งหมดในฐานข้อมูล MariaDB เป็นไฟล์บีบอัด <code>.sql.gz</code> รวดเร็ว ประหยัดพื้นที่ เหมาะสำหรับสำรองประจำวัน
                             </p>
                         </div>
-                        <form action="{{ route('backend.system_backup.create') }}" method="POST" onsubmit="return confirm('ยืนยันสำรองเฉพาะฐานข้อมูล (Database .sql.gz)?');">
+                        <form id="formBackupDb" action="{{ route('backend.system_backup.create') }}" method="POST" onsubmit="return triggerBackup(event, 'db', 'ยืนยันสำรองเฉพาะฐานข้อมูล MariaDB (.sql.gz) ทันที?');">
                             @csrf
                             <input type="hidden" name="type" value="db">
-                            <button type="submit" class="btn btn-outline-primary btn-sm w-100 d-inline-flex align-items-center justify-content-center gap-1.5 py-2">
+                            <button type="submit" class="btn btn-outline-primary btn-sm w-100 d-inline-flex align-items-center justify-content-center gap-1.5 py-2 btn-backup-trigger" {{ $isBackupRunning ? 'disabled' : '' }}>
                                 <i class="bi bi-database-down"></i> สำรองฐานข้อมูลทันที (.sql.gz)
                             </button>
                         </form>
@@ -152,10 +152,10 @@
                                 บีบอัดเอกสาร PDF รายงานวิจัยและภาพปกทั้งหมดใน <code>storage/app/public/</code> เป็นไฟล์ <code>.zip</code> ป้องกันไฟล์เอกสารสูญหาย
                             </p>
                         </div>
-                        <form action="{{ route('backend.system_backup.create') }}" method="POST" onsubmit="return confirm('ยืนยันสำรองไฟล์เอกสาร Storage (.zip)?');">
+                        <form id="formBackupFiles" action="{{ route('backend.system_backup.create') }}" method="POST" onsubmit="return triggerBackup(event, 'files', 'ยืนยันสำรองไฟล์เอกสาร Storage (.zip)? ระบบจะทำงานในเบื้องหลังพร้อมแถบแสดงสถานะสด (Storage ~{{ $storageSizeFormatted }})');">
                             @csrf
                             <input type="hidden" name="type" value="files">
-                            <button type="submit" class="btn btn-outline-info btn-sm w-100 d-inline-flex align-items-center justify-content-center gap-1.5 py-2">
+                            <button type="submit" class="btn btn-outline-info btn-sm w-100 d-inline-flex align-items-center justify-content-center gap-1.5 py-2 btn-backup-trigger" {{ $isBackupRunning ? 'disabled' : '' }}>
                                 <i class="bi bi-file-earmark-zip"></i> สำรองไฟล์เอกสารทันที (.zip)
                             </button>
                         </form>
@@ -173,15 +173,92 @@
                                 รวมทั้งฐานข้อมูล MariaDB และไฟล์ Storage ทั้งหมดไว้ในแพ็กเกจเดียว (Full Archive) สำหรับเตรียมย้ายเซิร์ฟเวอร์หรือกู้คืนฉุกเฉิน
                             </p>
                         </div>
-                        <form action="{{ route('backend.system_backup.create') }}" method="POST" onsubmit="return confirm('ยืนยันสำรองทั้งระบบแบบเต็ม (Full Archive DB + Files)? อาจใช้เวลา 1-3 นาทีขึ้นอยู่กับขนาดไฟล์');">
+                        <form id="formBackupAll" action="{{ route('backend.system_backup.create') }}" method="POST" onsubmit="return triggerBackup(event, 'all', 'ยืนยันสำรองทั้งระบบแบบเต็ม (Full Archive DB + Files)? ระบบจะทำงานในเบื้องหลังพร้อมแถบแสดงสถานะสด');">
                             @csrf
                             <input type="hidden" name="type" value="all">
-                            <button type="submit" class="btn btn-success btn-sm w-100 d-inline-flex align-items-center justify-content-center gap-1.5 py-2">
+                            <button type="submit" class="btn btn-success btn-sm w-100 d-inline-flex align-items-center justify-content-center gap-1.5 py-2 btn-backup-trigger" {{ $isBackupRunning ? 'disabled' : '' }}>
                                 <i class="bi bi-cloud-arrow-down-fill"></i> สำรองทั้งระบบเต็มรูปแบบ
                             </button>
                         </form>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2.5 Live Backup Progress Card -->
+    <div id="backupProgressCard" class="card border border-primary-subtle shadow-sm mb-4 {{ ($isBackupRunning || (!empty($currentProgress) && in_array(($currentProgress['status'] ?? ''), ['running', 'completed', 'failed']))) ? '' : 'd-none' }}" style="background: var(--bs-card-bg);">
+        <div class="card-header bg-primary-subtle py-2.5 px-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <span id="backupSpinnerIcon" class="spinner-border spinner-border-sm text-primary {{ ($currentProgress['status'] ?? '') === 'running' ? '' : 'd-none' }}" role="status"></span>
+                <i id="backupStatusIcon" class="bi {{ ($currentProgress['status'] ?? '') === 'completed' ? 'bi-check-circle-fill text-success' : (($currentProgress['status'] ?? '') === 'failed' ? 'bi-exclamation-triangle-fill text-danger' : 'bi-activity text-primary') }} fs-5"></i>
+                <h6 class="mb-0 fw-bold text-body" id="backupHeaderTitle">สถานะการสำรองข้อมูลสด (Live Backup Progress)</h6>
+                <span id="backupTypeBadge" class="badge bg-primary text-white ms-1">{{ $currentProgress['type_label'] ?? 'กำลังประมวลผล' }}</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-body border text-body-secondary fw-semibold px-2.5 py-1.5" style="font-variant-numeric: tabular-nums;">
+                    <i class="bi bi-stopwatch me-1 text-primary"></i>เวลาที่ใช้ไป: <span id="backupElapsedTime">{{ isset($currentProgress['elapsed_seconds']) ? sprintf('%02d:%02d', floor($currentProgress['elapsed_seconds'] / 60), $currentProgress['elapsed_seconds'] % 60) : '00:00' }}</span>
+                </span>
+                <button type="button" id="btnCancelBackup" class="btn btn-outline-secondary btn-sm py-0.5 px-2" onclick="cancelBackupProcess()" title="ปิด/ล้างแถบสถานะ">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card-body p-3 p-md-4">
+            <!-- Progress Bar -->
+            <div class="d-flex align-items-center justify-content-between mb-1.5">
+                <div class="fw-semibold text-body small d-flex align-items-center gap-1.5">
+                    <span id="backupStageLabel">{{ $currentProgress['stage_label'] ?? 'กำลังจัดเตรียมข้อมูล...' }}</span>
+                </div>
+                <div class="fw-bold text-primary small" id="backupPercentLabel" style="font-variant-numeric: tabular-nums;">
+                    {{ $currentProgress['percent'] ?? 0 }}%
+                </div>
+            </div>
+            <div class="progress mb-2.5" style="height: 18px; border-radius: 6px; background-color: var(--bs-tertiary-bg);" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+                <div id="backupProgressBar" 
+                     class="progress-bar progress-bar-striped {{ ($currentProgress['status'] ?? '') === 'running' ? 'progress-bar-animated' : '' }} {{ ($currentProgress['status'] ?? '') === 'completed' ? 'bg-success' : (($currentProgress['status'] ?? '') === 'failed' ? 'bg-danger' : 'bg-primary') }} fw-bold" 
+                     style="width: {{ $currentProgress['percent'] ?? 0 }}%; font-size: 0.75rem; transition: width 0.3s ease;">
+                    {{ $currentProgress['percent'] ?? 0 }}%
+                </div>
+            </div>
+
+            <!-- Details Strip -->
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 small text-body-secondary">
+                <div class="d-flex align-items-center gap-2 text-truncate" style="max-width: 70%;">
+                    <i class="bi bi-file-earmark-code text-body-tertiary"></i>
+                    <span id="backupCurrentFile" class="font-monospace text-truncate text-body-tertiary" style="font-size: 0.8rem;">
+                        {{ $currentProgress['current_file'] ?? '' }}
+                    </span>
+                </div>
+                <div id="backupCounter" class="fw-semibold" style="font-variant-numeric: tabular-nums;">
+                    @if(isset($currentProgress['total_files']) && $currentProgress['total_files'] > 0)
+                        {{ number_format($currentProgress['processed_files'] ?? 0) }} / {{ number_format($currentProgress['total_files']) }} ไฟล์
+                    @endif
+                </div>
+            </div>
+
+            <!-- Completed Message Banner -->
+            <div id="backupCompleteBanner" class="alert alert-success d-flex align-items-center mt-3 mb-0 py-2.5 px-3 {{ ($currentProgress['status'] ?? '') === 'completed' ? '' : 'd-none' }}">
+                <i class="bi bi-check-circle-fill fs-5 text-success me-2.5"></i>
+                <div class="flex-grow-1 small">
+                    <strong class="d-block text-success-emphasis">การสำรองข้อมูลเสร็จสมบูรณ์ 100%!</strong>
+                    <span id="backupCompleteMsg">{{ $currentProgress['stage_label'] ?? '' }}</span>
+                </div>
+                <a href="{{ route('backend.system_backup.index') }}" class="btn btn-success btn-sm ms-2">
+                    <i class="bi bi-arrow-clockwise me-1"></i>รีเฟรชตาราง
+                </a>
+            </div>
+
+            <!-- Error Message Banner -->
+            <div id="backupErrorBanner" class="alert alert-danger d-flex align-items-center mt-3 mb-0 py-2.5 px-3 {{ ($currentProgress['status'] ?? '') === 'failed' ? '' : 'd-none' }}">
+                <i class="bi bi-exclamation-triangle-fill fs-5 text-danger me-2.5"></i>
+                <div class="flex-grow-1 small">
+                    <strong class="d-block text-danger-emphasis">เกิดข้อผิดพลาดในการสำรองข้อมูล</strong>
+                    <span id="backupErrorMsg">{{ $currentProgress['error'] ?? 'เกิดข้อผิดพลาดไม่ทราบสาเหตุ' }}</span>
+                </div>
+                <button type="button" class="btn btn-outline-danger btn-sm ms-2" onclick="cancelBackupProcess()">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i>ปิดและลองใหม่
+                </button>
             </div>
         </div>
     </div>
@@ -531,6 +608,208 @@ document.addEventListener('DOMContentLoaded', function() {
     const confirmEl = document.getElementById('confirmTextInput');
     if (otpEl) otpEl.addEventListener('input', checkRestoreInputs);
     if (confirmEl) confirmEl.addEventListener('input', checkRestoreInputs);
+
+    // Auto-resume polling if backup is currently running
+    const isRunning = {{ $isBackupRunning ? 'true' : 'false' }};
+    if (isRunning) {
+        document.querySelectorAll('.btn-backup-trigger').forEach(b => b.disabled = true);
+        startProgressPolling();
+    }
 });
+
+// Live Backup Tracking Logic
+let backupProgressInterval = null;
+
+function formatElapsedSeconds(sec) {
+    if (!sec || sec < 0) return '00:00';
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
+}
+
+function resetProgressUi(type) {
+    const card = document.getElementById('backupProgressCard');
+    const typeLabels = {
+        'db': 'ฐานข้อมูล MariaDB (.sql.gz)',
+        'files': 'ไฟล์เอกสาร Storage (.zip)',
+        'all': 'ทั้งระบบเต็มรูปแบบ (Full Archive)'
+    };
+
+    card.classList.remove('d-none');
+    document.getElementById('backupSpinnerIcon').classList.remove('d-none');
+    document.getElementById('backupStatusIcon').className = 'bi bi-activity text-primary fs-5';
+    document.getElementById('backupTypeBadge').innerText = typeLabels[type] || 'กำลังประมวลผล';
+    document.getElementById('backupHeaderTitle').innerText = 'สถานะการสำรองข้อมูลสด (Live Backup Progress)';
+    document.getElementById('backupElapsedTime').innerText = '00:00';
+
+    document.getElementById('backupStageLabel').innerText = 'กำลังส่งคำสั่งไปยังเซิร์ฟเวอร์...';
+    document.getElementById('backupPercentLabel').innerText = '2%';
+    
+    const bar = document.getElementById('backupProgressBar');
+    bar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-primary fw-bold';
+    bar.style.width = '2%';
+    bar.innerText = '2%';
+
+    document.getElementById('backupCurrentFile').innerText = '';
+    document.getElementById('backupCounter').innerText = '';
+    document.getElementById('backupCompleteBanner').classList.add('d-none');
+    document.getElementById('backupErrorBanner').classList.add('d-none');
+}
+
+function updateProgressUi(p) {
+    if (!p) return;
+
+    const card = document.getElementById('backupProgressCard');
+    card.classList.remove('d-none');
+
+    const spinner = document.getElementById('backupSpinnerIcon');
+    const statusIcon = document.getElementById('backupStatusIcon');
+    const bar = document.getElementById('backupProgressBar');
+    const percent = Math.min(100, Math.max(0, parseInt(p.percent || 0)));
+
+    document.getElementById('backupElapsedTime').innerText = formatElapsedSeconds(p.elapsed_seconds || 0);
+    document.getElementById('backupStageLabel').innerText = p.stage_label || 'กำลังดำเนินการ...';
+    document.getElementById('backupPercentLabel').innerText = percent + '%';
+    if (p.type_label) {
+        document.getElementById('backupTypeBadge').innerText = p.type_label;
+    }
+
+    bar.style.width = percent + '%';
+    bar.innerText = percent + '%';
+
+    if (p.current_file) {
+        document.getElementById('backupCurrentFile').innerText = p.current_file;
+    }
+    if (p.total_files && p.total_files > 0) {
+        const processed = p.processed_files || 0;
+        document.getElementById('backupCounter').innerText = `${Number(processed).toLocaleString()} / ${Number(p.total_files).toLocaleString()} ไฟล์`;
+    }
+
+    if (p.status === 'running') {
+        spinner.classList.remove('d-none');
+        statusIcon.className = 'bi bi-activity text-primary fs-5';
+        bar.className = 'progress-bar progress-bar-striped progress-bar-animated bg-primary fw-bold';
+        document.getElementById('backupCompleteBanner').classList.add('d-none');
+        document.getElementById('backupErrorBanner').classList.add('d-none');
+    } else if (p.status === 'completed') {
+        spinner.classList.add('d-none');
+        statusIcon.className = 'bi bi-check-circle-fill text-success fs-5';
+        bar.className = 'progress-bar bg-success fw-bold';
+        document.getElementById('backupCompleteBanner').classList.remove('d-none');
+        document.getElementById('backupCompleteMsg').innerText = p.stage_label || 'สำรองข้อมูลสำเร็จ';
+        document.getElementById('backupErrorBanner').classList.add('d-none');
+    } else if (p.status === 'failed') {
+        spinner.classList.add('d-none');
+        statusIcon.className = 'bi bi-exclamation-triangle-fill text-danger fs-5';
+        bar.className = 'progress-bar bg-danger fw-bold';
+        document.getElementById('backupCompleteBanner').classList.add('d-none');
+        document.getElementById('backupErrorBanner').classList.remove('d-none');
+        document.getElementById('backupErrorMsg').innerText = p.error || p.stage_label || 'เกิดข้อผิดพลาดในการสำรองข้อมูล';
+    }
+}
+
+function pollBackupProgress() {
+    fetch('{{ route('backend.system_backup.progress') }}', {
+        headers: { 'Accept': 'application/json' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (!data || !data.progress) return;
+        const p = data.progress;
+        updateProgressUi(p);
+
+        if (p.status === 'completed') {
+            if (backupProgressInterval) clearInterval(backupProgressInterval);
+            backupProgressInterval = null;
+            document.querySelectorAll('.btn-backup-trigger').forEach(b => b.disabled = false);
+            // Refresh table or page after 3 seconds
+            setTimeout(() => {
+                window.location.reload();
+            }, 3000);
+        } else if (p.status === 'failed') {
+            if (backupProgressInterval) clearInterval(backupProgressInterval);
+            backupProgressInterval = null;
+            document.querySelectorAll('.btn-backup-trigger').forEach(b => b.disabled = false);
+        }
+    })
+    .catch(err => {
+        console.error('Error polling backup progress:', err);
+    });
+}
+
+function startProgressPolling() {
+    if (backupProgressInterval) clearInterval(backupProgressInterval);
+    backupProgressInterval = setInterval(pollBackupProgress, 1000);
+    pollBackupProgress();
+}
+
+function triggerBackup(event, type, confirmMessage) {
+    if (event) event.preventDefault();
+
+    if (!confirm(confirmMessage)) {
+        return false;
+    }
+
+    document.querySelectorAll('.btn-backup-trigger').forEach(b => b.disabled = true);
+    resetProgressUi(type);
+
+    const card = document.getElementById('backupProgressCard');
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    fetch('{{ route('backend.system_backup.create') }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({ type: type })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            startProgressPolling();
+        } else {
+            alert(data.message || 'ไม่สามารถเริ่มต้นสำรองข้อมูลได้');
+            if (data.progress && data.progress.status === 'running') {
+                startProgressPolling();
+            } else {
+                document.querySelectorAll('.btn-backup-trigger').forEach(b => b.disabled = false);
+            }
+        }
+    })
+    .catch(err => {
+        console.error('Failed to dispatch backup:', err);
+        alert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
+        document.querySelectorAll('.btn-backup-trigger').forEach(b => b.disabled = false);
+    });
+
+    return false;
+}
+
+function cancelBackupProcess() {
+    if (confirm('ยืนยันปิดแถบสถานะการสำรองข้อมูลนี้หรือไม่?')) {
+        if (backupProgressInterval) {
+            clearInterval(backupProgressInterval);
+            backupProgressInterval = null;
+        }
+
+        fetch('{{ route('backend.system_backup.cancel') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        })
+        .then(() => {
+            document.getElementById('backupProgressCard').classList.add('d-none');
+            document.querySelectorAll('.btn-backup-trigger').forEach(b => b.disabled = false);
+        })
+        .catch(() => {
+            document.getElementById('backupProgressCard').classList.add('d-none');
+            document.querySelectorAll('.btn-backup-trigger').forEach(b => b.disabled = false);
+        });
+    }
+}
 </script>
 @endsection

@@ -74,6 +74,12 @@ class SystemBackupCommand extends Command
             $this->info("Backup destination: " . $backupService->getBackupDir());
             return Command::SUCCESS;
         } catch (\Throwable $e) {
+            SystemBackupService::updateProgress([
+                'status' => 'failed',
+                'stage' => 'failed',
+                'stage_label' => 'การสำรองข้อมูลล้มเหลว: ' . $e->getMessage(),
+                'error' => $e->getMessage(),
+            ]);
             $this->error("Backup failed: " . $e->getMessage());
             return Command::FAILURE;
         }
