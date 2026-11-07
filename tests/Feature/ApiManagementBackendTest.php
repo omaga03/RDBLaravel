@@ -69,6 +69,8 @@ class ApiManagementBackendTest extends TestCase
         $this->assertNotNull($tokenInDb);
         $this->assertTrue($tokenInDb->can('project:read'));
         $this->assertFalse($tokenInDb->can('project:write'));
+
+        $tokenInDb->delete();
     }
 
     public function test_admin_can_revoke_bearer_token(): void
@@ -160,7 +162,7 @@ class ApiManagementBackendTest extends TestCase
         $this->assertNotNull($user);
 
         // Issue a token to this user
-        $user->createToken('Research Sync Token');
+        $createdToken = $user->createToken('Research Sync Token');
 
         $response = $this->actingAs($user)->get(route('backend.api_management.index'));
         $response->assertStatus(200);
@@ -172,5 +174,7 @@ class ApiManagementBackendTest extends TestCase
         // Cannot see Token Management tab or issue token button
         $response->assertDontSee('ออก Bearer Token ใหม่');
         $response->assertDontSee('id="createTokenModal"', false);
+
+        $createdToken->accessToken->delete();
     }
 }
