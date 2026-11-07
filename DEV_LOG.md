@@ -1,5 +1,41 @@
 # บันทึกการพัฒนาประจำวัน (Development Log)
 
+## วันที่: 7 พฤศจิกายน 2569 (2026-11-07)
+
+### 📌 ยกระดับศูนย์สำรองข้อมูล, ระบบ Git Push/Pull อัตโนมัติ และการเตรียมระบบขึ้น Production 100% (Pre-Production Sanitization & Unified Schema)
+
+#### 1. ศูนย์สำรองและกู้คืนข้อมูลระดับองค์กร (System Backup & Disaster Recovery Hub Enhancements)
+- **แก้ไขแถบสถานะความคืบหน้าสดสำหรับการสำรองข้อมูลเต็มระบบ (Type 3 Full Backup Live Progress)**:
+  - ปรับปรุง [`SystemBackupService::createFullBackup()`](app/Services/SystemBackupService.php) และ `createDatabaseBackup(..., $trackProgress = false)` เพื่อไม่ให้การสำรองฐานข้อมูลย่อยเขียนทับหรือล้างสถานะความคืบหน้าของงานหลัก ทำให้แถบ Progress Bar แสดงผลต่อเนื่องตั้งแต่ 5% (Dump DB) ➔ 25%–95% (บีบอัดไฟล์ Storage) จนครบ 100%
+- **ระบบลบไฟล์สำรองแบบ Idempotent ไร้แจ้งเตือนผิดพลาด**:
+  - เปลี่ยนเส้นทางลบไฟล์สำรองเป็น `POST /backend/system-backup/delete` ใน [`SystemBackupController::destroy()`](app/Http/Controllers/Backend/SystemBackupController.php) พร้อมล็อกปุ่มกดซ้ำใน [`resources/views/backend/system_backup/index.blade.php`](resources/views/backend/system_backup/index.blade.php) และจัดการกรณีไฟล์ถูกลบไปแล้วให้ตอบกลับสำเร็จอย่างปลอดภัย
+- **ระบบอัปเดตและดึงโค้ดกับ GitHub ในคลิกเดียว (One-Click Git Commit & Push / Git Pull with Email OTP)**:
+  - พัฒนาฟังก์ชันตรวจสอบสถานะ Git (`getGitStatus`), อัปเดตโค้ดขึ้น GitHub (`commitAndPushGit`), ส่งรหัส OTP 6 หลักทางอีเมล (`sendGitPullOtp`), และดึงโค้ดล่าสุดพร้อมล้างแคชอัตโนมัติ (`pullFromGit`) เฉพาะสิทธิ์ **The Creator**
+  - รองรับการทำงานทั้งบน Windows (Laragon) และ Linux Production Server (ส่งต่อ `HOME`/`USERPROFILE`, ตั้งค่า Identity `-c user.name` / `-c user.email` อัตโนมัติ และบล็อกไฟล์ `.env` หรือไฟล์ขนาดเกิน 50 MB)
+- **ปรับปรุงระบบกู้คืนข้อมูลและ Audit Log**:
+  - แก้ไขการเรียกใช้ `AuditLog::record(...)` ใน `SystemBackupService` และ `SystemBackupController`
+  - แก้ไขพาธการแตกไฟล์ `.zip` (`storage/*`) ใน `SystemBackupService::restoreBackup()` ให้วางลง `storage_path('app/public')` อย่างถูกต้อง
+
+#### 2. การทำความสะอาดฐานข้อมูลและไฟล์ทั้งระบบก่อนขึ้น Production (Pre-Production Sanitization)
+- **ล้างข้อมูลทดสอบจาก PHPUnit โดยรักษาข้อมูลจริงครบ 100%**:
+  - ลบเฉพาะโครงการทดสอบ API 11 รายการ (`pro_id` 2913–2928, รีเซ็ต `AUTO_INCREMENT = 2898`), บัญชีผู้ใช้ทดสอบ 5 รายการ (`AUTO_INCREMENT = 4589`), นักวิจัยจำลอง 2 รายการ (`AUTO_INCREMENT = 4431`), และข้อมูลทดสอบใน `rdb_review_*` / `personal_access_tokens`
+  - ปรับปรุง [`tests/Feature/ApiManagementBackendTest.php`](tests/Feature/ApiManagementBackendTest.php) ให้ลบ Sanctum Token ทดสอบอัตโนมัติหลังจบการทดสอบ
+  - ข้อมูลจริงทั้งหมดคงอยู่ครบ 100%: โครงการวิจัย `2,856` โครงการ, นักวิจัย `1,070` คน, บัญชีผู้ใช้ `1,213` บัญชี, ผลงานตีพิมพ์ `1,872` รายการ, ทรัพย์สินทางปัญญา `58` รายการ, และการนำไปใช้ประโยชน์ `1,111` รายการ
+- **การจัดระเบียบตารางและระบบไฟล์**:
+  - รัน `OPTIMIZE TABLE` และ `ANALYZE TABLE` ครบทั้ง 82 ตารางหลัก
+  - ลบโฟลเดอร์ขยะจากการทดสอบใน `storage/app/public/` (`audit_security`, `audit_test`, `test`, `test_docs`), ล้าง `audit_logs`, `notifications`, `cache`, และ `storage/logs/laravel.log` (`0 bytes`)
+
+#### 3. การยุบรวมระบบ Migration เหลือไฟล์เดียว (Single-File Unified Schema Squashing)
+- **ยุบรวมไฟล์ Migration ทั้งหมด 38 ไฟล์ เหลือเพียงไฟล์ตั้งต้นรวมศูนย์ไฟล์เดียว**:
+  - สร้าง [`database/migrations/0000_00_00_000000_create_legacy_base_schema.php`](database/migrations/0000_00_00_000000_create_legacy_base_schema.php) คู่กับโครงสร้างตารางรวมศูนย์ [`database/schema/legacy_base_tables.sql`](database/schema/legacy_base_tables.sql) (`96.9 KB`)
+  - รองรับทั้งการนำเข้าไฟล์สำรองฐานข้อมูลชุดสมบูรณ์เพียงไฟล์เดียว (`backup_db_20261107_085104.sql.gz` ขนาด `7.97 MB`) และการรัน `php artisan migrate --force` เพียงคำสั่งเดียวในทุกสภาพแวดล้อม พร้อมสร้าง View Aliases (`rdb_project_type`, `rdb_strategic`) และข้อมูลตั้งต้นประเภททุนหลัก 6 หมวดหมู่อัตโนมัติ
+
+#### 4. การอัปเดตเอกสารคู่มือและการทดสอบรับประกันคุณภาพ (Documentation & QA)
+- อัปเดตคู่มือการติดตั้งและขึ้นระบบจริงใน [`README.md`](README.md), [`.env.example`](.env.example), คู่มือผู้ดูแลระบบเล่ม 2 [`docs/manuals/VOLUME_2_BACKEND_ADMIN_RESEARCHER_MANUAL.md`](docs/manuals/VOLUME_2_BACKEND_ADMIN_RESEARCHER_MANUAL.md), และแผนตรวจรับระบบ [`docs/manuals/SYSTEM_ACCEPTANCE_TEST_PLAN.md`](docs/manuals/SYSTEM_ACCEPTANCE_TEST_PLAN.md) พร้อมคอมไพล์ HTML5 Portal
+- ชุดทดสอบ [`tests/Feature/SystemBackupTest.php`](tests/Feature/SystemBackupTest.php) ผ่านครบ **8/8 tests (49 assertions)**
+
+---
+
 ## วันที่: 6 พฤศจิกายน 2569 (2026-11-06)
 
 ### 📌 เสริมฟีเจอร์รายงานและการจัดการข้อมูลขนาดใหญ่ (Executive Intelligence & Bulk Operations Hub)
