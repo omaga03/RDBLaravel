@@ -172,4 +172,54 @@ class SystemBackupTest extends TestCase
 
         $this->assertNull(SystemBackupService::getProgress());
     }
+
+    /**
+     * Subtask database backup inside Full Backup must remain in running state (15%) and not mark progress completed early,
+     * and deleting backup via POST body is idempotent against duplicate requests
+     */
+    public function test_full_backup_db_subtask_keeps_running_progress_and_delete_is_idempotent(): void
+    {
+        $creator = User::where('id', 129)->first();
+        if (!$creator) {
+            $creator = User::factory()->create(['id' => 129]);
+        }
+
+        $service = app(SystemBackupService::class);
+        SystemBackupService::clearProgress();
+
+        // Simulate Step 1 of createFullBackup()
+        $subtaskResult = $service->createDatabaseBackup('temp_db', false);
+        $progress = SystemBackupService::getProgress();
+
+        $this->assertNotNull($progress);
+        $this->assertEquals('running', $progress['status']);
+        $this->assertEquals('all', $progress['type']);
+        $this->assertEquals(15, $progress['percent']);
+        if (isset($subtaskResult['path']) && file_exists($subtaskResult['path'])) {
+            @unlink($subtaskResult['path']);
+        }
+
+        // Create a dummy backup archive to test delete endpoint and idempotency
+        $dummyName = 'backup_db_20991231_235959.sql.gz';
+        $dummyPath = $service->getBackupDir() . DIRECTORY_SEPARATOR . $dummyName;
+        file_put_contents($dummyPath, gzencode('-- test sql dump', 9));
+        $this->assertFileExists($dummyPath);
+
+        // 1st delete request via POST body
+        $delRes1 = $this->actingAs($creator)->post('/backend/system-backup/delete', [
+            'filename' => $dummyName,
+        ]);
+        $delRes1->assertRedirect(route('backend.system_backup.index'));
+        $delRes1->assertSessionHas('success');
+        $this->assertFileDoesNotExist($dummyPath);
+
+        // 2nd duplicate/replayed delete request should also succeed without false error flash
+        $delRes2 = $this->actingAs($creator)->post('/backend/system-backup/delete', [
+            'filename' => $dummyName,
+        ]);
+        $delRes2->assertRedirect(route('backend.system_backup.index'));
+        $delRes2->assertSessionHas('success');
+
+        SystemBackupService::clearProgress();
+    }
 }

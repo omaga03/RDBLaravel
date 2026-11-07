@@ -174,20 +174,37 @@ class SystemBackupController extends Controller
     }
 
     /**
+     * Delete backup archive via POST body (avoids browser download extensions intercepting .zip/.gz URLs)
+     */
+    public function destroyPost(Request $request)
+    {
+        $this->ensureTheCreatorOnly();
+
+        $filename = trim((string) $request->input('filename', ''));
+        if ($filename === '') {
+            return redirect()->route('backend.system_backup.index')
+                             ->with('error', 'ไม่ได้ระบุชื่อไฟล์สำรองที่ต้องการลบ');
+        }
+
+        return $this->destroy($filename);
+    }
+
+    /**
      * Delete backup archive
      */
     public function destroy(string $filename)
     {
         $this->ensureTheCreatorOnly();
 
-        $deleted = $this->backupService->deleteBackup($filename);
+        $clean = basename($filename);
+        $deleted = $this->backupService->deleteBackup($clean);
         if ($deleted) {
             return redirect()->route('backend.system_backup.index')
-                             ->with('success', "ลบไฟล์สำรอง {$filename} เรียบร้อยแล้ว");
+                             ->with('success', "ลบไฟล์สำรอง {$clean} เรียบร้อยแล้ว");
         }
 
         return redirect()->route('backend.system_backup.index')
-                         ->with('error', "ไม่สามารถลบไฟล์ {$filename} ได้ หรือไม่พบไฟล์");
+                         ->with('error', "ไม่สามารถลบไฟล์ {$clean} ได้ หรือไม่พบไฟล์");
     }
 
     /**

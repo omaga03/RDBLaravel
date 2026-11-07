@@ -131,7 +131,7 @@
                                 สกัดตารางทั้งหมดในฐานข้อมูล MariaDB เป็นไฟล์บีบอัด <code>.sql.gz</code> รวดเร็ว ประหยัดพื้นที่ เหมาะสำหรับสำรองประจำวัน
                             </p>
                         </div>
-                        <form id="formBackupDb" action="{{ route('backend.system_backup.create') }}" method="POST" onsubmit="return triggerBackup(event, 'db', 'ยืนยันสำรองเฉพาะฐานข้อมูล MariaDB (.sql.gz) ทันที?');">
+                        <form id="formBackupDb" class="no-loading" action="{{ route('backend.system_backup.create') }}" method="POST" onsubmit="return triggerBackup(event, 'db', 'ยืนยันสำรองเฉพาะฐานข้อมูล MariaDB (.sql.gz) ทันที?');">
                             @csrf
                             <input type="hidden" name="type" value="db">
                             <button type="submit" class="btn btn-outline-primary btn-sm w-100 d-inline-flex align-items-center justify-content-center gap-1.5 py-2 btn-backup-trigger" {{ $isBackupRunning ? 'disabled' : '' }}>
@@ -152,7 +152,7 @@
                                 บีบอัดเอกสาร PDF รายงานวิจัยและภาพปกทั้งหมดใน <code>storage/app/public/</code> เป็นไฟล์ <code>.zip</code> ป้องกันไฟล์เอกสารสูญหาย
                             </p>
                         </div>
-                        <form id="formBackupFiles" action="{{ route('backend.system_backup.create') }}" method="POST" onsubmit="return triggerBackup(event, 'files', 'ยืนยันสำรองไฟล์เอกสาร Storage (.zip)? ระบบจะทำงานในเบื้องหลังพร้อมแถบแสดงสถานะสด (Storage ~{{ $storageSizeFormatted }})');">
+                        <form id="formBackupFiles" class="no-loading" action="{{ route('backend.system_backup.create') }}" method="POST" onsubmit="return triggerBackup(event, 'files', 'ยืนยันสำรองไฟล์เอกสาร Storage (.zip)? ระบบจะทำงานในเบื้องหลังพร้อมแถบแสดงสถานะสด (Storage ~{{ $storageSizeFormatted }})');">
                             @csrf
                             <input type="hidden" name="type" value="files">
                             <button type="submit" class="btn btn-outline-info btn-sm w-100 d-inline-flex align-items-center justify-content-center gap-1.5 py-2 btn-backup-trigger" {{ $isBackupRunning ? 'disabled' : '' }}>
@@ -173,7 +173,7 @@
                                 รวมทั้งฐานข้อมูล MariaDB และไฟล์ Storage ทั้งหมดไว้ในแพ็กเกจเดียว (Full Archive) สำหรับเตรียมย้ายเซิร์ฟเวอร์หรือกู้คืนฉุกเฉิน
                             </p>
                         </div>
-                        <form id="formBackupAll" action="{{ route('backend.system_backup.create') }}" method="POST" onsubmit="return triggerBackup(event, 'all', 'ยืนยันสำรองทั้งระบบแบบเต็ม (Full Archive DB + Files)? ระบบจะทำงานในเบื้องหลังพร้อมแถบแสดงสถานะสด');">
+                        <form id="formBackupAll" class="no-loading" action="{{ route('backend.system_backup.create') }}" method="POST" onsubmit="return triggerBackup(event, 'all', 'ยืนยันสำรองทั้งระบบแบบเต็ม (Full Archive DB + Files)? ระบบจะทำงานในเบื้องหลังพร้อมแถบแสดงสถานะสด');">
                             @csrf
                             <input type="hidden" name="type" value="all">
                             <button type="submit" class="btn btn-success btn-sm w-100 d-inline-flex align-items-center justify-content-center gap-1.5 py-2 btn-backup-trigger" {{ $isBackupRunning ? 'disabled' : '' }}>
@@ -338,12 +338,12 @@
                                         @endif
 
                                         <!-- Delete Button -->
-                                        <form action="{{ route('backend.system_backup.destroy', $b['filename']) }}" 
+                                        <form action="{{ route('backend.system_backup.delete') }}" 
                                               method="POST" 
-                                              class="d-inline" 
-                                              onsubmit="return confirm('ยืนยันลบไฟล์สำรอง {{ $b['filename'] }} ออกจากเซิร์ฟเวอร์?');">
+                                              class="d-inline no-loading" 
+                                              onsubmit="if(this.dataset.submitting === '1') return false; if(!confirm('ยืนยันลบไฟล์สำรอง {{ $b['filename'] }} ออกจากเซิร์ฟเวอร์?')) return false; this.dataset.submitting = '1'; const btn = this.querySelector('button[type=submit]'); if(btn) btn.disabled = true; return true;">
                                             @csrf
-                                            @method('DELETE')
+                                            <input type="hidden" name="filename" value="{{ $b['filename'] }}">
                                             <button type="submit" class="btn btn-outline-secondary" title="ลบไฟล์สำรอง">
                                                 <i class="bi bi-trash"></i>
                                             </button>
@@ -723,18 +723,10 @@ function pollBackupProgress() {
             backupProgressInterval = null;
             document.querySelectorAll('.btn-backup-trigger').forEach(b => b.disabled = false);
 
-            // Give user 2.5 seconds to see 100% success banner, then clear progress and reload cleanly
+            // Give user 1.5 seconds to see 100% success animation, then reload table while keeping completion card visible
             setTimeout(() => {
-                fetch('{{ route('backend.system_backup.cancel') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                }).finally(() => {
-                    window.location.reload();
-                });
-            }, 2500);
+                window.location.reload();
+            }, 1500);
         } else if (p.status === 'failed') {
             if (backupProgressInterval) clearInterval(backupProgressInterval);
             backupProgressInterval = null;

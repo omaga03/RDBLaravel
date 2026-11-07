@@ -80,7 +80,12 @@ class SystemBackupService
      */
     public static function getProgress(): ?array
     {
-        return Cache::get(self::CACHE_PROGRESS_KEY);
+        $progress = Cache::get(self::CACHE_PROGRESS_KEY);
+        if (is_array($progress) && ($progress['status'] ?? '') === 'running') {
+            $startTime = $progress['start_timestamp'] ?? time();
+            $progress['elapsed_seconds'] = max(0, time() - $startTime);
+        }
+        return $progress;
     }
 
     /**
@@ -118,17 +123,16 @@ class SystemBackupService
         }
 
         $now = time();
-        $startTime = $current['start_timestamp'] ?? $now;
+        $startTime = $data['start_timestamp'] ?? $current['start_timestamp'] ?? $now;
 
-        $merged = array_merge($current, $data, [
+        $merged = array_merge([
+            'status' => 'running',
+        ], $current, $data, [
+            'start_timestamp' => $startTime,
             'updated_timestamp' => $now,
             'updated_at' => date('Y-m-d H:i:s'),
             'elapsed_seconds' => max(0, $now - $startTime),
         ]);
-
-        if (!isset($merged['start_timestamp'])) {
-            $merged['start_timestamp'] = $now;
-        }
 
         // Keep in cache for 2 hours
         Cache::put(self::CACHE_PROGRESS_KEY, $merged, 7200);
@@ -152,6 +156,8 @@ class SystemBackupService
             'files' => 'ไฟล์เอกสาร Storage (.zip)',
             'all' => 'ทั้งระบบเต็มรูปแบบ (Full Archive)',
         ];
+
+        self::clearProgress();
 
         self::updateProgress([
             'status' => 'running',
@@ -188,20 +194,33 @@ class SystemBackupService
     /**
      * Create database backup (.sql.gz)
      */
-    public function createDatabaseBackup(string $prefix = 'backup_db'): array
+    public function createDatabaseBackup(string $prefix = 'backup_db', bool $standalone = true): array
     {
         @ini_set('memory_limit', '1024M');
         @set_time_limit(0);
 
+        $isFullSubtask = (!$standalone && $prefix === 'temp_db');
+
         try {
-            self::updateProgress([
-                'status' => 'running',
-                'type' => 'db',
-                'type_label' => 'ฐานข้อมูล MariaDB (.sql.gz)',
-                'stage' => 'init_db',
-                'stage_label' => 'กำลังตรวจสอบไบนารี mysqldump และการเชื่อมต่อ...',
-                'percent' => 10,
-            ]);
+            if ($standalone) {
+                self::updateProgress([
+                    'status' => 'running',
+                    'type' => 'db',
+                    'type_label' => 'ฐานข้อมูล MariaDB (.sql.gz)',
+                    'stage' => 'init_db',
+                    'stage_label' => 'กำลังตรวจสอบไบนารี mysqldump และการเชื่อมต่อ...',
+                    'percent' => 10,
+                ]);
+            } elseif ($isFullSubtask) {
+                self::updateProgress([
+                    'status' => 'running',
+                    'type' => 'all',
+                    'type_label' => 'ทั้งระบบเต็มรูปแบบ (Full Archive)',
+                    'stage' => 'init_db',
+                    'stage_label' => 'ขั้นตอนที่ 1/3: กำลังตรวจสอบไบนารี mysqldump และการเชื่อมต่อ...',
+                    'percent' => 4,
+                ]);
+            }
 
             $mysqldump = $this->getMysqldumpBinary();
             if (!$mysqldump) {
@@ -261,11 +280,19 @@ class SystemBackupService
 
             $cmd[] = $database;
 
-            self::updateProgress([
-                'stage' => 'dumping_db',
-                'stage_label' => "กำลังสกัดตารางและข้อมูลจากฐานข้อมูล {$database} ผ่าน mysqldump...",
-                'percent' => 35,
-            ]);
+            if ($standalone) {
+                self::updateProgress([
+                    'stage' => 'dumping_db',
+                    'stage_label' => "กำลังสกัดตารางและข้อมูลจากฐานข้อมูล {$database} ผ่าน mysqldump...",
+                    'percent' => 35,
+                ]);
+            } elseif ($isFullSubtask) {
+                self::updateProgress([
+                    'stage' => 'dumping_db',
+                    'stage_label' => "ขั้นตอนที่ 1/3: กำลังสกัดตารางและข้อมูลจากฐานข้อมูล {$database} ผ่าน mysqldump...",
+                    'percent' => 8,
+                ]);
+            }
 
             // Execute dump into temporary .sql file
             $process = new Process($cmd);
@@ -289,11 +316,19 @@ class SystemBackupService
                 throw new \RuntimeException("การส่งออกฐานข้อมูลล้มเหลว: {$err}");
             }
 
-            self::updateProgress([
-                'stage' => 'compressing_db',
-                'stage_label' => 'กำลังบีบอัดไฟล์ SQL ด้วย Gzip (Compression Level 9)...',
-                'percent' => 75,
-            ]);
+            if ($standalone) {
+                self::updateProgress([
+                    'stage' => 'compressing_db',
+                    'stage_label' => 'กำลังบีบอัดไฟล์ SQL ด้วย Gzip (Compression Level 9)...',
+                    'percent' => 75,
+                ]);
+            } elseif ($isFullSubtask) {
+                self::updateProgress([
+                    'stage' => 'compressing_db',
+                    'stage_label' => 'ขั้นตอนที่ 1/3: กำลังบีบอัดไฟล์ฐานข้อมูล SQL ด้วย Gzip...',
+                    'percent' => 12,
+                ]);
+            }
 
             // Compress SQL file with gzip (level 9 for maximum compression)
             $rawSql = file_get_contents($sqlTempPath);
@@ -301,20 +336,30 @@ class SystemBackupService
             file_put_contents($gzFinalPath, $compressed);
             @unlink($sqlTempPath); // remove uncompressed file
 
-            self::updateProgress([
-                'stage' => 'checksum_db',
-                'stage_label' => 'กำลังคำนวณ Checksum MD5 และบันทึกประวัติความปลอดภัย...',
-                'percent' => 95,
-            ]);
+            if ($standalone) {
+                self::updateProgress([
+                    'stage' => 'checksum_db',
+                    'stage_label' => 'กำลังคำนวณ Checksum MD5 และบันทึกประวัติความปลอดภัย...',
+                    'percent' => 95,
+                ]);
+            } elseif ($isFullSubtask) {
+                self::updateProgress([
+                    'stage' => 'checksum_db',
+                    'stage_label' => 'ขั้นตอนที่ 1/3: สกัดฐานข้อมูลเสร็จสมบูรณ์ เตรียมสแกนไฟล์เอกสาร Storage...',
+                    'percent' => 15,
+                ]);
+            }
 
             $size = filesize($gzFinalPath);
             $checksum = $this->computeFastChecksum($gzFinalPath);
 
-            $this->logAction('backup_db_created', [
-                'filename' => $gzFileName,
-                'size' => $size,
-                'checksum' => $checksum,
-            ]);
+            if ($standalone) {
+                $this->logAction('backup_db_created', [
+                    'filename' => $gzFileName,
+                    'size' => $size,
+                    'checksum' => $checksum,
+                ]);
+            }
 
             $result = [
                 'filename' => $gzFileName,
@@ -326,22 +371,26 @@ class SystemBackupService
                 'created_at' => date('Y-m-d H:i:s'),
             ];
 
-            self::updateProgress([
-                'status' => 'completed',
-                'stage' => 'completed',
-                'stage_label' => "สำรองฐานข้อมูลสำเร็จ: {$gzFileName} ({$result['size_formatted']})",
-                'percent' => 100,
-                'result' => $result,
-            ]);
+            if ($standalone) {
+                self::updateProgress([
+                    'status' => 'completed',
+                    'stage' => 'completed',
+                    'stage_label' => "สำรองฐานข้อมูลสำเร็จ: {$gzFileName} ({$result['size_formatted']})",
+                    'percent' => 100,
+                    'result' => $result,
+                ]);
+            }
 
             return $result;
         } catch (\Throwable $e) {
-            self::updateProgress([
-                'status' => 'failed',
-                'stage' => 'failed',
-                'stage_label' => 'การสำรองฐานข้อมูลล้มเหลว: ' . $e->getMessage(),
-                'error' => $e->getMessage(),
-            ]);
+            if ($standalone || $isFullSubtask) {
+                self::updateProgress([
+                    'status' => 'failed',
+                    'stage' => 'failed',
+                    'stage_label' => 'การสำรองฐานข้อมูลล้มเหลว: ' . $e->getMessage(),
+                    'error' => $e->getMessage(),
+                ]);
+            }
             throw $e;
         }
     }
@@ -394,7 +443,7 @@ class SystemBackupService
 
             self::updateProgress([
                 'stage' => 'adding_files',
-                'stage_label' => "พบทั้งหมด " . number_format($totalCount) . " ไฟล์ (" . $this->formatBytes($totalBytes) . ") เริ่มบรรจุไฟล์ลง ZIP...",
+                'stage_label' => "พบทั้งหมด " . number_format($totalCount) . " ไฟล์ (" . $this->formatBytes($totalBytes) . ") เริ่มลงทะเบียนไฟล์ลง ZIP...",
                 'total_files' => $totalCount,
                 'total_bytes' => $totalBytes,
                 'processed_files' => 0,
@@ -406,13 +455,26 @@ class SystemBackupService
                 throw new \RuntimeException("ไม่สามารถสร้างไฟล์ ZIP ที่ {$zipPath} ได้");
             }
 
-            // Register progress callback for ZipArchive::close() flush phase
+            // Register progress callback for ZipArchive::close() disk flush phase (25% -> 98%)
             if (method_exists($zip, 'registerProgressCallback')) {
-                $zip->registerProgressCallback(0.02, function (float $callbackProgress) {
-                    $percent = 80 + (int) round($callbackProgress * 18); // 80% to 98%
+                $lastFlushUpdate = 0.0;
+                $zip->registerProgressCallback(0.005, function (float $callbackProgress) use (&$lastFlushUpdate, $totalCount, $allFiles, $sourceDir) {
+                    $now = microtime(true);
+                    if (($now - $lastFlushUpdate) < 0.4 && $callbackProgress < 0.99) {
+                        return;
+                    }
+                    $lastFlushUpdate = $now;
+                    $flushedFiles = min($totalCount, (int) round($callbackProgress * $totalCount));
+                    $sampleFile = '';
+                    if ($flushedFiles > 0 && isset($allFiles[$flushedFiles - 1])) {
+                        $sampleFile = 'storage/' . substr($allFiles[$flushedFiles - 1], strlen($sourceDir) + 1);
+                    }
+                    $percent = 25 + (int) round($callbackProgress * 73); // 25% to 98%
                     self::updateProgress([
                         'stage' => 'compressing',
-                        'stage_label' => 'กำลังบันทึกและปิดผนึกไฟล์ ZIP (Flushing to disk ' . round($callbackProgress * 100) . '%)...',
+                        'stage_label' => 'กำลังเขียนข้อมูลลงไฟล์ ZIP Archive (' . number_format($flushedFiles) . ' / ' . number_format($totalCount) . ' ไฟล์ — ' . round($callbackProgress * 100) . '%)...',
+                        'processed_files' => $flushedFiles,
+                        'current_file' => $sampleFile,
                         'percent' => min(98, $percent),
                     ]);
                 });
@@ -437,12 +499,12 @@ class SystemBackupService
                 }
 
                 $nowTime = microtime(true);
-                if ($fileCount % 250 === 0 || ($nowTime - $lastUpdateTime) > 0.5 || $fileCount === $totalCount) {
+                if ($fileCount % 500 === 0 || ($nowTime - $lastUpdateTime) > 0.5 || $fileCount === $totalCount) {
                     $lastUpdateTime = $nowTime;
-                    $archivePercent = 5 + (int) round(($fileCount / max(1, $totalCount)) * 75); // 5% to 80%
+                    $archivePercent = 5 + (int) round(($fileCount / max(1, $totalCount)) * 20); // 5% to 25%
                     self::updateProgress([
                         'stage' => 'adding_files',
-                        'stage_label' => "กำลังจัดเตรียมและบรรจุไฟล์ (" . number_format($fileCount) . " / " . number_format($totalCount) . " ไฟล์)...",
+                        'stage_label' => "กำลังจัดเตรียมรายการไฟล์ (" . number_format($fileCount) . " / " . number_format($totalCount) . " ไฟล์)...",
                         'processed_files' => $fileCount,
                         'current_file' => $relativePath,
                         'percent' => $archivePercent,
@@ -452,16 +514,18 @@ class SystemBackupService
 
             self::updateProgress([
                 'stage' => 'compressing',
-                'stage_label' => 'กำลังจัดเก็บและปิดผนึกไฟล์ ZIP Archive (กรุณารอสักครู่)...',
-                'percent' => 80,
+                'stage_label' => 'กำลังเริ่มต้นเขียนข้อมูลไฟล์ลงดิสก์ (0%)...',
+                'processed_files' => 0,
+                'percent' => 25,
             ]);
 
             $zip->close();
 
             self::updateProgress([
                 'stage' => 'checksum',
-                'stage_label' => 'กำลังตรวจสอบความถูกต้องและคำนวณค่า Checksum MD5...',
-                'percent' => 98,
+                'stage_label' => 'กำลังตรวจสอบความสมบูรณ์ของไฟล์สำรอง...',
+                'processed_files' => $totalCount,
+                'percent' => 99,
             ]);
 
             $size = filesize($zipPath);
@@ -489,6 +553,7 @@ class SystemBackupService
                 'status' => 'completed',
                 'stage' => 'completed',
                 'stage_label' => "สำรองไฟล์ Storage สำเร็จ: {$zipFileName} ({$result['size_formatted']}, " . number_format($fileCount) . " ไฟล์)",
+                'processed_files' => $fileCount,
                 'percent' => 100,
                 'result' => $result,
             ]);
@@ -531,20 +596,17 @@ class SystemBackupService
             $fullFileName = "backup_full_{$timestamp}.zip";
             $fullZipPath = $this->backupDir . DIRECTORY_SEPARATOR . $fullFileName;
 
-            // 1. First dump database (0% - 20%)
-            self::updateProgress([
-                'stage' => 'db_dump',
-                'stage_label' => 'ขั้นตอนที่ 1/3: กำลังสกัดฐานข้อมูล MariaDB ทั้งหมดเป็น .sql.gz...',
-                'percent' => 5,
-            ]);
-
-            $dbBackup = $this->createDatabaseBackup('temp_db');
+            // 1. First dump database as subtask (2% - 15%) — does NOT mark progress as completed!
+            $dbBackup = $this->createDatabaseBackup('temp_db', false);
             $dbPath = $dbBackup['path'];
 
             self::updateProgress([
+                'status' => 'running',
+                'type' => 'all',
+                'type_label' => 'ทั้งระบบเต็มรูปแบบ (Full Archive)',
                 'stage' => 'scanning_storage',
                 'stage_label' => 'ขั้นตอนที่ 2/3: สกัดฐานข้อมูลสำเร็จ กำลังสแกนไฟล์เอกสาร Storage ทั้งหมด...',
-                'percent' => 20,
+                'percent' => 16,
             ]);
 
             $sourceDir = storage_path('app/public');
@@ -564,19 +626,44 @@ class SystemBackupService
 
             $totalCount = count($allFiles);
 
+            self::updateProgress([
+                'stage' => 'adding_storage',
+                'stage_label' => "ขั้นตอนที่ 2/3: พบไฟล์ Storage " . number_format($totalCount) . " ไฟล์ (" . $this->formatBytes($totalBytes) . ") กำลังจัดเตรียมแพ็กเกจ...",
+                'total_files' => $totalCount,
+                'total_bytes' => $totalBytes,
+                'processed_files' => 0,
+                'percent' => 18,
+            ]);
+
             $zip = new ZipArchive();
             if ($zip->open($fullZipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
                 @unlink($dbPath);
                 throw new \RuntimeException("ไม่สามารถสร้างไฟล์ ZIP เต็มรูปแบบได้");
             }
 
-            // Register progress callback for ZipArchive::close() flush phase
+            // Register progress callback for ZipArchive::close() disk flush phase (30% -> 98%)
             if (method_exists($zip, 'registerProgressCallback')) {
-                $zip->registerProgressCallback(0.02, function (float $callbackProgress) {
-                    $percent = 80 + (int) round($callbackProgress * 18); // 80% to 98%
+                $lastFlushUpdate = 0.0;
+                $zip->registerProgressCallback(0.005, function (float $callbackProgress) use (&$lastFlushUpdate, $totalCount, $allFiles, $sourceDir) {
+                    $now = microtime(true);
+                    if (($now - $lastFlushUpdate) < 0.4 && $callbackProgress < 0.99) {
+                        return;
+                    }
+                    $lastFlushUpdate = $now;
+                    $flushedFiles = min($totalCount, (int) round($callbackProgress * $totalCount));
+                    $sampleFile = '';
+                    if ($flushedFiles > 0 && isset($allFiles[$flushedFiles - 1])) {
+                        $sampleFile = 'storage/' . substr($allFiles[$flushedFiles - 1], strlen($sourceDir) + 1);
+                    }
+                    $percent = 30 + (int) round($callbackProgress * 68); // 30% to 98%
                     self::updateProgress([
+                        'status' => 'running',
+                        'type' => 'all',
                         'stage' => 'compressing',
-                        'stage_label' => 'ขั้นตอนที่ 3/3: กำลังบันทึกและปิดผนึกแพ็กเกจ Full Archive (Flushing to disk ' . round($callbackProgress * 100) . '%)...',
+                        'stage_label' => 'ขั้นตอนที่ 3/3: กำลังบันทึกแพ็กเกจ Full Archive ลงดิสก์ (' . number_format($flushedFiles) . ' / ' . number_format($totalCount) . ' ไฟล์ — ' . round($callbackProgress * 100) . '%)...',
+                        'processed_files' => $flushedFiles,
+                        'total_files' => $totalCount,
+                        'current_file' => $sampleFile,
                         'percent' => min(98, $percent),
                     ]);
                 });
@@ -605,12 +692,14 @@ class SystemBackupService
                 }
 
                 $nowTime = microtime(true);
-                if ($fileCount % 250 === 0 || ($nowTime - $lastUpdateTime) > 0.5 || $fileCount === $totalCount) {
+                if ($fileCount % 500 === 0 || ($nowTime - $lastUpdateTime) > 0.5 || $fileCount === $totalCount) {
                     $lastUpdateTime = $nowTime;
-                    $archivePercent = 20 + (int) round(($fileCount / max(1, $totalCount)) * 60); // 20% to 80%
+                    $archivePercent = 18 + (int) round(($fileCount / max(1, $totalCount)) * 12); // 18% to 30%
                     self::updateProgress([
+                        'status' => 'running',
+                        'type' => 'all',
                         'stage' => 'adding_storage',
-                        'stage_label' => "กำลังบรรจุไฟล์ Storage ลงในแพ็กเกจ (" . number_format($fileCount) . " / " . number_format($totalCount) . " ไฟล์)...",
+                        'stage_label' => "ขั้นตอนที่ 2/3: กำลังลงทะเบียนไฟล์ Storage (" . number_format($fileCount) . " / " . number_format($totalCount) . " ไฟล์)...",
                         'processed_files' => $fileCount,
                         'total_files' => $totalCount,
                         'current_file' => $relativePath,
@@ -637,18 +726,25 @@ class SystemBackupService
             $zip->addFromString('manifest.json', json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
             self::updateProgress([
+                'status' => 'running',
+                'type' => 'all',
                 'stage' => 'compressing',
-                'stage_label' => 'ขั้นตอนที่ 3/3: กำลังจัดเก็บและปิดผนึก Full Archive (กรุณารอสักครู่)...',
-                'percent' => 80,
+                'stage_label' => 'ขั้นตอนที่ 3/3: กำลังเริ่มต้นบันทึกแพ็กเกจ Full Archive ลงดิสก์ (0%)...',
+                'processed_files' => 0,
+                'total_files' => $totalCount,
+                'percent' => 30,
             ]);
 
             $zip->close();
             @unlink($dbPath); // clean temp DB file
 
             self::updateProgress([
+                'status' => 'running',
+                'type' => 'all',
                 'stage' => 'checksum',
-                'stage_label' => 'กำลังคำนวณ Checksum MD5 และตรวจสอบความสมบูรณ์...',
-                'percent' => 98,
+                'stage_label' => 'กำลังตรวจสอบความสมบูรณ์ของแพ็กเกจ Full Archive...',
+                'processed_files' => $totalCount,
+                'percent' => 99,
             ]);
 
             $size = filesize($fullZipPath);
@@ -665,6 +761,7 @@ class SystemBackupService
                 'path' => $fullZipPath,
                 'size' => $size,
                 'size_formatted' => $this->formatBytes($size),
+                'file_count' => $fileCount,
                 'checksum' => $checksum,
                 'type' => 'full',
                 'created_at' => date('Y-m-d H:i:s'),
@@ -672,8 +769,10 @@ class SystemBackupService
 
             self::updateProgress([
                 'status' => 'completed',
+                'type' => 'all',
                 'stage' => 'completed',
-                'stage_label' => "สำรองทั้งระบบเต็มรูปแบบสำเร็จ: {$fullFileName} ({$result['size_formatted']})",
+                'stage_label' => "สำรองทั้งระบบเต็มรูปแบบสำเร็จ: {$fullFileName} ({$result['size_formatted']}, " . number_format($fileCount) . " ไฟล์)",
+                'processed_files' => $totalCount,
                 'percent' => 100,
                 'result' => $result,
             ]);
@@ -752,16 +851,30 @@ class SystemBackupService
     }
 
     /**
-     * Delete a backup file
+     * Delete a backup file (idempotent against duplicate browser/extension requests)
      */
     public function deleteBackup(string $filename): bool
     {
-        $path = $this->getBackupFilePath($filename);
-        if ($path && @unlink($path)) {
-            $this->logAction('backup_deleted', ['filename' => $filename]);
-            return true;
+        $clean = basename($filename);
+        if (!preg_match('/^backup_(db|files|full|pre_restore_safety_snapshot)_.*\.(sql\.gz|zip)$/i', $clean)) {
+            return false;
         }
-        return false;
+
+        $fullPath = $this->backupDir . DIRECTORY_SEPARATOR . $clean;
+        if (file_exists($fullPath) && is_file($fullPath)) {
+            if (@unlink($fullPath)) {
+                clearstatcache(true, $fullPath);
+                $this->logAction('backup_deleted', ['filename' => $clean]);
+                return true;
+            }
+            clearstatcache(true, $fullPath);
+            if (file_exists($fullPath)) {
+                return false;
+            }
+        }
+
+        // File is already absent (e.g., duplicate request replayed milliseconds after unlink)
+        return true;
     }
 
     /**
@@ -881,7 +994,7 @@ class SystemBackupService
         }
 
         // Step 1: ALWAYS take a pre-restore safety snapshot of the live database
-        $safetySnapshot = $this->createDatabaseBackup('backup_pre_restore_safety_snapshot');
+        $safetySnapshot = $this->createDatabaseBackup('backup_pre_restore_safety_snapshot', false);
 
         $mysql = $this->getMysqlBinary();
         if (!$mysql) {

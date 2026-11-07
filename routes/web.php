@@ -224,6 +224,7 @@ Route::prefix('backend')->name('backend.')->middleware(['auth', \App\Http\Middle
     Route::get('/system-backup/progress', [\App\Http\Controllers\Backend\SystemBackupController::class, 'progress'])->name('system_backup.progress');
     Route::post('/system-backup/cancel', [\App\Http\Controllers\Backend\SystemBackupController::class, 'cancelProgress'])->name('system_backup.cancel');
     Route::get('/system-backup/download/{filename}', [\App\Http\Controllers\Backend\SystemBackupController::class, 'download'])->name('system_backup.download');
+    Route::post('/system-backup/delete', [\App\Http\Controllers\Backend\SystemBackupController::class, 'destroyPost'])->name('system_backup.delete');
     Route::delete('/system-backup/{filename}', [\App\Http\Controllers\Backend\SystemBackupController::class, 'destroy'])->name('system_backup.destroy');
     Route::post('/system-backup/restore-otp', [\App\Http\Controllers\Backend\SystemBackupController::class, 'requestRestoreOtp'])->name('system_backup.request_otp');
     Route::post('/system-backup/confirm-restore', [\App\Http\Controllers\Backend\SystemBackupController::class, 'confirmRestore'])->name('system_backup.confirm_restore');
