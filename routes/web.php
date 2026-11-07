@@ -228,6 +228,8 @@ Route::prefix('backend')->name('backend.')->middleware(['auth', \App\Http\Middle
     Route::delete('/system-backup/{filename}', [\App\Http\Controllers\Backend\SystemBackupController::class, 'destroy'])->name('system_backup.destroy');
     Route::post('/system-backup/restore-otp', [\App\Http\Controllers\Backend\SystemBackupController::class, 'requestRestoreOtp'])->name('system_backup.request_otp');
     Route::post('/system-backup/confirm-restore', [\App\Http\Controllers\Backend\SystemBackupController::class, 'confirmRestore'])->name('system_backup.confirm_restore');
+    Route::get('/system-backup/git-status', [\App\Http\Controllers\Backend\SystemBackupController::class, 'gitStatus'])->name('system_backup.git_status');
+    Route::post('/system-backup/git-push', [\App\Http\Controllers\Backend\SystemBackupController::class, 'gitPush'])->name('system_backup.git_push');
 
     // Backward compatibility aliases
     Route::post('/system-commands/backup/create', [\App\Http\Controllers\Backend\SystemBackupController::class, 'create'])->name('system_commands.backup.create');

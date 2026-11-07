@@ -222,4 +222,38 @@ class SystemBackupTest extends TestCase
 
         SystemBackupService::clearProgress();
     }
+
+    /**
+     * Only The Creator can inspect Git status and trigger Git Push
+     */
+    public function test_git_status_and_push_authorization_and_inspection(): void
+    {
+        $regularUser = User::whereHas('roles', fn($q) => $q->where('item_name', 'Researcher'))->first();
+        if (!$regularUser) {
+            $regularUser = User::where('id', '<>', 129)->first();
+        }
+
+        // Regular user blocked with 403
+        $this->actingAs($regularUser)->getJson('/backend/system-backup/git-status')->assertStatus(403);
+        $this->actingAs($regularUser)->postJson('/backend/system-backup/git-push', [
+            'commit_message' => 'test unauthorized push',
+        ])->assertStatus(403);
+
+        // The Creator can inspect live Git status
+        $creator = User::where('id', 129)->first();
+        if (!$creator) {
+            $creator = User::factory()->create(['id' => 129]);
+        }
+
+        $res = $this->actingAs($creator)->getJson('/backend/system-backup/git-status');
+        $res->assertStatus(200);
+        $res->assertJson([
+            'success' => true,
+            'status' => [
+                'available' => true,
+            ],
+        ]);
+        $this->assertNotEmpty($res->json('status.branch'));
+        $this->assertIsArray($res->json('status.changed_files'));
+    }
 }

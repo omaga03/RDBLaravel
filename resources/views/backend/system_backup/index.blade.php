@@ -29,7 +29,16 @@
                 </p>
             </div>
         </div>
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <button type="button" class="btn btn-outline-success btn-sm d-inline-flex align-items-center gap-1.5 shadow-sm" onclick="openGitSyncModal()">
+                <i class="bi bi-git me-0.5"></i> อัปเดตขึ้น Git (Git Push)
+                @php
+                    $gitPendingCount = ($gitStatus['changed_count'] ?? 0) + ($gitStatus['ahead_count'] ?? 0);
+                @endphp
+                <span id="gitHeaderBadge" class="badge {{ $gitPendingCount > 0 ? 'bg-warning-subtle text-warning-emphasis border border-warning-subtle' : 'bg-success-subtle text-success-emphasis border border-success-subtle' }} ms-1" style="font-variant-numeric: tabular-nums;">
+                    {{ $gitPendingCount > 0 ? ($gitStatus['changed_count'] ?? 0) . ' ไฟล์' : 'ซิงค์แล้ว ✓' }}
+                </span>
+            </button>
             <button type="button" class="btn btn-outline-info btn-sm d-inline-flex align-items-center gap-1.5 shadow-sm" data-bs-toggle="modal" data-bs-target="#rcloneGuideModal">
                 <i class="bi bi-cloud-arrow-up me-1"></i> ซิงค์ Google Drive (Rclone)
             </button>
@@ -527,6 +536,90 @@
     </div>
 </div>
 
+<!-- 6. Git Sync & Push Modal -->
+<div class="modal fade" id="gitSyncModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-success-subtle border-bottom border-success-subtle py-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-success text-white p-2 rounded-2"><i class="bi bi-git fs-5"></i></span>
+                    <div>
+                        <h6 class="modal-title fw-bold text-body mb-0">อัปเดตโค้ดขึ้น GitHub Repository (One-Click Git Commit &amp; Push)</h6>
+                        <small class="text-body-secondary">ตรวจสอบไฟล์ที่มีการแก้ไข บันทึก Commit และส่งขึ้น Remote Repository โดยอัตโนมัติ</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <!-- Repository Info Strip -->
+                <div class="row g-2 mb-3">
+                    <div class="col-md-4">
+                        <div class="p-2.5 rounded-3 bg-body-tertiary border h-100">
+                            <div class="text-body-secondary small mb-0.5"><i class="bi bi-diagram-2 me-1 text-primary"></i>สาขาปัจจุบัน (Branch)</div>
+                            <div class="fw-bold text-body font-monospace small" id="gitBranchDisplay">{{ $gitStatus['branch'] ?? 'main' }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="p-2.5 rounded-3 bg-body-tertiary border h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-0.5">
+                                <span class="text-body-secondary small"><i class="bi bi-clock-history me-1 text-success"></i>Commit ล่าสุด</span>
+                                <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle font-monospace" id="gitLastHashDisplay">{{ $gitStatus['last_commit_hash'] ?? '-' }}</span>
+                            </div>
+                            <div class="fw-semibold text-body small text-truncate" id="gitLastMsgDisplay" title="{{ $gitStatus['last_commit_message'] ?? '-' }}">
+                                {{ $gitStatus['last_commit_message'] ?? '-' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Changed Files Header -->
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div class="fw-bold text-body small">
+                        <i class="bi bi-file-earmark-diff me-1 text-warning"></i>รายการไฟล์ที่มีการเปลี่ยนแปลง (<span id="gitChangedCountText" style="font-variant-numeric: tabular-nums;">{{ $gitStatus['changed_count'] ?? 0 }}</span> ไฟล์)
+                    </div>
+                    <button type="button" id="btnRefreshGitStatus" class="btn btn-outline-secondary btn-sm py-0.5 px-2 small" onclick="refreshGitStatus()">
+                        <i class="bi bi-arrow-clockwise me-1"></i>ตรวจสอบสถานะล่าสุด
+                    </button>
+                </div>
+
+                <!-- Changed Files List Box -->
+                <div id="gitFilesListContainer" class="border rounded-3 bg-body-tertiary p-2.5 mb-3" style="max-height: 210px; overflow-y: auto;">
+                    <!-- Populated dynamically by JS -->
+                </div>
+
+                <!-- Commit Message Input -->
+                <div class="mb-3">
+                    <label for="gitCommitMessageInput" class="form-label small fw-bold text-body mb-1">
+                        ข้อความบันทึกการเปลี่ยนแปลง (Commit Message) <span class="text-danger">*</span>
+                    </label>
+                    <input type="text"
+                           id="gitCommitMessageInput"
+                           class="form-control form-control-sm font-monospace"
+                           maxlength="255"
+                           placeholder="เช่น chore: update system changes">
+                    <div class="form-text small text-body-secondary">
+                        ระบบจะรันคำสั่ง <code>git add -A</code> ➔ <code>git commit -m "..."</code> ➔ <code>git push origin <span id="gitBranchCode">{{ $gitStatus['branch'] ?? 'main' }}</span></code> ตามลำดับ (เคารพกฎ <code>.gitignore</code> และไม่ส่งไฟล์ <code>.env</code> หรือไฟล์สำรองขนาดใหญ่)
+                    </div>
+                </div>
+
+                <!-- Git Execution Output Console -->
+                <div id="gitOutputSection" class="d-none mt-3">
+                    <div class="small fw-bold text-body mb-1"><i class="bi bi-terminal me-1"></i>ผลลัพธ์การทำงาน (Git Console Output):</div>
+                    <pre id="gitOutputConsole" class="p-3 bg-dark text-light rounded-3 font-monospace mb-0" style="font-size: 0.78rem; max-height: 180px; overflow-y: auto; white-space: pre-wrap;"></pre>
+                </div>
+            </div>
+            <div class="modal-footer bg-body-tertiary border-top py-2.5 d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-bs-dismiss="modal">ปิดหน้าต่าง</button>
+                <button type="button" id="btnExecuteGitPush" class="btn btn-success btn-sm px-4 d-inline-flex align-items-center gap-1.5 fw-semibold" onclick="executeGitPush()">
+                    <span id="gitPushSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                    <i id="gitPushIcon" class="bi bi-cloud-upload-fill"></i>
+                    <span id="gitPushBtnText">Commit &amp; Push ขึ้น GitHub ทันที</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 let currentRestoreFilename = '';
 
@@ -811,6 +904,184 @@ function cancelBackupProcess() {
             document.querySelectorAll('.btn-backup-trigger').forEach(b => b.disabled = false);
         });
     }
+}
+
+// ==========================================
+// Git Sync & Push Modal Logic
+// ==========================================
+function getDefaultCommitMessage() {
+    const now = new Date();
+    const pad = n => (n < 10 ? '0' + n : n);
+    const ts = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    return `chore: update system changes (${ts})`;
+}
+
+function openGitSyncModal() {
+    const msgInput = document.getElementById('gitCommitMessageInput');
+    if (msgInput && !msgInput.value.trim()) {
+        msgInput.value = getDefaultCommitMessage();
+    }
+    document.getElementById('gitOutputSection').classList.add('d-none');
+    document.getElementById('gitOutputConsole').innerText = '';
+
+    const modalEl = document.getElementById('gitSyncModal');
+    if (modalEl) {
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+    }
+    refreshGitStatus();
+}
+
+function renderGitStatus(status) {
+    if (!status) return;
+
+    document.getElementById('gitBranchDisplay').innerText = status.branch || 'main';
+    document.getElementById('gitBranchCode').innerText = status.branch || 'main';
+    document.getElementById('gitLastHashDisplay').innerText = status.last_commit_hash || '-';
+    document.getElementById('gitLastMsgDisplay').innerText = status.last_commit_message || '-';
+    document.getElementById('gitChangedCountText').innerText = status.changed_count || 0;
+
+    // Update header badge
+    const headerBadge = document.getElementById('gitHeaderBadge');
+    const pendingTotal = (status.changed_count || 0) + (status.ahead_count || 0);
+    if (headerBadge) {
+        if (pendingTotal > 0) {
+            headerBadge.className = 'badge bg-warning-subtle text-warning-emphasis border border-warning-subtle ms-1';
+            headerBadge.innerText = (status.changed_count > 0)
+                ? `${status.changed_count} ไฟล์`
+                : `รอ Push ${status.ahead_count}`;
+        } else {
+            headerBadge.className = 'badge bg-success-subtle text-success-emphasis border border-success-subtle ms-1';
+            headerBadge.innerText = 'ซิงค์แล้ว ✓';
+        }
+    }
+
+    const container = document.getElementById('gitFilesListContainer');
+    const btnPush = document.getElementById('btnExecuteGitPush');
+    const files = status.changed_files || [];
+
+    if (files.length === 0) {
+        if ((status.ahead_count || 0) > 0) {
+            container.innerHTML = `
+                <div class="text-center py-3 text-warning-emphasis small">
+                    <i class="bi bi-cloud-arrow-up fs-4 d-block mb-1"></i>
+                    มี <strong>${status.ahead_count} Commit</strong> ที่บันทึกไว้แล้วและกำลังรอส่งขึ้น GitHub (กดปุ่มด้านล่างเพื่อ Push ได้ทันที)
+                </div>`;
+            if (btnPush) btnPush.disabled = false;
+        } else {
+            container.innerHTML = `
+                <div class="text-center py-3 text-success small">
+                    <i class="bi bi-check-circle-fill fs-4 d-block mb-1"></i>
+                    โค้ดทั้งหมดเป็นปัจจุบันตรงกับ GitHub แล้ว (Working tree clean — ไม่มีไฟล์ค้าง)
+                </div>`;
+            if (btnPush) btnPush.disabled = true;
+        }
+        return;
+    }
+
+    if (btnPush) btnPush.disabled = false;
+
+    let html = '<div class="d-flex flex-column gap-1.5">';
+    files.forEach(item => {
+        const safeFile = item.file.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        html += `
+            <div class="d-flex align-items-center justify-content-between py-1 px-2 rounded bg-body border small">
+                <span class="font-monospace text-truncate me-2 text-body" style="max-width: 75%;" title="${safeFile}">${safeFile}</span>
+                <span class="badge border ${item.badge || 'bg-secondary-subtle text-secondary-emphasis'}">${item.label || item.code}</span>
+            </div>`;
+    });
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function refreshGitStatus() {
+    const container = document.getElementById('gitFilesListContainer');
+    const btnRefresh = document.getElementById('btnRefreshGitStatus');
+    if (btnRefresh) btnRefresh.disabled = true;
+    if (container) {
+        container.innerHTML = '<div class="text-center py-3 text-body-secondary small"><span class="spinner-border spinner-border-sm me-2"></span>กำลังตรวจสอบสถานะไฟล์กับ Git...</div>';
+    }
+
+    fetch('{{ route('backend.system_backup.git_status') }}', {
+        headers: { 'Accept': 'application/json' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (btnRefresh) btnRefresh.disabled = false;
+        if (data && data.status) {
+            renderGitStatus(data.status);
+        }
+    })
+    .catch(() => {
+        if (btnRefresh) btnRefresh.disabled = false;
+        if (container) {
+            container.innerHTML = '<div class="text-center py-3 text-danger small">ไม่สามารถดึงสถานะ Git ได้</div>';
+        }
+    });
+}
+
+function executeGitPush() {
+    const msgInput = document.getElementById('gitCommitMessageInput');
+    const commitMsg = msgInput ? msgInput.value.trim() : '';
+
+    if (!confirm('ยืนยันบันทึกการเปลี่ยนแปลง (Commit) และอัปเดตโค้ดขึ้น GitHub ทันทีหรือไม่?')) {
+        return;
+    }
+
+    const btn = document.getElementById('btnExecuteGitPush');
+    const spinner = document.getElementById('gitPushSpinner');
+    const icon = document.getElementById('gitPushIcon');
+    const btnText = document.getElementById('gitPushBtnText');
+    const outSec = document.getElementById('gitOutputSection');
+    const outConsole = document.getElementById('gitOutputConsole');
+
+    btn.disabled = true;
+    spinner.classList.remove('d-none');
+    icon.classList.add('d-none');
+    btnText.innerText = 'กำลัง Commit & Push ขึ้น GitHub...';
+    outSec.classList.remove('d-none');
+    outConsole.className = 'p-3 bg-dark text-info rounded-3 font-monospace mb-0';
+    outConsole.innerText = 'กำลังรันคำสั่ง git add -A, git commit และ git push origin... กรุณารอสักครู่';
+
+    fetch('{{ route('backend.system_backup.git_push') }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({ commit_message: commitMsg })
+    })
+    .then(res => res.json())
+    .then(data => {
+        spinner.classList.add('d-none');
+        icon.classList.remove('d-none');
+        btnText.innerText = 'Commit & Push ขึ้น GitHub ทันที';
+
+        if (data.status) {
+            renderGitStatus(data.status);
+        }
+
+        if (data.success) {
+            outConsole.className = 'p-3 bg-dark text-success rounded-3 font-monospace mb-0';
+            outConsole.innerText = '✓ ' + (data.message || 'สำเร็จ') + '\n\n' + (data.output || '');
+            if (msgInput) {
+                msgInput.value = getDefaultCommitMessage();
+            }
+        } else {
+            btn.disabled = false;
+            outConsole.className = 'p-3 bg-dark text-danger rounded-3 font-monospace mb-0';
+            outConsole.innerText = '✗ เกิดข้อผิดพลาด: ' + (data.message || 'ไม่สามารถ Push ขึ้น GitHub ได้');
+        }
+    })
+    .catch(err => {
+        spinner.classList.add('d-none');
+        icon.classList.remove('d-none');
+        btn.disabled = false;
+        btnText.innerText = 'Commit & Push ขึ้น GitHub ทันที';
+        outConsole.className = 'p-3 bg-dark text-danger rounded-3 font-monospace mb-0';
+        outConsole.innerText = '✗ เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์';
+    });
 }
 </script>
 @endsection

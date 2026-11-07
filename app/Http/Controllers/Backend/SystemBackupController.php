@@ -43,6 +43,7 @@ class SystemBackupController extends Controller
         $mysqlAvailable = !empty($this->backupService->getMysqlBinary());
         $currentProgress = SystemBackupService::getProgress();
         $isBackupRunning = SystemBackupService::isBackupRunning();
+        $gitStatus = $this->backupService->getGitStatus();
 
         // If completed/failed and was finished more than 60 seconds ago, auto-clear stale card
         if (!$isBackupRunning && $currentProgress && in_array($currentProgress['status'] ?? '', ['completed', 'failed'])) {
@@ -60,7 +61,8 @@ class SystemBackupController extends Controller
             'mysqldumpAvailable',
             'mysqlAvailable',
             'currentProgress',
-            'isBackupRunning'
+            'isBackupRunning',
+            'gitStatus'
         ));
     }
 
@@ -289,6 +291,44 @@ class SystemBackupController extends Controller
         } catch (\Throwable $e) {
             return redirect()->route('backend.system_backup.index')
                              ->with('error', 'การกู้คืนระบบล้มเหลว: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get live Git repository status via AJAX
+     */
+    public function gitStatus()
+    {
+        $this->ensureTheCreatorOnly();
+
+        return response()->json([
+            'success' => true,
+            'status' => $this->backupService->getGitStatus(),
+        ]);
+    }
+
+    /**
+     * Execute Git Add, Commit, and Push via AJAX
+     */
+    public function gitPush(Request $request)
+    {
+        $this->ensureTheCreatorOnly();
+
+        $request->validate([
+            'commit_message' => 'nullable|string|max:255',
+        ]);
+
+        try {
+            $message = (string) $request->input('commit_message', '');
+            $res = $this->backupService->commitAndPushGit($message);
+
+            return response()->json($res);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'status' => $this->backupService->getGitStatus(),
+            ], 422);
         }
     }
 }

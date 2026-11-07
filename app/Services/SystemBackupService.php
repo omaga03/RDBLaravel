@@ -1251,6 +1251,250 @@ class SystemBackupService
     }
 
     /**
+     * Find git CLI binary
+     */
+    public function getGitBinary(): ?string
+    {
+        $envPath = env('GIT_PATH');
+        if ($envPath && file_exists($envPath)) {
+            return $envPath;
+        }
+
+        $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+        $testCmd = $isWindows ? 'where git 2>nul' : 'which git 2>/dev/null';
+        $out = @shell_exec($testCmd);
+        if (!empty(trim((string) $out))) {
+            $lines = preg_split('/\r\n|\r|\n/', trim($out));
+            if (!empty($lines[0]) && file_exists(trim($lines[0]))) {
+                return trim($lines[0]);
+            }
+            return 'git';
+        }
+
+        if ($isWindows) {
+            $candidates = [
+                'C:\Program Files\Git\cmd\git.exe',
+                'C:\Program Files\Git\bin\git.exe',
+                'C:\laragon\bin\git\cmd\git.exe',
+                'C:\laragon\bin\git\bin\git.exe',
+                'F:\laragon\bin\git\cmd\git.exe',
+                'D:\laragon\bin\git\cmd\git.exe',
+            ];
+            foreach ($candidates as $c) {
+                if (file_exists($c)) {
+                    return $c;
+                }
+            }
+        } else {
+            foreach (['/usr/bin/git', '/usr/local/bin/git', '/bin/git'] as $c) {
+                if (file_exists($c)) {
+                    return $c;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Run a git command safely in project root
+     */
+    protected function runGitProcess(array $args, int $timeout = 60): Process
+    {
+        $git = $this->getGitBinary();
+        if (!$git) {
+            throw new \RuntimeException('ไม่พบคำสั่ง git บนเซิร์ฟเวอร์');
+        }
+
+        $cmd = array_merge([$git], $args);
+        $process = new Process($cmd, base_path());
+        $process->setTimeout($timeout);
+        $process->run();
+
+        return $process;
+    }
+
+    /**
+     * Inspect current Git repository status (branch, last commit, modified/untracked files, ahead commits)
+     */
+    public function getGitStatus(): array
+    {
+        try {
+            $git = $this->getGitBinary();
+            if (!$git || !is_dir(base_path('.git'))) {
+                return [
+                    'available' => false,
+                    'branch' => '-',
+                    'remote_url' => '-',
+                    'last_commit_hash' => '-',
+                    'last_commit_message' => 'ไม่พบ Git Repository',
+                    'last_commit_date' => '-',
+                    'ahead_count' => 0,
+                    'changed_files' => [],
+                    'changed_count' => 0,
+                    'can_sync' => false,
+                ];
+            }
+
+            $branchProc = $this->runGitProcess(['rev-parse', '--abbrev-ref', 'HEAD'], 10);
+            $branch = $branchProc->isSuccessful() ? trim($branchProc->getOutput()) : 'main';
+
+            $remoteProc = $this->runGitProcess(['config', '--get', 'remote.origin.url'], 10);
+            $remoteUrl = $remoteProc->isSuccessful() ? trim($remoteProc->getOutput()) : '-';
+
+            $logProc = $this->runGitProcess(['log', '-1', '--format=%h|%s|%ci'], 10);
+            $lastHash = '-';
+            $lastMsg = '-';
+            $lastDate = '-';
+            if ($logProc->isSuccessful() && trim($logProc->getOutput()) !== '') {
+                $parts = explode('|', trim($logProc->getOutput()), 3);
+                $lastHash = $parts[0] ?? '-';
+                $lastMsg = $parts[1] ?? '-';
+                $lastDate = isset($parts[2]) ? substr($parts[2], 0, 19) : '-';
+            }
+
+            $aheadProc = $this->runGitProcess(['rev-list', '--count', '@{u}..HEAD'], 10);
+            $aheadCount = $aheadProc->isSuccessful() ? (int) trim($aheadProc->getOutput()) : 0;
+
+            $statusProc = $this->runGitProcess(['status', '--porcelain', '-uall'], 15);
+            $changedFiles = [];
+            if ($statusProc->isSuccessful()) {
+                $lines = preg_split('/\r\n|\r|\n/', rtrim($statusProc->getOutput(), "\r\n"));
+                foreach ($lines as $line) {
+                    if (strlen(trim($line)) < 3) {
+                        continue;
+                    }
+                    $xy = substr($line, 0, 2);
+                    $filePath = trim(substr($line, 3), '" ');
+                    $code = trim($xy);
+
+                    $label = 'แก้ไข (Modified)';
+                    $badge = 'bg-warning-subtle text-warning-emphasis border-warning-subtle';
+                    if ($code === '??' || str_contains($code, 'A')) {
+                        $label = 'เพิ่มใหม่ (Added)';
+                        $badge = 'bg-success-subtle text-success-emphasis border-success-subtle';
+                    } elseif (str_contains($code, 'D')) {
+                        $label = 'ลบไฟล์ (Deleted)';
+                        $badge = 'bg-danger-subtle text-danger-emphasis border-danger-subtle';
+                    } elseif (str_contains($code, 'R')) {
+                        $label = 'เปลี่ยนชื่อ (Renamed)';
+                        $badge = 'bg-info-subtle text-info-emphasis border-info-subtle';
+                    }
+
+                    $changedFiles[] = [
+                        'code' => $code,
+                        'label' => $label,
+                        'badge' => $badge,
+                        'file' => $filePath,
+                    ];
+                }
+            }
+
+            $changedCount = count($changedFiles);
+
+            return [
+                'available' => true,
+                'branch' => $branch,
+                'remote_url' => $remoteUrl,
+                'last_commit_hash' => $lastHash,
+                'last_commit_message' => $lastMsg,
+                'last_commit_date' => $lastDate,
+                'ahead_count' => $aheadCount,
+                'changed_files' => $changedFiles,
+                'changed_count' => $changedCount,
+                'can_sync' => ($changedCount > 0 || $aheadCount > 0),
+            ];
+        } catch (\Throwable $e) {
+            return [
+                'available' => false,
+                'branch' => '-',
+                'remote_url' => '-',
+                'last_commit_hash' => '-',
+                'last_commit_message' => $e->getMessage(),
+                'last_commit_date' => '-',
+                'ahead_count' => 0,
+                'changed_files' => [],
+                'changed_count' => 0,
+                'can_sync' => false,
+            ];
+        }
+    }
+
+    /**
+     * Stage changes, commit, and push to remote origin
+     */
+    public function commitAndPushGit(string $commitMessage = ''): array
+    {
+        $status = $this->getGitStatus();
+        if (!$status['available']) {
+            throw new \RuntimeException('ระบบ Git ไม่พร้อมใช้งานบนเซิร์ฟเวอร์นี้');
+        }
+
+        $commitMessage = trim($commitMessage);
+        if ($commitMessage === '') {
+            $commitMessage = 'chore: update system changes (' . date('Y-m-d H:i:s') . ')';
+        }
+
+        $branch = $status['branch'] ?: 'main';
+        $outputs = [];
+
+        // Safety check: ensure no modified/untracked file exceeds 50 MB or is .env
+        foreach ($status['changed_files'] as $item) {
+            $relPath = $item['file'];
+            if (basename($relPath) === '.env') {
+                throw new \RuntimeException('ตรวจพบไฟล์ .env ในรายการเปลี่ยนแปลง ระบบระงับการอัปโหลดเพื่อความปลอดภัย');
+            }
+            $absPath = base_path($relPath);
+            if (is_file($absPath) && filesize($absPath) > 50 * 1024 * 1024) {
+                $sizeStr = $this->formatBytes(filesize($absPath));
+                throw new \RuntimeException("ตรวจพบไฟล์ขนาดใหญ่เกินพิกัด ({$relPath} ขนาด {$sizeStr}) เกินขีดจำกัด 50 MB ของ GitHub");
+            }
+        }
+
+        // Step 1: If there are file changes, git add -A & git commit
+        if ($status['changed_count'] > 0) {
+            $addProc = $this->runGitProcess(['add', '-A'], 30);
+            if (!$addProc->isSuccessful()) {
+                throw new \RuntimeException('คำสั่ง git add ล้มเหลว: ' . ($addProc->getErrorOutput() ?: $addProc->getOutput()));
+            }
+            $outputs[] = '> git add -A: สำเร็จ (' . $status['changed_count'] . ' ไฟล์)';
+
+            $commitProc = $this->runGitProcess(['commit', '-m', $commitMessage], 30);
+            $commitOut = trim($commitProc->getOutput() . "\n" . $commitProc->getErrorOutput());
+            if (!$commitProc->isSuccessful() && !str_contains($commitOut, 'nothing to commit')) {
+                throw new \RuntimeException('คำสั่ง git commit ล้มเหลว: ' . $commitOut);
+            }
+            $outputs[] = "> git commit -m \"{$commitMessage}\":\n" . $commitOut;
+        } else {
+            $outputs[] = '> ไม่มีไฟล์ที่แก้ไขใหม่ (ข้ามขั้นตอน git commit)';
+        }
+
+        // Step 2: Push to origin
+        $pushProc = $this->runGitProcess(['push', 'origin', $branch], 120);
+        $pushOut = trim($pushProc->getOutput() . "\n" . $pushProc->getErrorOutput());
+        if (!$pushProc->isSuccessful()) {
+            throw new \RuntimeException('คำสั่ง git push ล้มเหลว: ' . $pushOut);
+        }
+        $outputs[] = "> git push origin {$branch}:\n" . ($pushOut ?: 'Everything up-to-date');
+
+        $updatedStatus = $this->getGitStatus();
+
+        $this->logAction('git_sync_pushed', [
+            'branch' => $branch,
+            'commit_message' => $commitMessage,
+            'commit_hash' => $updatedStatus['last_commit_hash'] ?? '-',
+            'files_count' => $status['changed_count'],
+        ]);
+
+        return [
+            'success' => true,
+            'message' => "อัปเดตโค้ดขึ้น GitHub สาขา {$branch} สำเร็จเรียบร้อยแล้ว (Commit: {$updatedStatus['last_commit_hash']})",
+            'output' => implode("\n\n", $outputs),
+            'status' => $updatedStatus,
+        ];
+    }
+
+    /**
      * Record action in AuditLog
      */
     protected function logAction(string $action, array $data = []): void
