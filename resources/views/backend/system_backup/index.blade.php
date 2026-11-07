@@ -722,10 +722,19 @@ function pollBackupProgress() {
             if (backupProgressInterval) clearInterval(backupProgressInterval);
             backupProgressInterval = null;
             document.querySelectorAll('.btn-backup-trigger').forEach(b => b.disabled = false);
-            // Refresh table or page after 3 seconds
+
+            // Give user 2.5 seconds to see 100% success banner, then clear progress and reload cleanly
             setTimeout(() => {
-                window.location.reload();
-            }, 3000);
+                fetch('{{ route('backend.system_backup.cancel') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                }).finally(() => {
+                    window.location.reload();
+                });
+            }, 2500);
         } else if (p.status === 'failed') {
             if (backupProgressInterval) clearInterval(backupProgressInterval);
             backupProgressInterval = null;

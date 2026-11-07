@@ -44,6 +44,15 @@ class SystemBackupController extends Controller
         $currentProgress = SystemBackupService::getProgress();
         $isBackupRunning = SystemBackupService::isBackupRunning();
 
+        // If completed/failed and was finished more than 60 seconds ago, auto-clear stale card
+        if (!$isBackupRunning && $currentProgress && in_array($currentProgress['status'] ?? '', ['completed', 'failed'])) {
+            $updatedAt = $currentProgress['updated_timestamp'] ?? 0;
+            if ((time() - $updatedAt) > 60) {
+                SystemBackupService::clearProgress();
+                $currentProgress = null;
+            }
+        }
+
         return view('backend.system_backup.index', compact(
             'backupList',
             'dbSizeFormatted',
